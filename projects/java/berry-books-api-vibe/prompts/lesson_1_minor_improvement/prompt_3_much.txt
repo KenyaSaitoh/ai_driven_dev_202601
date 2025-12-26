@@ -1,0 +1,171 @@
+===============================================
+小規模改善プロンプト【高：詳細版】
+===============================================
+
+berry-books-1プロジェクトを以下の3点で改善してください。
+
+## 1. 決済方法のEnum化
+
+### 現状分析
+
+**CartSession.java（93-115行目）**
+- Integer settlementTypeフィールドで決済方法を保持
+- getSettlementTypeName()メソッドでif-else分岐による変換
+- コード値：0=銀行振り込み、1=クレジットカード、2=着払い
+- null時は"未選択"、範囲外は"不明"を返す
+
+**OrderTran.java（138-152行目）**
+- CartSessionと同様のgetSettlementTypeName()メソッドが重複実装
+
+**bookOrder.xhtml（84-86行目）**
+- <f:selectItem>で決済方法の値と表示名をハードコード
+
+### 実施内容
+
+#### ステップ1: SettlementType Enumクラスの作成
+- パッケージ: pro.kensait.berrybooks.common
+- クラス名: SettlementType.java
+- Enum定数:
+  - BANK_TRANSFER(1, "銀行振り込み")
+  - CREDIT_CARD(2, "クレジットカード")
+  - CASH_ON_DELIVERY(3, "着払い")
+- フィールド:
+  - private final Integer code
+  - private final String displayName
+- コンストラクタ:
+  - SettlementType(Integer code, String displayName)
+- メソッド:
+  - getCode(): Integer - 決済方法コードを取得
+  - getDisplayName(): String - 表示名を取得
+  - fromCode(Integer code): SettlementType - コードからEnumを取得、nullの場合はnullを返す、不正値の場合はIllegalArgumentExceptionをスロー
+  - getDisplayNameByCode(Integer code): String - nullセーフな表示名取得（null時は"未選択"、不正値は"不明"）
+  - getAllCodes(): Integer[] - 全ての決済方法コードの配列を取得
+
+#### ステップ2: CartSession.javaの修正
+- ファイル: src/main/java/pro/kensait/berrybooks/web/cart/CartSession.java
+- import文追加: pro.kensait.berrybooks.common.SettlementType
+- 変更箇所: 101-115行目のgetSettlementTypeName()メソッド
+- 変更内容: SettlementType.getDisplayNameByCode(settlementType)を呼び出すように変更
+
+#### ステップ3: OrderTran.javaの修正
+- ファイル: src/main/java/pro/kensait/berrybooks/entity/OrderTran.java
+- import文追加: pro.kensait.berrybooks.common.SettlementType
+- 変更箇所: 138-152行目のgetSettlementTypeName()メソッド
+- 変更内容: SettlementType.getDisplayNameByCode(settlementType)を呼び出すように変更
+
+#### ステップ4: XHTMLファイルのコード値確認
+- ファイル: src/main/webapp/bookOrder.xhtml（84-86行目）
+- 確認事項: itemValueがEnum定義と一致すること（1, 2, 3）
+- 注意: CartSessionの旧コード値（0, 1, 2）との差異を確認
+
+---
+
+## 2. エラーメッセージのプロパティ化
+
+### 現状分析
+
+**CartBean.java（138行目）**
+- エラーメッセージがハードコード: "カートに商品が一つも入っていません"
+
+**その他の箇所**
+- OrderBean: 在庫不足、楽観的ロックエラーなど
+- CustomerBean: 顧客登録エラー
+- LoginBean: ログインエラー
+
+### 実施内容
+
+#### ステップ1: messages.propertiesファイルの作成
+- ファイルパス: src/main/resources/messages.properties
+- エンコーディング: UTF-8
+- 定義するメッセージキー:
+  - error.cart.empty: カートが空の場合
+  - error.delivery-address.required: 配送先住所未入力
+  - error.delivery-address.max-length: 配送先住所の長さ超過
+  - error.delivery-address.invalid-prefecture: 不正な都道府県名
+  - error.settlement-type.required: 決済方法未選択
+  - error.out-of-stock: 在庫不足
+  - error.optimistic-lock: 楽観的ロックエラー
+  - error.order-processing: 注文処理エラー
+  - error.general: 汎用エラー
+  - 既存のハードコードされたメッセージも移行:
+    - error.address.prefecture
+    - error.customer.exists
+    - error.email.not-exist
+    - error.password.unmatch
+    - error.order.outof-stock（パラメータ付き: {0}）
+    - error.order.optimistic-lock
+
+#### ステップ2: MessageUtilクラスの作成
+- パッケージ: pro.kensait.berrybooks.common
+- クラス名: MessageUtil.java
+- クラス修飾子: public final（インスタンス化不可）
+- フィールド:
+  - private static final ResourceBundle bundle - messages.propertiesを読み込み
+- メソッド:
+  - get(String key): String - キーに対応するメッセージを取得、キーが見つからない場合はキー自体を返す
+  - get(String key, Object... params): String - パラメータ付きメッセージ取得、String.formatで置換
+
+#### ステップ3: 既存コードの修正
+- CartBean.java: 138行目をMessageUtil.get("error.cart.empty")に変更
+- OrderBean.java: 在庫不足、楽観的ロックエラーをMessageUtil.get()に変更
+- CustomerBean.java: 顧客登録エラーをMessageUtil.get()に変更
+- LoginBean.java: ログインエラーをMessageUtil.get()に変更
+- 対象箇所: String型のエラーメッセージリテラルをすべて検索し、置換
+
+---
+
+## 3. 住所判定ロジックの共通化
+
+### 現状分析
+
+**DeliveryFeeService.java**
+- 住所判定がハードコード: deliveryAddress.startsWith("沖縄県")
+- 都道府県名の妥当性検証が行われていない
+
+**問題点**
+- 沖縄県判定ロジックが再利用不可
+- 住所が正しい都道府県名で始まるかのチェックが不在
+
+### 実施内容
+
+#### ステップ1: AddressUtilクラスの作成
+- パッケージ: pro.kensait.berrybooks.util
+- クラス名: AddressUtil.java
+- クラス修飾子: public final（インスタンス化不可）
+- フィールド:
+  - private static final String[] PREFECTURES - 47都道府県の配列
+- メソッド:
+  - startsWithValidPrefecture(String address): boolean
+    - 住所がnullまたは空白の場合はfalseを返す
+    - PREFECTURES配列をループして、いずれかの都道府県名で始まる場合はtrueを返す
+    - どの都道府県名にも一致しない場合はfalseを返す
+  - getPrefectures(): String[]
+    - PREFECTURES配列のクローンを返す（直接参照を防ぐ）
+
+#### ステップ2: DeliveryFeeService.javaの修正
+- ファイル: src/main/java/pro/kensait/berrybooks/service/delivery/DeliveryFeeService.java
+- import文追加: pro.kensait.berrybooks.util.AddressUtil
+- 変更箇所2: 31行目の条件判定
+  - deliveryAddress.startsWith("沖縄県") → isOkinawa(deliveryAddress)に変更
+- 追加メソッド1: isOkinawa(String deliveryAddress): boolean
+  - deliveryAddressがnullでない かつ "沖縄県"で始まる場合にtrueを返す
+- 追加メソッド2: isFreeDelivery(BigDecimal totalPrice): boolean
+  - totalPriceがFREE_DELIVERY_THRESHOLD（5000円）以上の場合にtrueを返す
+
+#### ステップ3: 住所検証ロジックの追加（推奨）
+- 対象: OrderBeanなど注文処理を行うクラス
+- 実装箇所: 注文確定前のバリデーション
+- 検証内容:
+  - AddressUtil.startsWithValidPrefecture()を使用して配送先住所をチェック
+  - 不正な場合はerror.delivery-address.invalid-prefectureメッセージを表示
+  - エラーページへリダイレクト
+
+---
+
+## 注意事項
+
+- コード値の整合性: CartSessionの旧実装（0, 1, 2）とXHTML（1, 2, 3）の差異に注意
+- messages.propertiesのエンコーディング: UTF-8を使用
+- ResourceBundleのキャッシュ: プロパティファイル変更後はアプリケーションの再起動が必要
+- 都道府県名の表記: 正確な表記（例: "東京都"、"大阪府"、"京都府"、"北海道"、その他は"○○県"）
+

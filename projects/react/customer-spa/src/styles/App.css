@@ -1,0 +1,522 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  background-color: #ffffff;
+  line-height: 1.6;
+  padding: 30px 40px;
+  min-height: 100vh;
+}
+
+.app-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.app-header {
+  margin-bottom: 40px;
+}
+
+h1 {
+  color: #A32D3A;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 2em;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Welcome page title */
+h1.welcome-title {
+  background: linear-gradient(135deg, #CF3F4E 0%, #E55563 50%, #CF3F4E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 2.5em;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-top: 40px;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px 4px rgba(207, 63, 78, 0.1);
+}
+
+h2 {
+  color: #A32D3A;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 2em;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+hr {
+  margin-bottom: 20px;
+  border: none;
+  border-top: 2px solid #CF3F4E;
+  opacity: 0.5;
+}
+
+/* 顧客一覧コンテナ */
+.customer-list-container {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 20px rgba(207, 63, 78, 0.08);
+}
+
+/* 顧客数表示 */
+.customer-count {
+  text-align: center;
+  margin-bottom: 25px;
+  padding: 15px;
+  background: linear-gradient(135deg, #FFF5F6 0%, #FFE5E8 100%);
+  border-radius: 8px;
+  border-left: 4px solid #CF3F4E;
+}
+
+.customer-count p {
+  font-size: 1.1em;
+  color: #A32D3A;
+}
+
+.customer-count strong {
+  color: #CF3F4E;
+  font-size: 1.3em;
+  font-weight: 700;
+}
+
+/* テーブルスタイル */
+.book-table {
+  width: 100%;
+  margin-bottom: 30px;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  box-shadow: 0 2px 20px rgba(207, 63, 78, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.book-table th,
+.book-table td {
+  padding: 14px 16px;
+  border: 1px solid #F5D5D8;
+  text-align: left;
+}
+
+.book-table th {
+  background: linear-gradient(135deg, #CF3F4E 0%, #A32D3A 100%);
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  font-size: 1.05em;
+}
+
+.book-table tbody tr:hover {
+  background-color: #FFE5E8;
+  transition: background-color 0.2s ease;
+}
+
+/* 数値セル（右揃え） */
+.number-cell {
+  text-align: right;
+  font-weight: 600;
+  color: #CF3F4E;
+}
+
+/* ローディング表示 */
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 1.3em;
+  color: #A32D3A;
+}
+
+.loading::after {
+  content: '';
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  margin-left: 10px;
+  border: 4px solid #F5D5D8;
+  border-top-color: #CF3F4E;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* エラー表示 */
+.error {
+  display: block;
+  margin: 40px auto;
+  padding: 20px 24px;
+  max-width: 600px;
+  background-color: #FFF0F2;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(209, 73, 91, 0.15);
+  text-align: center;
+}
+
+.error p {
+  color: #d1495b;
+  font-weight: 600;
+  font-size: 1.1em;
+}
+
+/* 操作セル（編集ボタン） */
+.action-cell {
+  text-align: center !important;
+  vertical-align: middle;
+}
+
+.edit-button {
+  background: linear-gradient(135deg, #FFB3BA 0%, #FFCDD2 100%);
+  color: #A32D3A;
+  border: 1px solid #FFB3BA;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 0.95em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 179, 186, 0.3);
+}
+
+.edit-button:hover {
+  background: linear-gradient(135deg, #FF8A94 0%, #FFB3BA 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 138, 148, 0.4);
+}
+
+.edit-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(255, 179, 186, 0.3);
+}
+
+/* モーダルオーバーレイ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* モーダルコンテンツ */
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(207, 63, 78, 0.2);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* モーダルヘッダー */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  border-bottom: 2px solid #F5D5D8;
+  background: linear-gradient(135deg, #FFF5F6 0%, #FFE5E8 100%);
+  border-radius: 12px 12px 0 0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #A32D3A;
+  font-size: 1.5em;
+  font-weight: 600;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 2em;
+  color: #A32D3A;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background-color: rgba(207, 63, 78, 0.1);
+  transform: rotate(90deg);
+}
+
+/* フォームスタイル */
+form {
+  padding: 28px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #A32D3A;
+  font-weight: 600;
+  font-size: 1em;
+}
+
+.form-group .required {
+  color: #CF3F4E;
+  font-weight: 700;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #F5D5D8;
+  border-radius: 8px;
+  font-size: 1em;
+  transition: all 0.3s ease;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #CF3F4E;
+  box-shadow: 0 0 0 3px rgba(207, 63, 78, 0.1);
+}
+
+.form-group input:hover {
+  border-color: #E55563;
+}
+
+.form-group .field-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.85em;
+  color: #999;
+  font-style: italic;
+}
+
+/* フォームエラー */
+.form-error {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background-color: #FFF0F2;
+  border-left: 4px solid #d1495b;
+  border-radius: 6px;
+}
+
+.form-error p {
+  margin: 0;
+  color: #d1495b;
+  font-weight: 600;
+}
+
+/* フォームアクション（ボタン） */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #F5D5D8;
+}
+
+.cancel-button,
+.save-button {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-button {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.cancel-button:hover {
+  background-color: #e0e0e0;
+}
+
+.cancel-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.save-button {
+  background: linear-gradient(135deg, #CF3F4E 0%, #A32D3A 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(207, 63, 78, 0.3);
+}
+
+.save-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(207, 63, 78, 0.4);
+}
+
+.save-button:active {
+  transform: translateY(0);
+}
+
+.save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* トースト通知 */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 2000;
+  animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.toast p {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1em;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 1200px) {
+  .book-table {
+    font-size: 0.9em;
+  }
+
+  .book-table th,
+  .book-table td {
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 20px;
+  }
+
+  h1.welcome-title {
+    font-size: 2em;
+  }
+
+  h2 {
+    font-size: 1.5em;
+  }
+
+  .customer-list-container {
+    padding: 20px;
+  }
+
+  .book-table {
+    font-size: 0.8em;
+  }
+
+  .book-table th,
+  .book-table td {
+    padding: 8px 10px;
+  }
+
+  .modal-content {
+    width: 95%;
+    max-height: 95vh;
+  }
+
+  .modal-header {
+    padding: 20px;
+  }
+
+  .modal-header h3 {
+    font-size: 1.3em;
+  }
+
+  form {
+    padding: 20px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .cancel-button,
+  .save-button {
+    width: 100%;
+  }
+
+  .toast {
+    bottom: 20px;
+    right: 20px;
+    left: 20px;
+    font-size: 0.9em;
+  }
+}
+

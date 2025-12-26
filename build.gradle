@@ -1,0 +1,1386 @@
+import groovy.io.FileType
+import groovy.sql.Sql
+
+// 初期化処理
+buildscript {
+    // リポジトリ設定
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath files('hsqldb/lib/hsqldb.jar')
+    }
+}
+
+subprojects {
+    // プラグイン読み込み
+    apply plugin: "java"
+    apply plugin: "war"
+    apply plugin: "jacoco"
+
+    // リポジトリ設定
+    repositories {
+        mavenCentral()
+    }
+
+    // 文字コード設定
+    def defaultEncoding = "UTF-8"
+    tasks.withType(AbstractCompile).each { it.options.encoding = defaultEncoding }
+
+    // Gradle7.x対応
+    processResources {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
+    
+    processTestResources {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
+
+    // 依存関係設定
+    dependencies {
+        // SLF4J Logging（全プロジェクト共通）
+        implementation "org.slf4j:slf4j-api:2.0.12"
+        
+        // berry-books-mvc-sdd用: Log4j2を使用
+        if (project.name == "berry-books-mvc-sdd") {
+            implementation "org.apache.logging.log4j:log4j-core:2.21.1"
+            implementation "org.apache.logging.log4j:log4j-slf4j2-impl:2.21.1"
+        } else {
+            implementation "org.slf4j:slf4j-simple:2.0.12"
+        }
+        
+        // HSQLDB Database
+        if (project.name == "berry-books-mvc-sdd") {
+            // berry-books-mvc-sdd用: Maven Centralから
+            implementation "org.hsqldb:hsqldb:2.7.2"
+        } else {
+            // その他のプロジェクト: ローカルjarファイル
+            implementation files(rootProject.file('hsqldb/lib/hsqldb.jar'))
+        }
+        
+        // Struts 1.3.10 - Strutsプロジェクト用（TomEE 8用）
+        if (project.name == "struts-person") {
+            implementation "org.apache.struts:struts-core:1.3.10"
+            implementation "org.apache.struts:struts-taglib:1.3.10"
+            implementation "commons-beanutils:commons-beanutils:1.9.4"
+            implementation "commons-digester:commons-digester:2.1"
+            implementation "commons-validator:commons-validator:1.7"
+            
+            // Java EE 8（TomEE 8はこちらを使用）
+            compileOnly "javax.servlet:javax.servlet-api:4.0.1"
+            compileOnly "javax.servlet.jsp:javax.servlet.jsp-api:2.3.3"
+            compileOnly "javax.ejb:javax.ejb-api:3.2.2"
+        } else if (project.name == "struts-to-jsf-person-sdd") {
+            // Struts 1.3.10（移行元のフレームワーク）
+            implementation "org.apache.struts:struts-core:1.3.10"
+            implementation "org.apache.struts:struts-taglib:1.3.10"
+            implementation "commons-beanutils:commons-beanutils:1.9.4"
+            implementation "commons-digester:commons-digester:2.1"
+            implementation "commons-validator:commons-validator:1.7"
+            
+            // Java EE 8（Struts 1.3.10のために必要）
+            compileOnly "javax.servlet:javax.servlet-api:4.0.1"
+            compileOnly "javax.servlet.jsp:javax.servlet.jsp-api:2.3.3"
+            compileOnly "javax.ejb:javax.ejb-api:3.2.2"
+            
+            // Jakarta EE 10依存関係（移行先のプラットフォーム - Payara Server用）
+            // Jakarta EE 10 API（provided scope）
+            compileOnly "jakarta.platform:jakarta.jakartaee-api:10.0.0"
+            
+            // MicroProfile Config API（Payara Server 6に含まれる - provided scope）
+            compileOnly "org.eclipse.microprofile.config:microprofile-config-api:3.0.3"
+            
+            // Jakarta Faces (JSF) API - JSFプロジェクト用
+            compileOnly "jakarta.faces:jakarta.faces-api:4.0.1"
+            
+            // Jakarta Servlet Pages (JSP) API
+            compileOnly "jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.1.1"
+            
+            // JSTL API & Implementation
+            implementation "org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1"
+            
+            // Jakarta Bean Validation
+            implementation "org.hibernate.validator:hibernate-validator:8.0.1.Final"
+            
+            // Jakarta Faces (JSF) Implementation - MVCプロジェクト用
+            implementation "org.glassfish:jakarta.faces:4.0.5"
+            
+            // JSON-B Implementation (Yasson) - RESTプロジェクト用
+            implementation "org.eclipse:yasson:3.0.3"
+        } else {
+            // Jakarta EE 10依存関係（Payara Server用プロジェクト）
+            // Jakarta EE 10 API（provided scope）
+            compileOnly "jakarta.platform:jakarta.jakartaee-api:10.0.0"
+            
+            // MicroProfile Config API（Payara Server 6に含まれる - provided scope）
+            compileOnly "org.eclipse.microprofile.config:microprofile-config-api:3.0.3"
+            
+            // Jakarta Faces (JSF) API - JSFプロジェクト用
+            compileOnly "jakarta.faces:jakarta.faces-api:4.0.1"
+            
+            // Jakarta Servlet Pages (JSP) API
+            compileOnly "jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.1.1"
+            
+            // JSTL API & Implementation
+            implementation "org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1"
+            
+            // Jakarta Bean Validation
+            implementation "org.hibernate.validator:hibernate-validator:8.0.1.Final"
+            
+            // Jakarta Faces (JSF) Implementation - MVCプロジェクト用
+            implementation "org.glassfish:jakarta.faces:4.0.5"
+            
+            // JSON-B Implementation (Yasson) - RESTプロジェクト用
+            implementation "org.eclipse:yasson:3.0.3"
+        }
+        
+        // berry-books-api, berry-books-api-vibe用: JWT and BCrypt dependencies
+        if (project.name == "berry-books-api" || project.name == "berry-books-api-vibe") {
+            // JWT
+            implementation "io.jsonwebtoken:jjwt-api:0.12.6"
+            runtimeOnly "io.jsonwebtoken:jjwt-impl:0.12.6"
+            runtimeOnly "io.jsonwebtoken:jjwt-jackson:0.12.6"
+            
+            // BCrypt for password hashing
+            implementation "org.mindrot:jbcrypt:0.4"
+        }
+        
+        // テスト依存関係
+        testImplementation "org.junit.jupiter:junit-jupiter:5.10.0"
+        testImplementation "org.mockito:mockito-core:5.5.0"
+        testImplementation "org.mockito:mockito-junit-jupiter:5.5.0"
+        testImplementation "com.microsoft.playwright:playwright:1.40.0"
+        
+        // Jakarta EE API（テスト用）
+        testImplementation "jakarta.platform:jakarta.jakartaee-api:10.0.0"
+    }
+
+    // Javaプラグイン設定
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+
+    // WAR設定
+    war {
+        if (project.name == "berry-books-mvc-sdd") {
+            // berry-books-mvc-sdd用: シンプルなWAR名
+            archiveBaseName = "berry-books"
+            archiveVersion = ""
+        } else {
+            archiveFileName = "${project.name}.war"
+        }
+        webAppDirectory = file("src/main/webapp")
+    }
+
+    // ソースフォルダの設定
+    sourceSets {
+        main {
+            java {
+                srcDir "src/main/java"
+            }
+            resources {
+                srcDir "src/main/resources"
+            }
+        }
+        test {
+            java {
+                srcDir "src/test/java"
+            }
+            resources {
+                srcDir "src/test/resources"
+            }
+        }
+    }
+
+    // アプリケーションをデプロイ
+    task deploy {
+        group = "payara"
+        description = "Deploy the application to Payara Server"
+        dependsOn "war"
+        doLast {
+            def asadmin = rootProject.file(conf.payaraServer.asadminCmd)
+            // berry-books-mvc-sdd uses simplified WAR name
+            def warName = project.name == "berry-books-mvc-sdd" ? "berry-books.war" : "${project.name}.war"
+            def warFile = file("${buildDir}/libs/${warName}")
+            
+            if (!asadmin.exists()) {
+                throw new GradleException("asadmin command not found: ${asadmin}")
+            }
+            if (!warFile.exists()) {
+                throw new GradleException("WAR file not found: ${warFile}")
+            }
+            
+            println "Deploying ${project.name} to Payara Server..."
+            
+            exec {
+                commandLine asadmin.absolutePath, "deploy",
+                    "--force=true",
+                    "--contextroot", "/${project.name}",
+                    warFile.absolutePath
+                ignoreExitValue = true
+            }
+            
+            println "Application deployed: http://localhost:${conf.payaraServer.httpPort}/${project.name}"
+        }
+    }
+
+    // アプリケーションをアンデプロイ
+    task undeploy {
+        group = "payara"
+        description = "Undeploy the application from Payara Server"
+        doLast {
+            def asadmin = rootProject.file(conf.payaraServer.asadminCmd)
+            
+            if (!asadmin.exists()) {
+                throw new GradleException("asadmin command not found: ${asadmin}")
+            }
+            
+            println "Undeploying ${project.name} from Payara Server..."
+            
+            exec {
+                commandLine asadmin.absolutePath, "undeploy", project.name
+                ignoreExitValue = true
+            }
+        }
+    }
+    // 初期データをセットアップする（HSQLDB）
+    task setupHsqldb doLast {
+        execSqlDir("$projectDir/sql/hsqldb", conf.hsqldb.general.url,
+                conf.hsqldb.general.user, conf.hsqldb.general.password,
+                conf.hsqldb.driverClass)
+    }
+
+    // テスト設定（全プロジェクト共通）
+    test {
+        useJUnitPlatform {
+            // E2Eテスト(@Tag("e2e"))を除外（全プロジェクト共通）
+            excludeTags 'e2e'
+        }
+        
+        // berry-books-mvc-sdd用: 詳細なテストログ
+        if (project.name == "berry-books-mvc-sdd") {
+            useJUnitPlatform {
+                excludeTags 'e2e'
+            }
+            testLogging {
+                events "passed", "skipped", "failed"
+                exceptionFormat "full"
+                showStandardStreams = false
+            }
+            // 日本語の文字化け対策（Windows対応）
+            systemProperty 'file.encoding', 'UTF-8'
+            systemProperty 'sun.jnu.encoding', 'UTF-8'
+            systemProperty 'stdout.encoding', 'UTF-8'
+            systemProperty 'stderr.encoding', 'UTF-8'
+            jvmArgs '-Dfile.encoding=UTF-8', '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
+        }
+    }
+    
+    // E2Eテスト専用タスク（全プロジェクト共通）
+    task e2eTest(type: Test) {
+        group = "verification"
+        description = "Run E2E tests with @Tag(\"e2e\") (requires deployed application)"
+        
+        useJUnitPlatform {
+            includeTags 'e2e'
+        }
+        
+        testLogging {
+            events "passed", "skipped", "failed"
+            exceptionFormat "full"
+            showStandardStreams = false
+        }
+        
+        // 日本語の文字化け対策（Windows対応）
+        systemProperty 'file.encoding', 'UTF-8'
+        systemProperty 'sun.jnu.encoding', 'UTF-8'
+        systemProperty 'stdout.encoding', 'UTF-8'
+        systemProperty 'stderr.encoding', 'UTF-8'
+        jvmArgs '-Dfile.encoding=UTF-8', '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
+        
+        // E2Eテストの前に、通常のテストが完了していることを推奨
+        shouldRunAfter test
+        
+        doFirst {
+            println ""
+            println "===================================="
+            println "Running E2E Tests for ${project.name}"
+            println "===================================="
+            println "Make sure the application is deployed:"
+            println "  1. Payara Server is running (gradle startPayara)"
+            println "  2. Application is deployed (gradle :projects:java:${project.name}:deploy)"
+            println ""
+        }
+    }
+
+    // TomEE 8専用タスク（Strutsプロジェクト）
+    if (project.name == "struts-person") {
+        // クリーンなserver.xmlをテンプレートから初期化する
+        task initTomee8Config doLast {
+            def templateFile = rootProject.file("${rootProject.conf.tomee8.home}/conf/server.xml.original")
+            def targetFile = rootProject.file("${rootProject.conf.tomee8.home}/conf/server.xml")
+            
+            if (!templateFile.exists()) {
+                throw new GradleException("Template file not found: ${templateFile}")
+            }
+            
+            println "Initializing TomEE 8 configuration..."
+            println "  Template: ${templateFile.absolutePath}"
+            println "  Target:   ${targetFile.absolutePath}"
+            
+            // バックアップを作成（既存ファイルが存在する場合）
+            if (targetFile.exists()) {
+                def timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date())
+                def backupFile = new File(targetFile.parent, "server.xml.backup_${timestamp}")
+                java.nio.file.Files.copy(
+                    targetFile.toPath(),
+                    backupFile.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                )
+                println "  Backup:   ${backupFile.absolutePath}"
+            }
+            
+            // テンプレートをコピー
+            java.nio.file.Files.copy(
+                templateFile.toPath(),
+                targetFile.toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+            )
+            
+            println ""
+            println "===================================="
+            println "TomEE 8 configuration initialized!"
+            println "===================================="
+            println ""
+            println "次のステップ:"
+            println "  1. ポート設定を変更: gradle :projects:java:struts-person:configureTomee8Ports"
+            println "  2. TomEE 8を起動: gradle :projects:java:struts-person:startTomee8"
+        }
+        
+        // TomEE 8のポート設定を変更
+        task configureTomee8Ports doLast {
+            def serverXml = rootProject.file("${rootProject.conf.tomee8.home}/conf/server.xml")
+            
+            if (!serverXml.exists()) {
+                throw new GradleException("server.xml not found: ${serverXml}")
+            }
+            
+            println "Configuring TomEE 8 ports..."
+            
+            def content = serverXml.text
+            
+            // HTTPポート変更
+            content = content.replaceAll('port="8080"', "port=\"${rootProject.conf.tomee8.httpPort}\"")
+            // HTTPSポート変更
+            content = content.replaceAll('redirectPort="8443"', "redirectPort=\"${rootProject.conf.tomee8.httpsPort}\"")
+            // Shutdownポート変更
+            content = content.replaceAll('<Server port="8005"', "<Server port=\"${rootProject.conf.tomee8.shutdownPort}\"")
+            // AJPポート変更
+            content = content.replaceAll('port="8009" protocol="AJP', "port=\"${rootProject.conf.tomee8.ajpPort}\" protocol=\"AJP")
+            
+            serverXml.text = content
+            
+            println "TomEE 8 ports configured:"
+            println "  - HTTP Port: ${rootProject.conf.tomee8.httpPort}"
+            println "  - HTTPS Port: ${rootProject.conf.tomee8.httpsPort}"
+            println "  - Shutdown Port: ${rootProject.conf.tomee8.shutdownPort}"
+            println "  - AJP Port: ${rootProject.conf.tomee8.ajpPort}"
+        }
+        
+        // TomEE 8のデータソース設定
+        task configureTomee8DataSource doLast {
+            def tomeeXml = rootProject.file("${rootProject.conf.tomee8.home}/conf/tomee.xml")
+            
+            if (!tomeeXml.exists()) {
+                throw new GradleException("tomee.xml not found: ${tomeeXml}")
+            }
+            
+            println "Configuring TomEE 8 DataSource..."
+            
+            def content = tomeeXml.text
+            
+            // データソース定義が既に存在するかチェック
+            if (content.contains('id="HsqldbDS"')) {
+                println "DataSource already configured in tomee.xml"
+                return
+            }
+            
+            // データソース定義を追加
+            def dataSourceConfig = """
+  
+  <!-- HSQLDB DataSource for struts-person application -->
+  <Resource id="HsqldbDS" type="DataSource">
+    JdbcDriver org.hsqldb.jdbc.JDBCDriver
+    JdbcUrl jdbc:hsqldb:hsql://localhost:${rootProject.conf.hsqldb.tcpPort}/${rootProject.conf.hsqldb.general.db}
+    UserName ${rootProject.conf.hsqldb.general.user}
+    Password ${rootProject.conf.hsqldb.general.password}
+    JtaManaged true
+  </Resource>"""
+            
+            // </tomee>の前に挿入
+            content = content.replace('</tomee>', "${dataSourceConfig}\n</tomee>")
+            
+            tomeeXml.text = content
+            
+            println "TomEE 8 DataSource configured:"
+            println "  - Resource ID: HsqldbDS"
+            println "  - JDBC URL: jdbc:hsqldb:hsql://localhost:${rootProject.conf.hsqldb.tcpPort}/${rootProject.conf.hsqldb.general.db}"
+            println "  - UserName: ${rootProject.conf.hsqldb.general.user}"
+            println ""
+            println "✅ DataSource configuration completed successfully!"
+        }
+
+        // TomEE 8を起動（フォアグラウンド - Ctrl+Cで停止可能）
+        task startTomee8 doLast {
+            def catalinaCmd = rootProject.file(rootProject.conf.tomee8.catalinaCmd)
+            
+            if (!catalinaCmd.exists()) {
+                throw new GradleException("Catalina script not found: ${catalinaCmd}")
+            }
+            
+            println "Starting TomEE 8 (Foreground Mode)..."
+            println "  - HTTP Port: ${rootProject.conf.tomee8.httpPort}"
+            println "  - Access URL: http://localhost:${rootProject.conf.tomee8.httpPort}"
+            println ""
+            println "Press Ctrl+C to stop the server"
+            println "=========================================="
+            println ""
+            
+            exec {
+                workingDir rootProject.file(rootProject.conf.tomee8.home)
+                if (System.properties['os.name'].toLowerCase().contains('windows')) {
+                    // Windowsの場合 - setenv.batが自動的に読み込まれる
+                    commandLine 'cmd', '/c', 'chcp', '65001', '&', catalinaCmd.absolutePath, 'run'
+                } else {
+                    // Linux/Macの場合 - setenv.shが自動的に読み込まれる
+                    commandLine catalinaCmd.absolutePath, 'run'
+                }
+                standardOutput = System.out
+                errorOutput = System.err
+                ignoreExitValue = false
+            }
+        }
+
+        // TomEE 8を停止
+        task stopTomee8 doLast {
+            def shutdownCmd = rootProject.file(rootProject.conf.tomee8.shutdownCmd)
+            
+            if (!shutdownCmd.exists()) {
+                throw new GradleException("Shutdown script not found: ${shutdownCmd}")
+            }
+            
+            println "Stopping TomEE 8..."
+            
+            exec {
+                workingDir rootProject.conf.tomee8.home
+                commandLine shutdownCmd.absolutePath
+                ignoreExitValue = true
+            }
+            
+            println "TomEE 8 stopped successfully."
+        }
+
+        // TomEE 8をバックグラウンドで起動（停止はstopTomee8を使用）
+        task startTomee8Background doLast {
+            def startupCmd = rootProject.file(rootProject.conf.tomee8.startupCmd)
+            
+            if (!startupCmd.exists()) {
+                throw new GradleException("Startup script not found: ${startupCmd}")
+            }
+            
+            println "Starting TomEE 8 (Background Mode)..."
+            println "  - HTTP Port: ${rootProject.conf.tomee8.httpPort}"
+            println "  - Access URL: http://localhost:${rootProject.conf.tomee8.httpPort}"
+            println ""
+            
+            exec {
+                workingDir rootProject.file(rootProject.conf.tomee8.home)
+                // setenv.bat/setenv.shが自動的に読み込まれる
+                commandLine startupCmd.absolutePath
+            }
+            
+            println ""
+            println "TomEE 8 started in background."
+            println "To stop the server, run: gradle :projects:java:struts-person:stopTomee8"
+        }
+
+        // TomEE 8を再起動
+        task restartTomee8 {
+            group = "tomee8"
+            description = "Restart TomEE 8"
+            dependsOn stopTomee8
+            finalizedBy startTomee8Background
+        }
+
+        // TomEE 8にデプロイ
+        task deployToTomee8 {
+            group = "tomee8"
+            description = "Deploy struts-person to TomEE 8"
+            dependsOn "war"
+            
+            doLast {
+                def webappsDir = rootProject.file(rootProject.conf.tomee8.webappsDir)
+                def warFile = file("${buildDir}/libs/${project.name}.war")
+                
+                if (!webappsDir.exists()) {
+                    throw new GradleException("TomEE webapps directory not found: ${webappsDir}")
+                }
+                
+                if (!warFile.exists()) {
+                    throw new GradleException("WAR file not found: ${warFile}")
+                }
+                
+                println "Deploying ${warFile.name} to TomEE 8..."
+                
+                // 既存のデプロイを削除
+                def deployedWar = new File(webappsDir, warFile.name)
+                def deployedDir = new File(webappsDir, project.name)
+                
+                if (deployedWar.exists()) {
+                    deployedWar.delete()
+                }
+                if (deployedDir.exists()) {
+                    deployedDir.deleteDir()
+                }
+                
+                // WARファイルをコピー
+                java.nio.file.Files.copy(
+                    warFile.toPath(),
+                    deployedWar.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                )
+                
+                println "Application deployed successfully."
+                println "Access URL: http://localhost:${rootProject.conf.tomee8.httpPort}/${project.name}/"
+            }
+        }
+
+        // TomEE 8からアンデプロイ
+        task undeployFromTomee8 {
+            group = "tomee8"
+            description = "Undeploy struts-person from TomEE 8"
+            
+            doLast {
+                def webappsDir = rootProject.file(rootProject.conf.tomee8.webappsDir)
+                def deployedWar = new File(webappsDir, "${project.name}.war")
+                def deployedDir = new File(webappsDir, project.name)
+                
+                println "Undeploying ${project.name} from TomEE 8..."
+                
+                if (deployedWar.exists()) {
+                    deployedWar.delete()
+                    println "Removed: ${deployedWar.name}"
+                }
+                
+                if (deployedDir.exists()) {
+                    deployedDir.deleteDir()
+                    println "Removed: ${deployedDir.name}/"
+                }
+                
+                println "Application undeployed successfully."
+            }
+        }
+
+        // タスクをグループ化する
+        [initTomee8Config, configureTomee8Ports, configureTomee8DataSource, startTomee8, startTomee8Background, stopTomee8, restartTomee8, 
+         deployToTomee8, undeployFromTomee8]*.group = "tomee8"
+    }
+
+    // Specification-Driven Development: Clean artifacts while preserving directory structure
+    if (project.name == "berry-books-mvc-sdd") {
+        task cleanSddArtifacts {
+            group = "sdd"
+            description = "Clean SDD artifacts (src/ and sql/hsqldb/) while preserving directory structure"
+            
+            doLast {
+                println "Cleaning SDD artifacts for ${project.name}..."
+                println ""
+                
+                def deletedFilesCount = 0
+                def preservedDirsCount = 0
+                
+                // Define directory structure to preserve
+                def preservedDirs = [
+                    "$projectDir/src/main/java",
+                    "$projectDir/src/main/resources/META-INF",
+                    "$projectDir/src/main/webapp/resources",
+                    "$projectDir/src/main/webapp/WEB-INF",
+                    "$projectDir/src/test/java",
+                    "$projectDir/src/test/resources"
+                ]
+                
+                // Create directories if they don't exist
+                preservedDirs.each { dirPath ->
+                    def dir = file(dirPath)
+                    if (!dir.exists()) {
+                        dir.mkdirs()
+                        println "Created directory: ${dirPath.replace(projectDir.toString(), '')}"
+                    }
+                }
+                
+                // Delete files under src/ (preserve directories)
+                def srcDir = file("$projectDir/src")
+                if (srcDir.exists()) {
+                    println ""
+                    println "Cleaning src/ directory..."
+                    srcDir.eachFileRecurse(groovy.io.FileType.FILES) { file ->
+                        // Delete all files except .gitkeep
+                        if (file.name != ".gitkeep") {
+                            println "  Deleting: ${file.absolutePath.replace(projectDir.toString(), '')}"
+                            file.delete()
+                            deletedFilesCount++
+                        }
+                    }
+                }
+                
+                // Delete files under sql/hsqldb/ (preserve directories)
+                def sqlDir = file("$projectDir/sql/hsqldb")
+                if (sqlDir.exists()) {
+                    println ""
+                    println "Cleaning sql/hsqldb/ directory..."
+                    sqlDir.eachFileRecurse(groovy.io.FileType.FILES) { file ->
+                        if (file.name != ".gitkeep") {
+                            println "  Deleting: ${file.name}"
+                            file.delete()
+                            deletedFilesCount++
+                        }
+                    }
+                }
+                
+                // Place .gitkeep in empty preserved directories
+                println ""
+                println "Preserving directory structure..."
+                preservedDirs.each { dirPath ->
+                    def dir = file(dirPath)
+                    if (dir.exists() && dir.listFiles().length == 0) {
+                        def gitkeepFile = new File(dir, ".gitkeep")
+                        if (!gitkeepFile.exists()) {
+                            gitkeepFile.createNewFile()
+                            println "  .gitkeep created: ${dirPath.replace(projectDir.toString(), '')}"
+                            preservedDirsCount++
+                        }
+                    }
+                }
+                
+                // Place .gitkeep in sql/hsqldb/ if empty
+                if (sqlDir.exists() && sqlDir.listFiles().length == 0) {
+                    def gitkeepFile = new File(sqlDir, ".gitkeep")
+                    if (!gitkeepFile.exists()) {
+                        gitkeepFile.createNewFile()
+                        println "  .gitkeep created: sql/hsqldb/"
+                        preservedDirsCount++
+                    }
+                }
+                
+                println ""
+                println "===================================="
+                println "SDD Artifacts Cleanup Completed!"
+                println "===================================="
+                println "  Deleted files: ${deletedFilesCount}"
+                println "  Preserved directories: ${preservedDirsCount}"
+                println ""
+                println "[INFO] Directory structure has been preserved:"
+                println "    - src/main/java"
+                println "    - src/main/resources/META-INF"
+                println "    - src/main/webapp/resources"
+                println "    - src/main/webapp/WEB-INF"
+                println "    - src/test/java"
+                println "    - src/test/resources"
+                println "    - sql/hsqldb"
+                println ""
+                println "[INFO] Empty directories contain .gitkeep files."
+                println ""
+                println "Ready for re-implementation from SPEC!"
+                println "Next steps:"
+                println "  1. @instructions/tasks.md - Generate implementation tasks"
+                println "  2. @instructions/implement.md - Implement from tasks"
+            }
+        }
+    }
+
+    // タスクをグループ化する
+    [setupHsqldb]*.group = "setup-init-data"
+}
+
+// 設定情報の読み込み
+def conf = {
+    def slurper = new ConfigSlurper()
+    slurper.binding = project.properties
+    def confLocation = System.properties["user.home"]
+    
+    // env-conf.gradleを読み込み
+    // 1. ユーザーホームディレクトリ
+    def file = new File(confLocation + "/env-conf.gradle")
+    if (!file.exists()) {
+        // 2. プロジェクトルート
+        file = new File("$projectDir/env-conf.gradle")
+        if (!file.exists()) {
+            println "WARNING: env-conf.gradle not found. Please create it in project root or home directory."
+            return null
+        }
+    }
+    return new ConfigSlurper().parse(file.toURL())
+}()
+
+// 設定情報を拡張プロパティにセット
+ext.conf = conf
+
+// SQLを発行するメソッド（ディレクトリ指定）
+def execSqlDir(dir, url, user, password, driverClass) {
+    new File(dir).listFiles().sort{a, b -> a.name <=> b.name}.each{ File f ->
+        println "Executing SQL file: ${f.name}"
+        def sqlContent = f.getText("UTF-8")
+        
+        // コメントを除去（--で始まる行）
+        def cleanedSql = sqlContent.split('\n')
+            .collect { line ->
+                // 行末コメント（--以降）を除去
+                def commentIndex = line.indexOf('--')
+                if (commentIndex >= 0) {
+                    return line.substring(0, commentIndex)
+                }
+                return line
+            }
+            .findAll { it.trim() } // 空行を除去
+            .join('\n')
+        
+        // 一時ファイルに書き出し
+        def tempFile = File.createTempFile("sql_", ".sql", new File(System.getProperty("java.io.tmpdir")))
+        tempFile.deleteOnExit()
+        tempFile.write(cleanedSql, "UTF-8")
+        
+        ant.sql(url: url,
+            userid: user,
+            password: password,
+            driver: driverClass,
+            classpath: buildscript.configurations.classpath.asPath,
+            encoding: "UTF-8",
+            onerror: "continue") {
+                fileset(file: tempFile)
+            }
+    }
+}
+
+// SQLを発行するメソッド（ファイル指定）
+def execSql(file, url, user, password, driverClass) {
+    println "Executing SQL file: ${new File(file).name}"
+    def sqlContent = new File(file).getText("UTF-8")
+    
+    // コメントを除去（--で始まる行）
+    def cleanedSql = sqlContent.split('\n')
+        .collect { line ->
+            // 行末コメント（--以降）を除去
+            def commentIndex = line.indexOf('--')
+            if (commentIndex >= 0) {
+                return line.substring(0, commentIndex)
+            }
+            return line
+        }
+        .findAll { it.trim() } // 空行を除去
+        .join('\n')
+    
+    // 一時ファイルに書き出し
+    def tempFile = File.createTempFile("sql_", ".sql", new File(System.getProperty("java.io.tmpdir")))
+    tempFile.deleteOnExit()
+    tempFile.write(cleanedSql, "UTF-8")
+    
+    ant.sql(
+        driver: driverClass,
+        url: url,
+        userid: user,
+        password: password,
+        classpath: buildscript.configurations.classpath.asPath,
+        encoding: "UTF-8",
+        onerror: "continue") {
+            fileset(file: tempFile)
+        }
+}
+
+// HSQLDB Databaseサーバーを起動する
+task startHsqldb doLast {
+    def hsqldbJar = file("hsqldb/lib/hsqldb.jar")
+    
+    if (!hsqldbJar.exists()) {
+        throw new GradleException("HSQLDB JAR not found: ${hsqldbJar}")
+    }
+    
+    println "Starting HSQLDB Database Server..."
+    println "  - TCP Server on port ${conf.hsqldb.tcpPort}"
+    println "  - Web Console on port ${conf.hsqldb.webPort} (http://localhost:${conf.hsqldb.webPort})"
+    println ""
+    println "To stop the server, run: gradle stopHsqldb"
+    println ""
+    
+    def pidFile = file("${buildDir}/.hsqldbserver.pid")
+    pidFile.parentFile.mkdirs()
+    
+    def process = [
+        "java", 
+        "-cp", hsqldbJar.absolutePath,
+        "org.hsqldb.server.Server",
+        "--database.0", "file:${conf.hsqldb.general.dbPath}",
+        "--dbname.0", conf.hsqldb.general.db,
+        "--port", conf.hsqldb.tcpPort
+    ].execute()
+    
+    // Windows用のプロセスID保存
+    if (System.properties['os.name'].toLowerCase().contains('windows')) {
+        sleep(2000)  // プロセスが起動するまで待機
+        def jpsProcess = "jps -l".execute()
+        jpsProcess.waitFor()
+        def jpsOutput = jpsProcess.text
+        def hsqldbProcessLine = jpsOutput.split('\n').find { it.contains('org.hsqldb.server.Server') }
+        if (hsqldbProcessLine) {
+            def pid = hsqldbProcessLine.split()[0]
+            pidFile.text = pid
+            println "HSQLDB Server started with PID: ${pid}"
+        }
+    } else {
+        pidFile.text = process.pid()
+        println "HSQLDB Server started with PID: ${process.pid()}"
+    }
+}
+
+// HSQLDB Databaseサーバーを停止する
+task stopHsqldb doLast {
+    def pidFile = file("${buildDir}/.hsqldbserver.pid")
+    
+    if (!pidFile.exists()) {
+        println "No PID file found. HSQLDB Server may not be running."
+        return
+    }
+    
+    def pid = pidFile.text.trim()
+    println "Stopping HSQLDB Server (PID: ${pid})..."
+    
+    try {
+        if (System.properties['os.name'].toLowerCase().contains('windows')) {
+            "taskkill /F /PID ${pid}".execute().waitFor()
+        } else {
+            "kill ${pid}".execute().waitFor()
+        }
+        pidFile.delete()
+        println "HSQLDB Server stopped successfully."
+    } catch (Exception e) {
+        println "Failed to stop HSQLDB Server: ${e.message}"
+        println "You may need to stop it manually."
+    }
+}
+
+// HSQLDBを初期化する（テーブル削除・作成用）
+task initHsqldb doLast {
+    execSql("$projectDir/sql/hsqldb/DROP_HSQLDB_USER.sql",
+            conf.hsqldb.general.url, conf.hsqldb.general.user, conf.hsqldb.general.password,
+            conf.hsqldb.driverClass)
+    execSql("$projectDir/sql/hsqldb/DROP_HSQLDB_DATABASE.sql",
+            conf.hsqldb.general.url, conf.hsqldb.general.user, conf.hsqldb.general.password,
+            conf.hsqldb.driverClass)
+    execSql("$projectDir/sql/hsqldb/CREATE_HSQLDB_USER.sql",
+            conf.hsqldb.general.url, conf.hsqldb.general.user, conf.hsqldb.general.password,
+            conf.hsqldb.driverClass)
+    execSql("$projectDir/sql/hsqldb/CREATE_HSQLDB_DATABASE.sql",
+            conf.hsqldb.general.url, conf.hsqldb.general.user, conf.hsqldb.general.password,
+            conf.hsqldb.driverClass)
+}
+
+// タスクをグループ化する
+[startHsqldb, stopHsqldb, initHsqldb]*.group = "hsqldb"
+
+// Payara Serverを起動する（バックグラウンド）
+task startPayara doLast {
+    def asadmin = file(conf.payaraServer.asadminCmd)
+    
+    if (!asadmin.exists()) {
+        throw new GradleException("asadmin command not found: ${asadmin}")
+    }
+    
+    println "Starting Payara Server..."
+    println "  - HTTP Port: ${conf.payaraServer.httpPort}"
+    println "  - HTTPS Port: ${conf.payaraServer.httpsPort}"
+    println "  - Admin Port: ${conf.payaraServer.adminPort}"
+    println "  - Admin Console: http://localhost:${conf.payaraServer.adminPort}"
+    println ""
+    
+    exec {
+        commandLine asadmin.absolutePath, "start-domain", conf.payaraServer.domain
+    }
+    
+    println ""
+    println "Payara Server started successfully."
+    println "To stop the server, run: gradle stopPayara"
+}
+
+// Payara Serverを停止する
+task stopPayara doLast {
+    def asadmin = file(conf.payaraServer.asadminCmd)
+    
+    if (!asadmin.exists()) {
+        throw new GradleException("asadmin command not found: ${asadmin}")
+    }
+    
+    println "Stopping Payara Server..."
+    
+    exec {
+        commandLine asadmin.absolutePath, "stop-domain", conf.payaraServer.domain
+        ignoreExitValue = true
+    }
+    
+    println "Payara Server stopped successfully."
+}
+
+// Payara Serverを再起動する
+task restartPayara {
+    group = "payara"
+    description = "Restart Payara Server"
+    dependsOn stopPayara
+    finalizedBy startPayara
+}
+
+// Payara Serverのステータスを確認する
+task statusPayara doLast {
+    def asadmin = file(conf.payaraServer.asadminCmd)
+    
+    if (!asadmin.exists()) {
+        throw new GradleException("asadmin command not found: ${asadmin}")
+    }
+    
+    exec {
+        commandLine asadmin.absolutePath, "list-domains"
+    }
+}
+
+// 全てのJavaプロセスを強制終了する（開発用）
+task killAllJava doLast {
+    println "WARNING: This will kill ALL Java processes including Gradle daemon!"
+    println "Killing all Java processes in 3 seconds... Press Ctrl+C to cancel."
+    
+    try {
+        Thread.sleep(3000)
+    } catch (InterruptedException e) {
+        println "Cancelled."
+        return
+    }
+    
+    if (System.properties['os.name'].toLowerCase().contains('windows')) {
+        exec {
+            commandLine 'taskkill', '/F', '/IM', 'java.exe'
+            ignoreExitValue = true
+        }
+    } else {
+        exec {
+            commandLine 'pkill', '-9', 'java'
+            ignoreExitValue = true
+        }
+    }
+    
+    println "All Java processes killed."
+}
+
+// タスクをグループ化する
+[startPayara, stopPayara, restartPayara, statusPayara, killAllJava]*.group = "payara"
+
+// HSQLDBドライバをPayara Serverにコピーする
+task installHsqldbDriver doLast {
+    def hsqldbJar = file(conf.hsqldb.jarPath)
+    def payaraLibDir = file("${conf.payaraServer.home}/glassfish/domains/${conf.payaraServer.domain}/lib")
+    
+    if (!hsqldbJar.exists()) {
+        throw new GradleException("HSQLDB JAR not found: ${hsqldbJar}")
+    }
+    
+    if (!payaraLibDir.exists()) {
+        payaraLibDir.mkdirs()
+    }
+    
+    def targetFile = new File(payaraLibDir, "hsqldb.jar")
+    
+    println "Copying HSQLDB driver to Payara Server..."
+    println "  Source: ${hsqldbJar.absolutePath}"
+    println "  Target: ${targetFile.absolutePath}"
+    
+    java.nio.file.Files.copy(
+        hsqldbJar.toPath(),
+        targetFile.toPath(),
+        java.nio.file.StandardCopyOption.REPLACE_EXISTING
+    )
+    
+    println "HSQLDB driver installed successfully."
+    println "Please restart Payara Server for changes to take effect."
+}
+
+// JDBCコネクションプールを作成する
+task createConnectionPool doLast {
+    def asadmin = file(conf.payaraServer.asadminCmd)
+    
+    if (!asadmin.exists()) {
+        throw new GradleException("asadmin command not found: ${asadmin}")
+    }
+    
+    println "Creating JDBC Connection Pool: ${conf.hsqldb.general.connPoolName}..."
+    
+    // 既存のコネクションプールを削除（エラーを無視）
+    exec {
+        executable asadmin.absolutePath
+        args "delete-jdbc-connection-pool"
+        args conf.hsqldb.general.connPoolName
+        ignoreExitValue = true
+    }
+    
+    // 新しいコネクションプールを作成
+    // URLの : をエスケープ（Payara asadminの要件）
+    def escapedUrl = conf.hsqldb.general.url.replace(":", "\\:")
+    
+    println "Creating connection pool with URL: ${conf.hsqldb.general.url}"
+    println "User: ${conf.hsqldb.general.user}"
+    println "Password: ${conf.hsqldb.general.password.isEmpty() ? '(empty - using space placeholder)' : '(set)'}"
+    
+    // HSQLDBは空パスワードの場合、Driverクラスを使用
+    // HSQLDB SAユーザーは空パスワードだが、Payaraは空値を受け付けないため
+    // スペース文字をパスワードとして設定（HSQLDBは空でもスペースでも認証可能）
+    def passwordValue = conf.hsqldb.general.password.isEmpty() ? " " : conf.hsqldb.general.password
+    
+    exec {
+        executable asadmin.absolutePath
+        args "create-jdbc-connection-pool"
+        args "--driverclassname", conf.hsqldb.driverClass
+        args "--restype", "java.sql.Driver"
+        args "--property", "user=${conf.hsqldb.general.user}:password=${passwordValue}:url=${escapedUrl}"
+        args conf.hsqldb.general.connPoolName
+    }
+    
+    println "JDBC Connection Pool created successfully."
+}
+
+// JDBCリソース（データソース）を作成する
+task createDataSource doLast {
+    def asadmin = file(conf.payaraServer.asadminCmd)
+    
+    if (!asadmin.exists()) {
+        throw new GradleException("asadmin command not found: ${asadmin}")
+    }
+    
+    println "Creating JDBC Resource: ${conf.hsqldb.general.datasourceJndiName}..."
+    
+    // 既存のJDBCリソースを削除（エラーを無視）
+    exec {
+        executable asadmin.absolutePath
+        args "delete-jdbc-resource"
+        args conf.hsqldb.general.datasourceJndiName
+        ignoreExitValue = true
+    }
+    
+    // 新しいJDBCリソースを作成
+    exec {
+        executable asadmin.absolutePath
+        args "create-jdbc-resource"
+        args "--connectionpoolid", conf.hsqldb.general.connPoolName
+        args "--enabled=true"
+        args conf.hsqldb.general.datasourceJndiName
+    }
+    
+    println "JDBC Resource created successfully."
+    println "JNDI Name: ${conf.hsqldb.general.datasourceJndiName}"
+}
+
+// コネクションプールをテストする
+task pingConnectionPool doLast {
+    def asadmin = file(conf.payaraServer.asadminCmd)
+    
+    if (!asadmin.exists()) {
+        throw new GradleException("asadmin command not found: ${asadmin}")
+    }
+    
+    println "Testing JDBC Connection Pool: ${conf.hsqldb.general.connPoolName}..."
+    
+    exec {
+        executable asadmin.absolutePath
+        args "ping-connection-pool"
+        args conf.hsqldb.general.connPoolName
+    }
+    
+    println "Connection pool test successful."
+}
+
+// データソースを削除する
+task deleteDataSource doLast {
+    def asadmin = file(conf.payaraServer.asadminCmd)
+    
+    if (!asadmin.exists()) {
+        throw new GradleException("asadmin command not found: ${asadmin}")
+    }
+    
+    println "Deleting JDBC Resource: ${conf.hsqldb.general.datasourceJndiName}..."
+    
+    exec {
+        executable asadmin.absolutePath
+        args "delete-jdbc-resource"
+        args conf.hsqldb.general.datasourceJndiName
+        ignoreExitValue = true
+    }
+    
+    println "JDBC Resource deleted (if it existed)."
+}
+
+// コネクションプールを削除する
+task deleteConnectionPool doLast {
+    def asadmin = file(conf.payaraServer.asadminCmd)
+    
+    if (!asadmin.exists()) {
+        throw new GradleException("asadmin command not found: ${asadmin}")
+    }
+    
+    println "Deleting JDBC Connection Pool: ${conf.hsqldb.general.connPoolName}..."
+    
+    exec {
+        executable asadmin.absolutePath
+        args "delete-jdbc-connection-pool"
+        args conf.hsqldb.general.connPoolName
+        ignoreExitValue = true
+    }
+    
+    println "JDBC Connection Pool deleted (if it existed)."
+}
+
+// データソースをセットアップする（統合タスク）
+task setupDataSource {
+    group = "payara"
+    description = "Setup HSQLDB datasource on Payara Server (pool + resource)"
+    dependsOn deleteDataSource, deleteConnectionPool, createConnectionPool, createDataSource
+    
+    // 実行順序を保証：削除 → 作成
+    deleteConnectionPool.mustRunAfter deleteDataSource
+    createConnectionPool.mustRunAfter deleteConnectionPool
+    createDataSource.mustRunAfter createConnectionPool
+    
+    doLast {
+        println ""
+        println "===================================="
+        println "Datasource setup completed!"
+        println "===================================="
+        println "Connection Pool: ${conf.hsqldb.general.connPoolName}"
+        println "JNDI Name: ${conf.hsqldb.general.datasourceJndiName}"
+        println "Database URL: ${conf.hsqldb.general.url}"
+        println ""
+        println "You can test the connection with: gradle pingConnectionPool"
+    }
+}
+
+// すべてのデプロイ済みアプリケーションをアンデプロイする
+task undeployAllApps doLast {
+    def asadmin = file(conf.payaraServer.asadminCmd)
+    
+    if (!asadmin.exists()) {
+        throw new GradleException("asadmin command not found: ${asadmin}")
+    }
+    
+    println "Listing all deployed applications..."
+    
+    // アプリケーション一覧を取得
+    def output = new ByteArrayOutputStream()
+    try {
+        exec {
+            executable asadmin.absolutePath
+            args "list-applications"
+            standardOutput = output
+            ignoreExitValue = true
+        }
+    } catch (Exception e) {
+        println "Failed to list applications: ${e.message}"
+        return
+    }
+    
+    def apps = output.toString().split('\n')
+        .findAll { it.trim() && !it.contains('Command list-applications') && !it.contains('Nothing to list') }
+        .collect { it.split()[0] }  // アプリケーション名のみ取得
+    
+    if (apps.isEmpty()) {
+        println "No applications deployed."
+        return
+    }
+    
+    println "Found ${apps.size()} application(s): ${apps.join(', ')}"
+    
+    apps.each { appName ->
+        println "Undeploying: ${appName}..."
+        exec {
+            executable asadmin.absolutePath
+            args "undeploy"
+            args appName
+            ignoreExitValue = true
+        }
+    }
+    
+    println "All applications undeployed."
+}
+
+// すべてをクリーンアップする（統合タスク）
+task cleanupAll {
+    group = "payara"
+    description = "Cleanup all (undeploy all apps, delete datasource and connection pool)"
+    
+    doLast {
+        println ""
+        println "===================================="
+        println "Starting Cleanup"
+        println "===================================="
+        println ""
+    }
+}
+
+cleanupAll.dependsOn undeployAllApps, deleteDataSource, deleteConnectionPool
+
+cleanupAll.doLast {
+    println ""
+    println "===================================="
+    println "Cleanup Completed!"
+    println "===================================="
+    println "- All applications undeployed"
+    println "- JDBC Resource deleted"
+    println "- JDBC Connection Pool deleted"
+    println ""
+    println "You can now safely stop the servers:"
+    println "  gradle stopPayara"
+    println "  gradle stopHsqldb"
+    println ""
+}
+
+// クリーンなdomain.xmlをテンプレートから初期化する
+task initPayaraDomainConfig doLast {
+    def templateFile = file("${conf.payaraServer.home}/glassfish/domains/${conf.payaraServer.domain}/config/domain.xml.template")
+    def targetFile = file("${conf.payaraServer.home}/glassfish/domains/${conf.payaraServer.domain}/config/domain.xml")
+    
+    if (!templateFile.exists()) {
+        throw new GradleException("Template file not found: ${templateFile}")
+    }
+    
+    println "Initializing Payara domain configuration..."
+    println "  Template: ${templateFile.absolutePath}"
+    println "  Target:   ${targetFile.absolutePath}"
+    
+    // バックアップを作成（既存ファイルが存在する場合）
+    if (targetFile.exists()) {
+        def timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date())
+        def backupFile = new File(targetFile.parent, "domain.xml.backup_${timestamp}")
+        java.nio.file.Files.copy(
+            targetFile.toPath(),
+            backupFile.toPath(),
+            java.nio.file.StandardCopyOption.REPLACE_EXISTING
+        )
+        println "  Backup:   ${backupFile.absolutePath}"
+    }
+    
+    // テンプレートをコピー
+    java.nio.file.Files.copy(
+        templateFile.toPath(),
+        targetFile.toPath(),
+        java.nio.file.StandardCopyOption.REPLACE_EXISTING
+    )
+    
+    println ""
+    println "===================================="
+    println "Domain configuration initialized!"
+    println "===================================="
+    println ""
+    println "次のステップ:"
+    println "  1. データソースを設定: gradle setupDataSource"
+    println "  2. アプリケーションをデプロイ: gradle :projects:java:berry-books-mvc:deploy"
+}
+
+// タスクをグループ化する
+[installHsqldbDriver, initPayaraDomainConfig, createConnectionPool, createDataSource, 
+ pingConnectionPool, setupDataSource, deleteDataSource, deleteConnectionPool,
+ undeployAllApps, cleanupAll]*.group = "payara"
+
+// EXCELファイルを探索して展開する
+task exploreExcelFiles doLast {
+    // ディレクトリパスをプロパティから取得（例: -PtargetDir=path/to/dir）
+    def targetDir = project.hasProperty('targetDir') ? project.property('targetDir') : null
+    
+    if (targetDir == null) {
+        throw new GradleException("Please specify target directory with -PtargetDir=<path>")
+    }
+    
+    // プロジェクトルートからの相対パスとして解決
+    def dir = project.file(targetDir)
+    
+    if (!dir.exists() || !dir.isDirectory()) {
+        throw new GradleException("Target directory does not exist or is not a directory: ${targetDir}")
+    }
+    
+    println "Searching for Excel files (.xlsx) in: ${dir.absolutePath}"
+    println ""
+    
+    def excelFiles = []
+    dir.eachFileRecurse(FileType.FILES) { file ->
+        if (file.name.toLowerCase().endsWith('.xlsx')) {
+            excelFiles << file
+        }
+    }
+    
+    if (excelFiles.isEmpty()) {
+        println "No Excel files (.xlsx) found."
+        return
+    }
+    
+    println "Found ${excelFiles.size()} Excel file(s):"
+    excelFiles.each { println "  - ${it.absolutePath}" }
+    println ""
+    
+    excelFiles.each { excelFile ->
+        try {
+            // タイムスタンプフォルダ名を生成
+            def timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date())
+            def outputDir = new File(excelFile.parentFile, timestamp)
+            outputDir.mkdirs()
+            
+            // .xlsx を .zip にリネーム
+            def zipFile = new File(excelFile.parentFile, excelFile.name.replaceAll(/\.xlsx$/, '.zip'))
+            println "Processing: ${excelFile.name}"
+            println "  Renaming to: ${zipFile.name}"
+            
+            java.nio.file.Files.copy(
+                excelFile.toPath(),
+                zipFile.toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+            )
+            
+            // ZIPファイルを展開
+            println "  Extracting to: ${outputDir.name}/"
+            
+            def zip = new java.util.zip.ZipFile(zipFile)
+            zip.entries().each { entry ->
+                def file = new File(outputDir, entry.name)
+                if (entry.directory) {
+                    file.mkdirs()
+                } else {
+                    file.parentFile.mkdirs()
+                    file.withOutputStream { out ->
+                        out << zip.getInputStream(entry)
+                    }
+                }
+            }
+            zip.close()
+            
+            // 一時的な.zipファイルを削除
+            zipFile.delete()
+            
+            println "  ✓ Extracted successfully to: ${outputDir.absolutePath}"
+            println ""
+            
+        } catch (Exception e) {
+            println "  ✗ Failed to process ${excelFile.name}: ${e.message}"
+            println "     Error details:"
+            e.printStackTrace()
+            println ""
+        }
+    }
+    
+    println "===================================="
+    println "Excel file exploration completed!"
+    println "===================================="
+}
+
+// タスクをグループ化する
+exploreExcelFiles.group = "utility"
+exploreExcelFiles.description = "Explore Excel files (.xlsx) recursively and extract them as ZIP archives"

@@ -1,0 +1,10 @@
+# Python dependencies for local development environment
+# Install with: pip install -r requirements.txt
+
+# For PySpark version (local parallel processing)
+pyspark==3.5.3          # Apache Spark Python API
+                        # Note: Supports Python 3.11 (Python 3.12 not compatible)
+                        # Requires Java 11-21 (tested with Java 25)
+
+# AWS SDK for S3 access
+boto3>=1.26.0

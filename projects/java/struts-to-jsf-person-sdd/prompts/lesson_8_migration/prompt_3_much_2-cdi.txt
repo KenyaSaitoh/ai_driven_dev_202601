@@ -1,0 +1,115 @@
+===============================================
+Jakarta EE 10 マイグレーション【高：詳細版】
+フェーズ2: ビジネスロジック層のCDI化
+===============================================
+
+struts-to-jsf-person-sddプロジェクトのビジネスロジック層を、EJBからCDIに移行してください。
+
+## 現状分析
+
+### 現在のService層の問題
+
+- `PersonService.java`（インターフェース） + `PersonServiceBean.java`（EJB実装）の2ファイル構成
+- `@Stateless` EJBによる実装
+- Actionクラスから`InitialContext.lookup()`でJNDIルックアップ
+- PersonDaoに処理を委譲
+
+---
+
+## マイグレーション内容
+
+### 1. PersonServiceの統合とCDI化
+
+**対象ファイル：** `pro.kensait.jsf.person.PersonService`
+
+**構造変更：**
+- インターフェースと実装クラスを統合
+- 実装クラスのみに変更
+
+**追加するアノテーション：**
+- `@RequestScoped` または `@ApplicationScoped` - CDI Bean化
+- `@Transactional(TxType.REQUIRED)` - トランザクション管理
+- `@PersistenceContext(unitName = "MyPersistenceUnit")` - EntityManager注入
+
+**削除するアノテーション：**
+- `@Stateless`（EJB関連）
+
+---
+
+### 2. データアクセス方式の変更
+
+**JDBC処理の置き換え：**
+
+**全件取得（findAll）:**
+- JDBC: `SELECT * FROM PERSON` + ResultSetループ処理
+- JPA: JPQLで `"SELECT p FROM Person p"`、`createQuery().getResultList()`
+
+**主キー検索（findById）:**
+- JDBC: `SELECT ... WHERE PERSON_ID = ?` + PreparedStatement
+- JPA: `entityManager.find(Person.class, personId)`
+
+**登録（insert）:**
+- JDBC: `INSERT INTO PERSON ...` + PreparedStatement
+- JPA: `entityManager.persist(person)` - IDは自動採番
+
+**更新（update）:**
+- JDBC: `UPDATE PERSON SET ... WHERE PERSON_ID = ?`
+- JPA: `entityManager.merge(person)`
+
+**削除（delete）:**
+- JDBC: `DELETE FROM PERSON WHERE PERSON_ID = ?`
+- JPA: findで取得後、`entityManager.remove(person)`
+
+---
+
+### 3. 例外処理の変更
+
+**変更前：**
+- SQLExceptionのcatch処理
+- try-with-resources構文
+
+**変更後：**
+- PersistenceException（RuntimeException）はそのままスロー
+- ビジネス例外への変換は任意
+
+---
+
+### 4. 削除するクラス
+
+**削除対象：**
+- `pro.kensait.struts.person.service.PersonService`（インターフェース）
+- `pro.kensait.struts.person.service.PersonServiceBean`（EJB実装）
+
+**統合先：**
+- `pro.kensait.jsf.person.PersonService`（CDI Bean）
+
+---
+
+## 変更後の構造
+
+```
+pro.kensait.jsf.person/
+├── Person.java           # JPAエンティティ
+└── PersonService.java    # CDI Bean（@RequestScoped, @Transactional）
+```
+
+---
+
+## 注意事項
+
+### スコープ選択
+- `@RequestScoped`: リクエストごとにインスタンス生成（軽量）
+- `@ApplicationScoped`: シングルトン（ステートレス設計必須）
+
+### トランザクション管理
+- `@Transactional`はServiceクラスまたはメソッドに付与
+- JTAによるコンテナ管理トランザクション
+
+### 依存性注入
+- バッキングBeanから`@Inject`でServiceを注入
+- JNDIルックアップは不要
+
+### EntityManagerの管理
+- コンテナが自動管理（close不要）
+- トランザクション境界内で有効
+

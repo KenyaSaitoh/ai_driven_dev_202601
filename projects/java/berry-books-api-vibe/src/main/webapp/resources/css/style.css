@@ -1,0 +1,672 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  background-color: #ffffff;
+  line-height: 1.6;
+  padding: 30px 40px;
+  min-height: 100vh;
+}
+
+/* ヘッダーナビゲーション */
+.header-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.header-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.search-link {
+  display: inline-block;
+  color: #CF3F4E;
+  text-decoration: none;
+  padding: 8px 12px;
+  margin: 0;
+  font-weight: 500;
+  font-size: 1em;
+  line-height: 1.5;
+  transition: all 0.3s ease;
+}
+
+.search-link:hover {
+  color: #A32D3A;
+  transform: translateY(-2px);
+}
+
+h2 {
+  color: #A32D3A;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 2em;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Welcome page title */
+h2.welcome-title {
+  background: linear-gradient(135deg, #CF3F4E 0%, #E55563 50%, #CF3F4E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 2.5em;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-top: 40px;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px 4px rgba(207, 63, 78, 0.1);
+}
+
+h3 {
+  color: #A32D3A;
+  margin-top: 30px;
+  margin-bottom: 15px;
+  font-size: 1.5em;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+hr {
+  margin-bottom: 20px;
+  border: none;
+  border-top: 2px solid #CF3F4E;
+  opacity: 0.5;
+}
+
+form.login, form.search {
+  width: 800px;
+  margin: 30px auto;
+  background-color: #ffffff;
+  padding: 30px 40px;
+  border-radius: 12px;
+}
+
+form.customer {
+  width: 1100px;
+  margin: 30px auto;
+  background-color: #ffffff;
+  padding: 30px 40px;
+  border-radius: 12px;
+}
+
+form.book {
+  margin: 30px auto;
+}
+
+table {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+td {
+  padding: 8px;
+}
+
+.book-table {
+  width: 100%;
+  margin-bottom: 30px;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  box-shadow: 0 2px 20px rgba(207, 63, 78, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.book-table th, .book-table td {
+  padding: 14px 16px;
+  border: 1px solid #F5D5D8;
+  text-align: left;
+}
+
+.book-table th {
+  background: linear-gradient(135deg, #CF3F4E 0%, #A32D3A 100%);
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.book-table tr:hover {
+  background-color: #FFE5E8;
+  transition: background-color 0.2s ease;
+}
+
+.book-table th {
+  font-size: 1.05em;
+}
+
+/* 注文内容テーブル */
+.order-items-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(207, 63, 78, 0.08);
+}
+
+.order-items-table th, .order-items-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border: 1px solid #F5D5D8;
+}
+
+.order-items-table th {
+  background-color: #FFF5F6;
+  color: #A32D3A;
+  font-size: 0.95em;
+  font-weight: 600;
+}
+
+.order-items-table td {
+  background-color: #ffffff;
+  color: #333;
+}
+
+.order-items-table tbody tr:hover {
+  background-color: #FFE5E8;
+}
+
+.order-items-table tbody tr:hover td {
+  background-color: #FFE5E8;
+  transition: background-color 0.2s ease;
+}
+
+/* 注文詳細テーブル */
+.order-detail-table {
+  width: 100%;
+  margin: 0 auto 20px;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  table-layout: fixed;
+  box-shadow: 0 2px 10px rgba(207, 63, 78, 0.08);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.order-detail-table td {
+  padding: 12px;
+  vertical-align: middle;
+  background-color: #ffffff;
+  border: 1px solid #F5D5D8;
+}
+
+.order-detail-table td:first-child {
+  width: 30%;
+  font-weight: 600;
+  color: #A32D3A;
+  background-color: #FFF5F6;
+}
+
+.order-detail-table td:nth-child(2) {
+  width: 35%;
+  color: #333;
+}
+
+.order-detail-table tr:hover td:not(.book-image-cell) {
+  background-color: #FFE5E8;
+  transition: background-color 0.2s ease;
+}
+
+.order-detail-table tr:hover td:first-child {
+  background-color: #FFE5E8;
+}
+
+.order-detail-table .book-image-cell {
+  width: 35%;
+  text-align: center;
+  vertical-align: middle;
+  padding: 12px;
+  background-color: #ffffff;
+}
+
+input[type="text"], input[type="password"], input[type="email"], select {
+  width: 100%;
+  margin-bottom: 15px;
+  padding: 12px 16px;
+  border: 2px solid #F5B3BA;
+  border-radius: 8px;
+  font-size: 1em;
+  transition: all 0.3s ease;
+  background-color: #ffffff;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, select:focus {
+  outline: none;
+  border-color: #CF3F4E;
+  box-shadow: 0 0 0 3px rgba(207, 63, 78, 0.1);
+}
+
+/* ボタンの共通スタイル（button要素とinput[type="submit"]の両方に適用） */
+button,
+input[type="submit"],
+input[type="button"] {
+  background: linear-gradient(135deg, #CF3F4E 0%, #A32D3A 100%);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 20px;
+  font-size: 1em;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(207, 63, 78, 0.2);
+}
+
+/* カートボタンの特別なスタイル */
+button.cart-button,
+input.cart-button {
+  margin-top: 0px;
+  padding: 8px 16px;
+  font-size: 0.9em;
+}
+
+/* 検索ボタンの特別なスタイル */
+.search-button {
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+/* ボタンのホバー効果 */
+button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover {
+  background: linear-gradient(135deg, #E55563 0%, #CF3F4E 100%);
+  box-shadow: 0 4px 12px rgba(207, 63, 78, 0.3);
+  transform: translateY(-2px);
+}
+
+button:active,
+input[type="submit"]:active,
+input[type="button"]:active {
+  transform: translateY(0);
+}
+
+a {
+  color: #CF3F4E;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 20px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+a.order-link {
+  margin-top: 0px;
+}
+
+a:hover {
+  color: #A32D3A;
+  text-decoration: none;
+  transform: translateX(3px);
+}
+
+a.links {
+  display: inline-block;
+  margin: 0 20px 0 0;
+  padding: 8px 12px;
+  font-weight: 500;
+  font-size: 1em;
+  line-height: 1.5;
+  transition: all 0.3s ease;
+}
+
+a.links:hover {
+  transform: translateY(-2px);
+}
+
+/* 最後のリンクのマージンを除去 */
+.links a:last-child {
+  margin-right: 0;
+}
+
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 24px;
+  height: 24px;
+  margin: 4px 10px 0;
+  cursor: pointer;
+  border: 2px solid #F5B3BA;
+  border-radius: 6px;
+  background-color: #ffffff;
+  position: relative;
+  transition: all 0.3s ease;
+  vertical-align: middle;
+}
+
+input[type="checkbox"]:hover {
+  border-color: #CF3F4E;
+  box-shadow: 0 0 0 3px rgba(207, 63, 78, 0.1);
+}
+
+input[type="checkbox"]:checked {
+  background: linear-gradient(135deg, #CF3F4E 0%, #A32D3A 100%);
+  border-color: #CF3F4E;
+}
+
+input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.custom-checkbox {
+  position: relative;
+  padding-left: 30px;
+  cursor: pointer;
+  display: inline-block;
+  line-height: 24px;
+}
+
+.custom-checkbox:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #F5B3BA;
+  border-radius: 6px;
+  background-color: #fff;
+  transition: all 0.3s ease;
+}
+
+.custom-checkbox:after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 3px;
+  background: #CF3F4E;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.custom-checkbox input[type="checkbox"]:checked+.custom-checkbox:after {
+  opacity: 1;
+}
+
+input[type="checkbox"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(207, 63, 78, 0.2);
+}
+
+input[type="checkbox"]:hover:before {
+  border-color: #CF3F4E;
+}
+
+.error {
+  color: #d1495b;
+  font-weight: 500;
+  margin-top: 15px;
+  display: block;
+}
+
+/* エラーメッセージブロック（h:messages用） */
+.error.ui-messages,
+form div .error {
+  display: block;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  padding: 14px 18px;
+  background-color: #FFF0F2;
+  border-left: 4px solid #d1495b;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(209, 73, 91, 0.1);
+}
+
+/* グローバルエラーメッセージのリスト */
+.error ul {
+  margin: 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.error li {
+  margin: 4px 0;
+}
+
+/* テーブルのセルに対する基本スタイル */
+.login table, .customer table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.login td, .customer td {
+  padding: 12px;
+  vertical-align: middle;
+}
+
+/* 入力フィールドのセルに対するスタイル */
+.login td input, .customer td input {
+  width: 100%;
+  padding: 12px 16px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  box-sizing: border-box;
+}
+
+/* エラーメッセージのセルに対するスタイル */
+.login td .error, .customer td .error {
+  color: #d1495b;
+  font-size: 0.9em;
+  display: block;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+/* テーブル列の幅を設定 */
+.login table td:nth-child(1) {
+  width: 160px;
+  min-width: 160px;
+  font-weight: 600;
+  color: #A32D3A;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.login table td:nth-child(2) {
+  width: 60%;
+  vertical-align: middle;
+}
+
+.login table td:nth-child(3) {
+  width: auto;
+  vertical-align: middle;
+}
+
+.customer table td:nth-child(1) {
+  width: 260px;
+  min-width: 260px;
+  font-weight: 600;
+  color: #A32D3A;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.customer table td:nth-child(2) {
+  width: 55%;
+  vertical-align: middle;
+}
+
+.customer table td:nth-child(3) {
+  width: auto;
+  vertical-align: middle;
+}
+
+/* ラジオボタンのカスタムスタイル */
+.custom-radio {
+  position: relative;
+  padding-left: 32px;
+  margin-bottom: 14px;
+  cursor: pointer;
+  font-size: 1em;
+  user-select: none;
+}
+
+/* 書籍表紙画像のポップアップスタイル */
+.book-row {
+  position: relative;
+}
+
+.book-cover-popup {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+  padding: 20px;
+  border: 3px solid #CF3F4E;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(207, 63, 78, 0.35);
+  max-width: 420px;
+  pointer-events: none;
+}
+
+.book-cover-popup img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.book-cover-popup .book-title {
+  margin-top: 15px;
+  text-align: center;
+  font-weight: 600;
+  color: #CF3F4E;
+  font-size: 1.2em;
+  letter-spacing: 0.3px;
+}
+
+.book-row:hover .book-cover-popup {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* 書籍詳細ページの画像表示 */
+.book-cover-image {
+  max-width: 320px;
+  width: 100%;
+  height: auto;
+  border: 3px solid #F5B3BA;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(207, 63, 78, 0.2);
+  margin: 20px 0;
+  transition: all 0.3s ease;
+}
+
+.book-cover-image:hover {
+  box-shadow: 0 8px 32px rgba(207, 63, 78, 0.3);
+  transform: scale(1.02);
+}
+
+.book-detail-with-image {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  margin: 30px 0;
+  background-color: #fafafa;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 2px 15px rgba(207, 63, 78, 0.1);
+}
+
+.book-detail-image {
+  flex: 0 0 320px;
+}
+
+.book-detail-info {
+  flex: 1;
+}
+
+.book-detail-info table {
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(207, 63, 78, 0.08);
+}
+
+.book-detail-info td:first-child {
+  font-weight: 600;
+  color: #CF3F4E;
+  background-color: #FFF5F6;
+  width: 30%;
+}
+
+/* 書籍一覧の画像表示 */
+.book-image-cell {
+  text-align: center;
+  vertical-align: middle;
+  padding: 8px !important;
+}
+
+.book-thumbnail {
+  height: 5cm;
+  width: auto;
+  max-width: 100%;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(207, 63, 78, 0.15);
+  transition: all 0.3s ease;
+  display: block;
+  margin: 0 auto;
+}
+
+.book-thumbnail:hover {
+  box-shadow: 0 4px 12px rgba(207, 63, 78, 0.25);
+  transform: scale(1.05);
+}
+
+/* 入荷待ち表示 */
+.out-of-stock {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: #E0E0E0;
+  color: #666;
+  font-weight: 600;
+  font-size: 0.9em;
+  border-radius: 8px;
+  text-align: center;
+  cursor: not-allowed;
+}
+

@@ -1,0 +1,94 @@
+===============================================
+ETL実装プロンプト【中：適切版】
+===============================================
+
+上流システム（売上・人事・在庫）から会計システムへのデータ統合ETL処理を、3つの実行方式で実装してください。
+
+## 1. アーキテクチャ原則
+
+**共通変換ロジック（`src/etl/`）を環境非依存で実装し、3つの実行環境で共通利用します。**
+
+```
+[共通] src/etl/Transformer
+    ↓ 同じロジック
+[実行環境①] Python標準版（ThreadPool）
+[実行環境②] PySpark版（RDD）
+[実行環境③] AWS Glue版（S3 + RDD）
+```
+
+## 2. 実装対象
+
+### 2.1 共通変換ロジック（`src/etl/`）
+
+3つのTransformerを実装：
+- **SalesTransformer**: 売上データ変換
+- **HRTransformer**: 人事データ変換（`hr_employee_org_export.csv`と`hr_payroll_export.csv`を`employee_id`でINNER JOIN）
+- **InventoryTransformer**: 在庫データ変換
+
+### 2.2 共通モジュール（`src/common/`）
+
+- **config.py**: 勘定科目マッピング、システム固定値、エラーコード定義
+- **csv_handler.py**: CSV読み込み/書き込み
+- **utils.py**: バッチID生成、日時フォーマット、ロギング
+
+### 2.3 実行環境別のラッパー
+
+#### ①Python標準版（`src/local/python_native/`）
+- ファイル名: `standalone_sales_etl_job.py`, `standalone_hr_etl_job.py`, `standalone_inventory_etl_job.py`
+- ThreadPoolExecutorで並列処理（小規模データ向け）
+
+#### ②PySpark版（`src/local/pyspark/`）
+- ファイル名: `pyspark_sales_etl_job.py`, `pyspark_hr_etl_job.py`, `pyspark_inventory_etl_job.py`
+- RDD.map()で分散処理（大規模データ向け）
+- **注意**: PYTHONPATH設定が必要（ワーカープロセスで`src`モジュールを認識させるため）
+
+#### ③AWS Glue版（`src/aws_glue/`）
+- ファイル名: `glue_sales_etl_job.py`, `glue_hr_etl_job.py`, `glue_inventory_etl_job.py`
+- S3読み込み/書き込み（本番環境）
+
+### 2.4 オーケストレーター（`src/local/etl_orchestrator.py`）
+
+- 3つのETLジョブをThreadPoolExecutorで並列実行
+- 個別出力（`*_sales.csv`, `*_hr.csv`, `*_inv.csv`）を統合して`accounting_txn_interface.csv`を生成
+- Python標準版とPySpark版の両方をサポート
+
+**実行方法**:
+```bash
+# Python標準版
+python src/local/etl_orchestrator.py --mode python --limit 100
+
+# PySpark版
+python src/local/etl_orchestrator.py --mode pyspark --limit 1000
+
+# 全件処理
+python src/local/etl_orchestrator.py --mode python
+```
+
+## 3. テスト
+
+### 単体テスト（`tests/unit/test_etl/`）
+- `test_sales_transformer.py`: 売上変換ロジックのテスト（15+ test cases）
+- `test_hr_transformer.py`: 人事変換ロジックのテスト（15+ test cases）
+- `test_inventory_transformer.py`: 在庫変換ロジックのテスト（15+ test cases）
+- 実行: `pytest tests/unit/ -v`
+
+### 統合テスト（`tests/integration/`）
+- `test_etl_output.py`: ETL出力と期待値データ（`test_data/expected/`）を照合
+- `test_orchestrator.py`: オーケストレーターの並列実行とマージ処理をテスト（10+ test cases）
+- 実行: `pytest tests/integration/ -v`
+
+## 4. 実装の優先順位
+
+1. 共通モジュール（config、csv_handler、utils）
+2. 3つのTransformer + 単体テスト
+3. Python標準版（3ジョブ）
+4. PySpark版（3ジョブ）
+5. AWS Glue版（3ジョブ）
+6. オーケストレーター + 統合テスト
+
+## 5. 参照資料
+
+- **変換仕様**: `spec/detail_design/*.md`（各システムの変換ロジック詳細）
+- **DDL**: `ddl/source/*.sql`（入力構造）、`ddl/erp/*.sql`（出力構造）
+- **アーキテクチャ**: `ARCHITECTURE.md`
+- **実行方法**: `README.md`

@@ -1,0 +1,46 @@
+# Python環境をGit管理に含める場合の .gitignore サンプル
+# 使用方法: このファイルを .gitignore にリネームしてください
+
+# Python実行時の一時ファイル
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# PySparkの一時ファイル
+metastore_db/
+derby.log
+spark-warehouse/
+
+# Python環境内のキャッシュ（これは除外すべき）
+python-3.11.7-embed-amd64/Lib/site-packages/__pycache__/
+python-3.11.7-embed-amd64/Lib/site-packages/**/test/
+python-3.11.7-embed-amd64/Lib/site-packages/**/__pycache__/
+
+# 出力ファイル
+output/
+*.csv
+
+# テスト関連
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE設定
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS固有
+.DS_Store
+Thumbs.db
+
+# ログファイル
+*.log
+
+# 一時ファイル
+*.tmp
+get-pip.py
+

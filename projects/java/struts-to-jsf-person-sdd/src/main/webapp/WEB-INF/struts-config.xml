@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 1.3//EN"
+    "http://struts.apache.org/dtds/struts-config_1_3.dtd">
+
+<struts-config>
+    
+    <!-- ========== Form Bean Definitions ================================ -->
+    <form-beans>
+        <form-bean name="personForm" type="pro.kensait.struts.person.form.PersonForm"/>
+    </form-beans>
+    
+    <!-- ========== Action Mapping Definitions =========================== -->
+    <action-mappings>
+        
+        <!-- PERSON一覧表示 -->
+        <action path="/personList"
+                type="pro.kensait.struts.person.action.PersonListAction">
+            <forward name="success" path="/personList.jsp"/>
+        </action>
+        
+        <!-- PERSON入力画面表示 -->
+        <action path="/personInput"
+                type="pro.kensait.struts.person.action.PersonInputAction"
+                name="personForm"
+                scope="session">
+            <forward name="success" path="/personInput.jsp"/>
+        </action>
+        
+        <!-- PERSON確認画面表示 -->
+        <action path="/personConfirm"
+                type="pro.kensait.struts.person.action.PersonConfirmAction"
+                name="personForm"
+                scope="session"
+                validate="false">
+            <forward name="success" path="/personConfirm.jsp"/>
+        </action>
+        
+        <!-- PERSON更新・追加 -->
+        <action path="/personUpdate"
+                type="pro.kensait.struts.person.action.PersonUpdateAction"
+                name="personForm"
+                scope="session"
+                validate="false">
+            <forward name="success" path="/personList.do" redirect="true"/>
+        </action>
+        
+        <!-- PERSON削除 -->
+        <action path="/personDelete"
+                type="pro.kensait.struts.person.action.PersonDeleteAction">
+            <forward name="success" path="/personList.do" redirect="true"/>
+        </action>
+        
+    </action-mappings>
+    
+    <!-- ========== Message Resources Definitions ======================== -->
+    <message-resources parameter="ApplicationResources"/>
+    
+</struts-config>

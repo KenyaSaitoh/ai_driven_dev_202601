@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Created-By: Maven WAR Plugin 3.4.0
+Build-Jdk-Spec: 11
+Glassfish-require-services: org.glassfish.api.admingui.ConsoleProvider
+HK2-Import-Bundles: fish.payara.server.internal.admingui.console-common,
+ org.glassfish.hk2.hk2,fish.payara.server.internal.admingui.console-plug
+ in-service, fish.payara.server.internal.deployment.deployment-client,
+ 
+                                jakarta.servlet-api,jakarta.servlet.jsp-
+ api,org.glassfish.expressly,fish.payara.server.internal.admingui.faces-
+ compat,fish.payara.server.internal.admingui.dataprovider,com.sun.pkg.cl
+ ient
+

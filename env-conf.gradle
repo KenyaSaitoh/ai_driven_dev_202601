@@ -1,0 +1,76 @@
+// Payara Server設定
+payaraServer {
+    // Payara Serverホームディレクトリ
+    home = "payara6"
+    
+    // asadminコマンドのパス
+    asadminCmd = System.properties['os.name'].toLowerCase().contains('windows') 
+                 ? "payara6/bin/asadmin.bat" 
+                 : "payara6/bin/asadmin"
+    
+    // ドメイン設定
+    domain = "domain1"
+    
+    // ポート設定
+    httpPort = 8080
+    httpsPort = 8181
+    adminPort = 4848
+    
+    // 管理ユーザー設定
+    adminUser = "admin"
+    adminPassword = ""  // デフォルトは空パスワード
+}
+
+// TomEE 8設定
+tomee8 {
+    // TomEE 8ホームディレクトリ
+    home = "tomee8"
+    
+    // catalinaスクリプトのパス
+    catalinaCmd = System.properties['os.name'].toLowerCase().contains('windows')
+                  ? "tomee8/bin/catalina.bat"
+                  : "tomee8/bin/catalina.sh"
+    
+    // startupスクリプトのパス
+    startupCmd = System.properties['os.name'].toLowerCase().contains('windows')
+                 ? "tomee8/bin/startup.bat"
+                 : "tomee8/bin/startup.sh"
+    
+    // shutdownスクリプトのパス
+    shutdownCmd = System.properties['os.name'].toLowerCase().contains('windows')
+                  ? "tomee8/bin/shutdown.bat"
+                  : "tomee8/bin/shutdown.sh"
+    
+    // ポート設定
+    httpPort = 8080
+    httpsPort = 8443
+    ajpPort = 8009
+    shutdownPort = 8005
+    
+    // webappsディレクトリ
+    webappsDir = "tomee8/webapps"
+}
+
+// HSQLDB Database設定
+hsqldb {
+    driverClass = "org.hsqldb.jdbc.JDBCDriver"
+    datasourceClass = "org.hsqldb.jdbc.JDBCDataSource"
+    jarPath = "hsqldb/lib/hsqldb.jar"
+    hostName = "localhost"
+    port = "9001"
+    tcpPort = "9001"
+    webPort = "8082"
+    general {
+        user = "SA"
+        password = ""
+        db = "testdb"
+        dbPath = "hsqldb/data/testdb"
+        // TCP Server mode for Payara Server
+        baseUrl = "jdbc:hsqldb:hsql://localhost:${tcpPort}"
+        url = "${baseUrl}/${db}"
+        // Embedded mode for local development (testing only)
+        embeddedUrl = "jdbc:hsqldb:file:${dbPath}"
+        connPoolName = "HSQLDBPool"
+        datasourceJndiName = "jdbc/HsqldbDS"
+    }
+}

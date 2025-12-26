@@ -1,0 +1,8 @@
+# SqlTool Configuration File
+# HSQLDBへの接続設定
+
+urlid testdb
+url jdbc:hsqldb:hsql://localhost:9001/testdb
+username SA
+password
+

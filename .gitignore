@@ -1,0 +1,115 @@
+# Payara Server - domain1配下はディレクトリ構造のみ管理（.gitkeepのみ）
+/payara6/glassfish/domains/domain1/applications/**
+!/payara6/glassfish/domains/domain1/applications/.gitkeep
+/payara6/glassfish/domains/domain1/autodeploy/**
+!/payara6/glassfish/domains/domain1/autodeploy/.gitkeep
+/payara6/glassfish/domains/domain1/logs/**
+!/payara6/glassfish/domains/domain1/logs/.gitkeep
+/payara6/glassfish/domains/domain1/generated/**
+!/payara6/glassfish/domains/domain1/generated/.gitkeep
+/payara6/glassfish/domains/domain1/osgi-cache/**
+!/payara6/glassfish/domains/domain1/osgi-cache/.gitkeep
+# Payara docroot - デフォルトランディングページは管理対象
+# （カスタムファイルは除外される可能性があるため、必要に応じて追加）
+/payara6/glassfish/domains/domain1/config/**
+!/payara6/glassfish/domains/domain1/config/.gitkeep
+!/payara6/glassfish/domains/domain1/config/domain.xml.template
+!/payara6/glassfish/domains/domain1/config/admin-keyfile
+!/payara6/glassfish/domains/domain1/config/keyfile
+!/payara6/glassfish/domains/domain1/config/cacerts.p12
+!/payara6/glassfish/domains/domain1/config/keystore.p12
+!/payara6/glassfish/domains/domain1/config/default-web.xml
+!/payara6/glassfish/domains/domain1/config/login.conf
+!/payara6/glassfish/domains/domain1/config/server.policy
+!/payara6/glassfish/domains/domain1/config/restrict.server.policy
+!/payara6/glassfish/domains/domain1/config/javaee.server.policy
+!/payara6/glassfish/domains/domain1/config/logging.properties
+!/payara6/glassfish/domains/domain1/config/default-logging.properties
+!/payara6/glassfish/domains/domain1/config/glassfish-acc.xml
+!/payara6/glassfish/domains/domain1/config/wss-server-config-1.0.xml
+!/payara6/glassfish/domains/domain1/config/wss-server-config-2.0.xml
+/payara6/glassfish/domains/domain1/endpoints/**
+!/payara6/glassfish/domains/domain1/endpoints/.gitkeep
+/payara6/glassfish/domains/domain1/init-info/**
+!/payara6/glassfish/domains/domain1/init-info/.gitkeep
+/payara6/glassfish/domains/domain1/lib/**
+!/payara6/glassfish/domains/domain1/lib/.gitkeep
+!/payara6/glassfish/domains/domain1/lib/hsqldb.jar
+!/payara6/glassfish/domains/domain1/lib/applibs/.gitkeep
+!/payara6/glassfish/domains/domain1/lib/classes/.gitkeep
+!/payara6/glassfish/domains/domain1/lib/databases/.gitkeep
+!/payara6/glassfish/domains/domain1/lib/warlibs/.gitkeep
+
+# TomEE 8 - 実行時生成ファイルのみ除外
+# （conf/*.template、conf/tomee.xml、lib/*.jarは初期セットアップ用に管理対象）
+/tomee8/webapps/*
+!/tomee8/webapps/
+/tomee8/logs/**
+!/tomee8/logs/.gitkeep
+/tomee8/temp/**
+/tomee8/work/**
+/tomee8/conf/Catalina/**
+
+# TomEE 8 - HSQLDB 動的ファイル除外
+/tomee8/data/hsqldb/*.log
+/tomee8/data/hsqldb/*.lck
+/tomee8/data/hsqldb/*.tmp/
+/tomee8/data/hsqldb/hsqldb.tmp/**
+
+# TomEE 8 - 動的に変更される設定ファイルを除外
+/tomee8/conf/server.xml
+!/tomee8/conf/server.xml.template
+!/tomee8/conf/server.xml.original
+!/tomee8/conf/tomee.xml
+
+# TomEE 8 - 文字化け対策のsetenvスクリプトは管理対象
+!/tomee8/bin/setenv.bat
+!/tomee8/bin/setenv.sh
+
+# HSQLDB データファイル
+/hsqldb/data/**
+!/hsqldb/data/.gitkeep
+
+# Python ETL 出力ファイル
+/projects/python/accounting_glue/output/*.csv
+/projects/python/accounting_glue/output/*.txt
+/projects/python/accounting_glue/output/*.log
+
+# Python キャッシュファイル
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Gradle ビルドファイル
+/classes
+/bin
+/build
+/target
+/.gradle
+/projects/build
+projects/**/build/
+*.war
+*.class
+
+# VS Code
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+*.code-workspace
+
+# Eclipse
+.metadata
+.classpath
+.project
+.settings/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr

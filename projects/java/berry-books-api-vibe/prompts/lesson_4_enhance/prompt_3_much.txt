@@ -1,0 +1,114 @@
+===============================================
+機能拡張プロンプト【高：詳細版】
+===============================================
+
+berry-books-1プロジェクトに在庫チェック機能を追加してください。
+
+## 実装内容
+
+詳細設計書（`spec/詳細設計書/EXCEL詳細仕様書_解凍版`フォルダ）の「8.3.3 在庫チェックロジック詳細」および「14.2.1 OutOfStockException」に記載された仕様に従って実装してください。
+
+---
+
+### 1. OutOfStockException例外クラスの作成
+
+**新規作成:** `src/main/java/pro/kensait/berrybooks/service/order/OutOfStockException.java`
+
+詳細設計書「14.2.1 OutOfStockException」の仕様に従って実装してください。
+
+**要点：**
+- RuntimeExceptionを継承
+- フィールド：`bookId`（Integer）、`bookName`（String）
+- 主要コンストラクタ：`OutOfStockException(Integer bookId, String bookName, String message)`
+- getterメソッド：`getBookId()`、`getBookName()`
+
+---
+
+### 2. OrderServiceへの在庫チェックロジック追加
+
+**対象:** `src/main/java/pro/kensait/berrybooks/service/order/OrderService.java`の`orderBooks()`メソッド
+
+詳細設計書「8.3.3 在庫チェックロジック詳細」の仕様に従って実装してください。
+
+**実装箇所：** カート内の書籍をループ処理する部分で、在庫減算処理の**前**に追加
+
+**実装内容：**
+- `stockDao.findById()`で取得した現在の在庫数と注文数を比較
+- 在庫不足の場合、`OutOfStockException`をスロー（書籍ID、書籍名、エラーメッセージを含める）
+- WARNレベルでログ出力（書籍ID、書籍名、在庫数、注文数を含める）
+- 在庫が充分な場合は既存の在庫減算処理を継続
+
+---
+
+### 3. OrderBeanでの例外ハンドリング追加
+
+**対象:** `src/main/java/pro/kensait/berrybooks/web/order/OrderBean.java`の注文確定処理メソッド
+
+**実装内容：**
+- `orderService.orderBooks()`呼び出し部分で`OutOfStockException`をcatch
+- WARNレベルでログ出力（書籍IDと書籍名を含める）
+- Flash Scopeにエラーメッセージを設定
+- `orderError.xhtml`へリダイレクト（`faces-redirect=true`を指定）
+- 既存の例外ハンドリングより前に配置（より具体的な例外を先にcatch）
+
+---
+
+### 4. エラーページの確認・作成
+
+**対象:** `src/main/webapp/orderError.xhtml`
+
+**確認・作成内容：**
+- 既存ファイルの有無を確認
+- 存在しない場合は新規作成
+- `#{flash.errorMessage}`でエラーメッセージを表示
+- カートに戻るボタンを配置（`cartView?faces-redirect=true`へ遷移）
+- 既存のJSFページのスタイルに合わせて実装
+
+---
+
+### 5. トランザクションとロールバックの確認
+
+**確認内容：**
+- `OrderService.orderBooks()`に`@Transactional`が付与されていることを確認
+- `OutOfStockException`はRuntimeExceptionを継承しているため、自動的にロールバックされる
+- 明示的なロールバック指定は不要
+
+---
+
+### 6. 楽観的ロックとの併用
+
+**実装上の注意点：**
+- 在庫数チェック（数量の妥当性）と楽観的ロック（バージョン番号による競合検出）の両方が必要
+- 在庫チェックは在庫減算処理の前に実行
+- 既存の楽観的ロック処理は変更しない
+
+---
+
+### 7. テスト観点
+
+**動作確認項目：**
+1. 在庫充分な場合：注文が正常に完了し、在庫が減算される
+2. 在庫不足の場合：OutOfStockExceptionがスローされ、エラー画面に遷移し、トランザクションがロールバックされる
+3. 複数商品の一部が在庫不足の場合：最初の在庫不足商品でエラーとなり、すべてロールバックされる
+4. 楽観的ロックとの併用：両方の例外が適切にハンドリングされる
+
+---
+
+## 実装順序の推奨
+
+1. OutOfStockException例外クラスの作成
+2. OrderServiceの在庫チェックロジック追加
+3. OrderBeanの例外ハンドリング追加
+4. orderError.xhtmlの確認・作成（必要に応じて）
+5. 動作確認とテスト
+
+---
+
+## 注意事項
+
+- 既存のコードを最小限の変更で機能追加すること
+- 詳細設計書（`spec/詳細設計書/EXCEL詳細仕様書_解凍版`フォルダ）の仕様に厳密に従うこと
+- 在庫減算ロジックは変更しない（在庫チェックを追加するのみ）
+- 楽観的ロックの実装も維持すること
+- トランザクション境界を変更しないこと
+- ログフォーマットは既存のスタイルに合わせること

@@ -1,0 +1,16 @@
+===============================================
+Jakarta EE 10 マイグレーションプロンプト【低：簡易版】
+===============================================
+
+struts-to-jsf-person-sddプロジェクトを、レガシーなStruts 1.3.10からJakarta EE 10ベースのモダンなアーキテクチャに全面的にマイグレーション（リライト）してください。
+
+以下の技術スタックに移行してください：
+
+- **Struts 1.3.10** → **Jakarta Faces (JSF) 4.0**
+- **JSP + Strutsタグ** → **Facelets (XHTML)**
+- **Action + ActionForm** → **バッキングBean (@Named, @ViewScoped)**
+- **EJB + JNDI lookup** → **CDI + @Inject**
+- **JDBC DAO** → **JPA (Jakarta Persistence)**
+
+全てのプレゼンテーション層、ビジネスロジック層、データアクセス層を書き換えてください。
+

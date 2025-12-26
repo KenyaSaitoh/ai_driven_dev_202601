@@ -1,0 +1,148 @@
+===============================================
+Jakarta EE 10 マイグレーションプロンプト【中：適切版】
+===============================================
+
+struts-to-jsf-person-sddプロジェクトを、レガシーなStruts 1.3.10からJakarta EE 10ベースのモダンなアーキテクチャに全面的にマイグレーション（リライト）してください。
+
+## 現状の技術スタック
+
+**現在使用している技術：**
+- Apache Struts 1.3.10（レガシーフレームワーク）
+- JSP + Strutsタグライブラリ（`<logic:iterate>`, `<bean:write>`, `<html:form>`等）
+- Struts Action + ActionForm
+- EJB 3.2 (Stateless Session Bean) + JNDIルックアップ
+- JDBC + DataSource（旧来型DAO）
+- TomEE 8
+- struts-config.xml（XML設定）
+
+---
+
+## マイグレーション計画
+
+### フェーズ1: データモデル層の変更（JDBC → JPA）
+
+**変更内容：**
+- `Person.java` を JPAエンティティ化（`@Entity`等のアノテーション付与）
+- `PersonDao.java` を削除（JPAのEntityManagerで置き換え）
+- `persistence.xml` を新規作成（JPA設定）
+
+---
+
+### フェーズ2: ビジネスロジック層の変更（EJB → CDI）
+
+**変更内容：**
+- `PersonService.java` と `PersonServiceBean.java` を統合し、CDI Beanに変更
+- EJBアノテーションを削除し、CDIアノテーション（`@RequestScoped`等）とJPAアノテーション（`@PersistenceContext`）を追加
+- `@Transactional`でトランザクション管理
+- JNDIルックアップの代わりに`@Inject`で依存性注入
+- JDBC処理をJPAのEntityManagerに置き換え（JPQL使用）
+
+---
+
+### フェーズ3: プレゼンテーション層の変更（Struts → JSF）
+
+#### 3.1 Actionクラスの置き換え
+
+**変更内容：**
+- 各Actionクラス（PersonListAction等）をバッキングBean（PersonTableBean等）に置き換え
+- Strutsの`Action`継承からJSFの`@Named`と`@ViewScoped`に変更
+- JNDIルックアップの代わりに`@Inject`でServiceを注入
+- アクションメソッドは遷移先のビューIDを文字列で返す
+
+#### 3.2 ActionFormの置き換え
+
+**変更内容：**
+- `PersonForm.java` を削除
+- 画面入力項目はバッキングBeanのプロパティとして定義
+- 全フィールドがString型 → 適切な型（Integer, String等）に変更
+
+#### 3.3 JSPの置き換え
+
+**変更内容：**
+- 各JSPファイルをFacelets（XHTML）に置き換え
+- Strutsタグライブラリ → JSFタグライブラリ（`<h:dataTable>`, `<h:form>`, `<h:inputText>`等）
+- リクエストスコープからのデータ取得 → EL式でBeanのプロパティに直接アクセス
+
+---
+
+### フェーズ4: 設定ファイルの変更
+
+**削除するファイル：**
+- `struts-config.xml`
+- `ejb-jar.xml`
+
+**新規作成するファイル：**
+- `persistence.xml` - JPA設定（unitName、データソース）
+- `beans.xml` - CDI有効化
+
+**変更するファイル：**
+- `web.xml` - Struts ServletをJSF Servletに変更
+
+---
+
+## 主要な変更ポイント
+
+### データアクセス層
+- JDBC SQL文 → JPQL
+- `PreparedStatement` → `EntityManager`のメソッド（find, persist, merge, remove）
+- try-with-resources → EntityManagerの自動管理
+
+### ビジネスロジック層
+- `@Stateless` EJB → `@RequestScoped`または`@ApplicationScoped` CDI Bean
+- JNDIルックアップ → `@Inject`
+- DAOへの委譲 → 直接EntityManagerを使用
+
+### プレゼンテーション層
+- Actionクラス → バッキングBean
+- `request.setAttribute()` → Beanのプロパティ
+- `mapping.findForward()` → 遷移先文字列を返す
+- Flash Scopeで画面間データを受け渡し
+
+---
+
+## 削除するクラス/ファイル
+
+- `action/` パッケージ（全てのActionクラス）
+- `form/PersonForm.java`
+- `service/PersonServiceBean.java`（Serviceに統合）
+- `dao/PersonDao.java`（JPAに置き換え）
+- `struts-config.xml`
+- `ejb-jar.xml`
+- `*.jsp`ファイル
+
+---
+
+## 注意事項
+
+### データソース設定
+- JNDI名（`jdbc/HsqldbDS`）は変更なし
+- persistence.xmlで参照
+
+### トランザクション管理
+- Serviceクラスで`@Transactional`を使用
+- バッキングBeanではトランザクションなしでServiceを呼び出す
+
+### 画面遷移
+- アクションメソッドは遷移先のビューID（拡張子なし）を文字列で返す
+- リダイレクトが必要な場合は`?faces-redirect=true`を付加
+
+### Flash Scope
+- 画面間でデータを受け渡す際に使用
+- リダイレクト後もデータが保持される
+
+### アプリケーションサーバー
+- TomEE 8 → Payara Server 6に変更
+- Jakarta EE 10フル対応
+
+---
+
+## 実装の優先順位
+
+1. Personエンティティの@Entity化
+2. persistence.xmlとbeans.xmlの作成
+3. PersonServiceのCDI化（JPA使用）
+4. PersonTableBean作成とPersonTablePage.xhtml作成（一覧機能）
+5. PersonInputBean作成とPersonInputPage.xhtml作成（入力機能）
+6. PersonUpdateBean作成とPersonConfirmPage.xhtml作成（登録/更新機能）
+7. web.xml変更（JSF Servlet）
+8. 旧ファイルの削除（Action、Form、DAO、JSP等）

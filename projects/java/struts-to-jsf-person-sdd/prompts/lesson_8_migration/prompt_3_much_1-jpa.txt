@@ -1,0 +1,108 @@
+===============================================
+Jakarta EE 10 マイグレーション【高：詳細版】
+フェーズ1: データモデル層のJPA化
+===============================================
+
+struts-to-jsf-person-sddプロジェクトのデータモデル層を、JDBCからJPAに移行してください。
+
+## 現状分析
+
+### 現在のデータアクセス方式の問題
+
+- `PersonDao.java` - DataSource + PreparedStatementによるJDBC処理
+- 手動でのResultSet処理とデータマッピング
+- SQL文が文字列リテラルで管理
+- O/Rマッピングなし
+- 接続リソースの手動管理（try-with-resources）
+
+---
+
+## マイグレーション内容
+
+### 1. Personクラスのエンティティ化
+
+**対象ファイル：** `pro.kensait.jsf.person.Person`
+
+**追加するアノテーション：**
+
+**クラスレベル：**
+- `@Entity` - JPAエンティティ
+- `@Table(name = "PERSON")` - テーブルマッピング
+
+**フィールドレベル：**
+- **personId:**
+  - `@Id` - 主キー
+  - `@GeneratedValue(strategy = GenerationType.IDENTITY)` - 自動採番
+  - `@Column(name = "PERSON_ID")`
+
+- **personName:**
+  - `@Column(name = "PERSON_NAME", nullable = false, length = 50)`
+
+- **age:**
+  - `@Column(name = "AGE", nullable = false)`
+
+- **gender:**
+  - `@Column(name = "GENDER", nullable = false, length = 10)`
+
+**追加要素：**
+- `implements Serializable` - セッション保存対応
+- 引数なしコンストラクタ（JPA必須）
+
+---
+
+### 2. persistence.xmlの作成
+
+**新規作成：** `src/main/resources/META-INF/persistence.xml`
+
+**必須設定項目：**
+- **persistence-unit:**
+  - name: `"MyPersistenceUnit"` または任意の名前
+  - transaction-type: `"JTA"`
+
+- **data-source:**
+  - `<jta-data-source>jdbc/HsqldbDS</jta-data-source>`
+
+- **エンティティクラス:**
+  - Personクラスを指定または自動スキャン
+
+- **プロパティ（開発用）:**
+  - スキーマ自動生成：none
+  - SQLログ出力設定
+  - パラメータ表示設定
+
+---
+
+### 3. PersonDaoの削除
+
+**削除対象：** `pro.kensait.struts.person.dao.PersonDao`
+
+**理由：**
+- JPAのEntityManagerで置き換え
+- JDBC処理は不要
+
+---
+
+## 変更後の構造
+
+```
+pro.kensait.jsf.person/
+├── Person.java        # @Entity付与、JPAエンティティ
+└── (PersonDaoは削除)
+```
+
+---
+
+## 注意事項
+
+### データソース
+- JNDI名（`jdbc/HsqldbDS`）は維持
+- TomEE 8のDataSource設定からPayara 6へ移行
+
+### エンティティ設計
+- フィールド名とカラム名の明示的なマッピング
+- NOT NULL制約の反映
+- 主キーの自動採番戦略（IDENTITY）
+
+### 削除判断
+- DAOクラスは完全に削除（Service層で直接EntityManagerを使用）
+

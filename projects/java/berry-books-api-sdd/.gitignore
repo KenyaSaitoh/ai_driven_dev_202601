@@ -1,0 +1,21 @@
+# Node.js
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# Spec Kit
+/memory/*.backup
+/.spec-kit/*.backup
+
+# Build
+build/
+bin/
+*.class
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Gradle
+.gradle/

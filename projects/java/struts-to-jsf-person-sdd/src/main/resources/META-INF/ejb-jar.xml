@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ejb-jar xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+         http://xmlns.jcp.org/xml/ns/javaee/ejb-jar_3_2.xsd"
+         version="3.2">
+    
+    <display-name>Person Management EJB</display-name>
+    
+    <enterprise-beans>
+        <session>
+            <ejb-name>PersonServiceBean</ejb-name>
+            <business-local>dev.berry.service.PersonService</business-local>
+            <ejb-class>dev.berry.service.PersonServiceBean</ejb-class>
+            <session-type>Stateless</session-type>
+            <transaction-type>Container</transaction-type>
+        </session>
+    </enterprise-beans>
+    
+</ejb-jar>

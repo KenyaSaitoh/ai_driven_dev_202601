@@ -1,0 +1,166 @@
+===============================================
+Jakarta EE 10 マイグレーション【高：詳細版】
+フェーズ4: ビュー層のFacelets化
+===============================================
+
+struts-to-jsf-person-sddプロジェクトのビュー層を、JSPからFacelets（XHTML）に移行してください。
+
+## 現状分析
+
+### 現在のビュー層の問題
+
+- JSPファイル（personList.jsp等）
+- Strutsタグライブラリ（`<logic:iterate>`, `<bean:write>`, `<html:form>`等）
+- リクエストスコープからのデータ取得
+- テンプレート機能が弱い
+
+---
+
+## マイグレーション内容
+
+### 1. PersonTablePage.xhtml（一覧画面）の作成
+
+**新規作成：** `src/main/webapp/PersonTablePage.xhtml`
+
+**役割：** `personList.jsp`の置き換え
+
+**基本構造：**
+- XML宣言とDOCTYPE
+- `xmlns:h="jakarta.faces.html"` - JSF HTMLタグライブラリ
+- `xmlns:f="jakarta.faces.core"` - JSF Coreタグライブラリ
+
+**主要コンポーネント：**
+
+**ヘッダー部：**
+- `<h:head>` - タイトルとCSS指定
+- `<h:outputStylesheet library="css" name="style.css"/>`
+
+**本文部：**
+- `<h:body>` - ボディタグ
+
+**新規追加リンク：**
+- `<h:link outcome="PersonInputPage" value="新規追加"/>` - outcomeで遷移先指定
+
+**テーブル表示：**
+- `<h:dataTable value="#{personTable.personList}" var="person">`
+- 各列は`<h:column>`で定義
+- ヘッダーは`<f:facet name="header">`
+- データは`<h:outputText value="#{person.propertyName}"/>`
+
+**条件分岐：**
+- `rendered`属性で表示制御
+- 性別表示の例：`rendered="#{person.gender == 'male'}"`
+
+**操作ボタン：**
+- `<h:commandButton value="編集" action="#{personTable.editPerson(person.personId)}"/>`
+- `<h:commandButton value="削除" action="#{personTable.removePerson(person.personId)}"/>`
+- JavaScriptによる確認ダイアログ：`onclick="return confirm('...');"`
+
+**重要な変更点：**
+- `<logic:iterate>` → `<h:dataTable>`
+- `<bean:write>` → `<h:outputText>`
+- リクエストスコープ → EL式でBean直接アクセス
+
+---
+
+### 2. PersonInputPage.xhtml（入力画面）の作成
+
+**新規作成：** `src/main/webapp/PersonInputPage.xhtml`
+
+**役割：** `personInput.jsp`の置き換え
+
+**主要コンポーネント：**
+
+**フォーム：**
+- `<h:form>` - フォームタグ
+
+**入力フィールド：**
+- テキスト入力：`<h:inputText value="#{personInput.personName}" required="true" requiredMessage="..."/>`
+- 数値入力：`<h:inputText value="#{personInput.age}" required="true"/>` - 型変換は自動
+- ラジオボタン：
+  - `<h:selectOneRadio value="#{personInput.gender}" required="true">`
+  - `<f:selectItem itemLabel="男性" itemValue="male"/>`
+  - `<f:selectItem itemLabel="女性" itemValue="female"/>`
+
+**ボタン：**
+- 確認ボタン：`<h:commandButton value="確認" action="#{personInput.confirm()}"/>`
+- キャンセルボタン：`<h:commandButton value="キャンセル" action="#{personInput.cancel()}" immediate="true"/>`
+  - `immediate="true"` - 検証スキップ
+
+**重要な変更点：**
+- `<html:form>` → `<h:form>`
+- `<html:text>` → `<h:inputText>`
+- value属性でBeanプロパティとバインド
+- required属性で必須検証
+
+---
+
+### 3. PersonConfirmPage.xhtml（確認画面）の作成
+
+**新規作成：** `src/main/webapp/PersonConfirmPage.xhtml`
+
+**役割：** `personConfirm.jsp`の置き換え
+
+**主要コンポーネント：**
+
+**確認表示：**
+- `<h:outputText value="#{personUpdate.person.personName}"/>` - データ表示
+- `<h:outputText value="#{personUpdate.person.age}"/>`
+- 性別の条件分岐表示
+
+**ボタン：**
+- 登録ボタン：`<h:commandButton value="登録" action="#{personUpdate.register()}"/>`
+- 戻るボタン：`<h:commandButton value="戻る" action="#{personUpdate.back()}" immediate="true"/>`
+
+---
+
+### 4. 削除するファイル
+
+**削除対象：**
+- `webapp/index.jsp`
+- `webapp/personList.jsp`
+- `webapp/personInput.jsp`
+- `webapp/personConfirm.jsp`
+
+---
+
+## 変更後の構造
+
+```
+src/main/webapp/
+├── PersonTablePage.xhtml     # 一覧画面
+├── PersonInputPage.xhtml     # 入力画面
+├── PersonConfirmPage.xhtml   # 確認画面
+├── css/
+│   └── style.css             # 既存CSSを活用
+└── WEB-INF/
+    └── (設定ファイル)
+```
+
+---
+
+## 注意事項
+
+### XHTMLの要件
+- 整形式XML（well-formed XML）
+- 全タグを閉じる
+- 属性値は引用符で囲む
+
+### EL式
+- `#{}` - 遅延評価（JSF推奨）
+- バッキングBeanのプロパティに直接アクセス
+
+### バリデーション
+- `required`属性 - 必須チェック
+- `requiredMessage`属性 - エラーメッセージ
+- Bean Validationとの連携
+
+### CSSスタイリング
+- JSFタグの`styleClass`属性でCSSクラス指定
+- 既存CSSを活用可能
+- JSFタグのデフォルトHTML出力に合わせた調整が必要な場合あり
+
+### 自動エスケープ
+- `<h:outputText>` はXSS対策で自動エスケープ
+- HTMLを出力する場合は`escape="false"`（慎重に使用）
+

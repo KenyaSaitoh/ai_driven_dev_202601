@@ -1,0 +1,65 @@
+plugins {
+    id 'java'
+}
+
+group = 'pro.kensait.berrybooks'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // JSON parsing
+    implementation 'org.json:json:20230227'
+    
+    // Testing
+    testImplementation 'junit:junit:4.13.2'
+}
+
+// Create executable JAR
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'pro.kensait.berrybooks.BerryBooksSwingApp',
+            'Application-Name': 'Berry Books Swing Application'
+        )
+    }
+    
+    // 依存関係を含める（Fat JAR）
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// Source directory
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+}
+
+// Build task
+task buildApp(dependsOn: jar) {
+    doLast {
+        println "Berry Books Swing Application built successfully!"
+        println "JAR location: ${jar.archiveFile.get().asFile.path}"
+        println ""
+        println "To run the application:"
+        println "  java -jar ${jar.archiveFile.get().asFile.path}"
+    }
+}
+
+

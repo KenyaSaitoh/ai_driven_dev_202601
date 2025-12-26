@@ -1,0 +1,30 @@
+2025-12-21 09:46:08.922 WARN  [ OrderService#orderBooks ] Stock not found for bookId=1
+2025-12-21 09:46:09.015 WARN  [ OrderService#orderBooks ] Out of stock: bookId=1, bookName=Java SE ディープダイブ, stock=1, ordered=2
+2025-12-21 09:46:09.062 WARN  [ OrderService#getOrderDetail ] OrderTran not found: orderTranId=999
+2025-12-21 09:46:09.244 WARN  [ CartSession#removeItem ] [ CartSession#removeItem ] bookId is null
+2025-12-21 09:46:09.247 WARN  [ CartSession#addItem ] [ CartSession#addItem ] item is null
+2025-12-21 09:50:21.010 WARN  [ OrderService#orderBooks ] Stock not found for bookId=1
+2025-12-21 09:50:21.049 WARN  [ OrderService#orderBooks ] Out of stock: bookId=1, bookName=Java SE ディープダイブ, stock=1, ordered=2
+2025-12-21 09:50:21.081 WARN  [ OrderService#getOrderDetail ] OrderTran not found: orderTranId=999
+2025-12-21 09:50:21.192 WARN  [ CartSession#removeItem ] [ CartSession#removeItem ] bookId is null
+2025-12-21 09:50:21.196 WARN  [ CartSession#addItem ] [ CartSession#addItem ] item is null
+2025-12-21 09:52:02.492 WARN  [ OrderService#orderBooks ] Stock not found for bookId=1
+2025-12-21 09:52:02.693 WARN  [ OrderService#orderBooks ] Out of stock: bookId=1, bookName=Java SE ディープダイブ, stock=1, ordered=2
+2025-12-21 09:52:02.744 WARN  [ OrderService#getOrderDetail ] OrderTran not found: orderTranId=999
+2025-12-21 09:52:04.607 WARN  [ CartSession#removeItem ] [ CartSession#removeItem ] bookId is null
+2025-12-21 09:52:04.615 WARN  [ CartSession#addItem ] [ CartSession#addItem ] item is null
+2025-12-21 09:56:54.139 WARN  [ OrderService#orderBooks ] Stock not found for bookId=1
+2025-12-21 09:56:54.181 WARN  [ OrderService#orderBooks ] Out of stock: bookId=1, bookName=Java SE ディープダイブ, stock=1, ordered=2
+2025-12-21 09:56:54.209 WARN  [ OrderService#getOrderDetail ] OrderTran not found: orderTranId=999
+2025-12-21 09:56:54.318 WARN  [ CartSession#removeItem ] [ CartSession#removeItem ] bookId is null
+2025-12-21 09:56:54.323 WARN  [ CartSession#addItem ] [ CartSession#addItem ] item is null
+2025-12-21 09:59:16.927 WARN  [ OrderService#orderBooks ] Stock not found for bookId=1
+2025-12-21 09:59:16.998 WARN  [ OrderService#orderBooks ] Out of stock: bookId=1, bookName=Java SE ディープダイブ, stock=1, ordered=2
+2025-12-21 09:59:17.036 WARN  [ OrderService#getOrderDetail ] OrderTran not found: orderTranId=999
+2025-12-21 09:59:17.288 WARN  [ CartSession#removeItem ] [ CartSession#removeItem ] bookId is null
+2025-12-21 09:59:17.300 WARN  [ CartSession#addItem ] [ CartSession#addItem ] item is null
+2025-12-21 10:01:35.575 WARN  [ OrderService#orderBooks ] Stock not found for bookId=1
+2025-12-21 10:01:35.634 WARN  [ OrderService#orderBooks ] Out of stock: bookId=1, bookName=Java SE ディープダイブ, stock=1, ordered=2
+2025-12-21 10:01:35.675 WARN  [ OrderService#getOrderDetail ] OrderTran not found: orderTranId=999
+2025-12-21 10:01:35.903 WARN  [ CartSession#removeItem ] [ CartSession#removeItem ] bookId is null
+2025-12-21 10:01:35.906 WARN  [ CartSession#addItem ] [ CartSession#addItem ] item is null
