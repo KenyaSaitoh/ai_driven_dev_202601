@@ -151,13 +151,13 @@ berry-books-api-sdd/
 
 ```bash
 # 1. データベーステーブルとデータを作成
-./gradlew :projects:java:berry-books-api-sdd:setupHsqldb
+./gradlew :berry-books-api-sdd:setupHsqldb
 
 # 2. プロジェクトをビルド
-./gradlew :projects:java:berry-books-api-sdd:war
+./gradlew :berry-books-api-sdd:war
 
 # 3. プロジェクトをデプロイ
-./gradlew :projects:java:berry-books-api-sdd:deploy
+./gradlew :berry-books-api-sdd:deploy
 ```
 
 > **重要:** このプロジェクトは独自のデータベーススキーマを使用します。他のプロジェクトとは異なるテーブル構成のため、`setupHsqldb`を必ず実行してください。
@@ -166,15 +166,15 @@ berry-books-api-sdd/
 
 ```bash
 # プロジェクトをアンデプロイ
-./gradlew :projects:java:berry-books-api-sdd:undeploy
+./gradlew :berry-books-api-sdd:undeploy
 ```
 
 ### ⑥ アプリケーション作成・更新のたびに実行
 
 ```bash
 # アプリケーションを再ビルドして再デプロイ
-./gradlew :projects:java:berry-books-api-sdd:war
-./gradlew :projects:java:berry-books-api-sdd:deploy
+./gradlew :berry-books-api-sdd:war
+./gradlew :berry-books-api-sdd:deploy
 ```
 
 ### 📍 アクセスURL
@@ -194,7 +194,7 @@ berry-books-api-sdd/
 テストを実行する前に、以下が起動していることを確認してください：
 
 - **① HSQLDBサーバー** （`./gradlew startHsqldb`）
-- **② データベースのセットアップ** （`./gradlew :projects:java:berry-books-api-sdd:setupHsqldb`）
+- **② データベースのセットアップ** （`./gradlew :berry-books-api-sdd:setupHsqldb`）
 
 > **Note:** Payara Server は起動不要です（単体テストの場合）。E2Eテストを実行する場合は Payara Server も起動が必要です。
 
@@ -202,7 +202,7 @@ berry-books-api-sdd/
 
 ```bash
 # プロジェクトのすべてのテストを実行（E2Eテストは除外）
-./gradlew :projects:java:berry-books-api-sdd:test
+./gradlew :berry-books-api-sdd:test
 ```
 
 > **Note:** 通常のビルド時テスト（`./gradlew test`）では、Playwright E2Eテストは除外されます。E2Eテストは個別に実行する設計となっています。
@@ -211,10 +211,10 @@ berry-books-api-sdd/
 
 ```bash
 # 特定のテストクラスのみを実行（例: BookServiceTest）
-./gradlew :projects:java:berry-books-api-sdd:test --tests "pro.kensait.berrybooks.service.BookServiceTest"
+./gradlew :berry-books-api-sdd:test --tests "pro.kensait.berrybooks.service.BookServiceTest"
 
 # パターンマッチングで複数のテストクラスを実行（例: すべての統合テスト）
-./gradlew :projects:java:berry-books-api-sdd:test --tests "*IntegrationTest"
+./gradlew :berry-books-api-sdd:test --tests "*IntegrationTest"
 ```
 
 ### E2Eテスト（Playwright）を実行
@@ -226,10 +226,10 @@ E2Eテストは通常のビルド時テストとは別に、専用のGradleタ�
 ./gradlew startPayara
 
 # 2. アプリケーションをデプロイ（まだの場合）
-./gradlew :projects:java:berry-books-api-sdd:deploy
+./gradlew :berry-books-api-sdd:deploy
 
 # 3. E2Eテスト専用タスクを実行
-./gradlew :projects:java:berry-books-api-sdd:e2eTest
+./gradlew :berry-books-api-sdd:e2eTest
 ```
 
 > **Note:** E2Eテストクラスには `@Tag("e2e")` アノテーションが付与されており、通常の `test` タスクでは実行されません。`e2eTest` タスクで個別に実行する設計です。
@@ -254,7 +254,7 @@ projects/java/berry-books-api-sdd/build/reports/tests/test/index.html
 
 ```bash
 # 成果物をクリーンアップ（ディレクトリ構造は保持）
-./gradlew :projects:java:berry-books-api-sdd:cleanSddArtifacts
+./gradlew :berry-books-api-sdd:cleanSddArtifacts
 ```
 
 **このタスクが削除するもの:**

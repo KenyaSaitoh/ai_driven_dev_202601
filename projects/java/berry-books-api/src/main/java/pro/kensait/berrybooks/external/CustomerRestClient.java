@@ -31,7 +31,7 @@ public class CustomerRestClient {
 
     private static final String PROPERTY_KEY = "customer.api.base-url";
     private static final String ENV_VAR_KEY = "CUSTOMER_API_BASE_URL";
-    private static final String DEFAULT_URL = "http://localhost:8080/berry-books-rest/customers";
+    private static final String DEFAULT_URL = "http://localhost:8080/customer-api/customers";
     
     private String baseUrl;
     private Client client;
@@ -99,6 +99,8 @@ public class CustomerRestClient {
         WebTarget target = client.target(baseUrl)
                 .path("/query_email")
                 .queryParam("email", email);
+        
+        logger.info("Request URL: " + target.getUri().toString());
 
         try (Response response = target.request(MediaType.APPLICATION_JSON).get()) {
             return switch (response.getStatus()) {
@@ -220,5 +222,7 @@ public class CustomerRestClient {
         return customer;
     }
 }
+
+
 
 

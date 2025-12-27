@@ -52,13 +52,13 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 ```bash
 # 1. データベーステーブルとデータを作成（このプロジェクトが担当）
-./gradlew :projects:java:berry-books-api:setupHsqldb
+./gradlew :berry-books-api:setupHsqldb
 
 # 2. プロジェクトをビルド
-./gradlew :projects:java:berry-books-api:war
+./gradlew :berry-books-api:war
 
 # 3. プロジェクトをデプロイ
-./gradlew :projects:java:berry-books-api:deploy
+./gradlew :berry-books-api:deploy
 ```
 
 > **重要:** `setupHsqldb`は**このプロジェクトで実行**してください。関連プロジェクトでも同じデータベースを使用します。
@@ -67,15 +67,15 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 ```bash
 # プロジェクトをアンデプロイ
-./gradlew :projects:java:berry-books-api:undeploy
+./gradlew :berry-books-api:undeploy
 ```
 
 ### ⑥ アプリケーション作成・更新のたびに実行
 
 ```bash
 # アプリケーションを再ビルドして再デプロイ
-./gradlew :projects:java:berry-books-api:war
-./gradlew :projects:java:berry-books-api:deploy
+./gradlew :berry-books-api:war
+./gradlew :berry-books-api:deploy
 ```
 
 ## 📍 APIエンドポイント
@@ -242,23 +242,23 @@ curl -X POST http://localhost:8080/berry-books-api/api/auth/logout \
 #### すべてのテストを実行
 
 ```bash
-./gradlew :projects:java:berry-books-api:test
+./gradlew :berry-books-api:test
 ```
 
 #### 特定のテストクラスを実行
 
 ```bash
 # OrderServiceのテストのみを実行
-./gradlew :projects:java:berry-books-api:test --tests "*OrderServiceTest"
+./gradlew :berry-books-api:test --tests "*OrderServiceTest"
 
 # BookServiceのテストのみを実行
-./gradlew :projects:java:berry-books-api:test --tests "*BookServiceTest"
+./gradlew :berry-books-api:test --tests "*BookServiceTest"
 ```
 
 #### テストの継続的実行（変更検知）
 
 ```bash
-./gradlew :projects:java:berry-books-api:test --continuous
+./gradlew :berry-books-api:test --continuous
 ```
 
 ### テストレポートの確認
@@ -275,7 +275,7 @@ projects/java/berry-books-api/build/reports/tests/test/index.html
 
 ```bash
 # テストカバレッジレポートを生成
-./gradlew :projects:java:berry-books-api:jacocoTestReport
+./gradlew :berry-books-api:jacocoTestReport
 
 # カバレッジレポートの場所
 # projects/java/berry-books-api/build/reports/jacoco/test/html/index.html
@@ -457,7 +457,7 @@ Database (HSQLDB) + External Customer API
 ### アプリケーションのアンデプロイ
 
 ```bash
-./gradlew :projects:java:berry-books-api:undeploy
+./gradlew :berry-books-api:undeploy
 ```
 
 ### Payara Server全体を停止
@@ -497,7 +497,7 @@ rm -f hsqldb/data/testdb.*
 ./gradlew startHsqldb
 
 # 初期データをセットアップ
-./gradlew :projects:java:berry-books-api:setupHsqldb
+./gradlew :berry-books-api:setupHsqldb
 ```
 
 ## 🔗 関連プロジェクト

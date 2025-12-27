@@ -13,7 +13,7 @@ cd /d "%SCRIPT_DIR%"
 REM プロジェクトルートへ移動してビルド
 echo 1. アプリケーションをビルド中...
 cd ..\..\..
-call gradlew.bat :projects:java:berry-books-swing:clean :projects:java:berry-books-swing:buildApp
+call gradlew.bat :berry-books-swing:clean :berry-books-swing:buildApp
 
 if errorlevel 1 (
     echo エラー: ビルドに失敗しました

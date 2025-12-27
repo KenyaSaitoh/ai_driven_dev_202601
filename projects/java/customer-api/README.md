@@ -1,11 +1,11 @@
-# berry-books-rest プロジェクト
+# customer-api プロジェクト
 
 ## 📖 概要
 
 Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオンライン書店「**Berry Books**」のREST APIアプリケーションです。
 顧客管理機能をRESTful APIとして提供します。
 
-> **Note:** このプロジェクトは`berry-books-1`プロジェクトと同じデータベースを共有します。
+> **Note:** このプロジェクトは`berry-books-api`プロジェクトと同じデータベースを共有します。
 
 ## 🚀 セットアップとコマンド実行ガイド
 
@@ -18,47 +18,47 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 ### ① プロジェクトを開始するときに1回だけ実行
 
-> **Note:** データベースのセットアップは`berry-books-1`プロジェクトで行います。  
+> **Note:** データベースのセットアップは`berry-books-api`プロジェクトで行います。  
 > まだ実行していない場合は、先に以下を実行してください：
 > ```bash
-> ./gradlew :projects:java:berry-books-1:setupHsqldb
+> ./gradlew :berry-books-api:setupHsqldb
 > ```
 
 ```bash
 # 1. プロジェクトをビルド
-./gradlew :projects:java:berry-books-rest:war
+./gradlew :customer-api:war
 
 # 2. プロジェクトをデプロイ
-./gradlew :projects:java:berry-books-rest:deploy
+./gradlew :customer-api:deploy
 ```
 
 ### ② プロジェクトを終了するときに1回だけ実行（CleanUp）
 
 ```bash
 # プロジェクトをアンデプロイ
-./gradlew :projects:java:berry-books-rest:undeploy
+./gradlew :customer-api:undeploy
 ```
 
 ### ③ アプリケーション作成・更新のたびに実行
 
 ```bash
 # アプリケーションを再ビルドして再デプロイ
-./gradlew :projects:java:berry-books-rest:war
-./gradlew :projects:java:berry-books-rest:deploy
+./gradlew :customer-api:war
+./gradlew :customer-api:deploy
 ```
 
 ## 📍 アクセスURL
 
 デプロイ後、以下のURLでAPIにアクセス：
 
-- **顧客取得**: http://localhost:8080/berry-books-rest/customers/1
-- **顧客の注文履歴取得**: http://localhost:8080/berry-books-rest/customers/1/orders
-- **顧客検索（メール）**: http://localhost:8080/berry-books-rest/customers/query_email?email=alice@gmail.com
+- **顧客取得**: http://localhost:8080/customer-api/api/customers/1
+- **顧客の注文履歴取得**: http://localhost:8080/customer-api/api/customers/1/orders
+- **顧客検索（メール）**: http://localhost:8080/customer-api/api/customers/query_email?email=alice@gmail.com
 
 ## 🎯 プロジェクト構成
 
 ```
-projects/berry-books-rest/
+projects/customer-api/api/
 ├── src/
 │   ├── main/
 │   │   ├── java/
@@ -80,7 +80,7 @@ projects/berry-books-rest/
 │   └── test/
 └── build/
     └── libs/
-        └── berry-books-rest.war
+        └── customer-api.war
 ```
 
 ## 🔧 使用している技術
@@ -228,7 +228,7 @@ pro.kensait.berrybooks/
 #### 1. 全顧客と統計情報を取得
 
 ```bash
-curl -X GET http://localhost:8080/berry-books-rest/customers/
+curl -X GET http://localhost:8080/customer-api/api/customers/
 ```
 
 **レスポンス例:**
@@ -258,13 +258,13 @@ curl -X GET http://localhost:8080/berry-books-rest/customers/
 #### 2. 顧客を取得（主キー検索）
 
 ```bash
-curl -X GET http://localhost:8080/berry-books-rest/customers/1
+curl -X GET http://localhost:8080/customer-api/api/customers/1
 ```
 
 #### 3. 顧客の注文履歴を取得
 
 ```bash
-curl -X GET http://localhost:8080/berry-books-rest/customers/1/orders
+curl -X GET http://localhost:8080/customer-api/api/customers/1/orders
 ```
 
 **レスポンス例:**
@@ -294,13 +294,13 @@ curl -X GET http://localhost:8080/berry-books-rest/customers/1/orders
 #### 4. 顧客を取得（メールアドレス検索）
 
 ```bash
-curl -X GET "http://localhost:8080/berry-books-rest/customers/query_email?email=yamada@example.com"
+curl -X GET "http://localhost:8080/customer-api/api/customers/query_email?email=yamada@example.com"
 ```
 
 #### 5. 顧客を新規登録
 
 ```bash
-curl -X POST http://localhost:8080/berry-books-rest/customers/ \
+curl -X POST http://localhost:8080/customer-api/api/customers/ \
   -H "Content-Type: application/json" \
   -d '{
     "customerName": "山田太郎",
@@ -315,7 +315,7 @@ curl -X POST http://localhost:8080/berry-books-rest/customers/ \
 #### 6. 顧客を更新
 
 ```bash
-curl -X PUT http://localhost:8080/berry-books-rest/customers/1 \
+curl -X PUT http://localhost:8080/customer-api/api/customers/1 \
   -H "Content-Type: application/json" \
   -d '{
     "customerName": "山田太郎",
@@ -328,7 +328,7 @@ curl -X PUT http://localhost:8080/berry-books-rest/customers/1 \
 #### 7. 顧客を削除
 
 ```bash
-curl -X DELETE http://localhost:8080/berry-books-rest/customers/1
+curl -X DELETE http://localhost:8080/customer-api/api/customers/1
 ```
 
 ## 📝 データソース設定について
@@ -356,7 +356,7 @@ curl -X DELETE http://localhost:8080/berry-books-rest/customers/1
 ### アプリケーションのアンデプロイ
 
 ```bash
-./gradlew :projects:java:berry-books-rest:undeploy
+./gradlew :customer-api:undeploy
 ```
 
 ### Payara Server全体を停止
@@ -396,7 +396,7 @@ rm -f hsqldb/data/testdb.*
 ./gradlew startHsqldb
 
 # 初期データをセットアップ（berry-booksプロジェクトで実行）
-./gradlew :projects:java:berry-books:setupHsqldb
+./gradlew :berry-books-api:setupHsqldb
 ```
 
 ## 📚 アーキテクチャ

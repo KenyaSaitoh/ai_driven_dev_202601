@@ -27,28 +27,28 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 
 ```bash
 # 1. データベーステーブルとデータを作成
-./gradlew :projects:java:jsf-person:setupHsqldb
+./gradlew :jsf-person:setupHsqldb
 
 # 2. プロジェクトをビルド
-./gradlew :projects:java:jsf-person:war
+./gradlew :jsf-person:war
 
 # 3. プロジェクトをデプロイ
-./gradlew :projects:java:jsf-person:deploy
+./gradlew :jsf-person:deploy
 ```
 
 ### ⑤ プロジェクトを終了するときに1回だけ実行（CleanUp）
 
 ```bash
 # プロジェクトをアンデプロイ
-./gradlew :projects:java:jsf-person:undeploy
+./gradlew :jsf-person:undeploy
 ```
 
 ### ⑥ アプリケーション作成・更新のたびに実行
 
 ```bash
 # アプリケーションを再ビルドして再デプロイ
-./gradlew :projects:java:jsf-person:war
-./gradlew :projects:java:jsf-person:deploy
+./gradlew :jsf-person:war
+./gradlew :jsf-person:deploy
 ```
 
 ## 📍 アクセスURL
@@ -120,7 +120,7 @@ projects/jsf-person/
 ### アプリケーションのアンデプロイ
 
 ```bash
-./gradlew :projects:java:jsf-person:undeploy
+./gradlew :jsf-person:undeploy
 ```
 
 ### Payara Server全体を停止

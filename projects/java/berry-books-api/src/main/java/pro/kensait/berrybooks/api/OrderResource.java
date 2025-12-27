@@ -137,12 +137,12 @@ public class OrderResource {
         // 注文履歴を取得
         List<OrderHistoryTO> orderHistoryList = orderService.getOrderHistory2(customerId);
 
-        // レスポンス生成
+        // レスポンス生成（内部モデルから外部APIモデルへの変換）
         List<OrderHistoryResponse> response = orderHistoryList.stream()
                 .map(history -> new OrderHistoryResponse(
                         history.orderDate(),
-                        history.tranId(),
-                        history.detailId(),
+                        history.tranId(),      // tranId → orderTranId（API層で明示的に）
+                        history.detailId(),    // detailId → orderDetailId（API層で明示的に）
                         history.bookName(),
                         history.publisherName(),
                         history.price(),

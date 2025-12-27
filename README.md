@@ -10,21 +10,24 @@ Servlet/JSP、JSF、CDI、JAX-RSを段階的に学習できます。
 このリポジトリは複数の技術スタックを含むマルチプロジェクト構成です：
 
 ```
-jee_micro_vsc/
+ai_driven_dev_202601/
 ├── projects/
 │   ├── java/                           # Jakarta EE (Java) プロジェクト
-│   │   ├── berry-books-mvc/            # Berry Books Webアプリケーション（MVC）【完成版】
-│   │   ├── berry-books-mvc-sdd/        # Berry Books Webアプリケーション（仕様駆動開発）【研修用】
-│   │   ├── berry-books-rest/           # Berry Books REST API【完成版】
-│   │   ├── jsf_person/                 # Person管理（JSF + JPA CRUD）【完成版】
-│   │   ├── struts_person/              # Person管理（Struts 1.3 + EJB）【完成版】
+│   │   ├── berry-books-api/            # Berry Books Webアプリケーション（MVC）【完成版】
+│   │   ├── berry-books-api-sdd/        # Berry Books Webアプリケーション（仕様駆動開発）【研修用】
+│   │   ├── berry-books-api-vibe/       # Berry Books Webアプリケーション（AI Vibe課題）【研修用】
+│   │   ├── berry-books-swing/          # Berry Books Swingデスクトップアプリケーション【完成版】
+│   │   ├── customer-api/               # Customer REST API【完成版】
+│   │   ├── jsf-person/                 # Person管理（JSF + JPA CRUD）【完成版】
+│   │   ├── struts-person/              # Person管理（Struts 1.3 + EJB）【完成版】
 │   │   └── struts-to-jsf-person-sdd/   # StrutsからJakarta EEへの移行プロジェクト【研修用】
 │   ├── python/                         # Pythonプロジェクト
 │   │   ├── accounting_etl/             # ERP会計統合ETL【完成版】
 │   │   └── accounting_etl_sdd/         # ERP会計統合ETL【研修用】
 │   └── react/                          # Reactプロジェクト
-│       ├── berry-books-frontend/       # Berry Books 管理者画面【完成版】
-│       └── berry-books-frontend-vibe/  # Berry Books 管理者画面【研修用】
+│       ├── berry-books-spa/            # Berry Books 管理者画面【完成版】
+│       ├── customer-spa/               # Customer管理画面【完成版】
+│       └── customer-spa-vibe/          # Customer管理画面（AI Vibe課題）【研修用】
 │
 ├── payara6/                            # Payara Server 6
 ├── hsqldb/                             # HSQLDB Database Server
@@ -104,51 +107,51 @@ chmod +x projects/python/accounting_etl_sdd/*.sh
 
 ```bash
 # プロジェクトのデータベーステーブルとデータを作成
-# 例：berry-books-mvc、berry-books-mvc-sdd、berry-books-rest共通
-./gradlew :projects:java:berry-books-mvc:setupHsqldb
+# 例：berry-books-api、berry-books-api-sdd、berry-books-api-vibe共通
+./gradlew :berry-books-api:setupHsqldb
 
 # プロジェクトをビルド
-./gradlew :projects:java:berry-books-mvc:war
+./gradlew :berry-books-api:war
 # または
-./gradlew :projects:java:berry-books-rest:war
+./gradlew :customer-api:war
 
 # プロジェクトをデプロイ
-./gradlew :projects:java:berry-books-mvc:deploy
+./gradlew :berry-books-api:deploy
 # または
-./gradlew :projects:java:berry-books-rest:deploy
+./gradlew :customer-api:deploy
 ```
 
 ### ⑥ プロジェクトを終了するときに1回だけ実行（CleanUp）
 
 ```bash
 # プロジェクトをアンデプロイ
-# 例：berry-books-mvcの場合
-./gradlew :projects:java:berry-books-mvc:undeploy
-# 例：berry-books-restの場合
-./gradlew :projects:java:berry-books-rest:undeploy
+# 例：berry-books-apiの場合
+./gradlew :berry-books-api:undeploy
+# 例：customer-apiの場合
+./gradlew :customer-api:undeploy
 ```
 
 ### ⑦ アプリケーション作成・更新のたびに実行
 
 ```bash
 # アプリケーションを再ビルドして再デプロイ
-# 例：berry-books-mvcの場合
-./gradlew :projects:java:berry-books-mvc:war
-./gradlew :projects:java:berry-books-mvc:deploy
-# 例：berry-books-restの場合
-./gradlew :projects:java:berry-books-rest:war
-./gradlew :projects:java:berry-books-rest:deploy
+# 例：berry-books-apiの場合
+./gradlew :berry-books-api:war
+./gradlew :berry-books-api:deploy
+# 例：customer-apiの場合
+./gradlew :customer-api:war
+./gradlew :customer-api:deploy
 ```
 
 ## 🧹 仕様駆動開発（SDD）プロジェクトの成果物クリーンアップ
 
-**berry-books-mvc-sdd** プロジェクトは、仕様駆動開発により何度でも再実装できます。
+**berry-books-api-sdd** プロジェクトは、仕様駆動開発により何度でも再実装できます。
 
 ### 成果物をクリーンアップ（ディレクトリ構造は保持）
 
 ```bash
-# berry-books-mvc-sddの成果物をクリーンアップ
-./gradlew :projects:java:berry-books-mvc-sdd:cleanSddArtifacts
+# berry-books-api-sddの成果物をクリーンアップ
+./gradlew :berry-books-api-sdd:cleanSddArtifacts
 ```
 
 **このタスクが削除するもの:**
@@ -170,10 +173,10 @@ chmod +x projects/python/accounting_etl_sdd/*.sh
 - その他のプロジェクト設定ファイル
 
 **クリーンアップ後の再実装:**
-1. `@instructions/tasks.md` を使ってタスクリストを生成
-2. `@instructions/implement.md` を使ってタスクに従って実装
+1. `@instructions/generate_tasks.md` を使ってタスクリストを生成
+2. `@instructions/generate_code.md` を使ってタスクに従って実装
 
-詳細は `projects/java/berry-books-mvc-sdd/README.md` を参照してください。
+詳細は `projects/java/berry-books-api-sdd/README.md` を参照してください。
 
 ---
 
@@ -181,8 +184,8 @@ chmod +x projects/python/accounting_etl_sdd/*.sh
 
 プロジェクトごとのアクセスURL例：
 ```
-http://localhost:8080/berry-books-mvc
-http://localhost:8080/berry-books-rest/customers/1
+http://localhost:8080/berry-books-api
+http://localhost:8080/customer-api/api/customers/1
 ```
 
 ### ログイン情報
@@ -247,7 +250,7 @@ tail -f -n 50 payara6/glassfish/domains/domain1/logs/server.log
 
 | タスク | 説明 |
 |--------|------|
-| `cleanSddArtifacts` | 成果物をクリーンアップ（berry-books-mvc-sdd専用、ディレクトリ構造は保持） |
+| `cleanSddArtifacts` | 成果物をクリーンアップ（berry-books-api-sdd専用、ディレクトリ構造は保持） |
 
 ### ユーティリティタスク
 
@@ -269,8 +272,8 @@ Excelファイル (.xlsx) を検索してZIP展開するタスクです。Excel�
 **実行例:**
 
 ```bash
-# berry-books-mvcのspecディレクトリを対象にする場合
-./gradlew exploreExcelFiles -PtargetDir=projects/java/berry-books-mvc/spec
+# berry-books-apiのspecディレクトリを対象にする場合
+./gradlew exploreExcelFiles -PtargetDir=projects/java/berry-books-api/spec
 ```
 
 **処理内容:**
@@ -283,7 +286,7 @@ Excelファイル (.xlsx) を検索してZIP展開するタスクです。Excel�
 **出力例:**
 
 ```
-projects/java/berry-books-mvc/spec/
+projects/java/berry-books-api/spec/
 ├── 設計書.xlsx
 └── 20251029_143025/        # タイムスタンプフォルダ
     ├── [Content_Types].xml
@@ -437,9 +440,9 @@ Payara Serverのドメインステータスを確認：
 
 アプリケーションをアンデプロイしてから再デプロイ：
 ```bash
-# berry-books-mvcの場合
-./gradlew :projects:java:berry-books-mvc:undeploy
-./gradlew :projects:java:berry-books-mvc:deploy
+# berry-books-apiの場合
+./gradlew :berry-books-api:undeploy
+./gradlew :berry-books-api:deploy
 ```
 
 ### ビルドエラー

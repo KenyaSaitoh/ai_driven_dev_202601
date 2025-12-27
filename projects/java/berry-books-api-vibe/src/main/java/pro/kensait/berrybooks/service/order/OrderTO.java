@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import pro.kensait.berrybooks.web.cart.CartItem;
-
 // 注文を保持するDTOクラス（Recordとして定義）
 public record OrderTO (
         // 顧客ID

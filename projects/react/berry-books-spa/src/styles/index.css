@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans text-gray-800 bg-white leading-normal min-h-screen;
+  }
+}
+
+@layer components {
+  /* グラデーションボタン */
+  .btn-primary {
+    @apply bg-gradient-primary text-white px-6 py-3 rounded-lg font-semibold 
+           shadow-primary transition-all duration-300 hover:bg-gradient-primary-hover 
+           hover:shadow-primary-md hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-primary-sm {
+    @apply bg-gradient-primary text-white px-4 py-2 rounded-lg font-semibold text-sm
+           shadow-primary transition-all duration-300 hover:bg-gradient-primary-hover 
+           hover:shadow-primary-md hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  /* リンクスタイル */
+  .link-primary {
+    @apply text-primary-dark no-underline font-bold transition-all duration-300
+           hover:text-primary-darker hover:translate-x-1 inline-block;
+  }
+
+  /* フォーム入力 */
+  .form-input {
+    @apply w-full px-4 py-3 border-2 border-accent rounded-lg text-base
+           transition-all duration-300 bg-white
+           focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10;
+  }
+
+  /* テーブル */
+  .table-primary {
+    @apply w-full border-collapse bg-white shadow-table rounded-lg overflow-hidden;
+  }
+
+  .table-primary th {
+    @apply px-4 py-3.5 text-left bg-gradient-primary text-white font-semibold tracking-wide;
+  }
+
+  .table-primary td {
+    @apply px-4 py-3.5 border border-accent;
+  }
+
+  .table-primary tbody tr:nth-child(odd) {
+    @apply bg-accent-light;
+  }
+
+  .table-primary tbody tr:hover {
+    @apply bg-accent-lighter transition-colors duration-200;
+  }
+
+  /* 書籍サムネイル */
+  .book-thumbnail {
+    @apply h-32 w-auto max-w-full rounded shadow-primary 
+           transition-all duration-300 hover:shadow-primary-md hover:scale-105
+           block mx-auto;
+  }
+
+  /* 入荷待ち表示 */
+  .out-of-stock {
+    @apply text-error font-semibold text-sm px-4 py-2 
+           bg-error-light rounded-md inline-block;
+  }
+
+  /* エラーメッセージ */
+  .error-text {
+    @apply text-error font-medium text-sm mt-2 block;
+  }
+
+  /* トースト通知アニメーション */
+  @keyframes slideIn {
+    from {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+}
+

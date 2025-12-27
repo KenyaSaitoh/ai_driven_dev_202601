@@ -9,13 +9,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.servlet.ServletContext;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import pro.kensait.berrybooks.dao.BookDao;
+import pro.kensait.berrybooks.entity.Book;
 
 /**
  * 画像配信API リソースクラス
@@ -27,20 +30,36 @@ public class ImageResource {
 
     @Context
     private ServletContext servletContext;
+    
+    @Inject
+    private BookDao bookDao;
 
     /**
      * 書籍表紙画像取得
      */
     @GET
     @Path("/covers/{bookId}")
-    @Produces("image/jpeg")
     public Response getBookCover(@PathParam("bookId") Integer bookId) {
         logger.info("[ ImageResource#getBookCover ] bookId: {}", bookId);
 
         try {
-            // 画像ファイルのパスを構築
-            String imagePath = "/resources/images/covers/book_" + bookId + ".jpg";
+            // 書籍情報を取得
+            Book book = bookDao.findById(bookId);
+            if (book == null) {
+                logger.warn("Book not found: bookId={}", bookId);
+                return Response.status(Response.Status.NOT_FOUND)
+                        .type(MediaType.TEXT_PLAIN)
+                        .entity("Book not found: bookId=" + bookId)
+                        .build();
+            }
+
+            // 書籍タイトルをファイル名として使用（スペースをアンダースコアに変換）
+            String imageFileName = book.getBookName().replace(" ", "_") + ".jpg";
+            String imagePath = "/resources/images/covers/" + imageFileName;
             String realPath = servletContext.getRealPath(imagePath);
+
+            logger.debug("Image path: {}", imagePath);
+            logger.debug("Real path: {}", realPath);
 
             File imageFile = new File(realPath);
 
@@ -54,7 +73,8 @@ public class ImageResource {
                 if (!imageFile.exists()) {
                     logger.warn("no-image.jpg not found");
                     return Response.status(Response.Status.NOT_FOUND)
-                            .entity("{\"error\":\"画像が見つかりません\"}")
+                            .type(MediaType.TEXT_PLAIN)
+                            .entity("Image not found: " + imageFileName + " (no-image.jpg also not found)")
                             .build();
                 }
             }
@@ -68,7 +88,14 @@ public class ImageResource {
         } catch (IOException e) {
             logger.error("Error reading image file", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\":\"画像の読み込みに失敗しました\"}")
+                    .type(MediaType.TEXT_PLAIN)
+                    .entity("Error reading image file: " + e.getMessage())
+                    .build();
+        } catch (Exception e) {
+            logger.error("Unexpected error", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .type(MediaType.TEXT_PLAIN)
+                    .entity("Unexpected error: " + e.getMessage())
                     .build();
         }
     }

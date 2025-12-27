@@ -52,13 +52,13 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 ```bash
 # 1. データベーステーブルとデータを作成（このプロジェクトが担当）
-./gradlew :projects:java:berry-books-api-vibe:setupHsqldb
+./gradlew :berry-books-api-vibe:setupHsqldb
 
 # 2. プロジェクトをビルド
-./gradlew :projects:java:berry-books-api-vibe:war
+./gradlew :berry-books-api-vibe:war
 
 # 3. プロジェクトをデプロイ
-./gradlew :projects:java:berry-books-api-vibe:deploy
+./gradlew :berry-books-api-vibe:deploy
 ```
 
 > **重要:** `setupHsqldb`は**このプロジェクトで実行**してください。関連プロジェクトでも同じデータベースを使用します。
@@ -67,15 +67,15 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 ```bash
 # プロジェクトをアンデプロイ
-./gradlew :projects:java:berry-books-api-vibe:undeploy
+./gradlew :berry-books-api-vibe:undeploy
 ```
 
 ### ⑥ アプリケーション作成・更新のたびに実行
 
 ```bash
 # アプリケーションを再ビルドして再デプロイ
-./gradlew :projects:java:berry-books-api-vibe:war
-./gradlew :projects:java:berry-books-api-vibe:deploy
+./gradlew :berry-books-api-vibe:war
+./gradlew :berry-books-api-vibe:deploy
 ```
 
 ## 📍 APIエンドポイント
@@ -409,7 +409,7 @@ Database (HSQLDB) + External Customer API
 ### アプリケーションのアンデプロイ
 
 ```bash
-./gradlew :projects:java:berry-books-api-vibe:undeploy
+./gradlew :berry-books-api-vibe:undeploy
 ```
 
 ### Payara Server全体を停止
@@ -449,7 +449,7 @@ rm -f hsqldb/data/testdb.*
 ./gradlew startHsqldb
 
 # 初期データをセットアップ
-./gradlew :projects:java:berry-books-api-vibe:setupHsqldb
+./gradlew :berry-books-api-vibe:setupHsqldb
 ```
 
 ## 🔗 関連プロジェクト

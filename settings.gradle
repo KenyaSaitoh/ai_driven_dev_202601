@@ -5,18 +5,27 @@
 rootProject.name = 'jee-web-projects-payara'
 
 // Berry Books プロジェクト
-include 'projects:java:berry-books-api'
-include 'projects:java:berry-books-api-vibe'
-include 'projects:java:berry-books-mvc'
-include 'projects:java:berry-books-mvc-sdd'
-include 'projects:java:berry-books-mvc-vibe'
-include 'projects:java:berry-books-rest'
-include 'projects:java:berry-books-rest-sdd'
-include 'projects:java:berry-books-swing'
+include 'berry-books-api'
+include 'berry-books-api-sdd'
+include 'berry-books-api-vibe'
+include 'berry-books-swing'
+
+// Customer API プロジェクト
+include 'customer-api'
 
 // JSF系プロジェクト
-include 'projects:java:jsf-person'
+include 'jsf-person'
 
 // Struts系プロジェクト
-include 'projects:java:struts-person'
-include 'projects:java:struts-to-jsf-person-sdd'
+include 'struts-person'
+include 'struts-to-jsf-person-sdd'
+
+// プロジェクトの物理的な場所を指定
+project(':berry-books-api').projectDir = file('projects/java/berry-books-api')
+project(':berry-books-api-sdd').projectDir = file('projects/java/berry-books-api-sdd')
+project(':berry-books-api-vibe').projectDir = file('projects/java/berry-books-api-vibe')
+project(':berry-books-swing').projectDir = file('projects/java/berry-books-swing')
+project(':customer-api').projectDir = file('projects/java/customer-api')
+project(':jsf-person').projectDir = file('projects/java/jsf-person')
+project(':struts-person').projectDir = file('projects/java/struts-person')
+project(':struts-to-jsf-person-sdd').projectDir = file('projects/java/struts-to-jsf-person-sdd')

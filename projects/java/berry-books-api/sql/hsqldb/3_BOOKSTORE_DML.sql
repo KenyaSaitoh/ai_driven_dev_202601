@@ -99,6 +99,7 @@ INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) 
 
 -- ============================================
 -- データ投入：CUSTOMER
+-- 開発環境用：パスワードは平文で保存（本番環境ではBCryptハッシュを使用すること）
 -- ============================================
 INSERT INTO CUSTOMER VALUES(1, 'Alice', 'password', 'alice@gmail.com', '1998-04-10', '東京都中央区1-1-1');
 INSERT INTO CUSTOMER VALUES(2, 'Bob', 'password', 'bob@gmail.com', '1988-05-10', '東京都杉並区2-2-2');

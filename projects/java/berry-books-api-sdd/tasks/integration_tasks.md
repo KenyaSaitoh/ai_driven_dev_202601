@@ -140,7 +140,7 @@
       - 全E2Eテストクラスに `@Tag("e2e")` アノテーションを付与
       - `build.gradle` の test タスクで "e2e" タグを除外: `test { useJUnitPlatform { excludeTags 'e2e' } }`
       - E2E専用Gradleタスクを定義: `task e2eTest(type: Test) { useJUnitPlatform { includeTags 'e2e' } }`
-      - 個別実行コマンド例: `./gradlew :projects:java:berry-books-mvc-sdd:e2eTest`
+      - 個別実行コマンド例: `./gradlew :berry-books-mvc-sdd:e2eTest`
   - **期待結果**: 自動E2Eテストが正常に実行され、全フローが検証される（個別実行時）
 
 ---
@@ -255,9 +255,9 @@
   - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「12. ビルド＆デプロイ」
   - **テストシナリオ**:
     1. `./gradlew clean`を実行
-    2. `./gradlew :projects:java:berry-books-mvc-sdd:war`を実行
+    2. `./gradlew :berry-books-mvc-sdd:war`を実行
     3. ビルドが成功することを確認
-    4. `./gradlew :projects:java:berry-books-mvc-sdd:deploy`を実行
+    4. `./gradlew :berry-books-mvc-sdd:deploy`を実行
     5. デプロイが成功することを確認
     6. `http://localhost:8080/berry-books/`にアクセス
     7. アプリケーションが正常に起動していることを確認

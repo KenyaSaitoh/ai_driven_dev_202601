@@ -8,8 +8,8 @@ import java.time.LocalDate;
  */
 public record OrderHistoryResponse(
     LocalDate orderDate,
-    Integer tranId,
-    Integer detailId,
+    Integer orderTranId,
+    Integer orderDetailId,
     String bookName,
     String publisherName,
     BigDecimal price,

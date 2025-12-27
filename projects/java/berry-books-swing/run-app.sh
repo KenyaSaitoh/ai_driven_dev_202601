@@ -14,7 +14,7 @@ cd "$SCRIPT_DIR"
 # プロジェクトルートへ移動してビルド
 echo "1. アプリケーションをビルド中..."
 cd ../../..
-./gradlew :projects:java:berry-books-swing:clean :projects:java:berry-books-swing:buildApp
+./gradlew :berry-books-swing:clean :berry-books-swing:buildApp
 
 if [ $? -ne 0 ]; then
     echo "エラー: ビルドに失敗しました"

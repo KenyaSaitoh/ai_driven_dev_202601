@@ -63,14 +63,14 @@ public class BookResource {
     }
 
     /**
-     * 書籍検索
+     * 書籍検索（静的クエリ - JPQL）
      */
     @GET
-    @Path("/search")
-    public Response searchBooks(
+    @Path("/search/jpql")
+    public Response searchBooksJpql(
             @QueryParam("categoryId") Integer categoryId,
             @QueryParam("keyword") String keyword) {
-        logger.info("[ BookResource#searchBooks ] categoryId: {}, keyword: {}", categoryId, keyword);
+        logger.info("[ BookResource#searchBooksJpql ] categoryId: {}, keyword: {}", categoryId, keyword);
 
         List<Book> books;
 
@@ -89,6 +89,33 @@ public class BookResource {
         }
 
         return Response.ok(books).build();
+    }
+
+    /**
+     * 書籍検索（動的クエリ - Criteria API）
+     */
+    @GET
+    @Path("/search/criteria")
+    public Response searchBooksCriteria(
+            @QueryParam("categoryId") Integer categoryId,
+            @QueryParam("keyword") String keyword) {
+        logger.info("[ BookResource#searchBooksCriteria ] categoryId: {}, keyword: {}", categoryId, keyword);
+
+        List<Book> books = bookService.searchBookWithCriteria(categoryId, keyword);
+        return Response.ok(books).build();
+    }
+
+    /**
+     * 書籍検索（後方互換性のため残す - デフォルトはJPQL）
+     */
+    @GET
+    @Path("/search")
+    public Response searchBooks(
+            @QueryParam("categoryId") Integer categoryId,
+            @QueryParam("keyword") String keyword) {
+        logger.info("[ BookResource#searchBooks ] categoryId: {}, keyword: {}", categoryId, keyword);
+        // デフォルトはJPQLを使用
+        return searchBooksJpql(categoryId, keyword);
     }
 
     /**

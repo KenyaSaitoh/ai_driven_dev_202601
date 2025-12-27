@@ -16,7 +16,7 @@ Berry Books オンライン書店の管理者画面（Java Swingデスクトッ�
 - **Java Runtime Environment (JRE) 8以降** または **JDK 8以降**
 - **Gradle** (プロジェクトルートのGradle Wrapperを使用)
 - **Git Bash** (Windows環境でBashコマンドを使用する場合)
-- **berry-books-rest API（バックエンド）が起動していること**
+- **berry-books-api API（バックエンド）が起動していること**
 
 > **Note:** 
 > - Java 8, 11, 17, 21など、任意のバージョンで動作します
@@ -29,8 +29,8 @@ Berry Books オンライン書店の管理者画面（Java Swingデスクトッ�
 
 - **① HSQLDBサーバー** （`./gradlew startHsqldb`）
 - **② Payara Server** （`./gradlew startPayara`）
-- **berry-books プロジェクトでデータベース初期化済み** （`./gradlew :projects:java:berry-books:setupHsqldb`）
-- **berry-books-rest がデプロイ済み** （`./gradlew :projects:java:berry-books-rest:deploy`）
+- **berry-books プロジェクトでデータベース初期化済み** （`./gradlew :berry-books-api:setupHsqldb`）
+- **customer-api がデプロイ済み** （`./gradlew :customer-api:deploy`）
 
 ### ④ プロジェクトを開始するときに1回だけ実行
 
@@ -59,7 +59,7 @@ cd projects\java\berry-books-swing
 # プロジェクトルートで実行（Git Bash / Mac / Linux）
 
 # 1. アプリケーションをビルド
-./gradlew :projects:java:berry-books-swing:clean :projects:java:berry-books-swing:buildApp
+./gradlew :berry-books-swing:clean :berry-books-swing:buildApp
 ```
 
 > **Note**: 
@@ -81,7 +81,7 @@ cd projects/java/berry-books-swing
 java -jar build/libs/berry-books-swing-1.0.0.jar
 
 # または、API URLを指定する場合:
-java -jar build/libs/berry-books-swing-1.0.0.jar http://localhost:8080/berry-books-rest
+java -jar build/libs/berry-books-swing-1.0.0.jar http://localhost:8080/customer-api
 ```
 
 > **Note**: 
@@ -98,7 +98,7 @@ cd projects\java\berry-books-swing
 java -jar build\libs\berry-books-swing-1.0.0.jar
 
 # または、API URLを指定する場合:
-java -jar build\libs\berry-books-swing-1.0.0.jar http://localhost:8080/berry-books-rest
+java -jar build\libs\berry-books-swing-1.0.0.jar http://localhost:8080/customer-api
 ```
 
 ### ⑥ プロジェクトを終了するときに1回だけ実行（CleanUp）
@@ -116,7 +116,7 @@ java -jar build\libs\berry-books-swing-1.0.0.jar http://localhost:8080/berry-boo
 # プロジェクトルートで実行（Git Bash / Mac / Linux）
 
 # 1. 再ビルド
-./gradlew :projects:java:berry-books-swing:clean :projects:java:berry-books-swing:buildApp
+./gradlew :berry-books-swing:clean :berry-books-swing:buildApp
 
 # 2. 再実行
 cd projects/java/berry-books-swing
@@ -173,7 +173,7 @@ projects/java/berry-books-swing/
 - 各顧客行の「編集」ボタンをクリックして編集ダイアログを表示（JDialog）
 - 顧客名、メールアドレス、生年月日、住所を編集可能
 - フォームバリデーション機能搭載
-- 編集後、REST API (`berry-books-rest`) に更新データを送信
+- 編集後、REST API (`customer-api`) に更新データを送信
 
 ### 3. 統計情報表示
 
@@ -182,7 +182,7 @@ projects/java/berry-books-swing/
 
 ### 4. リアルタイムデータ取得
 
-- REST API (`berry-books-rest`) からデータを取得
+- REST API (`customer-api`) からデータを取得
 - バックグラウンドスレッドで非同期取得
 - エラーハンドリング（JOptionPane）
 
@@ -191,11 +191,11 @@ projects/java/berry-books-swing/
 このアプリケーションは以下のAPIを使用します：
 
 ### 1. 顧客一覧取得
-- **エンドポイント**: `GET /berry-books-rest/customers/`
+- **エンドポイント**: `GET /customer-api/customers/`
 - **レスポンス**: `CustomerStatsTO[]`
 
 ### 2. 顧客情報更新
-- **エンドポイント**: `PUT /berry-books-rest/customers/{customerId}`
+- **エンドポイント**: `PUT /customer-api/customers/{customerId}`
 - **リクエストボディ**: 
 ```json
 {
@@ -243,22 +243,22 @@ projects/java/berry-books-swing/
 
 ```bash
 # プロジェクトルートで実行（Git Bash / Mac / Linux）
-./gradlew :projects:java:berry-books:setupHsqldb
+./gradlew :berry-books-api:setupHsqldb
 ```
 
-### ④ berry-books-rest をデプロイ
+### ④ customer-api をデプロイ
 
 ```bash
 # プロジェクトルートで実行（Git Bash / Mac / Linux）
-./gradlew :projects:java:berry-books-rest:war
-./gradlew :projects:java:berry-books-rest:deploy
+./gradlew :customer-api:war
+./gradlew :customer-api:deploy
 ```
 
 ### ⑤ Swingアプリケーションをビルド
 
 ```bash
 # プロジェクトルートで実行（Git Bash / Mac / Linux）
-./gradlew :projects:java:berry-books-swing:buildApp
+./gradlew :berry-books-swing:buildApp
 ```
 
 ### ⑥ Swingアプリケーションを実行
@@ -285,7 +285,7 @@ java -jar build/libs/berry-books-swing-1.0.0.jar
 # 1. Swingアプリケーションを閉じる（ウィンドウを閉じるか Ctrl+C）
 
 # 2. バックエンドをアンデプロイ（プロジェクトルートで実行）
-./gradlew :projects:java:berry-books-rest:undeploy
+./gradlew :customer-api:undeploy
 
 # 3. Payara Serverを停止（プロジェクトルートで実行）
 ./gradlew stopPayara
@@ -314,7 +314,7 @@ ls -la build/libs/berry-books-swing-1.0.0.jar
 
 # 存在しない場合は再ビルド
 cd ../../..  # プロジェクトルートへ
-./gradlew :projects:java:berry-books-swing:clean :projects:java:berry-books-swing:buildApp
+./gradlew :berry-books-swing:clean :berry-books-swing:buildApp
 ```
 
 > **Note**: PowerShellの場合は `Get-ChildItem build\libs\*.jar` と `.\gradlew.bat` を使用
@@ -323,12 +323,12 @@ cd ../../..  # プロジェクトルートへ
 
 **症状:** 「読み込み中...」のまま止まる、またはエラーダイアログが表示される
 
-**原因:** バックエンド（berry-books-rest）が起動していません。
+**原因:** バックエンド（customer-api）が起動していません。
 
 **解決方法:**
 
-- バックエンド（berry-books-rest）が起動しているか確認
-- `http://localhost:8080/berry-books-rest/customers/` にブラウザでアクセスできるか確認
+- バックエンド（customer-api）が起動しているか確認
+- `http://localhost:8080/customer-api/customers/` にブラウザでアクセスできるか確認
 - REST APIのステータスを確認（`./gradlew statusPayara`）
 
 ### 3. JSON-lib not foundエラー
@@ -341,7 +341,7 @@ cd ../../..  # プロジェクトルートへ
 
 ```bash
 # 再ビルド（clean してから build）
-./gradlew :projects:java:berry-books-swing:clean :projects:java:berry-books-swing:buildApp
+./gradlew :berry-books-swing:clean :berry-books-swing:buildApp
 
 # JARのサイズを確認（依存関係を含むため100KB以上あるはず）
 ls -lh build/libs/berry-books-swing-1.0.0.jar
@@ -373,13 +373,13 @@ java -Djava.awt.headless=false -jar build/libs/berry-books-swing-1.0.0.jar
 
 ```bash
 # 最新版を再ビルド
-./gradlew :projects:java:berry-books-swing:clean :projects:java:berry-books-swing:buildApp
+./gradlew :berry-books-swing:clean :berry-books-swing:buildApp
 ```
 
 ## 📖 参考リンク
 
 - [Java Swing Documentation](https://docs.oracle.com/javase/tutorial/uiswing/)
-- [berry-books-rest API](../berry-books-rest/README.md)
+- [customer-api API](../customer-api/README.md)
 - [berry-books-frontend (React版・完成版)](../../react/berry-books-frontend/README.md)
 - [berry-books-frontend-vibe (React版・研修用)](../../react/berry-books-frontend-vibe/README.md)
 

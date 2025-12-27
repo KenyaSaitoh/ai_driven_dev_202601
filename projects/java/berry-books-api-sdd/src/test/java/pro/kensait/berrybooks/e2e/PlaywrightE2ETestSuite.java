@@ -34,7 +34,7 @@ import com.microsoft.playwright.options.LoadState;
  * - Page Object Modelパターンの採用を推奨
  * - テストデータの初期化・クリーンアップ処理を含める
  * - @Tag("e2e")により、通常のビルド（./gradlew test）では実行されない
- * - 個別実行コマンド: ./gradlew :projects:java:berry-books-mvc-sdd:e2eTest
+ * - 個別実行コマンド: ./gradlew :berry-books-api-sdd:e2eTest
  * 
  * 期待結果: 自動E2Eテストが正常に実行され、全フローが検証される（個別実行時）
  */

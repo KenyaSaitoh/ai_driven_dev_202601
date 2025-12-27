@@ -52,13 +52,17 @@ public class Book implements Serializable {
     @Column(table = "STOCK", name = "QUANTITY")
     private Integer quantity;
 
+    // バージョン（楽観的ロック用）
+    @Column(table = "STOCK", name = "VERSION")
+    private Long version;
+
     // 引数なしのコンストラクタ
     public Book() {
     }
 
     // コンストラクタ
     public Book(Integer bookId, String bookName, String author, Category category, 
-            Publisher publisher, BigDecimal price, Integer quantity) {
+            Publisher publisher, BigDecimal price, Integer quantity, Long version) {
         this.bookId = bookId;
         this.bookName = bookName;
         this.author = author;
@@ -66,6 +70,7 @@ public class Book implements Serializable {
         this.publisher = publisher;
         this.price = price;
         this.quantity = quantity;
+        this.version = version;
     }
 
     // アクセサメソッド
@@ -125,10 +130,18 @@ public class Book implements Serializable {
         this.quantity = quantity;
     }
 
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     @Override
     public String toString() {
         return "Book [bookId=" + bookId + ", bookName=" + bookName + ", author=" + author
                 + ", category=" + category + ", publisher=" + publisher + ", price="
-                + price + ", quantity=" + quantity + "]";
+                + price + ", quantity=" + quantity + ", version=" + version + "]";
     }
 }

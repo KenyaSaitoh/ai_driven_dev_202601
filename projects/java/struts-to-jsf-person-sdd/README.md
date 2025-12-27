@@ -23,10 +23,10 @@
 
 ```bash
 # 1. TomEE 8のserver.xmlを初期化（クリーンな状態にリセット）
-./gradlew :projects:java:struts-to-jsf-person-sdd:initTomee8Config
+./gradlew :struts-to-jsf-person-sdd:initTomee8Config
 
 # 2. TomEE 8のポートをPayaraと競合しないように設定
-./gradlew :projects:java:struts-to-jsf-person-sdd:configureTomee8Ports
+./gradlew :struts-to-jsf-person-sdd:configureTomee8Ports
 ```
 
 **② HSQLDBサーバーの起動:**
@@ -41,7 +41,7 @@
 このプロジェクトを開始する前に、以下が起動していることを確認してください：
 
 - **HSQLDBサーバー** （`./gradlew startHsqldb`）
-- **TomEE 8サーバー** （`./gradlew :projects:java:struts-to-jsf-person-sdd:startTomee8`）
+- **TomEE 8サーバー** （`./gradlew :struts-to-jsf-person-sdd:startTomee8`）
 
 > **Note:** TomEE 8は`startTomee8`（フォアグラウンド、Ctrl+Cで停止）または`startTomee8Background`（バックグラウンド）で起動できます。
 > フォアグラウンドモードはログがターミナルに直接表示されるため、デバッグに便利です。
@@ -50,13 +50,13 @@
 
 ```bash
 # 1. データベーステーブルとデータを作成（初回のみ）
-./gradlew :projects:java:struts-to-jsf-person-sdd:setupHsqldb
+./gradlew :struts-to-jsf-person-sdd:setupHsqldb
 
 # 2. TomEE 8を起動（フォアグラウンド - Ctrl+Cで停止可能）
-./gradlew :projects:java:struts-to-jsf-person-sdd:startTomee8
+./gradlew :struts-to-jsf-person-sdd:startTomee8
 
 # 3. プロジェクトをビルドしてデプロイ（別のターミナルで実行）
-./gradlew :projects:java:struts-to-jsf-person-sdd:deployToTomee8
+./gradlew :struts-to-jsf-person-sdd:deployToTomee8
 ```
 
 > **Note:** `deployToTomee8`タスクは自動的に`war`タスクを実行するため、WARファイルのビルドとデプロイを1つのコマンドで実行できます。
@@ -65,14 +65,14 @@
 
 ```bash
 # プロジェクトをアンデプロイ
-./gradlew :projects:java:struts-to-jsf-person-sdd:undeployFromTomee8
+./gradlew :struts-to-jsf-person-sdd:undeployFromTomee8
 ```
 
 ### ⑥ アプリケーション作成・更新のたびに実行
 
 ```bash
 # アプリケーションを再ビルドして再デプロイ
-./gradlew :projects:java:struts-to-jsf-person-sdd:deployToTomee8
+./gradlew :struts-to-jsf-person-sdd:deployToTomee8
 ```
 
 ## 📍 アクセスURL
@@ -179,13 +179,13 @@ TomEE 8はコンテナ管理のデータソースをサポートしています�
 ### アプリケーションのアンデプロイ
 
 ```bash
-./gradlew :projects:java:struts-to-jsf-person-sdd:undeployFromTomee8
+./gradlew :struts-to-jsf-person-sdd:undeployFromTomee8
 ```
 
 ### TomEE 8を停止
 
 ```bash
-./gradlew :projects:java:struts-to-jsf-person-sdd:stopTomee8
+./gradlew :struts-to-jsf-person-sdd:stopTomee8
 ```
 
 ### HSQLDBサーバーを停止
@@ -198,12 +198,12 @@ TomEE 8はコンテナ管理のデータソースをサポートしています�
 
 ### フォアグラウンドモードの場合
 
-`./gradlew :projects:java:struts-to-jsf-person-sdd:startTomee8`で起動した場合、ログは自動的にターミナルに表示されます。
+`./gradlew :struts-to-jsf-person-sdd:startTomee8`で起動した場合、ログは自動的にターミナルに表示されます。
 Ctrl+Cでサーバーを停止できます。
 
 ### バックグラウンドモードの場合
 
-`./gradlew :projects:java:struts-to-jsf-person-sdd:startTomee8Background`で起動した場合は、別のターミナルでログを監視できます：
+`./gradlew :struts-to-jsf-person-sdd:startTomee8Background`で起動した場合は、別のターミナルでログを監視できます：
 
 ```bash
 tail -f -n 50 tomee8/logs/catalina.out
@@ -310,21 +310,21 @@ Strutsタグライブラリを使用して動的コンテンツを表示。
 
 | タスク | 説明 |
 |--------|------|
-| `:projects:java:struts-to-jsf-person-sdd:initTomee8Config` | server.xmlを初期状態にリセット（研修開催時に実行） |
-| `:projects:java:struts-to-jsf-person-sdd:configureTomee8Ports` | ポートを8088に設定（初回のみ） |
-| `:projects:java:struts-to-jsf-person-sdd:startTomee8` | TomEE 8を起動（フォアグラウンド、Ctrl+Cで停止） |
-| `:projects:java:struts-to-jsf-person-sdd:startTomee8Background` | TomEE 8をバックグラウンドで起動 |
-| `:projects:java:struts-to-jsf-person-sdd:stopTomee8` | TomEE 8を停止（バックグラウンド起動時） |
-| `:projects:java:struts-to-jsf-person-sdd:restartTomee8` | TomEE 8を再起動 |
-| `:projects:java:struts-to-jsf-person-sdd:deployToTomee8` | アプリケーションをデプロイ（WARビルド含む） |
-| `:projects:java:struts-to-jsf-person-sdd:undeployFromTomee8` | アプリケーションをアンデプロイ |
+| `:struts-to-jsf-person-sdd:initTomee8Config` | server.xmlを初期状態にリセット（研修開催時に実行） |
+| `:struts-to-jsf-person-sdd:configureTomee8Ports` | ポートを8088に設定（初回のみ） |
+| `:struts-to-jsf-person-sdd:startTomee8` | TomEE 8を起動（フォアグラウンド、Ctrl+Cで停止） |
+| `:struts-to-jsf-person-sdd:startTomee8Background` | TomEE 8をバックグラウンドで起動 |
+| `:struts-to-jsf-person-sdd:stopTomee8` | TomEE 8を停止（バックグラウンド起動時） |
+| `:struts-to-jsf-person-sdd:restartTomee8` | TomEE 8を再起動 |
+| `:struts-to-jsf-person-sdd:deployToTomee8` | アプリケーションをデプロイ（WARビルド含む） |
+| `:struts-to-jsf-person-sdd:undeployFromTomee8` | アプリケーションをアンデプロイ |
 
 ### プロジェクト関連
 
 | タスク | 説明 |
 |--------|------|
-| `:projects:java:struts-to-jsf-person-sdd:war` | WARファイルをビルド |
-| `:projects:java:struts-to-jsf-person-sdd:setupHsqldb` | データベース初期化 |
+| `:struts-to-jsf-person-sdd:war` | WARファイルをビルド |
+| `:struts-to-jsf-person-sdd:setupHsqldb` | データベース初期化 |
 
 ### HSQLDB関連
 

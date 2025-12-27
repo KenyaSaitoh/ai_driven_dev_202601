@@ -17,7 +17,6 @@ import pro.kensait.berrybooks.entity.OrderDetail;
 import pro.kensait.berrybooks.entity.OrderDetailPK;
 import pro.kensait.berrybooks.entity.OrderTran;
 import pro.kensait.berrybooks.entity.Stock;
-import pro.kensait.berrybooks.web.cart.CartItem;
 
 // 注文処理と注文履歴取得を行うサービスクラス
 @ApplicationScoped

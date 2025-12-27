@@ -70,8 +70,20 @@ public class AuthResource {
                         .build();
             }
 
-            // パスワード照合
-            if (!BCrypt.checkpw(request.password(), customer.getPassword())) {
+            // パスワード照合（BCryptハッシュまたは平文パスワードをサポート）
+            boolean passwordMatch;
+            String storedPassword = customer.getPassword();
+            
+            // BCryptハッシュかどうかを判定（$2a$, $2b$, $2y$ で始まる）
+            if (storedPassword.startsWith("$2a$") || storedPassword.startsWith("$2b$") || storedPassword.startsWith("$2y$")) {
+                // BCryptハッシュの場合
+                passwordMatch = BCrypt.checkpw(request.password(), storedPassword);
+            } else {
+                // 平文パスワードの場合（開発環境用）
+                passwordMatch = request.password().equals(storedPassword);
+            }
+            
+            if (!passwordMatch) {
                 logger.warn("[ AuthResource#login ] Password mismatch for email: {}", request.email());
                 ErrorResponse errorResponse = new ErrorResponse(
                         Response.Status.UNAUTHORIZED.getStatusCode(),

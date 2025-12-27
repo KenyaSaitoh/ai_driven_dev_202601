@@ -117,13 +117,13 @@
 
 - [ ] **T_SETUP_014**: プロジェクトのビルド
   - **目的**: Gradleでプロジェクトをビルドし、WARファイルを生成する
-  - **対象**: `./gradlew :projects:java:berry-books-mvc-sdd:war`
+  - **対象**: `./gradlew :berry-books-mvc-sdd:war`
   - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「12. ビルド＆デプロイ」
   - **注意事項**: ビルドエラーがないことを確認
 
 - [ ] **T_SETUP_015**: アプリケーションのデプロイ
   - **目的**: Payara ServerにWARファイルをデプロイする
-  - **対象**: `./gradlew :projects:java:berry-books-mvc-sdd:deploy`
+  - **対象**: `./gradlew :berry-books-mvc-sdd:deploy`
   - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「12. ビルド＆デプロイ」
   - **注意事項**: コンテキストルート`/berry-books`でデプロイされることを確認
 

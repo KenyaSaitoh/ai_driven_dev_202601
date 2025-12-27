@@ -21,10 +21,10 @@
 
 ```bash
 # 1. TomEE 8のserver.xmlを初期化（クリーンな状態にリセット）
-./gradlew :projects:java:struts-person:initTomee8Config
+./gradlew :struts-person:initTomee8Config
 
 # 2. TomEE 8のデータソース設定（HSQLDB接続のための重要な設定）
-./gradlew :projects:java:struts-person:configureTomee8DataSource
+./gradlew :struts-person:configureTomee8DataSource
 ```
 
 ### ② HSQLDBサーバーの起動
@@ -39,7 +39,7 @@
 このプロジェクトを開始する前に、以下が起動していることを確認してください：
 
 - **HSQLDBサーバー** （`./gradlew startHsqldb`）
-- **TomEE 8サーバー** （`./gradlew :projects:java:struts-person:startTomee8`）
+- **TomEE 8サーバー** （`./gradlew :struts-person:startTomee8`）
 
 > **Note:** TomEE 8は`startTomee8`（フォアグラウンド、Ctrl+Cで停止）または`startTomee8Background`（バックグラウンド）で起動できます。
 > フォアグラウンドモードはログがターミナルに直接表示されるため、デバッグに便利です。
@@ -51,13 +51,13 @@
 ./gradlew startHsqldb
 
 # 2. データベーステーブルとデータを作成（初回のみ）
-./gradlew :projects:java:struts-person:setupHsqldb
+./gradlew :struts-person:setupHsqldb
 
 # 3. TomEE 8を起動（フォアグラウンド - Ctrl+Cで停止可能）
-./gradlew :projects:java:struts-person:startTomee8
+./gradlew :struts-person:startTomee8
 
 # 4. プロジェクトをビルドしてデプロイ（別のターミナルで実行）
-./gradlew :projects:java:struts-person:deployToTomee8
+./gradlew :struts-person:deployToTomee8
 ```
 
 > **Note:** `deployToTomee8`タスクは自動的に`war`タスクを実行するため、WARファイルのビルドとデプロイを1つのコマンドで実行できます。
@@ -66,14 +66,14 @@
 
 ```bash
 # プロジェクトをアンデプロイ
-./gradlew :projects:java:struts-person:undeployFromTomee8
+./gradlew :struts-person:undeployFromTomee8
 ```
 
 ### ⑥ アプリケーション作成・更新のたびに実行
 
 ```bash
 # アプリケーションを再ビルドして再デプロイ
-./gradlew :projects:java:struts-person:deployToTomee8
+./gradlew :struts-person:deployToTomee8
 ```
 
 ## 📍 アクセスURL
@@ -204,13 +204,13 @@ TomEE 8でHSQLDBデータソースを使用するには、**2つの設定**が�
 ### アプリケーションのアンデプロイ
 
 ```bash
-./gradlew :projects:java:struts-person:undeployFromTomee8
+./gradlew :struts-person:undeployFromTomee8
 ```
 
 ### TomEE 8を停止
 
 ```bash
-./gradlew :projects:java:struts-person:stopTomee8
+./gradlew :struts-person:stopTomee8
 ```
 
 ### HSQLDBサーバーを停止
@@ -223,12 +223,12 @@ TomEE 8でHSQLDBデータソースを使用するには、**2つの設定**が�
 
 ### フォアグラウンドモードの場合
 
-`./gradlew :projects:java:struts-person:startTomee8`で起動した場合、ログは自動的にターミナルに表示されます。
+`./gradlew :struts-person:startTomee8`で起動した場合、ログは自動的にターミナルに表示されます。
 Ctrl+Cでサーバーを停止できます。
 
 ### バックグラウンドモードの場合
 
-`./gradlew :projects:java:struts-person:startTomee8Background`で起動した場合は、別のターミナルでログを監視できます：
+`./gradlew :struts-person:startTomee8Background`で起動した場合は、別のターミナルでログを監視できます：
 
 ```bash
 tail -f -n 50 tomee8/logs/catalina.out
@@ -335,22 +335,22 @@ Strutsタグライブラリを使用して動的コンテンツを表示。
 
 | タスク | 説明 |
 |--------|------|
-| `:projects:java:struts-person:initTomee8Config` | server.xmlを初期状態にリセット（研修開催時に実行） |
-| `:projects:java:struts-person:configureTomee8Ports` | ポートを8080に設定（初回のみ） |
-| `:projects:java:struts-person:configureTomee8DataSource` | HSQLDBデータソースを設定（初回のみ・重要） |
-| `:projects:java:struts-person:startTomee8` | TomEE 8を起動（フォアグラウンド、Ctrl+Cで停止） |
-| `:projects:java:struts-person:startTomee8Background` | TomEE 8をバックグラウンドで起動 |
-| `:projects:java:struts-person:stopTomee8` | TomEE 8を停止（バックグラウンド起動時） |
-| `:projects:java:struts-person:restartTomee8` | TomEE 8を再起動 |
-| `:projects:java:struts-person:deployToTomee8` | アプリケーションをデプロイ（WARビルド含む） |
-| `:projects:java:struts-person:undeployFromTomee8` | アプリケーションをアンデプロイ |
+| `:struts-person:initTomee8Config` | server.xmlを初期状態にリセット（研修開催時に実行） |
+| `:struts-person:configureTomee8Ports` | ポートを8080に設定（初回のみ） |
+| `:struts-person:configureTomee8DataSource` | HSQLDBデータソースを設定（初回のみ・重要） |
+| `:struts-person:startTomee8` | TomEE 8を起動（フォアグラウンド、Ctrl+Cで停止） |
+| `:struts-person:startTomee8Background` | TomEE 8をバックグラウンドで起動 |
+| `:struts-person:stopTomee8` | TomEE 8を停止（バックグラウンド起動時） |
+| `:struts-person:restartTomee8` | TomEE 8を再起動 |
+| `:struts-person:deployToTomee8` | アプリケーションをデプロイ（WARビルド含む） |
+| `:struts-person:undeployFromTomee8` | アプリケーションをアンデプロイ |
 
 ### プロジェクト関連
 
 | タスク | 説明 |
 |--------|------|
-| `:projects:java:struts-person:war` | WARファイルをビルド |
-| `:projects:java:struts-person:setupHsqldb` | データベース初期化 |
+| `:struts-person:war` | WARファイルをビルド |
+| `:struts-person:setupHsqldb` | データベース初期化 |
 
 ### HSQLDB関連
 

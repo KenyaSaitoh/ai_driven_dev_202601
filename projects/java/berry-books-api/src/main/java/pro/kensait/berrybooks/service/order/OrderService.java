@@ -5,6 +5,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import pro.kensait.berrybooks.common.MessageUtil;
 import pro.kensait.berrybooks.dao.BookDao;
 import pro.kensait.berrybooks.dao.OrderDetailDao;
@@ -15,9 +18,6 @@ import pro.kensait.berrybooks.entity.OrderDetail;
 import pro.kensait.berrybooks.entity.OrderDetailPK;
 import pro.kensait.berrybooks.entity.OrderTran;
 import pro.kensait.berrybooks.entity.Stock;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 
 // 注文処理と注文履歴取得を行うサービスクラス
 @ApplicationScoped
@@ -138,13 +138,7 @@ public class OrderService implements OrderServiceIF {
         // カートに追加された書籍毎に、在庫の残り個数をチェックする
         for (CartItem cartItem : orderTO.cartItems()) {
 
-            // 楽観的ロック：カート追加時点のVERSION値で在庫エンティティを作成
-            // （悲観的ロックのfindByIdWithLockは使用しない）
-            Stock stock = new Stock();
-            stock.setBookId(cartItem.getBookId());
-            stock.setVersion(cartItem.getVersion());  // カート追加時点のVERSION値を使用
-            
-            // 現在の在庫数を取得（楽観的ロックなし）
+            // 現在の在庫数を取得（最新のバージョン情報を含む）
             Stock currentStock = stockDao.findById(cartItem.getBookId());
 
             // 在庫が0未満になる場合は、例外を送出する
@@ -156,7 +150,13 @@ public class OrderService implements OrderServiceIF {
                         MessageUtil.get("error.out-of-stock.message"));
             }
 
-            // 在庫を減らす（カート追加時点のVERSION値を持つStockエンティティで更新）
+            // 楽観的ロック：現在のStockから取得したVERSION値で在庫エンティティを作成
+            // （悲観的ロックのfindByIdWithLockは使用しない）
+            Stock stock = new Stock();
+            stock.setBookId(cartItem.getBookId());
+            stock.setVersion(currentStock.getVersion());  // 現在の最新VERSION値を使用
+            
+            // 在庫を減らす（現在のVERSION値を持つStockエンティティで更新）
             stock.setQuantity(remaining);
             // JPAの@Versionアノテーションにより、UPDATE時に自動的にバージョンチェックされる
             // WHERE VERSION = ? 条件が付加され、バージョン不一致の場合はOptimisticLockExceptionがスローされる
