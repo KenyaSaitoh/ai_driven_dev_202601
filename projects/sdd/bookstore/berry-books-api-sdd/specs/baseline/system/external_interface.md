@@ -1,0 +1,617 @@
+# berry-books-api - 外部インターフェース仕様書
+
+**プロジェクトID:** berry-books-api  
+**バージョン:** 2.0.0  
+**最終更新日:** 2025-12-27  
+**ステータス:** 外部API仕様確定
+
+---
+
+## 1. 概要
+
+本文書は、berry-books-api REST APIが連携する外部システムのインターフェース仕様を記述する。現在、berry-books-rest API（顧客管理API）との連携を実装している。
+
+---
+
+## 2. 外部システム一覧
+
+| システムID | システム名 | 連携方式 | 目的 | 必須/任意 |
+|-----------|----------|---------|------|----------|
+| EXT-001 | berry-books-rest API | REST API (JAX-RS) | 顧客情報管理（CRUD） | 必須 |
+
+---
+
+## 3. berry-books-rest API連携
+
+### 3.1 概要
+
+**システム名**: berry-books-rest API
+
+**目的**: CUSTOMERテーブルへのアクセス（顧客情報取得、認証、登録）
+
+**連携方式**: REST API (HTTP/JSON)
+
+**プロトコル**: HTTP
+
+**認証方式**: なし（同一ネットワーク内の信頼された通信）
+
+**ベースURL**: `http://localhost:8080/customer-api/customers`
+
+**設定方法**:
+
+1. システムプロパティ: `-Dcustomer.api.base-url=...`
+2. 環境変数: `CUSTOMER_API_BASE_URL=...`
+3. プロパティファイル: `META-INF/microprofile-config.properties`
+4. デフォルト値: `http://localhost:8080/customer-api/customers`
+
+### 3.2 依存関係
+
+**実装クラス**: `pro.kensait.berrybooks.external.CustomerRestClient`
+
+**スコープ**: `@ApplicationScoped`
+
+**使用ライブラリ**: Jakarta RESTful Web Services Client API
+
+```java
+@ApplicationScoped
+public class CustomerRestClient {
+    private Client client;
+    private String baseUrl;
+    
+    @PostConstruct
+    public void init() {
+        client = ClientBuilder.newClient();
+        baseUrl = loadConfig(); // 設定値を読み込み
+    }
+}
+```
+
+---
+
+## 4. APIエンドポイント仕様
+
+### 4.1 顧客検索（メールアドレス）
+
+#### 4.1.1 エンドポイント
+
+```
+GET /customers/query_email?email={email}
+```
+
+#### 4.1.2 概要
+
+メールアドレスで顧客を検索する。ログイン認証時に使用する。
+
+#### 4.1.3 リクエスト
+
+**HTTPメソッド**: GET
+
+**クエリパラメータ**:
+
+| パラメータ | 型 | 必須 | 説明 |
+|----------|---|------|------|
+| email | string | ✓ | メールアドレス |
+
+**リクエスト例**:
+
+```
+GET http://localhost:8080/customer-api/customers/query_email?email=alice@gmail.com
+```
+
+#### 4.1.4 レスポンス
+
+**成功時 (200 OK)**:
+
+```json
+{
+  "customerId": 1,
+  "customerName": "Alice",
+  "password": "password",
+  "email": "alice@gmail.com",
+  "birthday": "1990-01-01",
+  "address": "東京都渋谷区1-2-3"
+}
+```
+
+**顧客が見つからない場合 (404 Not Found)**:
+
+```json
+{
+  "status": 404,
+  "error": "Not Found",
+  "message": "顧客が見つかりません",
+  "path": "/customers/query_email"
+}
+```
+
+#### 4.1.5 呼び出し元
+
+**クラス**: `pro.kensait.berrybooks.api.AuthResource`
+
+**メソッド**: `login(LoginRequest)`
+
+**呼び出しタイミング**: ログイン時
+
+```java
+Customer customer = customerRestClient.findByEmail(request.email());
+if (customer == null) {
+    return Response.status(401).entity(...).build();
+}
+```
+
+---
+
+### 4.2 顧客検索（顧客ID）
+
+#### 4.2.1 エンドポイント
+
+```
+GET /customers/{customerId}
+```
+
+#### 4.2.2 概要
+
+顧客IDで顧客を検索する。JWT Claimsから顧客IDを取得して顧客情報を取得する。
+
+#### 4.2.3 リクエスト
+
+**HTTPメソッド**: GET
+
+**パスパラメータ**:
+
+| パラメータ | 型 | 必須 | 説明 |
+|----------|---|------|------|
+| customerId | integer | ✓ | 顧客ID |
+
+**リクエスト例**:
+
+```
+GET http://localhost:8080/customer-api/customers/1
+```
+
+#### 4.2.4 レスポンス
+
+**成功時 (200 OK)**:
+
+```json
+{
+  "customerId": 1,
+  "customerName": "Alice",
+  "password": "password",
+  "email": "alice@gmail.com",
+  "birthday": "1990-01-01",
+  "address": "東京都渋谷区1-2-3"
+}
+```
+
+**顧客が見つからない場合 (404 Not Found)**:
+
+```json
+{
+  "status": 404,
+  "error": "Not Found",
+  "message": "顧客が見つかりません",
+  "path": "/customers/1"
+}
+```
+
+#### 4.2.5 呼び出し元
+
+**クラス**: `pro.kensait.berrybooks.api.AuthResource`
+
+**メソッド**: `getCurrentUser()`
+
+**呼び出しタイミング**: JWT認証後、ログイン中の顧客情報取得時
+
+```java
+Integer customerId = securedResource.getCustomerId(); // JWT Claimsから取得
+Customer customer = customerRestClient.findById(customerId);
+```
+
+---
+
+### 4.3 顧客登録
+
+#### 4.3.1 エンドポイント
+
+```
+POST /customers/
+```
+
+#### 4.3.2 概要
+
+新規顧客を登録する。
+
+#### 4.3.3 リクエスト
+
+**HTTPメソッド**: POST
+
+**Content-Type**: `application/json`
+
+**リクエストボディ**:
+
+```json
+{
+  "customerId": null,
+  "customerName": "山田太郎",
+  "password": "$2a$10$...",
+  "email": "yamada@example.com",
+  "birthday": "1990-01-01",
+  "address": "東京都渋谷区1-2-3"
+}
+```
+
+| フィールド | 型 | 必須 | 説明 |
+|----------|---|------|------|
+| customerId | integer | - | 顧客ID（新規登録時はnull） |
+| customerName | string | ✓ | 顧客名 |
+| password | string | ✓ | パスワード（BCryptハッシュ） |
+| email | string | ✓ | メールアドレス（一意制約） |
+| birthday | string (date) | - | 生年月日 |
+| address | string | - | 住所 |
+
+#### 4.3.4 レスポンス
+
+**成功時 (200 OK)**:
+
+```json
+{
+  "customerId": 10,
+  "customerName": "山田太郎",
+  "password": "$2a$10$...",
+  "email": "yamada@example.com",
+  "birthday": "1990-01-01",
+  "address": "東京都渋谷区1-2-3"
+}
+```
+
+**メールアドレス重複 (409 Conflict)**:
+
+```json
+{
+  "status": 409,
+  "error": "Conflict",
+  "message": "指定されたメールアドレスは既に登録されています",
+  "path": "/customers/"
+}
+```
+
+#### 4.3.5 呼び出し元
+
+**クラス**: `pro.kensait.berrybooks.api.AuthResource`
+
+**メソッド**: `register(RegisterRequest)`
+
+**呼び出しタイミング**: 新規登録時
+
+```java
+Customer customer = new Customer();
+customer.setCustomerName(request.customerName());
+customer.setPassword(BCrypt.hashpw(request.password(), BCrypt.gensalt()));
+customer.setEmail(request.email());
+// ...
+
+Customer createdCustomer = customerRestClient.register(customer);
+```
+
+---
+
+## 5. データ転送オブジェクト (DTO)
+
+### 5.1 CustomerTO
+
+**パッケージ**: `pro.kensait.berrybooks.external.dto`
+
+**実装**: Java Record
+
+```java
+public record CustomerTO(
+    Integer customerId,
+    String customerName,
+    String password,
+    String email,
+    LocalDate birthday,
+    String address
+) {}
+```
+
+### 5.2 ErrorResponse
+
+**パッケージ**: `pro.kensait.berrybooks.external.dto`
+
+**実装**: Java Record
+
+```java
+public record ErrorResponse(
+    int status,
+    String error,
+    String message,
+    String path
+) {}
+```
+
+---
+
+## 6. エラーハンドリング
+
+### 6.1 HTTPステータスコード
+
+| ステータスコード | 説明 | 対応 |
+|---------------|------|------|
+| 200 OK | 成功 | レスポンスを返す |
+| 404 Not Found | 顧客が見つからない | null を返す |
+| 409 Conflict | メールアドレス重複 | EmailAlreadyExistsException をスロー |
+| 500 Internal Server Error | サーバーエラー | RuntimeException をスロー |
+
+### 6.2 例外マッピング
+
+```java
+try (Response response = target.request(MediaType.APPLICATION_JSON).get()) {
+    return switch (response.getStatus()) {
+        case 200 -> {
+            CustomerTO customerTO = response.readEntity(CustomerTO.class);
+            yield toCustomer(customerTO);
+        }
+        case 404 -> {
+            logger.info("Customer not found");
+            yield null;
+        }
+        case 409 -> {
+            ErrorResponse error = response.readEntity(ErrorResponse.class);
+            throw new EmailAlreadyExistsException(email, error.message());
+        }
+        default -> {
+            logger.error("Unexpected response status: " + response.getStatus());
+            throw new RuntimeException("Failed to call external API");
+        }
+    };
+}
+```
+
+---
+
+## 7. リトライポリシー
+
+### 7.1 リトライ設定
+
+**現在の実装**: リトライなし
+
+**将来の拡張**: 以下のリトライポリシーを検討
+
+| 項目 | 値 |
+|------|-----|
+| リトライ対象 | 500 Internal Server Error, タイムアウト |
+| リトライ回数 | 3回 |
+| リトライ間隔 | 指数バックオフ（1秒, 2秒, 4秒） |
+| リトライ失敗時 | RuntimeException をスロー |
+
+---
+
+## 8. タイムアウト設定
+
+### 8.1 タイムアウト設定
+
+**現在の実装**: デフォルト値を使用（無制限）
+
+**推奨設定**:
+
+| 項目 | 値 |
+|------|-----|
+| 接続タイムアウト | 5秒 |
+| 読み取りタイムアウト | 10秒 |
+
+**将来の実装例**:
+
+```java
+ClientBuilder.newBuilder()
+    .connectTimeout(5, TimeUnit.SECONDS)
+    .readTimeout(10, TimeUnit.SECONDS)
+    .build();
+```
+
+---
+
+## 9. 監視・ログ
+
+### 9.1 ログ出力
+
+**ログレベル**: INFO
+
+**ログ内容**:
+
+- API呼び出し開始（メソッド名、パラメータ）
+- リクエストURL
+- レスポンスステータス
+- エラー詳細（例外発生時）
+
+**ログ例**:
+
+```
+INFO  [ CustomerRestClient#findByEmail ] email=alice@gmail.com
+INFO  Request URL: http://localhost:8080/customer-api/customers/query_email?email=alice@gmail.com
+INFO  Customer found: customerId=1
+```
+
+```
+WARN  Customer not found: email=unknown@example.com
+```
+
+```
+ERROR Error calling REST API: findByEmail
+java.net.ConnectException: Connection refused
+    at ...
+```
+
+---
+
+## 10. セキュリティ考慮事項
+
+### 10.1 認証・認可
+
+**現在の実装**: 認証なし（同一ネットワーク内の信頼された通信）
+
+**本番環境の推奨**:
+
+- **APIキー**: リクエストヘッダーに`X-API-Key`を追加
+- **相互TLS (mTLS)**: クライアント証明書による認証
+- **JWT**: マイクロサービス間の認証トークン
+
+### 10.2 通信暗号化
+
+**現在の実装**: HTTP（非暗号化）
+
+**本番環境の推奨**: HTTPS（TLS/SSL暗号化）
+
+```
+https://localhost:8443/customer-api/customers
+```
+
+### 10.3 データマスキング
+
+**パスワード**: ログ出力時にマスキング
+
+```
+INFO  Customer found: email=alice@gmail.com, password=****
+```
+
+---
+
+## 11. パフォーマンス考慮事項
+
+### 11.1 レスポンスタイム
+
+| API | 目標レスポンスタイム |
+|-----|-------------------|
+| GET /customers/query_email | 100ms以内 |
+| GET /customers/{customerId} | 100ms以内 |
+| POST /customers/ | 200ms以内 |
+
+### 11.2 スループット
+
+| 項目 | 目標値 |
+|------|--------|
+| 同時接続数 | 50接続 |
+| スループット | 100 req/sec |
+
+### 11.3 コネクションプーリング
+
+**将来の拡張**: Apache HttpClient等のコネクションプールを使用
+
+```java
+PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+cm.setMaxTotal(100);
+cm.setDefaultMaxPerRoute(20);
+```
+
+---
+
+## 12. テスト戦略
+
+### 12.1 ユニットテスト
+
+**モック**: Mockitoで外部APIをモック
+
+```java
+@Mock
+private CustomerRestClient customerRestClient;
+
+@Test
+public void testLogin() {
+    // モック設定
+    when(customerRestClient.findByEmail("alice@gmail.com"))
+        .thenReturn(customer);
+    
+    // テスト実行
+    Response response = authResource.login(loginRequest);
+    
+    // 検証
+    assertEquals(200, response.getStatus());
+}
+```
+
+### 12.2 結合テスト
+
+**テストサーバー**: berry-books-rest APIのテストインスタンスを起動
+
+**テストデータ**: テスト用の顧客データを事前登録
+
+### 12.3 E2Eテスト
+
+**ツール**: Playwright, curl
+
+**テストシナリオ**:
+
+1. 新規登録 → ログイン → 顧客情報取得
+2. エラーケース（メールアドレス重複、顧客が見つからない）
+
+---
+
+## 13. 障害対応
+
+### 13.1 障害シナリオと対応
+
+| 障害シナリオ | 影響 | 対応 |
+|-----------|------|------|
+| berry-books-rest APIがダウン | ログイン・新規登録不可 | エラーメッセージ表示、リトライ（将来） |
+| ネットワーク障害 | 外部API呼び出し失敗 | タイムアウト設定、リトライ |
+| レスポンスタイムアウト | API呼び出しが遅延 | タイムアウト設定、監視アラート |
+| データ不整合 | 顧客情報が存在しない | 404エラーとして処理 |
+
+### 13.2 サーキットブレーカー
+
+**将来の拡張**: サーキットブレーカーパターンを実装（MicroProfile Fault Tolerance）
+
+```java
+@CircuitBreaker(
+    requestVolumeThreshold = 4,
+    failureRatio = 0.5,
+    delay = 1000
+)
+public Customer findByEmail(String email) {
+    // API呼び出し
+}
+```
+
+---
+
+## 14. 将来の拡張
+
+### 14.1 追加予定のAPI連携
+
+| システム名 | 目的 | 連携方式 | 優先度 |
+|----------|------|---------|--------|
+| 決済システム | クレジットカード決済 | REST API | 高 |
+| 配送業者API | 配送依頼、配送状況追跡 | REST API | 中 |
+| メール配信サービス | 注文確認メール送信 | REST API | 中 |
+| 在庫管理システム | 在庫補充通知 | REST API | 低 |
+
+### 14.2 アーキテクチャの拡張性
+
+**メッセージキュー**: 非同期処理（Kafka, RabbitMQ）
+
+**イベント駆動**: 注文イベントを他のマイクロサービスに配信
+
+**サービスメッシュ**: Istio, Linkerdによるマイクロサービス間通信の制御
+
+---
+
+## 15. 参考資料
+
+本外部インターフェース仕様書に関連する詳細ドキュメント：
+
+- [requirements.md](requirements.md) - 要件定義書
+- [functional_design.md](functional_design.md) - 機能設計書（API仕様）
+- [architecture_design.md](architecture_design.md) - アーキテクチャ設計書
+- [behaviors.md](behaviors.md) - 振る舞い仕様書（受入基準）
+- [data_model.md](data_model.md) - データモデル仕様書
+- [README.md](../../README.md) - プロジェクトREADME
+
+---
+
+## 16. 連絡先
+
+**berry-books-rest API担当者**: [担当者名]
+
+**障害連絡先**: [メールアドレス/Slack]
+
+**APIドキュメント**: [URL]

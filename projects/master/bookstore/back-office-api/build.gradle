@@ -1,0 +1,14 @@
+// back-office-api: 書籍マスター・在庫管理API
+//
+// このプロジェクトはberry-books-apiから分離された書籍・在庫管理専用のREST APIです。
+// BOOK, CATEGORY, PUBLISHER, STOCKテーブルのみを管理します。
+
+// 親プロジェクトの設定を継承（依存関係、タスクなど）
+// build.gradleの設定は自動的に適用されます
+
+// テスト用の追加依存関係
+dependencies {
+    // BCrypt for password hashing in test utilities
+    testImplementation 'org.mindrot:jbcrypt:0.4'
+}
+

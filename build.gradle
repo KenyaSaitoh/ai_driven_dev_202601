@@ -13,6 +13,11 @@ buildscript {
 }
 
 subprojects {
+    // customer-hub-swingは独自のbuild.gradleを使用（Swingアプリケーション用）
+    if (project.name == "customer-hub-swing") {
+        return
+    }
+    
     // プラグイン読み込み
     apply plugin: "java"
     apply plugin: "war"
@@ -134,8 +139,11 @@ subprojects {
             implementation "org.eclipse:yasson:3.0.3"
         }
         
-        // berry-books-api, berry-books-api-vibe用: JWT and BCrypt dependencies
-        if (project.name == "berry-books-api" || project.name == "berry-books-api-vibe") {
+        // JWT and BCrypt dependencies for projects that need authentication
+        if (project.name == "berry-books-api" || 
+            project.name == "berry-books-api-vibe" || 
+            project.name == "berry-books-api-sdd" ||
+            project.name == "back-office-api") {
             // JWT
             implementation "io.jsonwebtoken:jjwt-api:0.12.6"
             runtimeOnly "io.jsonwebtoken:jjwt-impl:0.12.6"
@@ -309,7 +317,7 @@ subprojects {
             println "===================================="
             println "Make sure the application is deployed:"
             println "  1. Payara Server is running (gradle startPayara)"
-            println "  2. Application is deployed (gradle :projects:java:${project.name}:deploy)"
+            println "  2. Application is deployed (gradle :${project.name}:deploy)"
             println ""
         }
     }
@@ -354,8 +362,8 @@ subprojects {
             println "===================================="
             println ""
             println "次のステップ:"
-            println "  1. ポート設定を変更: gradle :projects:java:struts-person:configureTomee8Ports"
-            println "  2. TomEE 8を起動: gradle :projects:java:struts-person:startTomee8"
+            println "  1. ポート設定を変更: gradle :struts-person:configureTomee8Ports"
+            println "  2. TomEE 8を起動: gradle :struts-person:startTomee8"
         }
         
         // TomEE 8のポート設定を変更
@@ -502,7 +510,7 @@ subprojects {
             
             println ""
             println "TomEE 8 started in background."
-            println "To stop the server, run: gradle :projects:java:struts-person:stopTomee8"
+            println "To stop the server, run: gradle :struts-person:stopTomee8"
         }
 
         // TomEE 8を再起動
@@ -1284,7 +1292,7 @@ task initPayaraDomainConfig doLast {
     println ""
     println "次のステップ:"
     println "  1. データソースを設定: gradle setupDataSource"
-    println "  2. アプリケーションをデプロイ: gradle :projects:java:berry-books-mvc:deploy"
+    println "  2. アプリケーションをデプロイ: gradle :berry-books-api:deploy"
 }
 
 // タスクをグループ化する

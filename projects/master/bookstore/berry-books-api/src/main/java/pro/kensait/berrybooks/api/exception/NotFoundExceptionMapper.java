@@ -1,0 +1,37 @@
+package pro.kensait.berrybooks.api.exception;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
+import pro.kensait.berrybooks.api.dto.ErrorResponse;
+
+/**
+ * 404 Not Found例外マッパー
+ */
+@Provider
+public class NotFoundExceptionMapper implements ExceptionMapper<NotFoundException> {
+    private static final Logger logger = LoggerFactory.getLogger(NotFoundExceptionMapper.class);
+
+    @Override
+    public Response toResponse(NotFoundException exception) {
+        logger.warn("[ NotFoundExceptionMapper ] Resource not found: {}", exception.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                Response.Status.NOT_FOUND.getStatusCode(),
+                "Not Found",
+                "指定されたリソースが見つかりません",
+                ""
+        );
+
+        return Response.status(Response.Status.NOT_FOUND)
+                .type(MediaType.APPLICATION_JSON)
+                .entity(errorResponse)
+                .build();
+    }
+}
+

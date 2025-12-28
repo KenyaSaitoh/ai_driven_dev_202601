@@ -5,37 +5,78 @@
 Jakarta EE 10とPayara Serverを使用したWebアプリケーションの学習プロジェクト集です。
 Servlet/JSP、JSF、CDI、JAX-RSを段階的に学習できます。
 
+### 📌 代表プロジェクト（クイックスタート推奨）
+
+以下の3つのプロジェクトは、Jakarta EE 10のREST API開発を学習するための代表的なプロジェクトです：
+
+1. **berry-books-api** - 注文管理REST API
+   - 書籍の注文処理、認証・認可、JWT認証
+   
+2. **back-office-api** - 書籍・在庫管理REST API
+   - 書籍マスター、出版社・カテゴリ管理、在庫管理
+   
+3. **customer-hub-api** - 顧客管理REST API
+   - 顧客情報のCRUD操作、シンプルなREST API実装
+
 ## 📁 プロジェクト構成
 
-このリポジトリは複数の技術スタックを含むマルチプロジェクト構成です：
+このリポジトリは複数の技術スタックを含むマルチプロジェクト構成です。
+プロジェクトは以下の3つのカテゴリに分類されています。
+
+> **Note**: このREADMEでは、代表的な3つのプロジェクト（berry-books-api、back-office-api、customer-hub-api）を中心に説明します。その他のプロジェクトについては、各プロジェクトのREADME.mdを参照してください。
+
+### プロジェクトカテゴリ
+
+1. **master/** - 完成版プロジェクト（参照用）
+   - 動作確認済みの完成版コード
+   - 学習のリファレンス実装として利用
+
+2. **sdd/** - 仕様駆動開発（Specification-Driven Development）プロジェクト（研修用）
+   - 仕様書からコードを生成する手法を学習
+   - AIを活用した段階的な実装プロセスを体験
+
+3. **vibe/** - Vibe Coding（バイブコーディング）プロジェクト（研修用）
+   - AIとの自然な対話を通じてコーディングを進める手法
+   - インタラクティブな開発体験を重視
+
+### ディレクトリ構造
 
 ```
 ai_driven_dev_202601/
 ├── projects/
-│   ├── java/                           # Jakarta EE (Java) プロジェクト
-│   │   ├── berry-books-api/            # Berry Books Webアプリケーション（MVC）【完成版】
-│   │   ├── berry-books-api-sdd/        # Berry Books Webアプリケーション（仕様駆動開発）【研修用】
-│   │   ├── berry-books-api-vibe/       # Berry Books Webアプリケーション（AI Vibe課題）【研修用】
-│   │   ├── berry-books-swing/          # Berry Books Swingデスクトップアプリケーション【完成版】
-│   │   ├── customer-api/               # Customer REST API【完成版】
-│   │   ├── jsf-person/                 # Person管理（JSF + JPA CRUD）【完成版】
-│   │   ├── struts-person/              # Person管理（Struts 1.3 + EJB）【完成版】
-│   │   └── struts-to-jsf-person-sdd/   # StrutsからJakarta EEへの移行プロジェクト【研修用】
-│   ├── python/                         # Pythonプロジェクト
-│   │   ├── accounting_etl/             # ERP会計統合ETL【完成版】
-│   │   └── accounting_etl_sdd/         # ERP会計統合ETL【研修用】
-│   └── react/                          # Reactプロジェクト
-│       ├── berry-books-spa/            # Berry Books 管理者画面【完成版】
-│       ├── customer-spa/               # Customer管理画面【完成版】
-│       └── customer-spa-vibe/          # Customer管理画面（AI Vibe課題）【研修用】
+│   ├── master/                                      # 完成版プロジェクト（参照用）
+│   │   ├── accounting/                              # 会計ドメイン
+│   │   │   └── accounting_etl/                      # ERP会計統合ETL【完成版】
+│   │   ├── bookstore/                               # 書店ドメイン
+│   │   │   ├── berry-books-api/                     # Berry Books REST API（注文管理）【完成版】
+│   │   │   ├── berry-books-spa/                     # Berry Books SPA (React)【完成版】
+│   │   │   ├── customer-hub-api/                    # Customer Hub REST API（顧客管理）【完成版】
+│   │   │   ├── customer-hub-spa/                    # Customer Hub SPA (React)【完成版】
+│   │   │   ├── customer-hub-swing/                  # Customer Hub Swing【完成版】
+│   │   │   └── back-office-api/                 # Book Backoffice REST API（書籍・在庫管理）【完成版】
+│   │   └── person/                                  # 人物管理ドメイン
+│   │       ├── jsf-person/                          # Person管理（JSF + JPA）【完成版】
+│   │       └── struts-person/                       # Person管理（Struts 1.3 + EJB）【完成版】
+│   ├── sdd/                                         # 仕様駆動開発（SDD）プロジェクト（研修用）
+│   │   ├── accounting/                              # 会計ドメイン
+│   │   │   └── accounting_etl_sdd/                  # ERP会計統合ETL（SDD研修用）
+│   │   ├── bookstore/                               # 書店ドメイン
+│   │   │   └── berry-books-api-sdd/                 # Berry Books REST API（SDD研修用）
+│   │   └── person/                                  # 人物管理ドメイン
+│   │       └── struts-to-jsf-person-sdd/            # Struts→Jakarta EE移行（SDD研修用）
+│   └── vibe/                                        # Vibe Coding（バイブコーディング）プロジェクト（研修用）
+│       ├── accounting/                              # 会計ドメイン（プレースホルダー）
+│       └── bookstore/                               # 書店ドメイン
+│           ├── berry-books-api-vibe/                # Berry Books REST API（Vibe Coding研修用）
+│           └── customer-hub-spa-vibe/               # Customer Hub SPA (React, Vibe Coding研修用）
 │
-├── payara6/                            # Payara Server 6
-├── hsqldb/                             # HSQLDB Database Server
-├── tomee8/                             # Apache TomEE 8 (Struts用)
+├── payara6/                                         # Payara Server 6
+├── hsqldb/                                          # HSQLDB Database Server
+├── tomee8/                                          # Apache TomEE 8 (Struts用)
 │
-├── build.gradle                        # Javaプロジェクト用ビルド設定
-├── settings.gradle                     # Gradleマルチプロジェクト設定
-└── env-conf.gradle                     # 環境設定
+├── build.gradle                                     # Javaプロジェクト用ビルド設定
+├── settings.gradle                                  # Gradleマルチプロジェクト設定
+└── env-conf.gradle                                  # 環境設定
 ```
 
 ## 🚀 セットアップとコマンド実行ガイド
@@ -64,8 +105,8 @@ ai_driven_dev_202601/
 chmod +x gradlew
 chmod +x payara6/bin/*
 chmod +x tomee8/bin/*
-chmod +x projects/python/accounting_etl/*.sh
-chmod +x projects/python/accounting_etl_sdd/*.sh
+chmod +x projects/master/accounting/accounting_etl/*.sh
+chmod +x projects/sdd/accounting/accounting_etl_sdd/*.sh
 ```
 
 > **Note**: このステップはmacOS/Linuxのみ必要です。Windowsでは不要です。
@@ -107,28 +148,32 @@ chmod +x projects/python/accounting_etl_sdd/*.sh
 
 ```bash
 # プロジェクトのデータベーステーブルとデータを作成
-# 例：berry-books-api、berry-books-api-sdd、berry-books-api-vibe共通
-./gradlew :berry-books-api:setupHsqldb
+./gradlew :berry-books-api:setupHsqldb      # 注文管理テーブル
+./gradlew :back-office-api:setupHsqldb      # 書籍・在庫テーブル
+./gradlew :customer-hub-api:setupHsqldb     # 顧客テーブル
+```
 
+```bash
 # プロジェクトをビルド
 ./gradlew :berry-books-api:war
-# または
-./gradlew :customer-api:war
+./gradlew :back-office-api:war
+./gradlew :customer-hub-api:war
+```
 
+```bash
 # プロジェクトをデプロイ
 ./gradlew :berry-books-api:deploy
-# または
-./gradlew :customer-api:deploy
+./gradlew :back-office-api:deploy
+./gradlew :customer-hub-api:deploy
 ```
 
 ### ⑥ プロジェクトを終了するときに1回だけ実行（CleanUp）
 
 ```bash
 # プロジェクトをアンデプロイ
-# 例：berry-books-apiの場合
 ./gradlew :berry-books-api:undeploy
-# 例：customer-apiの場合
-./gradlew :customer-api:undeploy
+./gradlew :back-office-api:undeploy
+./gradlew :customer-hub-api:undeploy
 ```
 
 ### ⑦ アプリケーション作成・更新のたびに実行
@@ -138,9 +183,14 @@ chmod +x projects/python/accounting_etl_sdd/*.sh
 # 例：berry-books-apiの場合
 ./gradlew :berry-books-api:war
 ./gradlew :berry-books-api:deploy
-# 例：customer-apiの場合
-./gradlew :customer-api:war
-./gradlew :customer-api:deploy
+
+# 例：back-office-apiの場合
+./gradlew :back-office-api:war
+./gradlew :back-office-api:deploy
+
+# 例：customer-hub-apiの場合
+./gradlew :customer-hub-api:war
+./gradlew :customer-hub-api:deploy
 ```
 
 ## 🧹 仕様駆動開発（SDD）プロジェクトの成果物クリーンアップ
@@ -176,16 +226,23 @@ chmod +x projects/python/accounting_etl_sdd/*.sh
 1. `@instructions/generate_tasks.md` を使ってタスクリストを生成
 2. `@instructions/generate_code.md` を使ってタスクに従って実装
 
-詳細は `projects/java/berry-books-api-sdd/README.md` を参照してください。
+詳細は `projects/sdd/bookstore/berry-books-api-sdd/README.md` を参照してください。
 
 ---
 
-## 🌐 アプリケーションへのログイン
+## 🌐 アプリケーションへのアクセス
 
 プロジェクトごとのアクセスURL例：
+
 ```
-http://localhost:8080/berry-books-api
-http://localhost:8080/customer-api/api/customers/1
+# Berry Books API（注文管理）
+http://localhost:8080/berry-books-api/api/books
+
+# Back Office API（書籍・在庫管理）
+http://localhost:8080/back-office-api/api/books
+
+# Customer Hub API（顧客管理）
+http://localhost:8080/customer-hub-api/customers/1
 ```
 
 ### ログイン情報
@@ -273,7 +330,7 @@ Excelファイル (.xlsx) を検索してZIP展開するタスクです。Excel�
 
 ```bash
 # berry-books-apiのspecディレクトリを対象にする場合
-./gradlew exploreExcelFiles -PtargetDir=projects/java/berry-books-api/spec
+./gradlew exploreExcelFiles -PtargetDir=projects/master/bookstore/berry-books-api/spec
 ```
 
 **処理内容:**
@@ -286,7 +343,7 @@ Excelファイル (.xlsx) を検索してZIP展開するタスクです。Excel�
 **出力例:**
 
 ```
-projects/java/berry-books-api/spec/
+projects/master/bookstore/berry-books-api/spec/
 ├── 設計書.xlsx
 └── 20251029_143025/        # タイムスタンプフォルダ
     ├── [Content_Types].xml
@@ -382,23 +439,13 @@ SELECT * FROM PERSON;
 
 - **[設定ファイル](env-conf.gradle)** - Payara ServerとHSQLDB Database環境設定
 - **[domain.xml.template](payara6/glassfish/domains/domain1/config/domain.xml.template)** - Payara Serverのクリーンな初期設定（Git管理対象）
-- **[server.xml.template](tomee8/conf/server.xml.template)** - TomEE 8のクリーンな初期設定（Git管理対象）
 - **各プロジェクトのREADME.md** - プロジェクト固有の詳細情報
 
 ### 設定ファイルのテンプレート管理について
 
-#### Payara Server - domain.xml
-
 - **`domain.xml.template`**: Git管理対象の初期設定ファイル（デプロイ情報・データソース設定なし）
 - **`domain.xml`**: 実行時に使用される設定ファイル（Git管理対象外、実行時に動的に変更される）
 - 研修開催時に`initPayaraDomainConfig`タスクでテンプレートから初期化される
-
-#### TomEE 8 - server.xml
-
-- **`server.xml.template`**: Git管理対象の初期設定ファイル（デフォルトポート8080）
-- **`server.xml`**: 実行時に使用される設定ファイル（Git管理対象外、`configureTomee8Ports`で動的に変更される）
-- 研修開催時に`initTomee8Config`タスクでテンプレートから初期化される
-- **`tomee.xml`**: データソース設定（Git管理対象、手動で設定済み）
 
 ## 🐛 トラブルシューティング
 

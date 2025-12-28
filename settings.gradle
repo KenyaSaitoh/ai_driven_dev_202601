@@ -4,28 +4,33 @@
 
 rootProject.name = 'jee-web-projects-payara'
 
-// Berry Books プロジェクト
+// Master: 完成版プロジェクト
 include 'berry-books-api'
-include 'berry-books-api-sdd'
-include 'berry-books-api-vibe'
-include 'berry-books-swing'
-
-// Customer API プロジェクト
-include 'customer-api'
-
-// JSF系プロジェクト
+include 'customer-hub-api'
+include 'customer-hub-swing'
+include 'back-office-api'
 include 'jsf-person'
-
-// Struts系プロジェクト
 include 'struts-person'
+
+// SDD: 仕様駆動開発（Specification-Driven Development）プロジェクト
+include 'berry-books-api-sdd'
 include 'struts-to-jsf-person-sdd'
 
+// Vibe: Vibe Coding（バイブコーディング）プロジェクト
+include 'berry-books-api-vibe'
+
 // プロジェクトの物理的な場所を指定
-project(':berry-books-api').projectDir = file('projects/java/berry-books-api')
-project(':berry-books-api-sdd').projectDir = file('projects/java/berry-books-api-sdd')
-project(':berry-books-api-vibe').projectDir = file('projects/java/berry-books-api-vibe')
-project(':berry-books-swing').projectDir = file('projects/java/berry-books-swing')
-project(':customer-api').projectDir = file('projects/java/customer-api')
-project(':jsf-person').projectDir = file('projects/java/jsf-person')
-project(':struts-person').projectDir = file('projects/java/struts-person')
-project(':struts-to-jsf-person-sdd').projectDir = file('projects/java/struts-to-jsf-person-sdd')
+// Master: 完成版プロジェクト（ドメイン別に整理）
+project(':berry-books-api').projectDir = file('projects/master/bookstore/berry-books-api')
+project(':back-office-api').projectDir = file('projects/master/bookstore/back-office-api')
+project(':customer-hub-api').projectDir = file('projects/master/bookstore/customer-hub-api')
+project(':customer-hub-swing').projectDir = file('projects/master/bookstore/customer-hub-swing')
+project(':jsf-person').projectDir = file('projects/master/person/jsf-person')
+project(':struts-person').projectDir = file('projects/master/person/struts-person')
+
+// SDD: 仕様駆動開発（Specification-Driven Development）プロジェクト（ドメイン別に整理）
+project(':berry-books-api-sdd').projectDir = file('projects/sdd/bookstore/berry-books-api-sdd')
+project(':struts-to-jsf-person-sdd').projectDir = file('projects/sdd/person/struts-to-jsf-person-sdd')
+
+// Vibe: Vibe Coding（バイブコーディング）プロジェクト（ドメイン別に整理）
+project(':berry-books-api-vibe').projectDir = file('projects/vibe/bookstore/berry-books-api-vibe')
