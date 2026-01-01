@@ -1,0 +1,504 @@
+# 認証API 機能設計書
+
+## 1. API概要
+
+### 1.1 API名
+認証API（Authentication API）
+
+### 1.2 ベースパス
+`/api/auth`
+
+### 1.3 目的
+社員の認証（ログイン/ログアウト）およびユーザー情報取得機能を提供する。
+
+### 1.4 認証方式
+- ログイン: 社員コード + パスワード
+- セッション管理: JWT (JSON Web Token) + HttpOnly Cookie
+
+## 2. エンドポイント一覧
+
+| No | メソッド | パス | 機能 | 認証要否 |
+|----|---------|------|------|---------|
+| 1 | POST | `/api/auth/login` | ログイン | 不要 |
+| 2 | POST | `/api/auth/logout` | ログアウト | 不要 |
+| 3 | GET | `/api/auth/me` | 現在のユーザー情報取得 | 必要（未実装） |
+
+## 3. エンドポイント詳細
+
+### 3.1 ログイン
+
+#### 3.1.1 基本情報
+- **エンドポイント**: `POST /api/auth/login`
+- **機能**: 社員コードとパスワードで認証し、JWTトークンを発行
+- **認証**: 不要
+
+#### 3.1.2 リクエスト
+
+**ヘッダー**:
+```
+Content-Type: application/json
+```
+
+**ボディ**:
+```json
+{
+  "employeeCode": "E0001",
+  "password": "password123"
+}
+```
+
+**リクエストスキーマ**:
+| フィールド | 型 | 必須 | 説明 | バリデーション |
+|-----------|---|------|------|--------------|
+| employeeCode | String | Yes | 社員コード | NotBlank, Size(max=20) |
+| password | String | Yes | パスワード | NotBlank, Size(max=100) |
+
+#### 3.1.3 レスポンス
+
+**成功（200 OK）**:
+
+ヘッダー:
+```
+Set-Cookie: back-office-jwt=<JWT_TOKEN>; Path=/; Max-Age=86400; HttpOnly
+Content-Type: application/json; charset=UTF-8
+```
+
+ボディ:
+```json
+{
+  "employeeId": 1,
+  "employeeCode": "E0001",
+  "employeeName": "山田太郎",
+  "email": "yamada@example.com",
+  "jobRank": 2,
+  "departmentId": 1,
+  "departmentName": "営業部"
+}
+```
+
+**レスポンススキーマ**:
+| フィールド | 型 | 説明 |
+|-----------|---|------|
+| employeeId | Long | 社員ID |
+| employeeCode | String | 社員コード |
+| employeeName | String | 社員名 |
+| email | String | メールアドレス |
+| jobRank | Integer | 職務ランク（1: ASSOCIATE, 2: MANAGER, 3: DIRECTOR） |
+| departmentId | Long | 部署ID |
+| departmentName | String | 部署名 |
+
+**失敗（401 Unauthorized）**:
+```json
+{
+  "error": "Unauthorized",
+  "message": "社員コードまたはパスワードが正しくありません"
+}
+```
+
+**失敗（500 Internal Server Error）**:
+```json
+{
+  "error": "Internal Server Error",
+  "message": "ログイン処理中にエラーが発生しました"
+}
+```
+
+#### 3.1.4 処理フロー
+
+1. リクエストボディのバリデーション（Bean Validation）
+2. 社員コードで社員情報を検索（`EmployeeDao.findByCode()`）
+3. 社員が存在しない場合 → 401 Unauthorized
+4. パスワード照合
+   - BCryptハッシュの場合（`$2a$`, `$2b$`, `$2y$`で始まる）: `BCrypt.checkpw()`
+   - 平文パスワードの場合: 文字列比較（開発環境のみ）
+5. パスワードが一致しない場合 → 401 Unauthorized
+6. JWT生成（`JwtUtil.generateToken()`）
+   - Payload: employeeId, employeeCode, departmentId
+   - 署名アルゴリズム: HMAC-SHA256
+   - 秘密鍵: `jwt.secret-key`
+   - 有効期限: 24時間（`jwt.expiration-ms`）
+7. HttpOnly Cookieを生成
+   - Name: `back-office-jwt`（`jwt.cookie-name`）
+   - Value: JWT文字列
+   - HttpOnly: true
+   - Secure: false（開発環境）、true（本番環境）
+   - MaxAge: 86400秒
+8. レスポンス生成（LoginResponse + Set-Cookie）
+
+#### 3.1.5 ビジネスルール
+
+- **BR-AUTH-001**: パスワードはBCryptハッシュまたは平文で保存
+  - BCryptハッシュの判定: `$2a$`, `$2b$`, `$2y$`で始まる
+  - 平文パスワードは開発環境のみサポート（本番環境では非推奨）
+- **BR-AUTH-002**: JWT有効期限はデフォルト24時間
+  - `jwt.expiration-ms`プロパティで変更可能
+- **BR-AUTH-003**: 認証失敗時はセキュリティ上、詳細な理由を返さない
+  - 社員コード不存在もパスワード不一致も同じエラーメッセージ
+
+#### 3.1.6 JWT構造
+
+**ヘッダー**:
+```json
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+```
+
+**ペイロード**:
+```json
+{
+  "sub": "1",
+  "employeeCode": "E0001",
+  "departmentId": 1,
+  "iat": 1704067200,
+  "exp": 1704153600
+}
+```
+
+| クレーム | 説明 |
+|---------|------|
+| sub | Subject（社員ID） |
+| employeeCode | 社員コード |
+| departmentId | 部署ID |
+| iat | Issued At（発行日時） |
+| exp | Expiration（有効期限） |
+
+**シグネチャ**:
+```
+HMACSHA256(
+  base64UrlEncode(header) + "." + base64UrlEncode(payload),
+  secret-key
+)
+```
+
+#### 3.1.7 関連コンポーネント
+
+- `AuthenResource#login()`
+- `EmployeeDao#findByCode()`
+- `JwtUtil#generateToken()`
+- `JwtUtil#getCookieName()`
+- `JwtUtil#getExpirationSeconds()`
+- `BCrypt.checkpw()`
+
+---
+
+### 3.2 ログアウト
+
+#### 3.2.1 基本情報
+- **エンドポイント**: `POST /api/auth/logout`
+- **機能**: JWTトークンを無効化（Cookieを削除）
+- **認証**: 不要（Cookie削除のみ）
+
+#### 3.2.2 リクエスト
+
+**ヘッダー**: なし
+
+**ボディ**: なし
+
+#### 3.2.3 レスポンス
+
+**成功（200 OK）**:
+
+ヘッダー:
+```
+Set-Cookie: back-office-jwt=; Path=/; Max-Age=0; HttpOnly
+```
+
+ボディ: なし（空のレスポンス）
+
+#### 3.2.4 処理フロー
+
+1. HttpOnly Cookieを削除
+   - Name: `back-office-jwt`
+   - Value: 空文字
+   - MaxAge: 0（即座に削除）
+2. 空のレスポンスを返却
+
+#### 3.2.5 ビジネスルール
+
+- **BR-AUTH-004**: ログアウトは単にCookieを削除するのみ
+  - JWTトークン自体は無効化されない（ステートレス設計）
+  - 有効期限まではトークンは技術的には有効
+  - Cookieが削除されるためブラウザから送信されなくなる
+
+#### 3.2.6 関連コンポーネント
+
+- `AuthenResource#logout()`
+- `JwtUtil#getCookieName()`
+
+---
+
+### 3.3 現在のユーザー情報取得
+
+#### 3.3.1 基本情報
+- **エンドポイント**: `GET /api/auth/me`
+- **機能**: 現在ログイン中のユーザー情報を取得
+- **認証**: 必要（JWT）
+- **ステータス**: 未実装
+
+#### 3.3.2 リクエスト
+
+**ヘッダー**:
+```
+Cookie: back-office-jwt=<JWT_TOKEN>
+```
+
+**ボディ**: なし
+
+#### 3.3.3 レスポンス
+
+**現在（501 Not Implemented）**:
+```json
+{
+  "error": "Not Implemented",
+  "message": "この機能は未実装です"
+}
+```
+
+**将来の実装予定（200 OK）**:
+```json
+{
+  "employeeId": 1,
+  "employeeCode": "E0001",
+  "employeeName": "山田太郎",
+  "email": "yamada@example.com",
+  "jobRank": 2,
+  "departmentId": 1,
+  "departmentName": "営業部"
+}
+```
+
+#### 3.3.4 処理フロー（実装予定）
+
+1. CookieからJWTトークンを抽出
+2. JWTトークンを検証（`JwtUtil.validateToken()`）
+3. トークンが無効の場合 → 401 Unauthorized
+4. JWTから社員IDを取得（`JwtUtil.getEmployeeIdFromToken()`）
+5. 社員IDで社員情報を検索（`EmployeeDao.findById()`）
+6. 社員が存在しない場合 → 404 Not Found
+7. レスポンス生成（LoginResponse）
+
+#### 3.3.5 TODO
+
+JWT認証フィルタの実装後に以下を行う:
+- JWT認証フィルタで認証済みの社員IDをSecurityContextに設定
+- `getCurrentUser()`メソッドでSecurityContextから社員IDを取得
+- 社員情報をデータベースから取得して返却
+
+#### 3.3.6 関連コンポーネント
+
+- `AuthenResource#getCurrentUser()`
+- `JwtUtil#extractJwtFromRequest()`（将来）
+- `JwtUtil#validateToken()`（将来）
+- `JwtUtil#getEmployeeIdFromToken()`（将来）
+- `EmployeeDao#findById()`（将来）
+
+---
+
+## 4. データ転送オブジェクト（DTO）
+
+### 4.1 LoginRequest
+
+**パッケージ**: `pro.kensait.backoffice.api.dto`
+
+**フィールド**:
+```java
+public record LoginRequest(
+    @NotBlank
+    @Size(max = 20)
+    String employeeCode,
+    
+    @NotBlank
+    @Size(max = 100)
+    String password
+) {}
+```
+
+### 4.2 LoginResponse
+
+**パッケージ**: `pro.kensait.backoffice.api.dto`
+
+**フィールド**:
+```java
+public record LoginResponse(
+    Long employeeId,
+    String employeeCode,
+    String employeeName,
+    String email,
+    Integer jobRank,
+    Long departmentId,
+    String departmentName
+) {}
+```
+
+### 4.3 ErrorResponse
+
+**パッケージ**: `pro.kensait.backoffice.api.dto`
+
+**フィールド**:
+```java
+public record ErrorResponse(
+    String error,
+    String message
+) {}
+```
+
+---
+
+## 5. セキュリティ考慮事項
+
+### 5.1 パスワード保護
+
+- **ハッシュ化**: BCryptアルゴリズムでハッシュ化
+- **ソルト**: BCryptが自動生成
+- **ストレッチング**: BCryptのラウンド数（デフォルト10）
+- **平文パスワード**: 開発環境のみサポート（本番環境では非推奨）
+
+### 5.2 JWT保護
+
+- **署名**: HMAC-SHA256で署名
+- **秘密鍵**: 最低32文字以上（`jwt.secret-key`）
+- **有効期限**: 24時間（`jwt.expiration-ms`）
+- **Cookie**: HttpOnly属性でXSS対策
+- **Secure属性**: 本番環境ではtrueに設定（HTTPS必須）
+
+### 5.3 認証失敗時の対応
+
+- **エラーメッセージ**: 詳細な理由を返さない（列挙攻撃対策）
+- **ログ**: 認証失敗をWARNレベルでログ出力
+- **レート制限**: 現状未実装（将来的に検討）
+
+### 5.4 CSRF対策
+
+- **Cookie**: SameSite属性の設定を検討
+- **トークン**: 現状未実装、将来的にCSRFトークンの実装を検討
+
+---
+
+## 6. エラーハンドリング
+
+### 6.1 エラーケース
+
+| エラー内容 | HTTPステータス | レスポンス |
+|-----------|---------------|-----------|
+| 社員コードが存在しない | 401 Unauthorized | 社員コードまたはパスワードが正しくありません |
+| パスワードが不一致 | 401 Unauthorized | 社員コードまたはパスワードが正しくありません |
+| リクエストボディのバリデーションエラー | 400 Bad Request | バリデーションエラーメッセージ |
+| 予期しないエラー | 500 Internal Server Error | ログイン処理中にエラーが発生しました |
+| 未実装機能 | 501 Not Implemented | この機能は未実装です |
+
+### 6.2 ログ出力
+
+**INFOレベル**:
+```
+[ AuthenResource#login ] employeeCode: E0001
+[ AuthenResource#logout ]
+[ AuthenResource#getCurrentUser ]
+```
+
+**WARNレベル**:
+```
+[ AuthenResource#login ] Employee not found: E0001
+[ AuthenResource#login ] Password mismatch for employeeCode: E0001
+```
+
+**ERRORレベル**:
+```
+[ AuthenResource#login ] Unexpected error
+java.lang.Exception: ...
+```
+
+---
+
+## 7. 設定
+
+### 7.1 MicroProfile Config
+
+**ファイル**: `microprofile-config.properties`
+
+```properties
+# JWT秘密鍵（本番環境では環境変数で上書き）
+jwt.secret-key=BackOfficeSecretKeyForJWT2024MustBe32CharactersOrMore
+
+# JWT有効期限（ミリ秒）
+# デフォルト: 24時間 = 86400000
+jwt.expiration-ms=86400000
+
+# JWT Cookie名
+jwt.cookie-name=back-office-jwt
+```
+
+### 7.2 環境変数（本番環境）
+
+本番環境では以下の環境変数を設定してデフォルト値を上書き:
+
+```bash
+export JWT_SECRET_KEY="ProductionSecretKeyMustBeVeryStrong"
+export JWT_EXPIRATION_MS=86400000
+export JWT_COOKIE_NAME="back-office-jwt"
+```
+
+---
+
+## 8. テスト仕様
+
+### 8.1 正常系テスト
+
+| テストケース | 入力 | 期待結果 |
+|------------|------|---------|
+| 正しい社員コードとパスワード | employeeCode="E0001", password="password" | 200 OK + JWT Cookie |
+| BCryptパスワード | employeeCode="E0001", password="hashedPassword" | 200 OK + JWT Cookie |
+| ログアウト | なし | 200 OK + Cookie削除 |
+
+### 8.2 異常系テスト
+
+| テストケース | 入力 | 期待結果 |
+|------------|------|---------|
+| 存在しない社員コード | employeeCode="INVALID" | 401 Unauthorized |
+| 間違ったパスワード | employeeCode="E0001", password="wrong" | 401 Unauthorized |
+| 社員コードが空 | employeeCode="" | 400 Bad Request |
+| パスワードが空 | password="" | 400 Bad Request |
+| 未実装機能の呼び出し | GET /api/auth/me | 501 Not Implemented |
+
+---
+
+## 9. パフォーマンス要件
+
+- **ログインレスポンスタイム**: 500ms以内
+  - データベースクエリ: 100ms以内
+  - パスワード照合（BCrypt）: 200ms以内
+  - JWT生成: 50ms以内
+- **ログアウトレスポンスタイム**: 50ms以内
+
+---
+
+## 10. 将来の拡張
+
+### 10.1 JWT認証フィルタ
+
+すべてのAPIエンドポイントで認証を要求する場合、以下を実装:
+- `@PreMatching`フィルタでCookieからJWTを抽出
+- JWTを検証（`JwtUtil.validateToken()`）
+- 有効な場合、SecurityContextに社員情報を設定
+- 無効な場合、401 Unauthorizedを返す
+
+### 10.2 リフレッシュトークン
+
+長期間のログインを維持する場合、リフレッシュトークンを実装:
+- アクセストークン（短期間: 1時間）
+- リフレッシュトークン（長期間: 7日間）
+- リフレッシュトークンでアクセストークンを再発行
+
+### 10.3 多要素認証（MFA）
+
+セキュリティ強化のため、多要素認証を実装:
+- TOTP（Time-based One-Time Password）
+- SMS認証
+- メール認証
+
+### 10.4 ソーシャルログイン
+
+外部認証プロバイダーとの連携:
+- OAuth 2.0
+- OpenID Connect

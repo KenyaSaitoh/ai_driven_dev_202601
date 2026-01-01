@@ -6,11 +6,11 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "==========================================="
-echo "  Back Office API - 統合テスト"
+echo "  Berry Books API - 統合テスト"
 echo "==========================================="
 echo ""
 echo "📍 テストスクリプトディレクトリ: $SCRIPT_DIR"
-echo "🌐 API Base URL: http://localhost:8080/back-office-api"
+echo "🌐 API Base URL: http://localhost:8080/berry-books-api-sdd"
 echo ""
 echo "⚠️  事前確認:"
 echo "   1. HSQLDBサーバーが起動していますか？"
@@ -19,9 +19,11 @@ echo ""
 echo "   2. Payara Serverが起動していますか？"
 echo "      ./gradlew startPayara"
 echo ""
-echo "   3. Back Office APIがデプロイされていますか？"
-echo "      ./gradlew :back-office-api:setupHsqldb"
-echo "      ./gradlew :back-office-api:deploy"
+echo "   3. Berry Books APIがデプロイされていますか？"
+echo "      ./gradlew :berry-books-api-sdd:deploy"
+echo ""
+echo "   4. Customer APIがデプロイされていますか？"
+echo "      ./gradlew :customer-api:deploy"
 echo ""
 read -p "全てのサービスが起動していますか？ (y/n): " -n 1 -r
 echo ""
@@ -44,10 +46,10 @@ echo "┃  1. 認証API テスト                      ┃"
 echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 echo ""
 
-if [ -f "$SCRIPT_DIR/test_authen.sh" ]; then
-    bash "$SCRIPT_DIR/test_authen.sh"
+if [ -f "$SCRIPT_DIR/test_auth.sh" ]; then
+    bash "$SCRIPT_DIR/test_auth.sh"
 else
-    echo "❌ test_authen.sh が見つかりません"
+    echo "❌ test_auth.sh が見つかりません"
 fi
 
 echo ""
@@ -88,40 +90,18 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 # ===========================================
-# 3. カテゴリAPI テスト
+# 3. 注文API テスト
 # ===========================================
 echo ""
 echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
-echo "┃  3. カテゴリAPI テスト                  ┃"
+echo "┃  3. 注文API テスト                      ┃"
 echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 echo ""
 
-# カテゴリAPIは書籍APIのテストに含まれているため、スキップメッセージを表示
-print_info "カテゴリAPIは書籍APIテストに含まれています"
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
-read -p "次のテストに進みますか？ (y/n): " -n 1 -r
-echo ""
-
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "テストを終了します"
-    exit 0
-fi
-
-# ===========================================
-# 4. 出版社API テスト
-# ===========================================
-echo ""
-echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
-echo "┃  4. 出版社API テスト                    ┃"
-echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
-echo ""
-
-if [ -f "$SCRIPT_DIR/test_publishers.sh" ]; then
-    bash "$SCRIPT_DIR/test_publishers.sh"
+if [ -f "$SCRIPT_DIR/test_orders.sh" ]; then
+    bash "$SCRIPT_DIR/test_orders.sh"
 else
-    echo "❌ test_publishers.sh が見つかりません"
+    echo "❌ test_orders.sh が見つかりません"
 fi
 
 echo ""
@@ -136,44 +116,18 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 # ===========================================
-# 5. 在庫API テスト
+# 4. 画像API テスト
 # ===========================================
 echo ""
 echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
-echo "┃  5. 在庫API テスト                      ┃"
+echo "┃  4. 画像API テスト                      ┃"
 echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 echo ""
 
-if [ -f "$SCRIPT_DIR/test_stocks.sh" ]; then
-    bash "$SCRIPT_DIR/test_stocks.sh"
+if [ -f "$SCRIPT_DIR/test_images.sh" ]; then
+    bash "$SCRIPT_DIR/test_images.sh"
 else
-    echo "❌ test_stocks.sh が見つかりません"
-fi
-
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
-read -p "次のテストに進みますか？ (y/n): " -n 1 -r
-echo ""
-
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "テストを終了します"
-    exit 0
-fi
-
-# ===========================================
-# 6. ワークフローAPI テスト
-# ===========================================
-echo ""
-echo "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"
-echo "┃  6. ワークフローAPI テスト              ┃"
-echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
-echo ""
-
-if [ -f "$SCRIPT_DIR/test_workflow.sh" ]; then
-    bash "$SCRIPT_DIR/test_workflow.sh"
-else
-    echo "❌ test_workflow.sh が見つかりません"
+    echo "❌ test_images.sh が見つかりません"
 fi
 
 echo ""
@@ -189,22 +143,16 @@ echo "  ✨ 全APIテスト完了 ✨"
 echo "==========================================="
 echo ""
 echo "📊 実行したテスト:"
-echo "   1. 認証API (ログイン, ログアウト, 現在のユーザー情報)"
-echo "   2. 書籍API (一覧, 詳細, 検索, カテゴリ)"
-echo "   3. カテゴリAPI (一覧)"
-echo "   4. 出版社API (一覧)"
-echo "   5. 在庫API (一覧, 詳細, 更新, 楽観ロック)"
-echo "   6. ワークフローAPI (作成, 更新, 申請, 承認, 却下, 履歴)"
+echo "   1. 認証API (login, register, logout, me)"
+echo "   2. 書籍API (一覧, 詳細, フィルタ)"
+echo "   3. 注文API (作成, 履歴, 詳細)"
+echo "   4. 画像API (表紙画像取得)"
 echo ""
 echo "💡 個別にテストを実行する場合:"
-echo "   bash test_authen.sh"
+echo "   bash test_auth.sh"
 echo "   bash test_books.sh"
-echo "   bash test_publishers.sh"
-echo "   bash test_stocks.sh"
-echo "   bash test_workflow.sh"
-echo ""
-echo "💡 簡易テスト（Windows Git Bash対応）:"
-echo "   bash simple_test.sh"
+echo "   bash test_orders.sh"
+echo "   bash test_images.sh"
 echo ""
 echo "==========================================="
 

@@ -10,7 +10,9 @@ test_script/
 ├── _common.sh          # 共通関数ライブラリ
 ├── simple_test.sh      # 簡易テスト（Windows Git Bash対応）
 ├── test_all.sh         # 全API統合テスト
+├── test_authen.sh      # 認証API テスト
 ├── test_books.sh       # 書籍API テスト
+├── test_publishers.sh  # 出版社API テスト
 ├── test_stocks.sh      # 在庫API テスト
 └── test_workflow.sh    # ワークフローAPI テスト
 ```
@@ -70,8 +72,14 @@ cd projects/master/bookstore/back-office-api/test_script
 各APIを個別にテストする場合：
 
 ```bash
+# 認証API テスト
+./test_authen.sh
+
 # 書籍API テスト
 ./test_books.sh
+
+# 出版社API テスト
+./test_publishers.sh
 
 # 在庫API テスト
 ./test_stocks.sh
@@ -84,15 +92,36 @@ cd projects/master/bookstore/back-office-api/test_script
 
 ## 📋 各テストスクリプトの内容
 
-### 1. test_books.sh - 書籍API
+### 1. test_authen.sh - 認証API
+
+- ✅ ログイン（成功） (`POST /api/auth/login`)
+- ✅ ログイン（失敗 - 存在しない社員コード）
+- ✅ ログイン（失敗 - 間違ったパスワード）
+- ✅ 現在のログインユーザー情報取得 (`GET /api/auth/me`) - 未実装
+- ✅ ログアウト (`POST /api/auth/logout`)
+- ✅ 複数社員でのログインテスト
+
+### 2. test_books.sh - 書籍API
 
 - ✅ 書籍一覧取得 (`GET /api/books`)
 - ✅ 書籍詳細取得 (`GET /api/books/{id}`)
 - ✅ 存在しない書籍IDでのエラーテスト（404確認）
 - ✅ 複数の書籍詳細を連続取得
 - ✅ カテゴリ一覧取得 (`GET /api/categories`)
+- ✅ 書籍検索（デフォルト - JPQL） (`GET /api/books/search`)
+  - キーワードのみで検索
+  - カテゴリ + キーワードで検索
+  - カテゴリのみで検索
+- ✅ 書籍検索（JPQL - 明示的） (`GET /api/books/search/jpql`)
+- ✅ 書籍検索（Criteria API - 動的クエリ） (`GET /api/books/search/criteria`)
+- ✅ 書籍のカテゴリ一覧取得 (`GET /api/books/categories`)
 
-### 2. test_stocks.sh - 在庫API
+### 3. test_publishers.sh - 出版社API
+
+- ✅ 出版社一覧取得 (`GET /api/publishers`)
+- ✅ 出版社データの妥当性チェック
+
+### 4. test_stocks.sh - 在庫API
 
 - ✅ 在庫一覧取得 (`GET /api/stocks`)
 - ✅ 在庫詳細取得 (`GET /api/stocks/{bookId}`)
@@ -100,23 +129,29 @@ cd projects/master/bookstore/back-office-api/test_script
 - ✅ 楽観ロックテスト（バージョン競合エラー確認）
 - ✅ 存在しない書籍IDでのエラーテスト（404確認）
 
-### 3. test_workflow.sh - ワークフローAPI
+### 5. test_workflow.sh - ワークフローAPI
 
 - ✅ ワークフロー作成 (`POST /api/workflows`)
-  - 書籍追加（CREATE）
-  - 価格一時調整（PRICE_TEMP_ADJUSTMENT）
-  - 書籍削除（DELETE）
+  - 新規書籍の追加（ADD_NEW_BOOK）
+  - 書籍価格の改定（ADJUST_BOOK_PRICE）
+  - 既存書籍の削除（REMOVE_BOOK）
 - ✅ ワークフロー一覧取得 (`GET /api/workflows?state={state}`)
   - NEW状態
   - APPLIED状態
   - APPROVED状態
   - 全件取得
-- ✅ ワークフロー履歴取得 (`GET /api/workflows/{workflowId}`)
+- ✅ ワークフロー更新 (`PUT /api/workflows/{workflowId}`)
+- ✅ ワークフロー履歴取得 (`GET /api/workflows/{workflowId}/history`)
 - ✅ ワークフロー申請 (`POST /api/workflows/{workflowId}/apply`)
 - ✅ ワークフロー承認 (`POST /api/workflows/{workflowId}/approve`)
 - ✅ ワークフロー却下 (`POST /api/workflows/{workflowId}/reject`)
 
 **注意:** ワークフローAPIは認証不要でテスト可能ですが、本番環境では認証が必要になります。
+
+**ワークフロータイプの詳細:**
+- `ADD_NEW_BOOK`: 新規書籍の追加（書籍名、著者、カテゴリ、出版社、価格を指定）
+- `ADJUST_BOOK_PRICE`: 書籍価格の改定（書籍ID、新価格、開始日、終了日を指定）
+- `REMOVE_BOOK`: 既存書籍の削除（書籍IDを指定）
 
 ## 🔧 テスト用データ
 
@@ -165,6 +200,30 @@ cd projects/master/bookstore/back-office-api/test_script
 
 ## 🎯 使用例
 
+### 認証APIをテストする場合
+
+```bash
+cd projects/master/bookstore/back-office-api/test_script
+./test_authen.sh
+```
+
+**出力例:**
+```
+===========================================
+  認証API テスト
+===========================================
+
+1️⃣  ログイン（成功）
+-------------------------------------------
+✅ ログイン成功 (HTTP 200)
+
+レスポンス:
+{"employeeId":1,"employeeCode":"E00001","employeeName":"山田太郎",...}
+
+📝 ログインした社員ID: 1
+✅ 認証Cookieが保存されました
+```
+
 ### 書籍APIだけをテストする場合
 
 ```bash
@@ -200,12 +259,14 @@ cd projects/master/bookstore/back-office-api/test_script
 1. 書籍追加ワークフローを作成
 2. 価格調整ワークフローを作成
 3. 書籍削除ワークフローを作成
-4. ワークフロー一覧を取得
-5. ワークフローを申請
-6. ワークフロー履歴を取得
-7. ワークフローを承認
-8. ワークフローを却下
-9. 承認済みワークフロー一覧を取得
+4. ワークフロー一覧を取得（NEW状態）
+5. ワークフローを更新（一時保存）
+6. ワークフローを申請
+7. ワークフロー履歴を取得
+8. ワークフローを承認
+9. ワークフローを却下
+10. 承認済みワークフロー一覧を取得
+11. ワークフロー全件取得
 
 という流れでテストします。
 
@@ -345,6 +406,31 @@ APPROVED  ←→  NEW (却下時)
 - **APPLIED**: 申請済みの状態。APPROVE または REJECT 操作が可能。
 - **APPROVED**: 承認済みの状態。書籍マスターに反映される。
 - **REJECT**: 却下すると状態がNEWに戻る。
+
+## 🆕 新機能（2025年1月版）
+
+### 追加されたテストスクリプト
+
+1. **test_authen.sh** - 認証API（`/api/auth`）の包括的なテスト
+   - ログイン成功/失敗のケース
+   - ログアウト
+   - Cookie認証の確認
+
+2. **test_publishers.sh** - 出版社API（`/api/publishers`）のテスト
+   - 出版社一覧取得
+   - データ妥当性チェック
+
+### 拡張されたテストスクリプト
+
+1. **test_books.sh** - 書籍検索機能を追加
+   - `/api/books/search` - デフォルト検索（JPQL）
+   - `/api/books/search/jpql` - JPQL明示的検索
+   - `/api/books/search/criteria` - Criteria API動的検索
+   - キーワード、カテゴリ、組み合わせ検索のテスト
+
+2. **test_workflow.sh** - ワークフロー更新機能を追加
+   - `PUT /api/workflows/{workflowId}` - 一時保存機能のテスト
+   - ワークフロー履歴取得の正しいエンドポイント（`/history`）を使用
 
 ## 📖 関連ドキュメント
 

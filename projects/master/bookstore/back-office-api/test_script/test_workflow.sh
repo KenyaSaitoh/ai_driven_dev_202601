@@ -24,7 +24,7 @@ echo "1️⃣  ワークフロー作成（書籍追加）"
 echo "-------------------------------------------"
 
 WORKFLOW_CREATE_DATA='{
-  "workflowType": "CREATE",
+  "workflowType": "ADD_NEW_BOOK",
   "bookName": "新Javaプログラミングガイド",
   "author": "山田太郎",
   "categoryId": 1,
@@ -65,7 +65,7 @@ echo "2️⃣  ワークフロー作成（価格一時調整）"
 echo "-------------------------------------------"
 
 PRICE_ADJUST_DATA='{
-  "workflowType": "PRICE_TEMP_ADJUSTMENT",
+  "workflowType": "ADJUST_BOOK_PRICE",
   "bookId": 1,
   "price": 2400,
   "applyReason": "春のキャンペーン割引",
@@ -102,7 +102,7 @@ echo "3️⃣  ワークフロー作成（書籍削除）"
 echo "-------------------------------------------"
 
 DELETE_WORKFLOW_DATA='{
-  "workflowType": "DELETE",
+  "workflowType": "REMOVE_BOOK",
   "bookId": 50,
   "applyReason": "絶版につき販売終了",
   "createdBy": 2
@@ -155,10 +155,51 @@ echo ""
 echo ""
 
 # ===========================================
-# 5. ワークフロー申請（APPLY）
+# 5. ワークフロー更新（PUT - 一時保存）
 # ===========================================
 if [ -n "$WORKFLOW_ID" ]; then
-    echo "5️⃣  ワークフロー申請（Workflow ID: $WORKFLOW_ID）"
+    echo "5️⃣  ワークフロー更新（Workflow ID: $WORKFLOW_ID）"
+    echo "-------------------------------------------"
+    
+    UPDATE_DATA='{
+      "bookName": "新Javaプログラミングガイド 改訂版",
+      "author": "山田太郎, 佐藤次郎",
+      "categoryId": 1,
+      "publisherId": 1,
+      "price": 3800,
+      "imageUrl": "https://example.com/images/new-java-guide-revised.jpg",
+      "applyReason": "新刊書籍の追加（共著者を追加、価格を改訂）",
+      "updatedBy": 6
+    }'
+    
+    RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
+        -X PUT "$API_BASE/api/workflows/$WORKFLOW_ID" \
+        -H "Content-Type: application/json" \
+        -d "$UPDATE_DATA")
+    
+    HTTP_STATUS=$(extract_http_status "$RESPONSE")
+    BODY=$(extract_response_body "$RESPONSE")
+    
+    if [ "$HTTP_STATUS" == "200" ]; then
+        print_success "ワークフロー更新成功 (HTTP $HTTP_STATUS)"
+        echo ""
+        echo "レスポンス:"
+        echo "$BODY" | head -c 500
+        echo ""
+    else
+        print_error "ワークフロー更新失敗 (HTTP $HTTP_STATUS)"
+        echo "$BODY"
+    fi
+    
+    echo ""
+    echo ""
+fi
+
+# ===========================================
+# 6. ワークフロー申請（APPLY）
+# ===========================================
+if [ -n "$WORKFLOW_ID" ]; then
+    echo "6️⃣  ワークフロー申請（Workflow ID: $WORKFLOW_ID）"
     echo "-------------------------------------------"
     
     APPLY_DATA='{
@@ -185,13 +226,13 @@ if [ -n "$WORKFLOW_ID" ]; then
 fi
 
 # ===========================================
-# 6. ワークフロー履歴取得
+# 7. ワークフロー履歴取得
 # ===========================================
 if [ -n "$WORKFLOW_ID" ]; then
-    echo "6️⃣  ワークフロー履歴取得（Workflow ID: $WORKFLOW_ID）"
+    echo "7️⃣  ワークフロー履歴取得（Workflow ID: $WORKFLOW_ID）"
     echo "-------------------------------------------"
     
-    RESPONSE=$(api_get "$API_BASE/api/workflows/$WORKFLOW_ID")
+    RESPONSE=$(api_get "$API_BASE/api/workflows/$WORKFLOW_ID/history")
     HTTP_STATUS=$(extract_http_status "$RESPONSE")
     BODY=$(extract_response_body "$RESPONSE")
     
@@ -212,10 +253,10 @@ if [ -n "$WORKFLOW_ID" ]; then
 fi
 
 # ===========================================
-# 7. ワークフロー承認（APPROVE）
+# 8. ワークフロー承認（APPROVE）
 # ===========================================
 if [ -n "$WORKFLOW_ID" ]; then
-    echo "7️⃣  ワークフロー承認（Workflow ID: $WORKFLOW_ID）"
+    echo "8️⃣  ワークフロー承認（Workflow ID: $WORKFLOW_ID）"
     echo "-------------------------------------------"
     
     APPROVE_DATA='{
@@ -242,10 +283,10 @@ if [ -n "$WORKFLOW_ID" ]; then
 fi
 
 # ===========================================
-# 8. ワークフロー却下（REJECT）
+# 9. ワークフロー却下（REJECT）
 # ===========================================
 if [ -n "$WORKFLOW_ID_3" ]; then
-    echo "8️⃣  ワークフロー却下（Workflow ID: $WORKFLOW_ID_3）"
+    echo "9️⃣  ワークフロー却下（Workflow ID: $WORKFLOW_ID_3）"
     echo "-------------------------------------------"
     
     # まず申請する
@@ -283,9 +324,9 @@ if [ -n "$WORKFLOW_ID_3" ]; then
 fi
 
 # ===========================================
-# 9. ワークフロー一覧取得（承認済み）
+# 10. ワークフロー一覧取得（承認済み）
 # ===========================================
-echo "9️⃣  ワークフロー一覧取得（状態: APPROVED）"
+echo "🔟  ワークフロー一覧取得（状態: APPROVED）"
 echo "-------------------------------------------"
 
 RESPONSE=$(api_get "$API_BASE/api/workflows?state=APPROVED")
@@ -308,9 +349,9 @@ echo ""
 echo ""
 
 # ===========================================
-# 10. ワークフロー全件取得
+# 11. ワークフロー全件取得
 # ===========================================
-echo "🔟  ワークフロー全件取得"
+echo "1️⃣1️⃣  ワークフロー全件取得"
 echo "-------------------------------------------"
 
 RESPONSE=$(api_get "$API_BASE/api/workflows")
@@ -340,11 +381,12 @@ echo "✨ ワークフローAPIテスト完了"
 echo "==========================================="
 echo ""
 print_info "テストされたエンドポイント:"
-echo "   ✓ POST   /api/workflows (CREATE, PRICE_TEMP_ADJUSTMENT, DELETE)"
+echo "   ✓ POST   /api/workflows (ADD_NEW_BOOK, ADJUST_BOOK_PRICE, REMOVE_BOOK)"
 echo "   ✓ GET    /api/workflows?state=NEW"
 echo "   ✓ GET    /api/workflows?state=APPROVED"
 echo "   ✓ GET    /api/workflows (全件)"
-echo "   ✓ GET    /api/workflows/{workflowId}"
+echo "   ✓ PUT    /api/workflows/{workflowId}"
+echo "   ✓ GET    /api/workflows/{workflowId}/history"
 echo "   ✓ POST   /api/workflows/{workflowId}/apply"
 echo "   ✓ POST   /api/workflows/{workflowId}/approve"
 echo "   ✓ POST   /api/workflows/{workflowId}/reject"

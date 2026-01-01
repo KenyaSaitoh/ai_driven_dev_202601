@@ -44,9 +44,19 @@ echo ""
 echo ""
 
 # ===========================================
-# 4. 在庫一覧取得
+# 4. 出版社一覧取得
 # ===========================================
-echo "4. 在庫一覧取得（最初の600文字）"
+echo "4. 出版社一覧取得"
+echo "-------------------------------------------"
+
+curl -s "$API_BASE/api/publishers"
+echo ""
+echo ""
+
+# ===========================================
+# 5. 在庫一覧取得
+# ===========================================
+echo "5. 在庫一覧取得（最初の600文字）"
 echo "-------------------------------------------"
 
 curl -s "$API_BASE/api/stocks" | head -c 600
@@ -56,9 +66,9 @@ echo ""
 echo ""
 
 # ===========================================
-# 5. 在庫詳細取得
+# 6. 在庫詳細取得
 # ===========================================
-echo "5. 在庫詳細取得（Book ID: 1）"
+echo "6. 在庫詳細取得（Book ID: 1）"
 echo "-------------------------------------------"
 
 curl -s "$API_BASE/api/stocks/1"
@@ -66,20 +76,21 @@ echo ""
 echo ""
 
 # ===========================================
-# 6. ワークフロー作成（書籍追加）
+# 7. ワークフロー作成（書籍追加）
 # ===========================================
-echo "6. ワークフロー作成（書籍追加）"
+echo "7. ワークフロー作成（書籍追加）"
 echo "-------------------------------------------"
 
 curl -s -X POST "$API_BASE/api/workflows" \
   -H "Content-Type: application/json" \
   -d '{
-    "workflowType": "CREATE",
+    "workflowType": "ADD_NEW_BOOK",
     "bookName": "テスト書籍",
     "author": "テスト著者",
     "categoryId": 1,
     "publisherId": 1,
     "price": 3000,
+    "applyReason": "テスト用の書籍追加",
     "createdBy": 6
   }' \
   -w "\nHTTP Status: %{http_code}\n"
@@ -88,9 +99,9 @@ echo ""
 echo ""
 
 # ===========================================
-# 7. ワークフロー一覧取得（NEW状態）
+# 8. ワークフロー一覧取得（NEW状態）
 # ===========================================
-echo "7. ワークフロー一覧取得（状態: NEW）"
+echo "8. ワークフロー一覧取得（状態: NEW）"
 echo "-------------------------------------------"
 
 curl -s "$API_BASE/api/workflows?state=NEW" | head -c 800
@@ -100,9 +111,9 @@ echo ""
 echo ""
 
 # ===========================================
-# 8. ワークフロー全件取得
+# 9. ワークフロー全件取得
 # ===========================================
-echo "8. ワークフロー全件取得（最初の1000文字）"
+echo "9. ワークフロー全件取得（最初の1000文字）"
 echo "-------------------------------------------"
 
 curl -s "$API_BASE/api/workflows" | head -c 1000
@@ -112,13 +123,29 @@ echo ""
 echo ""
 
 # ===========================================
-# 9. 各種HTTPステータスの確認
+# 10. 各種HTTPステータスの確認
 # ===========================================
-echo "9. 各種HTTPステータスの確認"
+echo "10. 各種HTTPステータスの確認"
 echo "-------------------------------------------"
 
 echo "📖 書籍一覧:"
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/books")
+if [ "$HTTP_STATUS" == "200" ]; then
+    echo "  ✅ 正常 (HTTP $HTTP_STATUS)"
+else
+    echo "  ❌ エラー (HTTP $HTTP_STATUS)"
+fi
+
+echo "📂 カテゴリ一覧:"
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/categories")
+if [ "$HTTP_STATUS" == "200" ]; then
+    echo "  ✅ 正常 (HTTP $HTTP_STATUS)"
+else
+    echo "  ❌ エラー (HTTP $HTTP_STATUS)"
+fi
+
+echo "📚 出版社一覧:"
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/publishers")
 if [ "$HTTP_STATUS" == "200" ]; then
     echo "  ✅ 正常 (HTTP $HTTP_STATUS)"
 else
@@ -135,14 +162,6 @@ fi
 
 echo "🔄 ワークフロー一覧:"
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/workflows")
-if [ "$HTTP_STATUS" == "200" ]; then
-    echo "  ✅ 正常 (HTTP $HTTP_STATUS)"
-else
-    echo "  ❌ エラー (HTTP $HTTP_STATUS)"
-fi
-
-echo "📂 カテゴリ一覧:"
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/categories")
 if [ "$HTTP_STATUS" == "200" ]; then
     echo "  ✅ 正常 (HTTP $HTTP_STATUS)"
 else
