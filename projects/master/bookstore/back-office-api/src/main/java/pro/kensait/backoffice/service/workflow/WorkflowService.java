@@ -16,12 +16,13 @@ import jakarta.transaction.Transactional;
 import pro.kensait.backoffice.api.dto.WorkflowCreateRequest;
 import pro.kensait.backoffice.api.dto.WorkflowOperationRequest;
 import pro.kensait.backoffice.api.dto.WorkflowTO;
+import pro.kensait.backoffice.api.dto.WorkflowUpdateRequest;
 import pro.kensait.backoffice.dao.BookDao;
 import pro.kensait.backoffice.dao.EmployeeDao;
 import pro.kensait.backoffice.dao.StockDao;
 import pro.kensait.backoffice.dao.WorkflowDao;
 import pro.kensait.backoffice.entity.Book;
-import pro.kensait.backoffice.entity.BookWorkflow;
+import pro.kensait.backoffice.entity.Workflow;
 import pro.kensait.backoffice.entity.Category;
 import pro.kensait.backoffice.entity.Employee;
 import pro.kensait.backoffice.entity.Publisher;
@@ -34,25 +35,6 @@ import pro.kensait.backoffice.entity.Stock;
 @Transactional
 public class WorkflowService {
     private static final Logger logger = LoggerFactory.getLogger(WorkflowService.class);
-
-    // ワークフロータイプ
-    private static final String TYPE_CREATE = "CREATE";
-    private static final String TYPE_DELETE = "DELETE";
-    private static final String TYPE_PRICE_TEMP_ADJUSTMENT = "PRICE_TEMP_ADJUSTMENT";
-
-    // 状態
-    private static final String STATE_CREATED = "CREATED";  // NEW → CREATED
-    private static final String STATE_APPLIED = "APPLIED";
-    private static final String STATE_APPROVED = "APPROVED";
-
-    // 操作タイプ
-    private static final String OP_CREATE = "CREATE";  // CREATED → CREATE
-    private static final String OP_APPLY = "APPLY";
-    private static final String OP_APPROVE = "APPROVE";
-    private static final String OP_REJECT = "REJECT";  // UI表記は「差戻」
-
-    // 役職ランク
-    private static final int JOB_RANK_MANAGER = 2;
 
     @Inject
     private WorkflowDao workflowDao;
@@ -83,21 +65,24 @@ public class WorkflowService {
             throw new IllegalArgumentException("作成者が存在しません: " + request.getCreatedBy());
         }
 
+        // ワークフロータイプの変換
+        WorkflowType workflowType = WorkflowType.valueOf(request.getWorkflowType());
+
         // 次のワークフローIDを取得
         Long nextWorkflowId = workflowDao.getNextWorkflowId();
 
         // ワークフローエンティティを作成
-        BookWorkflow workflow = new BookWorkflow();
+        Workflow workflow = new Workflow();
         workflow.setWorkflowId(nextWorkflowId);
-        workflow.setWorkflowType(request.getWorkflowType());
-        workflow.setState(STATE_CREATED);
-        workflow.setOperationType(OP_CREATE);
+        workflow.setWorkflowType(workflowType.name());
+        workflow.setState(WorkflowStateType.CREATED.name());
+        workflow.setOperationType(WorkflowOperationType.CREATE.name());
         workflow.setOperatedAt(LocalDateTime.now());
         workflow.setOperatedBy(request.getCreatedBy());
 
         // ワークフロータイプごとの設定
-        switch (request.getWorkflowType()) {
-            case TYPE_CREATE:
+        switch (workflowType) {
+            case CREATE:
                 workflow.setBookName(request.getBookName());
                 workflow.setAuthor(request.getAuthor());
                 workflow.setPrice(request.getPrice());
@@ -105,23 +90,116 @@ public class WorkflowService {
                 workflow.setCategoryId(request.getCategoryId());
                 workflow.setPublisherId(request.getPublisherId());
                 break;
-            case TYPE_DELETE:
+            case DELETE:
                 workflow.setBookId(request.getBookId());
                 break;
-            case TYPE_PRICE_TEMP_ADJUSTMENT:
+            case PRICE_TEMP_ADJUSTMENT:
                 workflow.setBookId(request.getBookId());
                 workflow.setPrice(request.getPrice());
                 workflow.setStartDate(request.getStartDate());
                 workflow.setEndDate(request.getEndDate());
                 break;
             default:
-                throw new IllegalArgumentException("不明なワークフロータイプ: " + request.getWorkflowType());
+                throw new IllegalArgumentException("不明なワークフロータイプ: " + workflowType);
         }
 
         workflow.setApplyReason(request.getApplyReason());
 
         // 保存
-        BookWorkflow saved = workflowDao.insert(workflow);
+        Workflow saved = workflowDao.insert(workflow);
+
+        return convertToWorkflowTO(saved);
+    }
+
+    /**
+     * ワークフロー更新（一時保存）
+     * @param workflowId ワークフローID
+     * @param request 更新リクエスト
+     * @return ワークフローTO
+     */
+    public WorkflowTO updateWorkflow(Long workflowId, WorkflowUpdateRequest request) {
+        logger.info("[ WorkflowService#updateWorkflow ] workflowId={}", workflowId);
+
+        // 最新の状態を取得
+        Workflow latest = workflowDao.findLatestByWorkflowId(workflowId);
+        if (latest == null) {
+            throw new WorkflowNotFoundException("ワークフローが見つかりません: " + workflowId);
+        }
+
+        // 状態チェック: CREATEDでなければエラー
+        if (!WorkflowStateType.CREATED.name().equals(latest.getState())) {
+            throw new InvalidWorkflowStateException(
+                "更新できる状態ではありません。現在の状態: " + latest.getState());
+        }
+
+        // 更新者チェック
+        Employee updater = employeeDao.findById(request.getUpdatedBy());
+        if (updater == null) {
+            throw new IllegalArgumentException("更新者が存在しません: " + request.getUpdatedBy());
+        }
+
+        // ワークフロータイプの取得
+        WorkflowType workflowType = WorkflowType.valueOf(latest.getWorkflowType());
+
+        // 新しい操作履歴を作成（CREATED状態を維持）
+        Workflow newOp = copyWorkflowData(latest);
+        newOp.setState(WorkflowStateType.CREATED.name());
+        newOp.setOperationType(WorkflowOperationType.UPDATE.name());
+        newOp.setOperatedAt(LocalDateTime.now());
+        newOp.setOperatedBy(request.getUpdatedBy());
+
+        // ワークフロータイプごとの更新内容を反映
+        switch (workflowType) {
+            case CREATE:
+                if (request.getBookName() != null) {
+                    newOp.setBookName(request.getBookName());
+                }
+                if (request.getAuthor() != null) {
+                    newOp.setAuthor(request.getAuthor());
+                }
+                if (request.getPrice() != null) {
+                    newOp.setPrice(request.getPrice());
+                }
+                if (request.getImageUrl() != null) {
+                    newOp.setImageUrl(request.getImageUrl());
+                }
+                if (request.getCategoryId() != null) {
+                    newOp.setCategoryId(request.getCategoryId());
+                }
+                if (request.getPublisherId() != null) {
+                    newOp.setPublisherId(request.getPublisherId());
+                }
+                break;
+            case DELETE:
+                if (request.getBookId() != null) {
+                    newOp.setBookId(request.getBookId());
+                }
+                break;
+            case PRICE_TEMP_ADJUSTMENT:
+                if (request.getBookId() != null) {
+                    newOp.setBookId(request.getBookId());
+                }
+                if (request.getPrice() != null) {
+                    newOp.setPrice(request.getPrice());
+                }
+                if (request.getStartDate() != null) {
+                    newOp.setStartDate(request.getStartDate());
+                }
+                if (request.getEndDate() != null) {
+                    newOp.setEndDate(request.getEndDate());
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("不明なワークフロータイプ: " + workflowType);
+        }
+
+        // 申請理由の更新
+        if (request.getApplyReason() != null) {
+            newOp.setApplyReason(request.getApplyReason());
+        }
+
+        // 保存
+        Workflow saved = workflowDao.insert(newOp);
 
         return convertToWorkflowTO(saved);
     }
@@ -136,13 +214,13 @@ public class WorkflowService {
         logger.info("[ WorkflowService#applyWorkflow ] workflowId={}", workflowId);
 
         // 最新の状態を取得
-        BookWorkflow latest = workflowDao.findLatestByWorkflowId(workflowId);
+        Workflow latest = workflowDao.findLatestByWorkflowId(workflowId);
         if (latest == null) {
             throw new WorkflowNotFoundException("ワークフローが見つかりません: " + workflowId);
         }
 
         // 状態チェック: CREATEDでなければエラー
-        if (!STATE_CREATED.equals(latest.getState())) {
+        if (!WorkflowStateType.CREATED.name().equals(latest.getState())) {
             throw new InvalidWorkflowStateException(
                 "申請できる状態ではありません。現在の状態: " + latest.getState());
         }
@@ -154,15 +232,15 @@ public class WorkflowService {
         }
 
         // 新しい操作履歴を作成
-        BookWorkflow newOp = copyWorkflowData(latest);
-        newOp.setState(STATE_APPLIED);
-        newOp.setOperationType(OP_APPLY);
+        Workflow newOp = copyWorkflowData(latest);
+        newOp.setState(WorkflowStateType.APPLIED.name());
+        newOp.setOperationType(WorkflowOperationType.APPLY.name());
         newOp.setOperatedAt(LocalDateTime.now());
         newOp.setOperationReason(request.getOperationReason());
         newOp.setOperatedBy(request.getOperatedBy());
 
         // 保存
-        BookWorkflow saved = workflowDao.insert(newOp);
+        Workflow saved = workflowDao.insert(newOp);
 
         return convertToWorkflowTO(saved);
     }
@@ -177,13 +255,13 @@ public class WorkflowService {
         logger.info("[ WorkflowService#approveWorkflow ] workflowId={}", workflowId);
 
         // 最新の状態を取得
-        BookWorkflow latest = workflowDao.findLatestByWorkflowId(workflowId);
+        Workflow latest = workflowDao.findLatestByWorkflowId(workflowId);
         if (latest == null) {
             throw new WorkflowNotFoundException("ワークフローが見つかりません: " + workflowId);
         }
 
         // 状態チェック: APPLIEDでなければエラー
-        if (!STATE_APPLIED.equals(latest.getState())) {
+        if (!WorkflowStateType.APPLIED.name().equals(latest.getState())) {
             throw new InvalidWorkflowStateException(
                 "承認できる状態ではありません。現在の状態: " + latest.getState());
         }
@@ -195,15 +273,15 @@ public class WorkflowService {
         Employee operator = employeeDao.findById(request.getOperatedBy());
 
         // 新しい操作履歴を作成
-        BookWorkflow newOp = copyWorkflowData(latest);
-        newOp.setState(STATE_APPROVED);
-        newOp.setOperationType(OP_APPROVE);
+        Workflow newOp = copyWorkflowData(latest);
+        newOp.setState(WorkflowStateType.APPROVED.name());
+        newOp.setOperationType(WorkflowOperationType.APPROVE.name());
         newOp.setOperatedAt(LocalDateTime.now());
         newOp.setOperationReason(request.getOperationReason());
         newOp.setOperatedBy(request.getOperatedBy());
 
         // 保存
-        BookWorkflow saved = workflowDao.insert(newOp);
+        Workflow saved = workflowDao.insert(newOp);
 
         // 書籍マスタへの反映
         applyToBookMaster(saved);
@@ -212,7 +290,7 @@ public class WorkflowService {
     }
 
     /**
-     * 却下
+     * 却下（差戻）
      * @param workflowId ワークフローID
      * @param request 操作リクエスト
      * @return ワークフローTO
@@ -221,13 +299,13 @@ public class WorkflowService {
         logger.info("[ WorkflowService#rejectWorkflow ] workflowId={}", workflowId);
 
         // 最新の状態を取得
-        BookWorkflow latest = workflowDao.findLatestByWorkflowId(workflowId);
+        Workflow latest = workflowDao.findLatestByWorkflowId(workflowId);
         if (latest == null) {
             throw new WorkflowNotFoundException("ワークフローが見つかりません: " + workflowId);
         }
 
         // 状態チェック: APPLIEDでなければエラー
-        if (!STATE_APPLIED.equals(latest.getState())) {
+        if (!WorkflowStateType.APPLIED.name().equals(latest.getState())) {
             throw new InvalidWorkflowStateException(
                 "却下できる状態ではありません。現在の状態: " + latest.getState());
         }
@@ -239,15 +317,15 @@ public class WorkflowService {
         Employee operator = employeeDao.findById(request.getOperatedBy());
 
         // 新しい操作履歴を作成（CREATEDに戻る）
-        BookWorkflow newOp = copyWorkflowData(latest);
-        newOp.setState(STATE_CREATED);
-        newOp.setOperationType(OP_REJECT);
+        Workflow newOp = copyWorkflowData(latest);
+        newOp.setState(WorkflowStateType.CREATED.name());
+        newOp.setOperationType(WorkflowOperationType.REJECT.name());
         newOp.setOperatedAt(LocalDateTime.now());
         newOp.setOperationReason(request.getOperationReason());
         newOp.setOperatedBy(request.getOperatedBy());
 
         // 保存
-        BookWorkflow saved = workflowDao.insert(newOp);
+        Workflow saved = workflowDao.insert(newOp);
 
         return convertToWorkflowTO(saved);
     }
@@ -260,7 +338,7 @@ public class WorkflowService {
     public List<WorkflowTO> getWorkflowHistory(Long workflowId) {
         logger.info("[ WorkflowService#getWorkflowHistory ] workflowId={}", workflowId);
 
-        List<BookWorkflow> history = workflowDao.findByWorkflowId(workflowId);
+        List<Workflow> history = workflowDao.findByWorkflowId(workflowId);
         return history.stream()
                 .map(this::convertToWorkflowTO)
                 .collect(Collectors.toList());
@@ -275,7 +353,7 @@ public class WorkflowService {
     public List<WorkflowTO> getWorkflows(String state, String workflowType) {
         logger.info("[ WorkflowService#getWorkflows ] state={}, workflowType={}", state, workflowType);
 
-        List<BookWorkflow> workflows;
+        List<Workflow> workflows;
 
         if (state != null && workflowType != null) {
             workflows = workflowDao.findByStateAndType(state, workflowType);
@@ -307,19 +385,27 @@ public class WorkflowService {
             throw new IllegalArgumentException("承認者が存在しません: " + approverId);
         }
 
-        // 承認者のJOB_RANKチェック（MANAGER以上）
-        if (approver.getJobRank() < JOB_RANK_MANAGER) {
+        // 承認者の職務ランクをenumに変換
+        JobRankType approverJobRank;
+        try {
+            approverJobRank = JobRankType.fromRank(approver.getJobRank());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("承認者の職務ランクが不正です: " + approver.getJobRank());
+        }
+
+        // 承認者の職務ランクチェック（MANAGER以上）
+        if (!approverJobRank.isAtLeast(JobRankType.MANAGER)) {
             throw new UnauthorizedApprovalException(
-                "承認権限がありません。MANAGER以上の役職が必要です。");
+                "承認権限がありません。MANAGER以上の職務ランクが必要です。");
         }
 
         // 最初の操作（CREATE）から申請者を取得
-        List<BookWorkflow> history = workflowDao.findByWorkflowId(workflowId);
+        List<Workflow> history = workflowDao.findByWorkflowId(workflowId);
         if (history.isEmpty()) {
             throw new WorkflowNotFoundException("ワークフローが見つかりません: " + workflowId);
         }
 
-        BookWorkflow firstOp = history.get(0);
+        Workflow firstOp = history.get(0);
         Employee requester = employeeDao.findById(firstOp.getOperatedBy());
         if (requester == null) {
             throw new IllegalArgumentException("申請者が存在しません: " + firstOp.getOperatedBy());
@@ -329,7 +415,7 @@ public class WorkflowService {
         if (!approver.getDepartment().getDepartmentId()
                 .equals(requester.getDepartment().getDepartmentId())) {
             throw new UnauthorizedApprovalException(
-                "承認権限がありません。申請者と同じ部署のMANAGER以上が必要です。");
+                "承認権限がありません。申請者と同じ部署のMANAGER以上の職務ランクが必要です。");
         }
     }
 
@@ -337,11 +423,13 @@ public class WorkflowService {
      * 書籍マスタへの反映
      * @param workflow ワークフロー
      */
-    private void applyToBookMaster(BookWorkflow workflow) {
+    private void applyToBookMaster(Workflow workflow) {
         logger.info("[ WorkflowService#applyToBookMaster ] workflowType={}", workflow.getWorkflowType());
 
-        switch (workflow.getWorkflowType()) {
-            case TYPE_CREATE:
+        WorkflowType workflowType = WorkflowType.valueOf(workflow.getWorkflowType());
+
+        switch (workflowType) {
+            case CREATE:
                 // 新規書籍追加
                 Book newBook = new Book();
                 newBook.setBookName(workflow.getBookName());
@@ -370,7 +458,7 @@ public class WorkflowService {
                 logger.info("在庫情報を追加しました: bookId={}, quantity=0", newBook.getBookId());
                 break;
 
-            case TYPE_DELETE:
+            case DELETE:
                 // 書籍削除（論理削除）
                 Book bookToDelete = bookDao.findById(workflow.getBookId());
                 if (bookToDelete != null) {
@@ -380,7 +468,7 @@ public class WorkflowService {
                 }
                 break;
 
-            case TYPE_PRICE_TEMP_ADJUSTMENT:
+            case PRICE_TEMP_ADJUSTMENT:
                 // 価格の一時変更
                 Book bookToUpdate = bookDao.findById(workflow.getBookId());
                 if (bookToUpdate != null) {
@@ -391,7 +479,7 @@ public class WorkflowService {
                 break;
 
             default:
-                logger.warn("不明なワークフロータイプ: {}", workflow.getWorkflowType());
+                logger.warn("不明なワークフロータイプ: {}", workflowType);
         }
     }
 
@@ -400,8 +488,8 @@ public class WorkflowService {
      * @param source コピー元
      * @return コピーされたワークフロー（operationIdはnull）
      */
-    private BookWorkflow copyWorkflowData(BookWorkflow source) {
-        BookWorkflow copy = new BookWorkflow();
+    private Workflow copyWorkflowData(Workflow source) {
+        Workflow copy = new Workflow();
         copy.setWorkflowId(source.getWorkflowId());
         copy.setWorkflowType(source.getWorkflowType());
         copy.setBookId(source.getBookId());
@@ -423,7 +511,7 @@ public class WorkflowService {
      * @param workflow ワークフローエンティティ
      * @return ワークフローTO
      */
-    private WorkflowTO convertToWorkflowTO(BookWorkflow workflow) {
+    private WorkflowTO convertToWorkflowTO(Workflow workflow) {
         WorkflowTO to = new WorkflowTO();
         to.setOperationId(workflow.getOperationId());
         to.setWorkflowId(workflow.getWorkflowId());

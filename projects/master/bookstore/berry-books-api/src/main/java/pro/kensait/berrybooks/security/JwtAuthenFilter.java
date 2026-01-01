@@ -17,18 +17,18 @@ import jakarta.ws.rs.ext.Provider;
 
 /**
  * JWT認証フィルター
- * CookieからJWTを抽出・検証し、SecuredResourceに認証情報を設定する
+ * CookieからJWTを抽出・検証し、AuthenContextに認証情報を設定する
  */
 @Provider
 @Priority(Priorities.AUTHENTICATION)
-public class JwtAuthenticationFilter implements ContainerRequestFilter {
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+public class JwtAuthenFilter implements ContainerRequestFilter {
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenFilter.class);
 
     @Inject
     private JwtUtil jwtUtil;
 
     @Inject
-    private SecuredResource securedResource;
+    private AuthenContext authenContext;
 
     @Context
     private HttpServletRequest httpServletRequest;
@@ -36,11 +36,11 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         String requestUri = requestContext.getUriInfo().getPath();
-        logger.debug("[ JwtAuthenticationFilter#filter ] URI: {}", requestUri);
+        logger.debug("[ JwtAuthenFilter#filter ] URI: {}", requestUri);
 
         // 認証不要なパス（公開API）
         if (isPublicPath(requestUri)) {
-            logger.debug("[ JwtAuthenticationFilter ] Public path, skip authentication");
+            logger.debug("[ JwtAuthenFilter ] Public path, skip authentication");
             return;
         }
 
@@ -53,16 +53,16 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
                 Integer customerId = jwtUtil.getCustomerIdFromToken(jwt);
                 String email = jwtUtil.getEmailFromToken(jwt);
 
-                // SecuredResourceに認証情報を設定
-                securedResource.setCustomerId(customerId);
-                securedResource.setEmail(email);
+                // AuthenContextに認証情報を設定
+                authenContext.setCustomerId(customerId);
+                authenContext.setEmail(email);
 
-                logger.debug("[ JwtAuthenticationFilter ] Authenticated customerId: {}, email: {}", 
+                logger.debug("[ JwtAuthenFilter ] Authenticated customerId: {}, email: {}", 
                         customerId, email);
             } else {
                 // JWT認証必須のパスで未認証の場合はエラー
                 if (isSecuredPath(requestUri)) {
-                    logger.warn("[ JwtAuthenticationFilter ] Unauthorized access to: {}", requestUri);
+                    logger.warn("[ JwtAuthenFilter ] Unauthorized access to: {}", requestUri);
                     requestContext.abortWith(
                             Response.status(Response.Status.UNAUTHORIZED)
                                     .entity("{\"error\":\"認証が必要です\"}")
@@ -71,7 +71,7 @@ public class JwtAuthenticationFilter implements ContainerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            logger.error("[ JwtAuthenticationFilter ] Authentication error: {}", e.getMessage());
+            logger.error("[ JwtAuthenFilter ] Authentication error: {}", e.getMessage());
             if (isSecuredPath(requestUri)) {
                 requestContext.abortWith(
                         Response.status(Response.Status.UNAUTHORIZED)

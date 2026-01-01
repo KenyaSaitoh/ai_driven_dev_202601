@@ -22,7 +22,7 @@ import pro.kensait.berrybooks.api.dto.RegisterRequest;
 import pro.kensait.berrybooks.external.dto.CustomerTO;
 import pro.kensait.berrybooks.external.CustomerHubRestClient;
 import pro.kensait.berrybooks.security.JwtUtil;
-import pro.kensait.berrybooks.security.SecuredResource;
+import pro.kensait.berrybooks.security.AuthenContext;
 import pro.kensait.berrybooks.service.customer.EmailAlreadyExistsException;
 import pro.kensait.berrybooks.util.AddressUtil;
 
@@ -33,8 +33,8 @@ import pro.kensait.berrybooks.util.AddressUtil;
 @ApplicationScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class AuthResource {
-    private static final Logger logger = LoggerFactory.getLogger(AuthResource.class);
+public class AuthenResource {
+    private static final Logger logger = LoggerFactory.getLogger(AuthenResource.class);
 
     @Inject
     private CustomerHubRestClient customerHubClient;
@@ -43,7 +43,7 @@ public class AuthResource {
     private JwtUtil jwtUtil;
 
     @Inject
-    private SecuredResource securedResource;
+    private AuthenContext authenContext;
 
     /**
      * ログイン
@@ -51,14 +51,14 @@ public class AuthResource {
     @POST
     @Path("/login")
     public Response login(@Valid LoginRequest request) {
-        logger.info("[ AuthResource#login ] email: {}", request.email());
+        logger.info("[ AuthenResource#login ] email: {}", request.email());
 
         try {
             // 顧客情報を取得
             CustomerTO customer = customerHubClient.findByEmail(request.email());
 
             if (customer == null) {
-                logger.warn("[ AuthResource#login ] Customer not found: {}", request.email());
+                logger.warn("[ AuthenResource#login ] Customer not found: {}", request.email());
                 ErrorResponse errorResponse = new ErrorResponse(
                         Response.Status.UNAUTHORIZED.getStatusCode(),
                         "Unauthorized",
@@ -85,7 +85,7 @@ public class AuthResource {
             }
             
             if (!passwordMatch) {
-                logger.warn("[ AuthResource#login ] Password mismatch for email: {}", request.email());
+                logger.warn("[ AuthenResource#login ] Password mismatch for email: {}", request.email());
                 ErrorResponse errorResponse = new ErrorResponse(
                         Response.Status.UNAUTHORIZED.getStatusCode(),
                         "Unauthorized",
@@ -124,7 +124,7 @@ public class AuthResource {
                     .build();
 
         } catch (Exception e) {
-            logger.error("[ AuthResource#login ] Unexpected error", e);
+            logger.error("[ AuthenResource#login ] Unexpected error", e);
             ErrorResponse errorResponse = new ErrorResponse(
                     Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                     "Internal Server Error",
@@ -144,7 +144,7 @@ public class AuthResource {
     @POST
     @Path("/logout")
     public Response logout() {
-        logger.info("[ AuthResource#logout ]");
+        logger.info("[ AuthenResource#logout ]");
 
         // Cookieを削除（maxAge=0）
         NewCookie cookie = new NewCookie.Builder(jwtUtil.getCookieName())
@@ -166,21 +166,24 @@ public class AuthResource {
     @POST
     @Path("/register")
     public Response register(@Valid RegisterRequest request) {
-        logger.info("[ AuthResource#register ] email: {}", request.email());
+        logger.info("[ AuthenResource#register ] email: {}", request.email());
 
         // 住所のバリデーション（都道府県チェック）
-        if (!AddressUtil.startsWithValidPrefecture(request.address())) {
-            logger.warn("[ AuthResource#register ] Invalid address: {}", request.address());
-            ErrorResponse errorResponse = new ErrorResponse(
-                    Response.Status.BAD_REQUEST.getStatusCode(),
-                    "Bad Request",
-                    "住所は都道府県名から始めてください",
-                    "/api/auth/register"
-            );
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .type(MediaType.APPLICATION_JSON)
-                    .entity(errorResponse)
-                    .build();
+        // 住所が入力されている場合のみチェック（任意項目）
+        if (request.address() != null && !request.address().isBlank()) {
+            if (!AddressUtil.startsWithValidPrefecture(request.address())) {
+                logger.warn("[ AuthenResource#register ] Invalid address: {}", request.address());
+                ErrorResponse errorResponse = new ErrorResponse(
+                        Response.Status.BAD_REQUEST.getStatusCode(),
+                        "Bad Request",
+                        "住所は都道府県名から始めてください",
+                        "/api/auth/register"
+                );
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .type(MediaType.APPLICATION_JSON)
+                        .entity(errorResponse)
+                        .build();
+            }
         }
 
         try {
@@ -226,7 +229,7 @@ public class AuthResource {
                     .build();
 
         } catch (EmailAlreadyExistsException e) {
-            logger.warn("[ AuthResource#register ] Customer already exists: {}", request.email());
+            logger.warn("[ AuthenResource#register ] Customer already exists: {}", request.email());
             ErrorResponse errorResponse = new ErrorResponse(
                     Response.Status.CONFLICT.getStatusCode(),
                     "Conflict",
@@ -238,7 +241,7 @@ public class AuthResource {
                     .entity(errorResponse)
                     .build();
         } catch (Exception e) {
-            logger.error("[ AuthResource#register ] Unexpected error", e);
+            logger.error("[ AuthenResource#register ] Unexpected error", e);
             ErrorResponse errorResponse = new ErrorResponse(
                     Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                     "Internal Server Error",
@@ -258,10 +261,10 @@ public class AuthResource {
     @GET
     @Path("/me")
     public Response getCurrentUser() {
-        logger.info("[ AuthResource#getCurrentUser ]");
+        logger.info("[ AuthenResource#getCurrentUser ]");
 
-        // SecuredResourceから顧客IDを取得（JWT認証必須）
-        if (!securedResource.isAuthenticated()) {
+        // AuthenContextから顧客IDを取得（JWT認証必須）
+        if (!authenContext.isAuthenticated()) {
             ErrorResponse errorResponse = new ErrorResponse(
                     Response.Status.UNAUTHORIZED.getStatusCode(),
                     "Unauthorized",
@@ -273,7 +276,7 @@ public class AuthResource {
                     .build();
         }
 
-        Integer customerId = securedResource.getCustomerId();
+        Integer customerId = authenContext.getCustomerId();
 
         // 顧客情報を取得
         CustomerTO customer = customerHubClient.findById(customerId);

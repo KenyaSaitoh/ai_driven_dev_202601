@@ -6,7 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pro.kensait.berrybooks.client.customer.CustomerRestClient;
+import pro.kensait.berrybooks.external.CustomerRestClient;
+import pro.kensait.berrybooks.external.dto.CustomerTO;
 import pro.kensait.berrybooks.entity.Customer;
 
 import java.time.LocalDate;
@@ -28,6 +29,7 @@ class CustomerServiceTest {
     private CustomerService customerService;
     
     private Customer testCustomer;
+    private CustomerTO testCustomerTO;
     
     @BeforeEach
     void setUp() {
@@ -39,6 +41,16 @@ class CustomerServiceTest {
         testCustomer.setPassword("password123");
         testCustomer.setBirthday(LocalDate.of(1990, 1, 1));
         testCustomer.setAddress("東京都渋谷区神南1-1-1");
+        
+        // CustomerTO用のテストデータ
+        testCustomerTO = new CustomerTO(
+            1,
+            "Alice",
+            "password123",
+            "alice@gmail.com",
+            LocalDate.of(1990, 1, 1),
+            "東京都渋谷区神南1-1-1"
+        );
     }
     
     /**
@@ -49,7 +61,7 @@ class CustomerServiceTest {
     @Test
     void testRegister_Success() {
         // Given: REST APIが正常に顧客を登録
-        when(customerRestClient.registerCustomer(any(Customer.class))).thenReturn(testCustomer);
+        when(customerRestClient.register(any(CustomerTO.class))).thenReturn(testCustomerTO);
         
         // When: 顧客を登録
         Customer newCustomer = new Customer();
@@ -66,7 +78,7 @@ class CustomerServiceTest {
         assertEquals("alice@gmail.com", result.getEmail());
         
         // REST APIが呼ばれたことを確認
-        verify(customerRestClient, times(1)).registerCustomer(any(Customer.class));
+        verify(customerRestClient, times(1)).register(any(CustomerTO.class));
     }
     
     /**
@@ -76,9 +88,8 @@ class CustomerServiceTest {
      */
     @Test
     void testRegister_EmailAlreadyExists() {
-        // Given: REST APIがメールアドレス重複エラーをスロー
-        when(customerRestClient.registerCustomer(any(Customer.class)))
-                .thenThrow(new EmailAlreadyExistsException("alice@gmail.com"));
+        // Given: REST APIがnullを返す（メールアドレス重複）
+        when(customerRestClient.register(any(CustomerTO.class))).thenReturn(null);
         
         // When & Then: EmailAlreadyExistsExceptionがスローされる
         Customer newCustomer = new Customer();
@@ -94,7 +105,7 @@ class CustomerServiceTest {
         assertEquals("alice@gmail.com", exception.getEmail());
         
         // REST APIが呼ばれたことを確認
-        verify(customerRestClient, times(1)).registerCustomer(any(Customer.class));
+        verify(customerRestClient, times(1)).register(any(CustomerTO.class));
     }
     
     /**
@@ -105,7 +116,7 @@ class CustomerServiceTest {
     @Test
     void testAuthenticate_Success() {
         // Given: REST APIが顧客情報を返す
-        when(customerRestClient.getCustomerByEmail("alice@gmail.com")).thenReturn(testCustomer);
+        when(customerRestClient.findByEmail("alice@gmail.com")).thenReturn(testCustomerTO);
         
         // When: 認証を実行
         Customer result = customerService.authenticate("alice@gmail.com", "password123");
@@ -117,7 +128,7 @@ class CustomerServiceTest {
         assertEquals("alice@gmail.com", result.getEmail());
         
         // REST APIが呼ばれたことを確認
-        verify(customerRestClient, times(1)).getCustomerByEmail("alice@gmail.com");
+        verify(customerRestClient, times(1)).findByEmail("alice@gmail.com");
     }
     
     /**
@@ -128,7 +139,7 @@ class CustomerServiceTest {
     @Test
     void testAuthenticate_CustomerNotFound() {
         // Given: REST APIが顧客を見つけられない
-        when(customerRestClient.getCustomerByEmail("notfound@gmail.com")).thenReturn(null);
+        when(customerRestClient.findByEmail("notfound@gmail.com")).thenReturn(null);
         
         // When: 認証を実行
         Customer result = customerService.authenticate("notfound@gmail.com", "password123");
@@ -137,7 +148,7 @@ class CustomerServiceTest {
         assertNull(result);
         
         // REST APIが呼ばれたことを確認
-        verify(customerRestClient, times(1)).getCustomerByEmail("notfound@gmail.com");
+        verify(customerRestClient, times(1)).findByEmail("notfound@gmail.com");
     }
     
     /**
@@ -148,7 +159,7 @@ class CustomerServiceTest {
     @Test
     void testAuthenticate_PasswordMismatch() {
         // Given: REST APIが顧客情報を返す
-        when(customerRestClient.getCustomerByEmail("alice@gmail.com")).thenReturn(testCustomer);
+        when(customerRestClient.findByEmail("alice@gmail.com")).thenReturn(testCustomerTO);
         
         // When: 誤ったパスワードで認証を実行
         Customer result = customerService.authenticate("alice@gmail.com", "wrongpassword");
@@ -157,7 +168,7 @@ class CustomerServiceTest {
         assertNull(result);
         
         // REST APIが呼ばれたことを確認
-        verify(customerRestClient, times(1)).getCustomerByEmail("alice@gmail.com");
+        verify(customerRestClient, times(1)).findByEmail("alice@gmail.com");
     }
     
     /**
@@ -168,7 +179,7 @@ class CustomerServiceTest {
     @Test
     void testFindByEmail_Success() {
         // Given: REST APIが顧客情報を返す
-        when(customerRestClient.getCustomerByEmail("alice@gmail.com")).thenReturn(testCustomer);
+        when(customerRestClient.findByEmail("alice@gmail.com")).thenReturn(testCustomerTO);
         
         // When: メールアドレスで検索
         Customer result = customerService.findByEmail("alice@gmail.com");
@@ -180,7 +191,7 @@ class CustomerServiceTest {
         assertEquals("alice@gmail.com", result.getEmail());
         
         // REST APIが呼ばれたことを確認
-        verify(customerRestClient, times(1)).getCustomerByEmail("alice@gmail.com");
+        verify(customerRestClient, times(1)).findByEmail("alice@gmail.com");
     }
     
     /**
@@ -191,7 +202,7 @@ class CustomerServiceTest {
     @Test
     void testFindByEmail_NotFound() {
         // Given: REST APIが顧客を見つけられない
-        when(customerRestClient.getCustomerByEmail("notfound@gmail.com")).thenReturn(null);
+        when(customerRestClient.findByEmail("notfound@gmail.com")).thenReturn(null);
         
         // When: メールアドレスで検索
         Customer result = customerService.findByEmail("notfound@gmail.com");
@@ -200,7 +211,7 @@ class CustomerServiceTest {
         assertNull(result);
         
         // REST APIが呼ばれたことを確認
-        verify(customerRestClient, times(1)).getCustomerByEmail("notfound@gmail.com");
+        verify(customerRestClient, times(1)).findByEmail("notfound@gmail.com");
     }
 }
 

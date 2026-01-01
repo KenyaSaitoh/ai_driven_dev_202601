@@ -9,7 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import pro.kensait.backoffice.entity.BookWorkflow;
+import pro.kensait.backoffice.entity.Workflow;
 
 /**
  * ワークフローテーブルへのアクセスを行うDAOクラス
@@ -26,7 +26,7 @@ public class WorkflowDao {
      * @param workflow ワークフローエンティティ
      * @return 永続化されたワークフローエンティティ
      */
-    public BookWorkflow insert(BookWorkflow workflow) {
+    public Workflow insert(Workflow workflow) {
         logger.info("[ WorkflowDao#insert ] workflowId={}, operationType={}", 
                    workflow.getWorkflowId(), workflow.getOperationType());
         em.persist(workflow);
@@ -39,9 +39,9 @@ public class WorkflowDao {
      * @param operationId 操作ID
      * @return ワークフローエンティティ
      */
-    public BookWorkflow findByOperationId(Long operationId) {
+    public Workflow findByOperationId(Long operationId) {
         logger.info("[ WorkflowDao#findByOperationId ] operationId={}", operationId);
-        return em.find(BookWorkflow.class, operationId);
+        return em.find(Workflow.class, operationId);
     }
 
     /**
@@ -49,12 +49,12 @@ public class WorkflowDao {
      * @param workflowId ワークフローID
      * @return ワークフローエンティティのリスト（操作日時昇順）
      */
-    public List<BookWorkflow> findByWorkflowId(Long workflowId) {
+    public List<Workflow> findByWorkflowId(Long workflowId) {
         logger.info("[ WorkflowDao#findByWorkflowId ] workflowId={}", workflowId);
         
-        TypedQuery<BookWorkflow> query = em.createQuery(
-                "SELECT w FROM BookWorkflow w WHERE w.workflowId = :workflowId ORDER BY w.operatedAt ASC",
-                BookWorkflow.class);
+        TypedQuery<Workflow> query = em.createQuery(
+                "SELECT w FROM Workflow w WHERE w.workflowId = :workflowId ORDER BY w.operatedAt ASC",
+                Workflow.class);
         query.setParameter("workflowId", workflowId);
         return query.getResultList();
     }
@@ -64,17 +64,17 @@ public class WorkflowDao {
      * @param workflowId ワークフローID
      * @return 最新のワークフローエンティティ
      */
-    public BookWorkflow findLatestByWorkflowId(Long workflowId) {
+    public Workflow findLatestByWorkflowId(Long workflowId) {
         logger.info("[ WorkflowDao#findLatestByWorkflowId ] workflowId={}", workflowId);
         
-        TypedQuery<BookWorkflow> query = em.createQuery(
-                "SELECT w FROM BookWorkflow w WHERE w.workflowId = :workflowId " +
+        TypedQuery<Workflow> query = em.createQuery(
+                "SELECT w FROM Workflow w WHERE w.workflowId = :workflowId " +
                 "ORDER BY w.operatedAt DESC",
-                BookWorkflow.class);
+                Workflow.class);
         query.setParameter("workflowId", workflowId);
         query.setMaxResults(1);
         
-        List<BookWorkflow> results = query.getResultList();
+        List<Workflow> results = query.getResultList();
         return results.isEmpty() ? null : results.get(0);
     }
 
@@ -83,16 +83,16 @@ public class WorkflowDao {
      * @param state 状態 (NEW, APPLIED, APPROVED)
      * @return ワークフローエンティティのリスト
      */
-    public List<BookWorkflow> findByState(String state) {
+    public List<Workflow> findByState(String state) {
         logger.info("[ WorkflowDao#findByState ] state={}", state);
         
         // サブクエリで各ワークフローの最新操作IDを取得し、それに一致するレコードを取得
-        TypedQuery<BookWorkflow> query = em.createQuery(
-                "SELECT w FROM BookWorkflow w WHERE w.operationId IN (" +
-                "  SELECT MAX(w2.operationId) FROM BookWorkflow w2 GROUP BY w2.workflowId" +
+        TypedQuery<Workflow> query = em.createQuery(
+                "SELECT w FROM Workflow w WHERE w.operationId IN (" +
+                "  SELECT MAX(w2.operationId) FROM Workflow w2 GROUP BY w2.workflowId" +
                 ") AND w.state = :state " +
                 "ORDER BY w.operatedAt DESC",
-                BookWorkflow.class);
+                Workflow.class);
         query.setParameter("state", state);
         return query.getResultList();
     }
@@ -102,15 +102,15 @@ public class WorkflowDao {
      * @param workflowType ワークフロータイプ (CREATE, DELETE, PRICE_TEMP_ADJUSTMENT)
      * @return ワークフローエンティティのリスト
      */
-    public List<BookWorkflow> findByWorkflowType(String workflowType) {
+    public List<Workflow> findByWorkflowType(String workflowType) {
         logger.info("[ WorkflowDao#findByWorkflowType ] workflowType={}", workflowType);
         
-        TypedQuery<BookWorkflow> query = em.createQuery(
-                "SELECT w FROM BookWorkflow w WHERE w.operationId IN (" +
-                "  SELECT MAX(w2.operationId) FROM BookWorkflow w2 GROUP BY w2.workflowId" +
+        TypedQuery<Workflow> query = em.createQuery(
+                "SELECT w FROM Workflow w WHERE w.operationId IN (" +
+                "  SELECT MAX(w2.operationId) FROM Workflow w2 GROUP BY w2.workflowId" +
                 ") AND w.workflowType = :workflowType " +
                 "ORDER BY w.operatedAt DESC",
-                BookWorkflow.class);
+                Workflow.class);
         query.setParameter("workflowType", workflowType);
         return query.getResultList();
     }
@@ -121,15 +121,15 @@ public class WorkflowDao {
      * @param workflowType ワークフロータイプ
      * @return ワークフローエンティティのリスト
      */
-    public List<BookWorkflow> findByStateAndType(String state, String workflowType) {
+    public List<Workflow> findByStateAndType(String state, String workflowType) {
         logger.info("[ WorkflowDao#findByStateAndType ] state={}, workflowType={}", state, workflowType);
         
-        TypedQuery<BookWorkflow> query = em.createQuery(
-                "SELECT w FROM BookWorkflow w WHERE w.operationId IN (" +
-                "  SELECT MAX(w2.operationId) FROM BookWorkflow w2 GROUP BY w2.workflowId" +
+        TypedQuery<Workflow> query = em.createQuery(
+                "SELECT w FROM Workflow w WHERE w.operationId IN (" +
+                "  SELECT MAX(w2.operationId) FROM Workflow w2 GROUP BY w2.workflowId" +
                 ") AND w.state = :state AND w.workflowType = :workflowType " +
                 "ORDER BY w.operatedAt DESC",
-                BookWorkflow.class);
+                Workflow.class);
         query.setParameter("state", state);
         query.setParameter("workflowType", workflowType);
         return query.getResultList();
@@ -139,14 +139,14 @@ public class WorkflowDao {
      * 全ワークフローの最新状態を取得
      * @return ワークフローエンティティのリスト
      */
-    public List<BookWorkflow> findAllLatest() {
+    public List<Workflow> findAllLatest() {
         logger.info("[ WorkflowDao#findAllLatest ]");
         
-        TypedQuery<BookWorkflow> query = em.createQuery(
-                "SELECT w FROM BookWorkflow w WHERE w.operationId IN (" +
-                "  SELECT MAX(w2.operationId) FROM BookWorkflow w2 GROUP BY w2.workflowId" +
+        TypedQuery<Workflow> query = em.createQuery(
+                "SELECT w FROM Workflow w WHERE w.operationId IN (" +
+                "  SELECT MAX(w2.operationId) FROM Workflow w2 GROUP BY w2.workflowId" +
                 ") ORDER BY w.operatedAt DESC",
-                BookWorkflow.class);
+                Workflow.class);
         return query.getResultList();
     }
 
@@ -158,7 +158,7 @@ public class WorkflowDao {
         logger.info("[ WorkflowDao#getNextWorkflowId ]");
         
         TypedQuery<Long> query = em.createQuery(
-                "SELECT COALESCE(MAX(w.workflowId), 0L) + 1 FROM BookWorkflow w", Long.class);
+                "SELECT COALESCE(MAX(w.workflowId), 0L) + 1 FROM Workflow w", Long.class);
         return query.getSingleResult();
     }
 }

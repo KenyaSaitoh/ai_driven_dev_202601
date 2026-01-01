@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import pro.kensait.berrybooks.service.order.CartItem;
 
 /**
  * CartSessionのユニットテストクラス
@@ -32,7 +33,7 @@ class CartSessionTest {
         // Arrange
         CartItem item = new CartItem(
             1, "Java SE ディープダイブ", "Test Publisher",
-            BigDecimal.valueOf(3400), 2, 1L
+            3400, 2, 1L
         );
         
         // Act
@@ -54,11 +55,11 @@ class CartSessionTest {
         // Arrange
         CartItem item1 = new CartItem(
             1, "Java SE ディープダイブ", "Test Publisher",
-            BigDecimal.valueOf(3400), 2, 1L
+            3400, 2, 1L
         );
         CartItem item2 = new CartItem(
             1, "Java SE ディープダイブ", "Test Publisher",
-            BigDecimal.valueOf(3400), 3, 2L
+            3400, 3, 2L
         );
         
         // Act
@@ -81,11 +82,11 @@ class CartSessionTest {
         // Arrange
         CartItem item1 = new CartItem(
             1, "Java SE ディープダイブ", "Test Publisher",
-            BigDecimal.valueOf(3400), 2, 1L
+            3400, 2, 1L
         );
         CartItem item2 = new CartItem(
             2, "JVM とバイトコードの探求", "Test Publisher",
-            BigDecimal.valueOf(4200), 1, 1L
+            4200, 1, 1L
         );
         cartSession.addItem(item1);
         cartSession.addItem(item2);
@@ -108,7 +109,7 @@ class CartSessionTest {
         // Arrange
         CartItem item = new CartItem(
             1, "Java SE ディープダイブ", "Test Publisher",
-            BigDecimal.valueOf(3400), 2, 1L
+            3400, 2, 1L
         );
         cartSession.addItem(item);
         
@@ -129,15 +130,15 @@ class CartSessionTest {
         // Arrange
         CartItem item1 = new CartItem(
             1, "Java SE ディープダイブ", "Test Publisher",
-            BigDecimal.valueOf(3400), 2, 1L
+            3400, 2, 1L
         );
         CartItem item2 = new CartItem(
             2, "JVM とバイトコードの探求", "Test Publisher",
-            BigDecimal.valueOf(4200), 3, 1L
+            4200, 3, 1L
         );
         CartItem item3 = new CartItem(
             3, "Spring Boot ベストプラクティス", "Test Publisher",
-            BigDecimal.valueOf(2800), 1, 1L
+            2800, 1, 1L
         );
         
         // Act
@@ -159,11 +160,11 @@ class CartSessionTest {
         // Arrange
         CartItem item1 = new CartItem(
             1, "Java SE ディープダイブ", "Test Publisher",
-            BigDecimal.valueOf(3400), 2, 1L
+            3400, 2, 1L
         );
         CartItem item2 = new CartItem(
             2, "JVM とバイトコードの探求", "Test Publisher",
-            BigDecimal.valueOf(4200), 1, 1L
+            4200, 1, 1L
         );
         cartSession.addItem(item1);
         cartSession.addItem(item2);
@@ -197,7 +198,7 @@ class CartSessionTest {
         // Arrange
         CartItem item = new CartItem(
             1, "Java SE ディープダイブ", "Test Publisher",
-            BigDecimal.valueOf(3400), 1, 1L
+            3400, 1, 1L
         );
         
         // Act
@@ -230,7 +231,7 @@ class CartSessionTest {
         // Arrange
         CartItem item = new CartItem(
             1, "Java SE ディープダイブ", "Test Publisher",
-            BigDecimal.valueOf(3400), 1, 1L
+            3400, 1, 1L
         );
         cartSession.addItem(item);
         
@@ -282,15 +283,15 @@ class CartSessionTest {
         // Arrange
         CartItem item1 = new CartItem(
             1, "Java SE ディープダイブ", "Test Publisher",
-            BigDecimal.valueOf(3400), 2, 1L
+            3400, 2, 1L
         );
         CartItem item2 = new CartItem(
             2, "JVM とバイトコードの探求", "Test Publisher",
-            BigDecimal.valueOf(4200), 1, 1L
+            4200, 1, 1L
         );
         CartItem item3 = new CartItem(
             3, "Spring Boot ベストプラクティス", "Test Publisher",
-            BigDecimal.valueOf(2800), 1, 1L
+            2800, 1, 1L
         );
         cartSession.addItem(item1);
         cartSession.addItem(item2);

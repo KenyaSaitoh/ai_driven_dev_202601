@@ -48,7 +48,16 @@ const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      await register(registerData);
+      // 空文字列を undefined に変換（JSONに含めない）
+      const requestData = {
+        customerName: registerData.customerName,
+        email: registerData.email,
+        password: registerData.password,
+        birthday: registerData.birthday.trim() || undefined,
+        address: registerData.address.trim() || undefined,
+      };
+      
+      await register(requestData);
       navigate('/books');
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || '登録に失敗しました';
@@ -162,19 +171,19 @@ const LoginPage: React.FC = () => {
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-3 font-semibold text-primary-darker whitespace-nowrap">生年月日</td>
+                  <td className="py-3 font-semibold text-primary-darker whitespace-nowrap">生年月日（任意）</td>
                   <td className="py-3">
                     <input
-                      type="date"
+                      type="text"
                       value={registerData.birthday}
                       onChange={(e) => setRegisterData({ ...registerData, birthday: e.target.value })}
                       className="form-input"
-                      required
+                      placeholder="yyyy-mm-dd"
                     />
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-3 font-semibold text-primary-darker whitespace-nowrap">住所（都道府県名から）</td>
+                  <td className="py-3 font-semibold text-primary-darker whitespace-nowrap">住所（任意）</td>
                   <td className="py-3">
                     <input
                       type="text"
@@ -182,7 +191,6 @@ const LoginPage: React.FC = () => {
                       onChange={(e) => setRegisterData({ ...registerData, address: e.target.value })}
                       className="form-input"
                       placeholder="例：東京都渋谷区..."
-                      required
                     />
                   </td>
                 </tr>
@@ -195,19 +203,19 @@ const LoginPage: React.FC = () => {
               </div>
             )}
 
-            <div className="flex gap-4 mt-6">
-              <button type="submit" className="btn-primary">
-                登録
-              </button>
+            <div className="flex justify-end gap-4 mt-6">
               <button
                 type="button"
                 onClick={() => {
                   setIsRegister(false);
                   setError('');
                 }}
-                className="btn-primary"
+                className="btn-primary w-32"
               >
                 キャンセル
+              </button>
+              <button type="submit" className="btn-primary w-32">
+                登録
               </button>
             </div>
           </form>

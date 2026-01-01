@@ -101,6 +101,40 @@ public class BookDao {
     }
     
     /**
+     * キーワードで書籍を検索（JOIN FETCH使用）
+     * 
+     * @param keyword キーワード（書籍名、著者名で部分一致検索）
+     * @return 書籍リスト
+     */
+    public List<Book> findByKeyword(String keyword) {
+        logger.info("[ BookDao#findByKeyword ] keyword={}", keyword);
+        return searchBooks(null, keyword);
+    }
+    
+    /**
+     * カテゴリIDで書籍を検索（JOIN FETCH使用）
+     * 
+     * @param categoryId カテゴリID
+     * @return 書籍リスト
+     */
+    public List<Book> findByCategory(Integer categoryId) {
+        logger.info("[ BookDao#findByCategory ] categoryId={}", categoryId);
+        return searchBooks(categoryId, null);
+    }
+    
+    /**
+     * カテゴリIDとキーワードで書籍を検索（JOIN FETCH使用）
+     * 
+     * @param categoryId カテゴリID
+     * @param keyword キーワード（書籍名、著者名で部分一致検索）
+     * @return 書籍リスト
+     */
+    public List<Book> findByCategoryAndKeyword(Integer categoryId, String keyword) {
+        logger.info("[ BookDao#findByCategoryAndKeyword ] categoryId={}, keyword={}", categoryId, keyword);
+        return searchBooks(categoryId, keyword);
+    }
+    
+    /**
      * 書籍検索（カテゴリID、キーワード）
      * 
      * @param categoryId カテゴリID（0または未指定=全カテゴリ）

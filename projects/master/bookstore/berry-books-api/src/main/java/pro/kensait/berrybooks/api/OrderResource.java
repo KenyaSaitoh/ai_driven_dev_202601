@@ -29,7 +29,7 @@ import pro.kensait.berrybooks.entity.OrderDetail;
 import pro.kensait.berrybooks.entity.OrderTran;
 import pro.kensait.berrybooks.external.BackOfficeRestClient;
 import pro.kensait.berrybooks.external.dto.BookTO;
-import pro.kensait.berrybooks.security.SecuredResource;
+import pro.kensait.berrybooks.security.AuthenContext;
 import pro.kensait.berrybooks.service.delivery.DeliveryFeeService;
 import pro.kensait.berrybooks.service.order.CartItem;
 import pro.kensait.berrybooks.service.order.OrderHistoryTO;
@@ -50,7 +50,7 @@ public class OrderResource {
     private OrderServiceIF orderService;
 
     @Inject
-    private SecuredResource securedResource;
+    private AuthenContext authenContext;
 
     @Inject
     private BackOfficeRestClient backOfficeClient;
@@ -66,7 +66,7 @@ public class OrderResource {
         logger.info("[ OrderResource#createOrder ]");
 
         // JWT認証チェック
-        if (!securedResource.isAuthenticated()) {
+        if (!authenContext.isAuthenticated()) {
             ErrorResponse errorResponse = new ErrorResponse(
                     Response.Status.UNAUTHORIZED.getStatusCode(),
                     "Unauthorized",
@@ -79,7 +79,7 @@ public class OrderResource {
                     .build();
         }
 
-        Integer customerId = securedResource.getCustomerId();
+        Integer customerId = authenContext.getCustomerId();
 
         // CartItemRequestをCartItemに変換
         List<CartItem> cartItems = request.cartItems().stream()
@@ -136,7 +136,7 @@ public class OrderResource {
         logger.info("[ OrderResource#getOrderHistory ]");
 
         // JWT認証チェック
-        if (!securedResource.isAuthenticated()) {
+        if (!authenContext.isAuthenticated()) {
             ErrorResponse errorResponse = new ErrorResponse(
                     Response.Status.UNAUTHORIZED.getStatusCode(),
                     "Unauthorized",
@@ -149,7 +149,7 @@ public class OrderResource {
                     .build();
         }
 
-        Integer customerId = securedResource.getCustomerId();
+        Integer customerId = authenContext.getCustomerId();
 
         // 注文履歴を取得
         List<OrderHistoryTO> orderHistoryList = orderService.getOrderHistory2(customerId);

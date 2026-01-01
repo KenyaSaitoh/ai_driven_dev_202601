@@ -1,6 +1,5 @@
 package pro.kensait.berrybooks.dao;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +68,7 @@ class BookDaoTest {
         book1.setBookId(1);
         book1.setBookName("Java SE ディープダイブ");
         book1.setAuthor("Michael Johnson");
-        book1.setPrice(BigDecimal.valueOf(3400));
+        book1.setPrice(3400);
         book1.setCategory(category);
         book1.setPublisher(publisher);
         book1.setStock(stock1);
@@ -83,7 +82,7 @@ class BookDaoTest {
         book2.setBookId(2);
         book2.setBookName("JVM とバイトコードの探求");
         book2.setAuthor("James Lopez");
-        book2.setPrice(BigDecimal.valueOf(4200));
+        book2.setPrice(4200);
         book2.setCategory(category);
         book2.setPublisher(publisher);
         book2.setStock(stock2);
@@ -119,7 +118,11 @@ class BookDaoTest {
     void testFindById() {
         // Arrange
         Book book = testBooks.get(0);
-        when(em.find(Book.class, 1)).thenReturn(book);
+        List<Book> singleBookList = new ArrayList<>();
+        singleBookList.add(book);
+        when(em.createQuery(anyString(), eq(Book.class))).thenReturn(typedQuery);
+        when(typedQuery.setParameter(eq("bookId"), anyInt())).thenReturn(typedQuery);
+        when(typedQuery.getResultList()).thenReturn(singleBookList);
         
         // Act
         Book result = bookDao.findById(1);
@@ -128,7 +131,8 @@ class BookDaoTest {
         assertNotNull(result);
         assertEquals(1, result.getBookId());
         assertEquals("Java SE ディープダイブ", result.getBookName());
-        verify(em, times(1)).find(Book.class, 1);
+        verify(em, times(1)).createQuery(anyString(), eq(Book.class));
+        verify(typedQuery, times(1)).setParameter("bookId", 1);
     }
     
     /**
@@ -137,14 +141,17 @@ class BookDaoTest {
     @Test
     void testFindByIdNotFound() {
         // Arrange
-        when(em.find(Book.class, 999)).thenReturn(null);
+        when(em.createQuery(anyString(), eq(Book.class))).thenReturn(typedQuery);
+        when(typedQuery.setParameter(eq("bookId"), anyInt())).thenReturn(typedQuery);
+        when(typedQuery.getResultList()).thenReturn(new ArrayList<>());
         
         // Act
         Book result = bookDao.findById(999);
         
         // Assert
         assertNull(result);
-        verify(em, times(1)).find(Book.class, 999);
+        verify(em, times(1)).createQuery(anyString(), eq(Book.class));
+        verify(typedQuery, times(1)).setParameter("bookId", 999);
     }
     
     /**

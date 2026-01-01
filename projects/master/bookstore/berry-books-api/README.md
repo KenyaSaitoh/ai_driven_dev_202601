@@ -143,7 +143,7 @@ berry-books-spa → berry-books-api (BFF) → back-office-api / customer-hub-api
 1. クライアントが `/api/auth/login` にメールアドレスとパスワードを送信
 2. 認証成功時、サーバーがJWTを生成し、HttpOnly Cookieで返却
 3. 以降のリクエストで、ブラウザが自動的にCookieを送信
-4. サーバー側で`JwtAuthenticationFilter`がCookieからJWTを抽出・検証
+4. サーバー側で`JwtAuthenFilter`がCookieからJWTを抽出・検証
 5. 認証必須のエンドポイントでは、JWTが有効でない場合401エラーを返す
 
 ### JWT設定
@@ -295,15 +295,15 @@ projects/berry-books-api/
 │   │   ├── java/
 │   │   │   └── pro/kensait/berrybooks/
 │   │   │       ├── api/              # JAX-RS Resource（コントローラー層）
-│   │   │       │   ├── AuthResource.java
+│   │   │       │   ├── AuthenResource.java
 │   │   │       │   ├── OrderResource.java
 │   │   │       │   ├── ApplicationConfig.java
 │   │   │       │   ├── dto/          # Data Transfer Object
 │   │   │       │   └── exception/    # Exception Mapper
 │   │   │       ├── security/         # JWT認証
 │   │   │       │   ├── JwtUtil.java
-│   │   │       │   ├── JwtAuthenticationFilter.java
-│   │   │       │   └── SecuredResource.java
+│   │   │       │   ├── JwtAuthenFilter.java
+│   │   │       │   └── AuthenContext.java
 │   │   │       ├── service/          # ビジネスロジック
 │   │   │       │   ├── delivery/
 │   │   │       │   └── order/
@@ -348,7 +348,7 @@ projects/berry-books-api/
 ```
 pro.kensait.berrybooks/
 ├── api/                    # JAX-RS Resource層
-│   ├── AuthResource.java         # 認証API
+│   ├── AuthenResource.java       # 認証API
 │   ├── OrderResource.java        # 注文API
 │   ├── ApplicationConfig.java    # JAX-RS設定
 │   ├── dto/                      # Data Transfer Object
@@ -366,8 +366,8 @@ pro.kensait.berrybooks/
 │       └── GenericExceptionMapper.java
 ├── security/               # JWT認証
 │   ├── JwtUtil.java              # JWT生成・検証
-│   ├── JwtAuthenticationFilter.java  # JWT認証フィルター
-│   └── SecuredResource.java      # 認証済みリソース情報
+│   ├── JwtAuthenFilter.java      # JWT認証フィルター
+│   └── AuthenContext.java        # 認証コンテキスト情報
 ├── common/                 # 共通ユーティリティ・定数
 │   ├── MessageUtil.java          # メッセージ取得ユーティリティ
 │   └── SettlementType.java       # 決済方法のEnum（定数化）
@@ -413,7 +413,7 @@ berry-books-api (BFF)
 REST Client / SPA
     ↓ HTTP/JSON
 JAX-RS Resource (@Path, @ApplicationScoped)
-    ├─ Direct: AuthResource, OrderResource
+    ├─ Direct: AuthenResource, OrderResource
     └─ Proxy: BookResource, CategoryResource, ImageResource
         ↓ HTTP (BooksStockRestClient)
     JWT Authentication Filter
@@ -427,7 +427,7 @@ Database (HSQLDB) + External APIs (customer-hub-api, back-office-api)
 
 ### 主要クラス
 
-#### 1. AuthResource (JAX-RS Resource)
+#### 1. AuthenResource (JAX-RS Resource)
 
 `@Path("/auth")`と`@ApplicationScoped`を使用。認証機能（ログイン、登録、ログアウト）を提供。JWT Cookie を発行・削除します。
 
@@ -447,9 +447,9 @@ Database (HSQLDB) + External APIs (customer-hub-api, back-office-api)
 
 `customer-hub-api`との通信を担当するREST クライアント。顧客情報の取得・作成を行います。
 
-#### 6. JwtAuthenticationFilter (ContainerRequestFilter)
+#### 6. JwtAuthenFilter (ContainerRequestFilter)
 
-`@Provider`と`@Priority(Priorities.AUTHENTICATION)`を使用。すべてのリクエストでJWTを検証し、認証情報を`SecuredResource`に設定します。
+`@Provider`と`@Priority(Priorities.AUTHENTICATION)`を使用。すべてのリクエストでJWTを検証し、認証情報を`AuthenContext`に設定します。
 
 ## 📝 データソース設定について
 

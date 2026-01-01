@@ -10,9 +10,7 @@ import pro.kensait.berrybooks.dao.BookDao;
 import pro.kensait.berrybooks.entity.Book;
 import pro.kensait.berrybooks.entity.Category;
 import pro.kensait.berrybooks.entity.Publisher;
-import pro.kensait.berrybooks.web.book.SearchParam;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +48,7 @@ class BookServiceTest {
         book1.setBookId(1);
         book1.setBookName("Java SE ディープダイブ");
         book1.setAuthor("Michael Johnson");
-        book1.setPrice(BigDecimal.valueOf(3400));
+        book1.setPrice(3400);
         book1.setCategory(category);
         book1.setPublisher(publisher);
         
@@ -58,7 +56,7 @@ class BookServiceTest {
         book2.setBookId(2);
         book2.setBookName("JVM とバイトコードの探求");
         book2.setAuthor("James Lopez");
-        book2.setPrice(BigDecimal.valueOf(4200));
+        book2.setPrice(4200);
         book2.setCategory(category);
         book2.setPublisher(publisher);
         

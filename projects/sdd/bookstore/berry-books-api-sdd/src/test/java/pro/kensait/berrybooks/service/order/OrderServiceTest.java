@@ -1,6 +1,5 @@
 package pro.kensait.berrybooks.service.order;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,13 +28,11 @@ import pro.kensait.berrybooks.dao.OrderTranDao;
 import pro.kensait.berrybooks.dao.StockDao;
 import pro.kensait.berrybooks.entity.Book;
 import pro.kensait.berrybooks.entity.OrderDetail;
-import pro.kensait.berrybooks.entity.OrderDetailPK;
 import pro.kensait.berrybooks.entity.OrderTran;
 import pro.kensait.berrybooks.entity.Publisher;
 import pro.kensait.berrybooks.entity.Stock;
-import pro.kensait.berrybooks.web.cart.CartItem;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
  * OrderServiceのユニットテストクラス
@@ -72,7 +69,7 @@ class OrderServiceTest {
         item1.setBookId(1);
         item1.setBookName("Java SE ディープダイブ");
         item1.setPublisherName("Test Publisher");
-        item1.setPrice(new BigDecimal("3400"));
+        item1.setPrice(3400);
         item1.setCount(2);
         item1.setVersion(1L);
         cartItems.add(item1);
@@ -81,7 +78,7 @@ class OrderServiceTest {
         item2.setBookId(2);
         item2.setBookName("SpringBoot in Cloud");
         item2.setPublisherName("Test Publisher");
-        item2.setPrice(new BigDecimal("3000"));
+        item2.setPrice(3000);
         item2.setCount(1);
         item2.setVersion(1L);
         cartItems.add(item2);
@@ -90,8 +87,8 @@ class OrderServiceTest {
         orderTO = new OrderTO();
         orderTO.setCustomerId(1);
         orderTO.setDeliveryAddress("東京都渋谷区神南1-1-1");
-        orderTO.setDeliveryPrice(new BigDecimal("800"));
-        orderTO.setSettlementCode(2);
+        orderTO.setDeliveryPrice(800);
+        orderTO.setSettlementType(2);
         orderTO.setCartItems(cartItems);
     }
     
@@ -113,7 +110,6 @@ class OrderServiceTest {
         
         when(stockDao.findByBookId(1)).thenReturn(stock1);
         when(stockDao.findByBookId(2)).thenReturn(stock2);
-        when(stockDao.update(any(Stock.class))).thenAnswer(i -> i.getArgument(0));
         
         // BookDaoのモック設定
         Publisher publisher = new Publisher();
@@ -124,31 +120,31 @@ class OrderServiceTest {
         book1.setBookId(1);
         book1.setBookName("Java SE ディープダイブ");
         book1.setPublisher(publisher);
-        book1.setPrice(new BigDecimal("3400"));
+        book1.setPrice(3400);
         
         Book book2 = new Book();
         book2.setBookId(2);
         book2.setBookName("SpringBoot in Cloud");
         book2.setPublisher(publisher);
-        book2.setPrice(new BigDecimal("3000"));
+        book2.setPrice(3000);
         
         when(bookDao.findById(1)).thenReturn(book1);
         when(bookDao.findById(2)).thenReturn(book2);
         
         OrderTran orderTran = new OrderTran();
         orderTran.setOrderTranId(1);
-        doAnswer(invocation -> {
+        when(orderTranDao.insert(any(OrderTran.class))).thenAnswer(invocation -> {
             OrderTran ot = invocation.getArgument(0);
             ot.setOrderTranId(1);
-            return null;
-        }).when(orderTranDao).persist(any(OrderTran.class));
+            return ot;
+        });
         
         // Act
-        OrderTran result = orderService.orderBooks(orderTO);
+        OrderSummaryTO result = orderService.orderBooks(orderTO);
         
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.getOrderTranId());
+        assertEquals(1, result.orderTranId());
         
         // 在庫が減算されたことを確認
         assertEquals(8, stock1.getQuantity(), "書籍1の在庫は10-2=8であるべき");
@@ -157,9 +153,9 @@ class OrderServiceTest {
         // 各Daoのメソッドが呼ばれたことを確認
         verify(stockDao, times(1)).findByBookId(1);
         verify(stockDao, times(1)).findByBookId(2);
-        verify(stockDao, times(2)).update(any(Stock.class));
-        verify(orderTranDao, times(1)).persist(any(OrderTran.class));
-        verify(orderDetailDao, times(2)).persist(any());
+        verify(stockDao, times(2)).updateStock(anyInt(), anyInt(), any());
+        verify(orderTranDao, times(1)).insert(any(OrderTran.class));
+        verify(orderDetailDao, times(2)).insert(any(OrderDetail.class));
     }
     
     /**
@@ -186,9 +182,9 @@ class OrderServiceTest {
         assertEquals("Java SE ディープダイブ", exception.getBookName());
         
         // 在庫更新が呼ばれないことを確認
-        verify(stockDao, never()).update(any(Stock.class));
-        verify(orderTranDao, never()).persist(any(OrderTran.class));
-        verify(orderDetailDao, never()).persist(any());
+        verify(stockDao, never()).updateStock(anyInt(), anyInt(), any());
+        verify(orderTranDao, never()).insert(any(OrderTran.class));
+        verify(orderDetailDao, never()).insert(any(OrderDetail.class));
     }
     
     /**
@@ -203,7 +199,9 @@ class OrderServiceTest {
         stock1.setVersion(2L); // カートに保存されたバージョン(1L)と異なる
         
         when(stockDao.findByBookId(1)).thenReturn(stock1);
-        when(stockDao.update(any(Stock.class))).thenThrow(new OptimisticLockException());
+        doAnswer(invocation -> {
+            throw new OptimisticLockException();
+        }).when(stockDao).updateStock(anyInt(), anyInt(), any());
         
         // Act & Assert
         assertThrows(
@@ -213,8 +211,8 @@ class OrderServiceTest {
         );
         
         // 注文登録が呼ばれないことを確認
-        verify(orderTranDao, never()).persist(any(OrderTran.class));
-        verify(orderDetailDao, never()).persist(any());
+        verify(orderTranDao, never()).insert(any(OrderTran.class));
+        verify(orderDetailDao, never()).insert(any(OrderDetail.class));
     }
     
     /**
@@ -236,9 +234,9 @@ class OrderServiceTest {
         assertEquals("Java SE ディープダイブ", exception.getBookName());
         
         // 在庫更新が呼ばれないことを確認
-        verify(stockDao, never()).update(any(Stock.class));
-        verify(orderTranDao, never()).persist(any(OrderTran.class));
-        verify(orderDetailDao, never()).persist(any());
+        verify(stockDao, never()).updateStock(anyInt(), anyInt(), any());
+        verify(orderTranDao, never()).insert(any(OrderTran.class));
+        verify(orderDetailDao, never()).insert(any(OrderDetail.class));
     }
     
     /**
@@ -248,45 +246,22 @@ class OrderServiceTest {
     void testGetOrderHistory_Success() {
         // Arrange
         Integer customerId = 1;
-        List<OrderTran> orderTrans = new ArrayList<>();
+        List<OrderHistoryTO> orderHistory = new ArrayList<>();
         
-        // OrderTranを作成
-        OrderTran orderTran1 = new OrderTran();
-        orderTran1.setOrderTranId(1);
-        orderTran1.setCustomerId(customerId);
-        orderTran1.setOrderDate(LocalDateTime.of(2025, 12, 1, 10, 0));
-        orderTran1.setTotalPrice(new BigDecimal("9800"));
-        orderTran1.setDeliveryPrice(new BigDecimal("800"));
-        orderTran1.setSettlementType(2);
+        // OrderHistoryTOを作成
+        OrderHistoryTO history1 = new OrderHistoryTO(
+            LocalDate.of(2025, 12, 1),
+            1,  // orderTranId
+            1,  // orderDetailId
+            "Test Book",
+            "Test Publisher",
+            3000,  // price
+            2   // count
+        );
         
-        // Publisher, Book, OrderDetailを作成
-        Publisher publisher = new Publisher();
-        publisher.setPublisherId(1);
-        publisher.setPublisherName("Test Publisher");
+        orderHistory.add(history1);
         
-        Book book = new Book();
-        book.setBookId(1);
-        book.setBookName("Test Book");
-        book.setPublisher(publisher);
-        book.setPrice(new BigDecimal("3000"));
-        
-        OrderDetailPK detailPK = new OrderDetailPK();
-        detailPK.setOrderTranId(1);
-        detailPK.setOrderDetailId(1);
-        
-        OrderDetail orderDetail = new OrderDetail();
-        orderDetail.setId(detailPK);
-        orderDetail.setBook(book);
-        orderDetail.setPrice(new BigDecimal("3000"));
-        orderDetail.setCount(2);
-        
-        List<OrderDetail> orderDetails = new ArrayList<>();
-        orderDetails.add(orderDetail);
-        orderTran1.setOrderDetails(orderDetails);
-        
-        orderTrans.add(orderTran1);
-        
-        when(orderTranDao.findByCustomerIdWithDetails(customerId)).thenReturn(orderTrans);
+        when(orderTranDao.getOrderHistory(customerId)).thenReturn(orderHistory);
         
         // Act
         List<OrderHistoryTO> result = orderService.getOrderHistory(customerId);
@@ -294,14 +269,14 @@ class OrderServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size(), "注文明細が1件あるはず");
-        assertEquals(1, result.get(0).tranId(), "注文IDは1");
-        assertEquals(1, result.get(0).detailId(), "注文明細IDは1");
+        assertEquals(1, result.get(0).orderTranId(), "注文IDは1");
+        assertEquals(1, result.get(0).orderDetailId(), "注文明細IDは1");
         assertEquals("Test Book", result.get(0).bookName(), "書籍名はTest Book");
         assertEquals("Test Publisher", result.get(0).publisherName(), "出版社名はTest Publisher");
-        assertEquals(new BigDecimal("3000"), result.get(0).price(), "価格は3000");
+        assertEquals(3000, result.get(0).price(), "価格は3000");
         assertEquals(2, result.get(0).count(), "数量は2");
         
-        verify(orderTranDao, times(1)).findByCustomerIdWithDetails(customerId);
+        verify(orderTranDao, times(1)).getOrderHistory(customerId);
     }
     
     /**
@@ -311,7 +286,7 @@ class OrderServiceTest {
     void testGetOrderHistory_NoHistory() {
         // Arrange
         Integer customerId = 999;
-        when(orderTranDao.findByCustomerIdWithDetails(customerId)).thenReturn(new ArrayList<>());
+        when(orderTranDao.getOrderHistory(customerId)).thenReturn(new ArrayList<>());
         
         // Act
         List<OrderHistoryTO> result = orderService.getOrderHistory(customerId);
@@ -320,7 +295,7 @@ class OrderServiceTest {
         assertNotNull(result);
         assertEquals(0, result.size());
         
-        verify(orderTranDao, times(1)).findByCustomerIdWithDetails(customerId);
+        verify(orderTranDao, times(1)).getOrderHistory(customerId);
     }
     
     /**
@@ -333,20 +308,20 @@ class OrderServiceTest {
         
         OrderTran orderTran = new OrderTran();
         orderTran.setOrderTranId(orderTranId);
-        orderTran.setTotalPrice(new BigDecimal("9800"));
+        orderTran.setTotalPrice(9800);
         orderTran.setOrderDetails(new ArrayList<>()); // JOIN FETCHで取得された明細リスト
         
-        when(orderTranDao.findByIdWithDetails(orderTranId)).thenReturn(orderTran);
+        when(orderTranDao.findById(orderTranId)).thenReturn(orderTran);
         
         // Act
-        OrderSummaryTO result = orderService.getOrderDetail(orderTranId);
+        OrderTran result = orderService.getOrderDetail(orderTranId);
         
         // Assert
         assertNotNull(result);
-        assertEquals(orderTranId, result.getOrderTran().getOrderTranId());
+        assertEquals(orderTranId, result.getOrderTranId());
         assertNotNull(result.getOrderDetails());
         
-        verify(orderTranDao, times(1)).findByIdWithDetails(orderTranId);
+        verify(orderTranDao, times(1)).findById(orderTranId);
         // JOIN FETCHを使用するため、orderDetailDaoは呼ばれない
         verify(orderDetailDao, never()).findByOrderTranId(anyInt());
     }
@@ -358,16 +333,15 @@ class OrderServiceTest {
     void testGetOrderDetail_NotFound() {
         // Arrange
         Integer orderTranId = 999;
-        when(orderTranDao.findByIdWithDetails(orderTranId)).thenReturn(null);
+        when(orderTranDao.findById(orderTranId)).thenReturn(null);
         
         // Act
-        OrderSummaryTO result = orderService.getOrderDetail(orderTranId);
+        OrderTran result = orderService.getOrderDetail(orderTranId);
         
         // Assert
         assertNull(result, "注文が存在しない場合、nullが返されるべき");
         
-        verify(orderTranDao, times(1)).findByIdWithDetails(orderTranId);
+        verify(orderTranDao, times(1)).findById(orderTranId);
         verify(orderDetailDao, never()).findByOrderTranId(anyInt());
     }
 }
-

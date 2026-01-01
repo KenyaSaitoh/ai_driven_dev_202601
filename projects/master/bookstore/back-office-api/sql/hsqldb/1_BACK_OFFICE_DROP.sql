@@ -3,8 +3,7 @@
 -- ============================================
 -- 書籍マスターと在庫テーブル、部署・社員テーブル、ワークフローテーブル
 
--- ワークフローテーブル
-DROP TABLE BOOK_WORKFLOW IF EXISTS;
+DROP TABLE WORKFLOW IF EXISTS;
 
 -- 社員・部署テーブル
 DROP TABLE EMPLOYEE IF EXISTS;

@@ -5,20 +5,20 @@ import java.io.Serializable;
 import jakarta.enterprise.context.RequestScoped;
 
 /**
- * JWT認証済みリソース情報を保持するクラス
- * リクエストスコープで管理され、JAX-RSリソースクラスから顧客情報を取得するために使用する
+ * JWT認証コンテキスト情報を保持するクラス
+ * リクエストスコープで管理され、JAX-RSリソースクラスから認証済み顧客情報を取得するために使用する
  */
 @RequestScoped
-public class SecuredResource implements Serializable {
+public class AuthenContext implements Serializable {
     private static final long serialVersionUID = 1L;
     
     private Integer customerId;
     private String email;
 
-    public SecuredResource() {
+    public AuthenContext() {
     }
 
-    public SecuredResource(Integer customerId, String email) {
+    public AuthenContext(Integer customerId, String email) {
         this.customerId = customerId;
         this.email = email;
     }

@@ -10,6 +10,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -19,6 +20,7 @@ import jakarta.ws.rs.core.Response;
 import pro.kensait.backoffice.api.dto.WorkflowCreateRequest;
 import pro.kensait.backoffice.api.dto.WorkflowOperationRequest;
 import pro.kensait.backoffice.api.dto.WorkflowTO;
+import pro.kensait.backoffice.api.dto.WorkflowUpdateRequest;
 import pro.kensait.backoffice.service.workflow.WorkflowService;
 
 /**
@@ -62,13 +64,44 @@ public class WorkflowResource {
     }
 
     /**
+     * ワークフロー更新（一時保存）
+     * PUT /api/workflows/{workflowId}
+     * @param workflowId ワークフローID
+     * @param request 更新リクエスト
+     * @return 200 OK + WorkflowTO
+     */
+    @PUT
+    @Path("/{workflowId}")
+    public Response updateWorkflow(
+            @PathParam("workflowId") Long workflowId,
+            WorkflowUpdateRequest request) {
+        logger.info("[ WorkflowResource#updateWorkflow ] workflowId={}", workflowId);
+
+        try {
+            WorkflowTO workflow = workflowService.updateWorkflow(workflowId, request);
+            return Response.ok(workflow).build();
+        } catch (IllegalArgumentException e) {
+            logger.error("ワークフロー更新エラー（不正な引数）", e);
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\":\"" + e.getMessage() + "\"}")
+                    .build();
+        } catch (Exception e) {
+            logger.error("ワークフロー更新エラー（内部エラー）", e);
+            String message = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\":\"" + message + "\"}")
+                    .build();
+        }
+    }
+
+    /**
      * ワークフロー履歴取得
-     * GET /api/workflows/{workflowId}
+     * GET /api/workflows/{workflowId}/history
      * @param workflowId ワークフローID
      * @return 200 OK + List<WorkflowTO>
      */
     @GET
-    @Path("/{workflowId}")
+    @Path("/{workflowId}/history")
     public Response getWorkflowHistory(@PathParam("workflowId") Long workflowId) {
         logger.info("[ WorkflowResource#getWorkflowHistory ] workflowId={}", workflowId);
 
@@ -172,5 +205,3 @@ public class WorkflowResource {
         }
     }
 }
-
-

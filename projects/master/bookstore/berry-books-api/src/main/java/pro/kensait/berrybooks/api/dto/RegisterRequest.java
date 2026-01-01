@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 /**
@@ -23,10 +22,10 @@ public record RegisterRequest(
     @Email(message = "正しいメールアドレス形式で入力してください")
     String email,
     
-    @NotNull(message = "生年月日は必須です")
+    // 任意項目
     LocalDate birthday,
     
-    @NotBlank(message = "住所は必須です")
+    // 任意項目
     @Size(max = 200, message = "住所は200文字以内で入力してください")
     String address
 ) {

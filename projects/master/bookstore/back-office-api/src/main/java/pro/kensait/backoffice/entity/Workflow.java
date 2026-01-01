@@ -16,12 +16,12 @@ import jakarta.persistence.Table;
 
 /**
  * ワークフローエンティティ（履歴形式）
- * BOOK_WORKFLOW テーブルに対応
+ * WORKFLOW テーブルに対応
  * 1つのワークフローに対して複数の操作履歴行を持つ
  */
 @Entity
-@Table(name = "BOOK_WORKFLOW")
-public class BookWorkflow implements Serializable {
+@Table(name = "WORKFLOW")
+public class Workflow implements Serializable {
     private static final long serialVersionUID = 1L;
 
     // 操作ID（主キー）
@@ -119,7 +119,7 @@ public class BookWorkflow implements Serializable {
     private String operationReason;
 
     // デフォルトコンストラクタ
-    public BookWorkflow() {
+    public Workflow() {
     }
 
     // Getter/Setter
@@ -301,10 +301,9 @@ public class BookWorkflow implements Serializable {
 
     @Override
     public String toString() {
-        return "BookWorkflow [operationId=" + operationId + ", workflowId=" + workflowId 
+        return "Workflow [operationId=" + operationId + ", workflowId=" + workflowId 
                 + ", workflowType=" + workflowType + ", state=" + state 
                 + ", operationType=" + operationType + "]";
     }
 }
-
 

@@ -17,12 +17,11 @@ import pro.kensait.berrybooks.entity.Customer;
 import pro.kensait.berrybooks.entity.Publisher;
 import pro.kensait.berrybooks.entity.Stock;
 import pro.kensait.berrybooks.service.book.BookService;
+import pro.kensait.berrybooks.service.book.SearchParam;
 import pro.kensait.berrybooks.service.customer.CustomerService;
-import pro.kensait.berrybooks.web.book.SearchParam;
-import pro.kensait.berrybooks.web.cart.CartItem;
+import pro.kensait.berrybooks.service.order.CartItem;
 import pro.kensait.berrybooks.web.cart.CartSession;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,7 +78,7 @@ public class LoginToCartIntegrationTest extends IntegrationTestBase {
         testBook.setBookId(1);
         testBook.setBookName("Java Test Book");
         testBook.setPublisher(publisher);
-        testBook.setPrice(new BigDecimal("3000"));
+        testBook.setPrice(3000);
         testBook.setStock(stock);
         
         List<Book> bookList = new ArrayList<>();
@@ -155,7 +154,7 @@ public class LoginToCartIntegrationTest extends IntegrationTestBase {
         book1.setBookId(1);
         book1.setBookName("Java Test Book 1");
         book1.setPublisher(publisher);
-        book1.setPrice(new BigDecimal("3000"));
+        book1.setPrice(3000);
         book1.setStock(stock1);
         
         Stock stock2 = new Stock();
@@ -167,7 +166,7 @@ public class LoginToCartIntegrationTest extends IntegrationTestBase {
         book2.setBookId(2);
         book2.setBookName("Java Test Book 2");
         book2.setPublisher(publisher);
-        book2.setPrice(new BigDecimal("4000"));
+        book2.setPrice(4000);
         book2.setStock(stock2);
         
         List<Book> bookList = new ArrayList<>();
@@ -236,7 +235,7 @@ public class LoginToCartIntegrationTest extends IntegrationTestBase {
         book1Entity.setBookId(1);
         book1Entity.setBookName("Java Test Book 1");
         book1Entity.setPublisher(publisher);
-        book1Entity.setPrice(new BigDecimal("3000"));
+        book1Entity.setPrice(3000);
         book1Entity.setStock(stock1);
         
         Stock stock2 = new Stock();
@@ -248,7 +247,7 @@ public class LoginToCartIntegrationTest extends IntegrationTestBase {
         book2Entity.setBookId(2);
         book2Entity.setBookName("Java Test Book 2");
         book2Entity.setPublisher(publisher);
-        book2Entity.setPrice(new BigDecimal("4000"));
+        book2Entity.setPrice(4000);
         book2Entity.setStock(stock2);
         
         List<Book> bookList = new ArrayList<>();

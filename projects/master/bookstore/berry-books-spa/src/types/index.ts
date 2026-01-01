@@ -4,8 +4,8 @@ export interface User {
   customerId: number;
   customerName: string;
   email: string;
-  birthday: string;
-  address: string;
+  birthday?: string;
+  address?: string;
 }
 
 export interface LoginRequest {
@@ -17,16 +17,16 @@ export interface RegisterRequest {
   customerName: string;
   email: string;
   password: string;
-  birthday: string;
-  address: string;
+  birthday?: string;
+  address?: string;
 }
 
 export interface LoginResponse {
   customerId: number;
   customerName: string;
   email: string;
-  birthday: string;
-  address: string;
+  birthday?: string;
+  address?: string;
 }
 
 // ==================== Book ====================
