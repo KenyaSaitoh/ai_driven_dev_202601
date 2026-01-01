@@ -99,7 +99,7 @@ public class WorkflowDao {
 
     /**
      * ワークフロータイプで検索（最新の操作のみ）
-     * @param workflowType ワークフロータイプ (CREATE, DELETE, PRICE_TEMP_ADJUSTMENT)
+     * @param workflowType ワークフロータイプ (ADD_NEW_BOOK, REMOVE_BOOK, ADJUST_BOOK_PRICE)
      * @return ワークフローエンティティのリスト
      */
     public List<Workflow> findByWorkflowType(String workflowType) {

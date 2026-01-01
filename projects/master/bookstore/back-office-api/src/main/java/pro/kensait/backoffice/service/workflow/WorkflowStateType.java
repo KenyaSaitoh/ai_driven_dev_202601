@@ -5,10 +5,20 @@ package pro.kensait.backoffice.service.workflow;
  */
 public enum WorkflowStateType {
     /** 作成済み */
-    CREATED,
+    CREATED("作成済み"),
     /** 申請済み */
-    APPLIED,
+    APPLIED("申請中"),
     /** 承認済み */
-    APPROVED
+    APPROVED("承認済み");
+    
+    private final String displayName;
+    
+    WorkflowStateType(String displayName) {
+        this.displayName = displayName;
+    }
+    
+    public String getDisplayName() {
+        return this.displayName;
+    }
 }
 

@@ -1,5 +1,5 @@
 import api from './api';
-import { Workflow, WorkflowCreateRequest, WorkflowOperationRequest, CategoryMap, Publisher, Book } from '../types';
+import { Workflow, WorkflowCreateRequest, WorkflowOperationRequest, WorkflowUpdateRequest, Category, Publisher, Book } from '../types';
 
 /**
  * ワークフローサービス
@@ -14,14 +14,26 @@ export const workflowService = {
   },
 
   /**
+   * ワークフロー更新（一時保存）
+   * @param workflowId ワークフローID
+   * @param request 更新リクエスト
+   */
+  updateWorkflow: async (workflowId: number, request: WorkflowUpdateRequest): Promise<Workflow> => {
+    const response = await api.put<Workflow>(`/workflows/${workflowId}`, request);
+    return response.data;
+  },
+
+  /**
    * ワークフロー一覧取得
    * @param state 状態（オプション）
    * @param workflowType ワークフロータイプ（オプション）
+   * @param employeeId ログイン中の社員ID（CREATED状態のフィルタリング用）
    */
-  getWorkflows: async (state?: string, workflowType?: string): Promise<Workflow[]> => {
-    const params: Record<string, string> = {};
+  getWorkflows: async (state?: string, workflowType?: string, employeeId?: number): Promise<Workflow[]> => {
+    const params: Record<string, string | number> = {};
     if (state) params.state = state;
     if (workflowType) params.workflowType = workflowType;
+    if (employeeId) params.employeeId = employeeId;
     
     const response = await api.get<Workflow[]>('/workflows', { params });
     return response.data;
@@ -32,7 +44,7 @@ export const workflowService = {
    * @param workflowId ワークフローID
    */
   getWorkflowHistory: async (workflowId: number): Promise<Workflow[]> => {
-    const response = await api.get<Workflow[]>(`/workflows/${workflowId}`);
+    const response = await api.get<Workflow[]>(`/workflows/${workflowId}/history`);
     return response.data;
   },
 
@@ -67,10 +79,10 @@ export const workflowService = {
   },
 
   /**
-   * カテゴリ一覧取得（Map形式）
+   * カテゴリ一覧取得
    */
-  getCategories: async (): Promise<CategoryMap> => {
-    const response = await api.get<CategoryMap>('/categories');
+  getCategories: async (): Promise<Category[]> => {
+    const response = await api.get<Category[]>('/categories');
     return response.data;
   },
 

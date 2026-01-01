@@ -81,25 +81,11 @@ Payara Serverの設定ファイルにシステムプロパティを追加しま�
 
 OSの環境変数を設定してからPayara Serverを起動します。
 
-**Linux/macOS:**
+**Git Bash / macOS / Linux:**
 
 ```bash
 export CUSTOMER_API_BASE_URL=https://prod-server.example.com/berry-books-rest/customers
 ./gradlew startPayara
-```
-
-**Windows PowerShell:**
-
-```powershell
-$env:CUSTOMER_API_BASE_URL = "https://prod-server.example.com/berry-books-rest/customers"
-./gradlew startPayara
-```
-
-**Windows CMD:**
-
-```cmd
-set CUSTOMER_API_BASE_URL=https://prod-server.example.com/berry-books-rest/customers
-gradlew startPayara
 ```
 
 ---

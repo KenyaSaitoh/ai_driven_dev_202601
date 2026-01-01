@@ -34,11 +34,11 @@ public class Workflow implements Serializable {
     @Column(name = "WORKFLOW_ID")
     private Long workflowId;
 
-    // ワークフロー種別 (CREATE, DELETE, PRICE_TEMP_ADJUSTMENT)
+    // ワークフロー種別 (ADD_NEW_BOOK, REMOVE_BOOK, ADJUST_BOOK_PRICE)
     @Column(name = "WORKFLOW_TYPE")
     private String workflowType;
 
-    // 状態 (NEW, APPLIED, APPROVED)
+    // 状態 (CREATED, APPLIED, APPROVED)
     @Column(name = "STATE")
     private String state;
 

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import '../styles/Header.css';
 
 const Header: React.FC = () => {
   const { employee, logout, isAuthenticated } = useAuth();
@@ -20,35 +19,49 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="header">
-      <div className="header-content">
-        <div className="header-left">
-          <Link to="/workflows" className="header-logo">
-            バックオフィスシステム
-          </Link>
-          {isAuthenticated && (
-            <nav className="header-nav">
-              <Link to="/workflows" className="nav-link">
-                ワークフロー一覧
-              </Link>
-              <Link to="/workflows/create" className="nav-link">
-                新規作成
-              </Link>
-            </nav>
+    <header className="bg-gradient-primary shadow-primary-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          <div className="flex items-center space-x-8">
+            <Link 
+              to="/workflows" 
+              className="text-white text-xl font-bold hover:text-accent-light transition-colors duration-300"
+            >
+              Berry Books バックオフィス
+            </Link>
+            {isAuthenticated && (
+              <nav className="flex space-x-4">
+                <Link 
+                  to="/workflows" 
+                  className="text-white hover:text-accent-light px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300"
+                >
+                  ワークフロー一覧
+                </Link>
+                <Link 
+                  to="/workflows/create" 
+                  className="text-white hover:text-accent-light px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300"
+                >
+                  新規作成
+                </Link>
+              </nav>
+            )}
+          </div>
+
+          {isAuthenticated && employee && (
+            <div className="flex items-center space-x-4">
+              <span className="text-white text-sm">
+                {employee.employeeName} ({employee.employeeCode})
+                {employee.departmentName && ` - ${employee.departmentName}`}
+              </span>
+              <button 
+                onClick={handleLogout} 
+                className="bg-white text-primary hover:bg-accent-light px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 shadow-md hover:shadow-lg"
+              >
+                ログアウト
+              </button>
+            </div>
           )}
         </div>
-
-        {isAuthenticated && employee && (
-          <div className="header-right">
-            <span className="user-info">
-              {employee.employeeName} ({employee.employeeCode})
-              {employee.departmentName && ` - ${employee.departmentName}`}
-            </span>
-            <button onClick={handleLogout} className="logout-button">
-              ログアウト
-            </button>
-          </div>
-        )}
       </div>
     </header>
   );

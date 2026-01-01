@@ -5,14 +5,22 @@ package pro.kensait.backoffice.service.workflow;
  */
 public enum WorkflowOperationType {
     /** 作成 */
-    CREATE,
-    /** 更新（一時保存） */
-    UPDATE,
+    CREATE("作成"),
     /** 申請 */
-    APPLY,
+    APPLY("申請"),
     /** 承認 */
-    APPROVE,
+    APPROVE("承認"),
     /** 却下（差戻） */
-    REJECT
+    REJECT("差戻");
+    
+    private final String displayName;
+    
+    WorkflowOperationType(String displayName) {
+        this.displayName = displayName;
+    }
+    
+    public String getDisplayName() {
+        return this.displayName;
+    }
 }
 

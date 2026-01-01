@@ -6,7 +6,7 @@ import LoginPage from './pages/LoginPage';
 import WorkflowListPage from './pages/WorkflowListPage';
 import WorkflowDetailPage from './pages/WorkflowDetailPage';
 import CreateWorkflowPage from './pages/CreateWorkflowPage';
-import './styles/App.css';
+import EditWorkflowPage from './pages/EditWorkflowPage';
 
 const App: React.FC = () => {
   return (
@@ -29,6 +29,15 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <CreateWorkflowPage />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/workflows/:workflowId/edit"
+            element={
+              <ProtectedRoute>
+                <EditWorkflowPage />
               </ProtectedRoute>
             }
           />

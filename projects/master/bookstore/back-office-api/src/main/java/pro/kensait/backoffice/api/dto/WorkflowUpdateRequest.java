@@ -7,16 +7,16 @@ import java.time.LocalDate;
  * ワークフロー更新リクエストDTO
  */
 public class WorkflowUpdateRequest {
-    private Integer bookId; // DELETE, PRICE_TEMP_ADJUSTMENTの場合に必要
-    private String bookName; // CREATEの場合に必要
-    private String author; // CREATEの場合に必要
-    private Integer categoryId; // CREATEの場合に必要
-    private Integer publisherId; // CREATEの場合に必要
-    private BigDecimal price; // CREATE, PRICE_TEMP_ADJUSTMENTの場合に必要
-    private String imageUrl; // CREATEの場合
+    private Integer bookId; // REMOVE_BOOK, ADJUST_BOOK_PRICEの場合に必要
+    private String bookName; // ADD_NEW_BOOKの場合に必要
+    private String author; // ADD_NEW_BOOKの場合に必要
+    private Integer categoryId; // ADD_NEW_BOOKの場合に必要
+    private Integer publisherId; // ADD_NEW_BOOKの場合に必要
+    private BigDecimal price; // ADD_NEW_BOOK, ADJUST_BOOK_PRICEの場合に必要
+    private String imageUrl; // ADD_NEW_BOOKの場合
     private String applyReason; // 申請理由
-    private LocalDate startDate; // PRICE_TEMP_ADJUSTMENTの場合に必要
-    private LocalDate endDate; // PRICE_TEMP_ADJUSTMENTの場合に必要
+    private LocalDate startDate; // ADJUST_BOOK_PRICEの場合に必要
+    private LocalDate endDate; // ADJUST_BOOK_PRICEの場合に必要
     private Long updatedBy; // 更新者ID
 
     // デフォルトコンストラクタ

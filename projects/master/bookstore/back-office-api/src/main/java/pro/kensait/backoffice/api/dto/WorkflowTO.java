@@ -22,6 +22,7 @@ public class WorkflowTO {
     private Integer publisherId;
     private String publisherName;
     private BigDecimal price;
+    private BigDecimal originalPrice;  // 価格改定時の元の価格
     private String imageUrl;
     private String applyReason;
     private LocalDate startDate;
@@ -135,6 +136,14 @@ public class WorkflowTO {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public BigDecimal getOriginalPrice() {
+        return originalPrice;
+    }
+
+    public void setOriginalPrice(BigDecimal originalPrice) {
+        this.originalPrice = originalPrice;
     }
 
     public String getImageUrl() {

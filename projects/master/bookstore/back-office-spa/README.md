@@ -11,6 +11,12 @@
 - Vite
 - React Router
 - Axios
+- Tailwind CSS
+
+**デザイン:**
+- **テーマカラー**: Berry Books ストロベリーレッド (#CF3F4E)
+- **スタイリング**: Tailwind CSS
+- **レスポンシブデザイン**: モダンなグラデーションとシャドウ効果
 
 ## 主な機能
 
@@ -50,19 +56,11 @@ src/
 │   ├── api.ts
 │   ├── authService.ts
 │   └── workflowService.ts
-├── styles/           # CSSスタイル
-│   ├── App.css
-│   ├── Header.css
-│   ├── Layout.css
-│   ├── LoginPage.css
-│   ├── WorkflowListPage.css
-│   ├── WorkflowDetailPage.css
-│   └── CreateWorkflowPage.css
 ├── types/            # TypeScript型定義
 │   └── index.ts
 ├── App.tsx           # ルーティング設定
 ├── main.tsx          # エントリーポイント
-└── index.css         # グローバルスタイル
+└── index.css         # Tailwind CSSスタイル
 ```
 
 ## セットアップ
@@ -165,9 +163,9 @@ export default defineConfig({
 
 | タイプ | 説明 | 必要な情報 |
 |--------|------|-----------|
-| CREATE | 新規書籍作成 | 書籍名、著者、価格、カテゴリ、出版社、画像URL（任意） |
-| DELETE | 書籍削除 | 書籍ID |
-| PRICE_TEMP_ADJUSTMENT | 価格調整（期間限定） | 書籍ID、調整後価格、開始日、終了日 |
+| ADD_NEW_BOOK | 新規書籍の追加 | 書籍名、著者、価格、カテゴリ、出版社、画像URL（任意） |
+| REMOVE_BOOK | 既存書籍の削除 | 書籍ID |
+| ADJUST_BOOK_PRICE | 書籍価格の改定 | 書籍ID、改定後価格、開始日、終了日 |
 
 ## テストアカウント
 
@@ -191,10 +189,10 @@ export default defineConfig({
 
 ### スタイリングガイドライン
 
-1. **CSS Modules**: 各コンポーネント専用のCSSファイルを作成
-2. **CSS変数**: `index.css`で定義されたCSS変数を活用
-3. **レスポンシブデザイン**: モバイルファーストのアプローチ
-4. **共通スタイル**: ボタン、フォーム要素などは共通スタイルを使用
+1. **Tailwind CSS**: Utility-firstアプローチでスタイリング
+2. **テーマカラー**: Berry Books統一のストロベリーレッド
+3. **レスポンシブデザイン**: Tailwindのレスポンシブユーティリティを活用
+4. **共通スタイル**: `index.css`で定義されたカスタムクラスを使用（`btn-primary`, `form-input`など）
 
 ## トラブルシューティング
 
@@ -224,6 +222,9 @@ export default defineConfig({
 - [ ] ワークフロー統計・レポート機能
 - [ ] 通知機能（申請・承認時）
 - [ ] ユニットテスト・E2Eテストの追加
+- [x] Tailwind CSSへの移行
+- [x] Berry Booksテーマカラーの適用
+- [x] カテゴリAPIのArray形式対応
 
 ## ライセンス
 

@@ -6,8 +6,7 @@ Berry Books オンライン書店の管理者画面（Java Swingデスクトッ�
 顧客一覧を表示し、顧客情報の編集、注文件数と購入冊数の統計情報を確認できます。
 
 **💡 開発環境について:**
-- **Windows環境では Git Bash の使用を推奨します**（Mac/Linuxと同じコマンドが使えます）
-- PowerShellでも実行可能ですが、コマンドが異なります（本READMEに両方記載）
+- **Windows環境では Git Bash を使用してください**（Mac/Linuxと同じコマンドが使えます）
 
 ## 🚀 セットアップとコマンド実行ガイド
 
@@ -21,7 +20,7 @@ Berry Books オンライン書店の管理者画面（Java Swingデスクトッ�
 > **Note:** 
 > - Java 8, 11, 17, 21など、任意のバージョンで動作します
 > - ① と ② の手順は、ルートの`README.md`を参照してください
-> - **Windows環境では Git Bash の使用を推奨します**（Mac/Linuxと同じコマンドが使えます）
+> - **Windows環境では Git Bash を使用してください**（Mac/Linuxと同じコマンドが使えます）
 
 ### ③ 依存関係の確認
 
@@ -46,13 +45,6 @@ chmod +x run-app.sh
 
 > **Note**: Windows Git Bashでも上記のスクリプトがそのまま動作します
 
-**Windows PowerShell の場合:**
-
-```powershell
-cd projects\master\online\berry-books-swing
-.\run-app.bat
-```
-
 #### B. 手動でビルド・実行する方法
 
 ```bash
@@ -62,16 +54,14 @@ cd projects\master\online\berry-books-swing
 ./gradlew :berry-books-swing:clean :berry-books-swing:buildApp
 ```
 
-> **Note**: 
-> - **Windows環境では Git Bash の使用を推奨します**
-> - PowerShellを使用する場合は `.\gradlew.bat` を使用してください
+> **Note**: Windows環境では Git Bash を使用してください
 
 ビルドが成功すると、以下のファイルが生成されます：
 - `build/libs/berry-books-swing-1.0.0.jar` (実行可能JAR、依存関係含む)
 
 ### ⑤ アプリケーションを実行する方法
 
-#### Bash（Linux/Mac/Windows Git Bash）での実行手順 【推奨】
+#### Git Bash / Mac / Linux での実行手順
 
 ```bash
 # 1. berry-books-swingディレクトリに移動（プロジェクトルートから）
@@ -87,19 +77,6 @@ java -jar build/libs/berry-books-swing-1.0.0.jar http://localhost:8080/customer-
 > **Note**: 
 > - **Windows環境では Git Bash を使用してください**（上記コマンドがそのまま動作します）
 > - Mac/Linuxでも同じコマンドで実行できます
-
-#### Windows PowerShellでの実行手順（参考）
-
-```powershell
-# 1. berry-books-swingディレクトリに移動（プロジェクトルートから）
-cd projects\master\online\berry-books-swing
-
-# 2. アプリケーションを実行
-java -jar build\libs\berry-books-swing-1.0.0.jar
-
-# または、API URLを指定する場合:
-java -jar build\libs\berry-books-swing-1.0.0.jar http://localhost:8080/customer-api
-```
 
 ### ⑥ プロジェクトを終了するときに1回だけ実行（CleanUp）
 
@@ -122,8 +99,6 @@ java -jar build\libs\berry-books-swing-1.0.0.jar http://localhost:8080/customer-
 cd projects/master/bookstore/customer-swing
 java -jar build/libs/berry-books-swing-1.0.0.jar
 ```
-
-> **Note**: PowerShellの場合は `.\gradlew.bat` を使用してください
 
 ## 🎯 プロジェクト構成
 
@@ -269,8 +244,6 @@ cd projects/master/bookstore/customer-swing
 java -jar build/libs/berry-books-swing-1.0.0.jar
 ```
 
-> **Note**: PowerShellを使用する場合は `.\gradlew.bat` を使用してください
-
 ### ⑦ アプリケーションで顧客一覧を確認
 
 デスクトップアプリケーションウィンドウが開き、顧客一覧が表示されます。
@@ -294,8 +267,6 @@ java -jar build/libs/berry-books-swing-1.0.0.jar
 ./gradlew stopHsqldb
 ```
 
-> **Note**: PowerShellの場合は `.\gradlew.bat` を使用してください
-
 ## 🔍 トラブルシューティング
 
 ### 1. ClassNotFoundExceptionが発生
@@ -316,8 +287,6 @@ ls -la build/libs/berry-books-swing-1.0.0.jar
 cd ../../..  # プロジェクトルートへ
 ./gradlew :berry-books-swing:clean :berry-books-swing:buildApp
 ```
-
-> **Note**: PowerShellの場合は `Get-ChildItem build\libs\*.jar` と `.\gradlew.bat` を使用
 
 ### 2. REST APIに接続できない
 

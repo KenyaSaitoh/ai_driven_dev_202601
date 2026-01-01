@@ -29,8 +29,8 @@ import pro.kensait.backoffice.security.JwtUtil;
 @ApplicationScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class AuthResource {
-    private static final Logger logger = LoggerFactory.getLogger(AuthResource.class);
+public class AuthenResource {
+    private static final Logger logger = LoggerFactory.getLogger(AuthenResource.class);
 
     @Inject
     private EmployeeDao employeeDao;
@@ -44,14 +44,14 @@ public class AuthResource {
     @POST
     @Path("/login")
     public Response login(@Valid LoginRequest request) {
-        logger.info("[ AuthResource#login ] employeeCode: {}", request.employeeCode());
+        logger.info("[ AuthenResource#login ] employeeCode: {}", request.employeeCode());
 
         try {
             // 社員情報を取得
             Employee employee = employeeDao.findByCode(request.employeeCode());
 
             if (employee == null) {
-                logger.warn("[ AuthResource#login ] Employee not found: {}", request.employeeCode());
+                logger.warn("[ AuthenResource#login ] Employee not found: {}", request.employeeCode());
                 ErrorResponse errorResponse = new ErrorResponse(
                         "Unauthorized",
                         "社員コードまたはパスワードが正しくありません"
@@ -76,7 +76,7 @@ public class AuthResource {
             }
             
             if (!passwordMatch) {
-                logger.warn("[ AuthResource#login ] Password mismatch for employeeCode: {}", request.employeeCode());
+                logger.warn("[ AuthenResource#login ] Password mismatch for employeeCode: {}", request.employeeCode());
                 ErrorResponse errorResponse = new ErrorResponse(
                         "Unauthorized",
                         "社員コードまたはパスワードが正しくありません"
@@ -123,7 +123,7 @@ public class AuthResource {
                     .build();
 
         } catch (Exception e) {
-            logger.error("[ AuthResource#login ] Unexpected error", e);
+            logger.error("[ AuthenResource#login ] Unexpected error", e);
             ErrorResponse errorResponse = new ErrorResponse(
                     "Internal Server Error",
                     "ログイン処理中にエラーが発生しました"
@@ -141,7 +141,7 @@ public class AuthResource {
     @POST
     @Path("/logout")
     public Response logout() {
-        logger.info("[ AuthResource#logout ]");
+        logger.info("[ AuthenResource#logout ]");
 
         // Cookieを削除（maxAge=0）
         NewCookie cookie = new NewCookie.Builder(jwtUtil.getCookieName())
@@ -164,7 +164,7 @@ public class AuthResource {
     @GET
     @Path("/me")
     public Response getCurrentUser() {
-        logger.info("[ AuthResource#getCurrentUser ]");
+        logger.info("[ AuthenResource#getCurrentUser ]");
 
         // TODO: JWT認証フィルタから社員IDを取得する実装を追加
         ErrorResponse errorResponse = new ErrorResponse(

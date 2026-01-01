@@ -1,6 +1,5 @@
 package pro.kensait.backoffice.service.workflow;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,14 +18,12 @@ import pro.kensait.backoffice.api.dto.WorkflowTO;
 import pro.kensait.backoffice.api.dto.WorkflowUpdateRequest;
 import pro.kensait.backoffice.dao.BookDao;
 import pro.kensait.backoffice.dao.EmployeeDao;
-import pro.kensait.backoffice.dao.StockDao;
 import pro.kensait.backoffice.dao.WorkflowDao;
 import pro.kensait.backoffice.entity.Book;
 import pro.kensait.backoffice.entity.Workflow;
 import pro.kensait.backoffice.entity.Category;
 import pro.kensait.backoffice.entity.Employee;
 import pro.kensait.backoffice.entity.Publisher;
-import pro.kensait.backoffice.entity.Stock;
 
 /**
  * ワークフローサービス
@@ -44,9 +41,6 @@ public class WorkflowService {
 
     @Inject
     private BookDao bookDao;
-
-    @Inject
-    private StockDao stockDao;
 
     @PersistenceContext(unitName = "bookstorePU")
     private EntityManager em;
@@ -82,7 +76,7 @@ public class WorkflowService {
 
         // ワークフロータイプごとの設定
         switch (workflowType) {
-            case CREATE:
+            case ADD_NEW_BOOK:
                 workflow.setBookName(request.getBookName());
                 workflow.setAuthor(request.getAuthor());
                 workflow.setPrice(request.getPrice());
@@ -90,10 +84,10 @@ public class WorkflowService {
                 workflow.setCategoryId(request.getCategoryId());
                 workflow.setPublisherId(request.getPublisherId());
                 break;
-            case DELETE:
+            case REMOVE_BOOK:
                 workflow.setBookId(request.getBookId());
                 break;
-            case PRICE_TEMP_ADJUSTMENT:
+            case ADJUST_BOOK_PRICE:
                 workflow.setBookId(request.getBookId());
                 workflow.setPrice(request.getPrice());
                 workflow.setStartDate(request.getStartDate());
@@ -141,52 +135,49 @@ public class WorkflowService {
         // ワークフロータイプの取得
         WorkflowType workflowType = WorkflowType.valueOf(latest.getWorkflowType());
 
-        // 新しい操作履歴を作成（CREATED状態を維持）
-        Workflow newOp = copyWorkflowData(latest);
-        newOp.setState(WorkflowStateType.CREATED.name());
-        newOp.setOperationType(WorkflowOperationType.UPDATE.name());
-        newOp.setOperatedAt(LocalDateTime.now());
-        newOp.setOperatedBy(request.getUpdatedBy());
+        // 既存のCREATEレコードを直接更新（新規INSERT不要）
+        // 操作日時のみ更新（操作者は作成者のまま変更しない）
+        latest.setOperatedAt(LocalDateTime.now());
 
         // ワークフロータイプごとの更新内容を反映
         switch (workflowType) {
-            case CREATE:
+            case ADD_NEW_BOOK:
                 if (request.getBookName() != null) {
-                    newOp.setBookName(request.getBookName());
+                    latest.setBookName(request.getBookName());
                 }
                 if (request.getAuthor() != null) {
-                    newOp.setAuthor(request.getAuthor());
+                    latest.setAuthor(request.getAuthor());
                 }
                 if (request.getPrice() != null) {
-                    newOp.setPrice(request.getPrice());
+                    latest.setPrice(request.getPrice());
                 }
                 if (request.getImageUrl() != null) {
-                    newOp.setImageUrl(request.getImageUrl());
+                    latest.setImageUrl(request.getImageUrl());
                 }
                 if (request.getCategoryId() != null) {
-                    newOp.setCategoryId(request.getCategoryId());
+                    latest.setCategoryId(request.getCategoryId());
                 }
                 if (request.getPublisherId() != null) {
-                    newOp.setPublisherId(request.getPublisherId());
+                    latest.setPublisherId(request.getPublisherId());
                 }
                 break;
-            case DELETE:
+            case REMOVE_BOOK:
                 if (request.getBookId() != null) {
-                    newOp.setBookId(request.getBookId());
+                    latest.setBookId(request.getBookId());
                 }
                 break;
-            case PRICE_TEMP_ADJUSTMENT:
+            case ADJUST_BOOK_PRICE:
                 if (request.getBookId() != null) {
-                    newOp.setBookId(request.getBookId());
+                    latest.setBookId(request.getBookId());
                 }
                 if (request.getPrice() != null) {
-                    newOp.setPrice(request.getPrice());
+                    latest.setPrice(request.getPrice());
                 }
                 if (request.getStartDate() != null) {
-                    newOp.setStartDate(request.getStartDate());
+                    latest.setStartDate(request.getStartDate());
                 }
                 if (request.getEndDate() != null) {
-                    newOp.setEndDate(request.getEndDate());
+                    latest.setEndDate(request.getEndDate());
                 }
                 break;
             default:
@@ -195,13 +186,14 @@ public class WorkflowService {
 
         // 申請理由の更新
         if (request.getApplyReason() != null) {
-            newOp.setApplyReason(request.getApplyReason());
+            latest.setApplyReason(request.getApplyReason());
         }
 
-        // 保存
-        Workflow saved = workflowDao.insert(newOp);
+        // EntityManagerが管理しているため、変更は自動的にUPDATEされる
+        // 明示的なflushで即座に反映
+        em.flush();
 
-        return convertToWorkflowTO(saved);
+        return convertToWorkflowTO(latest);
     }
 
     /**
@@ -269,8 +261,11 @@ public class WorkflowService {
         // 承認権限チェック
         checkApprovalAuthority(workflowId, request.getOperatedBy());
 
-        // 操作者取得
+        // 操作者取得と存在チェック
         Employee operator = employeeDao.findById(request.getOperatedBy());
+        if (operator == null) {
+            throw new IllegalArgumentException("操作者が存在しません: " + request.getOperatedBy());
+        }
 
         // 新しい操作履歴を作成
         Workflow newOp = copyWorkflowData(latest);
@@ -313,8 +308,11 @@ public class WorkflowService {
         // 承認権限チェック
         checkApprovalAuthority(workflowId, request.getOperatedBy());
 
-        // 操作者取得
+        // 操作者取得と存在チェック
         Employee operator = employeeDao.findById(request.getOperatedBy());
+        if (operator == null) {
+            throw new IllegalArgumentException("操作者が存在しません: " + request.getOperatedBy());
+        }
 
         // 新しい操作履歴を作成（CREATEDに戻る）
         Workflow newOp = copyWorkflowData(latest);
@@ -348,10 +346,12 @@ public class WorkflowService {
      * ワークフロー一覧取得
      * @param state 状態（オプション）
      * @param workflowType ワークフロータイプ（オプション）
+     * @param employeeId ログイン中の社員ID（CREATED状態のフィルタリング用）
      * @return ワークフローTOのリスト
      */
-    public List<WorkflowTO> getWorkflows(String state, String workflowType) {
-        logger.info("[ WorkflowService#getWorkflows ] state={}, workflowType={}", state, workflowType);
+    public List<WorkflowTO> getWorkflows(String state, String workflowType, Long employeeId) {
+        logger.info("[ WorkflowService#getWorkflows ] state={}, workflowType={}, employeeId={}", 
+                    state, workflowType, employeeId);
 
         List<Workflow> workflows;
 
@@ -365,9 +365,86 @@ public class WorkflowService {
             workflows = workflowDao.findAllLatest();
         }
 
+        // CREATED状態のワークフローは作成者本人のみ閲覧可能
+        // APPLIED状態のワークフローは承認権限がある人のみ閲覧可能
+        if (employeeId != null) {
+            Employee employee = employeeDao.findById(employeeId);
+            workflows = workflows.stream()
+                    .filter(w -> {
+                        // CREATED状態: 作成者本人のみ
+                        if (WorkflowStateType.CREATED.name().equals(w.getState())) {
+                            return w.getOperatedBy().equals(employeeId);
+                        }
+                        // APPLIED状態: 作成者本人または承認権限がある人
+                        else if (WorkflowStateType.APPLIED.name().equals(w.getState())) {
+                            // 作成者（CREATE操作を行った人）を取得
+                            List<Workflow> history = workflowDao.findByWorkflowId(w.getWorkflowId());
+                            if (!history.isEmpty()) {
+                                Workflow firstOp = history.get(0);
+                                Long creatorId = firstOp.getOperatedBy();
+                                
+                                // 自分が作成者の場合は表示
+                                if (creatorId.equals(employeeId)) {
+                                    return true;
+                                }
+                                
+                                // 承認権限があるかチェック
+                                return hasApprovalAuthority(employee, creatorId);
+                            }
+                            return false;
+                        }
+                        // APPROVED状態: すべて表示
+                        return true;
+                    })
+                    .collect(Collectors.toList());
+        }
+
         return workflows.stream()
                 .map(this::convertToWorkflowTO)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 承認権限があるかチェック（例外を投げない版）
+     * @param approver 承認者
+     * @param creatorId 作成者ID
+     * @return 承認権限がある場合true
+     */
+    private boolean hasApprovalAuthority(Employee approver, Long creatorId) {
+        if (approver == null) {
+            return false;
+        }
+
+        // 承認者の職務ランクチェック（MANAGER以上）
+        JobRankType approverJobRank;
+        try {
+            approverJobRank = JobRankType.fromRank(approver.getJobRank());
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+
+        if (!approverJobRank.isAtLeast(JobRankType.MANAGER)) {
+            return false;
+        }
+
+        // DIRECTORは全部署の明細を参照可能
+        if (approverJobRank == JobRankType.DIRECTOR) {
+            return true;
+        }
+
+        // 作成者を取得
+        Employee creator = employeeDao.findById(creatorId);
+        if (creator == null) {
+            return false;
+        }
+
+        // 同じ部署かチェック（MANAGER向け）
+        if (approver.getDepartment() == null || creator.getDepartment() == null) {
+            return false;
+        }
+
+        return approver.getDepartment().getDepartmentId()
+                .equals(creator.getDepartment().getDepartmentId());
     }
 
     /**
@@ -399,6 +476,11 @@ public class WorkflowService {
                 "承認権限がありません。MANAGER以上の職務ランクが必要です。");
         }
 
+        // DIRECTORは全部署の明細を参照・承認可能
+        if (approverJobRank == JobRankType.DIRECTOR) {
+            return;
+        }
+
         // 最初の操作（CREATE）から申請者を取得
         List<Workflow> history = workflowDao.findByWorkflowId(workflowId);
         if (history.isEmpty()) {
@@ -411,7 +493,7 @@ public class WorkflowService {
             throw new IllegalArgumentException("申請者が存在しません: " + firstOp.getOperatedBy());
         }
 
-        // 同じ部署かチェック
+        // 同じ部署かチェック（MANAGER向け）
         if (!approver.getDepartment().getDepartmentId()
                 .equals(requester.getDepartment().getDepartmentId())) {
             throw new UnauthorizedApprovalException(
@@ -429,7 +511,7 @@ public class WorkflowService {
         WorkflowType workflowType = WorkflowType.valueOf(workflow.getWorkflowType());
 
         switch (workflowType) {
-            case CREATE:
+            case ADD_NEW_BOOK:
                 // 新規書籍追加
                 Book newBook = new Book();
                 newBook.setBookName(workflow.getBookName());
@@ -443,32 +525,28 @@ public class WorkflowService {
                 
                 newBook.setPrice(workflow.getPrice());
                 newBook.setImageUrl(workflow.getImageUrl());
+                newBook.setDeleted(false);
+                
+                // 在庫情報も設定（SecondaryTableなので同時にINSERTされる）
+                newBook.setQuantity(0);
+                newBook.setVersion(0L);
                 
                 em.persist(newBook);
                 em.flush();  // BOOKIDを取得するためにflush
-                logger.info("新規書籍を追加しました: bookId={}, bookName={}", 
+                logger.info("新規書籍と在庫情報を追加しました: bookId={}, bookName={}, quantity=0", 
                            newBook.getBookId(), newBook.getBookName());
-                
-                // STOCKテーブルにも在庫数0でINSERT
-                Stock newStock = new Stock();
-                newStock.setBookId(newBook.getBookId());
-                newStock.setQuantity(0);
-                newStock.setVersion(0L);
-                em.persist(newStock);
-                logger.info("在庫情報を追加しました: bookId={}, quantity=0", newBook.getBookId());
                 break;
 
-            case DELETE:
+            case REMOVE_BOOK:
                 // 書籍削除（論理削除）
                 Book bookToDelete = bookDao.findById(workflow.getBookId());
                 if (bookToDelete != null) {
-                    // DELETED列がないため、コメントアウト
-                    // bookToDelete.setDeleted(true);
+                    bookToDelete.setDeleted(true);
                     logger.info("書籍を論理削除しました: bookId={}", workflow.getBookId());
                 }
                 break;
 
-            case PRICE_TEMP_ADJUSTMENT:
+            case ADJUST_BOOK_PRICE:
                 // 価格の一時変更
                 Book bookToUpdate = bookDao.findById(workflow.getBookId());
                 if (bookToUpdate != null) {
@@ -532,6 +610,23 @@ public class WorkflowService {
         to.setOperatedAt(workflow.getOperatedAt());
         to.setOperationReason(workflow.getOperationReason());
 
+        // bookIdがあるがbookNameがない場合、書籍情報を取得
+        if (workflow.getBookId() != null && workflow.getBookName() == null) {
+            Book book = bookDao.findById(workflow.getBookId());
+            if (book != null) {
+                to.setBookName(book.getBookName());
+            }
+        }
+
+        // 価格改定の場合、元の価格を設定
+        if (WorkflowType.ADJUST_BOOK_PRICE.name().equals(workflow.getWorkflowType()) 
+                && workflow.getBookId() != null) {
+            Book book = bookDao.findById(workflow.getBookId());
+            if (book != null) {
+                to.setOriginalPrice(book.getPrice());
+            }
+        }
+
         // 関連エンティティの情報を設定
         if (workflow.getOperator() != null) {
             to.setOperatorName(workflow.getOperator().getEmployeeName());
@@ -541,6 +636,19 @@ public class WorkflowService {
             if (workflow.getOperator().getDepartment() != null) {
                 to.setDepartmentId(workflow.getOperator().getDepartment().getDepartmentId());
                 to.setDepartmentName(workflow.getOperator().getDepartment().getDepartmentName());
+            }
+        } else if (workflow.getOperatedBy() != null) {
+            // operatorがロードされていない場合、operatedByから取得
+            Employee operator = employeeDao.findById(workflow.getOperatedBy());
+            if (operator != null) {
+                to.setOperatorName(operator.getEmployeeName());
+                to.setOperatorCode(operator.getEmployeeCode());
+                to.setJobRank(operator.getJobRank());
+                
+                if (operator.getDepartment() != null) {
+                    to.setDepartmentId(operator.getDepartment().getDepartmentId());
+                    to.setDepartmentName(operator.getDepartment().getDepartmentName());
+                }
             }
         }
 

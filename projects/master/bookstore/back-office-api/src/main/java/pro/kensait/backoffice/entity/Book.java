@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -21,6 +23,7 @@ public class Book implements Serializable {
     private static final long serialVersionUID = 1L;
     // 書籍ID
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BOOK_ID")
     private Integer bookId;
 
@@ -52,6 +55,10 @@ public class Book implements Serializable {
     @Column(name = "IMAGE_URL")
     private String imageUrl;
 
+    // 削除フラグ
+    @Column(name = "DELETED")
+    private Boolean deleted;
+
     // 在庫数
     @Column(table = "STOCK", name = "QUANTITY")
     private Integer quantity;
@@ -66,7 +73,7 @@ public class Book implements Serializable {
 
     // コンストラクタ
     public Book(Integer bookId, String bookName, String author, Category category, 
-            Publisher publisher, BigDecimal price, String imageUrl, Integer quantity, Long version) {
+            Publisher publisher, BigDecimal price, String imageUrl, Boolean deleted, Integer quantity, Long version) {
         this.bookId = bookId;
         this.bookName = bookName;
         this.author = author;
@@ -74,6 +81,7 @@ public class Book implements Serializable {
         this.publisher = publisher;
         this.price = price;
         this.imageUrl = imageUrl;
+        this.deleted = deleted;
         this.quantity = quantity;
         this.version = version;
     }
@@ -133,6 +141,14 @@ public class Book implements Serializable {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
     public Integer getQuantity() {

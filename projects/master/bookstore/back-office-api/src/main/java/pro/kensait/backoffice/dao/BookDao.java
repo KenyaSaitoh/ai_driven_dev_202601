@@ -31,12 +31,12 @@ public class BookDao {
         return em.find(Book.class, bookId);
     }
 
-    // DAOメソッド：全書籍を取得
+    // DAOメソッド：全書籍を取得（削除済み書籍を除く）
     public List<Book> findAll() {
         logger.info("[ BookDao#findAll ]");
         
         TypedQuery<Book> query = em.createQuery(
-                "SELECT b FROM Book b", Book.class);
+                "SELECT b FROM Book b WHERE (b.deleted = false OR b.deleted IS NULL)", Book.class);
         
         List<Book> books = query.getResultList();
         
@@ -48,12 +48,13 @@ public class BookDao {
         return books;
     }
 
-    // DAOメソッド：カテゴリIDで書籍を検索
+    // DAOメソッド：カテゴリIDで書籍を検索（削除済み書籍を除く）
     public List<Book> queryByCategory(Integer categoryId) {
         logger.info("[ BookDao#queryByCategory ]");
         
         TypedQuery<Book> query = em.createQuery(
-                "SELECT b FROM Book b WHERE b.category.categoryId = :categoryId", 
+                "SELECT b FROM Book b WHERE b.category.categoryId = :categoryId " +
+                "AND (b.deleted = false OR b.deleted IS NULL)", 
                 Book.class);
         query.setParameter("categoryId", categoryId);
         
@@ -67,12 +68,13 @@ public class BookDao {
         return books;
     }
 
-    // DAOメソッド：キーワードで書籍を検索
+    // DAOメソッド：キーワードで書籍を検索（削除済み書籍を除く）
     public List<Book> queryByKeyword(String keyword) {
         logger.info("[ BookDao#queryByKeyword ]");
         
         TypedQuery<Book> query = em.createQuery(
-                "SELECT b FROM Book b WHERE b.bookName like :keyword", 
+                "SELECT b FROM Book b WHERE b.bookName like :keyword " +
+                "AND (b.deleted = false OR b.deleted IS NULL)", 
                 Book.class);
         query.setParameter("keyword", keyword);
         
@@ -86,13 +88,14 @@ public class BookDao {
         return books;
     }
 
-    // DAOメソッド：カテゴリIDとキーワードで書籍を検索
+    // DAOメソッド：カテゴリIDとキーワードで書籍を検索（削除済み書籍を除く）
     public List<Book> query(Integer categoryId, String keyword) {
         logger.info("[ BookDao#query ]");
         
         TypedQuery<Book> query = em.createQuery(
                 "SELECT b FROM Book b WHERE b.category.categoryId = :categoryId " +
-                "AND b.bookName like :keyword", 
+                "AND b.bookName like :keyword " +
+                "AND (b.deleted = false OR b.deleted IS NULL)", 
                 Book.class);
         query.setParameter("categoryId", categoryId);
         query.setParameter("keyword", keyword);
@@ -107,7 +110,7 @@ public class BookDao {
         return books;
     }
 
-    // DAOメソッド：動的クエリで書籍を検索（Criteria API）
+    // DAOメソッド：動的クエリで書籍を検索（Criteria API、削除済み書籍を除く）
     public List<Book> searchWithCriteria(Integer categoryId, String keyword) {
         logger.info("[ BookDao#searchWithCriteria ]");
         
@@ -117,6 +120,12 @@ public class BookDao {
 
         // 動的に条件を構築
         List<Predicate> predicates = new ArrayList<>();
+        
+        // 削除済み書籍を除外
+        predicates.add(cb.or(
+            cb.equal(book.get("deleted"), false),
+            cb.isNull(book.get("deleted"))
+        ));
         
         if (categoryId != null) {
             predicates.add(cb.equal(

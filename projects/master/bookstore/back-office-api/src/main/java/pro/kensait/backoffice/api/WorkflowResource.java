@@ -116,19 +116,22 @@ public class WorkflowResource {
 
     /**
      * ワークフロー一覧取得
-     * GET /api/workflows?state=xxx&workflowType=xxx
+     * GET /api/workflows?state=xxx&workflowType=xxx&employeeId=xxx
      * @param state 状態（オプション）
      * @param workflowType ワークフロータイプ（オプション）
+     * @param employeeId ログイン中の社員ID（CREATED状態のフィルタリング用）
      * @return 200 OK + List<WorkflowTO>
      */
     @GET
     public Response getWorkflows(
             @QueryParam("state") String state,
-            @QueryParam("workflowType") String workflowType) {
-        logger.info("[ WorkflowResource#getWorkflows ] state={}, workflowType={}", state, workflowType);
+            @QueryParam("workflowType") String workflowType,
+            @QueryParam("employeeId") Long employeeId) {
+        logger.info("[ WorkflowResource#getWorkflows ] state={}, workflowType={}, employeeId={}", 
+                    state, workflowType, employeeId);
 
         try {
-            List<WorkflowTO> workflows = workflowService.getWorkflows(state, workflowType);
+            List<WorkflowTO> workflows = workflowService.getWorkflows(state, workflowType, employeeId);
             return Response.ok(workflows).build();
         } catch (Exception e) {
             logger.error("ワークフロー一覧取得エラー", e);

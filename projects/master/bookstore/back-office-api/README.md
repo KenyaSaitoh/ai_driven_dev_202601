@@ -5,7 +5,7 @@
 Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオンライン書店「**Berry Books**」のREST APIアプリケーションです。
 書籍・在庫管理機能をRESTful APIとして提供します。
 
-> **Note:** このプロジェクトは`berry-books-api`プロジェクトと同じデータベースを共有します。
+> **Note:** このプロジェクトはbookstoreドメインの3つのREST API（berry-books-api、back-office-api、customer-hub-api）の1つです。各APIは独立して動作し、必要に応じて相互に連携します。
 
 ## 🔧 使用している技術
 
@@ -37,44 +37,77 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 - Payara Server 6（プロジェクトルートの`payara6/`に配置）
 - HSQLDB（プロジェクトルートの`hsqldb/`に配置）
 
-> **Note:** ① と ② の手順は、ルートの`README.md`を参照してください。
+> **Note:** すべてのコマンドはプロジェクトルート（`ai_driven_dev_202601/`）で実行します。
+> 
+> ① と ② の手順は、ルートの`README.md`または [bookstoreのREADME.md](../README.md) を参照してください。
 
 ### ③ 依存関係の確認
 
 このプロジェクトを開始する前に、以下が起動していることを確認してください：
 
+**プロジェクトルートで実行:**
+
 - **① HSQLDBサーバー** （`./gradlew startHsqldb`）
 - **② Payara Server** （`./gradlew startPayara`）
+- **③ データソース** （`./gradlew setupDataSource`）
 
 ### ④ プロジェクトを開始するときに1回だけ実行
 
-> **Note:** データベースのセットアップは`berry-books-api`プロジェクトで行います。  
-> まだ実行していない場合は、先に以下を実行してください：
-> ```bash
-> ./gradlew :berry-books-api:setupHsqldb
-> ```
+> **Note:** bookstoreドメインの3つのAPIは並列で開発できます。必要なAPIのみをセットアップしてください。
+
+#### データベースセットアップ（各APIごと）
 
 ```bash
-# 1. プロジェクトをビルド
-./gradlew :back-office-api:war
-
-# 2. プロジェクトをデプロイ
-./gradlew :back-office-api:deploy
+# プロジェクトルートで実行
+./gradlew :berry-books-api:setupHsqldb      # 注文管理テーブル
+./gradlew :back-office-api:setupHsqldb      # 書籍・在庫テーブル
+./gradlew :customer-hub-api:setupHsqldb     # 顧客テーブル
 ```
+
+#### ビルド
+
+```bash
+# プロジェクトルートで実行
+./gradlew :berry-books-api:war
+./gradlew :back-office-api:war
+./gradlew :customer-hub-api:war
+```
+
+#### デプロイ
+
+```bash
+# プロジェクトルートで実行
+./gradlew :berry-books-api:deploy
+./gradlew :back-office-api:deploy
+./gradlew :customer-hub-api:deploy
+```
+
+> **Note:** 各APIは独立しているため、必要なAPIのみをビルド・デプロイできます。
 
 ### ⑤ プロジェクトを終了するときに1回だけ実行（CleanUp）
 
 ```bash
-# プロジェクトをアンデプロイ
+# プロジェクトルートで実行
+./gradlew :berry-books-api:undeploy
 ./gradlew :back-office-api:undeploy
+./gradlew :customer-hub-api:undeploy
 ```
 
 ### ⑥ アプリケーション作成・更新のたびに実行
 
 ```bash
 # アプリケーションを再ビルドして再デプロイ
+# 例：berry-books-apiの場合
+./gradlew :berry-books-api:war
+./gradlew :berry-books-api:deploy
+
+# 例：back-office-apiの場合
 ./gradlew :back-office-api:war
 ./gradlew :back-office-api:deploy
+
+# 例：customer-hub-apiの場合
+./gradlew :customer-hub-api:war
+./gradlew :customer-hub-api:deploy
 ```
 
 ## 📍 APIエンドポイント
@@ -133,12 +166,14 @@ curl -X GET http://localhost:8080/back-office-api/api/categories
 #### すべてのテストを実行
 
 ```bash
+# プロジェクトルートで実行
 ./gradlew :back-office-api:test
 ```
 
 #### 特定のテストクラスを実行
 
 ```bash
+# プロジェクトルートで実行
 # BookServiceのテストのみを実行
 ./gradlew :back-office-api:test --tests "*BookServiceTest"
 ```
@@ -146,6 +181,7 @@ curl -X GET http://localhost:8080/back-office-api/api/categories
 #### テストの継続的実行（変更検知）
 
 ```bash
+# プロジェクトルートで実行
 ./gradlew :back-office-api:test --continuous
 ```
 
@@ -288,18 +324,23 @@ Database (HSQLDB)
 ### アプリケーションのアンデプロイ
 
 ```bash
+# プロジェクトルートで実行
+./gradlew :berry-books-api:undeploy
 ./gradlew :back-office-api:undeploy
+./gradlew :customer-hub-api:undeploy
 ```
 
 ### Payara Server全体を停止
 
 ```bash
+# プロジェクトルートで実行
 ./gradlew stopPayara
 ```
 
 ### HSQLDBサーバーを停止
 
 ```bash
+# プロジェクトルートで実行
 ./gradlew stopHsqldb
 ```
 
@@ -308,6 +349,7 @@ Database (HSQLDB)
 別のターミナルでログをリアルタイム監視：
 
 ```bash
+# プロジェクトルートで実行
 tail -f -n 50 payara6/glassfish/domains/domain1/logs/server.log
 ```
 
@@ -318,23 +360,44 @@ tail -f -n 50 payara6/glassfish/domains/domain1/logs/server.log
 データベースを初期状態に戻したい場合：
 
 ```bash
-# HSQLDBサーバーを停止
+# プロジェクトルートで実行
+
+# 1. HSQLDBサーバーを停止
 ./gradlew stopHsqldb
 
-# データファイルを削除
+# 2. データファイルを削除
 rm -f hsqldb/data/testdb.*
 
-# HSQLDBサーバーを再起動
+# 3. HSQLDBサーバーを再起動
 ./gradlew startHsqldb
 
-# 初期データをセットアップ
-./gradlew :berry-books-api:setupHsqldb
+# 4. 初期データをセットアップ（各APIごと）
+./gradlew :berry-books-api:setupHsqldb      # 注文管理テーブル
+./gradlew :back-office-api:setupHsqldb      # 書籍・在庫テーブル
+./gradlew :customer-hub-api:setupHsqldb     # 顧客テーブル
 ```
 
 ## 🔗 関連プロジェクト
 
-- **berry-books-api**: 注文管理API（このプロジェクトのAPIを呼び出す）
-- **customer-hub-api**: 顧客管理API
+bookstoreドメインの他のプロジェクト：
+
+### REST API（バックエンド）
+
+- **berry-books-api**: 注文管理REST API（書籍の注文処理、認証・認可、JWT認証）
+- **back-office-api**: 書籍・在庫管理REST API（このプロジェクト）
+- **customer-hub-api**: 顧客管理REST API（顧客情報のCRUD操作）
+
+### SPA（フロントエンド）
+
+- **berry-books-spa**: 注文管理フロントエンド（React + TypeScript）
+- **back-office-spa**: 書籍管理フロントエンド（React + TypeScript）
+- **customer-hub-spa**: 顧客管理フロントエンド（React + TypeScript）
+
+### Desktop
+
+- **customer-hub-swing**: 顧客管理デスクトップアプリケーション（Java Swing）
+
+詳細は [projects/master/bookstore/README.md](../README.md) を参照してください。
 
 ## 📖 参考リンク
 

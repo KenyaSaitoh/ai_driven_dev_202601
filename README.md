@@ -2,28 +2,27 @@
 
 ## 📖 概要
 
-Jakarta EE 10とPayara Serverを使用したWebアプリケーションの学習プロジェクト集です。
-Servlet/JSP、JSF、CDI、JAX-RSを段階的に学習できます。
+Jakarta EE 10とReactを使用したフルスタックWebアプリケーションの学習プロジェクト集です。
+
+- **バックエンド**: Jakarta EE 10（JAX-RS, CDI, JPA）+ Payara Server
+- **フロントエンド**: React + TypeScript + Vite
+- **レガシー**: Servlet/JSP、JSF（段階的学習用）
 
 ### 📌 代表プロジェクト（クイックスタート推奨）
 
-以下の3つのプロジェクトは、Jakarta EE 10のREST API開発を学習するための代表的なプロジェクトです：
-
-1. **berry-books-api** - 注文管理REST API
-   - 書籍の注文処理、認証・認可、JWT認証
+**Bookstoreドメイン**のフルスタックプロジェクトから始めることをお勧めします：
    
-2. **back-office-api** - 書籍・在庫管理REST API
-   - 書籍マスター、出版社・カテゴリ管理、在庫管理
+- **REST API**（バックエンド）: berry-books-api、back-office-api、customer-hub-api
+- **SPA**（フロントエンド）: berry-books-spa、back-office-spa、customer-hub-spa
    
-3. **customer-hub-api** - 顧客管理REST API
-   - 顧客情報のCRUD操作、シンプルなREST API実装
+詳細は [projects/master/bookstore/README.md](projects/master/bookstore/README.md) を参照してください。
 
 ## 📁 プロジェクト構成
 
 このリポジトリは複数の技術スタックを含むマルチプロジェクト構成です。
 プロジェクトは以下の3つのカテゴリに分類されています。
 
-> **Note**: このREADMEでは、代表的な3つのプロジェクト（berry-books-api、back-office-api、customer-hub-api）を中心に説明します。その他のプロジェクトについては、各プロジェクトのREADME.mdを参照してください。
+> **Note**: このREADMEでは、環境全体のセットアップと基本的なコマンドを説明します。個別のプロジェクトについては、各ドメインフォルダやプロジェクトのREADME.mdを参照してください（例：[projects/master/bookstore/README.md](projects/master/bookstore/README.md)）。
 
 ### プロジェクトカテゴリ
 
@@ -48,12 +47,13 @@ ai_driven_dev_202601/
 │   │   ├── accounting/                              # 会計ドメイン
 │   │   │   └── accounting_etl/                      # ERP会計統合ETL【完成版】
 │   │   ├── bookstore/                               # 書店ドメイン
-│   │   │   ├── berry-books-api/                     # Berry Books REST API（注文管理）【完成版】
-│   │   │   ├── berry-books-spa/                     # Berry Books SPA (React)【完成版】
-│   │   │   ├── customer-hub-api/                    # Customer Hub REST API（顧客管理）【完成版】
-│   │   │   ├── customer-hub-spa/                    # Customer Hub SPA (React)【完成版】
-│   │   │   ├── customer-hub-swing/                  # Customer Hub Swing【完成版】
-│   │   │   └── back-office-api/                 # Book Backoffice REST API（書籍・在庫管理）【完成版】
+│   │   │   ├── berry-books-api/                     # REST API: 注文管理【完成版】
+│   │   │   ├── berry-books-spa/                     # SPA: 注文管理フロントエンド (React+TS)【完成版】
+│   │   │   ├── back-office-api/                     # REST API: 書籍・在庫管理【完成版】
+│   │   │   ├── back-office-spa/                     # SPA: 書籍管理フロントエンド (React+TS)【完成版】
+│   │   │   ├── customer-hub-api/                    # REST API: 顧客管理【完成版】
+│   │   │   ├── customer-hub-spa/                    # SPA: 顧客管理フロントエンド (React+TS)【完成版】
+│   │   │   └── customer-hub-swing/                  # Desktop: 顧客管理 (Swing)【完成版】
 │   │   └── person/                                  # 人物管理ドメイン
 │   │       ├── jsf-person/                          # Person管理（JSF + JPA）【完成版】
 │   │       └── struts-person/                       # Person管理（Struts 1.3 + EJB）【完成版】
@@ -67,8 +67,8 @@ ai_driven_dev_202601/
 │   └── vibe/                                        # Vibe Coding（バイブコーディング）プロジェクト（研修用）
 │       ├── accounting/                              # 会計ドメイン（プレースホルダー）
 │       └── bookstore/                               # 書店ドメイン
-│           ├── berry-books-api-vibe/                # Berry Books REST API（Vibe Coding研修用）
-│           └── customer-hub-spa-vibe/               # Customer Hub SPA (React, Vibe Coding研修用）
+│           ├── berry-books-api-vibe/                # REST API: 注文管理（Vibe Coding研修用）
+│           └── customer-hub-spa-vibe/               # SPA: 顧客管理 (React+TS, Vibe Coding研修用）
 │
 ├── payara6/                                         # Payara Server 6
 ├── hsqldb/                                          # HSQLDB Database Server
@@ -83,10 +83,20 @@ ai_driven_dev_202601/
 
 ### 前提条件
 
+#### バックエンド開発
+
 - **JDK 21以上**
 - **Gradle 8.x以上**
 - **Payara Server 6** (プロジェクトルートの`payara6/`に配置済み)
 - **HSQLDB** (プロジェクトルートの`hsqldb/`に配置済み)
+
+#### フロントエンド開発
+
+- **Node.js 18以上**
+- **npm または yarn**
+
+#### 共通
+
 - **Windows**: Git Bash（Gradleコマンド実行用）
 
 > **Note**: すべてのコマンドはbash形式（`./gradlew`）です。WindowsではGit Bashを使用してください。
@@ -111,10 +121,10 @@ chmod +x projects/sdd/accounting/accounting_etl_sdd/*.sh
 
 > **Note**: このステップはmacOS/Linuxのみ必要です。Windowsでは不要です。
 
-### ③ 研修開催につき初回に1回だけ実行
+### ③ 研修開催につき初回に1回だけ実行（バックエンド環境）
 
 ```bash
-# 1. Payara Serverのdomain.xmlを初期化（クリーンな状態にリセット）
+# 1. Payara Serverのdomain.xmlを初期化
 ./gradlew initPayaraDomainConfig
 
 # 2. HSQLDBサーバーを起動
@@ -123,14 +133,8 @@ chmod +x projects/sdd/accounting/accounting_etl_sdd/*.sh
 # 3. Payara Serverを起動
 ./gradlew startPayara
 
-# 4. データソースをセットアップ（既存削除→コネクションプール作成→データソース作成）
+# 4. データソースをセットアップ
 ./gradlew setupDataSource
-
-# ※ setupDataSourceは以下を自動実行します：
-#   1. deleteDataSource（既存のデータソースを削除）
-#   2. deleteConnectionPool（既存の接続プールを削除）
-#   3. createConnectionPool（新しい接続プールを作成）
-#   4. createDataSource（新しいデータソースを作成）
 ```
 
 ### ④ 研修開催につき最後に1回だけ実行（CleanUp）
@@ -144,119 +148,117 @@ chmod +x projects/sdd/accounting/accounting_etl_sdd/*.sh
 ./gradlew stopHsqldb
 ```
 
-### ⑤ プロジェクトを開始するときに1回だけ実行
+### ⑤ プロジェクトを開始する
+
+#### バックエンド（REST API）
 
 ```bash
-# プロジェクトのデータベーステーブルとデータを作成
-./gradlew :berry-books-api:setupHsqldb      # 注文管理テーブル
-./gradlew :back-office-api:setupHsqldb      # 書籍・在庫テーブル
-./gradlew :customer-hub-api:setupHsqldb     # 顧客テーブル
+# データベーステーブルとデータを作成
+./gradlew :<api-project-name>:setupHsqldb
+
+# ビルド＆デプロイ
+./gradlew :<api-project-name>:war
+./gradlew :<api-project-name>:deploy
 ```
 
+#### フロントエンド（SPA）
+
 ```bash
-# プロジェクトをビルド
-./gradlew :berry-books-api:war
-./gradlew :back-office-api:war
-./gradlew :customer-hub-api:war
+# SPAプロジェクトディレクトリに移動
+cd projects/master/<domain>/<spa-project-name>
+
+# 依存関係をインストール（初回のみ）
+npm install
+
+# 開発サーバーを起動
+npm run dev
 ```
 
+> **Note**: 具体的なコマンドについては、各ドメインのREADME.mdを参照してください（例：[projects/master/bookstore/README.md](projects/master/bookstore/README.md)）。
+
+### ⑥ プロジェクトを終了する
+
+**バックエンド（REST API）:**
 ```bash
-# プロジェクトをデプロイ
-./gradlew :berry-books-api:deploy
-./gradlew :back-office-api:deploy
-./gradlew :customer-hub-api:deploy
+./gradlew :<api-project-name>:undeploy
 ```
 
-### ⑥ プロジェクトを終了するときに1回だけ実行（CleanUp）
-
+**フロントエンド（SPA）:**
 ```bash
-# プロジェクトをアンデプロイ
-./gradlew :berry-books-api:undeploy
-./gradlew :back-office-api:undeploy
-./gradlew :customer-hub-api:undeploy
+# 開発サーバーのターミナルで Ctrl+C
 ```
 
-### ⑦ アプリケーション作成・更新のたびに実行
+### ⑦ アプリケーション更新時
 
+**バックエンド（REST API）:**
 ```bash
-# アプリケーションを再ビルドして再デプロイ
-# 例：berry-books-apiの場合
-./gradlew :berry-books-api:war
-./gradlew :berry-books-api:deploy
+./gradlew :<api-project-name>:war
+./gradlew :<api-project-name>:deploy
+```
 
-# 例：back-office-apiの場合
-./gradlew :back-office-api:war
-./gradlew :back-office-api:deploy
-
-# 例：customer-hub-apiの場合
-./gradlew :customer-hub-api:war
-./gradlew :customer-hub-api:deploy
+**フロントエンド（SPA）:**
+```bash
+# ファイル保存で自動再読み込み（HMR）
+# プロダクションビルドの場合: npm run build
 ```
 
 ## 🧹 仕様駆動開発（SDD）プロジェクトの成果物クリーンアップ
 
 **berry-books-api-sdd** プロジェクトは、仕様駆動開発により何度でも再実装できます。
 
-### 成果物をクリーンアップ（ディレクトリ構造は保持）
-
 ```bash
 # berry-books-api-sddの成果物をクリーンアップ
 ./gradlew :berry-books-api-sdd:cleanSddArtifacts
 ```
 
-**このタスクが削除するもの:**
-- `src/` 配下のすべてのファイル（Java、XHTML、CSS、設定ファイルなど）
-- `sql/hsqldb/` 配下のすべてのSQLファイル
-
-**このタスクが保持するもの:**
-- 以下のディレクトリ構造（空のディレクトリも含む）：
-  - `src/main/java`
-  - `src/main/resources/META-INF`
-  - `src/main/webapp/resources`
-  - `src/main/webapp/WEB-INF`
-  - `src/test/java`
-  - `src/test/resources`
-  - `sql/hsqldb`
-- `specs/` フォルダ（SPEC）
-- `instructions/` フォルダ（インストラクション）
-- `memory/` フォルダ（憲章）
-- その他のプロジェクト設定ファイル
-
-**クリーンアップ後の再実装:**
-1. `@instructions/generate_tasks.md` を使ってタスクリストを生成
-2. `@instructions/generate_code.md` を使ってタスクに従って実装
-
-詳細は `projects/sdd/bookstore/berry-books-api-sdd/README.md` を参照してください。
+詳細は [projects/sdd/bookstore/berry-books-api-sdd/README.md](projects/sdd/bookstore/berry-books-api-sdd/README.md) を参照してください。
 
 ---
 
 ## 🌐 アプリケーションへのアクセス
 
-プロジェクトごとのアクセスURL例：
+### バックエンド（REST API）
+
+Payara Server上で動作（ポート: 8080）：
 
 ```
-# Berry Books API（注文管理）
-http://localhost:8080/berry-books-api/api/books
-
-# Back Office API（書籍・在庫管理）
-http://localhost:8080/back-office-api/api/books
-
-# Customer Hub API（顧客管理）
-http://localhost:8080/customer-hub-api/customers/1
+http://localhost:8080/<context-root>/api/...
 ```
 
-### ログイン情報
+### フロントエンド（SPA）
 
-- **メールアドレス**: alice@gmail.com
-- **パスワード**: password
+Vite開発サーバー上で動作：
 
-## 📊 ログをリアルタイム監視（別のターミナル）
+```
+http://localhost:5173   # berry-books-spa
+http://localhost:5174   # back-office-spa
+http://localhost:3000   # customer-hub-spa
+```
+
+> **Note**: SPAは開発サーバー起動時にポート番号が自動的に割り当てられます。ターミナルに表示されるURLを確認してください。
+
+各プロジェクト固有のアクセスURL、ログイン情報などの詳細は、各ドメインのREADME.mdを参照してください（例：[projects/master/bookstore/README.md](projects/master/bookstore/README.md)）。
+
+## 📊 ログをリアルタイム監視
+
+### バックエンド（Payara Server）
+
+別のターミナルでサーバーログを監視：
 
 ```bash
 tail -f -n 50 payara6/glassfish/domains/domain1/logs/server.log
 ```
 
 > **Note**: Windowsでは**Git Bash**を使用してください。
+
+### フロントエンド（SPA）
+
+開発サーバー起動時のターミナルに自動的にログが表示されます：
+
+- HTTP リクエスト
+- HMR（Hot Module Replacement）の更新
+- ビルドエラー・警告
+- TypeScriptの型チェックエラー
 
 ## 📋 Gradle タスク
 
@@ -329,8 +331,8 @@ Excelファイル (.xlsx) を検索してZIP展開するタスクです。Excel�
 **実行例:**
 
 ```bash
-# berry-books-apiのspecディレクトリを対象にする場合
-./gradlew exploreExcelFiles -PtargetDir=projects/master/bookstore/berry-books-api/spec
+# 特定のプロジェクトのspecディレクトリを対象にする場合
+./gradlew exploreExcelFiles -PtargetDir=projects/master/<domain>/<project-name>/spec
 ```
 
 **処理内容:**
@@ -343,7 +345,7 @@ Excelファイル (.xlsx) を検索してZIP展開するタスクです。Excel�
 **出力例:**
 
 ```
-projects/master/bookstore/berry-books-api/spec/
+projects/master/<domain>/<project-name>/spec/
 ├── 設計書.xlsx
 └── 20251029_143025/        # タイムスタンプフォルダ
     ├── [Content_Types].xml
@@ -373,19 +375,19 @@ projects/master/bookstore/berry-books-api/spec/
 
 コマンドラインからSQLを実行する場合は、SqlToolを使用します：
 
-**Windows PowerShell / CMD の場合:**
-```powershell
-java -cp "hsqldb\lib\hsqldb.jar;hsqldb\lib\sqltool.jar" org.hsqldb.cmdline.SqlTool --rcFile hsqldb\sqltool.rc testdb
+**Windows (Git Bash) の場合:**
+```bash
+java -cp "hsqldb/lib/hsqldb.jar;hsqldb/lib/sqltool.jar" org.hsqldb.cmdline.SqlTool --rcFile hsqldb/sqltool.rc testdb
 ```
 
-**Git Bash / macOS / Linux の場合:**
+**macOS / Linux の場合:**
 ```bash
 java -cp "hsqldb/lib/hsqldb.jar:hsqldb/lib/sqltool.jar" org.hsqldb.cmdline.SqlTool --rcFile hsqldb/sqltool.rc testdb
 ```
 
 > **重要**: 
-> - **PowerShell/CMD**: クラスパス区切りは `;`、パス区切りは `\`
-> - **Git Bash/Unix**: クラスパス区切りは `:`、パス区切りは `/`
+> - **Windows (Git Bash)**: クラスパス区切りは `;`（Javaに渡す引数はWindowsネイティブ形式）
+> - **macOS/Linux**: クラスパス区切りは `:`
 
 接続設定は`hsqldb/sqltool.rc`に記述されています。
 
@@ -409,6 +411,8 @@ SELECT * FROM PERSON;
 
 研修終了時に環境をクリーンアップするには：
 
+### バックエンド
+
 ```bash
 # すべてのアプリ、データソース、コネクションプールを削除
 ./gradlew cleanupAll
@@ -418,22 +422,51 @@ SELECT * FROM PERSON;
 ./gradlew stopHsqldb
 ```
 
+### フロントエンド
+
+```bash
+# 開発サーバーを停止（各SPAのターミナルで Ctrl+C）
+
+# （オプション）node_modulesを削除してディスク容量を節約
+cd projects/master/<domain>/<spa-project-name>
+rm -rf node_modules
+```
+
 ## 🔧 使用技術
+
+### バックエンド
 
 | カテゴリ | 技術 | バージョン |
 |---------|------|----------|
 | **Java** | JDK | 21+ |
 | **アプリケーションサーバー** | Payara Server | 6 |
 | **Jakarta EE** | Platform | 10.0 |
+| **JAX-RS** | Jakarta RESTful Web Services | 3.1 |
+| **CDI** | Jakarta CDI | 4.0 |
+| **JPA** | Jakarta Persistence | 3.1 |
+| **データベース** | HSQLDB | 2.7.x |
+| **ビルドツール** | Gradle | 8.x+ |
+
+### フロントエンド
+
+| カテゴリ | 技術 | バージョン |
+|---------|------|----------|
+| **JavaScript** | Node.js | 18+ |
+| **フレームワーク** | React | 18.x |
+| **言語** | TypeScript | 5.x |
+| **ビルドツール** | Vite | 5.x |
+| **スタイリング** | Tailwind CSS / CSS Modules | - |
+| **パッケージマネージャー** | npm / yarn | - |
+
+### レガシー技術（学習用）
+
+| カテゴリ | 技術 | バージョン |
+|---------|------|----------|
 | **Servlet** | Jakarta Servlet | 6.0 |
 | **JSP** | Jakarta Server Pages | 3.1 |
 | **JSF** | Jakarta Faces | 4.0 |
-| **CDI** | Jakarta CDI | 4.0 |
-| **JPA** | Jakarta Persistence | 3.1 |
-| **JAX-RS** | Jakarta RESTful Web Services | 3.1 |
 | **JSTL** | Jakarta Standard Tag Library | 3.0 |
-| **データベース** | HSQLDB | 2.7.x |
-| **ビルドツール** | Gradle | 8.x+ |
+| **Swing** | Java Swing | - |
 
 ## 📚 ドキュメント
 
@@ -449,52 +482,87 @@ SELECT * FROM PERSON;
 
 ## 🐛 トラブルシューティング
 
-### Payara Serverが起動しない
+### バックエンド（REST API）
 
-Payara Serverのドメインステータスを確認：
+#### Payara Serverが起動しない
+
 ```bash
+# ステータス確認
 ./gradlew statusPayara
-```
 
-既存のドメインをクリーンアップして再起動：
-```bash
+# 再起動
 ./gradlew stopPayara
 ./gradlew startPayara
-```
 
-プロセスが残っている場合（緊急時）：
-```bash
-# 全てのJavaプロセスを強制終了（Gradleも含む）
+# プロセスが残っている場合（緊急時）
 ./gradlew killAllJava
 ```
 
-### データベース接続エラー
+#### データベース接続エラー
 
-1. HSQLDB Databaseサーバーが起動していることを確認：
 ```bash
+# HSQLDBサーバーを起動
 ./gradlew startHsqldb
-```
 
-2. データソースがセットアップされていることを確認：
-```bash
+# データソースを再セットアップ
 ./gradlew setupDataSource
 ./gradlew pingConnectionPool
 ```
 
-3. `env-conf.gradle`の接続情報を確認
+#### デプロイエラー
 
-### デプロイエラー
-
-アプリケーションをアンデプロイしてから再デプロイ：
 ```bash
-# berry-books-apiの場合
-./gradlew :berry-books-api:undeploy
-./gradlew :berry-books-api:deploy
+# アンデプロイして再デプロイ
+./gradlew :<api-project-name>:undeploy
+./gradlew :<api-project-name>:deploy
 ```
 
-### ビルドエラー
+#### ビルドエラー
 
-クリーンビルドを実行：
 ```bash
 ./gradlew clean build
+```
+
+### フロントエンド（SPA）
+
+#### 依存関係のインストールエラー
+
+```bash
+# node_modulesを削除して再インストール
+rm -rf node_modules package-lock.json
+npm install
+
+# または yarn を使用
+rm -rf node_modules yarn.lock
+yarn install
+```
+
+#### 開発サーバーが起動しない
+
+```bash
+# ポートが使用中の場合、別のポートを指定
+npm run dev -- --port 5175
+
+# または、既存のプロセスを終了
+# Windows: タスクマネージャーでNode.jsプロセスを終了
+# macOS/Linux: lsof -ti:5173 | xargs kill
+```
+
+#### API接続エラー（CORS）
+
+SPAからAPIへのアクセスでCORSエラーが発生する場合、バックエンドAPIが正しく起動しているか確認してください：
+
+```bash
+# APIのステータス確認
+curl http://localhost:8080/<context-root>/api/...
+```
+
+#### ビルドエラー
+
+```bash
+# キャッシュをクリアして再ビルド
+npm run build -- --force
+
+# TypeScriptエラーの場合
+npx tsc --noEmit
 ```

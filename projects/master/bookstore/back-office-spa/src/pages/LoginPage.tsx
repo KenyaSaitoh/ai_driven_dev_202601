@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import '../styles/LoginPage.css';
 
 const LoginPage: React.FC = () => {
   const [employeeCode, setEmployeeCode] = useState('');
@@ -32,52 +31,57 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-content">
-        <h1 className="login-title">Berry Books バックオフィスシステム</h1>
-        <hr className="login-divider" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark px-4">
+      <div className="bg-white rounded-2xl shadow-primary-lg p-8 w-full max-w-md">
+        <h1 className="text-3xl font-bold text-center text-primary mb-2">
+          Berry Books
+        </h1>
+        <p className="text-center text-gray-600 mb-8">バックオフィスシステム</p>
         
-        <form onSubmit={handleLogin} className="login-form">
-          <table className="login-table">
-            <tbody>
-              <tr>
-                <td className="login-label">社員コード</td>
-                <td className="login-input-cell">
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div>
+            <label htmlFor="employeeCode" className="block text-sm font-semibold text-gray-700 mb-2">
+              社員コード
+            </label>
                   <input
+              id="employeeCode"
                     type="text"
                     value={employeeCode}
                     onChange={(e) => setEmployeeCode(e.target.value)}
-                    className="login-input"
-                    placeholder="例: E99999"
+              className="form-input"
+              placeholder="Eで始まる6桁の社員コード"
                     required
                     disabled={loading}
                   />
-                </td>
-              </tr>
-              <tr>
-                <td className="login-label">パスワード</td>
-                <td className="login-input-cell">
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+              パスワード
+            </label>
                   <input
+              id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="login-input"
-                    placeholder="パスワードを入力"
+              className="form-input"
+                    placeholder="パスワード"
                     required
                     disabled={loading}
                   />
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          </div>
 
           {error && (
-            <div className="login-error">
+            <div className="error-message">
               {error}
             </div>
           )}
 
-          <button type="submit" className="login-button" disabled={loading}>
+          <button 
+            type="submit" 
+            className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed" 
+            disabled={loading}
+          >
             {loading ? 'ログイン中...' : 'ログイン'}
           </button>
         </form>

@@ -1,6 +1,6 @@
 package pro.kensait.backoffice.api;
 
-import java.util.Map;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +12,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import pro.kensait.backoffice.api.dto.CategoryTO;
 import pro.kensait.backoffice.service.category.CategoryService;
 
 /**
@@ -27,13 +28,15 @@ public class CategoryResource {
     private CategoryService categoryService;
 
     /**
-     * カテゴリ一覧取得
+     * カテゴリ一覧取得（配列形式）
      */
     @GET
     public Response getAllCategories() {
         logger.info("[ CategoryResource#getAllCategories ]");
 
-        Map<String, Integer> categories = categoryService.getCategoryMap();
+        List<CategoryTO> categories = categoryService.getCategoriesAll().stream()
+                .map(c -> new CategoryTO(c.getCategoryId(), c.getCategoryName()))
+                .toList();
         return Response.ok(categories).build();
     }
 }
