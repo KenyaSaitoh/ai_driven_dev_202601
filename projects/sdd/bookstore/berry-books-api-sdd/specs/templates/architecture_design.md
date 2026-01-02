@@ -314,17 +314,17 @@ graph TB
 
 ### 16.1 コーディング規約
 
-- **命名規則:**
+* **命名規則:**
   - [NAMING_CONVENTION_1]
   - [NAMING_CONVENTION_2]
 
-- **コードフォーマット:**
+* **コードフォーマット:**
   - [FORMAT_RULE_1]
   - [FORMAT_RULE_2]
 
 ### 16.2 コミット規約
 
-- **コミットメッセージフォーマット:**
+* **コミットメッセージフォーマット:**
   ```
   [TYPE]: [SUBJECT]
   
@@ -333,7 +333,7 @@ graph TB
   [FOOTER]
   ```
 
-- **コミットタイプ:**
+* **コミットタイプ:**
   - `feat`: 新機能
   - `fix`: バグ修正
   - `docs`: ドキュメント変更
@@ -344,8 +344,8 @@ graph TB
 
 ### 16.3 ブランチ戦略
 
-- **ブランチモデル:** [BRANCH_MODEL] (例: Git Flow, GitHub Flow)
-- **ブランチ命名規則:**
+* **ブランチモデル:** [BRANCH_MODEL] (例: Git Flow, GitHub Flow)
+* **ブランチ命名規則:**
   - `main`: 本番環境
   - `develop`: 開発環境
   - `feature/[FEATURE_NAME]`: 機能開発
@@ -354,11 +354,11 @@ graph TB
 
 ### 16.4 コードレビュー
 
-- **レビュー観点:**
+* **レビュー観点:**
   - [REVIEW_POINT_1]
   - [REVIEW_POINT_2]
 
-- **承認ルール:**
+* **承認ルール:**
   - [APPROVAL_RULE]
 
 ---
@@ -369,21 +369,21 @@ graph TB
 
 以下の機能は現在のスコープ外であるが、将来的な拡張の可能性を考慮してアーキテクチャを設計している。
 
-- **[FUTURE_FEATURE_1]:**
+* **[FUTURE_FEATURE_1]:**
   - 概要: [DESCRIPTION]
   - 拡張ポイント: [EXTENSION_POINT]
 
-- **[FUTURE_FEATURE_2]:**
+* **[FUTURE_FEATURE_2]:**
   - 概要: [DESCRIPTION]
   - 拡張ポイント: [EXTENSION_POINT]
 
 ### 17.2 アーキテクチャの拡張性
 
-- **拡張可能な領域:**
+* **拡張可能な領域:**
   - [EXTENSIBLE_AREA_1]
   - [EXTENSIBLE_AREA_2]
 
-- **拡張時の注意点:**
+* **拡張時の注意点:**
   - [CONSIDERATION_1]
   - [CONSIDERATION_2]
 
@@ -393,15 +393,15 @@ graph TB
 
 ### 18.1 公式ドキュメント
 
-- [TECH_STACK_1]: [URL]
-- [TECH_STACK_2]: [URL]
+* [TECH_STACK_1]: [URL]
+* [TECH_STACK_2]: [URL]
 
 ### 18.2 関連仕様書
 
-- [SPEC_1]: [LINK]
-- [SPEC_2]: [LINK]
+* [SPEC_1]: [LINK]
+* [SPEC_2]: [LINK]
 
 ### 18.3 サンプルコード・リポジトリ
 
-- [SAMPLE_1]: [URL]
-- [SAMPLE_2]: [URL]
+* [SAMPLE_1]: [URL]
+* [SAMPLE_2]: [URL]

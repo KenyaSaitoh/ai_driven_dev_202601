@@ -51,27 +51,27 @@
 
 **連携目的:** [何のために連携するか]
 
-**連携方式:**
-- 通信方式: [REST API / SOAP / ファイル連携 等]
-- データ形式: [JSON / XML / CSV 等]
-- 認証方式: [API Key / OAuth / Basic認証 等]
+連携方式::
+* 通信方式: [REST API / SOAP / ファイル連携 等]
+* データ形式: [JSON / XML / CSV 等]
+* 認証方式: [API Key / OAuth / Basic認証 等]
 
-**連携タイミング:**
-- [リアルタイム / バッチ（日次/月次） / イベント駆動 等]
+連携タイミング::
+* [リアルタイム / バッチ（日次/月次） / イベント駆動 等]
 
-**送信データ:**
-- [データ項目一覧]
+送信データ::
+* [データ項目一覧]
 
-**受信データ:**
-- [データ項目一覧]
+受信データ::
+* [データ項目一覧]
 
-**エラー処理:**
-- [タイムアウト / リトライ / 例外ハンドリング の方針]
+エラー処理::
+* [タイムアウト / リトライ / 例外ハンドリング の方針]
 
 ---
 
 ## 4. 参考資料
 
-- [requirements.md](requirements.md) - 要件定義書
-- [architecture_design.md](architecture_design.md) - アーキテクチャ設計書
+* [requirements.md](requirements.md) - 要件定義書
+* [architecture_design.md](architecture_design.md) - アーキテクチャ設計書
 

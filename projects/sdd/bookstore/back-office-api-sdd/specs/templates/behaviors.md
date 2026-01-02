@@ -12,14 +12,14 @@
 このドキュメントは、[PROJECT_NAME]システムの外形的な振る舞いを定義する。
 各シナリオはGiven-When-Then形式で記述され、ブラックボックステストの基礎となる。
 
-**関連ドキュメント:**
-- [requirements.md](requirements.md) - 要件定義書（What & Why）
-- [functional_design.md](functional_design.md) - 機能設計書（Flows & UI）
-- [architecture_design.md](architecture_design.md) - アーキテクチャ設計書
-- [data_model.md](data_model.md) - データモデル仕様書
-- [screen_design.md](screen_design.md) - 画面仕様書
-- [external_interface.md](external_interface.md) - 外部インターフェース仕様書
-- [tasks.md](tasks.md) - 実装タスク
+関連ドキュメント::
+* [requirements.md](requirements.md) - 要件定義書（What & Why）
+* [functional_design.md](functional_design.md) - 機能設計書（Flows & UI）
+* [architecture_design.md](architecture_design.md) - アーキテクチャ設計書
+* [data_model.md](data_model.md) - データモデル仕様書
+* [screen_design.md](screen_design.md) - 画面仕様書
+* [external_interface.md](external_interface.md) - 外部インターフェース仕様書
+* [tasks.md](tasks.md) - 実装タスク
 
 ---
 
@@ -34,10 +34,10 @@ Then [期待される結果]
 And [追加の期待結果]
 ```
 
-**受入基準:**
-- [ ] [受入基準1]
-- [ ] [受入基準2]
-- [ ] [受入基準3]
+受入基準::
+* [ ] [受入基準1]
+* [ ] [受入基準2]
+* [ ] [受入基準3]
 
 ### Scenario: [SCENARIO_NAME_2]
 
@@ -114,11 +114,11 @@ And [システムの状態は変更されない]
 
 ### 機能テスト
 
-- [ ] **[機能名1]**: 全Xシナリオ実行
-- [ ] **[機能名2]**: 全Yシナリオ実行
+* [ ] **[機能名1]**: 全Xシナリオ実行
+* [ ] **[機能名2]**: 全Yシナリオ実行
 
 ### 例外・エラーテスト
 
-- [ ] **[カテゴリ1]**: 全Xケース実行
-- [ ] **[カテゴリ2]**: 全Yケース実行
+* [ ] **[カテゴリ1]**: 全Xケース実行
+* [ ] **[カテゴリ2]**: 全Yケース実行
 

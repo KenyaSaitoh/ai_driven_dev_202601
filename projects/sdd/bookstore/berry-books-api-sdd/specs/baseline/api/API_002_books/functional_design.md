@@ -47,7 +47,7 @@ GET /api/books
 
 #### 3.1.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 [
@@ -91,7 +91,7 @@ GET /api/books/{id}
 
 #### 3.2.3 リクエスト
 
-**パスパラメータ**:
+パスパラメータ:
 
 | パラメータ | 型 | 説明 |
 |----------|---|------|
@@ -99,7 +99,7 @@ GET /api/books/{id}
 
 #### 3.2.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 {
@@ -125,7 +125,7 @@ GET /api/books/{id}
 }
 ```
 
-**エラー時 (404 Not Found)**:
+エラー時 (404 Not Found):
 
 ```json
 {
@@ -149,14 +149,14 @@ GET /api/books/search?categoryId={id}&keyword={keyword}
 
 #### 3.3.3 リクエスト
 
-**クエリパラメータ**:
+クエリパラメータ:
 
 | パラメータ | 型 | 必須 | 説明 |
 |----------|---|------|------|
 | categoryId | integer | - | カテゴリID（0または未指定=全カテゴリ） |
 | keyword | string | - | キーワード（書籍名、著者名で部分一致検索） |
 
-**検索パターン**:
+検索パターン:
 
 | categoryId | keyword | 動作 |
 |-----------|---------|------|
@@ -167,7 +167,7 @@ GET /api/books/search?categoryId={id}&keyword={keyword}
 
 #### 3.3.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 [
@@ -219,7 +219,7 @@ GET /api/books/categories
 
 #### 3.4.3 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 {
@@ -292,21 +292,22 @@ GET /api/books/categories
 
 **解決策**: JOIN FETCHを使用して一括取得
 
-```java
-@Query("SELECT b FROM Book b " +
-       "JOIN FETCH b.category " +
-       "JOIN FETCH b.publisher " +
-       "LEFT JOIN FETCH b.stock " +
-       "WHERE b.category.categoryId = :categoryId")
-List<Book> findByCategoryId(@Param("categoryId") Integer categoryId);
-```
+クエリ仕様:
+* 対象エンティティ: Book
+* JOIN FETCH対象:
+  - category（内部結合）
+  - publisher（内部結合）
+  - stock（外部結合、LEFT JOIN）
+* WHERE条件: category.categoryId = パラメータ値
+* 戻り値: Bookエンティティのリスト
+* 効果: 関連エンティティを1回のSQLで取得、N+1問題を回避
 
 ---
 
 ## 7. 関連ドキュメント
 
-- [behaviors.md](behaviors.md) - 書籍APIの受入基準
-- [../../system/functional_design.md](../../system/functional_design.md) - 全体機能設計書
-- [../../system/architecture_design.md](../../system/architecture_design.md) - アーキテクチャ設計書
-- [../../system/data_model.md](../../system/data_model.md) - データモデル仕様書
+* [behaviors.md](behaviors.md) - 書籍APIの受入基準
+* [../../system/functional_design.md](../../system/functional_design.md) - 全体機能設計書
+* [../../system/architecture_design.md](../../system/architecture_design.md) - アーキテクチャ設計書
+* [../../system/data_model.md](../../system/data_model.md) - データモデル仕様書
 

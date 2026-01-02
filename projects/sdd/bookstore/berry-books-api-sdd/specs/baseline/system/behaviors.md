@@ -15,10 +15,10 @@
 
 API単位の受入基準は、以下のドキュメントを参照してください：
 
-- **[API_001_auth](../api/API_001_auth/behaviors.md)** - 認証APIの受入基準
-- **[API_002_books](../api/API_002_books/behaviors.md)** - 書籍APIの受入基準
-- **[API_003_orders](../api/API_003_orders/behaviors.md)** - 注文APIの受入基準
-- **[API_004_images](../api/API_004_images/behaviors.md)** - 画像APIの受入基準
+* **[API_001_auth](../api/API_001_auth/behaviors.md)** - 認証APIの受入基準
+* **[API_002_books](../api/API_002_books/behaviors.md)** - 書籍APIの受入基準
+* **[API_003_orders](../api/API_003_orders/behaviors.md)** - 注文APIの受入基準
+* **[API_004_images](../api/API_004_images/behaviors.md)** - 画像APIの受入基準
 
 ---
 
@@ -343,9 +343,9 @@ API単位の受入基準は、以下のドキュメントを参照してくだ�
 
 本振る舞い仕様書に関連する詳細ドキュメント：
 
-- [requirements.md](requirements.md) - 要件定義書
-- [functional_design.md](functional_design.md) - 機能設計書（API仕様）
-- [architecture_design.md](architecture_design.md) - アーキテクチャ設計書
-- [data_model.md](data_model.md) - データモデル仕様書
-- [external_interface.md](external_interface.md) - 外部インターフェース仕様書
-- [README.md](../../README.md) - プロジェクトREADME
+* [requirements.md](requirements.md) - 要件定義書
+* [functional_design.md](functional_design.md) - 機能設計書（API仕様）
+* [architecture_design.md](architecture_design.md) - アーキテクチャ設計書
+* [data_model.md](data_model.md) - データモデル仕様書
+* [external_interface.md](external_interface.md) - 外部インターフェース仕様書
+* [README.md](../../README.md) - プロジェクトREADME

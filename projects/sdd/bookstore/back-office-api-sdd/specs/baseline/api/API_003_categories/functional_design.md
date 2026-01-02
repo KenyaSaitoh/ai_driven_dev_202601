@@ -25,9 +25,9 @@
 ### 3.1 カテゴリ一覧取得
 
 #### 3.1.1 基本情報
-- **エンドポイント**: `GET /api/categories`
-- **機能**: すべてのカテゴリ情報を配列形式で取得
-- **認証**: 不要（将来:必要）
+* エンドポイント: `GET /api/categories`
+* 機能: すべてのカテゴリ情報を配列形式で取得
+* 認証: 不要（将来:必要）
 
 #### 3.1.2 リクエスト
 
@@ -39,7 +39,7 @@
 
 #### 3.1.3 レスポンス
 
-**成功（200 OK）**:
+成功（200 OK）:
 
 ヘッダー:
 ```
@@ -68,7 +68,7 @@ Content-Type: application/json; charset=UTF-8
 ]
 ```
 
-**レスポンススキーマ**:
+レスポンススキーマ:
 | フィールド | 型 | 必須 | 説明 |
 |-----------|---|------|------|
 | categoryId | Integer | Yes | カテゴリID |
@@ -88,15 +88,15 @@ Content-Type: application/json; charset=UTF-8
 
 #### 3.1.5 ビジネスルール
 
-- **BR-CATEGORY-001**: すべてのカテゴリを返却（フィルタリングなし）
-- **BR-CATEGORY-002**: カテゴリIDの昇順でソート（デフォルト）
-- **BR-CATEGORY-003**: 削除フラグはない（マスタデータとして永続）
+* BR-CATEGORY-001: すべてのカテゴリを返却（フィルタリングなし）
+* BR-CATEGORY-002: カテゴリIDの昇順でソート（デフォルト）
+* BR-CATEGORY-003: 削除フラグはない（マスタデータとして永続）
 
 #### 3.1.6 関連コンポーネント
 
-- `CategoryResource#getAllCategories()`
-- `CategoryService#getCategoriesAll()`
-- `CategoryDao#findAll()`
+* `CategoryResource#getAllCategories()`
+* `CategoryService#getCategoriesAll()`
+* `CategoryDao#findAll()`
 
 ---
 
@@ -106,15 +106,16 @@ Content-Type: application/json; charset=UTF-8
 
 **パッケージ**: `pro.kensait.backoffice.api.dto`
 
-**フィールド**:
-```java
-public record CategoryTO(
-    Integer categoryId,
-    String categoryName
-) {}
-```
+**構造種別**: レコード型（immutableなデータ転送オブジェクト）
 
-**例**:
+フィールド構成:
+
+| フィールド名 | 型 | 説明 |
+|------------|---|------|
+| categoryId | Integer | カテゴリID |
+| categoryName | String | カテゴリ名 |
+
+例:
 ```json
 {
   "categoryId": 1,
@@ -130,21 +131,16 @@ public record CategoryTO(
 
 **パッケージ**: `pro.kensait.backoffice.entity`
 
-**テーブル**: CATEGORY
+**マッピング対象テーブル**: CATEGORY
 
-**フィールド**:
-```java
-@Entity
-@Table(name = "CATEGORY")
-public class Category {
-    @Id
-    @Column(name = "CATEGORY_ID")
-    private Integer categoryId;
-    
-    @Column(name = "CATEGORY_NAME")
-    private String categoryName;
-}
-```
+エンティティ構成:
+
+| フィールド名 | 型 | カラム名 | 制約 | 説明 |
+|------------|---|---------|-----|------|
+| categoryId | Integer | CATEGORY_ID | PRIMARY KEY | カテゴリID |
+| categoryName | String | CATEGORY_NAME | - | カテゴリ名 |
+
+**エンティティ種別**: 永続化エンティティ（JPAエンティティ）
 
 ---
 
@@ -172,13 +168,13 @@ public class Category {
 
 ### 7.2 ログ出力
 
-**INFOレベル**:
+INFOレベル:
 ```
 [ CategoryResource#getAllCategories ]
 [ CategoryService#getCategoriesAll ]
 ```
 
-**DEBUGレベル**:
+DEBUGレベル:
 ```
 [ CategoryDao#findAll ] Executing JPQL: SELECT c FROM Category c
 [ CategoryDao#findAll ] Result count: 4
@@ -189,19 +185,19 @@ public class Category {
 ## 8. パフォーマンス考慮事項
 
 ### 8.1 レスポンスタイム
-- **目標**: 50ms以内
-- **実測**: 30-50ms（通常時）
+* 目標: 50ms以内
+* 実測: 30-50ms（通常時）
 
 ### 8.2 キャッシング
-- **現状**: キャッシュなし
-- **将来**: アプリケーションレベルキャッシュ推奨
+* 現状: キャッシュなし
+* 将来: アプリケーションレベルキャッシュ推奨
   - マスタデータのため変更頻度が低い
   - メモリキャッシュで高速化可能
 
 ### 8.3 データ量
-- **想定レコード数**: 10-50件
-- **データサイズ**: 数KB程度
-- **スケーラビリティ**: 問題なし
+* 想定レコード数: 10-50件
+* データサイズ: 数KB程度
+* スケーラビリティ: 問題なし
 
 ---
 
@@ -233,7 +229,7 @@ public class Category {
 | 推奨度 | ★★★★★ | ★★★☆☆（後方互換性） |
 | 用途 | 標準REST形式 | 既存UI用 |
 
-**`/api/categories` のレスポンス**:
+`/api/categories` のレスポンス:
 ```json
 [
   {"categoryId": 1, "categoryName": "文学"},
@@ -241,7 +237,7 @@ public class Category {
 ]
 ```
 
-**`/api/books/categories` のレスポンス**:
+`/api/books/categories` のレスポンス:
 ```json
 {
   "文学": 1,
@@ -255,21 +251,24 @@ public class Category {
 
 ## 11. データベースクエリ
 
-### 11.1 JPQL
+### 11.1 クエリ仕様（JPQL）
 
-```sql
-SELECT c FROM Category c
-```
+クエリ内容:
+* 対象エンティティ: Category
+* 取得フィールド: 全フィールド
+* WHERE条件: なし（全件取得）
 
-### 11.2 実行されるSQL（例）
+### 11.2 実行されるSQLの論理構造
 
-```sql
-SELECT 
-  c.CATEGORY_ID,
-  c.CATEGORY_NAME
-FROM CATEGORY c
-ORDER BY c.CATEGORY_ID ASC
-```
+SELECT句:
+* CATEGORY_ID
+* CATEGORY_NAME
+
+FROM句:
+* CATEGORY テーブル
+
+ORDER BY句:
+* CATEGORY_ID の昇順
 
 ---
 
@@ -330,13 +329,13 @@ GET /api/categories?search=文学
 ### 13.1 認証・認可
 
 現状は認証不要だが、将来的にJWT認証フィルタを実装:
-- すべてのエンドポイントで認証必須
-- 全社員が参照可能（職務ランクによる制限なし）
+* すべてのエンドポイントで認証必須
+* 全社員が参照可能（職務ランクによる制限なし）
 
 ### 13.2 データ保護
 
-- カテゴリ情報は公開情報
-- 機密情報は含まれない
+* カテゴリ情報は公開情報
+* 機密情報は含まれない
 
 ---
 
@@ -344,9 +343,9 @@ GET /api/categories?search=文学
 
 ### 14.1 データメンテナンス
 
-- **追加**: 新しいカテゴリの追加（管理者）
-- **更新**: カテゴリ名の変更（管理者）
-- **削除**: 論理削除または物理削除（慎重に実施）
+* 追加: 新しいカテゴリの追加（管理者）
+* 更新: カテゴリ名の変更（管理者）
+* 削除: 論理削除または物理削除（慎重に実施）
 
 ### 14.2 マイグレーション
 
@@ -359,7 +358,102 @@ GET /api/categories?search=文学
 
 ## 15. 関連API
 
-- **書籍API**: `/api/books` - カテゴリで絞り込み検索に使用
-- **書籍API（カテゴリ一覧）**: `/api/books/categories` - Map形式で取得
-- **ワークフローAPI**: `/api/workflows` - 新規書籍追加時にカテゴリID指定
+* 書籍API: `/api/books` - カテゴリで絞り込み検索に使用
+* 書籍API（カテゴリ一覧）: `/api/books/categories` - Map形式で取得
+* ワークフローAPI: `/api/workflows` - 新規書籍追加時にカテゴリID指定
+
+---
+
+## 16. 動的振る舞い
+
+### 16.1 カテゴリ一覧取得シーケンス
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant CategoryResource
+    participant CategoryService
+    participant CategoryDao
+    participant Database
+
+    Client->>CategoryResource: GET /api/categories
+    Note over CategoryResource: LOG INFO<br/>[CategoryResource#getAllCategories]
+    CategoryResource->>CategoryService: getAllCategories()
+    Note over CategoryService: LOG INFO<br/>[CategoryService#getCategoriesAll]
+    CategoryService->>CategoryDao: getCategoriesAll()
+    CategoryDao->>Database: findAll()<br/>Named Query: Category.findAll<br/>SELECT c FROM CATEGORY c<br/>ORDER BY c.CATEGORY_ID
+    Database-->>CategoryDao: List<Category> (4 records)
+    CategoryDao-->>CategoryService: List<Category>
+    CategoryService-->>CategoryResource: List<Category>
+    
+    CategoryResource->>CategoryResource: Stream & Map<br/>categories.stream()<br/>.map(c -> new CategoryTO(<br/>  c.getCategoryId(),<br/>  c.getCategoryName()))<br/>.toList()
+    
+    CategoryResource-->>Client: 200 OK<br/>[{CategoryTO}]<br/>Content-Type: application/json
+```
+
+### 16.2 処理フローチャート
+
+```mermaid
+flowchart TD
+    A[開始] --> B[リクエスト受信<br/>GET /categories]
+    B --> C[CategoryResource<br/>getAllCategories]
+    C --> D[CategoryService<br/>getCategoriesAll]
+    D --> E[CategoryDao<br/>findAll]
+    E --> F[DB Query実行<br/>SELECT c FROM CATEGORY]
+    F --> G[List&lt;Category&gt;取得]
+    G --> H[Stream API変換処理<br/>Category → CategoryTO]
+    H --> I[List&lt;CategoryTO&gt;生成]
+    I --> J[JSON Serialize]
+    J --> K[200 OK<br/>レスポンス返却]
+```
+
+### 16.3 データフロー全体図
+
+```mermaid
+graph TD
+    Client[Client]
+    Resource[CategoryResource<br/>- getAllCategories]
+    Service[CategoryService<br/>- getCategoriesAll]
+    Dao[CategoryDao<br/>- findAll]
+    DB[Database<br/>- CATEGORY table]
+    
+    Client -->|HTTP GET<br/>/api/categories| Resource
+    Resource -->|@Inject| Service
+    Service -->|@Inject| Dao
+    Dao -->|EntityManager / JPQL| DB
+```
+
+### 16.4 APIの用途比較
+
+```mermaid
+flowchart TD
+    Client[クライアント]
+    NewUI[新規UI<br/>推奨]
+    OldUI[既存UI<br/>後方互換]
+    CategoriesAPI[/api/categories<br/>配列形式<br/>標準REST]
+    BooksCategories[/api/books/categories<br/>Map形式]
+    
+    Client --> NewUI
+    Client --> OldUI
+    NewUI --> CategoriesAPI
+    OldUI --> BooksCategories
+```
+
+### 16.5 状態管理
+
+カテゴリAPIは状態を持たない（ステートレス）:
+
+```mermaid
+graph LR
+    R1[Request 1] --> CR1[Category<br/>Resource]
+    CR1 --> DB1[Database]
+    
+    R2[Request 2] --> CR2[Category<br/>Resource]
+    CR2 --> DB2[Database]
+    
+    R3[Request 3] --> CR3[Category<br/>Resource]
+    CR3 --> DB3[Database]
+```
+
+各リクエストは独立して処理される
 

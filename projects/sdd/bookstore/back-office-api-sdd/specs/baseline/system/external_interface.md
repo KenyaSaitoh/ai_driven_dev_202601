@@ -8,35 +8,41 @@
 
 ### 2.1 システム境界
 
-```
-┌─────────────────────────────────────────────────────┐
-│          Client Applications                        │
-│  ┌────────────┐  ┌────────────┐  ┌────────────┐   │
-│  │  Web       │  │  Mobile    │  │  Admin     │   │
-│  │  Browser   │  │  App       │  │  Tool      │   │
-│  └────────────┘  └────────────┘  └────────────┘   │
-└──────────┬─────────────┬──────────────┬───────────┘
-           │             │              │
-           │   HTTP/HTTPS (JSON)        │
-           │             │              │
-┌──────────▼─────────────▼──────────────▼───────────┐
-│      Books Stock API (Back Office API)            │
-│                                                    │
-│  REST API Endpoints (Base: /api)                  │
-│  - /auth      : 認証API                           │
-│  - /books     : 書籍API                           │
-│  - /categories: カテゴリAPI                        │
-│  - /publishers: 出版社API                         │
-│  - /stocks    : 在庫API                           │
-│  - /workflows : ワークフローAPI                    │
-└────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph ClientApps[Client Applications]
+        Web[Web Browser]
+        Mobile[Mobile App]
+        Admin[Admin Tool]
+    end
+    
+    subgraph API[Books Stock API - Back Office API]
+        Endpoints[REST API Endpoints Base: /api]
+        Auth[/auth - 認証API]
+        Books[/books - 書籍API]
+        Categories[/categories - カテゴリAPI]
+        Publishers[/publishers - 出版社API]
+        Stocks[/stocks - 在庫API]
+        Workflows[/workflows - ワークフローAPI]
+    end
+    
+    Web -->|HTTP/HTTPS<br/>JSON| Endpoints
+    Mobile -->|HTTP/HTTPS<br/>JSON| Endpoints
+    Admin -->|HTTP/HTTPS<br/>JSON| Endpoints
+    
+    Endpoints --- Auth
+    Endpoints --- Books
+    Endpoints --- Categories
+    Endpoints --- Publishers
+    Endpoints --- Stocks
+    Endpoints --- Workflows
 ```
 
 ### 2.2 通信プロトコル
-- **プロトコル**: HTTP/HTTPS
-- **データ形式**: JSON
-- **文字エンコーディング**: UTF-8
-- **認証方式**: JWT (JSON Web Token) + HttpOnly Cookie
+* プロトコル: HTTP/HTTPS
+* データ形式: JSON
+* 文字エンコーディング: UTF-8
+* 認証方式: JWT (JSON Web Token) + HttpOnly Cookie
 
 ## 3. REST API仕様
 
@@ -109,7 +115,7 @@
 
 **エンドポイント**: `POST /api/auth/login`
 
-**リクエスト**:
+リクエスト:
 ```json
 {
   "employeeCode": "E0001",
@@ -130,7 +136,7 @@
 }
 ```
 
-**Set-Cookie**:
+Set-Cookie:
 ```
 back-office-jwt=<JWT_TOKEN>; Path=/; Max-Age=86400; HttpOnly
 ```
@@ -151,7 +157,7 @@ back-office-jwt=<JWT_TOKEN>; Path=/; Max-Age=86400; HttpOnly
 
 **レスポンス**: `200 OK`（レスポンスボディなし）
 
-**Set-Cookie**:
+Set-Cookie:
 ```
 back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 ```
@@ -205,8 +211,8 @@ back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 
 **エンドポイント**: `GET /api/books/{id}`
 
-**パスパラメータ**:
-- `id`: 書籍ID（Integer）
+パスパラメータ:
+* `id`: 書籍ID（Integer）
 
 **レスポンス（成功）**: `200 OK`
 ```json
@@ -240,14 +246,14 @@ back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 
 **エンドポイント**: `GET /api/books/search/jpql`
 
-**クエリパラメータ**:
-- `categoryId`: カテゴリID（オプション、Integer）
-- `keyword`: 検索キーワード（オプション、String）
+クエリパラメータ:
+* `categoryId`: カテゴリID（オプション、Integer）
+* `keyword`: 検索キーワード（オプション、String）
 
-**例**:
-- `/api/books/search/jpql?categoryId=1&keyword=サンプル`
-- `/api/books/search/jpql?keyword=サンプル`
-- `/api/books/search/jpql?categoryId=1`
+例:
+* `/api/books/search/jpql?categoryId=1&keyword=サンプル`
+* `/api/books/search/jpql?keyword=サンプル`
+* `/api/books/search/jpql?categoryId=1`
 
 **レスポンス**: `200 OK`（書籍一覧と同じ形式）
 
@@ -255,9 +261,9 @@ back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 
 **エンドポイント**: `GET /api/books/search/criteria`
 
-**クエリパラメータ**:
-- `categoryId`: カテゴリID（オプション、Integer）
-- `keyword`: 検索キーワード（オプション、String）
+クエリパラメータ:
+* `categoryId`: カテゴリID（オプション、Integer）
+* `keyword`: 検索キーワード（オプション、String）
 
 **レスポンス**: `200 OK`（書籍一覧と同じ形式）
 
@@ -265,9 +271,9 @@ back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 
 **エンドポイント**: `GET /api/books/search`
 
-**クエリパラメータ**:
-- `categoryId`: カテゴリID（オプション、Integer）
-- `keyword`: 検索キーワード（オプション、String）
+クエリパラメータ:
+* `categoryId`: カテゴリID（オプション、Integer）
+* `keyword`: 検索キーワード（オプション、String）
 
 **備考**: 内部的にJPQLを使用（後方互換性のため）
 
@@ -352,8 +358,8 @@ back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 
 **エンドポイント**: `GET /api/stocks/{bookId}`
 
-**パスパラメータ**:
-- `bookId`: 書籍ID（Integer）
+パスパラメータ:
+* `bookId`: 書籍ID（Integer）
 
 **レスポンス（成功）**: `200 OK`
 ```json
@@ -375,10 +381,10 @@ back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 
 **エンドポイント**: `PUT /api/stocks/{bookId}`
 
-**パスパラメータ**:
-- `bookId`: 書籍ID（Integer）
+パスパラメータ:
+* `bookId`: 書籍ID（Integer）
 
-**リクエスト**:
+リクエスト:
 ```json
 {
   "version": 1,
@@ -408,7 +414,7 @@ back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 
 **エンドポイント**: `POST /api/workflows`
 
-**リクエスト（新規書籍追加）**:
+リクエスト（新規書籍追加）:
 ```json
 {
   "workflowType": "ADD_NEW_BOOK",
@@ -423,7 +429,7 @@ back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 }
 ```
 
-**リクエスト（既存書籍削除）**:
+リクエスト（既存書籍削除）:
 ```json
 {
   "workflowType": "REMOVE_BOOK",
@@ -433,7 +439,7 @@ back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 }
 ```
 
-**リクエスト（価格改定）**:
+リクエスト（価格改定）:
 ```json
 {
   "workflowType": "ADJUST_BOOK_PRICE",
@@ -476,10 +482,10 @@ back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 
 **エンドポイント**: `PUT /api/workflows/{workflowId}`
 
-**パスパラメータ**:
-- `workflowId`: ワークフローID（Long）
+パスパラメータ:
+* `workflowId`: ワークフローID（Long）
 
-**リクエスト**:
+リクエスト:
 ```json
 {
   "updatedBy": 1,
@@ -495,14 +501,14 @@ back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 
 **エンドポイント**: `GET /api/workflows`
 
-**クエリパラメータ**:
-- `state`: 状態（オプション、String: CREATED, APPLIED, APPROVED）
-- `workflowType`: ワークフロータイプ（オプション、String）
-- `employeeId`: 社員ID（オプション、Long）
+クエリパラメータ:
+* `state`: 状態（オプション、String: CREATED, APPLIED, APPROVED）
+* `workflowType`: ワークフロータイプ（オプション、String）
+* `employeeId`: 社員ID（オプション、Long）
 
-**例**:
-- `/api/workflows?state=APPLIED&employeeId=1`
-- `/api/workflows?workflowType=ADD_NEW_BOOK`
+例:
+* `/api/workflows?state=APPLIED&employeeId=1`
+* `/api/workflows?workflowType=ADD_NEW_BOOK`
 
 **レスポンス**: `200 OK`
 ```json
@@ -527,8 +533,8 @@ back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 
 **エンドポイント**: `GET /api/workflows/{workflowId}/history`
 
-**パスパラメータ**:
-- `workflowId`: ワークフローID（Long）
+パスパラメータ:
+* `workflowId`: ワークフローID（Long）
 
 **レスポンス**: `200 OK`
 ```json
@@ -570,10 +576,10 @@ back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 
 **エンドポイント**: `POST /api/workflows/{workflowId}/apply`
 
-**パスパラメータ**:
-- `workflowId`: ワークフローID（Long）
+パスパラメータ:
+* `workflowId`: ワークフローID（Long）
 
-**リクエスト**:
+リクエスト:
 ```json
 {
   "operatedBy": 1,
@@ -587,10 +593,10 @@ back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 
 **エンドポイント**: `POST /api/workflows/{workflowId}/approve`
 
-**パスパラメータ**:
-- `workflowId`: ワークフローID（Long）
+パスパラメータ:
+* `workflowId`: ワークフローID（Long）
 
-**リクエスト**:
+リクエスト:
 ```json
 {
   "operatedBy": 2,
@@ -612,10 +618,10 @@ back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 
 **エンドポイント**: `POST /api/workflows/{workflowId}/reject`
 
-**パスパラメータ**:
-- `workflowId`: ワークフローID（Long）
+パスパラメータ:
+* `workflowId`: ワークフローID（Long）
 
-**リクエスト**:
+リクエスト:
 ```json
 {
   "operatedBy": 2,
@@ -642,45 +648,45 @@ back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 ### 4.2 列挙型
 
 #### JobRank（職務ランク）
-- `1`: ASSOCIATE（一般社員）
-- `2`: MANAGER（マネージャー）
-- `3`: DIRECTOR（ディレクター）
+* `1`: ASSOCIATE（一般社員）
+* `2`: MANAGER（マネージャー）
+* `3`: DIRECTOR（ディレクター）
 
 #### WorkflowType（ワークフロータイプ）
-- `ADD_NEW_BOOK`: 新規書籍追加
-- `REMOVE_BOOK`: 既存書籍削除
-- `ADJUST_BOOK_PRICE`: 書籍価格改定
+* `ADD_NEW_BOOK`: 新規書籍追加
+* `REMOVE_BOOK`: 既存書籍削除
+* `ADJUST_BOOK_PRICE`: 書籍価格改定
 
 #### WorkflowState（ワークフロー状態）
-- `CREATED`: 作成済み
-- `APPLIED`: 申請中
-- `APPROVED`: 承認済み
+* `CREATED`: 作成済み
+* `APPLIED`: 申請中
+* `APPROVED`: 承認済み
 
 #### WorkflowOperationType（ワークフロー操作タイプ）
-- `CREATE`: 作成
-- `APPLY`: 申請
-- `APPROVE`: 承認
-- `REJECT`: 差戻
+* `CREATE`: 作成
+* `APPLY`: 申請
+* `APPROVE`: 承認
+* `REJECT`: 差戻
 
 ## 5. 非機能要件
 
 ### 5.1 性能要件
-- **レスポンスタイム**: 通常時1秒以内
-- **スループット**: 100リクエスト/秒
+* レスポンスタイム: 通常時1秒以内
+* スループット: 100リクエスト/秒
 
 ### 5.2 セキュリティ要件
-- **認証**: JWT（有効期限24時間）
-- **Cookie**: HttpOnly属性でXSS対策
-- **HTTPS**: 本番環境では必須
-- **パスワード**: BCryptでハッシュ化
+* 認証: JWT（有効期限24時間）
+* Cookie: HttpOnly属性でXSS対策
+* HTTPS: 本番環境では必須
+* パスワード: BCryptでハッシュ化
 
 ### 5.3 可用性要件
-- **稼働率**: 99%以上
-- **エラーハンドリング**: 全APIで統一的なエラーレスポンス
+* 稼働率: 99%以上
+* エラーハンドリング: 全APIで統一的なエラーレスポンス
 
 ## 6. 外部システム連携（将来）
 
 現時点では外部システムとの連携はないが、将来的に以下を想定:
-- メール通知サービス（ワークフロー通知）
-- 在庫管理システム（実在庫連携）
-- 会計システム（売上連携）
+* メール通知サービス（ワークフロー通知）
+* 在庫管理システム（実在庫連携）
+* 会計システム（売上連携）

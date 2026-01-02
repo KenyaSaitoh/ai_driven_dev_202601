@@ -37,7 +37,7 @@
 
 **ベースURL**: `http://localhost:8080/customer-api/customers`
 
-**設定方法**:
+設定方法:
 
 1. システムプロパティ: `-Dcustomer.api.base-url=...`
 2. 環境変数: `CUSTOMER_API_BASE_URL=...`
@@ -48,23 +48,16 @@
 
 **実装クラス**: `pro.kensait.berrybooks.external.CustomerRestClient`
 
-**スコープ**: `@ApplicationScoped`
+**スコープ**: アプリケーションスコープ（シングルトン）
 
 **使用ライブラリ**: Jakarta RESTful Web Services Client API
 
-```java
-@ApplicationScoped
-public class CustomerRestClient {
-    private Client client;
-    private String baseUrl;
-    
-    @PostConstruct
-    public void init() {
-        client = ClientBuilder.newClient();
-        baseUrl = loadConfig(); // 設定値を読み込み
-    }
-}
-```
+クラス構成:
+* RESTクライアントインスタンスを保持
+* ベースURL設定値を保持
+* 初期化メソッド（PostConstruct）:
+  - RESTクライアントインスタンスを生成
+  - 設定ファイルからベースURLを読み込み
 
 ---
 
@@ -86,13 +79,13 @@ GET /customers/query_email?email={email}
 
 **HTTPメソッド**: GET
 
-**クエリパラメータ**:
+クエリパラメータ:
 
 | パラメータ | 型 | 必須 | 説明 |
 |----------|---|------|------|
 | email | string | ✓ | メールアドレス |
 
-**リクエスト例**:
+リクエスト例:
 
 ```
 GET http://localhost:8080/customer-api/customers/query_email?email=alice@gmail.com
@@ -100,7 +93,7 @@ GET http://localhost:8080/customer-api/customers/query_email?email=alice@gmail.c
 
 #### 4.1.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 {
@@ -113,7 +106,7 @@ GET http://localhost:8080/customer-api/customers/query_email?email=alice@gmail.c
 }
 ```
 
-**顧客が見つからない場合 (404 Not Found)**:
+顧客が見つからない場合 (404 Not Found):
 
 ```json
 {
@@ -132,12 +125,13 @@ GET http://localhost:8080/customer-api/customers/query_email?email=alice@gmail.c
 
 **呼び出しタイミング**: ログイン時
 
-```java
-Customer customer = customerRestClient.findByEmail(request.email());
-if (customer == null) {
-    return Response.status(401).entity(...).build();
-}
-```
+処理フロー:
+1. CustomerRestClientのfindByEmail()メソッドを呼び出し
+2. メールアドレスで顧客情報を取得
+3. 顧客が存在しない場合:
+   - HTTPステータス 401 Unauthorized を返却
+4. 顧客が存在する場合:
+   - パスワード照合処理へ進む
 
 ---
 
@@ -157,13 +151,13 @@ GET /customers/{customerId}
 
 **HTTPメソッド**: GET
 
-**パスパラメータ**:
+パスパラメータ:
 
 | パラメータ | 型 | 必須 | 説明 |
 |----------|---|------|------|
 | customerId | integer | ✓ | 顧客ID |
 
-**リクエスト例**:
+リクエスト例:
 
 ```
 GET http://localhost:8080/customer-api/customers/1
@@ -171,7 +165,7 @@ GET http://localhost:8080/customer-api/customers/1
 
 #### 4.2.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 {
@@ -184,7 +178,7 @@ GET http://localhost:8080/customer-api/customers/1
 }
 ```
 
-**顧客が見つからない場合 (404 Not Found)**:
+顧客が見つからない場合 (404 Not Found):
 
 ```json
 {
@@ -203,10 +197,11 @@ GET http://localhost:8080/customer-api/customers/1
 
 **呼び出しタイミング**: JWT認証後、ログイン中の顧客情報取得時
 
-```java
-Integer customerId = securedResource.getCustomerId(); // JWT Claimsから取得
-Customer customer = customerRestClient.findById(customerId);
-```
+処理フロー:
+1. JWT ClaimsからcustomerIdを取得
+2. CustomerRestClientのfindById()メソッドを呼び出し
+3. 顧客IDで顧客情報を取得
+4. 顧客情報を返却
 
 ---
 
@@ -228,7 +223,7 @@ POST /customers/
 
 **Content-Type**: `application/json`
 
-**リクエストボディ**:
+リクエストボディ:
 
 ```json
 {
@@ -252,7 +247,7 @@ POST /customers/
 
 #### 4.3.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 {
@@ -265,7 +260,7 @@ POST /customers/
 }
 ```
 
-**メールアドレス重複 (409 Conflict)**:
+メールアドレス重複 (409 Conflict):
 
 ```json
 {
@@ -284,15 +279,15 @@ POST /customers/
 
 **呼び出しタイミング**: 新規登録時
 
-```java
-Customer customer = new Customer();
-customer.setCustomerName(request.customerName());
-customer.setPassword(BCrypt.hashpw(request.password(), BCrypt.gensalt()));
-customer.setEmail(request.email());
-// ...
-
-Customer createdCustomer = customerRestClient.register(customer);
-```
+処理フロー:
+1. 新しいCustomerオブジェクトを生成
+2. リクエストから各フィールドを設定:
+   - customerName: リクエストの顧客名
+   - password: BCryptでハッシュ化したパスワード
+   - email: リクエストのメールアドレス
+   - その他のフィールド
+3. CustomerRestClientのregister()メソッドを呼び出し
+4. 作成された顧客情報を返却
 
 ---
 
@@ -302,33 +297,33 @@ Customer createdCustomer = customerRestClient.register(customer);
 
 **パッケージ**: `pro.kensait.berrybooks.external.dto`
 
-**実装**: Java Record
+**構造種別**: レコード型（immutableなデータ転送オブジェクト）
 
-```java
-public record CustomerTO(
-    Integer customerId,
-    String customerName,
-    String password,
-    String email,
-    LocalDate birthday,
-    String address
-) {}
-```
+フィールド構成:
+
+| フィールド名 | 型 | 説明 |
+|------------|---|------|
+| customerId | Integer | 顧客ID |
+| customerName | String | 顧客名 |
+| password | String | パスワード（ハッシュ化済み） |
+| email | String | メールアドレス |
+| birthday | LocalDate | 生年月日 |
+| address | String | 住所 |
 
 ### 5.2 ErrorResponse
 
 **パッケージ**: `pro.kensait.berrybooks.external.dto`
 
-**実装**: Java Record
+**構造種別**: レコード型（immutableなデータ転送オブジェクト）
 
-```java
-public record ErrorResponse(
-    int status,
-    String error,
-    String message,
-    String path
-) {}
-```
+フィールド構成:
+
+| フィールド名 | 型 | 説明 |
+|------------|---|------|
+| status | int | HTTPステータスコード |
+| error | String | エラー種別 |
+| message | String | エラーメッセージ |
+| path | String | リクエストパス |
 
 ---
 
@@ -345,28 +340,26 @@ public record ErrorResponse(
 
 ### 6.2 例外マッピング
 
-```java
-try (Response response = target.request(MediaType.APPLICATION_JSON).get()) {
-    return switch (response.getStatus()) {
-        case 200 -> {
-            CustomerTO customerTO = response.readEntity(CustomerTO.class);
-            yield toCustomer(customerTO);
-        }
-        case 404 -> {
-            logger.info("Customer not found");
-            yield null;
-        }
-        case 409 -> {
-            ErrorResponse error = response.readEntity(ErrorResponse.class);
-            throw new EmailAlreadyExistsException(email, error.message());
-        }
-        default -> {
-            logger.error("Unexpected response status: " + response.getStatus());
-            throw new RuntimeException("Failed to call external API");
-        }
-    };
-}
-```
+HTTPレスポンス処理ロジック:
+
+レスポンスステータスコードに応じた分岐処理:
+
+* 200 OK:
+  - レスポンスボディをCustomerTOとして読み取り
+  - CustomerエンティティオブジェクトへDTOを変換
+  - 変換結果を返却
+
+* 404 Not Found:
+  - ログに「Customer not found」を出力
+  - nullを返却
+
+* 409 Conflict:
+  - レスポンスボディをErrorResponseとして読み取り
+  - EmailAlreadyExistsExceptionをスロー（メールアドレスとエラーメッセージを含む）
+
+* その他:
+  - ログに「Unexpected response status」を出力（ステータスコード含む）
+  - RuntimeExceptionをスロー（「Failed to call external API」メッセージ）
 
 ---
 
@@ -393,21 +386,19 @@ try (Response response = target.request(MediaType.APPLICATION_JSON).get()) {
 
 **現在の実装**: デフォルト値を使用（無制限）
 
-**推奨設定**:
+推奨設定:
 
 | 項目 | 値 |
 |------|-----|
 | 接続タイムアウト | 5秒 |
 | 読み取りタイムアウト | 10秒 |
 
-**将来の実装例**:
+将来の実装方針:
 
-```java
-ClientBuilder.newBuilder()
-    .connectTimeout(5, TimeUnit.SECONDS)
-    .readTimeout(10, TimeUnit.SECONDS)
-    .build();
-```
+RESTクライアントビルダーを使用して以下のタイムアウトを設定:
+* 接続タイムアウト: 5秒
+* 読み取りタイムアウト: 10秒
+* 時間単位: SECONDS
 
 ---
 
@@ -417,14 +408,14 @@ ClientBuilder.newBuilder()
 
 **ログレベル**: INFO
 
-**ログ内容**:
+ログ内容:
 
-- API呼び出し開始（メソッド名、パラメータ）
-- リクエストURL
-- レスポンスステータス
-- エラー詳細（例外発生時）
+* API呼び出し開始（メソッド名、パラメータ）
+* リクエストURL
+* レスポンスステータス
+* エラー詳細（例外発生時）
 
-**ログ例**:
+ログ例:
 
 ```
 INFO  [ CustomerRestClient#findByEmail ] email=alice@gmail.com
@@ -450,11 +441,11 @@ java.net.ConnectException: Connection refused
 
 **現在の実装**: 認証なし（同一ネットワーク内の信頼された通信）
 
-**本番環境の推奨**:
+本番環境の推奨:
 
-- **APIキー**: リクエストヘッダーに`X-API-Key`を追加
-- **相互TLS (mTLS)**: クライアント証明書による認証
-- **JWT**: マイクロサービス間の認証トークン
+* APIキー: リクエストヘッダーに`X-API-Key`を追加
+* 相互TLS (mTLS): クライアント証明書による認証
+* JWT: マイクロサービス間の認証トークン
 
 ### 10.2 通信暗号化
 
@@ -497,11 +488,10 @@ INFO  Customer found: email=alice@gmail.com, password=****
 
 **将来の拡張**: Apache HttpClient等のコネクションプールを使用
 
-```java
-PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-cm.setMaxTotal(100);
-cm.setDefaultMaxPerRoute(20);
-```
+コネクションプール設定方針:
+* プールマネージャー: PoolingHttpClientConnectionManager
+* 最大接続数: 100
+* ルート単位のデフォルト最大接続数: 20
 
 ---
 
@@ -509,25 +499,20 @@ cm.setDefaultMaxPerRoute(20);
 
 ### 12.1 ユニットテスト
 
-**モック**: Mockitoで外部APIをモック
+**モック戦略**: Mockitoを使用して外部APIをモック化
 
-```java
-@Mock
-private CustomerRestClient customerRestClient;
+テスト手順:
+1. **モック設定**:
+   - CustomerRestClientをモックオブジェクトとして定義
+   - findByEmail()メソッドの戻り値をスタブ化
+   - テスト用の顧客オブジェクトを返却するよう設定
 
-@Test
-public void testLogin() {
-    // モック設定
-    when(customerRestClient.findByEmail("alice@gmail.com"))
-        .thenReturn(customer);
-    
-    // テスト実行
-    Response response = authResource.login(loginRequest);
-    
-    // 検証
-    assertEquals(200, response.getStatus());
-}
-```
+2. **テスト実行**:
+   - AuthResourceのlogin()メソッドを呼び出し
+   - ログインリクエストを渡す
+
+3. **検証**:
+   - レスポンスのHTTPステータスコードが200であることを確認
 
 ### 12.2 結合テスト
 
@@ -539,7 +524,7 @@ public void testLogin() {
 
 **ツール**: Playwright, curl
 
-**テストシナリオ**:
+テストシナリオ:
 
 1. 新規登録 → ログイン → 顧客情報取得
 2. エラーケース（メールアドレス重複、顧客が見つからない）
@@ -561,16 +546,14 @@ public void testLogin() {
 
 **将来の拡張**: サーキットブレーカーパターンを実装（MicroProfile Fault Tolerance）
 
-```java
-@CircuitBreaker(
-    requestVolumeThreshold = 4,
-    failureRatio = 0.5,
-    delay = 1000
-)
-public Customer findByEmail(String email) {
-    // API呼び出し
-}
-```
+サーキットブレーカー設定方針:
+* リクエスト量閾値: 4（最小4リクエストで評価開始）
+* 失敗率閾値: 0.5（50%以上の失敗でオープン）
+* 遅延時間: 1000ms（オープン状態からハーフオープンへの遅延）
+
+**適用メソッド**: findByEmail(String email)
+* 外部API呼び出しを実行
+* 失敗率が閾値を超えるとサーキットがオープンし、即座に失敗を返す
 
 ---
 
@@ -599,12 +582,12 @@ public Customer findByEmail(String email) {
 
 本外部インターフェース仕様書に関連する詳細ドキュメント：
 
-- [requirements.md](requirements.md) - 要件定義書
-- [functional_design.md](functional_design.md) - 機能設計書（API仕様）
-- [architecture_design.md](architecture_design.md) - アーキテクチャ設計書
-- [behaviors.md](behaviors.md) - 振る舞い仕様書（受入基準）
-- [data_model.md](data_model.md) - データモデル仕様書
-- [README.md](../../README.md) - プロジェクトREADME
+* [requirements.md](requirements.md) - 要件定義書
+* [functional_design.md](functional_design.md) - 機能設計書（API仕様）
+* [architecture_design.md](architecture_design.md) - アーキテクチャ設計書
+* [behaviors.md](behaviors.md) - 振る舞い仕様書（受入基準）
+* [data_model.md](data_model.md) - データモデル仕様書
+* [README.md](../../README.md) - プロジェクトREADME
 
 ---
 

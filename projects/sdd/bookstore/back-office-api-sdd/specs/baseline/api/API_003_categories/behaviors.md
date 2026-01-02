@@ -1,429 +1,131 @@
-# カテゴリAPI 振る舞い仕様書
+# API_003_categories - カテゴリAPI受入基準
+
+**API ID:** API_003_categories  
+**API名:** カテゴリAPI  
+**ベースパス:** `/api/categories`  
+**バージョン:** 2.0.0  
+**最終更新日:** 2025-01-02
+
+---
 
 ## 1. 概要
 
-本ドキュメントは、カテゴリAPI（`/api/categories`）の動的な振る舞いをシーケンス図とフローチャートで定義する。
+本文書は、カテゴリAPIの受入基準を記述する。各エンドポイントについて、正常系・異常系の振る舞いを定義し、テストシナリオの基礎とする。
 
-## 2. カテゴリ一覧取得シーケンス
+---
 
-### 2.1 正常系: 全件取得
+## 2. カテゴリ一覧取得 (`GET /api/categories`)
 
-```
-┌──────┐         ┌─────────────┐      ┌──────────────┐      ┌───────────┐      ┌────────┐
-│Client│         │CategoryResource      │CategoryService      │CategoryDao│      │Database│
-└──┬───┘         └──────┬──────┘      └───────┬──────┘      └─────┬─────┘      └───┬────┘
-   │                     │                      │                    │               │
-   │GET /api/categories  │                      │                    │               │
-   ├────────────────────►│                      │                    │               │
-   │                     │                      │                    │               │
-   │                     │LOG INFO              │                    │               │
-   │                     │──────────┐           │                    │               │
-   │                     │          │           │                    │               │
-   │                     │[ CategoryResource#   │                    │               │
-   │                     │  getAllCategories ]  │                    │               │
-   │                     │◄─────────┘           │                    │               │
-   │                     │                      │                    │               │
-   │                     │getAllCategories()    │                    │               │
-   │                     ├─────────────────────►│                    │               │
-   │                     │                      │                    │               │
-   │                     │                      │LOG INFO            │               │
-   │                     │                      │──────────┐         │               │
-   │                     │                      │          │         │               │
-   │                     │                      │[ CategoryService#  │               │
-   │                     │                      │  getCategoriesAll ]│               │
-   │                     │                      │◄─────────┘         │               │
-   │                     │                      │                    │               │
-   │                     │                      │getCategoriesAll()  │               │
-   │                     │                      ├───────────────────►│               │
-   │                     │                      │                    │               │
-   │                     │                      │                    │findAll()      │
-   │                     │                      │                    ├──────────────►│
-   │                     │                      │                    │               │
-   │                     │                      │                    │Named Query:   │
-   │                     │                      │                    │Category.findAll│
-   │                     │                      │                    │               │
-   │                     │                      │                    │SELECT c       │
-   │                     │                      │                    │FROM CATEGORY c│
-   │                     │                      │                    │ORDER BY       │
-   │                     │                      │                    │ c.CATEGORY_ID │
-   │                     │                      │                    │               │
-   │                     │                      │                    │◄──────────────┤
-   │                     │                      │                    │List<Category> │
-   │                     │                      │                    │ (4 records)   │
-   │                     │                      │◄───────────────────┤               │
-   │                     │                      │List<Category>      │               │
-   │                     │◄─────────────────────┤                    │               │
-   │                     │List<Category>        │                    │               │
-   │                     │                      │                    │               │
-   │                     │Stream & Map          │                    │               │
-   │                     │──────────┐           │                    │               │
-   │                     │          │           │                    │               │
-   │                     │categories.stream()   │                    │               │
-   │                     │ .map(c -> new        │                    │               │
-   │                     │   CategoryTO(        │                    │               │
-   │                     │    c.getCategoryId(),│                    │               │
-   │                     │    c.getCategoryName()                    │               │
-   │                     │   ))                 │                    │               │
-   │                     │ .toList()            │                    │               │
-   │                     │◄─────────┘           │                    │               │
-   │                     │                      │                    │               │
-   │◄────────────────────┤200 OK                │                    │               │
-   │[{CategoryTO}]       │Content-Type:         │                    │               │
-   │                     │application/json      │                    │               │
-   │                     │                      │                    │               │
-```
+### 2.1 正常系
 
-### 2.2 データ変換の詳細
+| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
+|-----------|------|----------------|------------|---------------|
+| CAT-LIST-001 | すべてのカテゴリを取得できる | カテゴリが登録されている | /api/categoriesにリクエスト | 200 OK<br/>カテゴリ一覧が配列形式で返される |
+| CAT-LIST-002 | カテゴリがcategoryId昇順でソートされる | 複数のカテゴリが登録されている | /api/categoriesにリクエスト | 200 OK<br/>categoryId昇順で返される |
+| CAT-LIST-003 | レスポンス形式が配列 | カテゴリが登録されている | /api/categoriesにリクエスト | 200 OK<br/>[{categoryId: 1, categoryName: "文学"}, ...] |
+| CAT-LIST-004 | カテゴリが0件の場合、空配列を返す | カテゴリが登録されていない | /api/categoriesにリクエスト | 200 OK<br/>空配列 [] が返される |
 
-```
-Category Entity         →    CategoryTO
-───────────────────────────────────────────
-categoryId: 1           →    categoryId: 1
-categoryName: "文学"     →    categoryName: "文学"
+---
 
-categoryId: 2           →    categoryId: 2
-categoryName: "ビジネス"  →    categoryName: "ビジネス"
+## 3. データ整合性受入基準
 
-categoryId: 3           →    categoryId: 3
-categoryName: "技術"     →    categoryName: "技術"
+### 3.1 データ内容
 
-categoryId: 4           →    categoryId: 4
-categoryName: "歴史"     →    categoryName: "歴史"
-```
+| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
+|-----------|------|----------------|------------|---------------|
+| DATA-001 | categoryIdとcategoryNameが正しく返される | カテゴリ"文学"(ID=1)が存在 | /api/categoriesにリクエスト | 200 OK<br/>{categoryId: 1, categoryName: "文学"}が含まれる |
+| DATA-002 | すべてのカテゴリが含まれる | 4件のカテゴリが存在 | /api/categoriesにリクエスト | 200 OK<br/>4件すべてが返される |
 
-## 3. 処理フローチャート
+---
 
-```
-┌──────────────┐
-│  開始         │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│リクエスト受信  │
-│GET /categories│
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│CategoryResource│
-│getAllCategories()│
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│CategoryService│
-│getCategoriesAll()│
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│CategoryDao   │
-│findAll()     │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│DB Query実行   │
-│SELECT c      │
-│FROM CATEGORY │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│List<Category>│
-│取得           │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│Stream API    │
-│変換処理       │
-│Category→     │
-│CategoryTO    │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│List<CategoryTO│
-│生成           │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│JSON Serialize│
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│200 OK        │
-│レスポンス返却│
-└──────────────┘
-```
+## 4. API比較受入基準
 
-## 4. データフロー全体図
+### 4.1 `/api/categories` vs `/api/books/categories`
 
-```
-┌──────────────────────────────────────────────────────┐
-│                       Client                         │
-└───────────────────────┬──────────────────────────────┘
-                        │ HTTP GET
-                        │ /api/categories
-                        ▼
-┌──────────────────────────────────────────────────────┐
-│                 CategoryResource                     │
-│  - getAllCategories()                                │
-└───────────────────────┬──────────────────────────────┘
-                        │ @Inject
-                        ▼
-┌──────────────────────────────────────────────────────┐
-│                 CategoryService                      │
-│  - getCategoriesAll()                                │
-└───────────────────────┬──────────────────────────────┘
-                        │ @Inject
-                        ▼
-┌──────────────────────────────────────────────────────┐
-│                   CategoryDao                        │
-│  - findAll()                                         │
-└───────────────────────┬──────────────────────────────┘
-                        │ EntityManager / JPQL
-                        ▼
-┌──────────────────────────────────────────────────────┐
-│                     Database                         │
-│  - CATEGORY table                                    │
-└──────────────────────────────────────────────────────┘
-```
+| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
+|-----------|------|----------------|------------|---------------|
+| COMP-001 | `/api/categories`は配列形式 | - | /api/categoriesにリクエスト | 200 OK<br/>[{categoryId, categoryName}] |
+| COMP-002 | `/api/books/categories`はMap形式 | - | /api/books/categoriesにリクエスト | 200 OK<br/>{categoryName: categoryId} |
+| COMP-003 | 同じデータを異なる形式で返す | - | 両APIにリクエスト | 同じカテゴリ情報が異なる形式で返される |
 
-## 5. パフォーマンス特性
+---
 
-### 5.1 レスポンスタイム分析
+## 5. パフォーマンス受入基準
 
-```
-カテゴリ一覧取得 (Total: ~50ms)
+### 5.1 レスポンスタイム
 
-┌────────────────────────────────────────────────────────┐
-│ DB Query (SELECT)                        20ms (40%)   │
-├────────────────────────────────────────────────────────┤
-│ Entity → DTO Conversion                  10ms (20%)   │
-├────────────────────────────────────────────────────────┤
-│ JSON Serialization                       10ms (20%)   │
-├────────────────────────────────────────────────────────┤
-│ その他（ネットワーク、オーバーヘッド）     10ms (20%)   │
-└────────────────────────────────────────────────────────┘
-```
+| シナリオID | API | 受入基準 |
+|-----------|-----|---------|
+| PERF-001 | GET /api/categories | 50ms以内（95パーセンタイル） |
 
-### 5.2 キャッシング効果（将来）
+### 5.2 キャッシング効果（将来実装時）
 
-```
-キャッシュなし:
-┌────────────────────────────────────────┐
-│ First Request   ████████████  50ms    │
-│ Second Request  ████████████  50ms    │
-│ Third Request   ████████████  50ms    │
-└────────────────────────────────────────┘
+| シナリオID | 説明 | 受入基準 |
+|-----------|------|---------|
+| CACHE-001 | 初回リクエストはDB問い合わせ | 初回レスポンスタイム: 50ms |
+| CACHE-002 | 2回目以降はキャッシュから返却 | 2回目以降レスポンスタイム: 5ms以内 |
+| CACHE-003 | キャッシュTTLは適切に設定 | キャッシュTTL: 1時間（マスタデータのため） |
 
-キャッシュあり（実装後）:
-┌────────────────────────────────────────┐
-│ First Request   ████████████  50ms    │
-│ Second Request  █░░░░░░░░░░░  5ms     │
-│ Third Request   █░░░░░░░░░░░  5ms     │
-└────────────────────────────────────────┘
-```
+---
 
-**推奨**: マスタデータのため、アプリケーションレベルキャッシュを実装
+## 6. ログ出力受入基準
 
-## 6. ログ出力シーケンス
+### 6.1 ログレベル
 
-### 6.1 正常系ログ
+| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
+|-----------|------|----------------|------------|---------------|
+| LOG-001 | カテゴリ一覧取得時はINFOレベルでログ出力 | - | /api/categories | INFO: [CategoryResource#getAllCategories]<br/>INFO: [CategoryService#getCategoriesAll] |
+| LOG-002 | 取得成功時は件数を出力 | 4件のカテゴリが存在 | /api/categories | INFO: [CategoryResource#getAllCategories] Success: 4 categories returned |
+| LOG-003 | DB接続エラー時はERRORレベル | DB接続不可 | /api/categories | ERROR: [CategoryDao#findAll] Database error |
 
-```
-Time    Level   Message
-─────────────────────────────────────────────────────────────
-t1      INFO    [ CategoryResource#getAllCategories ]
-t2      INFO    [ CategoryService#getCategoriesAll ]
-t3      DEBUG   [ CategoryDao#findAll ] Executing JPQL: SELECT c FROM Category c
-t4      DEBUG   [ CategoryDao#findAll ] Result count: 4
-t5      DEBUG   [ CategoryResource ] Converting 4 entities to DTOs
-t6      INFO    [ CategoryResource#getAllCategories ] Success: 4 categories returned
-```
+---
 
-### 6.2 DBエラー時のログ
-
-```
-Time    Level   Message
-─────────────────────────────────────────────────────────────
-t1      INFO    [ CategoryResource#getAllCategories ]
-t2      INFO    [ CategoryService#getCategoriesAll ]
-t3      DEBUG   [ CategoryDao#findAll ] Executing JPQL: SELECT c FROM Category c
-t4      ERROR   [ CategoryDao#findAll ] Database error
-                java.sql.SQLException: Connection refused
-t5      ERROR   [ CategoryResource#getAllCategories ] Error retrieving categories
-t6      INFO    [ CategoryResource#getAllCategories ] Returning 500 Internal Server Error
-```
-
-## 7. 並行処理シナリオ
+## 7. 並行処理受入基準
 
 ### 7.1 同時リクエスト
 
-```
-時刻   ユーザーA                    ユーザーB                    ユーザーC
-t1    GET /api/categories
-t2                                GET /api/categories
-t3                                                            GET /api/categories
-t4    → DB Query (1)
-t5                                → DB Query (2)
-t6                                                            → DB Query (3)
-t7    ← Result (4 categories)
-t8                                ← Result (4 categories)
-t9                                                            ← Result (4 categories)
-```
+| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
+|-----------|------|----------------|------------|---------------|
+| CONC-001 | 複数ユーザーが同時にカテゴリ一覧を取得できる | - | 3ユーザーが同時に/api/categories | 全リクエストが成功<br/>独立したトランザクション |
+| CONC-002 | 読み取り専用のため競合なし | - | 同時に/api/categories | データ競合なし<br/>ロック不要 |
+| CONC-003 | 大量リクエスト時も安定 | - | 1000件の同時リクエスト | 全リクエストが3秒以内に完了<br/>平均レスポンスタイム: 150ms |
 
-**結果**: 独立したトランザクションで並行実行可能
+---
 
-### 7.2 大量リクエスト時
+## 8. 将来の拡張受入基準
 
-```
-1000 concurrent requests
+### 8.1 CRUD操作（実装予定）
 
-┌────────────────────────────────────────┐
-│ Connection Pool (Max: 20)              │
-├────────────────────────────────────────┤
-│ All requests complete in ~3 seconds    │
-│ Average response time: 150ms           │
-│ (50ms query + 100ms wait)              │
-└────────────────────────────────────────┘
-```
+| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
+|-----------|------|----------------|------------|---------------|
+| CRUD-001 | カテゴリ詳細取得 | categoryId=1が存在 | GET /api/categories/1 | 200 OK<br/>{categoryId: 1, categoryName: "文学"} |
+| CRUD-002 | カテゴリ作成 | - | POST /api/categories<br/>{categoryName: "新カテゴリ"} | 201 Created<br/>Location: /api/categories/5 |
+| CRUD-003 | カテゴリ更新 | categoryId=1が存在 | PUT /api/categories/1<br/>{categoryName: "更新"} | 200 OK |
+| CRUD-004 | カテゴリ削除 | categoryId=1が存在 | DELETE /api/categories/1 | 200 OK |
 
-**最適化案**:
-- アプリケーションレベルキャッシュの実装
-- CDNでの静的コンテンツ配信
-- レスポンスの圧縮（gzip）
+### 8.2 統計情報（実装予定）
 
-## 8. 比較: `/api/categories` vs `/api/books/categories`
+| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
+|-----------|------|----------------|------------|---------------|
+| STATS-001 | カテゴリ別書籍数を取得 | - | GET /api/categories?includeStats=true | 200 OK<br/>[{categoryId: 1, categoryName: "文学", bookCount: 150}] |
 
-### 8.1 レスポンス形式の違い
+---
 
-```
-┌─────────────────────────────────────────────────────┐
-│         `/api/categories`                           │
-│         (配列形式 - 推奨)                             │
-├─────────────────────────────────────────────────────┤
-│ [                                                   │
-│   {"categoryId": 1, "categoryName": "文学"},         │
-│   {"categoryId": 2, "categoryName": "ビジネス"}      │
-│ ]                                                   │
-└─────────────────────────────────────────────────────┘
+## 9. マスタデータ管理受入基準
 
-┌─────────────────────────────────────────────────────┐
-│         `/api/books/categories`                     │
-│         (Map形式 - 後方互換性)                        │
-├─────────────────────────────────────────────────────┤
-│ {                                                   │
-│   "文学": 1,                                         │
-│   "ビジネス": 2                                      │
-│ }                                                   │
-└─────────────────────────────────────────────────────┘
-```
+### 9.1 データ安定性
 
-### 8.2 用途の違い
+| シナリオID | 説明 | 受入基準 |
+|-----------|------|---------|
+| MASTER-001 | カテゴリマスタは変更頻度が低い | 月1回未満の更新 |
+| MASTER-002 | カテゴリ削除は論理削除 | 物理削除せず、フラグで管理 |
+| MASTER-003 | キャッシング推奨 | マスタデータのためキャッシュ適用を推奨 |
 
-```
-┌──────────────┐
-│  クライアント  │
-└──────┬───────┘
-       │
-       ├────────────────────┐
-       │                    │
-       ▼                    ▼
-┌──────────────┐    ┌──────────────┐
-│新規UI        │    │既存UI        │
-│(推奨)        │    │(後方互換)     │
-└──────┬───────┘    └──────┬───────┘
-       │                    │
-       ▼                    ▼
-┌──────────────┐    ┌──────────────┐
-│/api/categories    │/api/books/   │
-│              │    │categories    │
-│配列形式       │    │Map形式       │
-│標準REST      │    │            │
-└──────────────┘    └──────────────┘
-```
+---
 
-## 9. 状態管理
+## 10. 関連ドキュメント
 
-カテゴリAPIは状態を持たない（ステートレス）:
-
-```
-┌──────────────┐
-│ Request 1    │ → ┌──────────┐ → ┌──────────┐
-└──────────────┘   │ Category │   │ Database │
-                   │ Resource │   └──────────┘
-┌──────────────┐   └──────────┘
-│ Request 2    │ → ┌──────────┐ → ┌──────────┐
-└──────────────┘   │ Category │   │ Database │
-                   │ Resource │   └──────────┘
-┌──────────────┐   └──────────┘
-│ Request 3    │ → ┌──────────┐ → ┌──────────┐
-└──────────────┘   │ Category │   │ Database │
-                   │ Resource │   └──────────┘
-                   └──────────┘
-
-各リクエストは独立して処理される
-```
-
-## 10. 将来の拡張シーケンス
-
-### 10.1 カテゴリ詳細取得（実装予定）
-
-```
-┌──────┐         ┌─────────────┐      ┌──────────────┐      ┌───────────┐
-│Client│         │CategoryResource      │CategoryService      │CategoryDao│
-└──┬───┘         └──────┬──────┘      └───────┬──────┘      └─────┬─────┘
-   │                     │                      │                    │
-   │GET /api/categories/1│                      │                    │
-   ├────────────────────►│                      │                    │
-   │                     │                      │                    │
-   │                     │getCategory(1)        │                    │
-   │                     ├─────────────────────►│                    │
-   │                     │                      │findById(1)         │
-   │                     │                      ├───────────────────►│
-   │                     │                      │                    │
-   │                     │                      │◄───────────────────┤
-   │                     │                      │Category            │
-   │                     │◄─────────────────────┤                    │
-   │                     │Category              │                    │
-   │                     │                      │                    │
-   │◄────────────────────┤200 OK                │                    │
-   │{CategoryTO}         │                      │                    │
-   │                     │                      │                    │
-```
-
-### 10.2 カテゴリ統計情報（実装予定）
-
-```
-┌──────┐         ┌─────────────┐      ┌──────────────┐      ┌────────┐
-│Client│         │CategoryResource      │CategoryService      │BookDao │
-└──┬───┘         └──────┬──────┘      └───────┬──────┘      └───┬────┘
-   │                     │                      │                 │
-   │GET /api/categories  │                      │                 │
-   │  ?includeStats=true │                      │                 │
-   ├────────────────────►│                      │                 │
-   │                     │                      │                 │
-   │                     │getCategoriesWithStats()                │
-   │                     ├─────────────────────►│                 │
-   │                     │                      │                 │
-   │                     │                      │countByCategory()│
-   │                     │                      ├────────────────►│
-   │                     │                      │                 │
-   │                     │                      │◄────────────────┤
-   │                     │                      │Map<CategoryId,  │
-   │                     │                      │     Count>      │
-   │                     │◄─────────────────────┤                 │
-   │                     │                      │                 │
-   │◄────────────────────┤200 OK                │                 │
-   │[{categoryId: 1,     │                      │                 │
-   │  categoryName: "文学",                      │                 │
-   │  bookCount: 150}]   │                      │                 │
-   │                     │                      │                 │
-```
+* [functional_design.md](functional_design.md) - カテゴリAPI機能設計書
+* [../../system/behaviors.md](../../system/behaviors.md) - 全体受入基準
+* [../../system/architecture_design.md](../../system/architecture_design.md) - アーキテクチャ設計書
 

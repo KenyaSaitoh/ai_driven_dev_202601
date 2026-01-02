@@ -19,10 +19,10 @@
 
 API単位の詳細仕様は、以下のドキュメントを参照してください：
 
-- **[API_001_auth](../api/API_001_auth/functional_design.md)** - 認証API（ログイン、ログアウト、新規登録、ユーザー情報取得）
-- **[API_002_books](../api/API_002_books/functional_design.md)** - 書籍API（書籍一覧、詳細、検索、カテゴリ一覧）
-- **[API_003_orders](../api/API_003_orders/functional_design.md)** - 注文API（注文作成、注文履歴、注文詳細）
-- **[API_004_images](../api/API_004_images/functional_design.md)** - 画像API（書籍表紙画像取得）
+* **[API_001_auth](../api/API_001_auth/functional_design.md)** - 認証API（ログイン、ログアウト、新規登録、ユーザー情報取得）
+* **[API_002_books](../api/API_002_books/functional_design.md)** - 書籍API（書籍一覧、詳細、検索、カテゴリ一覧）
+* **[API_003_orders](../api/API_003_orders/functional_design.md)** - 注文API（注文作成、注文履歴、注文詳細）
+* **[API_004_images](../api/API_004_images/functional_design.md)** - 画像API（書籍表紙画像取得）
 
 ---
 
@@ -44,7 +44,7 @@ POST /api/auth/login
 
 **Content-Type**: `application/json`
 
-**リクエストボディ**:
+リクエストボディ:
 
 ```json
 {
@@ -60,7 +60,7 @@ POST /api/auth/login
 
 #### 2.1.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 **Set-Cookie**: `berry-books-jwt=<JWT Token>; Path=/; Max-Age=86400; HttpOnly`
 
@@ -74,7 +74,7 @@ POST /api/auth/login
 }
 ```
 
-**エラー時 (401 Unauthorized)**:
+エラー時 (401 Unauthorized):
 
 ```json
 {
@@ -144,7 +144,7 @@ JWT Cookieを削除（MaxAge=0）してログアウトする。
 
 #### 2.2.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 **Set-Cookie**: `berry-books-jwt=; Path=/; Max-Age=0; HttpOnly`
 
@@ -170,7 +170,7 @@ POST /api/auth/register
 
 **Content-Type**: `application/json`
 
-**リクエストボディ**:
+リクエストボディ:
 
 ```json
 {
@@ -192,7 +192,7 @@ POST /api/auth/register
 
 #### 2.3.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 **Set-Cookie**: `berry-books-jwt=<JWT Token>; Path=/; Max-Age=86400; HttpOnly`
 
@@ -206,7 +206,7 @@ POST /api/auth/register
 }
 ```
 
-**エラー時 (409 Conflict)**:
+エラー時 (409 Conflict):
 
 ```json
 {
@@ -217,7 +217,7 @@ POST /api/auth/register
 }
 ```
 
-**エラー時 (400 Bad Request)**:
+エラー時 (400 Bad Request):
 
 ```json
 {
@@ -259,7 +259,7 @@ JWT Cookieから顧客情報を取得する。認証必須。
 
 #### 2.4.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 {
@@ -271,7 +271,7 @@ JWT Cookieから顧客情報を取得する。認証必須。
 }
 ```
 
-**エラー時 (401 Unauthorized)**:
+エラー時 (401 Unauthorized):
 
 ```json
 {
@@ -304,7 +304,7 @@ GET /api/books
 
 #### 3.1.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 [
@@ -348,7 +348,7 @@ GET /api/books/{id}
 
 #### 3.2.3 リクエスト
 
-**パスパラメータ**:
+パスパラメータ:
 
 | パラメータ | 型 | 説明 |
 |----------|---|------|
@@ -356,7 +356,7 @@ GET /api/books/{id}
 
 #### 3.2.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 {
@@ -382,7 +382,7 @@ GET /api/books/{id}
 }
 ```
 
-**エラー時 (404 Not Found)**:
+エラー時 (404 Not Found):
 
 ```json
 {
@@ -406,14 +406,14 @@ GET /api/books/search?categoryId={id}&keyword={keyword}
 
 #### 3.3.3 リクエスト
 
-**クエリパラメータ**:
+クエリパラメータ:
 
 | パラメータ | 型 | 必須 | 説明 |
 |----------|---|------|------|
 | categoryId | integer | - | カテゴリID（0または未指定=全カテゴリ） |
 | keyword | string | - | キーワード（書籍名、著者名で部分一致検索） |
 
-**検索パターン**:
+検索パターン:
 
 | categoryId | keyword | 動作 |
 |-----------|---------|------|
@@ -424,7 +424,7 @@ GET /api/books/search?categoryId={id}&keyword={keyword}
 
 #### 3.3.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 [
@@ -476,7 +476,7 @@ GET /api/books/categories
 
 #### 3.4.3 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 {
@@ -511,7 +511,7 @@ POST /api/orders
 
 **Cookie**: `berry-books-jwt=<JWT Token>`
 
-**リクエストボディ**:
+リクエストボディ:
 
 ```json
 {
@@ -548,7 +548,7 @@ POST /api/orders
 
 #### 4.1.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 {
@@ -571,7 +571,7 @@ POST /api/orders
 }
 ```
 
-**エラー時 (409 Conflict - 在庫不足)**:
+エラー時 (409 Conflict - 在庫不足):
 
 ```json
 {
@@ -582,7 +582,7 @@ POST /api/orders
 }
 ```
 
-**エラー時 (409 Conflict - 楽観的ロック競合)**:
+エラー時 (409 Conflict - 楽観的ロック競合):
 
 ```json
 {
@@ -593,7 +593,7 @@ POST /api/orders
 }
 ```
 
-**エラー時 (401 Unauthorized)**:
+エラー時 (401 Unauthorized):
 
 ```json
 {
@@ -697,7 +697,7 @@ GET /api/orders/history
 
 #### 4.2.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 [
@@ -722,7 +722,7 @@ GET /api/orders/history
 ]
 ```
 
-**エラー時 (401 Unauthorized)**:
+エラー時 (401 Unauthorized):
 
 ```json
 {
@@ -758,7 +758,7 @@ GET /api/orders/{tranId}
 
 #### 4.3.3 リクエスト
 
-**パスパラメータ**:
+パスパラメータ:
 
 | パラメータ | 型 | 説明 |
 |----------|---|------|
@@ -766,7 +766,7 @@ GET /api/orders/{tranId}
 
 #### 4.3.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 {
@@ -797,7 +797,7 @@ GET /api/orders/{tranId}
 }
 ```
 
-**エラー時 (404 Not Found)**:
+エラー時 (404 Not Found):
 
 ```json
 {
@@ -824,7 +824,7 @@ GET /api/orders/{tranId}/details/{detailId}
 
 #### 4.4.3 リクエスト
 
-**パスパラメータ**:
+パスパラメータ:
 
 | パラメータ | 型 | 説明 |
 |----------|---|------|
@@ -833,7 +833,7 @@ GET /api/orders/{tranId}/details/{detailId}
 
 #### 4.4.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 {
@@ -846,7 +846,7 @@ GET /api/orders/{tranId}/details/{detailId}
 }
 ```
 
-**エラー時 (404 Not Found)**:
+エラー時 (404 Not Found):
 
 ```json
 {
@@ -875,7 +875,7 @@ GET /api/images/covers/{bookId}
 
 #### 5.1.3 リクエスト
 
-**パスパラメータ**:
+パスパラメータ:
 
 | パラメータ | 型 | 説明 |
 |----------|---|------|
@@ -883,13 +883,13 @@ GET /api/images/covers/{bookId}
 
 #### 5.1.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 **Content-Type**: `image/jpeg`
 
 **Body**: 画像バイナリデータ
 
-**エラー時 (404 Not Found)**:
+エラー時 (404 Not Found):
 
 フォールバック画像（`no-image.jpg`）を返す
 
@@ -1004,9 +1004,9 @@ flowchart TD
 
 本機能設計書に関連する詳細ドキュメント：
 
-- [requirements.md](requirements.md) - 要件定義書
-- [behaviors.md](behaviors.md) - 振る舞い仕様書（受入基準）
-- [architecture_design.md](architecture_design.md) - アーキテクチャ設計書
-- [data_model.md](data_model.md) - データモデル仕様書
-- [external_interface.md](external_interface.md) - 外部インターフェース仕様書
-- [README.md](../../README.md) - プロジェクトREADME
+* [requirements.md](requirements.md) - 要件定義書
+* [behaviors.md](behaviors.md) - 振る舞い仕様書（受入基準）
+* [architecture_design.md](architecture_design.md) - アーキテクチャ設計書
+* [data_model.md](data_model.md) - データモデル仕様書
+* [external_interface.md](external_interface.md) - 外部インターフェース仕様書
+* [README.md](../../README.md) - プロジェクトREADME

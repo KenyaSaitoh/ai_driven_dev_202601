@@ -163,22 +163,21 @@ sequenceDiagram
     ImageResource-->>Client: image/jpeg Binary
 ```
 
-**実装方針**:
+実装方針:
 
 1. **ServletContext使用**: WAR内リソースへのアクセスには`ServletContext.getResourceAsStream()`を使用
 2. **パス形式**: `/resources/...` から始まる絶対パス（WARルート相対）
 3. **フォールバック**: 画像が存在しない場合は`no-image.jpg`を返却
 4. **ファイルシステム禁止**: `new File("src/main/...")` は開発環境でのみ動作
 
-```java
-// ❌ 禁止: ファイルシステム直接アクセス
-File imageFile = new File("src/main/webapp/resources/images/covers/1.jpg");
+非推奨なアプローチ:
+* ファイルシステムへの直接アクセス（開発環境でのみ動作）
+* 相対パスを使用したFileオブジェクトの生成
 
-// ✅ 推奨: ServletContextを使用
-@Context
-private ServletContext servletContext;
-InputStream is = servletContext.getResourceAsStream("/resources/images/covers/1.jpg");
-```
+推奨アプローチ:
+* ServletContextをインジェクションして使用
+* ServletContext.getResourceAsStream()でWARルート相対パスを指定
+* パス形式: `/resources/images/covers/1.jpg`のような絶対パス（WARルート相対）
 
 ---
 
@@ -407,23 +406,16 @@ jwt.expiration-ms=86400000
 jwt.cookie-name=berry-books-jwt
 ```
 
-**初期化とフォールバック処理**:
+初期化とフォールバック処理:
 
-MicroProfile Configの`@ConfigProperty`によるDI（Dependency Injection）が環境によって信頼性が低い場合があるため、`@PostConstruct`で明示的にnullチェックとフォールバック値を設定します。
+MicroProfile Configの設定プロパティインジェクションが環境によって信頼性が低い場合があるため、初期化メソッドで明示的にnullチェックとフォールバック値を設定します。
 
-```java
-@ApplicationScoped
-public class JwtUtil {
-    
-    @ConfigProperty(name = "jwt.secret-key")
-    private String secretKey;
-    
-    @ConfigProperty(name = "jwt.expiration-ms", defaultValue = "86400000")
-    private Long expirationMs;
-    
-    private SecretKey key;
-    
-    @PostConstruct
+JwtUtilの初期化仕様:
+* スコープ: アプリケーションスコープ
+* 設定プロパティ:
+  - `jwt.secret-key`: JWT署名用の秘密鍵
+  - `jwt.expiration-ms`: トークン有効期限（ミリ秒）、デフォルト値=86400000
+* 初期化処理（PostConstruct
     public void init() {
         // @ConfigPropertyが失敗した場合のフォールバック
         if (secretKey == null || secretKey.isEmpty()) {
@@ -441,37 +433,31 @@ public class JwtUtil {
 }
 ```
 
-**設計上の理由**:
-- `@ConfigProperty`の`defaultValue`だけでは不十分（nullが注入される場合がある）
-- `@PostConstruct`で明示的に初期化し、安全にデフォルト値を設定
-- 設定欠落時は警告ログを出力し、運用で検知可能にする
+設計上の理由:
+* `@ConfigProperty`の`defaultValue`だけでは不十分（nullが注入される場合がある）
+* `@PostConstruct`で明示的に初期化し、安全にデフォルト値を設定
+* 設定欠落時は警告ログを出力し、運用で検知可能にする
 
 ### 5.3 JWTフィルターの実装詳細
 
-**コンテキストパス対応**:
+コンテキストパス対応:
 
 JwtAuthenticationFilterは、リクエストURIからコンテキストパスを除外してパスマッチングを行います。
 
-```java
-String requestURI = httpRequest.getRequestURI();
-String contextPath = httpRequest.getContextPath();
+パス処理ロジック:
+1. HTTPリクエストからリクエストURIを取得
+2. HTTPリクエストからコンテキストパスを取得
+3. リクエストURIからコンテキストパスを除外した部分パスを抽出
+4. 例: `/berry-books-api-sdd/api/auth/login` → `/api/auth/login`
+5. 抽出したパスが公開エンドポイントかどうかを判定
+6. 公開エンドポイントの場合は認証をスキップ
 
-// コンテキストパスを除いたパスを取得
-String path = requestURI.substring(contextPath.length());
-
-// 例: /berry-books-api-sdd/api/auth/login → /api/auth/login
-if (isPublicEndpoint(path)) {
-    chain.doFilter(request, response);
-    return;
-}
-```
-
-**認証除外エンドポイント**:
-- `/api/auth/login`
-- `/api/auth/logout`
-- `/api/auth/register`
-- `/api/books`（書籍一覧・詳細は認証不要）
-- `/api/images`（画像APIは認証不要）
+認証除外エンドポイント:
+* `/api/auth/login`
+* `/api/auth/logout`
+* `/api/auth/register`
+* `/api/books`（書籍一覧・詳細は認証不要）
+* `/api/images`（画像APIは認証不要）
 
 ### 5.4 セキュリティ対策
 
@@ -529,12 +515,12 @@ sequenceDiagram
 
 ### 6.2 トランザクション戦略
 
-**トランザクション境界:**
-- サービスレイヤーメソッドに `@Transactional`
-- JTA (Jakarta Transactions) による宣言的トランザクション
-- RuntimeException で自動ロールバック
+トランザクション境界::
+* サービスレイヤーメソッドに `@Transactional`
+* JTA (Jakarta Transactions) による宣言的トランザクション
+* RuntimeException で自動ロールバック
 
-**OrderService.orderBooks() の例:**
+OrderService.orderBooks() の例::
 
 1. **在庫可用性チェック**: `stockDao.findByBookId()`
 2. **在庫更新（楽観的ロック）**: `stockDao.updateStock(bookId, quantity, version)`
@@ -574,25 +560,23 @@ stateDiagram-v2
 
 ### 7.2 実装詳細
 
-**技術仕様:**
-- バージョンカラム: `STOCK.VERSION` (BIGINT NOT NULL)
-- Stock エンティティに `@Version` アノテーション
-- バージョン不一致時に `OptimisticLockException`
-- Exception Mapper で409 Conflictレスポンス
+技術仕様::
+* バージョンカラム: `STOCK.VERSION` (BIGINT NOT NULL)
+* Stock エンティティに `@Version` アノテーション
+* バージョン不一致時に `OptimisticLockException`
+* Exception Mapper で409 Conflictレスポンス
 
-**処理フロー:**
+処理フロー::
 
 1. **カート追加時**: VERSION値を取得し、カートアイテムに保存
 2. **注文確定時**: 保存したVERSION値で在庫を更新
-   ```java
-   @Query("UPDATE Stock s SET s.quantity = s.quantity - :quantity " +
-          "WHERE s.bookId = :bookId AND s.version = :version")
-   int updateStock(@Param("bookId") Integer bookId, 
-                   @Param("quantity") Integer quantity, 
-                   @Param("version") Long version);
-   ```
+   - 更新クエリ仕様:
+     - 対象: Stock エンティティ
+     - SET句: quantity = quantity - (減算数量)
+     - WHERE句: bookId = (対象書籍ID) AND version = (保存したバージョン)
+     - 戻り値: 更新件数
 3. **成功時**: 在庫数を減算、VERSION値を自動インクリメント
-4. **失敗時**: `OptimisticLockException`、ユーザーに「他のユーザーが購入済み」エラー表示
+4. **失敗時**: 楽観的ロック例外が発生、ユーザーに「他のユーザーが購入済み」エラー表示
 
 ---
 
@@ -646,15 +630,16 @@ classDiagram
 }
 ```
 
-**ErrorResponse Record:**
-```java
-public record ErrorResponse(
-    int status,
-    String error,
-    String message,
-    String path
-) {}
-```
+ErrorResponse構造::
+
+レコード型のエラーレスポンスオブジェクト
+
+| フィールド名 | 型 | 説明 |
+|------------|---|------|
+| status | int | HTTPステータスコード |
+| error | String | エラー種別 |
+| message | String | エラーメッセージ |
+| path | String | リクエストパス |
 
 ---
 
@@ -662,7 +647,7 @@ public record ErrorResponse(
 
 ### 9.1 永続化構成
 
-**persistence.xml:**
+persistence.xml::
 
 ```xml
 <persistence-unit name="BerryBooksPU" transaction-type="JTA">
@@ -691,9 +676,9 @@ public record ErrorResponse(
 
 ### 9.3 データベース制約
 
-- **トランザクション分離レベル**: READ_COMMITTED（デフォルト）
-- **接続タイムアウト**: 30秒
-- **アイドルタイムアウト**: 300秒
+* トランザクション分離レベル: READ_COMMITTED（デフォルト）
+* 接続タイムアウト: 30秒
+* アイドルタイムアウト: 300秒
 
 ---
 
@@ -705,10 +690,10 @@ public record ErrorResponse(
 SLF4J (API) → Log4j2 (Implementation)
 ```
 
-**依存関係:**
-- `org.slf4j:slf4j-api:2.0.x` - SLF4J API（ロギングファサード）
-- `org.apache.logging.log4j:log4j-core:2.21.x` - Log4j2コア実装
-- `org.apache.logging.log4j:log4j-slf4j2-impl:2.21.x` - SLF4J 2.xバインディング
+依存関係::
+* `org.slf4j:slf4j-api:2.0.x` - SLF4J API（ロギングファサード）
+* `org.apache.logging.log4j:log4j-core:2.21.x` - Log4j2コア実装
+* `org.apache.logging.log4j:log4j-slf4j2-impl:2.21.x` - SLF4J 2.xバインディング
 
 ### 10.2 ログレベル
 
@@ -736,12 +721,12 @@ java.lang.RuntimeException: ...
 
 ### 10.4 ログ出力方針
 
-**出力対象:**
-- 全REST APIエンドポイントのエントリ
-- 全パブリックサービスメソッドのエントリ
-- ビジネス例外の発生（WARN）
-- システム例外の発生（ERROR、スタックトレース付き）
-- 重要な状態変更（在庫更新、注文作成など）
+出力対象::
+* 全REST APIエンドポイントのエントリ
+* 全パブリックサービスメソッドのエントリ
+* ビジネス例外の発生（WARN）
+* システム例外の発生（ERROR、スタックトレース付き）
+* 重要な状態変更（在庫更新、注文作成など）
 
 ---
 
@@ -763,16 +748,16 @@ graph TB
 | 統合テスト | JUnit 5 | 主要フロー | サービス + DAO + データベース |
 | E2Eテスト | Playwright | 主要シナリオ | REST API全体フロー |
 
-**ユニットテスト:**
-- サービスレイヤーの全パブリックメソッド
-- ビジネスロジックの境界値テスト
-- エラーシナリオのテスト
-- DAOをMockitoでモック
+ユニットテスト::
+* サービスレイヤーの全パブリックメソッド
+* ビジネスロジックの境界値テスト
+* エラーシナリオのテスト
+* DAOをMockitoでモック
 
-**E2Eテスト:**
-- ログイン → 書籍検索 → 注文 → 注文履歴参照
-- エラーケース（在庫不足、認証エラー等）
-- HTTP Client（curl, Postman等）でのAPI呼び出し
+E2Eテスト::
+* ログイン → 書籍検索 → 注文 → 注文履歴参照
+* エラーケース（在庫不足、認証エラー等）
+* HTTP Client（curl, Postman等）でのAPI呼び出し
 
 ---
 
@@ -808,7 +793,7 @@ Payara Server 6.x
 │           └── server.log
 ```
 
-**デプロイ手順:**
+デプロイ手順::
 1. HSQLDBサーバー起動: `./gradlew startHsqldb`
 2. Payara Server起動: `./gradlew startPayara`
 3. データベース初期化: `./gradlew :berry-books-api:setupHsqldb`（初回のみ）
@@ -846,22 +831,22 @@ Payara Server 6.x
 
 ### 15.1 コーディング規約
 
-- **命名規則:**
+* **命名規則:**
   - クラス名: PascalCase
   - メソッド名: camelCase
   - 定数: UPPER_SNAKE_CASE
   - パッケージ名: lowercase
 
-- **コードフォーマット:**
+* **コードフォーマット:**
   - インデント: スペース4つ
   - 行の最大長: 120文字
   - Java 21の新機能を積極的に活用（Records, Sealed Classes等）
 
 ### 15.2 REST API設計原則
 
-- **リソース指向**: エンドポイントは名詞（`/api/books`, `/api/orders`）
-- **HTTPメソッド**: GET（取得）、POST（作成）、PUT（更新）、DELETE（削除）
-- **ステータスコード**: 適切なHTTPステータスコードを返す
+* リソース指向: エンドポイントは名詞（`/api/books`, `/api/orders`）
+* HTTPメソッド: GET（取得）、POST（作成）、PUT（更新）、DELETE（削除）
+* ステータスコード: 適切なHTTPステータスコードを返す
   - 200 OK: 成功
   - 201 Created: 作成成功
   - 400 Bad Request: バリデーションエラー
@@ -871,35 +856,35 @@ Payara Server 6.x
 
 ### 15.2.1 静的リソースアクセスのベストプラクティス
 
-**WAR内リソースへのアクセス**:
+WAR内リソースへのアクセス:
 
-```java
-// ❌ 非推奨: ファイルシステムの相対パス（開発環境でのみ動作）
-File file = new File("src/main/webapp/resources/images/1.jpg");
-InputStream is = new FileInputStream(file);
+非推奨アプローチ:
+* ファイルシステムの相対パスを使用したFileオブジェクトの生成
+* FileInputStreamによる直接読み込み
+* 問題点: 開発環境でのみ動作、デプロイ後は動作しない
 
-// ✅ 推奨: ServletContextを使用（デプロイ後も動作）
-@Context
-private ServletContext servletContext;
-InputStream is = servletContext.getResourceAsStream("/resources/images/1.jpg");
-```
+推奨アプローチ:
+* ServletContextをインジェクション
+* ServletContext.getResourceAsStream()を使用してリソースを取得
+* パス形式: `/resources/images/1.jpg`のようなWARルート相対パス
+* 利点: デプロイ後も正常に動作
 
-**理由**:
-- WARファイルはアーカイブ形式で、ファイルシステムAPIでは直接アクセス不可
-- ServletContextはコンテナが提供するAPIで、WAR内外のリソースに統一的にアクセス可能
-- 開発環境と本番環境で動作を統一できる
+理由:
+* WARファイルはアーカイブ形式で、ファイルシステムAPIでは直接アクセス不可
+* ServletContextはコンテナが提供するAPIで、WAR内外のリソースに統一的にアクセス可能
+* 開発環境と本番環境で動作を統一できる
 
 ### 15.3 ログ出力規約
 
-- 全REST APIエンドポイントの開始点でINFOログ
-- 全サービスメソッドの開始点でINFOログ
-- ビジネス例外はWARNログ
-- システム例外はERRORログ（スタックトレース付き）
+* 全REST APIエンドポイントの開始点でINFOログ
+* 全サービスメソッドの開始点でINFOログ
+* ビジネス例外はWARNログ
+* システム例外はERRORログ（スタックトレース付き）
 
 ### 15.4 ブランチ戦略
 
-- **ブランチモデル:** GitHub Flow
-- **ブランチ命名規則:**
+* **ブランチモデル:** GitHub Flow
+* **ブランチ命名規則:**
   - `main`: 本番環境
   - `feature/[FEATURE_NAME]`: 機能開発
   - `bugfix/[BUG_NAME]`: バグ修正
@@ -913,30 +898,30 @@ InputStream is = servletContext.getResourceAsStream("/resources/images/1.jpg");
 
 以下の機能は現在のスコープ外であるが、将来的な拡張の可能性を考慮してアーキテクチャを設計している。
 
-- **OAuth2認証:**
+* **OAuth2認証:**
   - 概要: Google, Facebook等のOAuth2プロバイダー連携
   - 拡張ポイント: AuthResourceに新しいエンドポイント追加
 
-- **GraphQL API:**
+* **GraphQL API:**
   - 概要: REST APIに加えてGraphQL APIを提供
   - 拡張ポイント: 新しいAPI層の追加、既存サービス層を再利用
 
-- **リアルタイム通知:**
+* **リアルタイム通知:**
   - 概要: WebSocketによる在庫更新通知
   - 拡張ポイント: Jakarta WebSocketの追加
 
-- **マルチテナント対応:**
+* **マルチテナント対応:**
   - 概要: 複数店舗・ブランドのサポート
   - 拡張ポイント: テナントIDをエンティティに追加
 
 ### 16.2 アーキテクチャの拡張性
 
-- **拡張可能な領域:**
+* **拡張可能な領域:**
   - 新しいAPIエンドポイントの追加（JAX-RS Resource）
   - 新しいビジネスロジックの追加（Service層）
   - 外部API連携の追加（external層）
 
-- **拡張時の注意点:**
+* **拡張時の注意点:**
   - トランザクション境界を適切に設計
   - JWT Claimsの拡張（テナントID等）
   - データベーススキーマの互換性維持
@@ -947,20 +932,20 @@ InputStream is = servletContext.getResourceAsStream("/resources/images/1.jpg");
 
 ### 17.1 公式ドキュメント
 
-- Jakarta EE 10: https://jakarta.ee/specifications/platform/10/
-- JAX-RS 3.1: https://jakarta.ee/specifications/restful-ws/3.1/
-- JPA 3.1: https://jakarta.ee/specifications/persistence/3.1/
-- JWT (JSON Web Token): https://jwt.io/
-- jjwt: https://github.com/jwtk/jjwt
+* Jakarta EE 10: https://jakarta.ee/specifications/platform/10/
+* JAX-RS 3.1: https://jakarta.ee/specifications/restful-ws/3.1/
+* JPA 3.1: https://jakarta.ee/specifications/persistence/3.1/
+* JWT (JSON Web Token): https://jwt.io/
+* jjwt: https://github.com/jwtk/jjwt
 
 ### 17.2 関連仕様書
 
-- [requirements.md](requirements.md) - 要件定義書
-- [functional_design.md](functional_design.md) - 機能設計書（API仕様）
-- [behaviors.md](behaviors.md) - 振る舞い仕様書（受入基準）
-- [data_model.md](data_model.md) - データモデル仕様書
-- [external_interface.md](external_interface.md) - 外部インターフェース仕様書
+* [requirements.md](requirements.md) - 要件定義書
+* [functional_design.md](functional_design.md) - 機能設計書（API仕様）
+* [behaviors.md](behaviors.md) - 振る舞い仕様書（受入基準）
+* [data_model.md](data_model.md) - データモデル仕様書
+* [external_interface.md](external_interface.md) - 外部インターフェース仕様書
 
 ### 17.3 プロジェクトREADME
 
-- [README.md](../../README.md) - プロジェクトREADME
+* [README.md](../../README.md) - プロジェクトREADME

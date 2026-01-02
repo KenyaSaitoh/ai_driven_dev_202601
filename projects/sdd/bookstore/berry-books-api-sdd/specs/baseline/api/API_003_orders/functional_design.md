@@ -47,7 +47,7 @@ POST /api/orders
 
 **Cookie**: `berry-books-jwt=<JWT Token>`
 
-**リクエストボディ**:
+リクエストボディ:
 
 ```json
 {
@@ -84,7 +84,7 @@ POST /api/orders
 
 #### 3.1.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 {
@@ -107,7 +107,7 @@ POST /api/orders
 }
 ```
 
-**エラー時 (409 Conflict - 在庫不足)**:
+エラー時 (409 Conflict - 在庫不足):
 
 ```json
 {
@@ -118,7 +118,7 @@ POST /api/orders
 }
 ```
 
-**エラー時 (409 Conflict - 楽観的ロック競合)**:
+エラー時 (409 Conflict - 楽観的ロック競合):
 
 ```json
 {
@@ -129,7 +129,7 @@ POST /api/orders
 }
 ```
 
-**エラー時 (401 Unauthorized)**:
+エラー時 (401 Unauthorized):
 
 ```json
 {
@@ -233,7 +233,7 @@ GET /api/orders/history
 
 #### 3.2.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 [
@@ -258,7 +258,7 @@ GET /api/orders/history
 ]
 ```
 
-**エラー時 (401 Unauthorized)**:
+エラー時 (401 Unauthorized):
 
 ```json
 {
@@ -294,7 +294,7 @@ GET /api/orders/{tranId}
 
 #### 3.3.3 リクエスト
 
-**パスパラメータ**:
+パスパラメータ:
 
 | パラメータ | 型 | 説明 |
 |----------|---|------|
@@ -302,7 +302,7 @@ GET /api/orders/{tranId}
 
 #### 3.3.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 {
@@ -333,7 +333,7 @@ GET /api/orders/{tranId}
 }
 ```
 
-**エラー時 (404 Not Found)**:
+エラー時 (404 Not Found):
 
 ```json
 {
@@ -360,7 +360,7 @@ GET /api/orders/{tranId}/details/{detailId}
 
 #### 3.4.3 リクエスト
 
-**パスパラメータ**:
+パスパラメータ:
 
 | パラメータ | 型 | 説明 |
 |----------|---|------|
@@ -369,7 +369,7 @@ GET /api/orders/{tranId}/details/{detailId}
 
 #### 3.4.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 {
@@ -382,7 +382,7 @@ GET /api/orders/{tranId}/details/{detailId}
 }
 ```
 
-**エラー時 (404 Not Found)**:
+エラー時 (404 Not Found):
 
 ```json
 {
@@ -399,69 +399,79 @@ GET /api/orders/{tranId}/details/{detailId}
 
 ### 4.1 OrderRequest
 
-```java
-public record OrderRequest(
-    @Valid List<CartItemRequest> cartItems,
-    @NotNull Integer totalPrice,
-    @NotNull Integer deliveryPrice,
-    @NotBlank String deliveryAddress,
-    @NotNull Integer settlementType
-) {}
-```
+**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+
+フィールド構成:
+
+| フィールド名 | 型 | 制約 | 説明 |
+|------------|---|------|------|
+| cartItems | List<CartItemRequest> | Valid（ネストバリデーション） | カートアイテムリスト |
+| totalPrice | Integer | NotNull | 合計金額 |
+| deliveryPrice | Integer | NotNull | 配送料 |
+| deliveryAddress | String | NotBlank | 配送先住所 |
+| settlementType | Integer | NotNull | 決済方法 |
 
 ### 4.2 CartItemRequest
 
-```java
-public record CartItemRequest(
-    @NotNull Integer bookId,
-    @NotBlank String bookName,
-    @NotBlank String publisherName,
-    @NotNull Integer price,
-    @NotNull Integer count,
-    @NotNull Integer version
-) {}
-```
+**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+
+フィールド構成:
+
+| フィールド名 | 型 | 制約 | 説明 |
+|------------|---|------|------|
+| bookId | Integer | NotNull | 書籍ID |
+| bookName | String | NotBlank | 書籍名 |
+| publisherName | String | NotBlank | 出版社名 |
+| price | Integer | NotNull | 価格 |
+| count | Integer | NotNull | 数量 |
+| version | Long | NotNull | 楽観的ロック用バージョン番号 |
 
 ### 4.3 OrderResponse
 
-```java
-public record OrderResponse(
-    Integer orderTranId,
-    LocalDate orderDate,
-    Integer totalPrice,
-    Integer deliveryPrice,
-    String deliveryAddress,
-    Integer settlementType,
-    List<OrderDetailResponse> orderDetails
-) {}
-```
+**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+
+フィールド構成:
+
+| フィールド名 | 型 | 説明 |
+|------------|---|------|
+| orderTranId | Integer | 注文トランザクションID |
+| orderDate | LocalDate | 注文日 |
+| totalPrice | Integer | 合計金額 |
+| deliveryPrice | Integer | 配送料 |
+| deliveryAddress | String | 配送先住所 |
+| settlementType | Integer | 決済方法 |
+| orderDetails | List<OrderDetailResponse> | 注文明細リスト |
 
 ### 4.4 OrderHistoryResponse
 
-```java
-public record OrderHistoryResponse(
-    LocalDate orderDate,
-    Integer orderTranId,
-    Integer orderDetailId,
-    String bookName,
-    String publisherName,
-    BigDecimal price,
-    Integer count
-) {}
-```
+**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+
+フィールド構成:
+
+| フィールド名 | 型 | 説明 |
+|------------|---|------|
+| orderDate | LocalDate | 注文日 |
+| orderTranId | Integer | 注文トランザクションID |
+| orderDetailId | Integer | 注文明細ID |
+| bookName | String | 書籍名 |
+| publisherName | String | 出版社名 |
+| price | BigDecimal | 価格 |
+| count | Integer | 数量 |
 
 ### 4.5 OrderDetailResponse
 
-```java
-public record OrderDetailResponse(
-    Integer orderDetailId,
-    Integer bookId,
-    String bookName,
-    String publisherName,
-    BigDecimal price,
-    Integer count
-) {}
-```
+**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+
+フィールド構成:
+
+| フィールド名 | 型 | 説明 |
+|------------|---|------|
+| orderDetailId | Integer | 注文明細ID |
+| bookId | Integer | 書籍ID |
+| bookName | String | 書籍名 |
+| publisherName | String | 出版社名 |
+| price | BigDecimal | 価格 |
+| count | Integer | 数量 |
 
 ---
 
@@ -487,21 +497,21 @@ public record OrderDetailResponse(
 
 **VERSIONカラム**: BIGINT NOT NULL
 
-**処理フロー**:
+処理フロー:
 
 1. カート追加時: VERSION値を取得しカートアイテムに保存
 2. 注文確定時: 保存したVERSION値で在庫を更新
 3. 成功時: 在庫数を減算、VERSION値を自動インクリメント
 4. 失敗時: OptimisticLockException、ユーザーにエラー表示
 
-**更新クエリ**:
-
-```sql
-UPDATE STOCK
-SET QUANTITY = QUANTITY - :quantity,
-    VERSION = VERSION + 1
-WHERE BOOK_ID = :bookId AND VERSION = :version
-```
+更新処理の論理構造:
+* 対象テーブル: STOCK
+* SET句:
+  - QUANTITY = QUANTITY - (減算数量)
+  - VERSION = VERSION + 1
+* WHERE句:
+  - BOOK_ID = (対象の書籍ID)
+  - VERSION = (保存したバージョン番号)
 
 ---
 
@@ -511,7 +521,7 @@ WHERE BOOK_ID = :bookId AND VERSION = :version
 
 **トランザクション境界**: サービスレイヤーの `@Transactional`
 
-**OrderService.orderBooks()の処理**:
+OrderService.orderBooks()の処理:
 
 1. 在庫可用性チェック
 2. 在庫更新（楽観的ロック付き）
@@ -524,8 +534,8 @@ WHERE BOOK_ID = :bookId AND VERSION = :version
 
 ## 8. 関連ドキュメント
 
-- [behaviors.md](behaviors.md) - 注文APIの受入基準
-- [../../system/functional_design.md](../../system/functional_design.md) - 全体機能設計書
-- [../../system/architecture_design.md](../../system/architecture_design.md) - アーキテクチャ設計書
-- [../../system/data_model.md](../../system/data_model.md) - データモデル仕様書
+* [behaviors.md](behaviors.md) - 注文APIの受入基準
+* [../../system/functional_design.md](../../system/functional_design.md) - 全体機能設計書
+* [../../system/architecture_design.md](../../system/architecture_design.md) - アーキテクチャ設計書
+* [../../system/data_model.md](../../system/data_model.md) - データモデル仕様書
 

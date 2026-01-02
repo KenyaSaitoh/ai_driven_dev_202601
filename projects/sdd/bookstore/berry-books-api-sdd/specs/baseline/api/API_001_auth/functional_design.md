@@ -47,7 +47,7 @@ POST /api/auth/login
 
 **Content-Type**: `application/json`
 
-**リクエストボディ**:
+リクエストボディ:
 
 ```json
 {
@@ -63,7 +63,7 @@ POST /api/auth/login
 
 #### 3.1.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 **Set-Cookie**: `berry-books-jwt=<JWT Token>; Path=/; Max-Age=86400; HttpOnly`
 
@@ -77,7 +77,7 @@ POST /api/auth/login
 }
 ```
 
-**エラー時 (401 Unauthorized)**:
+エラー時 (401 Unauthorized):
 
 ```json
 {
@@ -147,7 +147,7 @@ JWT Cookieを削除（MaxAge=0）してログアウトする。
 
 #### 3.2.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 **Set-Cookie**: `berry-books-jwt=; Path=/; Max-Age=0; HttpOnly`
 
@@ -173,7 +173,7 @@ POST /api/auth/register
 
 **Content-Type**: `application/json`
 
-**リクエストボディ**:
+リクエストボディ:
 
 ```json
 {
@@ -195,7 +195,7 @@ POST /api/auth/register
 
 #### 3.3.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 **Set-Cookie**: `berry-books-jwt=<JWT Token>; Path=/; Max-Age=86400; HttpOnly`
 
@@ -209,7 +209,7 @@ POST /api/auth/register
 }
 ```
 
-**エラー時 (409 Conflict)**:
+エラー時 (409 Conflict):
 
 ```json
 {
@@ -220,7 +220,7 @@ POST /api/auth/register
 }
 ```
 
-**エラー時 (400 Bad Request)**:
+エラー時 (400 Bad Request):
 
 ```json
 {
@@ -262,7 +262,7 @@ JWT Cookieから顧客情報を取得する。認証必須。
 
 #### 3.4.4 レスポンス
 
-**成功時 (200 OK)**:
+成功時 (200 OK):
 
 ```json
 {
@@ -274,7 +274,7 @@ JWT Cookieから顧客情報を取得する。認証必須。
 }
 ```
 
-**エラー時 (401 Unauthorized)**:
+エラー時 (401 Unauthorized):
 
 ```json
 {
@@ -291,47 +291,55 @@ JWT Cookieから顧客情報を取得する。認証必須。
 
 ### 4.1 LoginRequest
 
-```java
-public record LoginRequest(
-    @NotBlank @Email String email,
-    @NotBlank String password
-) {}
-```
+**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+
+フィールド構成:
+
+| フィールド名 | 型 | 制約 | 説明 |
+|------------|---|------|------|
+| email | String | NotBlank, Email形式 | メールアドレス |
+| password | String | NotBlank | パスワード |
 
 ### 4.2 LoginResponse
 
-```java
-public record LoginResponse(
-    Integer customerId,
-    String customerName,
-    String email,
-    LocalDate birthday,
-    String address
-) {}
-```
+**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+
+フィールド構成:
+
+| フィールド名 | 型 | 説明 |
+|------------|---|------|
+| customerId | Integer | 顧客ID |
+| customerName | String | 顧客名 |
+| email | String | メールアドレス |
+| birthday | LocalDate | 生年月日 |
+| address | String | 住所 |
 
 ### 4.3 RegisterRequest
 
-```java
-public record RegisterRequest(
-    @NotBlank @Size(max = 30) String customerName,
-    @NotBlank String password,
-    @NotBlank @Email @Size(max = 30) String email,
-    LocalDate birthday,
-    @Size(max = 120) String address
-) {}
-```
+**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+
+フィールド構成:
+
+| フィールド名 | 型 | 制約 | 説明 |
+|------------|---|------|------|
+| customerName | String | NotBlank, Size(max=30) | 顧客名 |
+| password | String | NotBlank | パスワード |
+| email | String | NotBlank, Email形式, Size(max=30) | メールアドレス |
+| birthday | LocalDate | - | 生年月日 |
+| address | String | Size(max=120) | 住所 |
 
 ### 4.4 ErrorResponse
 
-```java
-public record ErrorResponse(
-    int status,
-    String error,
-    String message,
-    String path
-) {}
-```
+**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+
+フィールド構成:
+
+| フィールド名 | 型 | 説明 |
+|------------|---|------|
+| status | int | HTTPステータスコード |
+| error | String | エラー種別 |
+| message | String | エラーメッセージ |
+| path | String | リクエストパス |
 
 ---
 
@@ -368,13 +376,14 @@ jwt.cookie-name=berry-books-jwt
 
 ### 6.2 パスワードハッシュ化
 
-- **アルゴリズム**: BCrypt
-- **Cost**: 10（デフォルト）
-- **ハッシュ長**: 60文字
+* アルゴリズム: BCrypt
+* Cost: 10（デフォルト）
+* ハッシュ長: 60文字
 
-```java
-String hashedPassword = BCrypt.hashpw(plainPassword, BCrypt.gensalt());
-```
+ハッシュ化処理:
+* BCryptアルゴリズムを使用して平文パスワードをハッシュ化
+* ソルト生成はBCryptが自動的に実行
+* 戻り値: ハッシュ化されたパスワード文字列（60文字）
 
 ### 6.3 Cookie設定
 
@@ -389,8 +398,8 @@ String hashedPassword = BCrypt.hashpw(plainPassword, BCrypt.gensalt());
 
 ## 7. 関連ドキュメント
 
-- [behaviors.md](behaviors.md) - 認証APIの受入基準
-- [../../system/functional_design.md](../../system/functional_design.md) - 全体機能設計書
-- [../../system/architecture_design.md](../../system/architecture_design.md) - アーキテクチャ設計書
-- [../../system/external_interface.md](../../system/external_interface.md) - 外部API連携仕様
+* [behaviors.md](behaviors.md) - 認証APIの受入基準
+* [../../system/functional_design.md](../../system/functional_design.md) - 全体機能設計書
+* [../../system/architecture_design.md](../../system/architecture_design.md) - アーキテクチャ設計書
+* [../../system/external_interface.md](../../system/external_interface.md) - 外部API連携仕様
 

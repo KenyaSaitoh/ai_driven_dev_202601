@@ -6,73 +6,79 @@
 
 ## 2. ER図
 
-```
-┌─────────────┐       ┌──────────────┐
-│ DEPARTMENT  │       │  CATEGORY    │
-│─────────────│       │──────────────│
-│ *DEPARTMENT_ID│◄─┐   │ *CATEGORY_ID │
-│  DEPARTMENT_NAME│  │   │  CATEGORY_NAME│
-└─────────────┘  │   └──────┬───────┘
-                 │          │
-                 │          │
-┌─────────────┐  │          │
-│ EMPLOYEE    │  │          │
-│─────────────│  │          │
-│ *EMPLOYEE_ID│  │          │
-│  EMPLOYEE_CODE│  │          │
-│  EMPLOYEE_NAME│  │          │
-│  EMAIL      │  │          │
-│  PASSWORD   │  │          │
-│  JOB_RANK   │  │          │
-│  DEPARTMENT_ID├──┘          │
-└──────┬──────┘             │
-       │                    │
-       │                    │
-       │          ┌─────────▼──────┐      ┌──────────────┐
-       │          │     BOOK        │      │  PUBLISHER   │
-       │          │─────────────────│      │──────────────│
-       │          │ *BOOK_ID        │      │ *PUBLISHER_ID│
-       │          │  BOOK_NAME      │      │  PUBLISHER_NAME│
-       │          │  AUTHOR         │      └──────┬───────┘
-       │          │  CATEGORY_ID    ├─────────────┘
-       │          │  PUBLISHER_ID   ├──────────────┘
-       │          │  PRICE          │
-       │          │  IMAGE_URL      │
-       │          │  DELETED        │
-       │          └────────┬────────┘
-       │                   │
-       │                   │ 1:1
-       │          ┌────────▼────────┐
-       │          │     STOCK       │
-       │          │─────────────────│
-       │          │ *BOOK_ID        │
-       │          │  QUANTITY       │
-       │          │  VERSION        │
-       │          └────────┬────────┘
-       │                   │
-       │                   │
-       │          ┌────────▼────────┐
-       │          │   WORKFLOW      │
-       │          │─────────────────│
-       │          │ *OPERATION_ID   │
-       │          │  WORKFLOW_ID    │
-       │          │  WORKFLOW_TYPE  │
-       │          │  STATE          │
-       │          │  BOOK_ID        │
-       │          │  BOOK_NAME      │
-       │          │  AUTHOR         │
-       │          │  CATEGORY_ID    │
-       │          │  PUBLISHER_ID   │
-       │          │  PRICE          │
-       │          │  IMAGE_URL      │
-       │          │  APPLY_REASON   │
-       │          │  START_DATE     │
-       │          │  END_DATE       │
-       │          │  OPERATION_TYPE │
-       │          │  OPERATED_BY    │
-       │          │  OPERATED_AT    │
-       │          │  OPERATION_REASON│
-       └──────────┴─────────────────┘
+```mermaid
+erDiagram
+    DEPARTMENT ||--o{ EMPLOYEE : "所属"
+    EMPLOYEE ||--o{ WORKFLOW : "操作"
+    CATEGORY ||--o{ BOOK : "分類"
+    PUBLISHER ||--o{ BOOK : "出版"
+    BOOK ||--|| STOCK : "1:1"
+    BOOK ||--o{ WORKFLOW : "対象"
+    CATEGORY ||--o{ WORKFLOW : "対象分類"
+    PUBLISHER ||--o{ WORKFLOW : "対象出版社"
+
+    DEPARTMENT {
+        BIGINT DEPARTMENT_ID PK "部署ID"
+        VARCHAR DEPARTMENT_NAME "部署名"
+    }
+
+    EMPLOYEE {
+        BIGINT EMPLOYEE_ID PK "社員ID"
+        VARCHAR EMPLOYEE_CODE UK "社員コード"
+        VARCHAR EMPLOYEE_NAME "社員名"
+        VARCHAR EMAIL "メールアドレス"
+        VARCHAR PASSWORD "パスワード(BCrypt)"
+        INTEGER JOB_RANK "職務ランク(1-3)"
+        BIGINT DEPARTMENT_ID FK "部署ID"
+    }
+    
+    CATEGORY {
+        INTEGER CATEGORY_ID PK "カテゴリID"
+        VARCHAR CATEGORY_NAME "カテゴリ名"
+    }
+
+    PUBLISHER {
+        INTEGER PUBLISHER_ID PK "出版社ID"
+        VARCHAR PUBLISHER_NAME "出版社名"
+    }
+    
+    BOOK {
+        INTEGER BOOK_ID PK "書籍ID"
+        VARCHAR BOOK_NAME "書籍名"
+        VARCHAR AUTHOR "著者"
+        INTEGER CATEGORY_ID FK "カテゴリID"
+        INTEGER PUBLISHER_ID FK "出版社ID"
+        DECIMAL PRICE "価格"
+        VARCHAR IMAGE_URL "画像URL"
+        BOOLEAN DELETED "削除フラグ"
+    }
+    
+    STOCK {
+        INTEGER BOOK_ID PK_FK "書籍ID"
+        INTEGER QUANTITY "在庫数"
+        BIGINT VERSION "バージョン(楽観的ロック)"
+    }
+
+    WORKFLOW {
+        BIGINT OPERATION_ID PK "操作ID"
+        BIGINT WORKFLOW_ID "ワークフローID"
+        VARCHAR WORKFLOW_TYPE "ワークフロータイプ"
+        VARCHAR STATE "状態"
+        INTEGER BOOK_ID FK "対象書籍ID"
+        VARCHAR BOOK_NAME "書籍名"
+        VARCHAR AUTHOR "著者"
+        INTEGER CATEGORY_ID FK "カテゴリID"
+        INTEGER PUBLISHER_ID FK "出版社ID"
+        DECIMAL PRICE "価格"
+        VARCHAR IMAGE_URL "画像URL"
+        VARCHAR APPLY_REASON "申請理由"
+        DATE START_DATE "適用開始日"
+        DATE END_DATE "適用終了日"
+        VARCHAR OPERATION_TYPE "操作タイプ"
+        BIGINT OPERATED_BY FK "操作者ID"
+        TIMESTAMP OPERATED_AT "操作日時"
+        VARCHAR OPERATION_REASON "操作理由"
+    }
 ```
 
 ## 3. テーブル定義
@@ -92,15 +98,15 @@
 | IMAGE_URL | VARCHAR | YES | - | 画像URL |
 | DELETED | BOOLEAN | YES | - | 削除フラグ（論理削除） |
 
-**制約**:
-- PRIMARY KEY: BOOK_ID
-- FOREIGN KEY: CATEGORY_ID → CATEGORY(CATEGORY_ID)
-- FOREIGN KEY: PUBLISHER_ID → PUBLISHER(PUBLISHER_ID)
+制約:
+* PRIMARY KEY: BOOK_ID
+* FOREIGN KEY: CATEGORY_ID → CATEGORY(CATEGORY_ID)
+* FOREIGN KEY: PUBLISHER_ID → PUBLISHER(PUBLISHER_ID)
 
-**インデックス**:
-- IDX_BOOK_CATEGORY: CATEGORY_ID
-- IDX_BOOK_PUBLISHER: PUBLISHER_ID
-- IDX_BOOK_DELETED: DELETED
+インデックス:
+* IDX_BOOK_CATEGORY: CATEGORY_ID
+* IDX_BOOK_PUBLISHER: PUBLISHER_ID
+* IDX_BOOK_DELETED: DELETED
 
 ### 3.2 STOCK（在庫マスタ）
 
@@ -112,14 +118,14 @@
 | QUANTITY | INTEGER | YES | - | 在庫数 |
 | VERSION | BIGINT | YES | - | バージョン（楽観的ロック用） |
 
-**制約**:
-- PRIMARY KEY: BOOK_ID
-- FOREIGN KEY: BOOK_ID → BOOK(BOOK_ID)
+制約:
+* PRIMARY KEY: BOOK_ID
+* FOREIGN KEY: BOOK_ID → BOOK(BOOK_ID)
 
-**備考**:
-- BOOKテーブルと1:1の関係
-- VERSIONカラムはJPAの`@Version`アノテーションで自動管理
-- 更新時にバージョンが一致しない場合、`OptimisticLockException`が発生
+備考:
+* BOOKテーブルと1:1の関係
+* VERSIONカラムはJPAの`@Version`アノテーションで自動管理
+* 更新時にバージョンが一致しない場合、`OptimisticLockException`が発生
 
 ### 3.3 CATEGORY（カテゴリマスタ）
 
@@ -130,14 +136,14 @@
 | CATEGORY_ID | INTEGER | NO | PK | カテゴリID |
 | CATEGORY_NAME | VARCHAR | YES | - | カテゴリ名 |
 
-**制約**:
-- PRIMARY KEY: CATEGORY_ID
+制約:
+* PRIMARY KEY: CATEGORY_ID
 
-**データ例**:
-- 1: 文学
-- 2: ビジネス
-- 3: 技術
-- 4: 歴史
+データ例:
+* 1: 文学
+* 2: ビジネス
+* 3: 技術
+* 4: 歴史
 
 ### 3.4 PUBLISHER（出版社マスタ）
 
@@ -148,8 +154,8 @@
 | PUBLISHER_ID | INTEGER | NO | PK | 出版社ID |
 | PUBLISHER_NAME | VARCHAR | YES | - | 出版社名 |
 
-**制約**:
-- PRIMARY KEY: PUBLISHER_ID
+制約:
+* PRIMARY KEY: PUBLISHER_ID
 
 ### 3.5 EMPLOYEE（社員マスタ）
 
@@ -165,18 +171,18 @@
 | JOB_RANK | INTEGER | YES | - | 職務ランク（1:ASSOCIATE, 2:MANAGER, 3:DIRECTOR） |
 | DEPARTMENT_ID | BIGINT | YES | FK | 部署ID |
 
-**制約**:
-- PRIMARY KEY: EMPLOYEE_ID
-- UNIQUE KEY: EMPLOYEE_CODE
-- FOREIGN KEY: DEPARTMENT_ID → DEPARTMENT(DEPARTMENT_ID)
+制約:
+* PRIMARY KEY: EMPLOYEE_ID
+* UNIQUE KEY: EMPLOYEE_CODE
+* FOREIGN KEY: DEPARTMENT_ID → DEPARTMENT(DEPARTMENT_ID)
 
-**インデックス**:
-- UK_EMPLOYEE_CODE: EMPLOYEE_CODE (UNIQUE)
-- IDX_EMPLOYEE_DEPT: DEPARTMENT_ID
+インデックス:
+* UK_EMPLOYEE_CODE: EMPLOYEE_CODE (UNIQUE)
+* IDX_EMPLOYEE_DEPT: DEPARTMENT_ID
 
-**備考**:
-- PASSWORDはBCryptでハッシュ化して保存
-- 開発環境では平文パスワードもサポート（本番環境では非推奨）
+備考:
+* PASSWORDはBCryptでハッシュ化して保存
+* 開発環境では平文パスワードもサポート（本番環境では非推奨）
 
 ### 3.6 DEPARTMENT（部署マスタ）
 
@@ -187,13 +193,13 @@
 | DEPARTMENT_ID | BIGINT | NO | PK | 部署ID |
 | DEPARTMENT_NAME | VARCHAR | YES | - | 部署名 |
 
-**制約**:
-- PRIMARY KEY: DEPARTMENT_ID
+制約:
+* PRIMARY KEY: DEPARTMENT_ID
 
-**データ例**:
-- 1: 営業部
-- 2: 管理部
-- 3: 物流部
+データ例:
+* 1: 営業部
+* 2: 管理部
+* 3: 物流部
 
 ### 3.7 WORKFLOW（ワークフロー履歴）
 
@@ -220,23 +226,23 @@
 | OPERATED_AT | TIMESTAMP | YES | - | 操作日時 |
 | OPERATION_REASON | VARCHAR | YES | - | 操作理由（承認・却下時） |
 
-**制約**:
-- PRIMARY KEY: OPERATION_ID
-- FOREIGN KEY: BOOK_ID → BOOK(BOOK_ID)
-- FOREIGN KEY: CATEGORY_ID → CATEGORY(CATEGORY_ID)
-- FOREIGN KEY: PUBLISHER_ID → PUBLISHER(PUBLISHER_ID)
-- FOREIGN KEY: OPERATED_BY → EMPLOYEE(EMPLOYEE_ID)
+制約:
+* PRIMARY KEY: OPERATION_ID
+* FOREIGN KEY: BOOK_ID → BOOK(BOOK_ID)
+* FOREIGN KEY: CATEGORY_ID → CATEGORY(CATEGORY_ID)
+* FOREIGN KEY: PUBLISHER_ID → PUBLISHER(PUBLISHER_ID)
+* FOREIGN KEY: OPERATED_BY → EMPLOYEE(EMPLOYEE_ID)
 
-**インデックス**:
-- IDX_WORKFLOW_ID: WORKFLOW_ID
-- IDX_WORKFLOW_STATE: STATE
-- IDX_WORKFLOW_TYPE: WORKFLOW_TYPE
-- IDX_WORKFLOW_OPERATED_BY: OPERATED_BY
+インデックス:
+* IDX_WORKFLOW_ID: WORKFLOW_ID
+* IDX_WORKFLOW_STATE: STATE
+* IDX_WORKFLOW_TYPE: WORKFLOW_TYPE
+* IDX_WORKFLOW_OPERATED_BY: OPERATED_BY
 
-**備考**:
-- 同じWORKFLOW_IDを持つ複数の行が履歴として保存される
-- 最新の状態は最大のOPERATION_IDまたは最新のOPERATED_ATを持つ行
-- 監査ログとして全操作履歴を保持
+備考:
+* 同じWORKFLOW_IDを持つ複数の行が履歴として保存される
+* 最新の状態は最大のOPERATION_IDまたは最新のOPERATED_ATを持つ行
+* 監査ログとして全操作履歴を保持
 
 ## 4. エンティティ関連図（JPA）
 
@@ -255,49 +261,49 @@
 ### 4.2 リレーションシップ
 
 #### Book ↔ Category
-- 関係: Many-to-One
-- Book側: `@ManyToOne`
-- 外部キー: BOOK.CATEGORY_ID → CATEGORY.CATEGORY_ID
+* 関係: Many-to-One
+* Book側: `@ManyToOne`
+* 外部キー: BOOK.CATEGORY_ID → CATEGORY.CATEGORY_ID
 
 #### Book ↔ Publisher
-- 関係: Many-to-One
-- Book側: `@ManyToOne`
-- 外部キー: BOOK.PUBLISHER_ID → PUBLISHER.PUBLISHER_ID
+* 関係: Many-to-One
+* Book側: `@ManyToOne`
+* 外部キー: BOOK.PUBLISHER_ID → PUBLISHER.PUBLISHER_ID
 
 #### Book ↔ Stock
-- 関係: One-to-One（同一エンティティ内で`@SecondaryTable`）
-- Book側: `@SecondaryTable(name = "STOCK")`
-- BOOKとSTOCKはBOOK_IDで結合
+* 関係: One-to-One（同一エンティティ内で`@SecondaryTable`）
+* Book側: `@SecondaryTable(name = "STOCK")`
+* BOOKとSTOCKはBOOK_IDで結合
 
 #### Employee ↔ Department
-- 関係: Many-to-One
-- Employee側: `@ManyToOne`
-- 外部キー: EMPLOYEE.DEPARTMENT_ID → DEPARTMENT.DEPARTMENT_ID
+* 関係: Many-to-One
+* Employee側: `@ManyToOne`
+* 外部キー: EMPLOYEE.DEPARTMENT_ID → DEPARTMENT.DEPARTMENT_ID
 
 #### Department ↔ Employee
-- 関係: One-to-Many
-- Department側: `@OneToMany(mappedBy = "department")`
-- 双方向関係
+* 関係: One-to-Many
+* Department側: `@OneToMany(mappedBy = "department")`
+* 双方向関係
 
 #### Workflow ↔ Book
-- 関係: Many-to-One
-- Workflow側: `@ManyToOne`（`insertable=false, updatable=false`）
-- 外部キー: WORKFLOW.BOOK_ID → BOOK.BOOK_ID
+* 関係: Many-to-One
+* Workflow側: `@ManyToOne`（`insertable=false, updatable=false`）
+* 外部キー: WORKFLOW.BOOK_ID → BOOK.BOOK_ID
 
 #### Workflow ↔ Category
-- 関係: Many-to-One
-- Workflow側: `@ManyToOne`（`insertable=false, updatable=false`）
-- 外部キー: WORKFLOW.CATEGORY_ID → CATEGORY.CATEGORY_ID
+* 関係: Many-to-One
+* Workflow側: `@ManyToOne`（`insertable=false, updatable=false`）
+* 外部キー: WORKFLOW.CATEGORY_ID → CATEGORY.CATEGORY_ID
 
 #### Workflow ↔ Publisher
-- 関係: Many-to-One
-- Workflow側: `@ManyToOne`（`insertable=false, updatable=false`）
-- 外部キー: WORKFLOW.PUBLISHER_ID → PUBLISHER.PUBLISHER_ID
+* 関係: Many-to-One
+* Workflow側: `@ManyToOne`（`insertable=false, updatable=false`）
+* 外部キー: WORKFLOW.PUBLISHER_ID → PUBLISHER.PUBLISHER_ID
 
 #### Workflow ↔ Employee
-- 関係: Many-to-One
-- Workflow側: `@ManyToOne`（`insertable=false, updatable=false`）
-- 外部キー: WORKFLOW.OPERATED_BY → EMPLOYEE.EMPLOYEE_ID
+* 関係: Many-to-One
+* Workflow側: `@ManyToOne`（`insertable=false, updatable=false`）
+* 外部キー: WORKFLOW.OPERATED_BY → EMPLOYEE.EMPLOYEE_ID
 
 ## 5. データ型マッピング
 
@@ -318,46 +324,46 @@
 ### 6.1 NOT NULL制約
 
 必須項目:
-- すべてのPRIMARY KEY
-- EMPLOYEE.EMPLOYEE_CODE
-- その他のフィールドは基本的にNULL許可（柔軟性のため）
+* すべてのPRIMARY KEY
+* EMPLOYEE.EMPLOYEE_CODE
+* その他のフィールドは基本的にNULL許可（柔軟性のため）
 
 ### 6.2 UNIQUE制約
 
 一意性保証:
-- EMPLOYEE.EMPLOYEE_CODE（ログインIDとして使用）
+* EMPLOYEE.EMPLOYEE_CODE（ログインIDとして使用）
 
 ### 6.3 CHECK制約
 
-- JOB_RANK: 1, 2, 3のいずれか
-- STATE: 'CREATED', 'APPLIED', 'APPROVED'のいずれか
-- WORKFLOW_TYPE: 'ADD_NEW_BOOK', 'REMOVE_BOOK', 'ADJUST_BOOK_PRICE'のいずれか
-- OPERATION_TYPE: 'CREATE', 'APPLY', 'APPROVE', 'REJECT'のいずれか
-- QUANTITY: 0以上
-- PRICE: 0以上
+* JOB_RANK: 1, 2, 3のいずれか
+* STATE: 'CREATED', 'APPLIED', 'APPROVED'のいずれか
+* WORKFLOW_TYPE: 'ADD_NEW_BOOK', 'REMOVE_BOOK', 'ADJUST_BOOK_PRICE'のいずれか
+* OPERATION_TYPE: 'CREATE', 'APPLY', 'APPROVE', 'REJECT'のいずれか
+* QUANTITY: 0以上
+* PRICE: 0以上
 
 ### 6.4 外部キー制約
 
 すべての外部キー参照は制約として定義:
-- ON DELETE: NO ACTION（参照整合性保証）
-- ON UPDATE: CASCADE（ID更新時の連鎖更新）
+* ON DELETE: NO ACTION（参照整合性保証）
+* ON UPDATE: CASCADE（ID更新時の連鎖更新）
 
 ## 7. インデックス設計
 
 ### 7.1 主キーインデックス
-- すべてのテーブルのPRIMARY KEYに自動作成
+* すべてのテーブルのPRIMARY KEYに自動作成
 
 ### 7.2 外部キーインデックス
-- すべての外部キーカラムにインデックス作成（JOIN性能向上）
+* すべての外部キーカラムにインデックス作成（JOIN性能向上）
 
 ### 7.3 検索用インデックス
-- BOOK.CATEGORY_ID: カテゴリ別検索
-- BOOK.PUBLISHER_ID: 出版社別検索
-- BOOK.DELETED: 論理削除フィルタ
-- WORKFLOW.WORKFLOW_ID: 履歴取得
-- WORKFLOW.STATE: 状態別検索
-- WORKFLOW.WORKFLOW_TYPE: タイプ別検索
-- WORKFLOW.OPERATED_BY: 操作者別検索
+* BOOK.CATEGORY_ID: カテゴリ別検索
+* BOOK.PUBLISHER_ID: 出版社別検索
+* BOOK.DELETED: 論理削除フィルタ
+* WORKFLOW.WORKFLOW_ID: 履歴取得
+* WORKFLOW.STATE: 状態別検索
+* WORKFLOW.WORKFLOW_TYPE: タイプ別検索
+* WORKFLOW.OPERATED_BY: 操作者別検索
 
 ## 8. データ容量見積もり
 
@@ -390,25 +396,25 @@
 ## 9. データライフサイクル
 
 ### 9.1 論理削除
-- **BOOK**: DELETEDフラグで論理削除
-- 物理削除は実施しない（履歴保持のため）
+* BOOK: DELETEDフラグで論理削除
+* 物理削除は実施しない（履歴保持のため）
 
 ### 9.2 履歴保持
-- **WORKFLOW**: 全操作履歴を永続的に保持（監査目的）
-- 将来的にはアーカイブテーブルへの移行も検討
+* WORKFLOW: 全操作履歴を永続的に保持（監査目的）
+* 将来的にはアーカイブテーブルへの移行も検討
 
 ### 9.3 マスタデータ更新
-- **CATEGORY, PUBLISHER**: 手動メンテナンス（管理者）
-- **EMPLOYEE, DEPARTMENT**: 人事システムからの連携（将来）
+* CATEGORY, PUBLISHER: 手動メンテナンス（管理者）
+* EMPLOYEE, DEPARTMENT: 人事システムからの連携（将来）
 
 ## 10. データセキュリティ
 
 ### 10.1 機密データ
-- **EMPLOYEE.PASSWORD**: BCryptハッシュで保存（不可逆変換）
-- **EMPLOYEE.EMAIL**: 個人情報として扱う
+* EMPLOYEE.PASSWORD: BCryptハッシュで保存（不可逆変換）
+* EMPLOYEE.EMAIL: 個人情報として扱う
 
 ### 10.2 監査ログ
-- **WORKFLOW**: 全操作履歴を保持
+* WORKFLOW: 全操作履歴を保持
   - 操作者（OPERATED_BY）
   - 操作日時（OPERATED_AT）
   - 操作内容（OPERATION_TYPE, OPERATION_REASON）
@@ -417,38 +423,38 @@
 
 ### 11.1 初期データ投入
 以下のマスタデータは初期投入が必要:
-- CATEGORY（カテゴリマスタ）
-- PUBLISHER（出版社マスタ）
-- DEPARTMENT（部署マスタ）
-- EMPLOYEE（社員マスタ）
-- BOOK（書籍マスタ）
-- STOCK（在庫マスタ）
+* CATEGORY（カテゴリマスタ）
+* PUBLISHER（出版社マスタ）
+* DEPARTMENT（部署マスタ）
+* EMPLOYEE（社員マスタ）
+* BOOK（書籍マスタ）
+* STOCK（在庫マスタ）
 
 ### 11.2 テストデータ
 開発・テスト環境用のテストデータを準備:
-- サンプル社員（各職務ランク）
-- サンプル書籍（各カテゴリ）
-- サンプルワークフロー（各状態）
+* サンプル社員（各職務ランク）
+* サンプル書籍（各カテゴリ）
+* サンプルワークフロー（各状態）
 
 ## 12. バックアップ・リカバリ
 
 ### 12.1 バックアップ戦略
-- **フルバックアップ**: 日次（深夜）
-- **トランザクションログ**: リアルタイム
+* フルバックアップ: 日次（深夜）
+* トランザクションログ: リアルタイム
 
 ### 12.2 リカバリポイント
-- RPO（Recovery Point Objective）: 24時間以内
-- RTO（Recovery Time Objective）: 2時間以内
+* RPO（Recovery Point Objective）: 24時間以内
+* RTO（Recovery Time Objective）: 2時間以内
 
 ## 13. データベース管理
 
 ### 13.1 統計情報更新
-- 定期的な統計情報の更新（クエリ最適化のため）
+* 定期的な統計情報の更新（クエリ最適化のため）
 
 ### 13.2 インデックス再構築
-- 断片化が進んだ場合のインデックス再構築
+* 断片化が進んだ場合のインデックス再構築
 
 ### 13.3 容量監視
-- ディスク使用量の監視
-- テーブルサイズの監視
-- 成長率の分析
+* ディスク使用量の監視
+* テーブルサイズの監視
+* 成長率の分析
