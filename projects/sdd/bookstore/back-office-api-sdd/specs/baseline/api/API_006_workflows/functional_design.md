@@ -177,6 +177,9 @@ OPERATION_ID  WORKFLOW_ID  STATE     OPERATION_TYPE  OPERATED_AT
 * 対象テーブル: BOOK
 * 更新カラム: DELETED = true
 * WHERE条件: BOOK_IDが対象書籍ID
+* 備考: 物理削除は行わず、論理削除フラグを設定する
+  - 論理削除後、書籍はAPIレスポンス（一覧・検索）から除外される
+  - 詳細取得APIでは引き続き参照可能
 
 ### 8.3 ADJUST_BOOK_PRICE
 

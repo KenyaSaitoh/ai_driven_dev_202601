@@ -1,9 +1,9 @@
 #!/bin/bash
-# Berry Books Swing Application 実行スクリプト
+# Customer Hub Swing Application 実行スクリプト
 # 対応環境: Linux / Mac / Windows Git Bash
 
 echo "========================================="
-echo "Berry Books Swing Application"
+echo "Customer Hub Swing Application"
 echo "========================================="
 echo ""
 
@@ -14,15 +14,15 @@ cd "$SCRIPT_DIR"
 # プロジェクトルートへ移動してビルド
 echo "1. アプリケーションをビルド中..."
 cd ../../..
-./gradlew :berry-books-swing:clean :berry-books-swing:buildApp
+./gradlew :customer-hub-swing:clean :customer-hub-swing:buildApp
 
 if [ $? -ne 0 ]; then
     echo "エラー: ビルドに失敗しました"
     exit 1
 fi
 
-# berry-books-swingディレクトリに戻る
-cd projects/java/berry-books-swing
+# customer-hub-swingディレクトリに戻る
+cd projects/master/bookstore/customer-hub-swing
 
 echo ""
 echo "========================================="
@@ -43,7 +43,7 @@ java -version
 echo ""
 
 # アプリケーションを実行
-java -jar build/libs/berry-books-swing-1.0.0.jar
+java -jar build/libs/customer-hub-swing-1.0.0.jar
 
 echo ""
 echo "========================================="

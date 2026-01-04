@@ -383,7 +383,25 @@ public class CustomerExceptionMapper implements ExceptionMapper<RuntimeException
 
 ## 🔗 関連プロジェクト
 
-- **berry-books**: 同じデータベースを使用するJSF MVCプロジェクト（データベース初期化も担当）
+bookstoreドメインの他のプロジェクト：
+
+### REST API（バックエンド）
+
+- **berry-books-api**: 注文管理REST API（書籍の注文処理、認証・認可、JWT認証）
+- **back-office-api**: 書籍・在庫管理REST API（書籍マスター、出版社・カテゴリ管理、在庫管理）
+- **customer-hub-api**: 顧客管理REST API（このプロジェクト）
+
+### SPA（フロントエンド）
+
+- **berry-books-spa**: 注文管理フロントエンド（React + TypeScript）
+- **back-office-spa**: 書籍管理フロントエンド（React + TypeScript）
+- **customer-hub-spa**: 顧客管理フロントエンド（React + TypeScript）
+
+### Desktop
+
+- **customer-hub-swing**: 顧客管理デスクトップアプリケーション（Java Swing）
+
+詳細は [projects/master/bookstore/README.md](../README.md) を参照してください。
 
 ## 📖 参考リンク
 

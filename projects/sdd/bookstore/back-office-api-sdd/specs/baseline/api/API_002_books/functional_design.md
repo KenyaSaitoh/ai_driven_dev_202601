@@ -114,9 +114,10 @@
 
 #### 3.1.5 ビジネスルール
 
-* BR-BOOK-001: 削除済み書籍（deleted=true）も含む
-  - UIで絞り込む場合はクライアント側で実施
-  - または将来的にクエリパラメータで制御
+* BR-BOOK-001: 論理削除された書籍（deleted=true）は除外する
+  - 書籍の削除は論理削除（DELETEDフラグ）で行われる
+  - APIレスポンスには論理削除された書籍は含まれない
+  - 物理削除は行わない（データ保持のため）
 * BR-BOOK-002: 在庫情報はSecondaryTableで結合
   - BOOKテーブルとSTOCKテーブルを自動結合
 
@@ -187,8 +188,9 @@
 
 #### 3.2.5 ビジネスルール
 
-* BR-BOOK-003: 削除済み書籍も取得可能
-  - DELETEDフラグで除外しない
+* BR-BOOK-003: 論理削除された書籍の詳細取得について
+  - 詳細取得APIでは論理削除フラグによる除外は行わない
+  - 存在する書籍IDであれば、論理削除された書籍も取得可能
 * BR-BOOK-004: 存在しない書籍IDは404エラー
 
 #### 3.2.6 関連コンポーネント
@@ -212,7 +214,7 @@
 | パラメータ | 型 | 必須 | 説明 |
 |-----------|---|------|------|
 | categoryId | Integer | No | カテゴリID（0または未指定で全カテゴリ） |
-| keyword | String | No | 検索キーワード（書籍名または著者名で部分一致） |
+| keyword | String | No | 検索キーワード（書籍名で部分一致） |
 
 例:
 * `/api/books/search?categoryId=1&keyword=サンプル`
@@ -262,7 +264,7 @@
 
 * BR-BOOK-005: categoryId=0は全カテゴリとして扱う
 * BR-BOOK-006: keywordは部分一致検索（LIKE '%keyword%'）
-* BR-BOOK-007: 書籍名と著者名の両方を検索対象とする
+* BR-BOOK-007: 書籍名のみを検索対象とする（著者名は検索対象外）
 
 #### 3.3.6 クエリロジック
 
@@ -270,7 +272,7 @@
 * 対象エンティティ: Book
 * WHERE条件:
   - categoryIdがパラメータ値と一致
-  - AND (書籍名がキーワードに部分一致 OR 著者名がキーワードに部分一致)
+  - AND 書籍名がキーワードに部分一致
 
 カテゴリのみ指定時:
 * 対象エンティティ: Book
@@ -280,7 +282,7 @@
 キーワードのみ指定時:
 * 対象エンティティ: Book
 * WHERE条件:
-  - 書籍名がキーワードに部分一致 OR 著者名がキーワードに部分一致
+  - 書籍名がキーワードに部分一致
 
 #### 3.3.7 関連コンポーネント
 
@@ -336,7 +338,7 @@
 | パラメータ | 型 | 必須 | 説明 |
 |-----------|---|------|------|
 | categoryId | Integer | No | カテゴリID（0または未指定で全カテゴリ） |
-| keyword | String | No | 検索キーワード（書籍名または著者名で部分一致） |
+| keyword | String | No | 検索キーワード（書籍名で部分一致） |
 
 例:
 * `/api/books/search/criteria?categoryId=1&keyword=サンプル`
@@ -373,14 +375,12 @@
    - **カテゴリ条件**: categoryIdがnullでなく、かつ0でない場合、等価条件を追加
    - **キーワード条件**: keywordがnullでなく、かつ空でない場合:
      - 書籍名の部分一致条件を作成
-     - 著者名の部分一致条件を作成
-     - 上記2条件をOR結合して追加
 4. すべての述語をAND結合してWHERE句を構成
 5. クエリを実行して結果リストを返却
 
 動的クエリの特徴:
 * パラメータの有無に応じて条件を動的に追加
-* 複数条件はANDで結合、書籍名と著者名の検索はORで結合
+* 複数条件はANDで結合
 * タイプセーフなクエリ構築が可能
 
 #### 3.5.7 用途
@@ -495,13 +495,13 @@
 
 | ルールID | ルール内容 |
 |---------|-----------|
-| BR-BOOK-001 | 削除済み書籍（deleted=true）も検索対象に含む |
+| BR-BOOK-001 | 論理削除された書籍（deleted=true）は検索結果から除外する |
 | BR-BOOK-002 | 在庫情報はSecondaryTableで自動結合 |
-| BR-BOOK-003 | 削除済み書籍も詳細取得可能 |
+| BR-BOOK-003 | 書籍の削除は論理削除（DELETEDフラグ）で実施し、物理削除は行わない |
 | BR-BOOK-004 | 存在しない書籍IDは404エラー |
 | BR-BOOK-005 | categoryId=0は全カテゴリとして扱う |
 | BR-BOOK-006 | keywordは部分一致検索（LIKE '%keyword%'） |
-| BR-BOOK-007 | 書籍名と著者名の両方を検索対象とする |
+| BR-BOOK-007 | 書籍名のみを検索対象とする（著者名は検索対象外） |
 | BR-BOOK-008 | カテゴリ一覧はMap形式でレスポンス（後方互換性） |
 | BR-BOOK-009 | `/api/categories`とは異なる形式 |
 
@@ -646,7 +646,8 @@ GET /api/books?sort=bookName,asc&sort=price,desc
 
 ### 10.3 データ保護
 
-* 削除済み書籍も参照可能（論理削除）
+* 書籍は論理削除（DELETEDフラグ）で管理され、物理削除は行わない
+* 検索APIでは論理削除された書籍は除外されるが、詳細取得APIでは参照可能
 * 機密情報は含まれない（価格、在庫数は公開情報）
 
 ---
@@ -721,7 +722,7 @@ sequenceDiagram
     
     Note over BookDao: Build Dynamic JPQL<br/>WHERE条件を動的に構築
     
-    BookDao->>Database: TypedQuery execution<br/>SELECT b FROM Book b<br/>WHERE b.deleted = false<br/>AND b.category.categoryId = :categoryId<br/>AND (b.bookName LIKE :keyword<br/>     OR b.author LIKE :keyword)
+    BookDao->>Database: TypedQuery execution<br/>SELECT b FROM Book b<br/>WHERE b.deleted = false<br/>AND b.category.categoryId = :categoryId<br/>AND b.bookName LIKE :keyword
     Database-->>BookDao: List<Book>
     BookDao-->>BookService: List<Book>
     BookService-->>BookResource: List<Book>

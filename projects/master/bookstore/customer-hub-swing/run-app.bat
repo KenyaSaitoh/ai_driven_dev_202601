@@ -1,8 +1,8 @@
 @echo off
-REM Berry Books Swing Application 実行スクリプト（Windows用）
+REM Customer Hub Swing Application 実行スクリプト（Windows用）
 
 echo =========================================
-echo Berry Books Swing Application
+echo Customer Hub Swing Application
 echo =========================================
 echo.
 
@@ -13,7 +13,7 @@ cd /d "%SCRIPT_DIR%"
 REM プロジェクトルートへ移動してビルド
 echo 1. アプリケーションをビルド中...
 cd ..\..\..
-call gradlew.bat :berry-books-swing:clean :berry-books-swing:buildApp
+call gradlew.bat :customer-hub-swing:clean :customer-hub-swing:buildApp
 
 if errorlevel 1 (
     echo エラー: ビルドに失敗しました
@@ -21,8 +21,8 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM berry-books-swingディレクトリに戻る
-cd projects\java\berry-books-swing
+REM customer-hub-swingディレクトリに戻る
+cd projects\master\bookstore\customer-hub-swing
 
 echo.
 echo =========================================
@@ -45,7 +45,7 @@ java -version
 echo.
 
 REM アプリケーションを実行
-java -jar build\libs\berry-books-swing-1.0.0.jar
+java -jar build\libs\customer-hub-swing-1.0.0.jar
 
 echo.
 echo =========================================

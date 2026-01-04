@@ -1,0 +1,111 @@
+# Agent Skills Specification v1.0
+# https://github.com/agentskills/agentskills
+
+name: jakarta-ee-bff-implementation
+version: 1.0.0
+description: >
+  Implementation skill for Jakarta EE 10 based BFF (Backend for Frontend) pattern projects.
+  Supports task generation from specifications and guided code implementation with architecture governance.
+
+author: Your Organization
+license: MIT
+created: 2025-01-04
+updated: 2025-01-04
+
+# Platform Independence
+platform_independent: true
+supported_platforms:
+  - Claude (Anthropic)
+  - GitHub Copilot
+  - ChatGPT (OpenAI)
+  - Gemini (Google)
+  - Cursor
+  - Cline
+  - Any AI coding assistant
+
+# Target Technology Stack
+technology_stack:
+  language: Java
+  version: "21"
+  framework: Jakarta EE 10
+  architecture_patterns:
+    - BFF (Backend for Frontend)
+    - Microservices Integration
+    - Layered Architecture
+  specifications:
+    - JAX-RS 3.1
+    - JPA 3.1
+    - CDI 4.0
+
+# Skill Capabilities
+capabilities:
+  - task_generation_from_specifications
+  - code_implementation_guidance
+  - architecture_pattern_enforcement
+  - test_driven_development
+  - api_integration_support
+
+# Supported Languages
+languages:
+  - en
+  - ja
+
+# Required Parameters
+parameters:
+  project_root:
+    type: string
+    description: Root directory of the target project
+    required: true
+    example: "projects/sdd/bookstore/berry-books-api-sdd"
+  
+  spec_directory:
+    type: string
+    description: Directory containing specification documents
+    required: true
+    example: "projects/sdd/bookstore/berry-books-api-sdd/specs"
+  
+  output_directory:
+    type: string
+    description: Directory for generated task files
+    required: false
+    default: "{project_root}/tasks"
+  
+  architecture_pattern:
+    type: string
+    enum: [BFF, Microservice, Monolith]
+    description: Architecture pattern of the project
+    required: false
+    default: BFF
+  
+  language:
+    type: string
+    enum: [en, ja]
+    description: Instruction language
+    required: false
+    default: en
+
+# Entry Points
+entry_points:
+  task_generation:
+    instruction: "instructions/{language}/task_generation.md"
+    description: Generate implementation task lists from completed specifications
+    
+  code_implementation:
+    instruction: "instructions/{language}/code_implementation.md"
+    description: Implement code based on generated tasks and specifications
+
+# Resources
+resources:
+  architecture_patterns:
+    - resources/architecture_patterns/bff_pattern.md
+  templates:
+    - resources/templates/task_template.md
+  examples:
+    - resources/examples/sample_output.md
+
+# Platform-Specific Guides
+platform_guides:
+  cursor_cline: platform_guides/cursor_cline.md
+  github_copilot: platform_guides/github_copilot.md
+  other: platform_guides/other_platforms.md
+

@@ -61,87 +61,154 @@ graph TD
 
 ## 2. アーキテクチャ設計
 
-### 2.1 レイヤードアーキテクチャ（REST API）
+### 2.1 BFF（Backend for Frontend）パターン
+
+**berry-books-api**は、フロントエンド（berry-books-spa）の唯一のエントリーポイントとして機能する**BFF（Backend for Frontend）**です。マイクロサービスアーキテクチャにおいて、複数のバックエンドサービスを統合し、フロントエンドに最適化されたAPIを提供します。
+
+#### 2.1.1 BFFパターンの利点
+
+| 利点 | 説明 |
+|-----|------|
+| **フロントエンド最適化** | フロントエンドに必要なデータ形式で直接レスポンス |
+| **バックエンドの抽象化** | 複数のマイクロサービスの存在を隠蔽 |
+| **認証の一元化** | BFF層でJWT認証を管理 |
+| **API集約** | 複数のバックエンドAPIの呼び出しを1つに集約 |
+| **柔軟な拡張** | バックエンドの変更がフロントエンドに影響しない |
+
+#### 2.1.2 マイクロサービス構成
+
+```mermaid
+graph TB
+    subgraph "Frontend"
+        SPA[berry-books-spa<br/>React SPA]
+    end
+    
+    subgraph "BFF Layer"
+        BFF[berry-books-api<br/>Backend for Frontend<br/>JWT認証・API統合]
+    end
+    
+    subgraph "Backend Microservices"
+        BackOffice[back-office-api<br/>書籍・在庫・カテゴリ管理]
+        CustomerHub[customer-hub-api<br/>顧客管理]
+    end
+    
+    subgraph "Database"
+        DB[(HSQLDB testdb<br/>共有データベース)]
+    end
+    
+    SPA -->|HTTP/JSON<br/>JWT Cookie| BFF
+    BFF -->|REST API<br/>書籍・在庫情報| BackOffice
+    BFF -->|REST API<br/>顧客情報| CustomerHub
+    BFF -->|JDBC<br/>注文データ| DB
+    BackOffice -->|JDBC<br/>書籍・在庫データ| DB
+    CustomerHub -->|JDBC<br/>顧客データ| DB
+```
+
+#### 2.1.3 責務分担
+
+| システム | 責務 | 管理するデータ |
+|---------|------|--------------|
+| **berry-books-api<br/>(BFF)** | • JWT認証<br/>• API統合・プロキシ<br/>• 注文処理<br/>• 配送料金計算<br/>• 画像配信 | ORDER_TRAN<br/>ORDER_DETAIL |
+| **back-office-api** | • 書籍管理<br/>• 在庫管理<br/>• カテゴリ管理<br/>• 楽観的ロック制御 | BOOK<br/>STOCK<br/>CATEGORY<br/>PUBLISHER |
+| **customer-hub-api** | • 顧客CRUD<br/>• 認証情報管理<br/>• メール重複チェック | CUSTOMER |
+
+### 2.2 BFF レイヤードアーキテクチャ
 
 ```mermaid
 graph TB
     subgraph "Client Layer"
-        Client[React SPA / Mobile App]
+        Client[berry-books-spa<br/>React SPA]
     end
     
-    subgraph "API Layer (JAX-RS Resources)"
-        AuthAPI[AuthResource<br/>@Path /auth]
-        BookAPI[BookResource<br/>@Path /books]
-        OrderAPI[OrderResource<br/>@Path /orders]
-        ImageAPI[ImageResource<br/>@Path /images]
+    subgraph "berry-books-api (BFF)"
+        subgraph "API Layer (JAX-RS Resources)"
+            AuthAPI[AuthResource<br/>認証API]
+            BookAPI[BookResource<br/>書籍API プロキシ]
+            CategoryAPI[CategoryResource<br/>カテゴリAPI プロキシ]
+            OrderAPI[OrderResource<br/>注文API]
+            ImageAPI[ImageResource<br/>画像API]
+        end
+        
+        subgraph "Security Layer"
+            JWTFilter[JwtAuthenticationFilter]
+            JWTUtil[JwtUtil]
+        end
+        
+        subgraph "Business Logic Layer"
+            OrderService[OrderService<br/>注文処理]
+            DeliveryService[DeliveryFeeService<br/>配送料金計算]
+        end
+        
+        subgraph "External Integration Layer"
+            BackOfficeClient[BackOfficeRestClient<br/>書籍・在庫API呼び出し]
+            CustomerClient[CustomerHubRestClient<br/>顧客API呼び出し]
+        end
+        
+        subgraph "Data Access Layer"
+            OrderDao[OrderTranDao<br/>OrderDetailDao]
+        end
+        
+        subgraph "Persistence Layer"
+            OrderEntity[OrderTran<br/>OrderDetail<br/>OrderDetailPK]
+        end
     end
     
-    subgraph "Security Layer"
-        JWTFilter[JwtAuthenticationFilter<br/>@Provider]
-        JWTUtil[JwtUtil<br/>@ApplicationScoped]
+    subgraph "External APIs"
+        BackOfficeAPI[back-office-api<br/>書籍・在庫管理]
+        CustomerAPI[customer-hub-api<br/>顧客管理]
     end
     
-    subgraph "Business Logic Layer"
-        BookService[BookService<br/>@ApplicationScoped]
-        OrderService[OrderService<br/>@ApplicationScoped<br/>@Transactional]
-        CategoryService[CategoryService<br/>@ApplicationScoped]
-        DeliveryService[DeliveryFeeService<br/>@ApplicationScoped]
-    end
-    
-    subgraph "External Integration Layer"
-        CustomerClient[CustomerRestClient<br/>@ApplicationScoped]
-    end
-    
-    subgraph "Data Access Layer"
-        BookDao[BookDao<br/>@ApplicationScoped]
-        StockDao[StockDao<br/>@ApplicationScoped]
-        OrderDao[OrderTranDao<br/>@ApplicationScoped]
-    end
-    
-    subgraph "Persistence Layer"
-        Entity[JPA Entities<br/>@Entity<br/>Relationships]
-    end
-    
-    subgraph "Database Layer"
-        DB[(HSQLDB<br/>testdb)]
-    end
-    
-    subgraph "External API"
-        RestAPI[berry-books-rest<br/>Customer API]
+    subgraph "Database"
+        DB[(HSQLDB testdb)]
     end
     
     Client -->|HTTP/JSON| JWTFilter
-    JWTFilter -->|Validate JWT| JWTUtil
     JWTFilter --> AuthAPI
     JWTFilter --> BookAPI
+    JWTFilter --> CategoryAPI
     JWTFilter --> OrderAPI
     JWTFilter --> ImageAPI
     
-    AuthAPI -->|@Inject| CustomerClient
-    BookAPI -->|@Inject| BookService
-    OrderAPI -->|@Inject| OrderService
+    AuthAPI --> CustomerClient
+    BookAPI --> BackOfficeClient
+    CategoryAPI --> BackOfficeClient
+    OrderAPI --> OrderService
+    OrderAPI --> BackOfficeClient
     
-    BookService -->|@Inject| BookDao
-    OrderService -->|@Inject| OrderDao
-    OrderService -->|@Inject| StockDao
-    OrderService -->|@Inject| DeliveryService
+    OrderService --> OrderDao
+    OrderService --> BackOfficeClient
+    OrderService --> DeliveryService
     
-    CustomerClient -->|REST API| RestAPI
-    RestAPI -->|JDBC| DB
+    BackOfficeClient -->|REST| BackOfficeAPI
+    CustomerClient -->|REST| CustomerAPI
     
-    BookDao -->|@PersistenceContext| Entity
-    Entity -->|JDBC| DB
+    OrderDao --> OrderEntity
+    OrderEntity -->|JPA| DB
+    
+    BackOfficeAPI -->|JDBC| DB
+    CustomerAPI -->|JDBC| DB
 ```
 
-### 2.2 コンポーネントの責務
+### 2.3 コンポーネントの責務（BFFパターン）
 
-| レイヤー | 責務 | 禁止事項 |
+| レイヤー | 責務 | 実装方式 |
 |-------|-----------------|-------------------|
-| **API Layer (JAX-RS Resource)** | • HTTPリクエスト・レスポンス処理<br/>• パスパラメータ・クエリパラメータ抽出<br/>• JWT認証情報の取得<br/>• サービス層への委譲<br/>• エラーレスポンス生成<br/>• 静的リソース配信（画像API） | • ビジネスロジックの実装<br/>• 直接的なDAO呼び出し<br/>• トランザクション制御<br/>• ファイルシステム直接アクセス |
-| **Security Layer** | • JWT生成・検証<br/>• Cookie管理<br/>• 認証フィルター処理<br/>• 認証情報のスレッドローカル管理 | • ビジネスロジック<br/>• データアクセス |
-| **Service Layer** | • ビジネスロジック<br/>• トランザクション境界<br/>• 複数DAOの連携<br/>• 外部API呼び出し | • HTTP関連処理<br/>• 直接的なSQL実行 |
-| **DAO Layer** | • CRUD操作<br/>• JPQL/Criteria API実行<br/>• エンティティライフサイクル管理 | • ビジネスロジック<br/>• トランザクション制御 |
-| **Entity Layer** | • データ構造<br/>• リレーションシップ定義<br/>• データベースマッピング | • ビジネスロジック<br/>• サービス呼び出し |
+| **API Layer (JAX-RS Resource)** | • HTTPリクエスト・レスポンス処理<br/>• JWT認証情報の取得<br/>• 外部APIへのプロキシ（BookResource、CategoryResource）<br/>• ビジネスロジック実行（OrderResource）<br/>• 静的リソース配信（ImageResource） | **プロキシ型**: 外部APIに転送<br/>**独自実装型**: サービス層を呼び出し |
+| **Security Layer** | • JWT生成・検証<br/>• Cookie管理<br/>• 認証フィルター処理<br/>• 認証情報のスレッドローカル管理 | JWT認証はBFF層で一元管理 |
+| **Service Layer** | • 注文ビジネスロジック<br/>• 配送料金計算<br/>• トランザクション境界<br/>• 外部API呼び出し | OrderService、DeliveryFeeServiceのみ実装<br/>（BookService、CategoryServiceは不要） |
+| **DAO Layer** | • 注文データのCRUD操作<br/>• JPQL実行<br/>• エンティティライフサイクル管理 | OrderTranDao、OrderDetailDaoのみ実装<br/>（BookDao、StockDaoは不要） |
+| **Entity Layer** | • 注文データ構造<br/>• リレーションシップ定義<br/>• データベースマッピング | OrderTran、OrderDetail、OrderDetailPKのみ実装<br/>（Book、Stock、Customerは不要） |
+| **External Integration Layer** | • 外部API呼び出し<br/>• DTOマッピング<br/>• エラーハンドリング<br/>• リトライ処理 | BackOfficeRestClient、CustomerHubRestClient |
+
+#### 2.3.1 プロキシパターン vs 独自実装
+
+| API Resource | 実装パターン | 説明 |
+|-------------|------------|------|
+| **BookResource** | プロキシ | back-office-apiにそのまま転送、独自ロジックなし |
+| **CategoryResource** | プロキシ | back-office-apiにそのまま転送、独自ロジックなし |
+| **AuthResource** | 独自実装 + 外部連携 | JWT生成、customer-hub-apiで認証情報取得 |
+| **OrderResource** | 独自実装 + 外部連携 | 注文処理、back-office-apiで在庫更新 |
+| **ImageResource** | 独自実装 | WAR内リソースを直接配信 |
 
 ### 2.3 静的リソース配信（画像API）
 
@@ -183,10 +250,24 @@ sequenceDiagram
 
 ## 3. デザインパターン
 
-### 3.1 適用パターン
+### 3.1 適用パターン（BFF）
 
 ```mermaid
 classDiagram
+    class BFFPattern {
+        <<pattern>>
+        +API Aggregation
+        +Backend Abstraction
+        +Frontend Optimization
+    }
+    
+    class ProxyPattern {
+        <<pattern>>
+        +Request forwarding
+        +No business logic
+        +Direct passthrough
+    }
+    
     class RESTResourcePattern {
         <<pattern>>
         +JAX-RS @Path
@@ -198,14 +279,7 @@ classDiagram
         <<pattern>>
         +Business logic encapsulation
         +Transaction boundaries
-        +DAO coordination
-    }
-    
-    class RepositoryPattern {
-        <<pattern>>
-        +Data access abstraction
-        +Query encapsulation
-        +Entity management
+        +External API coordination
     }
     
     class DTOPattern {
@@ -222,22 +296,25 @@ classDiagram
         +Filter-based validation
     }
     
+    BFFPattern --> RESTResourcePattern
+    BFFPattern --> ProxyPattern
     RESTResourcePattern --> ServiceLayerPattern
-    ServiceLayerPattern --> RepositoryPattern
-    RepositoryPattern --> DTOPattern
     RESTResourcePattern --> JWTAuthenticationPattern
+    ServiceLayerPattern --> DTOPattern
 ```
 
 | パターン | 目的 | 適用箇所 |
 |---------|------|---------|
+| **BFF Pattern** | API統合・バックエンド抽象化 | berry-books-api全体 |
+| **Proxy Pattern** | 外部APIへの透過的転送 | BookResource, CategoryResource |
 | **REST Resource Pattern** | HTTPエンドポイント提供 | AuthResource, BookResource, OrderResource |
-| **サービスレイヤー** | ビジネスロジック集約 | @ApplicationScoped Service |
-| **リポジトリ (DAO)** | データアクセス抽象化 | EntityManager使用DAO |
+| **サービスレイヤー** | 注文ビジネスロジック集約 | OrderService, DeliveryFeeService |
+| **リポジトリ (DAO)** | 注文データアクセス | OrderTranDao, OrderDetailDao |
 | **DTO (Record)** | データ転送オブジェクト | LoginResponse, OrderResponse, CartItemRequest |
 | **JWT認証** | ステートレス認証 | JwtAuthenticationFilter, JwtUtil |
 | **依存性注入** | 疎結合 | @Inject (CDI) |
-| **楽観的ロック** | 並行制御 | @Version (JPA) |
-| **トランザクション** | データ整合性 | @Transactional |
+| **楽観的ロック** | 並行制御（外部API側） | back-office-api の Stock エンティティ |
+| **トランザクション** | 注文データ整合性 | @Transactional（OrderService） |
 
 ### 3.2 DTO設計方針
 
@@ -254,34 +331,38 @@ classDiagram
 
 ## 4. パッケージ構造と命名規則
 
-### 4.1 パッケージ編成
+### 4.1 パッケージ編成（BFF実装）
 
 ```
 pro.kensait.berrybooks/
 ├── api/                        # REST API層（JAX-RS Resources）
 │   ├── ApplicationConfig       # JAX-RS設定
-│   ├── AuthResource            # 認証API
-│   ├── BookResource            # 書籍API
-│   ├── OrderResource           # 注文API
-│   ├── ImageResource           # 画像API（ServletContext使用）
+│   ├── AuthenResource          # 認証API（独自実装+外部連携）
+│   ├── BookResource            # 書籍API（プロキシ → back-office-api）
+│   ├── CategoryResource        # カテゴリAPI（プロキシ → back-office-api）
+│   ├── OrderResource           # 注文API（独自実装+外部連携）
+│   ├── ImageResource           # 画像API（WAR内リソース配信）
 │   ├── dto/                    # Data Transfer Objects（Java Records）
 │   │   ├── LoginRequest
 │   │   ├── LoginResponse
 │   │   ├── RegisterRequest
 │   │   ├── OrderRequest
 │   │   ├── OrderResponse
+│   │   ├── OrderHistoryResponse
+│   │   ├── OrderDetailResponse
 │   │   ├── CartItemRequest
 │   │   └── ErrorResponse
 │   └── exception/              # Exception Mappers
 │       ├── OutOfStockExceptionMapper
 │       ├── OptimisticLockExceptionMapper
 │       ├── ValidationExceptionMapper
+│       ├── NotFoundExceptionMapper
 │       └── GenericExceptionMapper
 │
 ├── security/                   # JWT認証層
 │   ├── JwtUtil                 # JWT生成・検証
-│   ├── JwtAuthenticationFilter # JWT認証フィルター
-│   └── SecuredResource         # 認証済みリソース情報（@RequestScoped）
+│   ├── JwtAuthenFilter         # JWT認証フィルター
+│   └── AuthenContext           # 認証コンテキスト（@RequestScoped）
 │
 ├── common/                     # 共通ユーティリティと定数
 │   ├── MessageUtil             # メッセージリソースユーティリティ
@@ -290,13 +371,8 @@ pro.kensait.berrybooks/
 ├── util/                       # 汎用ユーティリティ
 │   └── AddressUtil             # 住所処理ユーティリティ
 │
-├── service/                    # ビジネスロジック層
-│   ├── book/
-│   │   └── BookService         # 書籍ビジネスロジック
-│   ├── category/
-│   │   └── CategoryService     # カテゴリ管理
+├── service/                    # ビジネスロジック層（注文処理のみ）
 │   ├── customer/
-│   │   ├── CustomerService     # 顧客管理（REST API経由）
 │   │   └── EmailAlreadyExistsException
 │   ├── delivery/
 │   │   └── DeliveryFeeService  # 配送料金計算
@@ -309,29 +385,30 @@ pro.kensait.berrybooks/
 │       ├── CartItem            # カートアイテム（POJO）
 │       └── OutOfStockException # 在庫切れ例外
 │
-├── dao/                        # データアクセス層
-│   ├── BookDao                 # 書籍データアクセス
-│   ├── CategoryDao             # カテゴリデータアクセス
-│   ├── StockDao                # 在庫データアクセス
+├── dao/                        # データアクセス層（注文データのみ）
 │   ├── OrderTranDao            # 注文トランザクションデータアクセス
 │   └── OrderDetailDao          # 注文明細データアクセス
 │
-├── external/                   # 外部API連携層
-│   ├── CustomerRestClient      # 顧客管理REST APIクライアント
+├── external/                   # 外部API連携層（BFFの核心）
+│   ├── BackOfficeRestClient    # 書籍・在庫REST APIクライアント
+│   ├── CustomerHubRestClient   # 顧客管理REST APIクライアント
 │   └── dto/
+│       ├── BookTO              # 書籍転送オブジェクト
+│       ├── StockTO             # 在庫転送オブジェクト
+│       ├── StockUpdateRequest  # 在庫更新リクエスト
 │       ├── CustomerTO          # 顧客転送オブジェクト
 │       └── ErrorResponse       # エラーレスポンス
 │
-└── entity/                     # 永続化層（JPAエンティティ）
-    ├── Book                    # 書籍エンティティ
-    ├── Category                # カテゴリエンティティ
-    ├── Publisher               # 出版社エンティティ
-    ├── Stock                   # 在庫エンティティ（@Version付き）
-    ├── Customer                # 顧客エンティティ
+└── entity/                     # 永続化層（注文エンティティのみ）
     ├── OrderTran               # 注文トランザクションエンティティ
     ├── OrderDetail             # 注文明細エンティティ
     └── OrderDetailPK           # 注文明細複合キー
 ```
+
+**注意**: 以下のクラスは実装されていません（BFFパターンのため不要）:
+- `BookService`, `CategoryService` - プロキシパターンで代替
+- `BookDao`, `CategoryDao`, `StockDao` - 外部APIで管理
+- `Book`, `Category`, `Publisher`, `Stock`, `Customer` エンティティ - 外部APIで管理
 
 ### 4.2 命名規則
 
@@ -473,79 +550,110 @@ JwtAuthenticationFilterは、リクエストURIからコンテキストパスを
 
 ---
 
-## 6. トランザクション管理
+## 6. トランザクション管理（BFFパターン）
 
-### 6.1 トランザクション境界
+### 6.1 トランザクション境界とマイクロサービス連携
+
+BFFパターンでは、トランザクションは各マイクロサービスで独立して管理されます。
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Resource as REST Resource
-    participant Service as @Transactional Service
-    participant DAO1 as StockDao
-    participant DAO2 as OrderTranDao
-    participant DAO3 as OrderDetailDao
+    participant OrderResource
+    participant OrderService as OrderService<br/>@Transactional
+    participant BackOfficeAPI as BackOfficeRestClient
+    participant OrderDao as OrderTranDao
     participant DB as Database
+    participant ExtAPI as back-office-api
     
-    Client->>Resource: POST /api/orders
-    Resource->>Service: orderBooks(orderTO)
+    Client->>OrderResource: POST /api/orders
+    OrderResource->>OrderService: orderBooks(orderTO)
     
-    Note over Service,DB: BEGIN TRANSACTION
+    Note over OrderService,ExtAPI: 在庫チェック・更新（外部API）
     
-    Service->>DAO1: updateStock(bookId, version)
-    DAO1->>DB: UPDATE STOCK SET QUANTITY=...<br/>WHERE VERSION=...
-    DB-->>DAO1: 1 row updated
-    DAO1-->>Service: Success
+    OrderService->>BackOfficeAPI: findStockById(bookId)
+    BackOfficeAPI->>ExtAPI: GET /stocks/{bookId}
+    ExtAPI-->>BackOfficeAPI: StockTO
+    BackOfficeAPI-->>OrderService: StockTO
     
-    Service->>DAO2: insertOrderTran(orderTran)
-    DAO2->>DB: INSERT INTO ORDER_TRAN
-    DB-->>DAO2: orderTranId
-    DAO2-->>Service: OrderTran
+    OrderService->>OrderService: 在庫可用性チェック
     
-    Service->>DAO3: insertOrderDetail(orderDetail)
-    DAO3->>DB: INSERT INTO ORDER_DETAIL
-    DB-->>DAO3: Success
-    DAO3-->>Service: OrderDetail
+    OrderService->>BackOfficeAPI: updateStock(bookId, version, newQuantity)
+    BackOfficeAPI->>ExtAPI: PUT /stocks/{bookId}
+    Note over ExtAPI: 楽観的ロック検証<br/>@Version
+    ExtAPI-->>BackOfficeAPI: Updated StockTO
+    BackOfficeAPI-->>OrderService: Success
     
-    Note over Service,DB: COMMIT
+    Note over OrderService,DB: BEGIN TRANSACTION（注文データ）
     
-    Service-->>Resource: OrderSummaryTO
-    Resource-->>Client: 200 OK + JSON
+    OrderService->>OrderDao: insert(OrderTran)
+    OrderDao->>DB: INSERT INTO ORDER_TRAN
+    DB-->>OrderDao: orderTranId
+    OrderDao-->>OrderService: OrderTran
+    
+    OrderService->>OrderDao: insert(OrderDetail)
+    OrderDao->>DB: INSERT INTO ORDER_DETAIL
+    DB-->>OrderDao: Success
+    OrderDao-->>OrderService: OrderDetail
+    
+    Note over OrderService,DB: COMMIT
+    
+    OrderService-->>OrderResource: OrderTran
+    OrderResource-->>Client: 200 OK + OrderResponse
 ```
 
-### 6.2 トランザクション戦略
+### 6.2 トランザクション戦略（BFFパターン）
 
-トランザクション境界::
-* サービスレイヤーメソッドに `@Transactional`
-* JTA (Jakarta Transactions) による宣言的トランザクション
-* RuntimeException で自動ロールバック
+#### 6.2.1 分散トランザクションの扱い
 
-OrderService.orderBooks() の例::
+BFFパターンでは、複数のマイクロサービスにまたがるトランザクションは**結果整合性（Eventual Consistency）**で管理します。
 
-1. **在庫可用性チェック**: `stockDao.findByBookId()`
-2. **在庫更新（楽観的ロック）**: `stockDao.updateStock(bookId, quantity, version)`
-3. **注文トランザクション作成**: `orderTranDao.insert(orderTran)`
-4. **注文明細作成**: `orderDetailDao.insert(orderDetail)` × N
+| トランザクション範囲 | 管理方式 | 実装 |
+|------------------|---------|------|
+| **外部API（在庫更新）** | 外部APIの独立トランザクション | back-office-apiがトランザクション管理 |
+| **ローカル（注文作成）** | JTA宣言的トランザクション | berry-books-apiの@Transactional |
+
+#### 6.2.2 OrderService.orderBooks() の処理フロー
+
+1. **在庫可用性チェック（外部API）**: `backOfficeClient.findStockById(bookId)`
+2. **在庫更新（外部API・楽観的ロック）**: `backOfficeClient.updateStock(bookId, version, newQuantity)`
+   - 楽観的ロック検証はback-office-api側で実行
+   - 失敗時は`OptimisticLockException`をスロー
+3. **注文トランザクション作成（ローカルDB）**: `orderTranDao.insert(orderTran)`
+4. **注文明細作成（ローカルDB）**: `orderDetailDao.insert(orderDetail)` × N
 5. **コミット**: 正常終了時
 6. **ロールバック**: `OptimisticLockException`, `OutOfStockException` 発生時
 
+#### 6.2.3 エラーハンドリング
+
+| エラー | 発生箇所 | 対応 |
+|-------|---------|------|
+| `OutOfStockException` | OrderService（在庫チェック） | トランザクションロールバック、409 Conflict |
+| `OptimisticLockException` | back-office-api（在庫更新） | トランザクションロールバック、409 Conflict |
+| その他の例外 | 各処理 | トランザクションロールバック、500 Internal Server Error |
+
+**注意**: 在庫更新に成功し、注文作成に失敗した場合、在庫の不整合が発生する可能性があります。これは将来的にSaga パターンや補償トランザクションで対応する必要があります。
+
 ---
 
-## 7. 並行制御（楽観的ロック）
+## 7. 並行制御（楽観的ロック） - 外部API管理
 
-### 7.1 楽観的ロック戦略
+### 7.1 楽観的ロック戦略（BFFパターン）
+
+BFFパターンでは、在庫の楽観的ロックは**back-office-api**が管理します。berry-books-apiはクライアントから受け取ったバージョン番号を外部APIに転送します。
 
 ```mermaid
 stateDiagram-v2
     [*] --> CartAdd: User adds to cart
-    CartAdd --> StoreVersion: Save VERSION field
+    CartAdd --> StoreVersion: Save VERSION field (from back-office-api)
     StoreVersion --> [*]
     
     [*] --> OrderStart: User confirms order
-    OrderStart --> StockCheck: Check availability
-    StockCheck --> UpdateStock: Update with stored VERSION
+    OrderStart --> StockCheck: Check availability (via back-office-api)
+    StockCheck --> UpdateStock: Update with stored VERSION (via REST API)
     
-    UpdateStock --> VersionMatch: Database check
+    UpdateStock --> BackOfficeAPI: PUT /stocks/{bookId}
+    BackOfficeAPI --> VersionMatch: Database check (back-office-api)
     VersionMatch --> Success: VERSION matches
     VersionMatch --> Failure: VERSION mismatch
     
@@ -554,29 +662,43 @@ stateDiagram-v2
     Failure --> Rollback: Rollback transaction
     
     Commit --> [*]
-    Rollback --> ErrorResponse: OptimisticLockException
+    Rollback --> ErrorResponse: 409 Conflict (OptimisticLockException)
     ErrorResponse --> [*]
 ```
 
-### 7.2 実装詳細
+### 7.2 実装詳細（BFFとしての役割）
 
-技術仕様::
-* バージョンカラム: `STOCK.VERSION` (BIGINT NOT NULL)
-* Stock エンティティに `@Version` アノテーション
-* バージョン不一致時に `OptimisticLockException`
-* Exception Mapper で409 Conflictレスポンス
+#### 7.2.1 責務分担
 
-処理フロー::
+| システム | 責務 |
+|---------|------|
+| **back-office-api** | • STOCKテーブル管理<br/>• @Versionによる楽観的ロック<br/>• OptimisticLockException送出 |
+| **berry-books-api (BFF)** | • バージョン番号の転送<br/>• 外部API呼び出し<br/>• 例外のプロキシ（409 Conflict） |
 
-1. **カート追加時**: VERSION値を取得し、カートアイテムに保存
-2. **注文確定時**: 保存したVERSION値で在庫を更新
-   - 更新クエリ仕様:
-     - 対象: Stock エンティティ
-     - SET句: quantity = quantity - (減算数量)
-     - WHERE句: bookId = (対象書籍ID) AND version = (保存したバージョン)
-     - 戻り値: 更新件数
-3. **成功時**: 在庫数を減算、VERSION値を自動インクリメント
-4. **失敗時**: 楽観的ロック例外が発生、ユーザーに「他のユーザーが購入済み」エラー表示
+#### 7.2.2 処理フロー
+
+1. **書籍一覧取得時**: back-office-apiからVERSION値を含む書籍・在庫情報を取得
+2. **カート追加時（SPA側）**: VERSION値をカートアイテムに保存
+3. **注文確定時**: 
+   - berry-books-api: `BackOfficeRestClient.updateStock(bookId, version, newQuantity)`
+   - back-office-api: `PUT /stocks/{bookId}` で楽観的ロック検証
+   - WHERE句: `bookId = ? AND version = ?`
+   - 成功時: VERSION自動インクリメント、更新後のStockTOを返却
+   - 失敗時: 409 Conflict（OptimisticLockException）を返却
+4. **BFF側の処理**: 
+   - 成功時: 注文処理を続行
+   - 失敗時: `OptimisticLockException`を再スローし、ExceptionMapperで409 Conflictレスポンス
+
+#### 7.2.3 エラーレスポンス
+
+```json
+{
+  "status": 409,
+  "error": "Conflict",
+  "message": "在庫が他のユーザーによって更新されました。最新の在庫情報を確認してください。",
+  "path": "/api/orders"
+}
+```
 
 ---
 

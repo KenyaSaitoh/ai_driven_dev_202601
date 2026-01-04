@@ -11,16 +11,17 @@
 
 ### 1.1 構築するもの
 
-berry-books-apiは、オンライン書店「Berry Books」のバックエンドREST APIアプリケーションです。書籍検索、JWT認証、ショッピングカート管理、注文処理、注文履歴参照などのEC機能をREST APIとして提供します。
+berry-books-apiは、オンライン書店「Berry Books」の**BFF（Backend for Frontend）**として機能するREST APIアプリケーションです。フロントエンド（berry-books-spa）の唯一のエントリーポイントとして、複数のバックエンドマイクロサービスを統合し、JWT認証、注文処理、API統合などのEC機能をREST APIとして提供します。
 
 ### 1.2 プロジェクトの目的
 
 本システムは、フロントエンド（React SPA等）から利用されるバックエンドAPIを提供し、以下を実現することを目的とします：
 
-* フロントエンド・バックエンドの分離: フロントエンドとバックエンドを独立して開発・デプロイ可能
-* API-First開発: 明確なAPI仕様に基づく開発
-* JWT認証: ステートレスな認証機構による水平スケーラビリティ
-* データ整合性: 楽観的ロックによる在庫管理の正確性確保
+* **BFFパターン**: フロントエンドに最適化された単一のAPIエントリーポイント
+* **マイクロサービス統合**: 複数のバックエンドAPI（back-office-api、customer-hub-api）を統合
+* **API-First開発**: 明確なAPI仕様に基づく開発
+* **JWT認証**: ステートレスな認証機構による水平スケーラビリティ
+* **プロキシパターン**: 書籍・在庫情報はバックエンドAPIに透過的に転送
 
 ---
 
@@ -30,10 +31,11 @@ berry-books-apiは、オンライン書店「Berry Books」のバックエンド
 
 | 目標 | 説明 |
 |------|------|
-| APIベースのアーキテクチャ | RESTful APIによる柔軟なシステム連携 |
+| BFFパターンの実現 | フロントエンド最適化された単一APIエントリーポイント |
+| マイクロサービス統合 | 複数のバックエンドサービスの透過的な統合 |
 | マルチチャネル対応 | Web、モバイルアプリなど複数チャネルからの利用 |
 | スケーラビリティ | ステートレスなJWT認証による水平スケーリング |
-| 在庫管理の正確性 | 楽観的ロックによる在庫不整合の防止 |
+| 在庫管理の正確性 | 楽観的ロック（back-office-api）による在庫不整合の防止 |
 
 ### 2.2 成功指標
 
@@ -221,11 +223,11 @@ berry-books-apiは、オンライン書店「Berry Books」のバックエンド
 
 ---
 
-## 7. 外部インターフェース
+## 7. 外部インターフェース（BFFパターン）
 
-### 7.1 顧客管理API連携
+### 7.1 customer-hub-api連携
 
-**連携先:** berry-books-rest プロジェクト
+**連携先:** customer-hub-api
 
 **連携方式:** REST API (JAX-RS 3.1)
 
@@ -235,6 +237,25 @@ berry-books-apiは、オンライン書店「Berry Books」のバックエンド
 * `GET /customers/{customerId}` - 顧客取得
 * `GET /customers/query_email?email={email}` - メールアドレス検索（ログイン用）
 * `POST /customers/` - 顧客新規登録
+
+**詳細:** [external_interface.md](external_interface.md) を参照
+
+### 7.2 back-office-api連携
+
+**連携先:** back-office-api
+
+**連携方式:** REST API (JAX-RS 3.1)
+
+**目的:** BOOK、STOCK、CATEGORY、PUBLISHERテーブルへのアクセス（書籍・在庫管理）
+
+主要エンドポイント::
+* `GET /books` - 全書籍取得
+* `GET /books/{bookId}` - 書籍詳細取得
+* `GET /books/search/jpql` - 書籍検索（JPQL版）
+* `GET /books/search/criteria` - 書籍検索（Criteria API版）
+* `GET /categories` - カテゴリ一覧取得
+* `GET /stocks/{bookId}` - 在庫取得
+* `PUT /stocks/{bookId}` - 在庫更新（楽観的ロック対応）
 
 **詳細:** [external_interface.md](external_interface.md) を参照
 

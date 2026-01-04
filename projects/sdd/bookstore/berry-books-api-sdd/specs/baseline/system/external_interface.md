@@ -17,15 +17,16 @@
 
 | システムID | システム名 | 連携方式 | 目的 | 必須/任意 |
 |-----------|----------|---------|------|----------|
-| EXT-001 | berry-books-rest API | REST API (JAX-RS) | 顧客情報管理（CRUD） | 必須 |
+| EXT-001 | customer-hub-api | REST API (JAX-RS) | 顧客情報管理（CRUD） | 必須 |
+| EXT-002 | back-office-api | REST API (JAX-RS) | 書籍・在庫・カテゴリ管理 | 必須 |
 
 ---
 
-## 3. berry-books-rest API連携
+## 3. customer-hub-api連携
 
 ### 3.1 概要
 
-**システム名**: berry-books-rest API
+**システム名**: customer-hub-api
 
 **目的**: CUSTOMERテーブルへのアクセス（顧客情報取得、認証、登録）
 
@@ -35,18 +36,18 @@
 
 **認証方式**: なし（同一ネットワーク内の信頼された通信）
 
-**ベースURL**: `http://localhost:8080/customer-api/customers`
+**ベースURL**: `http://localhost:8080/customer-hub-api/customers`
 
 設定方法:
 
-1. システムプロパティ: `-Dcustomer.api.base-url=...`
-2. 環境変数: `CUSTOMER_API_BASE_URL=...`
+1. システムプロパティ: `-Dcustomer-hub-api.base-url=...`
+2. 環境変数: `CUSTOMER_HUB_API_BASE_URL=...`
 3. プロパティファイル: `META-INF/microprofile-config.properties`
-4. デフォルト値: `http://localhost:8080/customer-api/customers`
+4. デフォルト値: `http://localhost:8080/customer-hub-api/customers`
 
 ### 3.2 依存関係
 
-**実装クラス**: `pro.kensait.berrybooks.external.CustomerRestClient`
+**実装クラス**: `pro.kensait.berrybooks.external.CustomerHubRestClient`
 
 **スコープ**: アプリケーションスコープ（シングルトン）
 
@@ -557,18 +558,254 @@ INFO  Customer found: email=alice@gmail.com, password=****
 
 ---
 
-## 14. 将来の拡張
+## 14. back-office-api連携
 
-### 14.1 追加予定のAPI連携
+### 14.1 概要
+
+**システム名**: back-office-api
+
+**目的**: 書籍・在庫・カテゴリ管理（BOOK、STOCK、CATEGORY、PUBLISHERテーブルへのアクセス）
+
+**連携方式**: REST API (HTTP/JSON)
+
+**プロトコル**: HTTP
+
+**認証方式**: なし（同一ネットワーク内の信頼された通信）
+
+**ベースURL**: `http://localhost:8080/back-office-api/api`
+
+設定方法:
+
+1. システムプロパティ: `-Dback-office-api.base-url=...`
+2. 環境変数: `BACK_OFFICE_API_BASE_URL=...`
+3. プロパティファイル: `META-INF/microprofile-config.properties`
+4. デフォルト値: `http://localhost:8080/back-office-api/api`
+
+### 14.2 依存関係
+
+**実装クラス**: `pro.kensait.berrybooks.external.BackOfficeRestClient`
+
+**スコープ**: アプリケーションスコープ（シングルトン）
+
+**使用ライブラリ**: Jakarta RESTful Web Services Client API
+
+---
+
+## 15. back-office-api エンドポイント仕様
+
+### 15.1 書籍一覧取得
+
+#### 15.1.1 エンドポイント
+
+```
+GET /books
+```
+
+#### 15.1.2 概要
+
+全書籍を在庫・カテゴリ・出版社情報と共に取得する。
+
+#### 15.1.3 レスポンス
+
+成功時 (200 OK):
+
+```json
+[
+  {
+    "bookId": 1,
+    "bookName": "Java入門",
+    "author": "山田太郎",
+    "categoryId": 1,
+    "publisherId": 1,
+    "price": 3000,
+    "category": {
+      "categoryId": 1,
+      "categoryName": "Java"
+    },
+    "publisher": {
+      "publisherId": 1,
+      "publisherName": "技術評論社"
+    },
+    "stock": {
+      "bookId": 1,
+      "quantity": 10,
+      "version": 1
+    }
+  }
+]
+```
+
+---
+
+### 15.2 書籍詳細取得
+
+#### 15.2.1 エンドポイント
+
+```
+GET /books/{bookId}
+```
+
+#### 15.2.2 リクエスト
+
+パスパラメータ:
+
+| パラメータ | 型 | 必須 | 説明 |
+|----------|---|------|------|
+| bookId | integer | ✓ | 書籍ID |
+
+#### 15.2.3 レスポンス
+
+成功時 (200 OK): 書籍一覧と同じ形式
+
+失敗時 (404 Not Found): 書籍が見つからない
+
+---
+
+### 15.3 書籍検索（JPQL）
+
+#### 15.3.1 エンドポイント
+
+```
+GET /books/search/jpql?categoryId={id}&keyword={keyword}
+```
+
+#### 15.3.2 リクエスト
+
+クエリパラメータ:
+
+| パラメータ | 型 | 必須 | 説明 |
+|----------|---|------|------|
+| categoryId | integer | - | カテゴリID（0または未指定=全カテゴリ） |
+| keyword | string | - | キーワード（書籍名、著者名で部分一致検索） |
+
+---
+
+### 15.4 書籍検索（Criteria API）
+
+#### 15.4.1 エンドポイント
+
+```
+GET /books/search/criteria?categoryId={id}&keyword={keyword}
+```
+
+#### 15.4.2 概要
+
+Criteria APIを使用した書籍検索。パラメータは15.3と同じ。
+
+---
+
+### 15.5 カテゴリ一覧取得
+
+#### 15.5.1 エンドポイント
+
+```
+GET /categories
+```
+
+#### 15.5.2 レスポンス
+
+成功時 (200 OK):
+
+```json
+{
+  "Java": 1,
+  "SpringBoot": 2,
+  "SQL": 3
+}
+```
+
+**形式**: カテゴリ名 → カテゴリID のマップ
+
+---
+
+### 15.6 在庫取得
+
+#### 15.6.1 エンドポイント
+
+```
+GET /stocks/{bookId}
+```
+
+#### 15.6.2 レスポンス
+
+成功時 (200 OK):
+
+```json
+{
+  "bookId": 1,
+  "quantity": 10,
+  "version": 1
+}
+```
+
+---
+
+### 15.7 在庫更新（楽観的ロック対応）
+
+#### 15.7.1 エンドポイント
+
+```
+PUT /stocks/{bookId}
+```
+
+#### 15.7.2 リクエスト
+
+パスパラメータ:
+
+| パラメータ | 型 | 必須 | 説明 |
+|----------|---|------|------|
+| bookId | integer | ✓ | 書籍ID |
+
+リクエストボディ:
+
+```json
+{
+  "version": 1,
+  "newQuantity": 8
+}
+```
+
+| フィールド | 型 | 必須 | 説明 |
+|----------|---|------|------|
+| version | long | ✓ | 楽観的ロック用バージョン番号 |
+| newQuantity | integer | ✓ | 更新後の在庫数 |
+
+#### 15.7.3 レスポンス
+
+成功時 (200 OK):
+
+```json
+{
+  "bookId": 1,
+  "quantity": 8,
+  "version": 2
+}
+```
+
+楽観的ロック失敗 (409 Conflict):
+
+```json
+{
+  "status": 409,
+  "error": "Conflict",
+  "message": "在庫が他のユーザーによって更新されました",
+  "path": "/stocks/1"
+}
+```
+
+---
+
+## 17. 将来の拡張
+
+### 17.1 追加予定のAPI連携
 
 | システム名 | 目的 | 連携方式 | 優先度 |
 |----------|------|---------|--------|
 | 決済システム | クレジットカード決済 | REST API | 高 |
 | 配送業者API | 配送依頼、配送状況追跡 | REST API | 中 |
 | メール配信サービス | 注文確認メール送信 | REST API | 中 |
-| 在庫管理システム | 在庫補充通知 | REST API | 低 |
 
-### 14.2 アーキテクチャの拡張性
+### 17.2 アーキテクチャの拡張性
 
 **メッセージキュー**: 非同期処理（Kafka, RabbitMQ）
 
@@ -578,7 +815,7 @@ INFO  Customer found: email=alice@gmail.com, password=****
 
 ---
 
-## 15. 参考資料
+## 18. 参考資料
 
 本外部インターフェース仕様書に関連する詳細ドキュメント：
 
@@ -591,9 +828,11 @@ INFO  Customer found: email=alice@gmail.com, password=****
 
 ---
 
-## 16. 連絡先
+## 19. 連絡先
 
-**berry-books-rest API担当者**: [担当者名]
+**customer-hub-api担当者**: [担当者名]
+
+**back-office-api担当者**: [担当者名]
 
 **障害連絡先**: [メールアドレス/Slack]
 

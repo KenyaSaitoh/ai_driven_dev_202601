@@ -1,8 +1,8 @@
 以下のインストラクションに従って、実装を進めてください。
 
 **【プロジェクト情報】** ← ここに実際のパスを記入してください
-- プロジェクトルート: `projects\java\berry-books-api-sdd`
-- タスクリスト: `projects\java\berry-books-api-sdd\tasks`
+- プロジェクトルート: `projects\sdd\bookstore\berry-books-api-sdd`
+- タスクリスト: `projects\sdd\bookstore\berry-books-api-sdd\tasks`
 
 ---
 
@@ -212,6 +212,113 @@
    - 静的リソースが正しく配置されていることを確認
    - 完了した作業の要約とともに最終ステータスを報告
    - **このタスクファイルのタスクがすべて完了したら、ここで停止する**
+
+---
+
+## BFFパターン特有の実装要件
+
+### berry-books-apiのアーキテクチャ特性
+
+**BFF（Backend for Frontend）としての役割:**
+- フロントエンド（berry-books-spa）の唯一のエントリーポイント
+- 複数のバックエンドマイクロサービスを統合
+- フロントエンドに最適化されたAPIを提供
+
+### 実装パターンの区別
+
+#### プロキシパターン（外部APIへの透過的転送）
+以下のResourceは独自のビジネスロジックを持たず、外部APIへ転送のみを行います：
+
+**BookResource (プロキシ → back-office-api)**:
+- GET /api/books → back-office-api
+- GET /api/books/{id} → back-office-api
+- GET /api/books/search/jpql → back-office-api
+- GET /api/books/search/criteria → back-office-api
+- **実装方法**: BackOfficeRestClient経由でそのまま転送
+- **注意**: BookService、BookDao、Bookエンティティは実装しない
+
+**CategoryResource (プロキシ → back-office-api)**:
+- GET /api/categories → back-office-api
+- **実装方法**: BackOfficeRestClient経由でそのまま転送
+- **注意**: CategoryService、CategoryDao、Categoryエンティティは実装しない
+
+#### 独自実装パターン（ビジネスロジックを持つ）
+
+**AuthenResource (独自実装 + customer-hub-api連携)**:
+- JWT生成・検証はBFF層で実装
+- 顧客情報取得はcustomer-hub-api経由
+- **実装**: AuthenResource、JwtUtil、JwtAuthenFilter、AuthenContext
+- **外部連携**: CustomerHubRestClient
+- **注意**: Customerエンティティは実装しない（外部API管理）
+
+**OrderResource (独自実装 + 外部API連携)**:
+- 注文処理のビジネスロジックを実装
+- 在庫チェック・更新はback-office-api経由
+- 注文データはローカルDBで管理
+- **実装**: OrderResource、OrderService、OrderTranDao、OrderDetailDao
+- **エンティティ**: OrderTran、OrderDetail、OrderDetailPK（これらのみ実装）
+- **外部連携**: BackOfficeRestClient（在庫管理）
+
+**ImageResource (独自実装)**:
+- WAR内リソース（画像ファイル）を直接配信
+- ServletContext.getResourceAsStream()を使用
+- **実装**: ImageResource
+
+### 実装してはいけないコンポーネント
+
+以下のコンポーネントは外部APIで管理されるため、**berry-books-apiでは実装しません**：
+
+**エンティティ（実装しない）**:
+- ❌ Book エンティティ
+- ❌ Stock エンティティ
+- ❌ Category エンティティ
+- ❌ Publisher エンティティ
+- ❌ Customer エンティティ
+
+**DAO（実装しない）**:
+- ❌ BookDao
+- ❌ StockDao
+- ❌ CategoryDao
+- ❌ PublisherDao
+- ❌ CustomerDao
+
+**Service（実装しない）**:
+- ❌ BookService
+- ❌ CategoryService
+
+### 外部API連携コンポーネント（必須実装）
+
+**BackOfficeRestClient**:
+- back-office-apiとの連携を担当
+- 書籍・在庫・カテゴリ情報の取得
+- 在庫更新（楽観的ロック対応）
+- **設定**: `back-office-api.base-url` プロパティ
+- **参照SPEC**: external_interface.mdの「14. back-office-api連携」
+
+**CustomerHubRestClient**:
+- customer-hub-apiとの連携を担当
+- 顧客情報の取得・登録
+- **設定**: `customer-hub-api.base-url` プロパティ
+- **参照SPEC**: external_interface.mdの「3. customer-hub-api連携」
+
+### データモデル制約
+
+**実装するエンティティ（注文関連のみ）**:
+- ✅ OrderTran（注文トランザクション）
+- ✅ OrderDetail（注文明細）
+- ✅ OrderDetailPK（注文明細複合主キー）
+
+**データベーステーブル管理**:
+- ORDER_TRAN、ORDER_DETAILテーブルのみ直接管理
+- 他のテーブル（BOOK、STOCK等）は外部APIが管理
+
+### トランザクション管理の注意点
+
+**分散トランザクション**:
+- 在庫更新: back-office-apiの独立トランザクション
+- 注文作成: berry-books-apiのJTAトランザクション
+- **結果整合性**: 在庫更新成功後、注文作成失敗のケースに注意
+- **参照SPEC**: architecture_design.mdの「6. トランザクション管理（BFFパターン）」
 
 ---
 

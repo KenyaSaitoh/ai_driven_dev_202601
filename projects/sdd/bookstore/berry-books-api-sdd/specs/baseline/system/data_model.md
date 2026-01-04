@@ -9,12 +9,22 @@
 
 ## 1. 概要
 
-本文書は、berry-books-api REST APIのデータベーススキーマとエンティティ設計を記述する。データモデルはHSQLDB 2.7.xを使用し、Jakarta Persistence (JPA) 3.1でO/Rマッピングを実装する。
+本文書は、berry-books-api REST API（BFF）とバックエンドマイクロサービスのデータベーススキーマとエンティティ設計を記述する。データモデルはHSQLDB 2.7.xを使用し、Jakarta Persistence (JPA) 3.1でO/Rマッピングを実装する。
 
 **データベース**: HSQLDB  
 **データベース名**: testdb  
 **接続URL**: jdbc:hsqldb:hsql://localhost:9001/testdb  
 **JNDI名**: jdbc/HsqldbDS
+
+### 1.1 BFFパターンにおけるデータ管理の責務分担
+
+| マイクロサービス | 管理するテーブル | 実装方式 |
+|--------------|--------------|---------|
+| **berry-books-api<br/>(BFF)** | ORDER_TRAN<br/>ORDER_DETAIL | JPAエンティティ + DAO |
+| **back-office-api** | BOOK<br/>STOCK<br/>CATEGORY<br/>PUBLISHER | JPAエンティティ + DAO<br/>（berry-books-apiからはREST API経由） |
+| **customer-hub-api** | CUSTOMER | JPAエンティティ + DAO<br/>（berry-books-apiからはREST API経由） |
+
+**重要**: berry-books-apiは注文データ（ORDER_TRAN、ORDER_DETAIL）のみを直接管理します。書籍・在庫・カテゴリ・顧客データは外部APIを通じてアクセスします。
 
 ---
 
@@ -363,22 +373,33 @@ JPA実装:
 
 ## 4. JPAエンティティマッピング
 
-### 4.1 エンティティ一覧
+### 4.1 エンティティ一覧（BFFパターン）
 
-| エンティティクラス | テーブル | 主キー | バージョン管理 |
-|---------------|---------|--------|--------------|
-| Publisher | PUBLISHER | publisherId | - |
-| Category | CATEGORY | categoryId | - |
-| Book | BOOK | bookId | - |
-| Stock | STOCK | bookId | @Version |
-| Customer | CUSTOMER | customerId | - |
-| OrderTran | ORDER_TRAN | orderTranId | - |
-| OrderDetail | ORDER_DETAIL | (orderTranId, orderDetailId) | - |
-| OrderDetailPK | - | 複合主キークラス | - |
+#### 4.1.1 berry-books-api (BFF)で実装されるエンティティ
+
+| エンティティクラス | テーブル | 主キー | バージョン管理 | 実装状況 |
+|---------------|---------|--------|--------------|---------|
+| OrderTran | ORDER_TRAN | orderTranId | - | ✓ 実装済み |
+| OrderDetail | ORDER_DETAIL | (orderTranId, orderDetailId) | - | ✓ 実装済み |
+| OrderDetailPK | - | 複合主キークラス | - | ✓ 実装済み |
+
+#### 4.1.2 外部APIで管理されるエンティティ（BFFでは未実装）
+
+| エンティティクラス | テーブル | 管理API | アクセス方式 |
+|---------------|---------|---------|------------|
+| Book | BOOK | back-office-api | REST API (BookTO) |
+| Stock | STOCK | back-office-api | REST API (StockTO) |
+| Category | CATEGORY | back-office-api | REST API |
+| Publisher | PUBLISHER | back-office-api | REST API |
+| Customer | CUSTOMER | customer-hub-api | REST API (CustomerTO) |
+
+**注意**: berry-books-apiには上記のエンティティクラスは実装されていません。代わりに、外部API用のDTO（BookTO、StockTO、CustomerTO）を使用します。
 
 ### 4.2 リレーションシップ
 
-#### 4.2.1 Book ⇔ Publisher（多対一）
+**注意**: 以下のリレーションシップ仕様は、全体のデータモデルを示しています。berry-books-api (BFF)では、注文関連のリレーションシップ（4.2.4、4.2.5、4.2.6）のみが実装されています。
+
+#### 4.2.1 Book ⇔ Publisher（多対一） - **back-office-apiで実装**
 
 リレーションシップ仕様:
 * エンティティ: Book
@@ -387,7 +408,7 @@ JPA実装:
 * 結合カラム: PUBLISHER_ID（Bookテーブル内）
 * カーディナリティ: 多数のBookが1つのPublisherに関連
 
-#### 4.2.2 Book ⇔ Category（多対一）
+#### 4.2.2 Book ⇔ Category（多対一） - **back-office-apiで実装**
 
 リレーションシップ仕様:
 * エンティティ: Book
@@ -396,7 +417,7 @@ JPA実装:
 * 結合カラム: CATEGORY_ID（Bookテーブル内）
 * カーディナリティ: 多数のBookが1つのCategoryに関連
 
-#### 4.2.3 Book ⇔ Stock（一対一）
+#### 4.2.3 Book ⇔ Stock（一対一） - **back-office-apiで実装**
 
 Bookエンティティ側の仕様:
 * リレーション種別: 一対一（OneToOne）
@@ -415,7 +436,9 @@ Stockエンティティ側の仕様:
 
 Book → Stock → Book という双方向の関係により、JSONシリアル化時に無限ループが発生する可能性があるため、Stock側のbookフィールドはJSONシリアル化から除外する必要があります（JsonbTransient相当の処理）。
 
-#### 4.2.4 OrderTran ⇔ Customer（多対一）
+#### 4.2.4 OrderTran ⇔ Customer（多対一） - **berry-books-apiで部分実装**
+
+**注意**: OrderTranエンティティはberry-books-apiに実装されていますが、Customerエンティティは外部API（customer-hub-api）で管理されています。そのため、JPAリレーションシップは実装されず、CUSTOMER_IDを外部キーとして保持するのみです。
 
 リレーションシップ仕様:
 * エンティティ: OrderTran
@@ -424,7 +447,7 @@ Book → Stock → Book という双方向の関係により、JSONシリアル�
 * 結合カラム: CUSTOMER_ID（OrderTranテーブル内）
 * カーディナリティ: 多数のOrderTranが1つのCustomerに関連
 
-#### 4.2.5 OrderTran ⇔ OrderDetail（一対多）
+#### 4.2.5 OrderTran ⇔ OrderDetail（一対多） - **berry-books-apiで実装**
 
 OrderTranエンティティ側の仕様:
 * リレーション種別: 一対多（OneToMany）
@@ -441,7 +464,9 @@ OrderDetailエンティティ側の仕様:
 * 結合カラム: ORDER_TRAN_ID
 * 更新制限: insertable=false, updatable=false（複合主キーの一部のため）
 
-#### 4.2.6 OrderDetail ⇔ Book（多対一）
+#### 4.2.6 OrderDetail ⇔ Book（多対一） - **berry-books-apiで部分実装**
+
+**注意**: OrderDetailエンティティはberry-books-apiに実装されていますが、Bookエンティティは外部API（back-office-api）で管理されています。そのため、JPAリレーションシップは実装されず、BOOK_IDを外部キーとして保持するのみです。書籍情報が必要な場合は、BackOfficeRestClient経由でREST APIを呼び出します。
 
 リレーションシップ仕様:
 * エンティティ: OrderDetail
@@ -450,11 +475,13 @@ OrderDetailエンティティ側の仕様:
 * 結合カラム: BOOK_ID（OrderDetailテーブル内）
 * カーディナリティ: 多数のOrderDetailが1つのBookに関連
 
-### 4.3 楽観的ロック（バージョン管理）
+### 4.3 楽観的ロック（バージョン管理） - **back-office-apiで実装**
 
 **適用テーブル**: STOCK
 
-楽観的ロック仕様:
+**注意**: 楽観的ロックはback-office-apiのStockエンティティで実装されています。berry-books-apiはバージョン番号を外部APIに転送するのみです。
+
+楽観的ロック仕様（back-office-api側）:
 * エンティティ: Stock
 * 主キー: BOOK_ID（INTEGER型）
 * バージョン管理: 

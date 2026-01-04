@@ -1,23 +1,68 @@
-以下のインストラクションに従って、実装タスクリストを生成してください。
+# タスク生成インストラクション
 
-**【プロジェクト情報】** ← ここに実際のパスを記入してください
-- プロジェクトルート: `projects\sdd\bookstore\berry-books-api-sdd`
-- SPEC配置ディレクトリ: `projects\sdd\bookstore\berry-books-api-sdd\specs`
-- 出力先: `projects\sdd\bookstore\berry-books-api-sdd\tasks`
+## Agent Skillについて
 
-**【プロジェクトの役割 - BFFパターン】**
-- **アーキテクチャパターン**: BFF（Backend for Frontend）
-- **役割**: フロントエンド（berry-books-spa）の唯一のエントリーポイント
-- **外部API統合**: 
-  - back-office-api: 書籍・在庫・カテゴリ管理
-  - customer-hub-api: 顧客管理
-- **実装パターン**:
-  - **プロキシ**: BookResource、CategoryResource（外部APIへ透過的転送）
-  - **独自実装**: AuthResource（JWT認証）、OrderResource（注文処理）
-- **管理データ**: 注文データ（ORDER_TRAN、ORDER_DETAIL）のみ直接管理
-- **重要事項**: 
-  - Book、Stock、Category、Publisher、Customerエンティティは実装しない（外部API管理）
-  - 書籍・在庫情報は外部API（BackOfficeRestClient）経由でアクセス
+このインストラクションは**Agent Skills標準仕様**（v1.0）に準拠しています。
+
+**プラットフォーム非依存:**
+- Claude (Anthropic)
+- GitHub Copilot
+- ChatGPT (OpenAI)
+- Gemini (Google)
+- Cursor
+- その他のAIコーディングアシスタント
+
+上記いずれのAIプラットフォームでも利用可能です。
+
+**プラットフォーム固有の操作方法:**
+- ファイル読み込み、ファイル作成などの具体的な操作方法は、プラットフォームによって異なります
+- 詳細は `../../platform_guides/` を参照してください
+
+---
+
+## パラメータ設定
+
+**実行前に以下のパラメータを設定してください:**
+
+```yaml
+project_root: "ここにプロジェクトルートのパスを入力"
+spec_directory: "ここに仕様書ディレクトリのパスを入力"
+output_directory: "ここにタスク出力先のパスを入力（オプション）"
+```
+
+**例（back-office-apiの場合）:**
+```yaml
+project_root: "projects/sdd/bookstore/back-office-api-sdd"
+spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs"
+output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
+```
+
+**注意:** 
+- パス区切りはOS環境に応じて調整してください（Windows: `\`, Unix/Linux/Mac: `/`）
+- 以降、`{project_root}` と表記されている箇所は、上記で設定した値に置き換えてください
+
+---
+
+## プロジェクトの役割（例: back-office-api）
+
+**back-office-apiの場合のマイクロサービスパターン:**
+
+- **アーキテクチャパターン**: Microservice（マイクロサービス）
+- **役割**: 書籍・在庫・カテゴリ・出版社の完全なデータ管理サービス
+- **呼び出し元**: BFF（berry-books-api）からREST APIとして呼ばれる
+- **管理データ**: 
+  - Book（書籍）
+  - Stock（在庫）- **楽観的ロック必須**
+  - Category（カテゴリ）
+  - Publisher（出版社）
+- **重要な実装要件**:
+  - **楽観的ロック**: Stockエンティティに`@Version`アノテーション必須
+  - **2種類の書籍検索**: JPQL検索とCriteria API検索の両方を実装
+  - **全エンティティ実装**: Book、Stock、Category、Publisherすべて実装
+  - **CORS対応**: BFFからのクロスオリジンリクエストに対応
+  - **エラーハンドリング**: OptimisticLockException → HTTP 409 Conflict
+
+**注意:** 上記はback-office-apiの例です。あなたのプロジェクトの役割は、仕様書（`{spec_directory}/system/architecture_design.md`）から判断してください。
 
 ---
 
@@ -32,17 +77,24 @@
 - 詳細な実装は次の「実装フェーズ（コード生成）」で仕様書を参照して行います
 
 **出力先:**
-- **ベースプロジェクトの場合**: `{プロジェクトルート}/tasks/` ディレクトリ
-- **拡張の場合**: `{SPEC配置ディレクトリ}/tasks/` ディレクトリ
-- **重要**: `{プロジェクトルート}` と `{SPEC配置ディレクトリ}` は、プロンプトで指定されたパスに置き換えてください
+- **ベースプロジェクトの場合**: `{project_root}/tasks/` ディレクトリ
+- **拡張の場合**: `{spec_directory}/tasks/` ディレクトリ
+- **重要**: `{project_root}` と `{spec_directory}` は、パラメータで指定した値に置き換えてください
 
 ---
 
 ## 1. 設計ドキュメントの分析
 
-プロンプトで指定されたプロジェクト情報に基づいて、以下の設計ドキュメントをロードして分析してください：
+パラメータで指定されたプロジェクト情報に基づいて、以下の設計ドキュメントを読み込んで分析してください：
 
-**注意:** `{プロジェクトルート}` は、プロンプトで指定されたパスに置き換えてください。全てのパスはそのプロジェクトルートを基準とした相対パスです。
+**ファイル読み込みの方法:**
+- ファイル読み込み操作は、使用しているAIプラットフォームによって異なります
+- **Cursor/Cline**: ファイル読み込みツールを使用
+- **GitHub Copilot**: ワークスペースコンテキスト参照機能を使用
+- **ChatGPT**: ユーザーにファイル内容の貼り付けを依頼
+- **その他**: `../../platform_guides/` を参照してください
+
+**注意:** `{project_root}` は、パラメータで指定されたパスに置き換えてください。全てのパスはそのプロジェクトルートを基準とした相対パスです。
 
 ### プロジェクト憲章（最優先で確認）
 - **principles/** - プロジェクトの開発原則、アーキテクチャ方針、品質基準、組織標準を確認
@@ -60,7 +112,7 @@
 - **external_interface.md** - 外部連携とAPI仕様（OpenAPI YAML含む）を確認
 
 ### API単位ドキュメント（api/配下）
-- **api/API_XXX_yyyy/** - 各API単位のディレクトリ（例: API_001_auth, API_002_books）
+- **api/API_XXX_yyyy/** - 各API単位のディレクトリ（例: API_001_books, API_002_stocks）
   - **functional_design.md** - 各APIの詳細な機能設計（エンドポイント、リクエスト/レスポンス、ビジネスルール）
   - **behaviors.md** - 各APIの振る舞い仕様（受入基準、Given-When-Then）
 
@@ -71,13 +123,13 @@
 ## 2. タスクファイルの分割構造
 
 **出力先の決定:**
-- **ベースプロジェクトの場合**: `{プロジェクトルート}/tasks/` ディレクトリ
-- **拡張の場合**: `{SPEC配置ディレクトリ}/tasks/` ディレクトリ
+- **ベースプロジェクトの場合**: `{project_root}/tasks/` ディレクトリ
+- **拡張の場合**: `{spec_directory}/tasks/` ディレクトリ
 
 **重要:** 
-- `{プロジェクトルート}` は、プロンプトで指定されたパスに置き換えてください
-- ベースプロジェクトのタスクは `{プロジェクトルート}/tasks/` に配置
-- 拡張のタスクは `{SPEC配置ディレクトリ}/tasks/` に配置（例: `specs/enhancements/202512_inventory_alert/tasks/`）
+- `{project_root}` は、パラメータで指定されたパスに置き換えてください
+- ベースプロジェクトのタスクは `{project_root}/tasks/` に配置
+- 拡張のタスクは `{spec_directory}/tasks/` に配置（例: `specs/enhancements/202512_inventory_alert/tasks/`）
 
 複数人が並行して作業できるように、以下のようにタスクファイルを分割して生成してください：
 
@@ -100,18 +152,25 @@
 ### 2.3 共通機能タスク
 **`tasks/common_tasks.md`**
 - 複数機能で共有される共通コンポーネント
-- **注文エンティティ**: OrderTran, OrderDetail, OrderDetailPK（これらのみ実装）
-- **共通サービス**: DeliveryFeeService（配送料金計算）
-- **JWT認証基盤**: JwtUtil, JwtAuthenFilter, AuthenContext
-- **外部API連携**: BackOfficeRestClient, CustomerHubRestClient
-- **共通DTO**: ErrorResponse, 外部API用DTO（BookTO, StockTO, CustomerTO等）
-- **共通ユーティリティ**: MessageUtil, AddressUtil, SettlementType
+- **全エンティティ**: Book, Stock, Category, Publisher（すべて実装）
+- **重要**: Stockエンティティには`@Version`アノテーション必須（楽観的ロック）
+- **共通DAO**: 各エンティティのDAO
+  - BookDao（JPQL検索）
+  - BookDaoCriteria（Criteria API検索）- **両方実装**
+  - StockDao（楽観的ロック対応）
+  - CategoryDao
+  - PublisherDao
+- **共通サービス**: 必要に応じて
+- **共通DTO/レスポンスモデル**: ErrorResponse等
+- **例外ハンドラ**: OptimisticLockExceptionMapper（HTTP 409 Conflict）
+- **CORSフィルター**: BFFからのリクエスト対応
 
-**注意 - BFFパターンによる制約**: 
-以下のコンポーネントは実装しません（外部APIで管理されるため）:
-- ❌ Book, Stock, Category, Publisher, Customerエンティティ
-- ❌ BookDao, StockDao, CategoryDao, PublisherDao, CustomerDao
-- ❌ BookService, CategoryService
+**注意 - マイクロサービスパターン**: 
+このプロジェクトは**すべてのエンティティとDAOを実装**します：
+- ✅ Book, Stock, Category, Publisherエンティティ
+- ✅ BookDao, BookDaoCriteria, StockDao, CategoryDao, PublisherDao
+- ✅ 全サービスクラス
+- ✅ すべてのREST APIエンドポイント
 
 共通コンポーネントの具体的な内容は、プロジェクトのSPECから判断してください。
 
@@ -122,12 +181,12 @@
 #### 機能の識別と抽出
 1. **機能（API）の識別**
    - requirements.md、api/ ディレクトリ、functional_design.mdから機能を抽出
-   - 各APIの範囲と責務を分析（認証API、書籍API、注文API、画像API等）
+   - 各APIの範囲と責務を分析（書籍API、在庫API、カテゴリAPI、出版社API等）
    - API間の依存関係を把握
 
 2. **タスクファイルの命名規則**
    - 基本形式：`tasks/[API_ID]_[API名].md`
-   - 例：`API_001_auth.md`、`API_002_books.md`、`API_003_orders.md`
+   - 例：`API_001_books.md`、`API_002_stocks.md`、`API_003_categories.md`
    - api/配下のディレクトリ名と対応させる
    - **注意**: ファイル名はアンダースコア区切りを使用
 
@@ -136,7 +195,7 @@
    - API固有のServiceクラス
    - API固有のDaoクラス
    - API固有のDTO/レスポンスモデル
-   - API固有のテストケース（単体テスト、APIテスト）
+   - API固有のテストケース（単体テスト、APIテスト、**並行処理テスト**）
    - **担当者:** 1名（API単位で独立して実装可能）
 
 4. **機能分割の判断基準**
@@ -148,8 +207,9 @@
 **`tasks/integration_tasks.md`**
 - API間結合テスト
 - E2E APIテスト（REST Assured/JAX-RS Client） - 主要な業務フローをAPIシーケンスでテスト
+- **並行処理テスト**: 在庫更新の競合シナリオテスト（重要！）
 - パフォーマンステスト
-- セキュリティテスト（JWT認証、認可）
+- CORS動作確認
 - 最終検証
 
 ---
@@ -178,7 +238,7 @@
 - **Dao**: 1 Daoクラスの作成/修正
 - **Service**: 1 Serviceクラスの作成/修正（複雑な場合は複数タスクに分割）
 - **Resource**: 1 Resourceクラス（JAX-RSエンドポイント）の作成/修正
-- **Filter/Interceptor**: 1フィルター/インターセプターの作成/修正
+- **Filter/Interceptor/ExceptionMapper**: 1コンポーネントの作成/修正
 - **Test**: 1テストクラスの作成/修正
 
 **注意**: 上記の用語はプロジェクトの技術スタックに応じて読み替えてください。
@@ -199,10 +259,10 @@
    - データベース設定
 
 2. **共通機能** (複数機能で共有)
-   - 共通Entity/Model
-   - 共通Utility/Helper
+   - 全Entity（Book, Stock, Category, Publisher）
+   - 全Dao（BookDao, BookDaoCriteria, StockDao等）
    - 共通Service
-   - JWT認証基盤
+   - CORSフィルター、例外ハンドラ
    - 共通DTO/Response
 
 3. **機能別実装（API単位）** (並行実行可能)
@@ -213,6 +273,7 @@
 4. **結合テスト** (全API実装後)
    - API間結合
    - E2E APIテスト（REST Assured） - 主要な業務フローベース
+   - **並行処理テスト**（在庫更新競合シナリオ）
    - パフォーマンステスト
 
 ---
@@ -253,22 +314,22 @@
 
 **記述例:**
 ```markdown
-- [ ] **T_API002_003**: BookDao の作成
-  - **目的**: 書籍情報の検索・取得機能を実装する
-  - **対象**: BookDao.java (DAOクラス)
-  - **参照SPEC**: [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「2.2 BookDao」
-  - **注意事項**: カテゴリとの結合、フィルタリング条件を考慮すること
+- [ ] **T_API002_003**: StockDao の作成
+  - **目的**: 在庫情報の検索・更新機能を実装する
+  - **対象**: StockDao.java (DAOクラス)
+  - **参照SPEC**: [functional_design.md](../specs/baseline/api/API_002_stocks/functional_design.md) の「2.2 StockDao」
+  - **注意事項**: 楽観的ロックに対応したupdate処理を実装すること
 ```
 
 **複数SPEC参照の例:**
 ```markdown
-- [ ] **T_API002_006**: BookResource の作成
-  - **目的**: 書籍検索・取得APIエンドポイントを実装する
-  - **対象**: BookResource.java (JAX-RS Resourceクラス)
+- [ ] **T_API002_006**: StockResource の作成
+  - **目的**: 在庫管理APIエンドポイントを実装する
+  - **対象**: StockResource.java (JAX-RS Resourceクラス)
   - **参照SPEC**: 
-    - [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「2. エンドポイント仕様」
-    - [behaviors.md](../specs/baseline/api/API_002_books/behaviors.md) の「2. 書籍API」
-  - **注意事項**: JWT認証が必要なエンドポイントには@Securedアノテーションを付与
+    - [functional_design.md](../specs/baseline/api/API_002_stocks/functional_design.md) の「2. エンドポイント仕様」
+    - [behaviors.md](../specs/baseline/api/API_002_stocks/behaviors.md) の「2. 在庫API」
+  - **注意事項**: OptimisticLockException発生時はHTTP 409 Conflictを返すこと
 ```
 
 **注意: ソースコードや詳細な実装手順は記述しない**
@@ -277,7 +338,7 @@
 
 ## 5. メインタスクリスト（tasks.md）の構造
 
-`{プロジェクトルート}/tasks/tasks.md` は以下の構造で生成：
+`{project_root}/tasks/tasks.md` は以下の構造で生成：
 
 ```markdown
 # [プロジェクト名] - 実装タスクリスト
@@ -289,9 +350,9 @@
 |---------|--------------|--------|---------|---------|
 | 0. セットアップ | setup_tasks.md | 全員 | 不可 | [分析から算出] |
 | 1. 共通機能 | common_tasks.md | 共通機能チーム | 一部可能 | [分析から算出] |
-| 2. 認証API | API_001_auth.md | 担当者A | 可能 | [分析から算出] |
-| 3. 書籍API | API_002_books.md | 担当者B | 可能 | [分析から算出] |
-| 4. 注文API | API_003_orders.md | 担当者C | 可能 | [分析から算出] |
+| 2. 書籍API | API_001_books.md | 担当者A | 可能 | [分析から算出] |
+| 3. 在庫API | API_002_stocks.md | 担当者B | 可能 | [分析から算出] |
+| 4. カテゴリAPI | API_003_categories.md | 担当者C | 可能 | [分析から算出] |
 | ... | ... | ... | ... | ... |
 | N. 結合テスト | integration_tasks.md | 全員 | 一部可能 | [分析から算出] |
 
@@ -304,8 +365,8 @@
 ### タスクファイル一覧
 - [セットアップタスク](setup_tasks.md)
 - [共通機能タスク](common_tasks.md)
-- [認証APIのタスク](API_001_auth.md)
-- [書籍APIのタスク](API_002_books.md)
+- [書籍APIのタスク](API_001_books.md)
+- [在庫APIのタスク](API_002_stocks.md)
 - ...
 - [結合テストタスク](integration_tasks.md)
 
@@ -327,6 +388,11 @@
 - ソースコードや詳細な実装手順を含まず、「何を作成・修正するか」を明確に記述
 - [P]マークで並行実行可能なタスクを明示し、依存関係を明確に記述
 - タスクIDはアンダースコア区切り（例: `T_SETUP_001`）で一意に付与
+- **back-office-api特有の要件**:
+  - Stockエンティティの@Version注記がタスクに明記されている
+  - JPQL検索とCriteria API検索の両方がタスクに含まれている
+  - OptimisticLockExceptionHandlerがタスクに含まれている
+  - 並行処理テストがタスクに含まれている
 
 ---
 
@@ -339,7 +405,11 @@
 5. **並行化判定**: [P]マークを付与し、タスクファイルを指定された出力先に生成
 6. **メインリスト生成**: `tasks/tasks.md` に全体概要と実行計画を生成
 
-**注意**: `{プロジェクトルート}` と出力先はプロンプトで指定されます。ファイル名・タスクIDは全てアンダースコア区切りを使用。
+**ファイル生成の方法:**
+- ファイル作成操作は、使用しているAIプラットフォームによって異なります
+- 詳細は `../../platform_guides/` を参照してください
+
+**注意**: `{project_root}` と出力先はパラメータで指定されます。ファイル名・タスクIDは全てアンダースコア区切りを使用。
 
 ---
 
@@ -352,24 +422,42 @@
 ### SPEC参照の記述
 全てのタスクの「参照SPEC」は以下の形式で記述してください：
 - Markdownリンク形式でクリック可能にする（例: `[functional_design.md](相対パス)`）
-- 具体的なセクション番号とセクション名を明記（例: `の「2.2 BookDao」`）
+- 具体的なセクション番号とセクション名を明記（例: `の「2.2 StockDao」`）
 - 複数SPEC参照の場合は箇条書きで列挙
 - system/とapi/配下の両方のドキュメントを適切に参照する
 
 ### タスク生成の原則
-- **憲章遵守**: `{プロジェクトルート}/principles/` 配下の憲章（開発原則、品質基準、組織標準）を必ず遵守
+- **憲章遵守**: `{project_root}/principles/` 配下の憲章（開発原則、品質基準、組織標準）を必ず遵守
 - **抽象度の維持**: タスクは「何を作るか」のみを記述。ソースコードや詳細な実装手順は記述しない
 - **既存コード考慮**: 既存実装がある場合は、修正タスクと新規作成タスクを明確に区別
 - **APIテスト設定**: E2E APIテストは通常ビルドから除外し、個別実行可能にする設定（JUnit `@Tag`, Gradle設定等）を明記
 
+### back-office-api特有の注意点
+- **全エンティティ実装**: Book、Stock、Category、Publisherすべてのエンティティを実装
+- **楽観的ロック必須**: Stockエンティティには必ず`@Version`アノテーションを付ける
+- **2種類の検索実装**: BookDaoとBookDaoCriteriaの両方を実装
+- **並行処理テスト**: 在庫更新の競合シナリオテストを必ず含める
+- **CORS対応**: BFFからの呼び出しに対応するCORSフィルターを実装
+- **例外ハンドリング**: OptimisticLockException → HTTP 409 Conflictの変換を実装
+
 ### REST API特有の注意点
 - 画面（UI）は含まれないため、View/XHTMLに関するタスクは生成しない
 - API エンドポイント（Resource）のテストは REST Assured や JAX-RS Client を使用
-- JWT認証、CORS、HTTPステータスコードの適切な使用を考慮
+- CORS、HTTPステータスコードの適切な使用を考慮
 
 ### プロジェクトルートの扱い
-- `{プロジェクトルート}` は、プロンプトで明示的に指定されたパスに置き換えてください
+- `{project_root}` は、パラメータで明示的に指定されたパスに置き換えてください
 - 相対パスでも絶対パスでも構いません
 - 全てのファイル操作は、このプロジェクトルートを基準に行います
 
+---
+
+## プラットフォーム別ガイド
+
+このインストラクションの実行方法は、AIプラットフォームによって異なります。
+詳細は以下を参照してください：
+
+- **Cursor/Cline**: `../../platform_guides/cursor_cline.md`
+- **GitHub Copilot**: `../../platform_guides/github_copilot.md`
+- **その他**: `../../platform_guides/other_platforms.md`
 

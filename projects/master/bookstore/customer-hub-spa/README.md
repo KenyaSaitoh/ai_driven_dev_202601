@@ -1,8 +1,8 @@
-# customer-spa プロジェクト（完成版）
+# customer-hub-spa プロジェクト
 
 ## 📖 概要
 
-顧客管理SPA（React + TypeScript）です。
+Berry Books オンライン書店の顧客管理SPA（React + TypeScript）です。
 顧客一覧を表示し、注文件数と購入冊数の統計情報を確認できます。
 
 ## 🚀 セットアップとコマンド実行ガイド
@@ -28,7 +28,7 @@
 
 ```bash
 # 1. プロジェクトのディレクトリに移動
-cd projects/master/bookstore/customer-spa
+cd projects/master/bookstore/customer-hub-spa
 
 # 2. 依存関係をインストール（初回のみ）
 npm install
@@ -75,7 +75,7 @@ npm run preview
 ## 🎯 プロジェクト構成
 
 ```
-projects/master/bookstore/customer-spa/
+projects/master/bookstore/customer-hub-spa/
 ├── src/
 │   ├── components/
 │   │   └── CustomerList.tsx    # 顧客一覧コンポーネント
@@ -209,8 +209,8 @@ server: {
 ### ⑤ フロントエンドを起動
 
 ```bash
-# customer-spaディレクトリで実行
-cd projects/master/bookstore/customer-spa
+# customer-hub-spaディレクトリで実行
+cd projects/master/bookstore/customer-hub-spa
 npm install  # 初回のみ
 npm run dev
 ```
