@@ -4,15 +4,13 @@
 
 This instruction conforms to **Agent Skills standard specification** (v1.0).
 
-**Platform Independent:**
-- Claude (Anthropic)
-- GitHub Copilot
-- ChatGPT (OpenAI)
-- Gemini (Google)
+**Supported Platforms:**
+- Claude Code
+- Cline
 - Cursor
-- Other AI coding assistants
+- GitHub Copilot
 
-Compatible with all the above AI platforms.
+Compatible with the above AI coding agents.
 
 **Platform-Specific Operations:**
 - Specific operation methods such as file reading, creation, and editing vary by platform
@@ -49,12 +47,11 @@ Based on the project root and task file specified as parameters, execute the fol
 
 ### 1. Load and Analyze Implementation Context
 
-**File Loading Methods:**
-- File loading operations vary depending on the AI platform you're using
-- **Cursor/Cline**: Use file reading tools
-- **GitHub Copilot**: Use workspace context reference features
-- **ChatGPT**: Request users to paste file contents
-- **Others**: See `../../platform_guides/`
+**File Reference Methods:**
+- File reference operations vary depending on the AI platform you're using
+- **Claude Code/Cline/Cursor**: Use `@` reference to add files to context
+- **GitHub Copilot**: Use `#file:` reference or workspace context
+- **Details**: See `../../platform_guides/`
 
 #### Documents to Load (in priority order)
 
@@ -543,7 +540,7 @@ The following components are managed by external APIs and are **NOT implemented 
 Execution methods for this instruction vary by AI platform.
 See the following for details:
 
-- **Cursor/Cline**: `../../platform_guides/cursor_cline.md`
+- **Claude Code/Cline/Cursor**: `../../platform_guides/cursor_cline.md`
 - **GitHub Copilot**: `../../platform_guides/github_copilot.md`
 - **Others**: `../../platform_guides/other_platforms.md`
 

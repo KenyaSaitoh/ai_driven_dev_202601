@@ -1,25 +1,31 @@
-# Cursor/Cline Platform Guide
+# Claude Code / Cline / Cursor Platform Guide
 
 ## Overview
 
 This guide explains how to use the Jakarta EE Microservice Implementation Agent Skill with:
-- **Cursor IDE** - AI-powered code editor with built-in Claude
+- **Claude Code** - Anthropic's AI coding agent with built-in Claude
 - **Cline** - VS Code extension for AI-assisted coding with Claude
+- **Cursor IDE** - AI-powered code editor with built-in Claude
 
-Both platforms use the same `@` reference syntax for file context.
+All platforms use the same `@` reference syntax for file context.
 
 ## Prerequisites
 
-### For Cursor
-- Cursor IDE installed
-- Claude AI enabled in Cursor
-- Project workspace opened in Cursor
+### For Claude Code
+- Claude Code installed
+- Claude AI account
+- Project workspace opened in Claude Code
 
 ### For Cline
 - Visual Studio Code installed
 - Cline extension installed from VS Code Marketplace
 - Claude API key configured in Cline
 - Project workspace opened in VS Code
+
+### For Cursor
+- Cursor IDE installed
+- Claude AI enabled in Cursor
+- Project workspace opened in Cursor
 
 ## Using the Agent Skill
 

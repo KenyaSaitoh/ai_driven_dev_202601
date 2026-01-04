@@ -16,13 +16,10 @@ updated: 2025-01-04
 # Platform Independence
 platform_independent: true
 supported_platforms:
-  - Claude (Anthropic)
-  - GitHub Copilot
-  - ChatGPT (OpenAI)
-  - Gemini (Google)
-  - Cursor
+  - Claude Code
   - Cline
-  - Any AI coding assistant
+  - Cursor
+  - GitHub Copilot
 
 # Target Technology Stack
 technology_stack:
@@ -108,7 +105,6 @@ resources:
 
 # Platform-Specific Guides
 platform_guides:
-  cursor_cline: platform_guides/cursor_cline.md
+  claude_code_cline_cursor: platform_guides/cursor_cline.md
   github_copilot: platform_guides/github_copilot.md
-  other: platform_guides/other_platforms.md
 

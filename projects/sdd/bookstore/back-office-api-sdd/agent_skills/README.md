@@ -5,8 +5,8 @@
 Jakarta EE 10ベースの**マイクロサービス**プロジェクトを実装するための**Agent Skill**です。
 
 **Agent Skills**とは：
-- AIコーディングアシスタント用の標準化されたインストラクション形式
-- Cursor、GitHub Copilot、ChatGPT、Geminiなど、どのAIでも使える
+- AIコーディングエージェント用の標準化されたインストラクション形式
+- Claude Code、Cline、Cursor、GitHub Copilotで使える
 - プラットフォーム非依存の設計
 
 **back-office-apiの役割:**
@@ -16,7 +16,7 @@ Jakarta EE 10ベースの**マイクロサービス**プロジェクトを実装
 
 ---
 
-## 🚀 超簡単な使い方（Cursor/Cline）
+## 🚀 超簡単な使い方（Claude Code/Cline/Cursor）
 
 ### 📋 タスク生成
 
@@ -31,7 +31,7 @@ Jakarta EE 10ベースの**マイクロサービス**プロジェクトを実装
 - output_directory: projects/sdd/bookstore/back-office-api-sdd/tasks
 ```
 
-**これだけ！** Claudeが自動で：
+**これだけ！** AIが自動で：
 1. 📖 仕様書を読み込む
 2. 🔧 タスクファイルを生成する
 3. 💾 `tasks/`フォルダに保存する
@@ -48,7 +48,7 @@ Jakarta EE 10ベースの**マイクロサービス**プロジェクトを実装
 - task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/setup_tasks.md
 ```
 
-Claudeが：
+AIが：
 1. 📄 タスクと仕様書を読み込む
 2. 💻 コードを実装する
 3. ✅ テストを作成する
@@ -277,13 +277,10 @@ Stockエンティティには@Versionアノテーションを付けてくださ�
 
 ## 🌍 対応プラットフォーム
 
-- ✅ **Cursor** - `@参照` で簡単使用
+- ✅ **Claude Code** - `@参照` で簡単使用
 - ✅ **Cline (VS Code拡張)** - `@参照` で簡単使用
+- ✅ **Cursor** - `@参照` で簡単使用
 - ✅ **GitHub Copilot** - `#file:参照` で使用
-- ✅ **ChatGPT** - 内容をコピペ
-- ✅ **Claude.ai** - 内容をコピペ
-- ✅ **Gemini** - 内容をコピペ
-- ✅ **その他のAI** - API経由でも使用可能
 
 詳細は `platform_guides/` を参照してください。
 
@@ -371,9 +368,8 @@ public class CorsFilter implements ContainerResponseFilter {
 ## 📚 詳細ドキュメント
 
 - **プラットフォーム別ガイド**: 
-  - Cursor/Cline: `platform_guides/cursor_cline.md`
+  - Claude Code/Cline/Cursor: `platform_guides/cursor_cline.md`
   - GitHub Copilot: `platform_guides/github_copilot.md`
-  - その他: `platform_guides/other_platforms.md`
 - **マイクロサービスパターン解説**: `resources/architecture_patterns/microservice_pattern.md`
 - **タスクテンプレート**: `resources/templates/task_template.md`
 - **出力例**: `resources/examples/sample_output.md`

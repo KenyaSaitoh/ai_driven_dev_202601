@@ -4,18 +4,16 @@
 
 このインストラクションは**Agent Skills標準仕様**（v1.0）に準拠しています。
 
-**プラットフォーム非依存:**
-- Claude (Anthropic)
-- GitHub Copilot
-- ChatGPT (OpenAI)
-- Gemini (Google)
+**サポートプラットフォーム:**
+- Claude Code
+- Cline
 - Cursor
-- その他のAIコーディングアシスタント
+- GitHub Copilot
 
-上記いずれのAIプラットフォームでも利用可能です。
+上記のAIコーディングエージェントで利用可能です。
 
 **プラットフォーム固有の操作方法:**
-- ファイル読み込み、ファイル作成などの具体的な操作方法は、プラットフォームによって異なります
+- ファイル参照、ファイル作成などの具体的な操作方法は、プラットフォームによって異なります
 - 詳細は `../../platform_guides/` を参照してください
 
 ---
@@ -87,12 +85,11 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
 
 パラメータで指定されたプロジェクト情報に基づいて、以下の設計ドキュメントを読み込んで分析してください：
 
-**ファイル読み込みの方法:**
-- ファイル読み込み操作は、使用しているAIプラットフォームによって異なります
-- **Cursor/Cline**: ファイル読み込みツールを使用
-- **GitHub Copilot**: ワークスペースコンテキスト参照機能を使用
-- **ChatGPT**: ユーザーにファイル内容の貼り付けを依頼
-- **その他**: `../../platform_guides/` を参照してください
+**ファイル参照の方法:**
+- ファイル参照操作は、使用しているAIプラットフォームによって異なります
+- **Claude Code/Cline/Cursor**: `@`参照でファイルをコンテキストに追加
+- **GitHub Copilot**: `#file:`参照またはワークスペースコンテキストを使用
+- **詳細**: `../../platform_guides/` を参照してください
 
 **注意:** `{project_root}` は、パラメータで指定されたパスに置き換えてください。全てのパスはそのプロジェクトルートを基準とした相対パスです。
 
@@ -457,7 +454,6 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
 このインストラクションの実行方法は、AIプラットフォームによって異なります。
 詳細は以下を参照してください：
 
-- **Cursor/Cline**: `../../platform_guides/cursor_cline.md`
+- **Claude Code/Cline/Cursor**: `../../platform_guides/cursor_cline.md`
 - **GitHub Copilot**: `../../platform_guides/github_copilot.md`
-- **その他**: `../../platform_guides/other_platforms.md`
 

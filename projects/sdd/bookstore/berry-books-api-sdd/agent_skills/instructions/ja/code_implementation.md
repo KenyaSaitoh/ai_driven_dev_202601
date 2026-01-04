@@ -4,18 +4,16 @@
 
 このインストラクションは**Agent Skills標準仕様**（v1.0）に準拠しています。
 
-**プラットフォーム非依存:**
-- Claude (Anthropic)
-- GitHub Copilot
-- ChatGPT (OpenAI)
-- Gemini (Google)
+**サポートプラットフォーム:**
+- Claude Code
+- Cline
 - Cursor
-- その他のAIコーディングアシスタント
+- GitHub Copilot
 
-上記いずれのAIプラットフォームでも利用可能です。
+上記のAIコーディングエージェントで利用可能です。
 
 **プラットフォーム固有の操作方法:**
-- ファイル読み込み、ファイル作成、編集などの具体的な操作方法は、プラットフォームによって異なります
+- ファイル参照、ファイル作成、編集などの具体的な操作方法は、プラットフォームによって異なります
 - 詳細は `../../platform_guides/` を参照してください
 
 ---
@@ -49,12 +47,11 @@ task_file: "projects/sdd/bookstore/berry-books-api-sdd/tasks/setup_tasks.md"
 
 ### 1. 実装コンテキストをロードして分析してください
 
-**ファイル読み込みの方法:**
-- ファイル読み込み操作は、使用しているAIプラットフォームによって異なります
-- **Cursor/Claude**: ファイル読み込みツールを使用
-- **GitHub Copilot**: ワークスペースコンテキスト参照機能を使用
-- **ChatGPT**: ユーザーにファイル内容の貼り付けを依頼
-- **その他**: `../../platform_guides/` を参照してください
+**ファイル参照の方法:**
+- ファイル参照操作は、使用しているAIプラットフォームによって異なります
+- **Claude Code/Cline/Cursor**: `@`参照でファイルをコンテキストに追加
+- **GitHub Copilot**: `#file:`参照またはワークスペースコンテキストを使用
+- **詳細**: `../../platform_guides/` を参照してください
 
 #### 読み込むべきドキュメント（優先順）
 
@@ -446,7 +443,6 @@ architecture_design.mdの以下を参照すること：
 このインストラクションの実行方法は、AIプラットフォームによって異なります。
 詳細は以下を参照してください：
 
-- **Cursor/Cline**: `../../platform_guides/cursor_cline.md`
+- **Claude Code/Cline/Cursor**: `../../platform_guides/cursor_cline.md`
 - **GitHub Copilot**: `../../platform_guides/github_copilot.md`
-- **その他**: `../../platform_guides/other_platforms.md`
 
