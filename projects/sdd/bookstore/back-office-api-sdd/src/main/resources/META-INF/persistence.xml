@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
+                                 https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
+    
+    <persistence-unit name="back-office-pu" transaction-type="JTA">
+        <!-- データソースJNDI名 -->
+        <jta-data-source>jdbc/HsqldbDS</jta-data-source>
+        
+        <!-- エンティティクラスの登録 -->
+        <class>pro.kensait.backoffice.entity.Book</class>
+        <class>pro.kensait.backoffice.entity.Stock</class>
+        <class>pro.kensait.backoffice.entity.Category</class>
+        <class>pro.kensait.backoffice.entity.Publisher</class>
+        <class>pro.kensait.backoffice.entity.Employee</class>
+        <class>pro.kensait.backoffice.entity.Department</class>
+        <class>pro.kensait.backoffice.entity.Workflow</class>
+        
+        <properties>
+            <!-- Hibernate設定 -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect"/>
+            
+            <!-- DDL自動生成: none (手動でDDLを管理) -->
+            <property name="hibernate.hbm2ddl.auto" value="none"/>
+            
+            <!-- SQLログ出力 -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            
+            <!-- ログレベル -->
+            <property name="hibernate.use_sql_comments" value="true"/>
+            
+            <!-- 統計情報 -->
+            <property name="hibernate.generate_statistics" value="false"/>
+            
+            <!-- 接続プール設定（アプリケーションサーバー側で管理） -->
+            <!-- Payara Serverのコネクションプールを使用 -->
+        </properties>
+    </persistence-unit>
+</persistence>

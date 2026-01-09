@@ -1,22 +1,22 @@
-# Jakarta EE BFF実装 Agent Skill
+# Jakarta EE BFF Implementation Agent Skill
 
 ## 🎯 これは何？
 
-Jakarta EE 10ベースの**BFF（Backend for Frontend）**プロジェクトを実装するための**Agent Skill**です。
+Jakarta EE 10ベースのBFF（Backend for Frontend）プロジェクトを実装するための**Agent Skill**です。
 
-**berry-books-apiの役割:**
-- フロントエンド（berry-books-spa）の唯一のエントリーポイント
-- 外部APIを統合してフロントエンド向けに最適化されたAPIを提供
-- BFF（Backend for Frontend）パターンを採用
+**Agent Skills**とは：
+- AIコーディングエージェント用の標準化されたインストラクション形式
+- Claude Code、Cline、Cursor、GitHub Copilotで使える
+- プラットフォーム非依存の設計
 
 ---
 
-## 🚀 超簡単な使い方
+## 🚀 超簡単な使い方（Claude Code/Cline/Cursor）
 
 ### 📋 タスク生成
 
 ```
-@projects/sdd/bookstore/berry-books-api-sdd/agent_skills/instructions/task_generation.md
+@agent_skills/instructions/ja/task_generation.md
 
 タスクを生成してください。
 
@@ -34,7 +34,7 @@ Jakarta EE 10ベースの**BFF（Backend for Frontend）**プロジェクトを�
 ### ⚙️ コード実装
 
 ```
-@projects/sdd/bookstore/berry-books-api-sdd/agent_skills/instructions/code_implementation.md
+@agent_skills/instructions/ja/code_implementation.md
 
 セットアップタスクを実行してください。
 
@@ -61,7 +61,7 @@ AIが：
 ### 例1: プロジェクト立ち上げ
 
 ```
-@projects/sdd/bookstore/berry-books-api-sdd/agent_skills/instructions/task_generation.md
+@agent_skills/instructions/ja/task_generation.md
 
 berry-books-apiの全タスクを生成してください。
 
@@ -85,10 +85,11 @@ tasks/
 ### 例2: 認証APIを実装
 
 ```
-@projects/sdd/bookstore/berry-books-api-sdd/agent_skills/instructions/code_implementation.md
-@projects/sdd/bookstore/berry-books-api-sdd/tasks/API_001_auth.md
+@agent_skills/instructions/ja/code_implementation.md
+@tasks/API_001_auth.md
 
 認証APIを実装してください。
+完了したらタスクファイルにチェック[X]を入れてください。
 ```
 
 AIが自動実装：
@@ -105,24 +106,24 @@ AIが自動実装：
 
 **開発者A（認証API）:**
 ```
-@projects/sdd/bookstore/berry-books-api-sdd/agent_skills/instructions/code_implementation.md
-@projects/sdd/bookstore/berry-books-api-sdd/tasks/API_001_auth.md
+@agent_skills/instructions/ja/code_implementation.md
+@tasks/API_001_auth.md
 
 認証APIを実装
 ```
 
 **開発者B（書籍API、同時に実行）:**
 ```
-@projects/sdd/bookstore/berry-books-api-sdd/agent_skills/instructions/code_implementation.md
-@projects/sdd/bookstore/berry-books-api-sdd/tasks/API_002_books.md
+@agent_skills/instructions/ja/code_implementation.md
+@tasks/API_002_books.md
 
 書籍APIを実装
 ```
 
 **開発者C（注文API、同時に実行）:**
 ```
-@projects/sdd/bookstore/berry-books-api-sdd/agent_skills/instructions/code_implementation.md
-@projects/sdd/bookstore/berry-books-api-sdd/tasks/API_003_orders.md
+@agent_skills/instructions/ja/code_implementation.md
+@tasks/API_003_orders.md
 
 注文APIを実装
 ```
@@ -136,9 +137,9 @@ AIが自動実装：
 ### 複数ファイルを同時参照
 
 ```
-@projects/sdd/bookstore/berry-books-api-sdd/agent_skills/instructions/code_implementation.md
-@projects/sdd/bookstore/berry-books-api-sdd/tasks/API_001_auth.md
-@projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/api/API_001_auth/functional_design.md
+@agent_skills/instructions/ja/code_implementation.md
+@tasks/API_001_auth.md
+@specs/baseline/api/API_001_auth/functional_design.md
 
 認証APIを実装してください。
 ```
@@ -146,8 +147,8 @@ AIが自動実装：
 ### 段階的実装
 
 ```
-@projects/sdd/bookstore/berry-books-api-sdd/agent_skills/instructions/code_implementation.md
-@projects/sdd/bookstore/berry-books-api-sdd/tasks/API_001_auth.md
+@agent_skills/instructions/ja/code_implementation.md
+@tasks/API_001_auth.md
 
 タスクT_API001_001からT_API001_003まで実装してください。
 残りは次回やります。
@@ -156,12 +157,23 @@ AIが自動実装：
 ### レビュー依頼
 
 ```
-@projects/sdd/bookstore/berry-books-api-sdd/agent_skills/instructions/code_implementation.md
-@projects/sdd/bookstore/berry-books-api-sdd/tasks/API_001_auth.md
+@agent_skills/instructions/ja/code_implementation.md
+@tasks/API_001_auth.md
 
 全タスク完了しています。
 仕様書との整合性をチェックしてください。
 特にBFFパターンの制約に違反していないか確認してください。
+```
+
+### 修正依頼
+
+```
+@agent_skills/instructions/ja/code_implementation.md
+@tasks/API_001_auth.md
+@src/main/java/pro/kensait/berrybooks/api/AuthenResource.java
+
+テストが失敗しています。
+仕様書に従って修正してください。
 ```
 
 ---
@@ -171,7 +183,7 @@ AIが自動実装：
 ### Day 1: プロジェクト立ち上げ
 
 ```
-@projects/sdd/bookstore/berry-books-api-sdd/agent_skills/instructions/task_generation.md
+@agent_skills/instructions/ja/task_generation.md
 
 プロジェクト全体のタスクを生成してください。
 ```
@@ -182,8 +194,8 @@ AIが自動実装：
 
 **パターンA: フルセットアップ（初回のみ）**
 ```
-@projects/sdd/bookstore/berry-books-api-sdd/agent_skills/instructions/code_implementation.md
-@projects/sdd/bookstore/berry-books-api-sdd/tasks/setup_tasks.md
+@agent_skills/instructions/ja/code_implementation.md
+@tasks/setup_tasks.md
 
 セットアップを実行してください。
 
@@ -195,8 +207,8 @@ AIが自動実装：
 
 **パターンB: アプリケーションセットアップのみ（開発環境構築済みの場合）**
 ```
-@projects/sdd/bookstore/berry-books-api-sdd/agent_skills/instructions/code_implementation.md
-@projects/sdd/bookstore/berry-books-api-sdd/tasks/setup_tasks.md
+@agent_skills/instructions/ja/code_implementation.md
+@tasks/setup_tasks.md
 
 セットアップを実行してください（インフラセットアップはスキップ）。
 
@@ -217,10 +229,48 @@ AIが自動実装：
 ### Day 6: 結合テスト
 
 ```
-@projects/sdd/bookstore/berry-books-api-sdd/agent_skills/instructions/code_implementation.md
-@projects/sdd/bookstore/berry-books-api-sdd/tasks/integration_tasks.md
+@agent_skills/instructions/ja/code_implementation.md
+@tasks/integration_tasks.md
 
 結合テストを実行してください。
+```
+
+---
+
+## 🌍 対応プラットフォーム
+
+- ✅ **Claude Code** - `@参照` で簡単使用
+- ✅ **Cline (VS Code拡張)** - `@参照` で簡単使用
+- ✅ **Cursor** - `@参照` で簡単使用
+- ✅ **GitHub Copilot** - `#file:参照` で使用
+
+詳細は `platform_guides/` を参照してください。
+
+---
+
+## 📁 ディレクトリ構造
+
+```
+agent_skills/
+├── skill.yaml                          # Agent Skills メタデータ
+├── README.md                           # このファイル
+├── instructions/
+│   ├── en/                             # 英語版
+│   │   ├── task_generation.md
+│   │   └── code_implementation.md
+│   └── ja/                             # 日本語版
+│       ├── task_generation.md
+│       └── code_implementation.md
+├── resources/
+│   ├── architecture_patterns/
+│   │   └── bff_pattern.md              # BFFパターン詳細説明
+│   ├── templates/
+│   │   └── task_template.md            # タスクテンプレート
+│   └── examples/
+│       └── sample_output.md            # 出力例
+└── platform_guides/
+    ├── cursor_cline.md                 # Claude Code/Cline/Cursor用ガイド
+    └── github_copilot.md               # GitHub Copilot用ガイド
 ```
 
 ---
@@ -241,18 +291,35 @@ AIが自動実装：
 - **実装する**: OrderTran、OrderDetail（注文関連のみ）
 - **実装しない**: Book、Stock、Category、Customer（外部API管理）
 
+詳細は `resources/architecture_patterns/bff_pattern.md` を参照してください。
+
 ---
 
-## 📁 ディレクトリ構造
+## 💬 言語サポート
 
-```
-agent_skills/
-├── SKILL.md                          # Agent Skill説明書
-├── README.md                         # このファイル
-└── instructions/
-    ├── task_generation.md            # タスク生成インストラクション
-    └── code_implementation.md        # コード実装インストラクション
-```
+- 🇯🇵 日本語 (`instructions/ja/`)
+- 🇬🇧 英語 (`instructions/en/`)
+
+---
+
+## 📚 詳細ドキュメント
+
+- **プラットフォーム別ガイド**: 
+  - Claude Code/Cline/Cursor: `platform_guides/cursor_cline.md`
+  - GitHub Copilot: `platform_guides/github_copilot.md`
+- **BFFパターン解説**: `resources/architecture_patterns/bff_pattern.md`
+- **タスクテンプレート**: `resources/templates/task_template.md`
+- **出力例**: `resources/examples/sample_output.md`
+
+---
+
+## 🆘 サポート
+
+困ったときは：
+
+1. **プラットフォーム別ガイドを確認** - `platform_guides/`
+2. **サンプル出力を参照** - `resources/examples/sample_output.md`
+3. **BFFパターンを理解** - `resources/architecture_patterns/bff_pattern.md`
 
 ---
 
@@ -262,9 +329,18 @@ agent_skills/
   - タスク生成機能
   - コード実装ガイダンス
   - BFFパターンサポート
+  - プラットフォーム非依存設計
 
 ---
 
 ## 📜 ライセンス
 
 MIT License
+
+---
+
+## 🤝 コントリビューション
+
+Agent Skills標準仕様に従った貢献を歓迎します：
+https://github.com/agentskills/agentskills
+

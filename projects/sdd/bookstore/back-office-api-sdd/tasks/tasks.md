@@ -1,151 +1,123 @@
-# berry-books-api - 実装タスクリスト
-
-**プロジェクト名**: berry-books-api REST API  
-**バージョン**: 2.0.0  
-**最終更新日**: 2025-12-27
-
----
+# Books Stock API - バックオフィス書籍在庫管理システム 実装タスクリスト
 
 ## 全体構成と担当割り当て
 
 ### タスク概要
-
 | タスク | タスクファイル | 担当者 | 並行実行 | 想定工数 |
 |---------|--------------|--------|---------|---------|
-| 0. セットアップ | setup_tasks.md | 全員 | 不可 | 2時間 |
-| 1. 共通機能 | common_tasks.md | 共通機能チーム | 一部可能 | 8時間 |
-| 2. 認証API | API_001_auth.md | 担当者A | 可能 | 6時間 |
-| 3. 書籍API | API_002_books.md | 担当者B | 可能 | 5時間 |
-| 4. 注文API | API_003_orders.md | 担当者C | 可能 | 7時間 |
-| 5. 画像API | API_004_images.md | 担当者D | 可能 | 2時間 |
-| 6. 結合テスト | integration_tasks.md | 全員 | 一部可能 | 6時間 |
+| 0. セットアップ | [setup_tasks.md](setup_tasks.md) | 全員 | 不可 | 2時間 |
+| 1. 共通機能 | [common_tasks.md](common_tasks.md) | 共通機能チーム | 一部可能 | 8時間 |
+| 2. 認証API | [API_001_auth.md](API_001_auth.md) | 担当者A | 可能 | 4時間 |
+| 3. 書籍API | [API_002_books.md](API_002_books.md) | 担当者B | 可能 | 6時間 |
+| 4. カテゴリAPI | [API_003_categories.md](API_003_categories.md) | 担当者C | 可能 | 2時間 |
+| 5. 出版社API | [API_004_publishers.md](API_004_publishers.md) | 担当者D | 可能 | 2時間 |
+| 6. 在庫API | [API_005_stocks.md](API_005_stocks.md) | 担当者E | 可能 | 4時間 |
+| 7. ワークフローAPI | [API_006_workflows.md](API_006_workflows.md) | 担当者F | 可能 | 10時間 |
+| 8. 結合テスト | [integration_tasks.md](integration_tasks.md) | 全員 | 一部可能 | 6時間 |
 
-**合計想定工数**: 36時間（並行実行により大幅に短縮可能）
+**合計想定工数**: 44時間
 
----
+### 実行順序
+1. **タスク0: セットアップ**（全員で実行）
+   - プロジェクト初期化、データベース設定、アプリケーションサーバー設定
+2. **タスク1: 共通機能**（共通機能チームが実装）
+   - 全エンティティ（Book, Stock, Category, Publisher, Employee, Department, Workflow）
+   - 全DAO（BookDao, BookDaoCriteria, StockDao, CategoryDao, PublisherDao, EmployeeDao, DepartmentDao, WorkflowDao）
+   - 共通DTO、例外ハンドラ、ユーティリティクラス
+3. **タスク2～7: API別実装**（各担当者が並行実行） ← **並行化のポイント**
+   - 各APIは独立して実装可能
+   - 共通機能完了後に開始
+4. **タスク8: 結合テスト**（全員で実施）
+   - API間結合テスト、E2E APIテスト、並行処理テスト
 
-## 実行順序
-
-### フェーズ1: セットアップ（全員で実行）
-1. タスク0: セットアップ（全員が実行前に1回だけ）
-
-### フェーズ2: 共通機能実装（共通機能チームが実装）
-2. タスク1: 共通機能（Entity、共通Service、JWT認証基盤、共通DTO等）
-
-### フェーズ3: API別実装（各担当者が並行実行） ← **ここが並行化のポイント**
-3. タスク2～5: API別実装
-   - API_001_auth（認証API）
-   - API_002_books（書籍API）
-   - API_003_orders（注文API）
-   - API_004_images（画像API）
-
-### フェーズ4: 結合テスト（全員で実施）
-4. タスク6: 結合テスト（API間結合、E2Eテスト、パフォーマンステスト等）
-
----
-
-## タスクファイル一覧
-
+### タスクファイル一覧
 - [セットアップタスク](setup_tasks.md)
 - [共通機能タスク](common_tasks.md)
 - [認証APIのタスク](API_001_auth.md)
 - [書籍APIのタスク](API_002_books.md)
-- [注文APIのタスク](API_003_orders.md)
-- [画像APIのタスク](API_004_images.md)
+- [カテゴリAPIのタスク](API_003_categories.md)
+- [出版社APIのタスク](API_004_publishers.md)
+- [在庫APIのタスク](API_005_stocks.md)
+- [ワークフローAPIのタスク](API_006_workflows.md)
 - [結合テストタスク](integration_tasks.md)
-
----
 
 ## 依存関係図
 
 ```mermaid
 graph TD
-    Setup[0. セットアップ<br/>setup_tasks.md] --> Common[1. 共通機能<br/>common_tasks.md]
-    
-    Common --> Auth[2. 認証API<br/>API_001_auth.md]
-    Common --> Books[3. 書籍API<br/>API_002_books.md]
-    Common --> Orders[4. 注文API<br/>API_003_orders.md]
-    Common --> Images[5. 画像API<br/>API_004_images.md]
-    
-    Auth --> Integration[6. 結合テスト<br/>integration_tasks.md]
-    Books --> Integration
-    Orders --> Integration
-    Images --> Integration
-    
-    style Setup fill:#ffcccc
-    style Common fill:#ffffcc
-    style Auth fill:#ccffcc
-    style Books fill:#ccffcc
-    style Orders fill:#ccffcc
-    style Images fill:#ccffcc
-    style Integration fill:#ccccff
+    A[0. セットアップ] --> B[1. 共通機能]
+    B --> C[2. 認証API]
+    B --> D[3. 書籍API]
+    B --> E[4. カテゴリAPI]
+    B --> F[5. 出版社API]
+    B --> G[6. 在庫API]
+    B --> H[7. ワークフローAPI]
+    C --> I[8. 結合テスト]
+    D --> I
+    E --> I
+    F --> I
+    G --> I
+    H --> I
 ```
 
----
+## プロジェクト概要
 
-## 並行実行の推奨
+### プロジェクト名
+Books Stock API - バックオフィス書籍在庫管理システム
 
-以下のタスクは並行実行可能です：
+### アーキテクチャパターン
+レイヤードアーキテクチャ（Presentation、Business Logic、Data Access、Entity）
 
-### フェーズ3: API別実装（同時並行実行可能）
+### 技術スタック
+- **Jakarta EE**: 10
+- **JAX-RS**: 3.1（RESTful Webサービス）
+- **JPA**: 3.1（ORM）
+- **CDI**: 4.0（依存性注入）
+- **Bean Validation**: 3.0
+- **MicroProfile Config**: 3.0
+- **Application Server**: Payara Server 6.x
+- **Database**: HSQLDB 2.x
+- **JDK**: Java 17+
 
-| API | タスクファイル | 担当者 | 独立性 |
-|-----|--------------|--------|--------|
-| 認証API | API_001_auth.md | 担当者A | 外部API連携あり |
-| 書籍API | API_002_books.md | 担当者B | 完全独立 |
-| 注文API | API_003_orders.md | 担当者C | 完全独立 |
-| 画像API | API_004_images.md | 担当者D | 完全独立 |
+### 主要機能
+1. **認証機能**: JWT + HttpOnly Cookie認証
+2. **書籍管理**: 一覧取得、詳細取得、検索（JPQL/Criteria API）
+3. **カテゴリ管理**: カテゴリ一覧取得
+4. **出版社管理**: 出版社一覧取得
+5. **在庫管理**: 在庫参照・更新（楽観的ロック対応）
+6. **ワークフロー管理**: 書籍マスタ変更の申請・承認フロー
 
-**注意事項:**
-- 各APIは共通機能（Entity、共通Service、JWT認証基盤）に依存
-- 共通機能の実装完了後に、各APIの実装を開始してください
+### 重要な実装要件
+- **楽観的ロック**: Stockエンティティに`@Version`アノテーション必須
+- **2種類の書籍検索**: JPQL検索とCriteria API検索の両方を実装
+- **全エンティティ実装**: Book、Stock、Category、Publisher、Employee、Department、Workflowすべて実装
+- **論理削除**: 書籍の削除は論理削除（DELETEDフラグ）で対応
+- **トランザクション管理**: ワークフロー承認時は履歴追加と書籍マスタ反映を1トランザクションで実行
 
----
+## 開発原則（憲章遵守）
 
-## 開発環境要件
+本プロジェクトは「berry-books 仕様駆動開発憲章」に準拠します：
 
-| 項目 | 要件 |
-|------|------|
-| JDK | 21以上 |
-| Jakarta EE | 10 |
-| アプリケーションサーバー | Payara Server 6.x |
-| データベース | HSQLDB 2.7.x |
-| ビルドツール | Gradle 8.x |
+1. **仕様ファースト開発**: すべての実装は仕様書に基づいて行う
+2. **アーキテクチャの一貫性**: レイヤーアーキテクチャを厳格に守る
+3. **テスト駆動品質**: すべてのビジネスロジックに対して単体テストを作成
+4. **ドキュメント品質の追求**: コードとSPECドキュメントを常に最新の状態に保つ
 
----
+## 注意事項
 
-## 品質基準（憲章より）
+### タスク実装時の注意
+- 各タスクの「参照SPEC」に記載されたドキュメントを必ず参照すること
+- タスクIDはアンダースコア区切り（例: `T_SETUP_001`）
+- 並行実行可能なタスクには`[P]`マークが付与されている
+- 依存関係のあるタスクは順次実行すること
 
-### テストカバレッジ基準
-- サービス層のユニットテストカバレッジ: **80%以上**
-- 主要APIのE2Eテスト: **完了**
+### SPEC参照について
+- すべてのタスクにMarkdownリンク形式でSPEC参照が記載されている
+- リンクをクリックすることで直接SPECファイルに移動できる
+- 実装時は必ず該当セクションを確認すること
 
-### パフォーマンス基準
-- APIレスポンスタイム: **500ms以内**（95パーセンタイル）
-- スループット: **100 req/sec以上**
-
-### セキュリティ基準
-- JWT認証: HttpOnly Cookie使用
-- パスワード: BCryptハッシュ化
-- 入力検証: Bean Validation使用
-
----
-
-## 参考資料
-
-### プロジェクト憲章
-- [constitution.md](../principles/constitution.md) - プロジェクト開発憲章
-
-### システム仕様書
-- [requirements.md](../specs/baseline/system/requirements.md) - 要件定義書
-- [architecture_design.md](../specs/baseline/system/architecture_design.md) - アーキテクチャ設計書
-- [functional_design.md](../specs/baseline/system/functional_design.md) - 機能設計書
-- [data_model.md](../specs/baseline/system/data_model.md) - データモデル仕様書
-- [behaviors.md](../specs/baseline/system/behaviors.md) - 振る舞い仕様書
-- [external_interface.md](../specs/baseline/system/external_interface.md) - 外部インターフェース仕様書
-
-### API単位仕様書
-- [API_001_auth](../specs/baseline/api/API_001_auth/functional_design.md) - 認証API
-- [API_002_books](../specs/baseline/api/API_002_books/functional_design.md) - 書籍API
-- [API_003_orders](../specs/baseline/api/API_003_orders/functional_design.md) - 注文API
-- [API_004_images](../specs/baseline/api/API_004_images/functional_design.md) - 画像API
+### 並行実行について
+- セットアップタスクは全員で実行（並行実行不可）
+- 共通機能タスクは一部並行実行可能（エンティティ単位で分割可能）
+- API別タスクは完全に並行実行可能（各APIは独立）
+- 結合テストは一部並行実行可能（テストケース単位で分割可能）

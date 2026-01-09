@@ -1,263 +1,395 @@
 # 共通機能タスク
 
-**担当者:** 共通機能チーム（1-2名）  
-**推奨スキル:** Jakarta EE、JPA、JWT認証、JAX-RS  
+**担当者:** 共通機能チーム（2～3名）  
+**推奨スキル:** JPA、Jakarta EE、Bean Validation  
 **想定工数:** 8時間  
 **依存タスク:** [setup_tasks.md](setup_tasks.md)
 
 ---
 
-## 概要
-
-複数のAPIで共有される共通コンポーネントを実装します。Entity、共通Service、JWT認証基盤、共通DTO、Exception Mapper等を含みます。
-
----
-
 ## タスクリスト
 
-### 1.1 JPAエンティティ実装
+### エンティティクラス作成
 
-- [ ] [P] **T_COMMON_001**: Publisher エンティティの作成
-  - **目的**: 出版社マスタエンティティを実装する
-  - **対象**: `pro.kensait.berrybooks.entity.Publisher`
-  - **参照SPEC**: [data_model.md](../specs/baseline/system/data_model.md) の「3.1 PUBLISHER（出版社）」
-  - **注意事項**: @Entity, @Id, @GeneratedValue（IDENTITY）を使用
+#### T_COMMON_001: [P] Bookエンティティの作成
 
-- [ ] [P] **T_COMMON_002**: Category エンティティの作成
-  - **目的**: カテゴリマスタエンティティを実装する
-  - **対象**: `pro.kensait.berrybooks.entity.Category`
-  - **参照SPEC**: [data_model.md](../specs/baseline/system/data_model.md) の「3.2 CATEGORY（カテゴリ）」
-  - **注意事項**: @Entity, @Id, @GeneratedValue（IDENTITY）を使用
-
-- [ ] **T_COMMON_003**: Book エンティティの作成
-  - **目的**: 書籍マスタエンティティを実装する
-  - **対象**: `pro.kensait.berrybooks.entity.Book`
-  - **参照SPEC**: [data_model.md](../specs/baseline/system/data_model.md) の「3.3 BOOK（書籍）」
-  - **注意事項**: 
-    - Category、Publisherへの@ManyToOne関係
-    - Stockへの@OneToOne関係
-
-- [ ] **T_COMMON_004**: Stock エンティティの作成
-  - **目的**: 在庫マスタエンティティを実装する（楽観的ロック対応）
-  - **対象**: `pro.kensait.berrybooks.entity.Stock`
-  - **参照SPEC**: [data_model.md](../specs/baseline/system/data_model.md) の「3.4 STOCK（在庫）」
-  - **注意事項**: 
-    - @Version アノテーションを使用
-    - Bookへの@OneToOne関係
-
-- [ ] **T_COMMON_005**: Customer エンティティの作成
-  - **目的**: 顧客マスタエンティティを実装する
-  - **対象**: `pro.kensait.berrybooks.entity.Customer`
-  - **参照SPEC**: [data_model.md](../specs/baseline/system/data_model.md) の「3.5 CUSTOMER（顧客）」
-  - **注意事項**: パスワードはBCryptハッシュで保存
-
-- [ ] **T_COMMON_006**: OrderTran エンティティの作成
-  - **目的**: 注文トランザクションエンティティを実装する
-  - **対象**: `pro.kensait.berrybooks.entity.OrderTran`
-  - **参照SPEC**: [data_model.md](../specs/baseline/system/data_model.md) の「3.6 ORDER_TRAN（注文トランザクション）」
-  - **注意事項**: 
-    - Customerへの@ManyToOne関係
-    - OrderDetailへの@OneToMany関係
-
-- [ ] **T_COMMON_007**: OrderDetail エンティティと複合主キーの作成
-  - **目的**: 注文明細エンティティと複合主キークラスを実装する
-  - **対象**: 
-    - `pro.kensait.berrybooks.entity.OrderDetail`
-    - `pro.kensait.berrybooks.entity.OrderDetailPK`
-  - **参照SPEC**: [data_model.md](../specs/baseline/system/data_model.md) の「3.7 ORDER_DETAIL（注文明細）」
-  - **注意事項**: 
-    - 複合主キー（@IdClass）を使用
-    - OrderTranへの@ManyToOne関係
-    - Bookへの@ManyToOne関係
+- **目的**: 書籍情報を管理するエンティティクラスを作成する
+- **対象**: Book.java（Entityクラス）
+- **参照SPEC**: 
+  - [data_model.md](../specs/baseline/system/data_model.md) の「3.1 BOOK（書籍マスタ）」
+  - [data_model.md](../specs/baseline/system/data_model.md) の「4.1 エンティティクラスとテーブルのマッピング」
+- **注意事項**: 
+  - `@SecondaryTable`でSTOCKテーブルと結合する（BOOK + STOCK）
+  - `@ManyToOne`でCategoryとPublisherをマッピングする
+  - deletedフィールド（論理削除フラグ）を含める
+  - 在庫情報（quantity, version）をSecondaryTableから取得する
 
 ---
 
-### 1.2 共通DTO/Record実装
+#### T_COMMON_002: [P] Stockエンティティの作成
 
-- [ ] [P] **T_COMMON_008**: ErrorResponse レコードの作成
-  - **目的**: 統一的なエラーレスポンス形式を実装する
-  - **対象**: `pro.kensait.berrybooks.api.dto.ErrorResponse`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「8.3 統一的なエラーレスポンス形式」
-  - **注意事項**: Java Record を使用（status, error, message, path）
-
----
-
-### 1.3 JWT認証基盤実装
-
-- [ ] **T_COMMON_009**: JwtUtil クラスの作成
-  - **目的**: JWT生成・検証ユーティリティを実装する
-  - **対象**: `pro.kensait.berrybooks.security.JwtUtil`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「5. JWT認証アーキテクチャ」
-  - **注意事項**: 
-    - jjwt 0.12.6 ライブラリを使用
-    - generateToken(), validateToken(), getCustomerIdFromToken() メソッドを実装
-    - MicroProfile Configから秘密鍵と有効期限を読み込む
-
-- [ ] **T_COMMON_010**: SecuredResource クラスの作成
-  - **目的**: 認証済みリソース情報を管理する
-  - **対象**: `pro.kensait.berrybooks.security.SecuredResource`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「4.1 パッケージ編成」
-  - **注意事項**: 
-    - @RequestScoped を使用
-    - customerId, email を保持
-
-- [ ] **T_COMMON_011**: JwtAuthenticationFilter の作成
-  - **目的**: JWT認証フィルターを実装する
-  - **対象**: `pro.kensait.berrybooks.security.JwtAuthenticationFilter`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「5.1 認証フロー」
-  - **注意事項**: 
-    - @Provider を使用
-    - ContainerRequestFilter を実装
-    - JWT Cookie から認証情報を取得し、SecuredResource に設定
+- **目的**: 在庫情報を管理するエンティティクラスを作成する（楽観的ロック対応）
+- **対象**: Stock.java（Entityクラス）
+- **参照SPEC**: 
+  - [data_model.md](../specs/baseline/system/data_model.md) の「3.2 STOCK（在庫マスタ）」
+  - [functional_design.md (API_005_stocks)](../specs/baseline/api/API_005_stocks/functional_design.md) の「4. 楽観的ロックの仕組み」
+- **注意事項**: 
+  - **重要**: `@Version`アノテーションをversionフィールドに付与する（楽観的ロック必須）
+  - bookIdをPRIMARY KEYとして設定する
+  - quantityフィールド（在庫数）を含める
 
 ---
 
-### 1.4 共通ユーティリティ実装
+#### T_COMMON_003: [P] Categoryエンティティの作成
 
-- [ ] [P] **T_COMMON_012**: MessageUtil クラスの作成
-  - **目的**: メッセージリソースユーティリティを実装する
-  - **対象**: `pro.kensait.berrybooks.common.MessageUtil`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「4.1 パッケージ編成」
-  - **注意事項**: messages.propertiesからメッセージを読み込む
-
-- [ ] [P] **T_COMMON_013**: AddressUtil クラスの作成
-  - **目的**: 住所処理ユーティリティを実装する
-  - **対象**: `pro.kensait.berrybooks.util.AddressUtil`
-  - **参照SPEC**: [api/API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) の「3.3.5 ビジネスルール」
-  - **注意事項**: startsWithValidPrefecture() メソッドで都道府県名チェック
-
-- [ ] [P] **T_COMMON_014**: SettlementType 列挙型の作成
-  - **目的**: 決済方法列挙型を実装する
-  - **対象**: `pro.kensait.berrybooks.common.SettlementType`
-  - **参照SPEC**: [data_model.md](../specs/baseline/system/data_model.md) の「3.6.5 決済方法（SETTLEMENT_TYPE）」
-  - **注意事項**: 
-    - BANK_TRANSFER(1), CREDIT_CARD(2), CASH_ON_DELIVERY(3) を定義
+- **目的**: カテゴリ情報を管理するエンティティクラスを作成する
+- **対象**: Category.java（Entityクラス）
+- **参照SPEC**: [data_model.md](../specs/baseline/system/data_model.md) の「3.3 CATEGORY（カテゴリマスタ）」
+- **注意事項**: 
+  - categoryId（PRIMARY KEY）とcategoryNameを含める
+  - マスタデータとして扱う
 
 ---
 
-### 1.5 共通サービス実装
+#### T_COMMON_004: [P] Publisherエンティティの作成
 
-- [ ] [P] **T_COMMON_015**: DeliveryFeeService の作成
-  - **目的**: 配送料金計算サービスを実装する
-  - **対象**: `pro.kensait.berrybooks.service.delivery.DeliveryFeeService`
-  - **参照SPEC**: [functional_design.md](../specs/baseline/system/functional_design.md) の「4.1.5 ビジネスルール」
-  - **注意事項**: 
-    - @ApplicationScoped を使用
-    - 購入金額10,000円未満: 800円
-    - 購入金額10,000円以上: 0円
-    - 沖縄県: 特別料金
+- **目的**: 出版社情報を管理するエンティティクラスを作成する
+- **対象**: Publisher.java（Entityクラス）
+- **参照SPEC**: [data_model.md](../specs/baseline/system/data_model.md) の「3.4 PUBLISHER（出版社マスタ）」
+- **注意事項**: 
+  - publisherId（PRIMARY KEY）とpublisherNameを含める
+  - マスタデータとして扱う
 
 ---
 
-### 1.6 共通DAO実装
+#### T_COMMON_005: [P] Employeeエンティティの作成
 
-- [ ] [P] **T_COMMON_016**: CategoryDao の作成
-  - **目的**: カテゴリデータアクセスクラスを実装する
-  - **対象**: `pro.kensait.berrybooks.dao.CategoryDao`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「4.1 パッケージ編成」
-  - **注意事項**: 
-    - @ApplicationScoped を使用
-    - @PersistenceContext で EntityManager を注入
-    - findAll() メソッドを実装
-
----
-
-### 1.7 外部API連携クライアント実装
-
-- [ ] **T_COMMON_017**: CustomerRestClient の作成
-  - **目的**: 顧客管理REST APIクライアントを実装する
-  - **対象**: `pro.kensait.berrybooks.external.CustomerRestClient`
-  - **参照SPEC**: [external_interface.md](../specs/baseline/system/external_interface.md) の「4. APIエンドポイント仕様」
-  - **注意事項**: 
-    - @ApplicationScoped を使用
-    - Jakarta RESTful Web Services Client API を使用
-    - findByEmail(), findById(), register() メソッドを実装
-
-- [ ] [P] **T_COMMON_018**: CustomerTO レコードの作成
-  - **目的**: 顧客転送オブジェクトを実装する
-  - **対象**: `pro.kensait.berrybooks.external.dto.CustomerTO`
-  - **参照SPEC**: [external_interface.md](../specs/baseline/system/external_interface.md) の「5.1 CustomerTO」
-  - **注意事項**: Java Record を使用
+- **目的**: 社員情報を管理するエンティティクラスを作成する
+- **対象**: Employee.java（Entityクラス）
+- **参照SPEC**: 
+  - [data_model.md](../specs/baseline/system/data_model.md) の「3.5 EMPLOYEE（社員マスタ）」
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「6. セキュリティアーキテクチャ」
+- **注意事項**: 
+  - employeeCode（UNIQUE KEY）を含める
+  - password（BCryptハッシュ）を含める
+  - jobRank（職務ランク: 1=ASSOCIATE, 2=MANAGER, 3=DIRECTOR）を含める
+  - `@ManyToOne`でDepartmentをマッピングする
 
 ---
 
-### 1.8 Exception Mapper実装
+#### T_COMMON_006: [P] Departmentエンティティの作成
 
-- [ ] [P] **T_COMMON_019**: ValidationExceptionMapper の作成
-  - **目的**: Bean Validation例外マッパーを実装する
-  - **対象**: `pro.kensait.berrybooks.api.exception.ValidationExceptionMapper`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「8.2 Exception Mapper」
-  - **注意事項**: 
-    - @Provider を使用
-    - ConstraintViolationException → 400 Bad Request
-
-- [ ] [P] **T_COMMON_020**: GenericExceptionMapper の作成
-  - **目的**: 汎用例外マッパーを実装する
-  - **対象**: `pro.kensait.berrybooks.api.exception.GenericExceptionMapper`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「8.2 Exception Mapper」
-  - **注意事項**: 
-    - @Provider を使用
-    - Exception → 500 Internal Server Error
+- **目的**: 部署情報を管理するエンティティクラスを作成する
+- **対象**: Department.java（Entityクラス）
+- **参照SPEC**: [data_model.md](../specs/baseline/system/data_model.md) の「3.6 DEPARTMENT（部署マスタ）」
+- **注意事項**: 
+  - departmentId（PRIMARY KEY）とdepartmentNameを含める
+  - `@OneToMany`でEmployeeとの双方向関係を設定する
 
 ---
 
-### 1.9 JAX-RS設定
+#### T_COMMON_007: [P] Workflowエンティティの作成
 
-- [ ] **T_COMMON_021**: ApplicationConfig の作成
-  - **目的**: JAX-RS設定クラスを実装する
-  - **対象**: `pro.kensait.berrybooks.api.ApplicationConfig`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「4.1 パッケージ編成」
-  - **注意事項**: 
-    - @ApplicationPath("/api") を使用
-    - jakarta.ws.rs.core.Application を継承
-
----
-
-### 1.10 ユニットテスト（共通機能）
-
-- [ ] [P] **T_COMMON_022**: JwtUtil のユニットテスト
-  - **目的**: JWT生成・検証ロジックのテストを実装する
-  - **対象**: `pro.kensait.berrybooks.security.JwtUtilTest`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「11.2 テストアプローチ」
-  - **注意事項**: 
-    - JUnit 5 を使用
-    - トークン生成、検証、期限切れのテストを実施
-
-- [ ] [P] **T_COMMON_023**: DeliveryFeeService のユニットテスト
-  - **目的**: 配送料金計算ロジックのテストを実装する
-  - **対象**: `pro.kensait.berrybooks.service.delivery.DeliveryFeeServiceTest`
-  - **参照SPEC**: [behaviors.md](../specs/baseline/system/behaviors.md) の「7. 配送料金計算」
-  - **注意事項**: 
-    - JUnit 5 を使用
-    - 境界値テスト（10,000円未満、以上）を実施
-
-- [ ] [P] **T_COMMON_024**: AddressUtil のユニットテスト
-  - **目的**: 住所検証ロジックのテストを実装する
-  - **対象**: `pro.kensait.berrybooks.util.AddressUtilTest`
-  - **参照SPEC**: [api/API_001_auth/behaviors.md](../specs/baseline/api/API_001_auth/behaviors.md) の「4. 新規登録」
-  - **注意事項**: 
-    - JUnit 5 を使用
-    - 都道府県名の正常系・異常系テストを実施
+- **目的**: ワークフロー履歴を管理するエンティティクラスを作成する
+- **対象**: Workflow.java（Entityクラス）
+- **参照SPEC**: 
+  - [data_model.md](../specs/baseline/system/data_model.md) の「3.7 WORKFLOW（ワークフロー履歴）」
+  - [functional_design.md (API_006_workflows)](../specs/baseline/api/API_006_workflows/functional_design.md) の「7. ワークフロー履歴」
+- **注意事項**: 
+  - operationId（PRIMARY KEY、自動採番）を含める
+  - workflowId（複数行で共通）を含める
+  - state（CREATED, APPLIED, APPROVED）を含める
+  - operationType（CREATE, APPLY, APPROVE, REJECT）を含める
+  - `@ManyToOne`でBook、Category、Publisher、Employeeをマッピングする（insertable=false, updatable=false）
 
 ---
 
-## 完了条件
+### DAOクラス作成
 
-以下の全ての条件を満たしていること：
+#### T_COMMON_008: BookDaoの作成（JPQL検索）
 
-- [ ] 全てのJPAエンティティが作成され、リレーションシップが定義されている
-- [ ] JWT認証基盤（JwtUtil, JwtAuthenticationFilter, SecuredResource）が実装されている
-- [ ] 共通DTO、ユーティリティ、サービス、DAOが実装されている
-- [ ] 外部API連携クライアント（CustomerRestClient）が実装されている
-- [ ] Exception Mapperが実装されている
-- [ ] ユニットテストが実装され、カバレッジが80%以上である
-- [ ] プロジェクトが正常にビルドできる
+- **目的**: 書籍情報のデータアクセスクラスを作成する（JPQL使用）
+- **対象**: BookDao.java（DAOクラス）
+- **参照SPEC**: 
+  - [functional_design.md (API_002_books)](../specs/baseline/api/API_002_books/functional_design.md) の「3.4 書籍検索（JPQL）」
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.3 Data Access Layer」
+- **注意事項**: 
+  - findAll()、findById()、query()メソッドを実装する
+  - JPQLでカテゴリ・キーワード検索を実装する
+  - 論理削除された書籍（deleted=true）を除外する
 
 ---
 
-## 参考資料
+#### T_COMMON_009: BookDaoCriteriaの作成（Criteria API検索）
 
-- [architecture_design.md](../specs/baseline/system/architecture_design.md) - アーキテクチャ設計書
-- [data_model.md](../specs/baseline/system/data_model.md) - データモデル仕様書
-- [external_interface.md](../specs/baseline/system/external_interface.md) - 外部インターフェース仕様書
-- [behaviors.md](../specs/baseline/system/behaviors.md) - 振る舞い仕様書
+- **目的**: 書籍情報のデータアクセスクラスを作成する（Criteria API使用）
+- **対象**: BookDaoCriteria.java（DAOクラス）
+- **参照SPEC**: 
+  - [functional_design.md (API_002_books)](../specs/baseline/api/API_002_books/functional_design.md) の「3.5 書籍検索（Criteria API）」
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.3 Data Access Layer」
+- **注意事項**: 
+  - **重要**: Criteria APIで動的クエリを構築する
+  - searchWithCriteria()メソッドを実装する
+  - カテゴリIDとキーワードの有無に応じて動的に条件を追加する
+  - タイプセーフなクエリ構築を行う
+
+---
+
+#### T_COMMON_010: [P] StockDaoの作成
+
+- **目的**: 在庫情報のデータアクセスクラスを作成する（楽観的ロック対応）
+- **対象**: StockDao.java（DAOクラス）
+- **参照SPEC**: 
+  - [functional_design.md (API_005_stocks)](../specs/baseline/api/API_005_stocks/functional_design.md) の「4. 楽観的ロックの仕組み」
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.3 Data Access Layer」
+- **注意事項**: 
+  - findAll()、findById()、update()メソッドを実装する
+  - 楽観的ロックはJPAの`@Version`により自動的に処理される
+
+---
+
+#### T_COMMON_011: [P] CategoryDaoの作成
+
+- **目的**: カテゴリ情報のデータアクセスクラスを作成する
+- **対象**: CategoryDao.java（DAOクラス）
+- **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.3 Data Access Layer」
+- **注意事項**: 
+  - findAll()メソッドを実装する
+  - マスタデータの取得のみ
+
+---
+
+#### T_COMMON_012: [P] PublisherDaoの作成
+
+- **目的**: 出版社情報のデータアクセスクラスを作成する
+- **対象**: PublisherDao.java（DAOクラス）
+- **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.3 Data Access Layer」
+- **注意事項**: 
+  - findAll()メソッドを実装する
+  - マスタデータの取得のみ
+
+---
+
+#### T_COMMON_013: [P] EmployeeDaoの作成
+
+- **目的**: 社員情報のデータアクセスクラスを作成する
+- **対象**: EmployeeDao.java（DAOクラス）
+- **参照SPEC**: 
+  - [functional_design.md (API_001_auth)](../specs/baseline/api/API_001_auth/functional_design.md) の「3.1 ログイン」
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.3 Data Access Layer」
+- **注意事項**: 
+  - findByCode()、findById()メソッドを実装する
+  - 認証とワークフロー承認権限チェックで使用される
+
+---
+
+#### T_COMMON_014: [P] DepartmentDaoの作成
+
+- **目的**: 部署情報のデータアクセスクラスを作成する
+- **対象**: DepartmentDao.java（DAOクラス）
+- **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.3 Data Access Layer」
+- **注意事項**: 
+  - findAll()、findById()メソッドを実装する
+  - マスタデータの取得
+
+---
+
+#### T_COMMON_015: [P] WorkflowDaoの作成
+
+- **目的**: ワークフロー履歴のデータアクセスクラスを作成する
+- **対象**: WorkflowDao.java（DAOクラス）
+- **参照SPEC**: 
+  - [functional_design.md (API_006_workflows)](../specs/baseline/api/API_006_workflows/functional_design.md) の「7. ワークフロー履歴」
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.3 Data Access Layer」
+- **注意事項**: 
+  - findLatestByWorkflowId()、findHistoryByWorkflowId()、persist()メソッドを実装する
+  - getNextWorkflowId()でワークフローIDを採番する
+  - 最新の状態取得と履歴取得を実装する
+
+---
+
+### 共通DTOクラス作成
+
+#### T_COMMON_016: [P] ErrorResponseの作成
+
+- **目的**: エラーレスポンス用のDTOクラスを作成する
+- **対象**: ErrorResponse.java（DTOクラス）
+- **参照SPEC**: 
+  - [functional_design.md (system)](../specs/baseline/system/functional_design.md) の「6. エラーハンドリング」
+  - [functional_design.md (API_001_auth)](../specs/baseline/api/API_001_auth/functional_design.md) の「4.3 ErrorResponse」
+- **注意事項**: 
+  - errorフィールド（エラー種別）を含める
+  - messageフィールド（エラーメッセージ）を含める
+  - レコード型（immutable）で実装する
+
+---
+
+#### T_COMMON_017: [P] CategoryInfoの作成
+
+- **目的**: カテゴリ情報のネスト用DTOクラスを作成する
+- **対象**: CategoryInfo.java（DTOクラス）
+- **参照SPEC**: [functional_design.md (API_002_books)](../specs/baseline/api/API_002_books/functional_design.md) の「4.1 BookTO」
+- **注意事項**: 
+  - categoryId、categoryNameを含める
+  - BookTOのネスト構造として使用される
+
+---
+
+#### T_COMMON_018: [P] PublisherInfoの作成
+
+- **目的**: 出版社情報のネスト用DTOクラスを作成する
+- **対象**: PublisherInfo.java（DTOクラス）
+- **参照SPEC**: [functional_design.md (API_002_books)](../specs/baseline/api/API_002_books/functional_design.md) の「4.1 BookTO」
+- **注意事項**: 
+  - publisherId、publisherNameを含める
+  - BookTOのネスト構造として使用される
+
+---
+
+### 例外ハンドラ作成
+
+#### T_COMMON_019: [P] GenericExceptionMapperの作成
+
+- **目的**: 一般的な例外をハンドリングするException Mapperを作成する
+- **対象**: GenericExceptionMapper.java（Exception Mapperクラス）
+- **参照SPEC**: 
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「8. エラーハンドリング」
+  - [functional_design.md (system)](../specs/baseline/system/functional_design.md) の「6. エラーハンドリング」
+- **注意事項**: 
+  - IllegalArgumentException → 400 Bad Request
+  - 一般的な例外 → 500 Internal Server Error
+  - ErrorResponseを返却する
+
+---
+
+#### T_COMMON_020: [P] OptimisticLockExceptionMapperの作成
+
+- **目的**: 楽観的ロック例外をハンドリングするException Mapperを作成する
+- **対象**: OptimisticLockExceptionMapper.java（Exception Mapperクラス）
+- **参照SPEC**: 
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「8. エラーハンドリング」
+  - [functional_design.md (API_005_stocks)](../specs/baseline/api/API_005_stocks/functional_design.md) の「7. エラーハンドリング」
+- **注意事項**: 
+  - **重要**: OptimisticLockException → 409 Conflict
+  - 「在庫が他のユーザーによって更新されました」メッセージを返す
+
+---
+
+#### T_COMMON_021: [P] NotFoundExceptionMapperの作成
+
+- **目的**: 404エラーをハンドリングするException Mapperを作成する
+- **対象**: NotFoundExceptionMapper.java（Exception Mapperクラス）
+- **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「8. エラーハンドリング」
+- **注意事項**: 
+  - NotFoundException → 404 Not Found
+  - ErrorResponseを返却する
+
+---
+
+#### T_COMMON_022: [P] WorkflowExceptionMapperの作成
+
+- **目的**: ワークフロー関連の例外をハンドリングするException Mapperを作成する
+- **対象**: WorkflowExceptionMapper.java（Exception Mapperクラス）
+- **参照SPEC**: 
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「8. エラーハンドリング」
+  - [functional_design.md (API_006_workflows)](../specs/baseline/api/API_006_workflows/functional_design.md) の「12. エラーハンドリング」
+- **注意事項**: 
+  - WorkflowNotFoundException → 404 Not Found
+  - InvalidWorkflowStateException → 400 Bad Request
+  - UnauthorizedApprovalException → 403 Forbidden
+
+---
+
+### ユーティリティクラス作成
+
+#### T_COMMON_023: JwtUtilの作成
+
+- **目的**: JWT生成・検証のユーティリティクラスを作成する
+- **対象**: JwtUtil.java（ユーティリティクラス）
+- **参照SPEC**: 
+  - [functional_design.md (API_001_auth)](../specs/baseline/api/API_001_auth/functional_design.md) の「3.1.6 JWT構造」
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「6. セキュリティアーキテクチャ」
+- **注意事項**: 
+  - generateToken()メソッドを実装する（employeeId, employeeCode, departmentIdをペイロードに含める）
+  - HMAC-SHA256で署名する
+  - MicroProfile Configから秘密鍵と有効期限を取得する
+  - getCookieName()、getExpirationSeconds()メソッドを実装する
+
+---
+
+#### T_COMMON_024: [P] MessageUtilの作成
+
+- **目的**: プロパティファイルからメッセージを取得するユーティリティクラスを作成する
+- **対象**: MessageUtil.java（ユーティリティクラス）
+- **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.5 Cross-Cutting Concerns」
+- **注意事項**: 
+  - messages.propertiesからメッセージを取得する
+  - 日本語メッセージをサポートする
+
+---
+
+### JAX-RS設定
+
+#### T_COMMON_025: ApplicationConfigの作成
+
+- **目的**: JAX-RSアプリケーション設定クラスを作成する
+- **対象**: ApplicationConfig.java（JAX-RS Applicationクラス）
+- **参照SPEC**: 
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.1 Presentation Layer」
+  - [functional_design.md (system)](../specs/baseline/system/functional_design.md) の「2. 機能一覧」
+- **注意事項**: 
+  - `@ApplicationPath("/api")`でベースパスを設定する
+  - すべてのResourceクラスとException Mapperを登録する
+
+---
+
+## 共通機能完了チェックリスト
+
+### エンティティ
+- [ ] Bookエンティティが作成された（SecondaryTableでSTOCK結合）
+- [ ] Stockエンティティが作成された（@Version付与）
+- [ ] Categoryエンティティが作成された
+- [ ] Publisherエンティティが作成された
+- [ ] Employeeエンティティが作成された
+- [ ] Departmentエンティティが作成された
+- [ ] Workflowエンティティが作成された
+
+### DAO
+- [ ] BookDaoが作成された（JPQL検索）
+- [ ] BookDaoCriteriaが作成された（Criteria API検索）
+- [ ] StockDaoが作成された
+- [ ] CategoryDaoが作成された
+- [ ] PublisherDaoが作成された
+- [ ] EmployeeDaoが作成された
+- [ ] DepartmentDaoが作成された
+- [ ] WorkflowDaoが作成された
+
+### DTO
+- [ ] ErrorResponseが作成された
+- [ ] CategoryInfoが作成された
+- [ ] PublisherInfoが作成された
+
+### 例外ハンドラ
+- [ ] GenericExceptionMapperが作成された
+- [ ] OptimisticLockExceptionMapperが作成された（409 Conflict）
+- [ ] NotFoundExceptionMapperが作成された
+- [ ] WorkflowExceptionMapperが作成された
+
+### ユーティリティ
+- [ ] JwtUtilが作成された
+- [ ] MessageUtilが作成された
+
+### JAX-RS設定
+- [ ] ApplicationConfigが作成された（/apiベースパス）
+
+---
+
+## 次のステップ
+
+共通機能が完了したら、各API実装タスクに進んでください：
+- [認証API](API_001_auth.md)
+- [書籍API](API_002_books.md)
+- [カテゴリAPI](API_003_categories.md)
+- [出版社API](API_004_publishers.md)
+- [在庫API](API_005_stocks.md)
+- [ワークフローAPI](API_006_workflows.md)

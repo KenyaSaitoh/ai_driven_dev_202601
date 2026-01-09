@@ -1,206 +1,151 @@
 # セットアップタスク
 
-**担当者:** 全員（各開発者が実行前に1回だけ実行）  
-**推奨スキル:** Java開発環境構築、データベース基礎知識  
+**担当者:** 全員（プロジェクト開始時に1回のみ実行）  
+**推奨スキル:** Jakarta EE、Payara Server、HSQLDB、Gradle  
 **想定工数:** 2時間  
 **依存タスク:** なし
 
 ---
 
-## 概要
-
-プロジェクトの開発環境を構築し、データベースを初期化します。全員が実装開始前に1回だけ実行してください。
-
----
-
 ## タスクリスト
 
-### 0.1 開発環境セットアップ
+### T_SETUP_001: プロジェクト構造の確認
 
-- [ ] **T_SETUP_001**: JDK 21のインストール
-  - **目的**: Java開発環境を構築する
-  - **対象**: JDK 21（LTS）
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「1.1 コアプラットフォーム」
-  - **注意事項**: JAVA_HOME環境変数を設定すること
-
-- [ ] **T_SETUP_002**: Payara Server 6のインストール
-  - **目的**: Jakarta EE 10対応アプリケーションサーバーを準備する
-  - **対象**: Payara Server 6.x
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「1.1 コアプラットフォーム」
-  - **注意事項**: Payaraのポート設定を確認すること（デフォルト: 8080, 4848）
-
-- [ ] **T_SETUP_003**: Gradle 8のインストール
-  - **目的**: ビルドツールを準備する
-  - **対象**: Gradle 8.x
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「1.1 コアプラットフォーム」
-  - **注意事項**: Gradle Wrapperを使用する場合は不要
-
-- [ ] **T_SETUP_004**: IDEのインストールと設定
-  - **目的**: 開発用IDEを準備する
-  - **対象**: IntelliJ IDEA / Eclipse / VS Code
-  - **参照SPEC**: なし
-  - **注意事項**: Jakarta EE、JAX-RS、JPAのプラグインをインストールすること
+- **目的**: プロジェクトのディレクトリ構造とビルド設定を確認する
+- **対象**: プロジェクトルート、build.gradle、settings.gradle
+- **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「2. 全体アーキテクチャ」
+- **注意事項**: 
+  - レイヤードアーキテクチャ（Presentation、Business Logic、Data Access、Entity）の構造を理解する
+  - Gradleビルド設定を確認する
 
 ---
 
-### 0.2 プロジェクトセットアップ
+### T_SETUP_002: データベース初期化
 
-- [ ] **T_SETUP_005**: プロジェクトのクローン
-  - **目的**: プロジェクトのソースコードを取得する
-  - **対象**: Gitリポジトリ
-  - **参照SPEC**: [README.md](../README.md)
-  - **注意事項**: なし
-
-- [ ] **T_SETUP_006**: プロジェクトの依存関係解決
-  - **目的**: 必要なライブラリをダウンロードする
-  - **対象**: Gradle依存関係
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「1.3 追加ライブラリ」
-  - **注意事項**: `./gradlew :berry-books-api:dependencies` で確認
+- **目的**: HSQLDBデータベースを初期化し、初期データを投入する
+- **対象**: データベーススキーマ、初期データSQLスクリプト
+- **参照SPEC**: 
+  - [data_model.md](../specs/baseline/system/data_model.md) の「3. テーブル定義」
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「4.2 実行環境」
+- **注意事項**: 
+  - すべてのテーブル（BOOK, STOCK, CATEGORY, PUBLISHER, EMPLOYEE, DEPARTMENT, WORKFLOW）を作成する
+  - 初期データ（社員、部署、カテゴリ、出版社、書籍、在庫）を投入する
+  - 外部キー制約、インデックスを設定する
 
 ---
 
-### 0.3 データベースセットアップ
+### T_SETUP_003: Payara Server設定
 
-- [ ] **T_SETUP_007**: HSQLDBサーバーの起動
-  - **目的**: データベースサーバーを起動する
-  - **対象**: HSQLDB 2.7.x
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「9. データベース構成」
-  - **注意事項**: `./gradlew startHsqldb` で起動、ポート9001でリッスン
-
-- [ ] **T_SETUP_008**: データベース初期化
-  - **目的**: テーブル作成とサンプルデータ投入を実行する
-  - **対象**: DDL、DMLスクリプト
-  - **参照SPEC**: 
-    - [data_model.md](../specs/baseline/system/data_model.md) の「3. テーブル定義」
-    - `sql/hsqldb/1_DDL.sql`, `sql/hsqldb/2_INSERT.sql`
-  - **注意事項**: `./gradlew :berry-books-api:setupHsqldb` で実行
-
-- [ ] **T_SETUP_009**: データソース設定
-  - **目的**: Payara ServerにJNDIデータソースを設定する
-  - **対象**: jdbc/HsqldbDS
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「9.2 コネクションプール」
-  - **注意事項**: 
-    - JNDI名: `jdbc/HsqldbDS`
-    - 接続URL: `jdbc:hsqldb:hsql://localhost:9001/testdb`
-    - ユーザー: `SA`, パスワード: (空)
+- **目的**: Payara Server 6.xをセットアップし、データソースを設定する
+- **対象**: Payara Server、JDBCリソース、接続プール
+- **参照SPEC**: 
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「4.2 実行環境」
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「10.3 接続プール」
+- **注意事項**: 
+  - JNDI名: `jdbc/HsqldbDS`でデータソースを設定する
+  - 接続プールの設定を行う
+  - Payara Serverの起動を確認する
 
 ---
 
-### 0.4 アプリケーション設定
+### T_SETUP_004: persistence.xml設定
 
-- [ ] **T_SETUP_010**: persistence.xmlの確認
-  - **目的**: JPA設定を確認する
-  - **対象**: `src/main/resources/META-INF/persistence.xml`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「9.1 永続化構成」
-  - **注意事項**: JTA DataSourceが`jdbc/HsqldbDS`に設定されていることを確認
-
-- [ ] **T_SETUP_011**: Log4j2設定ファイルの配置
-  - **目的**: ログ出力設定を行う
-  - **対象**: `src/main/resources/log4j2.xml`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「10. ログ戦略」
-  - **注意事項**: ログレベルはINFO、エラーログはWARN/ERROR
-
-- [ ] **T_SETUP_012**: JWT設定ファイルの配置
-  - **目的**: JWT秘密鍵と有効期限を設定する
-  - **対象**: `src/main/resources/META-INF/microprofile-config.properties`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「5.2 JWT設定」
-  - **注意事項**: 
-    - `jwt.secret-key`: 秘密鍵（32文字以上）
-    - `jwt.expiration-ms`: 86400000（24時間）
-    - `jwt.cookie-name`: berry-books-jwt
+- **目的**: JPA設定ファイルを作成し、データソースとエンティティを設定する
+- **対象**: src/main/resources/META-INF/persistence.xml
+- **参照SPEC**: 
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「4.3 設定ファイル」
+  - [data_model.md](../specs/baseline/system/data_model.md) の「4. エンティティ関連図（JPA）」
+- **注意事項**: 
+  - データソースJNDI名を指定する
+  - すべてのエンティティクラスを登録する
+  - JPAプロパティ（ログレベル、DDL生成など）を設定する
 
 ---
 
-### 0.5 外部API連携設定
+### T_SETUP_005: MicroProfile Config設定
 
-- [ ] **T_SETUP_013**: berry-books-rest APIの起動確認
-  - **目的**: 外部顧客管理APIが利用可能であることを確認する
-  - **対象**: berry-books-rest API
-  - **参照SPEC**: [external_interface.md](../specs/baseline/system/external_interface.md) の「3. berry-books-rest API連携」
-  - **注意事項**: 
-    - ベースURL: `http://localhost:8080/customer-api/customers`
-    - エンドポイント確認: `GET /customers/query_email?email=alice@gmail.com`
-
-- [ ] **T_SETUP_014**: 外部API接続設定
-  - **目的**: 外部APIのベースURLを設定する
-  - **対象**: `META-INF/microprofile-config.properties`
-  - **参照SPEC**: [external_interface.md](../specs/baseline/system/external_interface.md) の「3.1 概要」
-  - **注意事項**: `customer.api.base-url=http://localhost:8080/customer-api/customers`
+- **目的**: MicroProfile Config設定ファイルを作成し、JWT設定を行う
+- **対象**: src/main/resources/META-INF/microprofile-config.properties
+- **参照SPEC**: 
+  - [functional_design.md (API_001_auth)](../specs/baseline/api/API_001_auth/functional_design.md) の「7. 設定」
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「4.3 設定ファイル」
+- **注意事項**: 
+  - JWT秘密鍵（jwt.secret-key）を設定する（32文字以上）
+  - JWT有効期限（jwt.expiration-ms）を設定する（デフォルト: 86400000ミリ秒 = 24時間）
+  - JWT Cookie名（jwt.cookie-name）を設定する（デフォルト: back-office-jwt）
 
 ---
 
-### 0.6 静的リソース配置
+### T_SETUP_006: beans.xml設定
 
-- [ ] **T_SETUP_015**: 書籍表紙画像の配置
-  - **目的**: 書籍表紙画像ファイルを配置する
-  - **対象**: `src/main/webapp/resources/images/covers/`
-  - **参照SPEC**: 
-    - [functional_design.md](../specs/baseline/system/functional_design.md) の「5. 画像API」
-    - [api/API_004_images/functional_design.md](../specs/baseline/api/API_004_images/functional_design.md) の「4. ファイル命名規則」
-  - **注意事項**: 
-    - ファイル名: `{書籍名}.jpg`
-    - フォールバック画像: `no-image.jpg`
+- **目的**: CDI設定ファイルを作成する
+- **対象**: src/main/resources/META-INF/beans.xml
+- **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「4.3 設定ファイル」
+- **注意事項**: 
+  - CDI 4.0の設定を行う
+  - bean-discovery-mode="all"を設定する
 
 ---
 
-### 0.7 動作確認
+### T_SETUP_007: ログ設定
 
-- [ ] **T_SETUP_016**: プロジェクトのビルド
-  - **目的**: プロジェクトが正常にビルドできることを確認する
-  - **対象**: WARファイル
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「12.1 ビルドプロセス」
-  - **注意事項**: `./gradlew :berry-books-api:war` で実行
-
-- [ ] **T_SETUP_017**: アプリケーションのデプロイ
-  - **目的**: Payara Serverにアプリケーションをデプロイする
-  - **対象**: berry-books-api.war
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「12.2 デプロイアーキテクチャ」
-  - **注意事項**: `./gradlew :berry-books-api:deploy` で実行
-
-- [ ] **T_SETUP_018**: 動作確認
-  - **目的**: アプリケーションが正常に起動していることを確認する
-  - **対象**: REST APIエンドポイント
-  - **参照SPEC**: [functional_design.md](../specs/baseline/system/functional_design.md)
-  - **注意事項**: 
-    - ベースURL: `http://localhost:8080/berry-books-api/api`
-    - 確認エンドポイント: `GET /api/books`（認証不要）
+- **目的**: SLF4Jログ設定を行う
+- **対象**: ログ設定ファイル（logback.xml等）
+- **参照SPEC**: 
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「9. ログ設計」
+  - [requirements.md](../specs/baseline/system/requirements.md) の「3.4 保守性要件」
+- **注意事項**: 
+  - ログレベル（INFO、WARN、ERROR、DEBUG）を設定する
+  - ログ形式を統一する（[クラス名#メソッド名] メッセージ）
+  - ログファイルのローテーション設定を行う
 
 ---
 
-## 完了条件
+### T_SETUP_008: メッセージプロパティファイル作成
 
-以下の全ての条件を満たしていること：
-
-- [ ] 開発環境（JDK 21、Payara Server 6、Gradle 8）がインストールされている
-- [ ] HSQLDBサーバーが起動し、データベースが初期化されている
-- [ ] プロジェクトが正常にビルドできる
-- [ ] アプリケーションがPayara Serverにデプロイされている
-- [ ] REST APIエンドポイント（`GET /api/books`）が正常にレスポンスを返す
-
----
-
-## トラブルシューティング
-
-### データベース接続エラー
-- HSQLDBサーバーが起動しているか確認
-- ポート9001が使用可能か確認
-- データソース設定（JNDI名、接続URL）が正しいか確認
-
-### ビルドエラー
-- JDK 21がインストールされているか確認
-- JAVA_HOME環境変数が設定されているか確認
-- Gradleの依存関係が解決されているか確認
-
-### デプロイエラー
-- Payara Serverが起動しているか確認
-- ポート8080が使用可能か確認
-- WARファイルが正常に生成されているか確認
+- **目的**: エラーメッセージとバリデーションメッセージの日本語プロパティファイルを作成する
+- **対象**: 
+  - src/main/resources/messages.properties
+  - src/main/resources/ValidationMessages_ja.properties
+- **参照SPEC**: 
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.5 Cross-Cutting Concerns」
+  - [functional_design.md (system)](../specs/baseline/system/functional_design.md) の「6. エラーハンドリング」
+- **注意事項**: 
+  - すべてのエラーメッセージを日本語で定義する
+  - バリデーションメッセージを日本語で定義する
+  - MessageUtilクラスで読み込めるようにする
 
 ---
 
-## 参考資料
+### T_SETUP_009: 開発環境の動作確認
 
-- [README.md](../README.md) - プロジェクトREADME
-- [architecture_design.md](../specs/baseline/system/architecture_design.md) - アーキテクチャ設計書
-- [data_model.md](../specs/baseline/system/data_model.md) - データモデル仕様書
-- [external_interface.md](../specs/baseline/system/external_interface.md) - 外部インターフェース仕様書
+- **目的**: セットアップが正しく完了したことを確認する
+- **対象**: プロジェクト全体
+- **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「11. デプロイメント構成」
+- **注意事項**: 
+  - Gradleビルドが成功することを確認する
+  - Payara Serverにデプロイできることを確認する
+  - データベース接続が正常に動作することを確認する
+  - アプリケーションが起動することを確認する
+
+---
+
+## セットアップ完了チェックリスト
+
+- [x] プロジェクト構造を理解した
+- [x] データベースが初期化され、初期データが投入された（SQLスクリプト修正完了）
+- [ ] Payara Serverが起動し、データソースが設定された（インフラセットアップはスキップ）
+- [x] persistence.xmlが正しく設定された
+- [x] MicroProfile Config設定が完了した
+- [x] beans.xmlが作成された
+- [x] ログ設定が完了した
+- [x] メッセージプロパティファイルが作成された
+- [ ] Gradleビルドが成功する
+- [ ] アプリケーションがPayara Serverにデプロイできる
+- [ ] データベース接続が正常に動作する
+
+---
+
+## 次のステップ
+
+セットアップが完了したら、[共通機能タスク](common_tasks.md)に進んでください。

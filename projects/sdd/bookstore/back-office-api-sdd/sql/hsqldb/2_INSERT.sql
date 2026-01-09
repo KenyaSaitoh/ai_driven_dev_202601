@@ -1,21 +1,47 @@
 -- ============================================================================
--- berry-books Initial Data Script for HSQLDB
+-- back-office-api Initial Data Script for HSQLDB
 -- ============================================================================
--- プロジェクトID: berry-books
+-- プロジェクトID: back-office-api
 -- バージョン: 1.0.0
--- 最終更新日: 2025-12-20
+-- 最終更新日: 2026-01-08
 -- 対象データベース: HSQLDB 2.7.x
 -- ============================================================================
 
 -- ============================================================================
--- 1. PUBLISHER (出版社マスタ)
+-- 1. DEPARTMENT (部署マスタ)
+-- ============================================================================
+INSERT INTO DEPARTMENT (DEPARTMENT_ID, DEPARTMENT_NAME) VALUES (1, '営業部');
+INSERT INTO DEPARTMENT (DEPARTMENT_ID, DEPARTMENT_NAME) VALUES (2, '管理部');
+INSERT INTO DEPARTMENT (DEPARTMENT_ID, DEPARTMENT_NAME) VALUES (3, '物流部');
+
+-- ============================================================================
+-- 2. EMPLOYEE (社員マスタ)
+-- ============================================================================
+-- パスワード: password (BCryptハッシュ: $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy)
+INSERT INTO EMPLOYEE (EMPLOYEE_ID, EMPLOYEE_CODE, EMPLOYEE_NAME, EMAIL, PASSWORD, JOB_RANK, DEPARTMENT_ID) 
+VALUES (1, 'E0001', '山田太郎', 'yamada@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 3, 1);
+
+INSERT INTO EMPLOYEE (EMPLOYEE_ID, EMPLOYEE_CODE, EMPLOYEE_NAME, EMAIL, PASSWORD, JOB_RANK, DEPARTMENT_ID) 
+VALUES (2, 'E0002', '佐藤花子', 'sato@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 2, 1);
+
+INSERT INTO EMPLOYEE (EMPLOYEE_ID, EMPLOYEE_CODE, EMPLOYEE_NAME, EMAIL, PASSWORD, JOB_RANK, DEPARTMENT_ID) 
+VALUES (3, 'E0003', '鈴木一郎', 'suzuki@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 1);
+
+INSERT INTO EMPLOYEE (EMPLOYEE_ID, EMPLOYEE_CODE, EMPLOYEE_NAME, EMAIL, PASSWORD, JOB_RANK, DEPARTMENT_ID) 
+VALUES (4, 'E0004', '田中美咲', 'tanaka@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 2, 2);
+
+INSERT INTO EMPLOYEE (EMPLOYEE_ID, EMPLOYEE_CODE, EMPLOYEE_NAME, EMAIL, PASSWORD, JOB_RANK, DEPARTMENT_ID) 
+VALUES (5, 'E0005', '高橋健太', 'takahashi@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 3);
+
+-- ============================================================================
+-- 3. PUBLISHER (出版社マスタ)
 -- ============================================================================
 INSERT INTO PUBLISHER (PUBLISHER_ID, PUBLISHER_NAME) VALUES (1, 'デジタルフロンティア出版');
 INSERT INTO PUBLISHER (PUBLISHER_ID, PUBLISHER_NAME) VALUES (2, 'コードブレイクプレス');
 INSERT INTO PUBLISHER (PUBLISHER_ID, PUBLISHER_NAME) VALUES (3, 'ネットワークノード出版');
 
 -- ============================================================================
--- 2. CATEGORY (カテゴリマスタ)
+-- 4. CATEGORY (カテゴリマスタ)
 -- ============================================================================
 INSERT INTO CATEGORY (CATEGORY_ID, CATEGORY_NAME) VALUES (1, 'Java');
 INSERT INTO CATEGORY (CATEGORY_ID, CATEGORY_NAME) VALUES (2, 'SpringBoot');
@@ -28,79 +54,170 @@ INSERT INTO CATEGORY (CATEGORY_ID, CATEGORY_NAME) VALUES (8, 'AI/ML');
 INSERT INTO CATEGORY (CATEGORY_ID, CATEGORY_NAME) VALUES (9, 'Jakarta EE');
 
 -- ============================================================================
--- 3. BOOK (書籍) - 50冊のサンプルデータ
+-- 5. BOOK (書籍) - 50冊のサンプルデータ
 -- ============================================================================
 
 -- Java カテゴリ (1)
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (1, 'Java SEディープダイブ', 'Michael Johnson', 1, 3, 3400);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (2, 'コンカレントプログラミング in Java SE', 'Emily Davis', 1, 1, 3800);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (3, 'JVMとバイトコードの探求', 'David Martinez', 1, 2, 4200);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (4, 'Javaでのエレガントなコード設計', 'Laura Garcia', 1, 1, 3600);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (5, 'Javaアーキテクトのための設計原理', 'James Wilson', 1, 2, 4000);
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (1, 'Java SEディープダイブ', 'Michael Johnson', 1, 3, 3400, '/images/covers/1.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (2, 'コンカレントプログラミング in Java SE', 'Emily Davis', 1, 1, 3800, '/images/covers/2.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (3, 'JVMとバイトコードの探求', 'David Martinez', 1, 2, 4200, '/images/covers/3.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (4, 'Javaでのエレガントなコード設計', 'Laura Garcia', 1, 1, 3600, '/images/covers/4.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (5, 'Javaアーキテクトのための設計原理', 'James Wilson', 1, 2, 4000, '/images/covers/5.jpg', FALSE);
 
 -- SpringBoot カテゴリ (2)
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (9, 'SpringBoot in Cloud', 'Paul Martin', 2, 3, 3000);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (10, 'SpringBootによるエンタープライズ開発', 'Linda Anderson', 2, 1, 4500);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (11, 'SpringBootアーキテクチャの深層', 'Robert Thomas', 2, 2, 4800);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (12, 'SpringBootでのAPI実践', 'Jennifer Taylor', 2, 3, 3200);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (13, 'SpringBoot魔法のレシピ', 'Christopher Moore', 2, 1, 3400);
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (9, 'SpringBoot in Cloud', 'Paul Martin', 2, 3, 3000, '/images/covers/9.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (10, 'SpringBootによるエンタープライズ開発', 'Linda Anderson', 2, 1, 4500, '/images/covers/10.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (11, 'SpringBootアーキテクチャの深層', 'Robert Thomas', 2, 2, 4800, '/images/covers/11.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (12, 'SpringBootでのAPI実践', 'Jennifer Taylor', 2, 3, 3200, '/images/covers/12.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (13, 'SpringBoot魔法のレシピ', 'Christopher Moore', 2, 1, 3400, '/images/covers/13.jpg', FALSE);
 
 -- SQL カテゴリ (3)
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (17, 'SQLの冒険～RDBの深層', 'Brian Lee', 3, 2, 2200);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (18, 'データベースの科学', 'Nancy White', 3, 1, 3500);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (19, '実践！SQLパフォーマンス最適化の秘訣', 'Kevin Harris', 3, 3, 4000);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (20, 'SQLアナリティクス実践ガイド', 'Sarah Clark', 3, 2, 3600);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (21, 'SQLデザインパターン～効率的なクエリ構築', 'Mark Lewis', 3, 1, 3800);
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (17, 'SQLの冒険～RDBの深層', 'Brian Lee', 3, 2, 2200, '/images/covers/17.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (18, 'データベースの科学', 'Nancy White', 3, 1, 3500, '/images/covers/18.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (19, '実践！SQLパフォーマンス最適化の秘訣', 'Kevin Harris', 3, 3, 4000, '/images/covers/19.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (20, 'SQLアナリティクス実践ガイド', 'Sarah Clark', 3, 2, 3600, '/images/covers/20.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (21, 'SQLデザインパターン～効率的なクエリ構築', 'Mark Lewis', 3, 1, 3800, '/images/covers/21.jpg', FALSE);
 
 -- JavaScript カテゴリ (4)
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (25, 'JavaScriptマジック', 'Daniel Walker', 4, 3, 2800);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (26, 'ES6＋完全ガイド', 'Elizabeth Hall', 4, 1, 3200);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (27, 'Node.jsによるサーバーサイド開発', 'Matthew Allen', 4, 2, 3600);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (28, 'JavaScriptアルゴリズム実践集', 'Jessica Young', 4, 3, 3400);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (29, 'JSアーキテクチャパターンの探求', 'Andrew King', 4, 1, 4000);
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (25, 'JavaScriptマジック', 'Daniel Walker', 4, 3, 2800, '/images/covers/25.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (26, 'ES6＋完全ガイド', 'Elizabeth Hall', 4, 1, 3200, '/images/covers/26.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (27, 'Node.jsによるサーバーサイド開発', 'Matthew Allen', 4, 2, 3600, '/images/covers/27.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (28, 'JavaScriptアルゴリズム実践集', 'Jessica Young', 4, 3, 3400, '/images/covers/28.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (29, 'JSアーキテクチャパターンの探求', 'Andrew King', 4, 1, 4000, '/images/covers/29.jpg', FALSE);
 
 -- HTML/CSS カテゴリ (5)
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (33, 'HTML5エッセンス～Webの未来', 'Michelle Wright', 5, 2, 2600);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (34, 'HTMLとCSS実践ガイド', 'Joshua Lopez', 5, 3, 2800);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (35, 'HTMLとCSSハンズオンプロジェクト', 'Amanda Hill', 5, 1, 3000);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (36, 'Webアクセシビリティ基礎', 'Ryan Scott', 5, 2, 3200);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (37, 'Vue・React・Angular徹底比較入門', 'Megan Green', 5, 3, 3600);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (38, 'フロントエンドのためのテスト入門', 'Tyler Adams', 5, 1, 3400);
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (33, 'HTML5エッセンス～Webの未来', 'Michelle Wright', 5, 2, 2600, '/images/covers/33.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (34, 'HTMLとCSS実践ガイド', 'Joshua Lopez', 5, 3, 2800, '/images/covers/34.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (35, 'HTMLとCSSハンズオンプロジェクト', 'Amanda Hill', 5, 1, 3000, '/images/covers/35.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (36, 'Webアクセシビリティ基礎', 'Ryan Scott', 5, 2, 3200, '/images/covers/36.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (37, 'Vue・React・Angular徹底比較入門', 'Megan Green', 5, 3, 3600, '/images/covers/37.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (38, 'フロントエンドのためのテスト入門', 'Tyler Adams', 5, 1, 3400, '/images/covers/38.jpg', FALSE);
 
 -- Python カテゴリ (6)
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (41, 'Pythonプログラミング実践入門', 'Stephanie Baker', 6, 2, 3000);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (42, 'Pythonで学ぶアルゴリズムとデータ構造', 'Brandon Gonzalez', 6, 3, 3400);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (43, 'Pythonデータ分析パターン', 'Nicole Nelson', 6, 1, 3800);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (44, '高速Web開発のためのPythonフレームワーク', 'Justin Carter', 6, 2, 4000);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (45, 'Pythonで学ぶ並列処理と最適化', 'Rebecca Mitchell', 6, 3, 4200);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (46, 'テスト自動化のためのPython', 'Aaron Perez', 6, 1, 3600);
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (41, 'Pythonプログラミング実践入門', 'Stephanie Baker', 6, 2, 3000, '/images/covers/41.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (42, 'Pythonで学ぶアルゴリズムとデータ構造', 'Brandon Gonzalez', 6, 3, 3400, '/images/covers/42.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (43, 'Pythonデータ分析パターン', 'Nicole Nelson', 6, 1, 3800, '/images/covers/43.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (44, '高速Web開発のためのPythonフレームワーク', 'Justin Carter', 6, 2, 4000, '/images/covers/44.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (45, 'Pythonで学ぶ並列処理と最適化', 'Rebecca Mitchell', 6, 3, 4200, '/images/covers/45.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (46, 'テスト自動化のためのPython', 'Aaron Perez', 6, 1, 3600, '/images/covers/46.jpg', FALSE);
 
 -- AWS カテゴリ (7)
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (49, 'AWS設計原則とベストプラクティス', 'Rachel Roberts', 7, 2, 4500);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (50, 'AWSサーバーレスアーキテクチャ実践', 'Jacob Turner', 7, 3, 4800);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (51, 'AWSネットワークとセキュリティ入門', 'Samantha Phillips', 7, 1, 4200);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (52, 'IaCで進めるAWSインフラ構築', 'Nicholas Campbell', 7, 2, 4600);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (53, 'AWS監視とコスト最適化ガイド', 'Hannah Parker', 7, 3, 4000);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (54, 'サーバーレス実装ガイド', 'Zachary Evans', 7, 1, 4400);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (55, 'コンテナとオーケストレーション入門', 'Victoria Edwards', 7, 2, 4300);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (56, 'クラウドアーキテクチャ実践パターン', 'Nathan Collins', 7, 3, 4700);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (57, 'SREとクラウド運用ハンドブック', 'Olivia Stewart', 7, 1, 4500);
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (49, 'AWS設計原則とベストプラクティス', 'Rachel Roberts', 7, 2, 4500, '/images/covers/49.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (50, 'AWSサーバーレスアーキテクチャ実践', 'Jacob Turner', 7, 3, 4800, '/images/covers/50.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (51, 'AWSネットワークとセキュリティ入門', 'Samantha Phillips', 7, 1, 4200, '/images/covers/51.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (52, 'IaCで進めるAWSインフラ構築', 'Nicholas Campbell', 7, 2, 4600, '/images/covers/52.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (53, 'AWS監視とコスト最適化ガイド', 'Hannah Parker', 7, 3, 4000, '/images/covers/53.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (54, 'サーバーレス実装ガイド', 'Zachary Evans', 7, 1, 4400, '/images/covers/54.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (55, 'コンテナとオーケストレーション入門', 'Victoria Edwards', 7, 2, 4300, '/images/covers/55.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (56, 'クラウドアーキテクチャ実践パターン', 'Nathan Collins', 7, 3, 4700, '/images/covers/56.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (57, 'SREとクラウド運用ハンドブック', 'Olivia Stewart', 7, 1, 4500, '/images/covers/57.jpg', FALSE);
 
 -- AI/ML カテゴリ (8)
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (61, 'プロンプトエンジニアリング実践', 'Ethan Morris', 8, 2, 3800);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (62, 'ベクトル検索とRAG入門', 'Grace Rogers', 8, 3, 4200);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (63, 'LLMアプリケーションアーキテクチャ', 'Connor Reed', 8, 1, 4600);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (64, '生成AIシステム設計ガイド', 'Chloe Cook', 8, 2, 4800);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (65, '生成AIの評価と監視', 'Isaac Morgan', 8, 3, 4400);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (66, 'マルチモーダルAI実践ハンドブック', 'Zoe Bell', 8, 1, 5000);
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (61, 'プロンプトエンジニアリング実践', 'Ethan Morris', 8, 2, 3800, '/images/covers/61.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (62, 'ベクトル検索とRAG入門', 'Grace Rogers', 8, 3, 4200, '/images/covers/62.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (63, 'LLMアプリケーションアーキテクチャ', 'Connor Reed', 8, 1, 4600, '/images/covers/63.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (64, '生成AIシステム設計ガイド', 'Chloe Cook', 8, 2, 4800, '/images/covers/64.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (65, '生成AIの評価と監視', 'Isaac Morgan', 8, 3, 4400, '/images/covers/65.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (66, 'マルチモーダルAI実践ハンドブック', 'Zoe Bell', 8, 1, 5000, '/images/covers/66.jpg', FALSE);
 
 -- Jakarta EE カテゴリ (9)
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (69, 'Jakarta EEによるアーキテクチャ設計', 'Dylan Murphy', 9, 2, 4000);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (70, 'Jakarta EEパターンライブラリ', 'Ella Bailey', 9, 3, 4200);
-INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE) VALUES (71, 'Jakarta EE究極テストガイド', 'Caleb Rivera', 9, 1, 3800);
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (69, 'Jakarta EEによるアーキテクチャ設計', 'Dylan Murphy', 9, 2, 4000, '/images/covers/69.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (70, 'Jakarta EEパターンライブラリ', 'Ella Bailey', 9, 3, 4200, '/images/covers/70.jpg', FALSE);
+
+INSERT INTO BOOK (BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE, IMAGE_URL, DELETED) 
+VALUES (71, 'Jakarta EE究極テストガイド', 'Caleb Rivera', 9, 1, 3800, '/images/covers/71.jpg', FALSE);
 
 -- ============================================================================
--- 4. STOCK (在庫) - 全書籍に対して在庫を設定
+-- 6. STOCK (在庫) - 全書籍に対して在庫を設定
 -- ============================================================================
 
 -- Java カテゴリの在庫
@@ -172,30 +289,13 @@ INSERT INTO STOCK (BOOK_ID, QUANTITY, VERSION) VALUES (70, 4, 0);
 INSERT INTO STOCK (BOOK_ID, QUANTITY, VERSION) VALUES (71, 3, 0);
 
 -- ============================================================================
--- 5. CUSTOMER (テスト用顧客データ)
--- ============================================================================
-INSERT INTO CUSTOMER (CUSTOMER_ID, CUSTOMER_NAME, EMAIL, PASSWORD, BIRTHDAY, ADDRESS) 
-VALUES (1, 'Alice', 'alice@gmail.com', 'password', '1998-04-10', '東京都中央区1-1-1');
-
-INSERT INTO CUSTOMER (CUSTOMER_ID, CUSTOMER_NAME, EMAIL, PASSWORD, BIRTHDAY, ADDRESS) 
-VALUES (2, 'Bob', 'bob@gmail.com', 'password', '1988-05-10', '東京都杉並区2-2-2');
-
-INSERT INTO CUSTOMER (CUSTOMER_ID, CUSTOMER_NAME, EMAIL, PASSWORD, BIRTHDAY, ADDRESS) 
-VALUES (3, 'Charlie', 'charlie@gmail.com', 'password', '1995-07-15', '大阪府大阪市北区3-3-3');
-
--- ============================================================================
 -- 初期データスクリプト完了
 -- ============================================================================
 -- データ投入完了:
+-- - 部署: 3部署
+-- - 社員: 5名（各職務ランク）
 -- - 出版社: 3社
 -- - カテゴリ: 9種類
 -- - 書籍: 50冊
--- - 在庫: 50冊分（全書籍に在庫設定）
--- - 顧客: 3名（テスト用）
+-- - 在庫: 50冊分（全書籍に在庫設定、楽観的ロック対応）
 -- ============================================================================
-
-
-
-
-
-

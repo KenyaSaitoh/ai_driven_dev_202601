@@ -1,246 +1,206 @@
 # 結合テストタスク
 
 **担当者:** 全員（各API担当者が協力して実施）  
-**推奨スキル:** Jakarta EE、REST Assured、JUnit 5、パフォーマンステスト  
+**推奨スキル:** REST Assured、JAX-RS Client、並行処理テスト  
 **想定工数:** 6時間  
-**依存タスク:** [API_001_auth.md](API_001_auth.md), [API_002_books.md](API_002_books.md), [API_003_orders.md](API_003_orders.md), [API_004_images.md](API_004_images.md)
-
----
-
-## 概要
-
-全API実装後に実施する結合テストを実装します。API間結合テスト、E2E APIテスト、パフォーマンステスト、セキュリティテスト、最終検証を含みます。
+**依存タスク:** すべてのAPI実装タスク（[API_001_auth.md](API_001_auth.md)～[API_006_workflows.md](API_006_workflows.md)）
 
 ---
 
 ## タスクリスト
 
-### 6.1 API間結合テスト
+### T_INTEGRATION_001: [P] API間結合テストの作成
 
-- [ ] [P] **T_INTEGRATION_001**: 認証 → 書籍検索 → 注文作成の結合テスト
-  - **目的**: 主要な業務フローの結合テストを実装する
-  - **対象**: E2Eテストスクリプト（REST Assured）
-  - **参照SPEC**: 
-    - [behaviors.md](../specs/baseline/system/behaviors.md)
-    - [functional_design.md](../specs/baseline/system/functional_design.md) の「7.1 注文処理全体フロー」
-  - **注意事項**: 
-    - REST Assured または JAX-RS Client を使用
-    - ログイン → JWT Cookie取得 → 書籍検索 → 注文作成 → 注文履歴取得のフロー
-    - JUnit 5 の @Tag("e2e") を使用
-
-- [ ] [P] **T_INTEGRATION_002**: 複数ユーザー同時注文の結合テスト
-  - **目的**: 楽観的ロック競合のテストを実装する
-  - **対象**: E2Eテストスクリプト（並行実行）
-  - **参照SPEC**: [behaviors.md](../specs/baseline/system/behaviors.md) の「9. 並行制御（楽観的ロック）」
-  - **注意事項**: 
-    - 複数スレッドで同時に同一書籍を注文
-    - 1つは成功、他は409 Conflictを確認
-    - JUnit 5 の @Tag("e2e") を使用
-
-- [ ] [P] **T_INTEGRATION_003**: 在庫不足時のトランザクションロールバックテスト
-  - **目的**: トランザクション管理のテストを実装する
-  - **対象**: E2Eテストスクリプト
-  - **参照SPEC**: [behaviors.md](../specs/baseline/system/behaviors.md) の「8. トランザクション管理」
-  - **注意事項**: 
-    - 複数書籍を注文し、途中で在庫不足
-    - 全ての在庫更新がロールバックされることを確認
-    - JUnit 5 の @Tag("e2e") を使用
+- **目的**: 複数のAPIを組み合わせた結合テストを作成する
+- **対象**: IntegrationTest.java（テストクラス）
+- **参照SPEC**: 
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「5. データフロー」
+  - [functional_design.md (system)](../specs/baseline/system/functional_design.md) の「10. テスト要件」
+- **注意事項**: 
+  - REST AssuredまたはJAX-RS Clientを使用する
+  - 認証 → 書籍一覧取得 → 書籍詳細取得のシーケンステスト
+  - 認証 → カテゴリ一覧取得 → 書籍検索のシーケンステスト
+  - 認証 → 在庫取得 → 在庫更新のシーケンステスト
 
 ---
 
-### 6.2 E2E APIテスト（主要業務フロー）
+### T_INTEGRATION_002: [P] E2E APIテストの作成（主要業務フロー）
 
-- [ ] **T_INTEGRATION_004**: 新規ユーザー登録 → 書籍購入フローのE2Eテスト
-  - **目的**: 新規ユーザーの登録から購入までのE2Eテストを実装する
-  - **対象**: E2Eテストスクリプト（REST Assured）
-  - **参照SPEC**: [behaviors.md](../specs/baseline/system/behaviors.md)
-  - **注意事項**: 
-    - 新規登録 → 自動ログイン → 書籍検索 → カートに追加 → 注文作成 → 注文履歴確認
-    - JUnit 5 の @Tag("e2e") を使用
-
-- [ ] **T_INTEGRATION_005**: 既存ユーザーログイン → 書籍購入フローのE2Eテスト
-  - **目的**: 既存ユーザーの購入フローのE2Eテストを実装する
-  - **対象**: E2Eテストスクリプト（REST Assured）
-  - **参照SPEC**: [behaviors.md](../specs/baseline/system/behaviors.md)
-  - **注意事項**: 
-    - ログイン → 書籍検索 → カートに追加 → 注文作成 → 注文履歴確認
-    - JUnit 5 の @Tag("e2e") を使用
-
-- [ ] **T_INTEGRATION_006**: カテゴリ検索 → 複数書籍購入フローのE2Eテスト
-  - **目的**: カテゴリ検索から複数書籍購入までのE2Eテストを実装する
-  - **対象**: E2Eテストスクリプト（REST Assured）
-  - **参照SPEC**: [behaviors.md](../specs/baseline/system/behaviors.md)
-  - **注意事項**: 
-    - ログイン → カテゴリ検索 → 複数書籍をカートに追加 → 注文作成
-    - JUnit 5 の @Tag("e2e") を使用
+- **目的**: 主要な業務フローをAPIシーケンスでテストする
+- **対象**: E2EApiTest.java（テストクラス）
+- **参照SPEC**: 
+  - [behaviors.md (system)](../specs/baseline/system/behaviors.md)
+  - [functional_design.md (system)](../specs/baseline/system/functional_design.md) の「10. テスト要件」
+- **注意事項**: 
+  - **ワークフロー完全フロー**: 作成 → 申請 → 承認 → 書籍マスタ反映確認
+  - **新規書籍追加フロー**: ワークフロー作成（ADD_NEW_BOOK） → 申請 → 承認 → 書籍一覧で確認
+  - **書籍削除フロー**: ワークフロー作成（REMOVE_BOOK） → 申請 → 承認 → 論理削除確認
+  - **価格改定フロー**: ワークフロー作成（ADJUST_BOOK_PRICE） → 申請 → 承認 → 価格更新確認
+  - **ワークフロー却下フロー**: 作成 → 申請 → 却下 → 再申請 → 承認
+  - REST AssuredまたはJAX-RS Clientを使用する
+  - 各フローの最後に期待される状態を検証する
 
 ---
 
-### 6.3 エラーシナリオテスト
+### T_INTEGRATION_003: 並行処理テストの作成（在庫更新競合）
 
-- [ ] [P] **T_INTEGRATION_007**: 認証エラーのE2Eテスト
-  - **目的**: 認証エラーシナリオのテストを実装する
-  - **対象**: E2Eテストスクリプト
-  - **参照SPEC**: [behaviors.md](../specs/baseline/system/behaviors.md) の「6. JWT認証フィルター」
-  - **注意事項**: 
-    - JWT Cookie未設定、JWT無効、JWT期限切れのテスト
-    - 認証必須APIへのアクセスで401 Unauthorizedを確認
-    - JUnit 5 の @Tag("e2e") を使用
-
-- [ ] [P] **T_INTEGRATION_008**: バリデーションエラーのE2Eテスト
-  - **目的**: バリデーションエラーシナリオのテストを実装する
-  - **対象**: E2Eテストスクリプト
-  - **参照SPEC**: [behaviors.md](../specs/baseline/system/behaviors.md)
-  - **注意事項**: 
-    - 必須項目未入力、形式不正のテスト
-    - 400 Bad Requestとエラーメッセージを確認
-    - JUnit 5 の @Tag("e2e") を使用
-
-- [ ] [P] **T_INTEGRATION_009**: ビジネスエラーのE2Eテスト
-  - **目的**: ビジネスエラーシナリオのテストを実装する
-  - **対象**: E2Eテストスクリプト
-  - **参照SPEC**: [behaviors.md](../specs/baseline/system/behaviors.md)
-  - **注意事項**: 
-    - 在庫不足、楽観的ロック競合、メールアドレス重複のテスト
-    - 409 Conflictとエラーメッセージを確認
-    - JUnit 5 の @Tag("e2e") を使用
+- **目的**: 在庫更新の並行処理シナリオをテストする（楽観的ロック）
+- **対象**: ConcurrencyTest.java（テストクラス）
+- **参照SPEC**: 
+  - [functional_design.md (API_005_stocks)](../specs/baseline/api/API_005_stocks/functional_design.md) の「4. 楽観的ロックの仕組み」
+  - [functional_design.md (API_005_stocks)](../specs/baseline/api/API_005_stocks/functional_design.md) の「11.6 並行更新フローチャート」
+- **注意事項**: 
+  - **重要**: 2つのスレッドが同時に同じ在庫を更新するシナリオをテストする
+  - ユーザーA: 在庫取得（version=1） → 更新リクエスト（version=1） → 成功（version=2）
+  - ユーザーB: 在庫取得（version=1） → 更新リクエスト（version=1） → 409 Conflict
+  - ユーザーB: 再取得（version=2） → 更新リクエスト（version=2） → 成功（version=3）
+  - ExecutorServiceを使用して並行実行する
+  - 楽観的ロック例外が正しく処理されることを確認する
 
 ---
 
-### 6.4 パフォーマンステスト
+### T_INTEGRATION_004: [P] パフォーマンステストの作成
 
-- [ ] **T_INTEGRATION_010**: 書籍一覧取得のパフォーマンステスト
-  - **目的**: 書籍一覧取得APIのレスポンスタイムを測定する
-  - **対象**: パフォーマンステストスクリプト
-  - **参照SPEC**: 
-    - [requirements.md](../specs/baseline/system/requirements.md) の「6.1 パフォーマンス要件」
-    - [behaviors.md](../specs/baseline/system/behaviors.md) の「10. パフォーマンス受入基準」
-  - **注意事項**: 
-    - 100回実行し、95パーセンタイルが500ms以内であることを確認
-    - N+1問題が発生していないことを確認
-    - JUnit 5 の @Tag("performance") を使用
-
-- [ ] **T_INTEGRATION_011**: 注文作成のパフォーマンステスト
-  - **目的**: 注文作成APIのレスポンスタイムを測定する
-  - **対象**: パフォーマンステストスクリプト
-  - **参照SPEC**: [behaviors.md](../specs/baseline/system/behaviors.md) の「10. パフォーマンス受入基準」
-  - **注意事項**: 
-    - 100回実行し、95パーセンタイルが500ms以内であることを確認
-    - トランザクション処理が最適化されていることを確認
-    - JUnit 5 の @Tag("performance") を使用
-
-- [ ] **T_INTEGRATION_012**: スループットテスト
-  - **目的**: 同時リクエスト処理数を測定する
-  - **対象**: パフォーマンステストスクリプト
-  - **参照SPEC**: [requirements.md](../specs/baseline/system/requirements.md) の「6.1 パフォーマンス要件」
-  - **注意事項**: 
-    - 100 req/sec以上を処理できることを確認
-    - JUnit 5 の @Tag("performance") を使用
+- **目的**: APIのパフォーマンス要件を満たすことを確認する
+- **対象**: PerformanceTest.java（テストクラス）
+- **参照SPEC**: 
+  - [requirements.md](../specs/baseline/system/requirements.md) の「3.1 性能要件」
+  - [functional_design.md (system)](../specs/baseline/system/functional_design.md) の「9. パフォーマンス考慮事項」
+- **注意事項**: 
+  - 書籍一覧取得: 200ms以内
+  - 書籍詳細取得: 100ms以内
+  - 書籍検索: 500ms以内
+  - 在庫更新: 200ms以内
+  - ログイン: 500ms以内
+  - ワークフロー承認: 1秒以内
+  - 複数回実行して平均レスポンスタイムを測定する
 
 ---
 
-### 6.5 セキュリティテスト
+### T_INTEGRATION_005: [P] CORS動作確認テストの作成
 
-- [ ] [P] **T_INTEGRATION_013**: JWT Cookie セキュリティテスト
-  - **目的**: JWT Cookie のセキュリティ設定を確認する
-  - **対象**: セキュリティテストスクリプト
-  - **参照SPEC**: [behaviors.md](../specs/baseline/system/behaviors.md) の「11. セキュリティ受入基準」
-  - **注意事項**: 
-    - HttpOnly Cookieであることを確認
-    - JavaScriptからアクセス不可であることを確認
-    - JUnit 5 の @Tag("security") を使用
-
-- [ ] [P] **T_INTEGRATION_014**: パスワードハッシュ化テスト
-  - **目的**: パスワードがBCryptハッシュ化されていることを確認する
-  - **対象**: セキュリティテストスクリプト
-  - **参照SPEC**: [behaviors.md](../specs/baseline/system/behaviors.md) の「11. セキュリティ受入基準」
-  - **注意事項**: 
-    - データベースに平文パスワードが保存されていないことを確認
-    - JUnit 5 の @Tag("security") を使用
-
-- [ ] [P] **T_INTEGRATION_015**: 入力検証テスト
-  - **目的**: サーバーサイド入力検証が機能していることを確認する
-  - **対象**: セキュリティテストスクリプト
-  - **参照SPEC**: [requirements.md](../specs/baseline/system/requirements.md) の「6.2 セキュリティ要件」
-  - **注意事項**: 
-    - Bean Validationが機能していることを確認
-    - 不正な入力で400 Bad Requestが返されることを確認
-    - JUnit 5 の @Tag("security") を使用
+- **目的**: CORSフィルタが正しく動作することを確認する
+- **対象**: CorsTest.java（テストクラス）
+- **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.5 Cross-Cutting Concerns」
+- **注意事項**: 
+  - OPTIONSリクエストでプリフライトチェックを確認する
+  - Access-Control-Allow-Originヘッダーが設定されていることを確認する
+  - Access-Control-Allow-Methodsヘッダーが設定されていることを確認する
+  - Access-Control-Allow-Headersヘッダーが設定されていることを確認する
 
 ---
 
-### 6.6 Gradle設定
+### T_INTEGRATION_006: [P] エラーハンドリング統合テストの作成
 
-- [ ] **T_INTEGRATION_016**: E2Eテスト用Gradle設定
-  - **目的**: E2Eテストを通常ビルドから除外する設定を追加する
-  - **対象**: `build.gradle`
-  - **参照SPEC**: [generate_tasks.md](../instructions/generate_tasks.md) の「8. 重要な注意事項」
-  - **注意事項**: 
-    - JUnit 5 の @Tag("e2e") を使用
-    - Gradleで `./gradlew test` では実行されず、`./gradlew e2eTest` で個別実行可能にする
-    - パフォーマンステスト、セキュリティテストも同様
-
----
-
-### 6.7 最終検証
-
-- [ ] **T_INTEGRATION_017**: 全API動作確認
-  - **目的**: 全APIが正常に動作していることを最終確認する
-  - **対象**: 全APIエンドポイント
-  - **参照SPEC**: [requirements.md](../specs/baseline/system/requirements.md) の「9. 成功基準」
-  - **注意事項**: 
-    - 全APIエンドポイントが正常に動作する
-    - 全ビジネスルールが実装されている
-    - JWT認証が正常に機能する
-
-- [ ] **T_INTEGRATION_018**: テストカバレッジ確認
-  - **目的**: テストカバレッジが基準を満たしていることを確認する
-  - **対象**: JaCoCo カバレッジレポート
-  - **参照SPEC**: 
-    - [constitution.md](../principles/constitution.md) の「原則3: テスト駆動品質」
-    - [requirements.md](../specs/baseline/system/requirements.md) の「9.3 品質要件の充足」
-  - **注意事項**: 
-    - サービス層のカバレッジが80%以上
-    - `./gradlew :berry-books-api:jacocoTestReport` で確認
-
-- [ ] **T_INTEGRATION_019**: ログ出力確認
-  - **目的**: ログ出力が適切に行われていることを確認する
-  - **対象**: アプリケーションログ
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「10. ログ戦略」
-  - **注意事項**: 
-    - 全REST APIエンドポイントのエントリがINFOログに出力される
-    - ビジネス例外がWARNログに出力される
-    - システム例外がERRORログ（スタックトレース付き）に出力される
-
-- [ ] **T_INTEGRATION_020**: ドキュメント最終確認
-  - **目的**: ドキュメントが完成していることを確認する
-  - **対象**: 全SPEC文書
-  - **参照SPEC**: [requirements.md](../specs/baseline/system/requirements.md) の「9.4 ドキュメント要件の充足」
-  - **注意事項**: 
-    - 全SPECドキュメントが完成している
-    - README.mdが完成している
+- **目的**: すべてのException Mapperが正しく動作することを確認する
+- **対象**: ErrorHandlingTest.java（テストクラス）
+- **参照SPEC**: 
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「8. エラーハンドリング」
+  - [functional_design.md (system)](../specs/baseline/system/functional_design.md) の「6. エラーハンドリング」
+- **注意事項**: 
+  - 400 Bad Request: バリデーションエラー
+  - 401 Unauthorized: 認証失敗
+  - 403 Forbidden: 承認権限不足
+  - 404 Not Found: リソースが見つからない
+  - 409 Conflict: 楽観的ロック失敗
+  - 500 Internal Server Error: 予期しないエラー
+  - すべてのエラーレスポンスがErrorResponse形式であることを確認する
 
 ---
 
-## 完了条件
+### T_INTEGRATION_007: トランザクション統合テストの作成
 
-以下の全ての条件を満たしていること：
-
-- [ ] 全てのAPI間結合テストが実装され、正常に動作する
-- [ ] 全てのE2E APIテストが実装され、主要フローが正常に動作する
-- [ ] エラーシナリオテストが実装され、適切なエラーレスポンスが返される
-- [ ] パフォーマンステストが実装され、要件を満たしている
-- [ ] セキュリティテストが実装され、要件を満たしている
-- [ ] テストカバレッジが80%以上である
-- [ ] 全APIが正常に動作している
-- [ ] ログ出力が適切に行われている
-- [ ] ドキュメントが完成している
+- **目的**: トランザクション管理が正しく動作することを確認する
+- **対象**: TransactionTest.java（テストクラス）
+- **参照SPEC**: 
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「7. トランザクション設計」
+  - [functional_design.md (system)](../specs/baseline/system/functional_design.md) の「7. トランザクション管理」
+- **注意事項**: 
+  - **ワークフロー承認トランザクション**: ワークフロー履歴追加と書籍マスタ反映が1トランザクションで実行されることを確認
+  - エラー発生時にロールバックされることを確認
+  - 意図的にエラーを発生させてロールバックをテストする
 
 ---
 
-## 参考資料
+### T_INTEGRATION_008: [P] JPQL vs Criteria API比較テストの作成
 
-- [requirements.md](../specs/baseline/system/requirements.md) - 要件定義書
-- [behaviors.md](../specs/baseline/system/behaviors.md) - 振る舞い仕様書
-- [architecture_design.md](../specs/baseline/system/architecture_design.md) - アーキテクチャ設計書
-- [constitution.md](../principles/constitution.md) - プロジェクト開発憲章
+- **目的**: JPQLとCriteria APIの検索結果が一致することを確認する
+- **対象**: QueryComparisonTest.java（テストクラス）
+- **参照SPEC**: 
+  - [functional_design.md (API_002_books)](../specs/baseline/api/API_002_books/functional_design.md) の「3.4 書籍検索（JPQL）」
+  - [functional_design.md (API_002_books)](../specs/baseline/api/API_002_books/functional_design.md) の「3.5 書籍検索（Criteria API）」
+- **注意事項**: 
+  - 同一の検索条件でJPQLとCriteria APIを実行する
+  - 結果セットが完全に一致することを確認する
+  - カテゴリ+キーワード、カテゴリのみ、キーワードのみ、条件なしの各パターンをテストする
+
+---
+
+### T_INTEGRATION_009: 最終検証テストの作成
+
+- **目的**: システム全体の最終検証を行う
+- **対象**: FinalVerificationTest.java（テストクラス）
+- **参照SPEC**: 
+  - [requirements.md](../specs/baseline/system/requirements.md) の「2. 機能要件」
+  - [requirements.md](../specs/baseline/system/requirements.md) の「3. 非機能要件」
+- **注意事項**: 
+  - すべての機能要件が実装されていることを確認する
+  - すべてのエンドポイントが正常に動作することを確認する
+  - データベースの整合性を確認する
+  - ログが正しく出力されることを確認する
+
+---
+
+### T_INTEGRATION_010: テスト実行設定の作成
+
+- **目的**: 結合テストの実行設定を作成する
+- **対象**: Gradle設定、JUnit設定
+- **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「11. デプロイメント構成」
+- **注意事項**: 
+  - E2E APIテストは通常ビルドから除外する
+  - `@Tag("integration")`でタグ付けする
+  - Gradleタスクで個別実行可能にする（例: `gradle integrationTest`）
+  - テスト実行前にデータベースを初期化する
+  - テスト実行後にクリーンアップする
+
+---
+
+## 結合テスト完了チェックリスト
+
+- [ ] API間結合テストが作成された
+- [ ] E2E APIテストが作成された
+  - [ ] ワークフロー完全フロー
+  - [ ] 新規書籍追加フロー
+  - [ ] 書籍削除フロー
+  - [ ] 価格改定フロー
+  - [ ] ワークフロー却下フロー
+- [ ] 並行処理テストが作成された
+  - [ ] 在庫更新競合シナリオ
+  - [ ] 楽観的ロック動作確認
+- [ ] パフォーマンステストが作成された
+  - [ ] すべてのAPIのレスポンスタイム測定
+- [ ] CORS動作確認テストが作成された
+- [ ] エラーハンドリング統合テストが作成された
+  - [ ] すべてのHTTPステータスコード確認
+- [ ] トランザクション統合テストが作成された
+  - [ ] ロールバック動作確認
+- [ ] JPQL vs Criteria API比較テストが作成された
+- [ ] 最終検証テストが作成された
+- [ ] テスト実行設定が作成された
+  - [ ] Gradle設定
+  - [ ] JUnit設定（@Tag）
+
+---
+
+## 次のステップ
+
+すべての結合テストが完了し、テストが成功したら、プロジェクトは完成です！
+
+最終確認事項：
+- [ ] すべての単体テストが成功する
+- [ ] すべての結合テストが成功する
+- [ ] すべての機能要件が実装されている
+- [ ] すべての非機能要件が満たされている
+- [ ] ドキュメントが最新の状態である
+- [ ] コードレビューが完了している
+- [ ] デプロイメント準備が完了している

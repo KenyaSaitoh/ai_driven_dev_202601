@@ -1,23 +1,5 @@
 # コード実装インストラクション
 
-## Agent Skillについて
-
-このインストラクションは**Agent Skills標準仕様**（v1.0）に準拠しています。
-
-**サポートプラットフォーム:**
-- Claude Code
-- Cline
-- Cursor
-- GitHub Copilot
-
-上記のAIコーディングエージェントで利用可能です。
-
-**プラットフォーム固有の操作方法:**
-- ファイル参照、ファイル作成、編集などの具体的な操作方法は、プラットフォームによって異なります
-- 詳細は `../../platform_guides/` を参照してください
-
----
-
 ## パラメータ設定
 
 **実行前に以下のパラメータを設定してください:**
@@ -25,12 +7,14 @@
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
 task_file: "ここに実行するタスクファイルのパスを入力"
+skip_infrastructure: false  # trueの場合、インフラセットアップをスキップ
 ```
 
 **例（back-office-apiの場合）:**
 ```yaml
 project_root: "projects/sdd/bookstore/back-office-api-sdd"
 task_file: "projects/sdd/bookstore/back-office-api-sdd/tasks/setup_tasks.md"
+skip_infrastructure: true  # インフラセットアップをスキップ
 ```
 
 **注意:** 
@@ -46,12 +30,6 @@ task_file: "projects/sdd/bookstore/back-office-api-sdd/tasks/setup_tasks.md"
 パラメータとして指定されたプロジェクトルートとタスクファイルに基づいて、以下を実行してください：
 
 ### 1. 実装コンテキストをロードして分析してください
-
-**ファイル参照の方法:**
-- ファイル参照操作は、使用しているAIプラットフォームによって異なります
-- **Claude Code/Cline/Cursor**: `@`参照でファイルをコンテキストに追加
-- **GitHub Copilot**: `#file:`参照またはワークスペースコンテキストを使用
-- **詳細**: `../../platform_guides/` を参照してください
 
 #### 読み込むべきドキュメント（優先順）
 
@@ -96,7 +74,10 @@ task_file: "projects/sdd/bookstore/back-office-api-sdd/tasks/setup_tasks.md"
 ### 3. タスク計画に従って実装を実行してください
 
 - **タスクごとの実行**: 次のタスクに進む前に各タスクを完了
-- **セットアップタスク**: リソース配置（画像ファイルのコピー等）を最優先で実行
+- **セットアップタスク**: 
+  - `skip_infrastructure: true`の場合、インフラ関連タスク（DB/APサーバーのインストール等）はスキップ
+  - アプリケーション固有のセットアップ（スキーマ作成、初期データ、静的リソース配置等）は実行
+  - リソース配置（画像ファイルのコピー等）を最優先で実行
 - **依存関係の尊重**: 順次タスクは順番に実行、並列タスク[P]は一緒に実行可能
 - **TDDアプローチに従う**: 対応する実装の前にテストを実行（プロジェクトがTDDを採用している場合）
 - **ファイルベースの調整**: 同じファイルに影響するタスクは順次実行必須
@@ -126,6 +107,14 @@ architecture_design.mdに記載された技術スタックを厳密に遵守
 プロジェクト構造、依存関係、構成を初期化
 - **静的リソースの配置**: 必要な画像やファイルを適切な場所にコピー
 - データベーススキーマのセットアップ
+
+**注意: インフラセットアップのスキップ**
+- `skip_infrastructure: true` パラメータが指定された場合、以下のインフラ関連タスクはスキップします：
+  - データベースサーバーのインストール・起動
+  - アプリケーションサーバーのインストール・設定
+  - ミドルウェアのセットアップ
+- **スキップ可能な理由**: 開発環境がすでに構築済みの場合や、CI/CD環境で実行する場合
+- **実行するタスク**: データベーススキーマ作成、初期データ投入、静的リソース配置などのアプリケーション固有のセットアップは実行します
 
 #### コードの前にテスト
 契約、エンティティ、結合シナリオのテストを作成（TDDの場合）
@@ -266,16 +255,6 @@ architecture_design.mdの以下を参照すること：
 
 ---
 
-## ドキュメント参照の基本方針
-
-- **architecture_design.md**: 技術スタック、アーキテクチャパターン、品質基準など、プロジェクト全体の技術的指針を提供
-- **system/functional_design.md**: システム全体の機能設計概要と各APIへのリンクを提供
-- **api/配下のfunctional_design.md**: 各APIの具体的なクラス設計、メソッドシグネチャ、エンドポイント仕様など、実装レベルの詳細を提供
-- **api/配下のbehaviors.md**: 各APIの振る舞い仕様（Given-When-Then）、受入基準、テストシナリオを提供
-- **各コンポーネントの参照方法**: 上記のセクションを参照
-
----
-
 ## 進捗追跡とエラーハンドリング
 
 - 完了した各タスク後に進捗を報告
@@ -284,10 +263,6 @@ architecture_design.mdの以下を参照すること：
 - デバッグのためのコンテキスト付きの明確なエラーメッセージを提供
 - 実装を続行できない場合は次の手順を提案
 - **重要**: 完了したタスクについては、タスクファイルでタスクを[X]としてマーク
-
-**タスク更新の方法:**
-- ファイル編集操作は、使用しているAIプラットフォームによって異なります
-- 詳細は `../../platform_guides/` を参照してください
 
 ---
 
@@ -349,7 +324,7 @@ architecture_design.mdの以下を参照すること：
 
 ### 楽観的ロック（Optimistic Locking）の実装
 
-**Stock EntityにVarious** 在庫管理では、複数のトランザクションが同時に在庫を更新する可能性があります。楽観的ロックで競合を検出し、データの整合性を保ちます。
+在庫管理では、複数のトランザクションが同時に在庫を更新する可能性があります。楽観的ロックで競合を検出し、データの整合性を保ちます。
 
 **実装方法:**
 
@@ -410,33 +385,6 @@ public class StockService {
         stock.setQuantity(quantity);
         // versionチェックはJPAが自動的に行う
         stockDao.update(stock);
-    }
-}
-```
-
-#### 4. StockResource
-
-```java
-@Path("/stocks")
-@ApplicationScoped
-public class StockResource {
-    @Inject
-    private StockService stockService;
-    
-    @PUT
-    @Path("/{bookId}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateStock(
-        @PathParam("bookId") Integer bookId,
-        StockUpdateRequest request
-    ) {
-        try {
-            stockService.updateStock(bookId, request.getQuantity(), request.getVersion());
-            return Response.ok().build();
-        } catch (OptimisticLockException e) {
-            // ExceptionMapperが自動的にHTTP 409に変換
-            throw e;
-        }
     }
 }
 ```
@@ -514,64 +462,6 @@ public class BookDaoCriteria {
 
 **エンドポイント**: `GET /books/search/criteria`
 
-#### 3. BookService
-
-両方のDaoを使い分け：
-
-```java
-@ApplicationScoped
-public class BookService {
-    @Inject
-    private BookDao bookDao;
-    
-    @Inject
-    private BookDaoCriteria bookDaoCriteria;
-    
-    public List<Book> searchBooksJpql(String keyword, Integer categoryId, Integer publisherId) {
-        return bookDao.searchBooks(keyword, categoryId, publisherId);
-    }
-    
-    public List<Book> searchBooksCriteria(String keyword, Integer categoryId, Integer publisherId) {
-        return bookDaoCriteria.searchBooks(keyword, categoryId, publisherId);
-    }
-}
-```
-
-#### 4. BookResource
-
-2つの検索エンドポイントを公開：
-
-```java
-@Path("/books")
-@ApplicationScoped
-public class BookResource {
-    @Inject
-    private BookService bookService;
-    
-    @GET
-    @Path("/search/jpql")
-    public Response searchBooksJpql(
-        @QueryParam("keyword") String keyword,
-        @QueryParam("categoryId") Integer categoryId,
-        @QueryParam("publisherId") Integer publisherId
-    ) {
-        List<Book> books = bookService.searchBooksJpql(keyword, categoryId, publisherId);
-        return Response.ok(books).build();
-    }
-    
-    @GET
-    @Path("/search/criteria")
-    public Response searchBooksCriteria(
-        @QueryParam("keyword") String keyword,
-        @QueryParam("categoryId") Integer categoryId,
-        @QueryParam("publisherId") Integer publisherId
-    ) {
-        List<Book> books = bookService.searchBooksCriteria(keyword, categoryId, publisherId);
-        return Response.ok(books).build();
-    }
-}
-```
-
 **両方の実装は同じ結果を返します。学習・比較用に両方実装します。**
 
 ### CORS設定
@@ -631,14 +521,3 @@ public class CorsFilter implements ContainerResponseFilter {
 - `{project_root}` は、パラメータで明示的に指定されたパスに置き換えてください
 - 相対パスでも絶対パスでも構いません
 - 全てのファイル操作は、このプロジェクトルートを基準に行います
-
----
-
-## プラットフォーム別ガイド
-
-このインストラクションの実行方法は、AIプラットフォームによって異なります。
-詳細は以下を参照してください：
-
-- **Claude Code/Cline/Cursor**: `../../platform_guides/cursor_cline.md`
-- **GitHub Copilot**: `../../platform_guides/github_copilot.md`
-
