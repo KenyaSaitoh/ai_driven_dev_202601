@@ -162,6 +162,11 @@ subprojects {
         
         // Jakarta EE API（テスト用）
         testImplementation "jakarta.platform:jakarta.jakartaee-api:10.0.0"
+        
+        // JAX-RS実装（テスト用）
+        testImplementation "org.glassfish.jersey.core:jersey-server:3.1.3"
+        testImplementation "org.glassfish.jersey.core:jersey-common:3.1.3"
+        testImplementation "org.glassfish.jersey.inject:jersey-hk2:3.1.3"
     }
 
     // Javaプラグイン設定
