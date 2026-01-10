@@ -1,154 +1,151 @@
-# 認証API (API_001_auth) タスク
+# API_001_auth - 認証APIタスク
 
 **担当者:** 担当者A（1名）  
-**推奨スキル:** Jakarta EE、JAX-RS、JWT認証、外部API連携  
+**推奨スキル:** JAX-RS、JWT認証、REST Client API、BCrypt  
 **想定工数:** 6時間  
 **依存タスク:** [common_tasks.md](common_tasks.md)
 
 ---
 
-## 概要
+## タスク一覧
 
-認証APIを実装します。ログイン、ログアウト、新規登録、ユーザー情報取得の4つのエンドポイントを含みます。JWT Cookie認証とberry-books-rest API連携を実装します。
+### DTO作成
 
----
-
-## タスクリスト
-
-### 2.1 DTO/Record実装
-
-- [ ] [P] **T_API001_001**: LoginRequest レコードの作成
+- [X] [P] **T_API001_001**: LoginRequestの作成
   - **目的**: ログインリクエストDTOを実装する
-  - **対象**: `pro.kensait.berrybooks.api.dto.LoginRequest`
-  - **参照SPEC**: [api/API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) の「4.1 LoginRequest」
-  - **注意事項**: @NotBlank, @Email アノテーションを使用
+  - **対象**: LoginRequest.java（Record）
+  - **参照SPEC**: [API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) の「4.1 LoginRequest」
+  - **注意事項**: email、passwordフィールド、Bean Validation（@NotBlank、@Email）
 
-- [ ] [P] **T_API001_002**: LoginResponse レコードの作成
+---
+
+- [X] [P] **T_API001_002**: LoginResponseの作成
   - **目的**: ログインレスポンスDTOを実装する
-  - **対象**: `pro.kensait.berrybooks.api.dto.LoginResponse`
-  - **参照SPEC**: [api/API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) の「4.2 LoginResponse」
-  - **注意事項**: Java Record を使用
+  - **対象**: LoginResponse.java（Record）
+  - **参照SPEC**: [API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) の「4.2 LoginResponse」
+  - **注意事項**: customerId、customerName、email、birthday、addressフィールド
 
-- [ ] [P] **T_API001_003**: RegisterRequest レコードの作成
+---
+
+- [X] [P] **T_API001_003**: RegisterRequestの作成
   - **目的**: 新規登録リクエストDTOを実装する
-  - **対象**: `pro.kensait.berrybooks.api.dto.RegisterRequest`
-  - **参照SPEC**: [api/API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) の「4.3 RegisterRequest」
-  - **注意事項**: @NotBlank, @Email, @Size アノテーションを使用
+  - **対象**: RegisterRequest.java（Record）
+  - **参照SPEC**: [API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) の「4.3 RegisterRequest」
+  - **注意事項**: customerName、password、email、birthday、addressフィールド、Bean Validation
 
 ---
 
-### 2.2 例外クラス実装
+### Resource作成
 
-- [ ] [P] **T_API001_004**: EmailAlreadyExistsException の作成
-  - **目的**: メールアドレス重複例外を実装する
-  - **対象**: `pro.kensait.berrybooks.service.customer.EmailAlreadyExistsException`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「8.1 例外階層」
-  - **注意事項**: RuntimeException を継承
-
----
-
-### 2.3 Resourceクラス実装
-
-- [ ] **T_API001_005**: AuthResource の作成（ログイン機能）
-  - **目的**: ログインエンドポイントを実装する
-  - **対象**: `pro.kensait.berrybooks.api.AuthResource` の login() メソッド
+- [X] **T_API001_004**: AuthenResourceの作成
+  - **目的**: 認証APIエンドポイントを実装する
+  - **対象**: AuthenResource.java（@Path("/auth"), @ApplicationScoped）
   - **参照SPEC**: 
-    - [api/API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) の「3.1 ログイン」
-    - [api/API_001_auth/behaviors.md](../specs/baseline/api/API_001_auth/behaviors.md) の「2. ログイン」
-  - **注意事項**: 
-    - @Path("/auth"), @POST, @Path("/login") を使用
-    - CustomerRestClient で顧客情報を取得
-    - BCrypt でパスワード検証
-    - JwtUtil で JWT 生成
-    - Set-Cookie ヘッダーで JWT Cookie を返す
-
-- [ ] **T_API001_006**: AuthResource の作成（ログアウト機能）
-  - **目的**: ログアウトエンドポイントを実装する
-  - **対象**: `pro.kensait.berrybooks.api.AuthResource` の logout() メソッド
-  - **参照SPEC**: 
-    - [api/API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) の「3.2 ログアウト」
-    - [api/API_001_auth/behaviors.md](../specs/baseline/api/API_001_auth/behaviors.md) の「3. ログアウト」
-  - **注意事項**: 
-    - @POST, @Path("/logout") を使用
-    - Set-Cookie ヘッダーで JWT Cookie を削除（MaxAge=0）
-
-- [ ] **T_API001_007**: AuthResource の作成（新規登録機能）
-  - **目的**: 新規登録エンドポイントを実装する
-  - **対象**: `pro.kensait.berrybooks.api.AuthResource` の register() メソッド
-  - **参照SPEC**: 
-    - [api/API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) の「3.3 新規登録」
-    - [api/API_001_auth/behaviors.md](../specs/baseline/api/API_001_auth/behaviors.md) の「4. 新規登録」
-  - **注意事項**: 
-    - @POST, @Path("/register") を使用
-    - AddressUtil で住所検証
-    - BCrypt でパスワードハッシュ化
-    - CustomerRestClient で顧客登録
-    - JwtUtil で JWT 生成（自動ログイン）
-
-- [ ] **T_API001_008**: AuthResource の作成（ユーザー情報取得機能）
-  - **目的**: 現在のログインユーザー情報取得エンドポイントを実装する
-  - **対象**: `pro.kensait.berrybooks.api.AuthResource` の getCurrentUser() メソッド
-  - **参照SPEC**: 
-    - [api/API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) の「3.4 現在のログインユーザー情報取得」
-    - [api/API_001_auth/behaviors.md](../specs/baseline/api/API_001_auth/behaviors.md) の「5. 現在のログインユーザー情報取得」
-  - **注意事項**: 
-    - @GET, @Path("/me") を使用
-    - SecuredResource から customerId を取得
-    - CustomerRestClient で顧客情報を取得
+    - [API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) の「3. API仕様」
+    - [API_001_auth/behaviors.md](../specs/baseline/api/API_001_auth/behaviors.md) の「2. 認証API」
+  - **注意事項**: login、logout、register、getCurrentUserエンドポイントを実装、CustomerHubRestClient、JwtUtilをインジェクション
 
 ---
 
-### 2.4 ユニットテスト
+### 認証ロジック実装
 
-- [ ] [P] **T_API001_009**: AuthResource のユニットテスト（ログイン）
-  - **目的**: ログイン機能のテストを実装する
-  - **対象**: `pro.kensait.berrybooks.api.AuthResourceTest`
-  - **参照SPEC**: [api/API_001_auth/behaviors.md](../specs/baseline/api/API_001_auth/behaviors.md) の「2. ログイン」
-  - **注意事項**: 
-    - JUnit 5 + Mockito を使用
-    - CustomerRestClient をモック
-    - 正常系、メールアドレス不存在、パスワード不一致のテスト
-
-- [ ] [P] **T_API001_010**: AuthResource のユニットテスト（新規登録）
-  - **目的**: 新規登録機能のテストを実装する
-  - **対象**: `pro.kensait.berrybooks.api.AuthResourceTest`
-  - **参照SPEC**: [api/API_001_auth/behaviors.md](../specs/baseline/api/API_001_auth/behaviors.md) の「4. 新規登録」
-  - **注意事項**: 
-    - JUnit 5 + Mockito を使用
-    - CustomerRestClient をモック
-    - 正常系、メールアドレス重複、住所検証エラーのテスト
+- [X] **T_API001_005**: loginメソッドの実装
+  - **目的**: ログイン処理を実装する
+  - **対象**: AuthenResource.login()
+  - **参照SPEC**: 
+    - [API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) の「3.1 ログイン」
+    - [API_001_auth/behaviors.md](../specs/baseline/api/API_001_auth/behaviors.md) の「2.1 ログイン」
+  - **注意事項**: メールアドレスで顧客検索、BCryptパスワード照合、JWT Cookie発行、401エラーハンドリング
 
 ---
 
-### 2.5 APIテスト（E2E）
-
-- [ ] **T_API001_011**: 認証APIのE2Eテスト
-  - **目的**: 認証API全体のE2Eテストを実装する
-  - **対象**: E2Eテストスクリプト（JUnit 5またはPlaywright）
-  - **参照SPEC**: [api/API_001_auth/behaviors.md](../specs/baseline/api/API_001_auth/behaviors.md)
-  - **注意事項**: 
-    - ログイン → ユーザー情報取得 → ログアウト のフローをテスト
-    - 新規登録 → 自動ログイン のフローをテスト
-    - 認証エラーのテスト（JWT未設定、JWT無効）
+- [X] **T_API001_006**: logoutメソッドの実装
+  - **目的**: ログアウト処理を実装する
+  - **対象**: AuthenResource.logout()
+  - **参照SPEC**: [API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) の「3.2 ログアウト」
+  - **注意事項**: JWT Cookie削除（MaxAge=0）
 
 ---
 
-## 完了条件
+- [X] **T_API001_007**: registerメソッドの実装
+  - **目的**: 新規登録処理を実装する
+  - **対象**: AuthenResource.register()
+  - **参照SPEC**: 
+    - [API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) の「3.3 新規登録」
+    - [API_001_auth/behaviors.md](../specs/baseline/api/API_001_auth/behaviors.md) の「2.3 新規登録」
+  - **注意事項**: パスワードBCryptハッシュ化、住所バリデーション（AddressUtil.startsWithValidPrefecture）、CustomerHubRestClient.register()呼び出し、JWT Cookie発行
 
-以下の全ての条件を満たしていること：
+---
 
-- [ ] 全てのDTO/Recordが作成されている
-- [ ] AuthResourceの全てのエンドポイント（login, logout, register, me）が実装されている
-- [ ] ユニットテストが実装され、カバレッジが80%以上である
-- [ ] E2Eテストが実装され、主要フローが正常に動作する
-- [ ] JWT Cookie認証が正常に機能する
-- [ ] 外部API（berry-books-rest）との連携が正常に機能する
+- [X] **T_API001_008**: getCurrentUserメソッドの実装
+  - **目的**: 現在のログインユーザー情報取得処理を実装する
+  - **対象**: AuthenResource.getCurrentUser()
+  - **参照SPEC**: [API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) の「3.4 現在のログインユーザー情報取得」
+  - **注意事項**: AuthenContextからcustomerIdを取得、CustomerHubRestClient.findById()呼び出し
+
+---
+
+### 単体テスト
+
+- [X] [P] **T_API001_009**: AuthenResourceのテスト（login）
+  - **目的**: ログイン処理の単体テストを実装する
+  - **対象**: AuthenResourceTest.java（JUnit 5 + Mockito）
+  - **参照SPEC**: [API_001_auth/behaviors.md](../specs/baseline/api/API_001_auth/behaviors.md) の「2.1 ログイン」
+  - **注意事項**: CustomerHubRestClientをモック、正常系・異常系（メールアドレス不存在、パスワード不一致）をテスト
+
+---
+
+- [X] [P] **T_API001_010**: AuthenResourceのテスト（register）
+  - **目的**: 新規登録処理の単体テストを実装する
+  - **対象**: AuthenResourceTest.java（JUnit 5 + Mockito）
+  - **参照SPEC**: [API_001_auth/behaviors.md](../specs/baseline/api/API_001_auth/behaviors.md) の「2.3 新規登録」
+  - **注意事項**: 住所バリデーションテスト、メールアドレス重複テスト
+
+---
+
+### APIテスト（オプション）
+
+- [ ] [P] **T_API001_011**: 認証APIのE2Eテスト
+  - **目的**: 認証APIのE2Eテストを実装する（オプション）
+  - **対象**: AuthApiE2ETest.java（JUnit 5 + REST Assured）
+  - **参照SPEC**: [API_001_auth/behaviors.md](../specs/baseline/api/API_001_auth/behaviors.md) の「2. 認証API」
+  - **注意事項**: ログイン → JWT Cookie確認 → /api/auth/me → ログアウトのシナリオテスト、@Tag("e2e")でタグ付け
+
+---
+
+## 実装時の注意事項
+
+### JWT Cookie設定
+
+| 属性 | 値 | 目的 |
+|-----|-----|------|
+| HttpOnly | true | XSS攻撃対策（JavaScriptからアクセス不可） |
+| Secure | false（開発環境）、true（本番環境） | HTTPS通信のみでCookie送信 |
+| Path | / | 全パスでCookieを送信 |
+| MaxAge | 86400（24時間） | Cookie有効期限 |
+
+### パスワードハッシュ化
+
+* アルゴリズム: BCrypt
+* Cost: 10（デフォルト）
+* ハッシュ長: 60文字
+
+**実装例:**
+
+```java
+String hashedPassword = BCrypt.hashpw(plainPassword, BCrypt.gensalt());
+boolean isValid = BCrypt.checkpw(plainPassword, hashedPassword);
+```
+
+### 住所バリデーション
+
+AddressUtil.startsWithValidPrefecture()を使用して、住所が都道府県名から始まることを検証する。
 
 ---
 
 ## 参考資料
 
-- [api/API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) - 認証API機能設計書
-- [api/API_001_auth/behaviors.md](../specs/baseline/api/API_001_auth/behaviors.md) - 認証API受入基準
-- [architecture_design.md](../specs/baseline/system/architecture_design.md) - アーキテクチャ設計書
-- [external_interface.md](../specs/baseline/system/external_interface.md) - 外部インターフェース仕様書
+- [API_001_auth/functional_design.md](../specs/baseline/api/API_001_auth/functional_design.md) - 認証API機能設計書
+- [API_001_auth/behaviors.md](../specs/baseline/api/API_001_auth/behaviors.md) - 認証API受入基準
+- [external_interface.md](../specs/baseline/system/external_interface.md) - 外部API連携仕様（customer-hub-api）
+- [architecture_design.md](../specs/baseline/system/architecture_design.md) - JWT認証アーキテクチャ

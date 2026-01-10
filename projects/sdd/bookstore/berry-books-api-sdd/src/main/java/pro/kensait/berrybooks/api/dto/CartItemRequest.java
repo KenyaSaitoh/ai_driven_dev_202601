@@ -1,12 +1,13 @@
 package pro.kensait.berrybooks.api.dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /**
  * カートアイテムリクエストDTO
  * 
- * Java Recordを使用してイミュータブルなDTOを実装
+ * 注文リクエストに含まれる各書籍の情報を保持する。
  */
 public record CartItemRequest(
     @NotNull(message = "書籍IDは必須です")
@@ -19,13 +20,13 @@ public record CartItemRequest(
     String publisherName,
     
     @NotNull(message = "価格は必須です")
+    @Min(value = 0, message = "価格は0以上である必要があります")
     Integer price,
     
     @NotNull(message = "数量は必須です")
+    @Min(value = 1, message = "数量は1以上である必要があります")
     Integer count,
     
     @NotNull(message = "バージョンは必須です")
-    Long version
-) {
-}
-
+    Integer version  // 楽観的ロックバージョン
+) {}

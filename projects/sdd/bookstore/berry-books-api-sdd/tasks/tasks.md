@@ -1,8 +1,9 @@
-# berry-books-api - 実装タスクリスト
+# berry-books-api-sdd - 実装タスクリスト
 
-**プロジェクト名**: berry-books-api REST API  
-**バージョン**: 2.0.0  
-**最終更新日**: 2025-12-27
+**プロジェクトID:** berry-books-api-sdd  
+**バージョン:** 2.0.0  
+**最終更新日:** 2025-01-10  
+**アーキテクチャパターン:** BFF (Backend for Frontend)
 
 ---
 
@@ -12,140 +13,139 @@
 
 | タスク | タスクファイル | 担当者 | 並行実行 | 想定工数 |
 |---------|--------------|--------|---------|---------|
-| 0. セットアップ | setup_tasks.md | 全員 | 不可 | 2時間 |
-| 1. 共通機能 | common_tasks.md | 共通機能チーム | 一部可能 | 8時間 |
-| 2. 認証API | API_001_auth.md | 担当者A | 可能 | 6時間 |
-| 3. 書籍API | API_002_books.md | 担当者B | 可能 | 5時間 |
-| 4. 注文API | API_003_orders.md | 担当者C | 可能 | 7時間 |
-| 5. 画像API | API_004_images.md | 担当者D | 可能 | 2時間 |
-| 6. 結合テスト | integration_tasks.md | 全員 | 一部可能 | 6時間 |
+| 0. セットアップ | [setup_tasks.md](setup_tasks.md) | 全員 | 不可 | 2時間 |
+| 1. 共通機能 | [common_tasks.md](common_tasks.md) | 共通機能チーム | 一部可能 | 8時間 |
+| 2. API_001_auth | [API_001_auth.md](API_001_auth.md) | 担当者A | 可能 | 6時間 |
+| 3. API_002_books | [API_002_books.md](API_002_books.md) | 担当者B | 可能 | 3時間 |
+| 4. API_003_orders | [API_003_orders.md](API_003_orders.md) | 担当者C | 可能 | 8時間 |
+| 5. API_004_images | [API_004_images.md](API_004_images.md) | 担当者D | 可能 | 2時間 |
+| 6. 結合テスト | [integration_tasks.md](integration_tasks.md) | 全員 | 一部可能 | 6時間 |
 
-**合計想定工数**: 36時間（並行実行により大幅に短縮可能）
+**合計想定工数:** 35時間
 
 ---
 
 ## 実行順序
 
-### フェーズ1: セットアップ（全員で実行）
-1. タスク0: セットアップ（全員が実行前に1回だけ）
+1. **タスク0: セットアップ**（全員で実行）
+   - プロジェクト初期化
+   - データベース設定
+   - アプリケーションサーバー設定
 
-### フェーズ2: 共通機能実装（共通機能チームが実装）
-2. タスク1: 共通機能（Entity、共通Service、JWT認証基盤、共通DTO等）
+2. **タスク1: 共通機能**（共通機能チームが実装）
+   - 注文エンティティ（OrderTran, OrderDetail）
+   - 注文DAO
+   - JWT認証基盤
+   - 外部API連携クライアント（BackOfficeRestClient, CustomerHubRestClient）
+   - 共通DTO・ユーティリティ
+   - フィルター・例外ハンドラ
 
-### フェーズ3: API別実装（各担当者が並行実行） ← **ここが並行化のポイント**
-3. タスク2～5: API別実装
-   - API_001_auth（認証API）
-   - API_002_books（書籍API）
-   - API_003_orders（注文API）
-   - API_004_images（画像API）
+3. **タスク2～5: API別実装**（各担当者が並行実行） ← **並行化のポイント**
+   - API_001_auth: JWT認証 + 顧客管理連携
+   - API_002_books: プロキシパターン（back-office-api転送）
+   - API_003_orders: 注文処理 + 在庫管理連携
+   - API_004_images: WAR内リソース配信
 
-### フェーズ4: 結合テスト（全員で実施）
-4. タスク6: 結合テスト（API間結合、E2Eテスト、パフォーマンステスト等）
+4. **タスク6: 結合テスト**（全員で実施）
+   - API間結合テスト
+   - E2E APIテスト（REST Assured）
+   - 認証・認可テスト
+   - 楽観的ロックテスト
 
 ---
 
 ## タスクファイル一覧
 
-- [セットアップタスク](setup_tasks.md)
-- [共通機能タスク](common_tasks.md)
-- [認証APIのタスク](API_001_auth.md)
-- [書籍APIのタスク](API_002_books.md)
-- [注文APIのタスク](API_003_orders.md)
-- [画像APIのタスク](API_004_images.md)
-- [結合テストタスク](integration_tasks.md)
+- [setup_tasks.md](setup_tasks.md) - セットアップタスク
+- [common_tasks.md](common_tasks.md) - 共通機能タスク
+- [API_001_auth.md](API_001_auth.md) - 認証API
+- [API_002_books.md](API_002_books.md) - 書籍API（プロキシ）
+- [API_003_orders.md](API_003_orders.md) - 注文API
+- [API_004_images.md](API_004_images.md) - 画像API
+- [integration_tasks.md](integration_tasks.md) - 結合テストタスク
 
 ---
 
 ## 依存関係図
 
 ```mermaid
-graph TD
-    Setup[0. セットアップ<br/>setup_tasks.md] --> Common[1. 共通機能<br/>common_tasks.md]
-    
-    Common --> Auth[2. 認証API<br/>API_001_auth.md]
-    Common --> Books[3. 書籍API<br/>API_002_books.md]
-    Common --> Orders[4. 注文API<br/>API_003_orders.md]
-    Common --> Images[5. 画像API<br/>API_004_images.md]
-    
-    Auth --> Integration[6. 結合テスト<br/>integration_tasks.md]
+graph TB
+    Setup[0. セットアップ] --> Common[1. 共通機能]
+    Common --> Auth[2. API_001_auth]
+    Common --> Books[3. API_002_books]
+    Common --> Orders[4. API_003_orders]
+    Common --> Images[5. API_004_images]
+    Auth --> Integration[6. 結合テスト]
     Books --> Integration
     Orders --> Integration
     Images --> Integration
-    
-    style Setup fill:#ffcccc
-    style Common fill:#ffffcc
-    style Auth fill:#ccffcc
-    style Books fill:#ccffcc
-    style Orders fill:#ccffcc
-    style Images fill:#ccffcc
-    style Integration fill:#ccccff
 ```
 
 ---
 
-## 並行実行の推奨
+## BFFアーキテクチャ特有の注意事項
 
-以下のタスクは並行実行可能です：
+### データ管理の分離
 
-### フェーズ3: API別実装（同時並行実行可能）
+**BFFで管理するデータ:**
+- 注文トランザクション（ORDER_TRAN）
+- 注文明細（ORDER_DETAIL）
 
-| API | タスクファイル | 担当者 | 独立性 |
-|-----|--------------|--------|--------|
-| 認証API | API_001_auth.md | 担当者A | 外部API連携あり |
-| 書籍API | API_002_books.md | 担当者B | 完全独立 |
-| 注文API | API_003_orders.md | 担当者C | 完全独立 |
-| 画像API | API_004_images.md | 担当者D | 完全独立 |
+**外部APIで管理するデータ（BFFでは管理しない）:**
+- 書籍・在庫・カテゴリ・出版社（back-office-api）
+- 顧客情報（customer-hub-api）
 
-**注意事項:**
-- 各APIは共通機能（Entity、共通Service、JWT認証基盤）に依存
-- 共通機能の実装完了後に、各APIの実装を開始してください
+### 実装パターン
 
----
-
-## 開発環境要件
-
-| 項目 | 要件 |
-|------|------|
-| JDK | 21以上 |
-| Jakarta EE | 10 |
-| アプリケーションサーバー | Payara Server 6.x |
-| データベース | HSQLDB 2.7.x |
-| ビルドツール | Gradle 8.x |
-
----
-
-## 品質基準（憲章より）
-
-### テストカバレッジ基準
-- サービス層のユニットテストカバレッジ: **80%以上**
-- 主要APIのE2Eテスト: **完了**
-
-### パフォーマンス基準
-- APIレスポンスタイム: **500ms以内**（95パーセンタイル）
-- スループット: **100 req/sec以上**
-
-### セキュリティ基準
-- JWT認証: HttpOnly Cookie使用
-- パスワード: BCryptハッシュ化
-- 入力検証: Bean Validation使用
+| API Resource | 実装パターン | 説明 |
+|-------------|------------|------|
+| **AuthenResource** | 独自実装 + 外部連携 | JWT生成、customer-hub-apiで認証情報取得 |
+| **BookResource** | プロキシ | back-office-apiにそのまま転送、独自ロジックなし |
+| **CategoryResource** | プロキシ | back-office-apiにそのまま転送、独自ロジックなし |
+| **OrderResource** | 独自実装 + 外部連携 | 注文処理、back-office-apiで在庫更新 |
+| **ImageResource** | 独自実装 | WAR内リソースを直接配信 |
 
 ---
 
 ## 参考資料
 
-### プロジェクト憲章
-- [constitution.md](../principles/constitution.md) - プロジェクト開発憲章
+### 仕様書
 
-### システム仕様書
 - [requirements.md](../specs/baseline/system/requirements.md) - 要件定義書
 - [architecture_design.md](../specs/baseline/system/architecture_design.md) - アーキテクチャ設計書
 - [functional_design.md](../specs/baseline/system/functional_design.md) - 機能設計書
 - [data_model.md](../specs/baseline/system/data_model.md) - データモデル仕様書
-- [behaviors.md](../specs/baseline/system/behaviors.md) - 振る舞い仕様書
 - [external_interface.md](../specs/baseline/system/external_interface.md) - 外部インターフェース仕様書
+- [behaviors.md](../specs/baseline/system/behaviors.md) - 振る舞い仕様書
 
-### API単位仕様書
-- [API_001_auth](../specs/baseline/api/API_001_auth/functional_design.md) - 認証API
-- [API_002_books](../specs/baseline/api/API_002_books/functional_design.md) - 書籍API
-- [API_003_orders](../specs/baseline/api/API_003_orders/functional_design.md) - 注文API
-- [API_004_images](../specs/baseline/api/API_004_images/functional_design.md) - 画像API
+### API別仕様書
+
+- [API_001_auth](../specs/baseline/api/API_001_auth/) - 認証API仕様
+- [API_002_books](../specs/baseline/api/API_002_books/) - 書籍API仕様
+- [API_003_orders](../specs/baseline/api/API_003_orders/) - 注文API仕様
+- [API_004_images](../specs/baseline/api/API_004_images/) - 画像API仕様
+
+### 開発憲章
+
+- [@agent_skills/jakarta-ee-standard/principles/constitution.md](../../../../agent_skills/jakarta-ee-standard/principles/constitution.md) - Jakarta EE開発憲章
+
+---
+
+## プロジェクト情報
+
+**プロジェクトルート:** `projects/sdd/bookstore/berry-books-api-sdd`
+
+**技術スタック:**
+- Jakarta EE 10
+- JAX-RS 3.1（REST API）
+- JPA 3.1（Hibernate実装）
+- CDI 4.0（依存性注入）
+- Bean Validation 3.0
+- JWT（jjwt 0.12.6）
+- BCrypt（パスワードハッシュ化）
+- Payara Server 6
+- HSQLDB 2.7.x
+
+**ビルドツール:** Gradle 8.x
+
+**テストフレームワーク:** JUnit 5 + Mockito

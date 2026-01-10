@@ -7,7 +7,7 @@ curlコマンドを使用してBerry Books APIの全エンドポイントをテ�
 ```
 test_script/
 ├── README.md           # このファイル
-├── test_auth.sh        # 認証API テスト
+├── test_authen.sh      # 認証API テスト
 ├── test_books.sh       # 書籍API テスト
 ├── test_orders.sh      # 注文API テスト
 ├── test_images.sh      # 画像API テスト
@@ -76,7 +76,7 @@ cd projects/master/bookstore/berry-books-api/test_script
 
 ```bash
 # 認証API テスト
-./test_auth.sh
+./test_authen.sh
 
 # 書籍API テスト
 ./test_books.sh
@@ -92,7 +92,7 @@ cd projects/master/bookstore/berry-books-api/test_script
 
 ## 📋 各テストスクリプトの内容
 
-### 1. test_auth.sh - 認証API
+### 1. test_authen.sh - 認証API
 
 - ✅ ユーザー登録 (`POST /api/auth/register`)
 - ✅ ログイン (`POST /api/auth/login`)

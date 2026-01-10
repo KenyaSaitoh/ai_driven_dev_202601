@@ -1,14 +1,13 @@
 package pro.kensait.berrybooks.api.dto;
 
+import java.time.LocalDate;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import java.time.LocalDate;
 
 /**
  * 新規登録リクエストDTO
- * 
- * Java Recordを使用してイミュータブルなDTOを実装
  */
 public record RegisterRequest(
     @NotBlank(message = "顧客名は必須です")
@@ -19,7 +18,7 @@ public record RegisterRequest(
     String password,
     
     @NotBlank(message = "メールアドレスは必須です")
-    @Email(message = "メールアドレスの形式が正しくありません")
+    @Email(message = "有効なメールアドレスを入力してください")
     @Size(max = 30, message = "メールアドレスは30文字以内で入力してください")
     String email,
     
@@ -29,4 +28,3 @@ public record RegisterRequest(
     String address
 ) {
 }
-

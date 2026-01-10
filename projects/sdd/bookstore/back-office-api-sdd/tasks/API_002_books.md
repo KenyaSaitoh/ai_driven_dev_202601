@@ -1,213 +1,177 @@
-# 書籍API タスク
+# API_002_books - 書籍APIタスク
 
-**担当者:** 担当者B（1名）  
+**担当者:** 1名  
 **推奨スキル:** JAX-RS、JPA、JPQL、Criteria API  
-**想定工数:** 6時間  
+**想定工数:** 12時間  
 **依存タスク:** [common_tasks.md](common_tasks.md)
+
+---
+
+## 概要
+
+このタスクリストは、書籍API（一覧取得、詳細取得、検索）の実装タスクを含みます。JPQL検索とCriteria API検索の両方を実装します。
 
 ---
 
 ## タスクリスト
 
-### T_API002_001: [P] BookTOの作成
+### T_API002_001: BookTOの作成
 
-- **目的**: 書籍情報のデータ転送オブジェクトを作成する
-- **対象**: BookTO.java（DTOクラス）
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「4.1 BookTO」
-- **注意事項**: 
-  - bookId、bookName、author、price、imageUrl、quantity、versionを含める
-  - CategoryInfo（ネスト構造）を含める
-  - PublisherInfo（ネスト構造）を含める
-
----
-
-### T_API002_002: [P] BookServiceの作成
-
-- **目的**: 書籍管理のビジネスロジッククラスを作成する
-- **対象**: BookService.java（Serviceクラス）
+- **目的**: 書籍情報レスポンス用のDTOを実装する
+- **対象**: `pro.kensait.backoffice.api.dto.BookTO`（Record）
 - **参照SPEC**: 
-  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.2 Business Logic Layer」
-  - [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「3. エンドポイント詳細」
+  - [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「2.1 GET /api/books」
 - **注意事項**: 
-  - `@ApplicationScoped`でCDI管理する
-  - `@Transactional`でトランザクション境界を制御する
-  - getBooksAll()、getBook()、searchBook()、searchBookWithCriteria()メソッドを実装する
-  - BookDaoとBookDaoCriteriaを使用する
+  - Java Record形式で実装
+  - フィールド: 
+    - `bookId`（Integer）
+    - `bookName`（String）
+    - `author`（String）
+    - `category`（CategoryInfo）
+    - `publisher`（PublisherInfo）
+    - `price`（BigDecimal）
+    - `imageUrl`（String）
+    - `quantity`（Integer）- 在庫数
+    - `version`（Long）- 楽観的ロック用バージョン
+    - `deleted`（Boolean）- 論理削除フラグ
 
 ---
 
-### T_API002_003: [P] CategoryServiceの作成
+### T_API002_002: BookServiceの作成
 
-- **目的**: カテゴリ管理のビジネスロジッククラスを作成する
-- **対象**: CategoryService.java（Serviceクラス）
-- **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.2 Business Logic Layer」
-- **注意事項**: 
-  - `@ApplicationScoped`でCDI管理する
-  - getCategoryMap()メソッドを実装する（Map<String, Integer>形式）
-  - CategoryDaoを使用する
-
----
-
-### T_API002_004: [P] BookResourceの作成
-
-- **目的**: 書籍APIのエンドポイントを実装するResourceクラスを作成する
-- **対象**: BookResource.java（JAX-RS Resourceクラス）
+- **目的**: 書籍検索ビジネスロジックを実装する
+- **対象**: `pro.kensait.backoffice.service.BookService`
 - **参照SPEC**: 
-  - [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「2. エンドポイント一覧」
-  - [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「3. エンドポイント詳細」
+  - [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「3. ビジネスロジック」
 - **注意事項**: 
-  - `@Path("/books")`でベースパスを設定する
-  - getAllBooks()、getBookById()、searchBooks()、searchBooksJpql()、searchBooksCriteria()、getAllCategories()メソッドを実装する
+  - `@ApplicationScoped`、`@Transactional`
+  - BookDao、BookDaoCriteriaを`@Inject`
+  - メソッド:
+    - `getBooksAll()`: 全書籍取得（論理削除を除外）
+    - `getBook(Integer bookId)`: 書籍詳細取得
+    - `searchBook(Integer categoryId)`: カテゴリ別検索
+    - `searchBook(String keyword)`: キーワード検索
+    - `searchBook(Integer categoryId, String keyword)`: 複合検索
+  - BookエンティティをBookTOに変換
+  - 論理削除された書籍は検索結果から除外（`deleted = false`）
+  - 書籍詳細取得では論理削除された書籍も取得可能
 
 ---
 
-### T_API002_005: getAllBooks()メソッドの実装
+### T_API002_003: BookResourceの作成
 
-- **目的**: 書籍一覧取得機能を実装する
-- **対象**: BookResource#getAllBooks()
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「3.1 書籍一覧取得」
-- **注意事項**: 
-  - BookServiceのgetBooksAll()を呼び出す
-  - BookエンティティをBookTOに変換する
-  - 論理削除された書籍（deleted=true）は除外される
-  - ログ出力（INFO）を行う
-
----
-
-### T_API002_006: getBookById()メソッドの実装
-
-- **目的**: 書籍詳細取得機能を実装する
-- **対象**: BookResource#getBookById()
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「3.2 書籍詳細取得」
-- **注意事項**: 
-  - パスパラメータから書籍IDを取得する
-  - BookServiceのgetBook()を呼び出す
-  - 書籍が見つからない場合は404 Not Foundを返す
-  - 論理削除された書籍も取得可能（詳細取得のみ）
-  - ログ出力（INFO、WARN）を行う
-
----
-
-### T_API002_007: searchBooksJpql()メソッドの実装
-
-- **目的**: 書籍検索機能を実装する（JPQL使用）
-- **対象**: BookResource#searchBooksJpql()
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「3.4 書籍検索（JPQL）」
-- **注意事項**: 
-  - クエリパラメータからcategoryIdとkeywordを取得する
-  - 検索条件に応じてBookServiceのメソッドを呼び分ける
-    - categoryId + keyword → searchBook(categoryId, keyword)
-    - categoryIdのみ → searchBook(categoryId)
-    - keywordのみ → searchBook(keyword)
-    - 条件なし → getBooksAll()
-  - categoryId=0は全カテゴリとして扱う
-  - keywordは部分一致検索（LIKE '%keyword%'）
-  - ログ出力（INFO）を行う
-
----
-
-### T_API002_008: searchBooksCriteria()メソッドの実装
-
-- **目的**: 書籍検索機能を実装する（Criteria API使用）
-- **対象**: BookResource#searchBooksCriteria()
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「3.5 書籍検索（Criteria API）」
-- **注意事項**: 
-  - **重要**: Criteria APIで動的クエリを構築する
-  - クエリパラメータからcategoryIdとkeywordを取得する
-  - BookServiceのsearchBookWithCriteria()を呼び出す
-  - カテゴリIDとキーワードの有無に応じて動的に条件を追加する
-  - タイプセーフなクエリ構築を行う
-  - ログ出力（INFO）を行う
-
----
-
-### T_API002_009: searchBooks()メソッドの実装（デフォルト）
-
-- **目的**: 書籍検索機能を実装する（デフォルト: JPQL使用）
-- **対象**: BookResource#searchBooks()
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「3.3 書籍検索（デフォルト）」
-- **注意事項**: 
-  - 内部的にsearchBooksJpql()を呼び出す
-  - デフォルトの検索エンドポイントとして提供する
-
----
-
-### T_API002_010: getAllCategories()メソッドの実装
-
-- **目的**: カテゴリ一覧取得機能を実装する（Map形式）
-- **対象**: BookResource#getAllCategories()
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「3.6 カテゴリ一覧取得（書籍API経由）」
-- **注意事項**: 
-  - CategoryServiceのgetCategoryMap()を呼び出す
-  - Map<String, Integer>形式でレスポンスを返す（カテゴリ名 → カテゴリID）
-  - 後方互換性のために提供される（将来的には/api/categoriesの使用を推奨）
-  - ログ出力（INFO）を行う
-
----
-
-### T_API002_011: [P] 書籍API単体テストの作成
-
-- **目的**: 書籍APIの単体テストを作成する
-- **対象**: BookResourceTest.java（テストクラス）
+- **目的**: 書籍APIのエンドポイントを実装する
+- **対象**: `pro.kensait.backoffice.api.BookResource`
 - **参照SPEC**: 
-  - [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「8. テスト仕様」
-  - [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「11. 動的振る舞い」
+  - [functional_design.md](../specs/baseline/api/API_002_books/functional_design.md) の「2. エンドポイント仕様」
+  - [behaviors.md](../specs/baseline/api/API_002_books/behaviors.md) の「2. 書籍API」
 - **注意事項**: 
-  - 正常系: 全件取得 → 200 OK + 全書籍リスト
-  - 正常系: 詳細取得（存在） → 200 OK + 書籍詳細
-  - 正常系: 検索（カテゴリ+キーワード） → 200 OK + フィルタされた書籍リスト
-  - 正常系: 検索（カテゴリのみ） → 200 OK + カテゴリ1の書籍リスト
-  - 正常系: 検索（キーワードのみ） → 200 OK + キーワードマッチの書籍リスト
-  - 正常系: 検索（条件なし） → 200 OK + 全書籍リスト
-  - 正常系: カテゴリ一覧 → 200 OK + カテゴリMap
-  - 異常系: 詳細取得（存在しない） → 404 Not Found
-  - 異常系: 不正なID形式 → 400 Bad Request
-  - JPQL vs Criteria API比較テスト: 同一条件で同じ結果が返ることを確認
+  - `@Path("/books")`、`@ApplicationScoped`
+  - BookServiceを`@Inject`
+  - エンドポイント:
+    - `@GET`: 全書籍取得
+    - `@GET @Path("/{id}")`: 書籍詳細取得
+    - `@GET @Path("/search/jpql")`: JPQL検索
+      - クエリパラメータ: `categoryId`（Integer、オプション）、`keyword`（String、オプション）
+    - `@GET @Path("/search/criteria")`: Criteria API検索
+      - クエリパラメータ: `categoryId`（Integer、オプション）、`keyword`（String、オプション）
+  - レスポンス: List<BookTO> または BookTO
+  - HTTPステータス: 200 OK、404 Not Found（書籍が存在しない場合）
+  - ログ出力: INFO（API呼び出し）
 
 ---
 
-## API実装完了チェックリスト
+### T_API002_004: 書籍検索の単体テスト（JPQL）
 
-- [ ] BookTOが作成された
-- [ ] BookServiceが作成された
-  - [ ] getBooksAll()が実装された
-  - [ ] getBook()が実装された
-  - [ ] searchBook()（複数オーバーロード）が実装された
-  - [ ] searchBookWithCriteria()が実装された
-- [ ] CategoryServiceが作成された
-  - [ ] getCategoryMap()が実装された
-- [ ] BookResourceが作成された
-- [ ] getAllBooks()メソッドが実装された
-  - [ ] 論理削除された書籍の除外
-  - [ ] ログ出力が実装された
-- [ ] getBookById()メソッドが実装された
-  - [ ] 404エラーハンドリング
-  - [ ] ログ出力が実装された
-- [ ] searchBooksJpql()メソッドが実装された
-  - [ ] 検索条件の分岐処理
-  - [ ] JPQL検索の実装
-  - [ ] ログ出力が実装された
-- [ ] searchBooksCriteria()メソッドが実装された
-  - [ ] Criteria API動的クエリ構築
-  - [ ] ログ出力が実装された
-- [ ] searchBooks()メソッドが実装された（デフォルト）
-- [ ] getAllCategories()メソッドが実装された
-  - [ ] Map形式のレスポンス
-  - [ ] ログ出力が実装された
-- [ ] 書籍API単体テストが作成された
-  - [ ] 正常系テストが実装された
-  - [ ] 異常系テストが実装された
-  - [ ] JPQL vs Criteria API比較テストが実装された
+- **目的**: BookService（JPQL検索）のテストケースを実装する
+- **対象**: `pro.kensait.backoffice.service.BookServiceTest`
+- **参照SPEC**: 
+  - [behaviors.md](../specs/baseline/api/API_002_books/behaviors.md) の「2. 書籍API」
+- **注意事項**: 
+  - JUnit 5 + Mockito使用
+  - BookDaoをモック化
+  - テストケース:
+    - `testGetBooksAll()`: 全書籍取得
+    - `testGetBook_Found()`: 書籍詳細取得（存在する）
+    - `testGetBook_NotFound()`: 書籍詳細取得（存在しない）
+    - `testSearchBook_ByCategory()`: カテゴリ別検索
+    - `testSearchBook_ByKeyword()`: キーワード検索
+    - `testSearchBook_ByCategoryAndKeyword()`: 複合検索
+
+---
+
+### T_API002_005: 書籍検索の単体テスト（Criteria API）
+
+- **目的**: BookDaoCriteria（Criteria API検索）のテストケースを実装する
+- **対象**: `pro.kensait.backoffice.dao.BookDaoCriteriaTest`
+- **参照SPEC**: 
+  - [behaviors.md](../specs/baseline/api/API_002_books/behaviors.md) の「2. 書籍API」
+- **注意事項**: 
+  - JUnit 5使用（モックなし、実際のEntityManager使用が望ましい）
+  - テストケース:
+    - `testSearch_ByCategoryOnly()`: カテゴリのみ指定
+    - `testSearch_ByKeywordOnly()`: キーワードのみ指定
+    - `testSearch_ByCategoryAndKeyword()`: 両方指定
+    - `testSearch_NoCondition()`: 条件なし（全件取得）
+
+---
+
+## 完了確認
+
+### チェックリスト
+
+- [X] BookTO
+- [X] BookService
+- [X] BookResource
+- [X] 書籍検索の単体テスト（JPQL）
+- [X] 書籍検索の単体テスト（Criteria API）
+
+### 動作確認
+
+以下のcurlコマンドで動作確認:
+
+#### 全書籍取得
+```bash
+curl -X GET http://localhost:8080/back-office-api-sdd/api/books
+```
+
+#### 書籍詳細取得
+```bash
+curl -X GET http://localhost:8080/back-office-api-sdd/api/books/1
+```
+
+#### 書籍検索（JPQL） - カテゴリ指定
+```bash
+curl -X GET "http://localhost:8080/back-office-api-sdd/api/books/search/jpql?categoryId=1"
+```
+
+#### 書籍検索（JPQL） - キーワード指定
+```bash
+curl -X GET "http://localhost:8080/back-office-api-sdd/api/books/search/jpql?keyword=Java"
+```
+
+#### 書籍検索（JPQL） - 複合条件
+```bash
+curl -X GET "http://localhost:8080/back-office-api-sdd/api/books/search/jpql?categoryId=1&keyword=Java"
+```
+
+#### 書籍検索（Criteria API） - 複合条件
+```bash
+curl -X GET "http://localhost:8080/back-office-api-sdd/api/books/search/criteria?categoryId=1&keyword=Java"
+```
 
 ---
 
 ## 次のステップ
 
-書籍APIが完了したら、他のAPI実装タスクと並行して進めることができます：
-- [認証API](API_001_auth.md)
-- [カテゴリAPI](API_003_categories.md)
-- [出版社API](API_004_publishers.md)
-- [在庫API](API_005_stocks.md)
-- [ワークフローAPI](API_006_workflows.md)
+このAPI実装完了後、以下のタスクに並行して進めます:
 
-すべてのAPI実装が完了したら、[結合テスト](integration_tasks.md)に進んでください。
+- [API_003_categories.md](API_003_categories.md) - カテゴリAPI
+- [API_004_publishers.md](API_004_publishers.md) - 出版社API
+- [API_005_stocks.md](API_005_stocks.md) - 在庫API
+- [API_006_workflows.md](API_006_workflows.md) - ワークフローAPI
+
+---
+
+**タスクファイル作成日:** 2025-01-10  
+**想定実行順序:** 4番目（共通機能実装後）

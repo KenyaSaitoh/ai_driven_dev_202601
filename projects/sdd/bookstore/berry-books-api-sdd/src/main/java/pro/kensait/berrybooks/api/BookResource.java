@@ -1,118 +1,132 @@
 package pro.kensait.berrybooks.api;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pro.kensait.berrybooks.api.dto.ErrorResponse;
-import pro.kensait.berrybooks.entity.Book;
-import pro.kensait.berrybooks.service.book.BookService;
-import pro.kensait.berrybooks.service.category.CategoryService;
 
-import java.util.List;
-import java.util.Map;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import pro.kensait.berrybooks.external.BackOfficeRestClient;
+import pro.kensait.berrybooks.external.dto.BookTO;
 
 /**
- * 書籍API Resource
+ * 書籍APIリソース（プロキシパターン）
  * 
- * ベースパス: /api/books
- * 
- * エンドポイント:
- * - GET /: 書籍一覧取得
- * - GET /{id}: 書籍詳細取得
- * - GET /search: 書籍検索
- * - GET /categories: カテゴリ一覧取得
+ * 書籍の一覧取得、詳細取得、検索を提供する。
+ * すべてのリクエストはback-office-apiに転送される。
  */
 @Path("/books")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+@ApplicationScoped
 public class BookResource {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(BookResource.class);
-    
+
     @Inject
-    private BookService bookService;
-    
-    @Inject
-    private CategoryService categoryService;
-    
+    private BackOfficeRestClient backOfficeClient;
+
     /**
-     * 書籍一覧取得
+     * 全書籍取得
      * 
      * @return 書籍リスト
      */
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getAllBooks() {
-        logger.info("[ BookResource#getAllBooks ] Retrieving all books");
+        logger.info("[ BookResource#getAllBooks ]");
         
-        List<Book> books = bookService.getAllBooks();
-        
-        return Response.ok(books).build();
+        try {
+            List<BookTO> books = backOfficeClient.findAllBooks();
+            logger.info("Found {} books", books.size());
+            return Response.ok(books).build();
+        } catch (Exception e) {
+            logger.error("[ BookResource#getAllBooks ] Error", e);
+            throw e;
+        }
     }
-    
+
     /**
      * 書籍詳細取得
      * 
-     * @param id 書籍ID
-     * @return 書籍詳細
+     * @param bookId 書籍ID
+     * @return 書籍情報
      */
     @GET
     @Path("/{id}")
-    public Response getBookById(@PathParam("id") Integer id) {
-        logger.info("[ BookResource#getBookById ] bookId={}", id);
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getBookById(@PathParam("id") Integer bookId) {
+        logger.info("[ BookResource#getBookById ] bookId={}", bookId);
         
-        Book book = bookService.getBookById(id);
-        
-        if (book == null) {
-            logger.warn("[ BookResource#getBookById ] Book not found: {}", id);
-            ErrorResponse errorResponse = new ErrorResponse(
-                404,
-                "Not Found",
-                "書籍が見つかりません",
-                "/api/books/" + id
-            );
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(errorResponse)
-                    .build();
+        try {
+            BookTO book = backOfficeClient.findBookById(bookId);
+            if (book == null) {
+                logger.warn("Book not found: bookId={}", bookId);
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"error\":\"書籍が見つかりません\"}")
+                        .type(MediaType.APPLICATION_JSON)
+                        .build();
+            }
+            return Response.ok(book).build();
+        } catch (Exception e) {
+            logger.error("[ BookResource#getBookById ] Error: bookId={}", bookId, e);
+            throw e;
         }
-        
-        return Response.ok(book).build();
     }
-    
+
     /**
-     * 書籍検索
+     * 書籍検索（JPQL版）
      * 
-     * @param categoryId カテゴリID（0または未指定=全カテゴリ）
-     * @param keyword キーワード（書籍名、著者名で部分一致検索）
-     * @return 書籍リスト
+     * @param categoryId カテゴリID（オプション）
+     * @param keyword キーワード（オプション）
+     * @return 検索結果の書籍リスト
      */
     @GET
-    @Path("/search")
-    public Response searchBooks(
-            @QueryParam("categoryId") @DefaultValue("0") Integer categoryId,
+    @Path("/search/jpql")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response searchBooksJpql(
+            @QueryParam("categoryId") Integer categoryId,
             @QueryParam("keyword") String keyword) {
-        logger.info("[ BookResource#searchBooks ] categoryId={}, keyword={}", categoryId, keyword);
+        logger.info("[ BookResource#searchBooksJpql ] categoryId={}, keyword={}", categoryId, keyword);
         
-        List<Book> books = bookService.searchBooks(categoryId, keyword);
-        
-        return Response.ok(books).build();
+        try {
+            List<BookTO> books = backOfficeClient.searchBooksJpql(categoryId, keyword);
+            logger.info("Found {} books", books.size());
+            return Response.ok(books).build();
+        } catch (Exception e) {
+            logger.error("[ BookResource#searchBooksJpql ] Error", e);
+            throw e;
+        }
     }
-    
+
     /**
-     * カテゴリ一覧取得
+     * 書籍検索（Criteria API版）
      * 
-     * @return カテゴリMap<カテゴリ名, カテゴリID>
+     * @param categoryId カテゴリID（オプション）
+     * @param keyword キーワード（オプション）
+     * @return 検索結果の書籍リスト
      */
     @GET
-    @Path("/categories")
-    public Response getCategories() {
-        logger.info("[ BookResource#getCategories ] Retrieving categories");
+    @Path("/search/criteria")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response searchBooksCriteria(
+            @QueryParam("categoryId") Integer categoryId,
+            @QueryParam("keyword") String keyword) {
+        logger.info("[ BookResource#searchBooksCriteria ] categoryId={}, keyword={}", categoryId, keyword);
         
-        Map<String, Integer> categoryMap = categoryService.getCategoryMap();
-        
-        return Response.ok(categoryMap).build();
+        try {
+            List<BookTO> books = backOfficeClient.searchBooksCriteria(categoryId, keyword);
+            logger.info("Found {} books", books.size());
+            return Response.ok(books).build();
+        } catch (Exception e) {
+            logger.error("[ BookResource#searchBooksCriteria ] Error", e);
+            throw e;
+        }
     }
 }
-

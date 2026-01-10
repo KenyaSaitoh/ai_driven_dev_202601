@@ -18,19 +18,18 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 ### ① プロジェクトを開始するときに1回だけ実行
 
-> **Note:** データベースのセットアップは`berry-books-api`プロジェクトで行います。  
-> まだ実行していない場合は、先に以下を実行してください：
-> ```bash
-> ./gradlew :berry-books-api:setupHsqldb
-> ```
-
 ```bash
-# 1. プロジェクトをビルド
+# 1. データベースのセットアップ（CUSTOMERテーブルとテストデータの作成）
+./gradlew :customer-hub-api:setupHsqldb
+
+# 2. プロジェクトをビルド
 ./gradlew :customer-hub-api:war
 
-# 2. プロジェクトをデプロイ
+# 3. プロジェクトをデプロイ
 ./gradlew :customer-hub-api:deploy
 ```
+
+> **Note:** このプロジェクトは独自にCUSTOMERテーブルを管理します。
 
 ### ② プロジェクトを終了するときに1回だけ実行（CleanUp）
 
@@ -52,7 +51,7 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 デプロイ後、以下のURLでAPIにアクセス：
 
 - **顧客取得**: http://localhost:8080/customer-hub-api/customers/1
-- **顧客検索（メール）**: http://localhost:8080/customer-hub-api/customers/query_email?email=alice@gmail.com
+- **顧客検索（メール）**: http://localhost:8080/customer-hub-api/customers/query_email?email=alice@example.com
 
 ## 🎯 プロジェクト構成
 
@@ -222,19 +221,19 @@ curl -X GET http://localhost:8080/customer-hub-api/customers/1
 [
   {
     "customerId": 1,
-    "customerName": "Alice Johnson",
-    "email": "alice@gmail.com",
-    "birthday": "1990-05-15",
-    "address": "123 Main St, Springfield",
+    "customerName": "Alice",
+    "email": "alice@example.com",
+    "birthday": "1998-04-10",
+    "address": "東京都中央区1-1-1",
     "orderCount": 5,
     "totalBooks": 12
   },
   {
     "customerId": 2,
-    "customerName": "Bob Smith",
-    "email": "bob@gmail.com",
-    "birthday": "1985-08-22",
-    "address": "456 Oak Ave, Shelbyville",
+    "customerName": "Bob",
+    "email": "bob@example.com",
+    "birthday": "1988-05-10",
+    "address": "東京都杉並区2-2-2",
     "orderCount": 3,
     "totalBooks": 7
   }
@@ -244,7 +243,7 @@ curl -X GET http://localhost:8080/customer-hub-api/customers/1
 #### 2. 顧客を取得（メールアドレス検索）
 
 ```bash
-curl -X GET "http://localhost:8080/customer-hub-api/customers/query_email?email=alice@gmail.com"
+curl -X GET "http://localhost:8080/customer-hub-api/customers/query_email?email=alice@example.com"
 ```
 
 #### 3. 顧客を新規登録

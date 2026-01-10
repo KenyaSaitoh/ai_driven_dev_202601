@@ -1,206 +1,328 @@
 # 結合テストタスク
 
-**担当者:** 全員（各API担当者が協力して実施）  
-**推奨スキル:** REST Assured、JAX-RS Client、並行処理テスト  
-**想定工数:** 6時間  
-**依存タスク:** すべてのAPI実装タスク（[API_001_auth.md](API_001_auth.md)～[API_006_workflows.md](API_006_workflows.md)）
+**担当者:** 全員（API実装完了後）  
+**推奨スキル:** REST Assured、JAX-RS Client、JUnit 5  
+**想定工数:** 8時間  
+**依存タスク:** 全APIタスク完了後
+
+---
+
+## 概要
+
+このタスクリストは、全API実装完了後に実施する結合テストタスクを含みます。API間の連携、E2E APIテスト、パフォーマンステスト、セキュリティテストを実施します。
+
+**重要:** 結合テストは通常のビルドから除外し、個別実行可能にする設定（JUnit `@Tag`、Gradle設定等）を明記してください。
 
 ---
 
 ## タスクリスト
 
-### T_INTEGRATION_001: [P] API間結合テストの作成
+## 1. テスト環境設定
 
-- **目的**: 複数のAPIを組み合わせた結合テストを作成する
-- **対象**: IntegrationTest.java（テストクラス）
+### T_INTEGRATION_001: 結合テスト用の設定
+
+- **目的**: 結合テスト実行環境を設定する
+- **対象**: 
+  - `build.gradle`（Gradleタスク設定）
+  - テストクラスに`@Tag("integration")`を付与
 - **参照SPEC**: 
-  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「5. データフロー」
-  - [functional_design.md (system)](../specs/baseline/system/functional_design.md) の「10. テスト要件」
+  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「10. テスト」
 - **注意事項**: 
-  - REST AssuredまたはJAX-RS Clientを使用する
-  - 認証 → 書籍一覧取得 → 書籍詳細取得のシーケンステスト
-  - 認証 → カテゴリ一覧取得 → 書籍検索のシーケンステスト
-  - 認証 → 在庫取得 → 在庫更新のシーケンステスト
+  - REST Assured依存関係を追加
+  - 結合テスト用のGradleタスク `integrationTest` を作成
+  - `./gradlew integrationTest` で実行可能にする
+  - 通常の `./gradlew test` では結合テストを除外
+  - テストクラスに`@Tag("integration")`を付与して識別
 
 ---
 
-### T_INTEGRATION_002: [P] E2E APIテストの作成（主要業務フロー）
+## 2. E2E APIテスト（REST Assured）
 
-- **目的**: 主要な業務フローをAPIシーケンスでテストする
-- **対象**: E2EApiTest.java（テストクラス）
+### T_INTEGRATION_002: 認証フローのE2Eテスト
+
+- **目的**: ログインからログアウトまでのE2Eフローをテストする
+- **対象**: `pro.kensait.backoffice.integration.AuthenticationE2ETest`
 - **参照SPEC**: 
-  - [behaviors.md (system)](../specs/baseline/system/behaviors.md)
-  - [functional_design.md (system)](../specs/baseline/system/functional_design.md) の「10. テスト要件」
+  - [behaviors.md](../specs/baseline/system/behaviors.md) の「3.1 E2E-001」
 - **注意事項**: 
-  - **ワークフロー完全フロー**: 作成 → 申請 → 承認 → 書籍マスタ反映確認
-  - **新規書籍追加フロー**: ワークフロー作成（ADD_NEW_BOOK） → 申請 → 承認 → 書籍一覧で確認
-  - **書籍削除フロー**: ワークフロー作成（REMOVE_BOOK） → 申請 → 承認 → 論理削除確認
-  - **価格改定フロー**: ワークフロー作成（ADJUST_BOOK_PRICE） → 申請 → 承認 → 価格更新確認
-  - **ワークフロー却下フロー**: 作成 → 申請 → 却下 → 再申請 → 承認
-  - REST AssuredまたはJAX-RS Clientを使用する
-  - 各フローの最後に期待される状態を検証する
+  - `@Tag("integration")`を付与
+  - REST Assured使用
+  - テストケース:
+    - `testLoginFlow()`: ログイン → Cookie取得 → APIアクセス
+    - `testLogoutFlow()`: ログアウト → Cookie削除
 
 ---
 
-### T_INTEGRATION_003: 並行処理テストの作成（在庫更新競合）
+### T_INTEGRATION_003: [P] 書籍検索フローのE2Eテスト
 
-- **目的**: 在庫更新の並行処理シナリオをテストする（楽観的ロック）
-- **対象**: ConcurrencyTest.java（テストクラス）
+- **目的**: 書籍一覧取得、検索、詳細取得のE2Eフローをテストする
+- **対象**: `pro.kensait.backoffice.integration.BookSearchE2ETest`
 - **参照SPEC**: 
-  - [functional_design.md (API_005_stocks)](../specs/baseline/api/API_005_stocks/functional_design.md) の「4. 楽観的ロックの仕組み」
-  - [functional_design.md (API_005_stocks)](../specs/baseline/api/API_005_stocks/functional_design.md) の「11.6 並行更新フローチャート」
+  - [behaviors.md](../specs/baseline/system/behaviors.md) の「3.1 E2E-001」
 - **注意事項**: 
-  - **重要**: 2つのスレッドが同時に同じ在庫を更新するシナリオをテストする
-  - ユーザーA: 在庫取得（version=1） → 更新リクエスト（version=1） → 成功（version=2）
-  - ユーザーB: 在庫取得（version=1） → 更新リクエスト（version=1） → 409 Conflict
-  - ユーザーB: 再取得（version=2） → 更新リクエスト（version=2） → 成功（version=3）
-  - ExecutorServiceを使用して並行実行する
-  - 楽観的ロック例外が正しく処理されることを確認する
+  - `@Tag("integration")`を付与
+  - REST Assured使用
+  - テストケース:
+    - `testBookListFlow()`: ログイン → 書籍一覧取得
+    - `testBookSearchFlow()`: ログイン → 書籍検索（JPQL） → 書籍詳細取得
+    - `testBookSearchCriteriaFlow()`: ログイン → 書籍検索（Criteria API）
 
 ---
 
-### T_INTEGRATION_004: [P] パフォーマンステストの作成
+### T_INTEGRATION_004: [P] 在庫更新フローのE2Eテスト
 
-- **目的**: APIのパフォーマンス要件を満たすことを確認する
-- **対象**: PerformanceTest.java（テストクラス）
+- **目的**: 在庫取得、更新のE2Eフローをテストする
+- **対象**: `pro.kensait.backoffice.integration.StockUpdateE2ETest`
 - **参照SPEC**: 
-  - [requirements.md](../specs/baseline/system/requirements.md) の「3.1 性能要件」
-  - [functional_design.md (system)](../specs/baseline/system/functional_design.md) の「9. パフォーマンス考慮事項」
+  - [behaviors.md](../specs/baseline/system/behaviors.md) の「3.1 E2E-003」
 - **注意事項**: 
-  - 書籍一覧取得: 200ms以内
-  - 書籍詳細取得: 100ms以内
-  - 書籍検索: 500ms以内
-  - 在庫更新: 200ms以内
-  - ログイン: 500ms以内
-  - ワークフロー承認: 1秒以内
-  - 複数回実行して平均レスポンスタイムを測定する
+  - `@Tag("integration")`を付与
+  - REST Assured使用
+  - テストケース:
+    - `testStockUpdateFlow()`: ログイン → 在庫取得 → 在庫更新 → 書籍詳細取得（在庫確認）
+    - `testOptimisticLockFlow()`: 2つのリクエストで同時更新 → 楽観的ロック失敗（409 Conflict）
 
 ---
 
-### T_INTEGRATION_005: [P] CORS動作確認テストの作成
+### T_INTEGRATION_005: [P] ワークフロー申請・承認フローのE2Eテスト
 
-- **目的**: CORSフィルタが正しく動作することを確認する
-- **対象**: CorsTest.java（テストクラス）
-- **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.5 Cross-Cutting Concerns」
-- **注意事項**: 
-  - OPTIONSリクエストでプリフライトチェックを確認する
-  - Access-Control-Allow-Originヘッダーが設定されていることを確認する
-  - Access-Control-Allow-Methodsヘッダーが設定されていることを確認する
-  - Access-Control-Allow-Headersヘッダーが設定されていることを確認する
-
----
-
-### T_INTEGRATION_006: [P] エラーハンドリング統合テストの作成
-
-- **目的**: すべてのException Mapperが正しく動作することを確認する
-- **対象**: ErrorHandlingTest.java（テストクラス）
+- **目的**: ワークフロー作成、申請、承認、書籍マスタ反映のE2Eフローをテストする
+- **対象**: `pro.kensait.backoffice.integration.WorkflowApprovalE2ETest`
 - **参照SPEC**: 
-  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「8. エラーハンドリング」
-  - [functional_design.md (system)](../specs/baseline/system/functional_design.md) の「6. エラーハンドリング」
+  - [behaviors.md](../specs/baseline/system/behaviors.md) の「3.1 E2E-002」
 - **注意事項**: 
-  - 400 Bad Request: バリデーションエラー
-  - 401 Unauthorized: 認証失敗
-  - 403 Forbidden: 承認権限不足
-  - 404 Not Found: リソースが見つからない
-  - 409 Conflict: 楽観的ロック失敗
-  - 500 Internal Server Error: 予期しないエラー
-  - すべてのエラーレスポンスがErrorResponse形式であることを確認する
+  - `@Tag("integration")`を付与
+  - REST Assured使用
+  - テストケース:
+    - `testAddNewBookFlow()`: ログイン（一般社員） → ワークフロー作成（ADD_NEW_BOOK） → 申請 → ログイン（マネージャー） → 承認 → 書籍一覧取得（新規書籍確認）
+    - `testRemoveBookFlow()`: ログイン → ワークフロー作成（REMOVE_BOOK） → 申請 → 承認 → 書籍一覧取得（削除された書籍が表示されない）
+    - `testAdjustPriceFlow()`: ログイン → ワークフロー作成（ADJUST_BOOK_PRICE） → 申請 → 承認 → 書籍詳細取得（価格確認）
 
 ---
 
-### T_INTEGRATION_007: トランザクション統合テストの作成
+## 3. API間結合テスト
 
-- **目的**: トランザクション管理が正しく動作することを確認する
-- **対象**: TransactionTest.java（テストクラス）
+### T_INTEGRATION_006: [P] 全APIエンドポイントの疎通確認
+
+- **目的**: 全APIエンドポイントが正常に動作することを確認する
+- **対象**: `pro.kensait.backoffice.integration.AllApiEndpointsTest`
 - **参照SPEC**: 
-  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「7. トランザクション設計」
-  - [functional_design.md (system)](../specs/baseline/system/functional_design.md) の「7. トランザクション管理」
+  - [functional_design.md](../specs/baseline/system/functional_design.md) の「2. 機能一覧」
 - **注意事項**: 
-  - **ワークフロー承認トランザクション**: ワークフロー履歴追加と書籍マスタ反映が1トランザクションで実行されることを確認
-  - エラー発生時にロールバックされることを確認
-  - 意図的にエラーを発生させてロールバックをテストする
+  - `@Tag("integration")`を付与
+  - REST Assured使用
+  - 全エンドポイント（認証、書籍、カテゴリ、出版社、在庫、ワークフロー）にアクセス
+  - HTTPステータスコードが期待値であることを確認
 
 ---
 
-### T_INTEGRATION_008: [P] JPQL vs Criteria API比較テストの作成
+## 4. トランザクションテスト
 
-- **目的**: JPQLとCriteria APIの検索結果が一致することを確認する
-- **対象**: QueryComparisonTest.java（テストクラス）
+### T_INTEGRATION_007: ワークフロー承認時のトランザクション整合性テスト
+
+- **目的**: ワークフロー承認時のトランザクション整合性を確認する
+- **対象**: `pro.kensait.backoffice.integration.WorkflowTransactionTest`
 - **参照SPEC**: 
-  - [functional_design.md (API_002_books)](../specs/baseline/api/API_002_books/functional_design.md) の「3.4 書籍検索（JPQL）」
-  - [functional_design.md (API_002_books)](../specs/baseline/api/API_002_books/functional_design.md) の「3.5 書籍検索（Criteria API）」
+  - [behaviors.md](../specs/baseline/system/behaviors.md) の「7.1 TRAN-001」
 - **注意事項**: 
-  - 同一の検索条件でJPQLとCriteria APIを実行する
-  - 結果セットが完全に一致することを確認する
-  - カテゴリ+キーワード、カテゴリのみ、キーワードのみ、条件なしの各パターンをテストする
+  - `@Tag("integration")`を付与
+  - テストケース:
+    - `testApprovalTransaction_Success()`: 承認成功時、WORKFLOW_OPERATION INSERTとBOOK INSERT/UPDATEが両方コミットされる
+    - `testApprovalTransaction_Rollback()`: 書籍マスタ反映失敗時、WORKFLOW_OPERATIONもロールバックされる
 
 ---
 
-### T_INTEGRATION_009: 最終検証テストの作成
+## 5. パフォーマンステスト
 
-- **目的**: システム全体の最終検証を行う
-- **対象**: FinalVerificationTest.java（テストクラス）
+### T_INTEGRATION_008: APIレスポンスタイムテスト
+
+- **目的**: 各APIのレスポンスタイムが要件を満たすことを確認する
+- **対象**: `pro.kensait.backoffice.integration.PerformanceTest`
 - **参照SPEC**: 
-  - [requirements.md](../specs/baseline/system/requirements.md) の「2. 機能要件」
-  - [requirements.md](../specs/baseline/system/requirements.md) の「3. 非機能要件」
+  - [behaviors.md](../specs/baseline/system/behaviors.md) の「5.1 レスポンスタイム」
 - **注意事項**: 
-  - すべての機能要件が実装されていることを確認する
-  - すべてのエンドポイントが正常に動作することを確認する
-  - データベースの整合性を確認する
-  - ログが正しく出力されることを確認する
+  - `@Tag("integration")`を付与
+  - REST Assured使用
+  - テストケース:
+    - `testAuthApiResponseTime()`: 認証API（500ms以内）
+    - `testBookApiResponseTime()`: 書籍API（500ms以内）
+    - `testCategoryApiResponseTime()`: カテゴリAPI（50ms以内）
+    - `testPublisherApiResponseTime()`: 出版社API（50ms以内）
+    - `testStockApiResponseTime()`: 在庫API（200ms以内）
+    - `testWorkflowApiResponseTime()`: ワークフローAPI（1秒以内）
+  - 各APIに10回アクセスし、95パーセンタイル値を計測
 
 ---
 
-### T_INTEGRATION_010: テスト実行設定の作成
+### T_INTEGRATION_009: N+1問題の確認
 
-- **目的**: 結合テストの実行設定を作成する
-- **対象**: Gradle設定、JUnit設定
-- **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「11. デプロイメント構成」
+- **目的**: N+1問題が発生していないことを確認する
+- **対象**: `pro.kensait.backoffice.integration.NplusOneTest`
+- **参照SPEC**: 
+  - [behaviors.md](../specs/baseline/system/behaviors.md) の「5.3 N+1問題の防止」
 - **注意事項**: 
-  - E2E APIテストは通常ビルドから除外する
-  - `@Tag("integration")`でタグ付けする
-  - Gradleタスクで個別実行可能にする（例: `gradle integrationTest`）
-  - テスト実行前にデータベースを初期化する
-  - テスト実行後にクリーンアップする
+  - `@Tag("integration")`を付与
+  - SQLログを監視してクエリ実行回数を確認
+  - テストケース:
+    - `testBookListQuery()`: 書籍一覧取得時、1回のクエリで全データ取得
+    - `testWorkflowListQuery()`: ワークフロー一覧取得時、1回のクエリで全データ取得
 
 ---
 
-## 結合テスト完了チェックリスト
+## 6. セキュリティテスト
 
-- [ ] API間結合テストが作成された
-- [ ] E2E APIテストが作成された
-  - [ ] ワークフロー完全フロー
-  - [ ] 新規書籍追加フロー
-  - [ ] 書籍削除フロー
-  - [ ] 価格改定フロー
-  - [ ] ワークフロー却下フロー
-- [ ] 並行処理テストが作成された
-  - [ ] 在庫更新競合シナリオ
-  - [ ] 楽観的ロック動作確認
-- [ ] パフォーマンステストが作成された
-  - [ ] すべてのAPIのレスポンスタイム測定
-- [ ] CORS動作確認テストが作成された
-- [ ] エラーハンドリング統合テストが作成された
-  - [ ] すべてのHTTPステータスコード確認
-- [ ] トランザクション統合テストが作成された
-  - [ ] ロールバック動作確認
-- [ ] JPQL vs Criteria API比較テストが作成された
-- [ ] 最終検証テストが作成された
-- [ ] テスト実行設定が作成された
-  - [ ] Gradle設定
-  - [ ] JUnit設定（@Tag）
+### T_INTEGRATION_010: [P] JWT認証のセキュリティテスト
+
+- **目的**: JWT認証のセキュリティ要件を確認する
+- **対象**: `pro.kensait.backoffice.integration.JwtSecurityTest`
+- **参照SPEC**: 
+  - [behaviors.md](../specs/baseline/system/behaviors.md) の「6.1 認証・認可」
+- **注意事項**: 
+  - `@Tag("integration")`を付与
+  - テストケース:
+    - `testJwtCookieIsHttpOnly()`: JWT CookieがHttpOnlyである
+    - `testJwtExpiration()`: JWT有効期限が24時間である
+    - `testPasswordIsHashed()`: パスワードがBCryptハッシュ化されている
+
+---
+
+### T_INTEGRATION_011: [P] ワークフロー承認権限のテスト
+
+- **目的**: ワークフロー承認権限が正しく制御されることを確認する
+- **対象**: `pro.kensait.backoffice.integration.WorkflowAuthorizationTest`
+- **参照SPEC**: 
+  - [behaviors.md](../specs/baseline/system/behaviors.md) の「6.1 SEC-004」
+- **注意事項**: 
+  - `@Tag("integration")`を付与
+  - テストケース:
+    - `testAssociateCannotApprove()`: ASSOCIATE（一般社員）は承認不可（403 Forbidden）
+    - `testManagerCanApproveSameDepartment()`: MANAGER（マネージャー）は同一部署のみ承認可
+    - `testManagerCannotApproveOtherDepartment()`: MANAGERは他部署のワークフローを承認不可（403 Forbidden）
+    - `testDirectorCanApproveAllDepartments()`: DIRECTOR（ディレクター）は全部署のワークフローを承認可
+
+---
+
+## 7. エラーハンドリングテスト
+
+### T_INTEGRATION_012: [P] エラーレスポンスの確認
+
+- **目的**: エラーレスポンスが統一フォーマットで返されることを確認する
+- **対象**: `pro.kensait.backoffice.integration.ErrorHandlingTest`
+- **参照SPEC**: 
+  - [behaviors.md](../specs/baseline/system/behaviors.md) の「10.1 エラーレスポンス」
+- **注意事項**: 
+  - `@Tag("integration")`を付与
+  - テストケース:
+    - `test404NotFound()`: リソースが見つからない（404 Not Found）
+    - `test400BadRequest()`: バリデーションエラー（400 Bad Request）
+    - `test403Forbidden()`: 権限不足（403 Forbidden）
+    - `test409Conflict()`: 楽観的ロック失敗（409 Conflict）
+    - `test500InternalServerError()`: システムエラー（500 Internal Server Error）
+  - レスポンス形式: `{"error": "...", "message": "..."}`
+
+---
+
+## 8. データ整合性テスト
+
+### T_INTEGRATION_013: [P] データ整合性の確認
+
+- **目的**: データベースの外部キー整合性を確認する
+- **対象**: `pro.kensait.backoffice.integration.DataIntegrityTest`
+- **参照SPEC**: 
+  - [behaviors.md](../specs/baseline/system/behaviors.md) の「4.1 外部キー整合性」
+- **注意事項**: 
+  - `@Tag("integration")`を付与
+  - テストケース:
+    - `testBookCategoryIntegrity()`: 全書籍にcategoryIdが存在し、CATEGORYテーブルに対応レコードが存在
+    - `testBookPublisherIntegrity()`: 全書籍にpublisherIdが存在し、PUBLISHERテーブルに対応レコードが存在
+    - `testBookStockIntegrity()`: 全書籍にSTOCKレコードが存在（1:1関係）
+    - `testWorkflowEmployeeIntegrity()`: 全ワークフローにcreatedBy, operatedByが存在し、EMPLOYEEテーブルに対応レコードが存在
+
+---
+
+## 9. 最終検証
+
+### T_INTEGRATION_014: システム全体の最終検証
+
+- **目的**: システム全体が要件通りに動作することを確認する
+- **対象**: 手動テスト + 自動テスト
+- **参照SPEC**: 
+  - [behaviors.md](../specs/baseline/system/behaviors.md) の「2. ユーザーストーリー」
+- **注意事項**: 
+  - 全ユーザーストーリーを実行
+  - 主要なビジネスフローをエンドツーエンドで確認
+  - データ整合性を確認
+  - ログ出力を確認
+  - エラーハンドリングを確認
+
+---
+
+## 完了確認
+
+### チェックリスト
+
+#### テスト環境設定
+- [ ] 結合テスト用の設定（Gradle、`@Tag`）
+
+#### E2E APIテスト
+- [ ] 認証フローのE2Eテスト
+- [ ] 書籍検索フローのE2Eテスト
+- [ ] 在庫更新フローのE2Eテスト
+- [ ] ワークフロー申請・承認フローのE2Eテスト
+
+#### API間結合テスト
+- [ ] 全APIエンドポイントの疎通確認
+
+#### トランザクションテスト
+- [ ] ワークフロー承認時のトランザクション整合性テスト
+
+#### パフォーマンステスト
+- [ ] APIレスポンスタイムテスト
+- [ ] N+1問題の確認
+
+#### セキュリティテスト
+- [ ] JWT認証のセキュリティテスト
+- [ ] ワークフロー承認権限のテスト
+
+#### エラーハンドリングテスト
+- [ ] エラーレスポンスの確認
+
+#### データ整合性テスト
+- [ ] データ整合性の確認
+
+#### 最終検証
+- [ ] システム全体の最終検証
+
+---
+
+## 実行方法
+
+### 結合テストの実行
+```bash
+# 全結合テストを実行
+./gradlew :back-office-api-sdd:integrationTest
+
+# 特定のテストクラスを実行
+./gradlew :back-office-api-sdd:integrationTest --tests "*AuthenticationE2ETest"
+```
+
+### 通常のビルド（結合テスト除外）
+```bash
+# 単体テストのみ実行（結合テストは除外）
+./gradlew :back-office-api-sdd:test
+```
 
 ---
 
 ## 次のステップ
 
-すべての結合テストが完了し、テストが成功したら、プロジェクトは完成です！
+結合テスト完了後、以下の作業に進んでください:
 
-最終確認事項：
-- [ ] すべての単体テストが成功する
-- [ ] すべての結合テストが成功する
-- [ ] すべての機能要件が実装されている
-- [ ] すべての非機能要件が満たされている
-- [ ] ドキュメントが最新の状態である
-- [ ] コードレビューが完了している
-- [ ] デプロイメント準備が完了している
+1. **ドキュメント更新**: README.md、API仕様書の更新
+2. **デプロイ準備**: 本番環境へのデプロイ準備
+3. **運用準備**: 監視、ログ設定、バックアップ設定
+
+---
+
+**タスクファイル作成日:** 2025-01-10  
+**想定実行順序:** 9番目（最後）

@@ -1,123 +1,193 @@
-# Books Stock API - バックオフィス書籍在庫管理システム 実装タスクリスト
+# back-office-api-sdd - 実装タスクリスト
+
+**プロジェクト名:** Books Stock API - バックオフィス書籍在庫管理システム  
+**アーキテクチャ:** マイクロサービス（レイヤードアーキテクチャ）  
+**生成日:** 2025-01-10
+
+---
 
 ## 全体構成と担当割り当て
 
 ### タスク概要
+
 | タスク | タスクファイル | 担当者 | 並行実行 | 想定工数 |
 |---------|--------------|--------|---------|---------|
 | 0. セットアップ | [setup_tasks.md](setup_tasks.md) | 全員 | 不可 | 2時間 |
-| 1. 共通機能 | [common_tasks.md](common_tasks.md) | 共通機能チーム | 一部可能 | 8時間 |
-| 2. 認証API | [API_001_auth.md](API_001_auth.md) | 担当者A | 可能 | 4時間 |
-| 3. 書籍API | [API_002_books.md](API_002_books.md) | 担当者B | 可能 | 6時間 |
-| 4. カテゴリAPI | [API_003_categories.md](API_003_categories.md) | 担当者C | 可能 | 2時間 |
-| 5. 出版社API | [API_004_publishers.md](API_004_publishers.md) | 担当者D | 可能 | 2時間 |
-| 6. 在庫API | [API_005_stocks.md](API_005_stocks.md) | 担当者E | 可能 | 4時間 |
-| 7. ワークフローAPI | [API_006_workflows.md](API_006_workflows.md) | 担当者F | 可能 | 10時間 |
-| 8. 結合テスト | [integration_tasks.md](integration_tasks.md) | 全員 | 一部可能 | 6時間 |
+| 1. 共通機能 | [common_tasks.md](common_tasks.md) | 共通機能チーム | 一部可能 | 16時間 |
+| 2. API_001_auth | [API_001_auth.md](API_001_auth.md) | 担当者A | 可能 | 8時間 |
+| 3. API_002_books | [API_002_books.md](API_002_books.md) | 担当者B | 可能 | 12時間 |
+| 4. API_003_categories | [API_003_categories.md](API_003_categories.md) | 担当者C | 可能 | 4時間 |
+| 5. API_004_publishers | [API_004_publishers.md](API_004_publishers.md) | 担当者D | 可能 | 4時間 |
+| 6. API_005_stocks | [API_005_stocks.md](API_005_stocks.md) | 担当者E | 可能 | 6時間 |
+| 7. API_006_workflows | [API_006_workflows.md](API_006_workflows.md) | 担当者F | 可能 | 16時間 |
+| 8. 結合テスト | [integration_tasks.md](integration_tasks.md) | 全員 | 一部可能 | 8時間 |
 
-**合計想定工数**: 44時間
+**合計想定工数:** 76時間
 
-### 実行順序
-1. **タスク0: セットアップ**（全員で実行）
-   - プロジェクト初期化、データベース設定、アプリケーションサーバー設定
-2. **タスク1: 共通機能**（共通機能チームが実装）
-   - 全エンティティ（Book, Stock, Category, Publisher, Employee, Department, Workflow）
-   - 全DAO（BookDao, BookDaoCriteria, StockDao, CategoryDao, PublisherDao, EmployeeDao, DepartmentDao, WorkflowDao）
-   - 共通DTO、例外ハンドラ、ユーティリティクラス
-3. **タスク2～7: API別実装**（各担当者が並行実行） ← **並行化のポイント**
-   - 各APIは独立して実装可能
-   - 共通機能完了後に開始
-4. **タスク8: 結合テスト**（全員で実施）
-   - API間結合テスト、E2E APIテスト、並行処理テスト
+---
 
-### タスクファイル一覧
-- [セットアップタスク](setup_tasks.md)
-- [共通機能タスク](common_tasks.md)
-- [認証APIのタスク](API_001_auth.md)
-- [書籍APIのタスク](API_002_books.md)
-- [カテゴリAPIのタスク](API_003_categories.md)
-- [出版社APIのタスク](API_004_publishers.md)
-- [在庫APIのタスク](API_005_stocks.md)
-- [ワークフローAPIのタスク](API_006_workflows.md)
-- [結合テストタスク](integration_tasks.md)
+## 実行順序
+
+### Phase 0: セットアップ（全員で実行）
+1. **タスク0: セットアップ** - プロジェクト初期化、データベース設定、アプリケーションサーバー設定
+
+### Phase 1: 共通機能（共通機能チームが実装）
+2. **タスク1: 共通機能** - エンティティ、DAO、DTO、ユーティリティ、例外ハンドラー、セキュリティ基盤
+
+### Phase 2: API別実装（各担当者が並行実行） ← ここが並行化のポイント
+3. **タスク2: API_001_auth** - 認証API（ログイン、ログアウト）
+4. **タスク3: API_002_books** - 書籍API（一覧、検索、詳細）
+5. **タスク4: API_003_categories** - カテゴリAPI（一覧）
+6. **タスク5: API_004_publishers** - 出版社API（一覧）
+7. **タスク6: API_005_stocks** - 在庫API（一覧、取得、更新）
+8. **タスク7: API_006_workflows** - ワークフローAPI（作成、更新、申請、承認、却下）
+
+### Phase 3: 結合テスト（全員で実施）
+9. **タスク8: 結合テスト** - API間結合テスト、E2Eテスト、パフォーマンステスト
+
+---
+
+## タスクファイル一覧
+
+### セットアップ
+- [setup_tasks.md](setup_tasks.md) - プロジェクト初期化、開発環境セットアップ
+
+### 共通機能
+- [common_tasks.md](common_tasks.md) - エンティティ、DAO、共通機能、セキュリティ基盤
+
+### API別実装
+- [API_001_auth.md](API_001_auth.md) - 認証API
+- [API_002_books.md](API_002_books.md) - 書籍API（JPQL + Criteria API）
+- [API_003_categories.md](API_003_categories.md) - カテゴリAPI
+- [API_004_publishers.md](API_004_publishers.md) - 出版社API
+- [API_005_stocks.md](API_005_stocks.md) - 在庫API（楽観的ロック）
+- [API_006_workflows.md](API_006_workflows.md) - ワークフローAPI
+
+### 結合テスト
+- [integration_tasks.md](integration_tasks.md) - API間結合テスト、E2Eテスト
+
+---
 
 ## 依存関係図
 
 ```mermaid
-graph TD
-    A[0. セットアップ] --> B[1. 共通機能]
-    B --> C[2. 認証API]
-    B --> D[3. 書籍API]
-    B --> E[4. カテゴリAPI]
-    B --> F[5. 出版社API]
-    B --> G[6. 在庫API]
-    B --> H[7. ワークフローAPI]
-    C --> I[8. 結合テスト]
-    D --> I
-    E --> I
-    F --> I
-    G --> I
-    H --> I
+flowchart TD
+    Setup["0. セットアップ<br/>(setup_tasks.md)"]
+    Common["1. 共通機能<br/>(common_tasks.md)"]
+    Auth["2. API_001_auth<br/>(API_001_auth.md)"]
+    Books["3. API_002_books<br/>(API_002_books.md)"]
+    Categories["4. API_003_categories<br/>(API_003_categories.md)"]
+    Publishers["5. API_004_publishers<br/>(API_004_publishers.md)"]
+    Stocks["6. API_005_stocks<br/>(API_005_stocks.md)"]
+    Workflows["7. API_006_workflows<br/>(API_006_workflows.md)"]
+    Integration["8. 結合テスト<br/>(integration_tasks.md)"]
+    
+    Setup --> Common
+    Common --> Auth
+    Common --> Books
+    Common --> Categories
+    Common --> Publishers
+    Common --> Stocks
+    Common --> Workflows
+    
+    Auth --> Integration
+    Books --> Integration
+    Categories --> Integration
+    Publishers --> Integration
+    Stocks --> Integration
+    Workflows --> Integration
 ```
 
-## プロジェクト概要
+---
 
-### プロジェクト名
-Books Stock API - バックオフィス書籍在庫管理システム
+## 重要な注意事項
 
-### アーキテクチャパターン
-レイヤードアーキテクチャ（Presentation、Business Logic、Data Access、Entity）
+### アーキテクチャ方針
+- **マイクロサービスパターン**: 全エンティティを実装
+- **楽観的ロック**: Stock エンティティに`@Version`を実装
+- **2種類の検索実装**: BookDao（JPQL）とBookDaoCriteria（Criteria API）
+- **CORS対応**: CorsFilterを実装
+
+### 実装優先順位
+1. **セットアップ**: 最初に必ず実行
+2. **共通機能**: API実装の前提となる共通コンポーネント
+3. **API実装**: 並行実行可能（担当者割り当て後）
+4. **結合テスト**: 全API実装完了後
+
+### 品質基準
+- **テストカバレッジ**: サービス層は80%以上
+- **ログ出力**: 全API呼び出しでINFOレベルログ出力
+- **エラーハンドリング**: 統一的なエラーレスポンス形式
+
+---
+
+## プロジェクト情報
 
 ### 技術スタック
-- **Jakarta EE**: 10
-- **JAX-RS**: 3.1（RESTful Webサービス）
-- **JPA**: 3.1（ORM）
-- **CDI**: 4.0（依存性注入）
-- **Bean Validation**: 3.0
-- **MicroProfile Config**: 3.0
-- **Application Server**: Payara Server 6.x
-- **Database**: HSQLDB 2.x
-- **JDK**: Java 17+
+- Jakarta EE 10
+- JAX-RS 3.1 (RESTful API)
+- JPA 3.1 (Hibernate実装)
+- Payara Server 6
+- HSQLDB 2.7.x
+- JUnit 5, Mockito
 
-### 主要機能
-1. **認証機能**: JWT + HttpOnly Cookie認証
-2. **書籍管理**: 一覧取得、詳細取得、検索（JPQL/Criteria API）
-3. **カテゴリ管理**: カテゴリ一覧取得
-4. **出版社管理**: 出版社一覧取得
-5. **在庫管理**: 在庫参照・更新（楽観的ロック対応）
-6. **ワークフロー管理**: 書籍マスタ変更の申請・承認フロー
+### ベースパッケージ
+```
+pro.kensait.backoffice
+├── api                    # JAX-RS Resources
+│   ├── dto               # Data Transfer Objects
+│   └── exception         # Exception Mappers
+├── service               # Business Logic
+├── dao                   # Data Access Objects
+├── entity                # JPA Entities
+├── security              # JWT, BCrypt
+├── common                # Common Classes
+└── util                  # Utilities
+```
 
-### 重要な実装要件
-- **楽観的ロック**: Stockエンティティに`@Version`アノテーション必須
-- **2種類の書籍検索**: JPQL検索とCriteria API検索の両方を実装
-- **全エンティティ実装**: Book、Stock、Category、Publisher、Employee、Department、Workflowすべて実装
-- **論理削除**: 書籍の削除は論理削除（DELETEDフラグ）で対応
-- **トランザクション管理**: ワークフロー承認時は履歴追加と書籍マスタ反映を1トランザクションで実行
+### データベース構成
+- BOOK（書籍マスタ）
+- STOCK（在庫マスタ）- 楽観的ロック対応
+- CATEGORY（カテゴリマスタ）
+- PUBLISHER（出版社マスタ）
+- EMPLOYEE（社員マスタ）
+- DEPARTMENT（部署マスタ）
+- WORKFLOW（ワークフロー履歴）
 
-## 開発原則（憲章遵守）
+---
 
-本プロジェクトは「berry-books 仕様駆動開発憲章」に準拠します：
+## 開発開始前の確認事項
 
-1. **仕様ファースト開発**: すべての実装は仕様書に基づいて行う
-2. **アーキテクチャの一貫性**: レイヤーアーキテクチャを厳格に守る
-3. **テスト駆動品質**: すべてのビジネスロジックに対して単体テストを作成
-4. **ドキュメント品質の追求**: コードとSPECドキュメントを常に最新の状態に保つ
+- [ ] HSQLDB サーバーが起動している
+- [ ] Payara Server が起動している
+- [ ] JDK 17以上がインストールされている
+- [ ] Gradle 8.x以上がインストールされている
+- [ ] 仕様書（specs/）を確認した
+- [ ] 憲章（principles/constitution.md）を確認した
 
-## 注意事項
+---
 
-### タスク実装時の注意
-- 各タスクの「参照SPEC」に記載されたドキュメントを必ず参照すること
-- タスクIDはアンダースコア区切り（例: `T_SETUP_001`）
-- 並行実行可能なタスクには`[P]`マークが付与されている
-- 依存関係のあるタスクは順次実行すること
+## 関連ドキュメント
 
-### SPEC参照について
-- すべてのタスクにMarkdownリンク形式でSPEC参照が記載されている
-- リンクをクリックすることで直接SPECファイルに移動できる
-- 実装時は必ず該当セクションを確認すること
+### 仕様書
+- [requirements.md](../specs/baseline/system/requirements.md) - 要件定義書
+- [architecture_design.md](../specs/baseline/system/architecture_design.md) - アーキテクチャ設計書
+- [functional_design.md](../specs/baseline/system/functional_design.md) - 機能設計書
+- [data_model.md](../specs/baseline/system/data_model.md) - データモデル設計書
+- [behaviors.md](../specs/baseline/system/behaviors.md) - 振る舞い仕様書
 
-### 並行実行について
-- セットアップタスクは全員で実行（並行実行不可）
-- 共通機能タスクは一部並行実行可能（エンティティ単位で分割可能）
-- API別タスクは完全に並行実行可能（各APIは独立）
-- 結合テストは一部並行実行可能（テストケース単位で分割可能）
+### API別仕様書
+- [API_001_auth/](../specs/baseline/api/API_001_auth/) - 認証API
+- [API_002_books/](../specs/baseline/api/API_002_books/) - 書籍API
+- [API_003_categories/](../specs/baseline/api/API_003_categories/) - カテゴリAPI
+- [API_004_publishers/](../specs/baseline/api/API_004_publishers/) - 出版社API
+- [API_005_stocks/](../specs/baseline/api/API_005_stocks/) - 在庫API
+- [API_006_workflows/](../specs/baseline/api/API_006_workflows/) - ワークフローAPI
+
+### 憲章
+- [constitution.md](../../agent_skills/jakarta-ee-standard/principles/constitution.md) - Jakarta EE開発憲章
+
+---
+
+**生成ツール:** Jakarta EE Standard Agent Skills - Task Generation  
+**バージョン:** 1.0.0

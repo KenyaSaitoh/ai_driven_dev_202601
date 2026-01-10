@@ -1,99 +1,66 @@
 package pro.kensait.berrybooks.dao;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
-import pro.kensait.berrybooks.entity.OrderTran;
-import pro.kensait.berrybooks.service.order.OrderHistoryTO;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import pro.kensait.berrybooks.entity.OrderTran;
 
 /**
- * 注文トランザクションデータアクセスクラス
+ * ORDER_TRANテーブルのDAOクラス
+ * 
+ * 注文トランザクションデータのCRUD操作を提供する。
  */
 @ApplicationScoped
 public class OrderTranDao {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(OrderTranDao.class);
-    
+
     @PersistenceContext(unitName = "BerryBooksPU")
     private EntityManager em;
-    
+
     /**
-     * 注文トランザクションを登録
+     * 注文トランザクションを登録する
      * 
      * @param orderTran 注文トランザクション
-     * @return 登録された注文トランザクション
+     * @return 登録された注文トランザクション（ORDER_TRAN_IDが設定される）
      */
     public OrderTran insert(OrderTran orderTran) {
-        logger.info("[ OrderTranDao#insert ] Inserting order transaction");
+        logger.info("[ OrderTranDao#insert ] customerId={}, totalPrice={}", 
+                    orderTran.getCustomerId(), orderTran.getTotalPrice());
         em.persist(orderTran);
-        em.flush(); // ID採番を確実に実行
-        logger.info("[ OrderTranDao#insert ] Order transaction inserted: orderTranId={}", 
-                   orderTran.getOrderTranId());
+        em.flush(); // IDENTITYで自動採番されたIDを即座に取得
+        logger.info("[ OrderTranDao#insert ] orderTranId={}", orderTran.getOrderTranId());
         return orderTran;
     }
-    
+
     /**
-     * 注文トランザクションIDで検索
+     * 注文トランザクションIDで検索する
      * 
      * @param orderTranId 注文トランザクションID
-     * @return OrderTran（見つからない場合はnull）
+     * @return 注文トランザクション（存在しない場合はnull）
      */
     public OrderTran findById(Integer orderTranId) {
         logger.info("[ OrderTranDao#findById ] orderTranId={}", orderTranId);
-        
-        TypedQuery<OrderTran> query = em.createQuery(
-            "SELECT ot FROM OrderTran ot " +
-            "LEFT JOIN FETCH ot.orderDetails od " +
-            "LEFT JOIN FETCH od.book b " +
-            "LEFT JOIN FETCH b.publisher " +
-            "WHERE ot.orderTranId = :orderTranId",
-            OrderTran.class
-        );
-        query.setParameter("orderTranId", orderTranId);
-        
-        List<OrderTran> orders = query.getResultList();
-        if (orders.isEmpty()) {
-            logger.info("[ OrderTranDao#findById ] Order not found: {}", orderTranId);
-            return null;
-        }
-        
-        return orders.get(0);
+        return em.find(OrderTran.class, orderTranId);
     }
-    
+
     /**
-     * 顧客IDで注文履歴を取得（非正規化DTO）
-     * 
-     * 1注文明細=1レコードで返す
+     * 顧客IDで注文トランザクションを検索する（注文日降順）
      * 
      * @param customerId 顧客ID
-     * @return 注文履歴リスト
+     * @return 注文トランザクションのリスト
      */
-    public List<OrderHistoryTO> getOrderHistory(Integer customerId) {
-        logger.info("[ OrderTranDao#getOrderHistory ] customerId={}", customerId);
-        
-        TypedQuery<OrderHistoryTO> query = em.createQuery(
-            "SELECT new pro.kensait.berrybooks.service.order.OrderHistoryTO(" +
-            "ot.orderDate, ot.orderTranId, od.orderDetailId, " +
-            "b.bookName, p.publisherName, od.price, od.count) " +
-            "FROM OrderTran ot " +
-            "JOIN ot.orderDetails od " +
-            "JOIN od.book b " +
-            "JOIN b.publisher p " +
-            "WHERE ot.customer.customerId = :customerId " +
-            "ORDER BY ot.orderDate DESC, ot.orderTranId, od.orderDetailId",
-            OrderHistoryTO.class
-        );
-        query.setParameter("customerId", customerId);
-        
-        List<OrderHistoryTO> history = query.getResultList();
-        logger.info("[ OrderTranDao#getOrderHistory ] Found {} order history records", history.size());
-        
-        return history;
+    public List<OrderTran> findByCustomerId(Integer customerId) {
+        logger.info("[ OrderTranDao#findByCustomerId ] customerId={}", customerId);
+        return em.createQuery(
+            "SELECT ot FROM OrderTran ot WHERE ot.customerId = :customerId ORDER BY ot.orderDate DESC", 
+            OrderTran.class)
+            .setParameter("customerId", customerId)
+            .getResultList();
     }
 }
-

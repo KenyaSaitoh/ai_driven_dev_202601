@@ -1,271 +1,353 @@
-# ワークフローAPI タスク
+# API_006_workflows - ワークフローAPIタスク
 
-**担当者:** 担当者F（1名）  
+**担当者:** 1名  
 **推奨スキル:** JAX-RS、JPA、トランザクション管理、ビジネスロジック  
-**想定工数:** 10時間  
+**想定工数:** 16時間  
 **依存タスク:** [common_tasks.md](common_tasks.md)
+
+---
+
+## 概要
+
+このタスクリストは、ワークフローAPI（作成、更新、申請、承認、却下、一覧取得、履歴取得）の実装タスクを含みます。複雑なビジネスロジックとトランザクション管理が必要です。
 
 ---
 
 ## タスクリスト
 
-### T_API006_001: [P] WorkflowCreateRequestの作成
+## 1. DTO（Data Transfer Objects）
 
-- **目的**: ワークフロー作成リクエスト用のDTOクラスを作成する
-- **対象**: WorkflowCreateRequest.java（DTOクラス）
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「10.1 WorkflowCreateRequest」
-- **注意事項**: 
-  - workflowType、createdBy、applyReasonを含める
-  - ワークフロータイプごとの追加フィールド（bookId、bookName、author、price、imageUrl、categoryId、publisherId、startDate、endDate）を含める
-  - Bean Validationアノテーションを付与する
+### T_API006_001: WorkflowTOの作成
 
----
-
-### T_API006_002: [P] WorkflowTOの作成
-
-- **目的**: ワークフロー情報のデータ転送オブジェクトを作成する
-- **対象**: WorkflowTO.java（DTOクラス）
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「10.2 WorkflowTO」
-- **注意事項**: 
-  - operationId、workflowId、workflowType、state、operationType、operatedBy、operatorName、operatedAtを含める
-  - その他のワークフロー関連フィールドを含める
-
----
-
-### T_API006_003: [P] WorkflowServiceの作成
-
-- **目的**: ワークフロー管理のビジネスロジッククラスを作成する
-- **対象**: WorkflowService.java（Serviceクラス）
+- **目的**: ワークフロー情報レスポンス用のDTOを実装する
+- **対象**: `pro.kensait.backoffice.api.dto.WorkflowTO`（Record）
 - **参照SPEC**: 
-  - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.2 Business Logic Layer」
-  - [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「5. エンドポイント詳細」
+  - [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「2.1 POST /api/workflows」
 - **注意事項**: 
-  - `@ApplicationScoped`でCDI管理する
-  - `@Transactional`でトランザクション境界を制御する
-  - createWorkflow()、updateWorkflow()、applyWorkflow()、approveWorkflow()、rejectWorkflow()メソッドを実装する
-  - checkApprovalAuthority()、applyToBookMaster()メソッドを実装する
+  - Java Record形式で実装
+  - フィールド: 
+    - `operationId`（Long）
+    - `workflowId`（Long）
+    - `workflowType`（String）- ADD_NEW_BOOK, REMOVE_BOOK, ADJUST_BOOK_PRICE
+    - `state`（String）- CREATED, APPLIED, APPROVED
+    - `bookId`（Integer）
+    - `bookName`（String）
+    - `author`（String）
+    - `categoryId`（Integer）
+    - `publisherId`（Integer）
+    - `price`（BigDecimal）
+    - `imageUrl`（String）
+    - `applyReason`（String）
+    - `startDate`（LocalDate）
+    - `endDate`（LocalDate）
+    - `operationType`（String）- CREATE, APPLY, APPROVE, REJECT
+    - `operatedBy`（Long）
+    - `operatedAt`（LocalDateTime）
+    - `operationReason`（String）
 
 ---
 
-### T_API006_004: [P] WorkflowResourceの作成
+### T_API006_002: WorkflowCreateRequestの作成
 
-- **目的**: ワークフローAPIのエンドポイントを実装するResourceクラスを作成する
-- **対象**: WorkflowResource.java（JAX-RS Resourceクラス）
+- **目的**: ワークフロー作成リクエスト用のDTOを実装する
+- **対象**: `pro.kensait.backoffice.api.dto.WorkflowCreateRequest`（Record）
 - **参照SPEC**: 
-  - [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「2. エンドポイント一覧」
-  - [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「5. エンドポイント詳細」
+  - [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「2.1 POST /api/workflows」
 - **注意事項**: 
-  - `@Path("/workflows")`でベースパスを設定する
-  - createWorkflow()、updateWorkflow()、getWorkflows()、getWorkflowHistory()、applyWorkflow()、approveWorkflow()、rejectWorkflow()メソッドを実装する
+  - Java Record形式で実装
+  - フィールド（共通）: `workflowType`、`createdBy`、`applyReason`
+  - フィールド（ADD_NEW_BOOK）: `bookName`、`author`、`price`、`imageUrl`、`categoryId`、`publisherId`
+  - フィールド（REMOVE_BOOK）: `bookId`
+  - フィールド（ADJUST_BOOK_PRICE）: `bookId`、`price`、`startDate`、`endDate`
+  - Bean Validation: `@NotNull`、`@NotBlank`
 
 ---
 
-### T_API006_005: createWorkflow()メソッドの実装
+### T_API006_003: WorkflowUpdateRequestの作成
 
-- **目的**: ワークフロー作成機能を実装する
-- **対象**: WorkflowService#createWorkflow()、WorkflowResource#createWorkflow()
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「5.1 ワークフロー作成」
-- **注意事項**: 
-  - 作成者の存在チェック（EmployeeDao）
-  - ワークフロータイプのバリデーション
-  - 次のワークフローIDを採番（WorkflowDao）
-  - Workflowエンティティを生成（STATE=CREATED、OPERATION_TYPE=CREATE）
-  - WorkflowDaoでINSERT
-  - 201 Createdを返す
-  - ログ出力（INFO）を行う
-
----
-
-### T_API006_006: updateWorkflow()メソッドの実装
-
-- **目的**: ワークフロー更新機能を実装する（一時保存）
-- **対象**: WorkflowService#updateWorkflow()、WorkflowResource#updateWorkflow()
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「5.2 ワークフロー更新」
-- **注意事項**: 
-  - 最新の状態を取得（WorkflowDao）
-  - 状態チェック：CREATEDでない場合 → 400 Bad Request
-  - 更新者の存在チェック（EmployeeDao）
-  - 既存のCREATEレコードを直接更新
-  - EntityManager#flush()で即座に反映
-  - ログ出力（INFO）を行う
-
----
-
-### T_API006_007: applyWorkflow()メソッドの実装
-
-- **目的**: ワークフロー申請機能を実装する
-- **対象**: WorkflowService#applyWorkflow()、WorkflowResource#applyWorkflow()
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「5.3 ワークフロー申請」
-- **注意事項**: 
-  - 最新の状態を取得（WorkflowDao）
-  - 状態チェック：CREATEDでない場合 → 400 Bad Request
-  - 新しい操作履歴を作成（STATE=APPLIED、OPERATION_TYPE=APPLY）
-  - WorkflowDaoでINSERT
-  - ログ出力（INFO）を行う
-
----
-
-### T_API006_008: approveWorkflow()メソッドの実装
-
-- **目的**: ワークフロー承認機能を実装する
-- **対象**: WorkflowService#approveWorkflow()、WorkflowResource#approveWorkflow()
+- **目的**: ワークフロー更新リクエスト用のDTOを実装する
+- **対象**: `pro.kensait.backoffice.api.dto.WorkflowUpdateRequest`（Record）
 - **参照SPEC**: 
-  - [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「5.4 ワークフロー承認」
-  - [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「6. 承認権限ルール」
+  - [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「2.2 PUT /api/workflows/{workflowId}」
 - **注意事項**: 
-  - **重要**: 承認権限チェックを実装する
-  - 最新の状態を取得（WorkflowDao）
-  - 状態チェック：APPLIEDでない場合 → 400 Bad Request
-  - 承認者の取得（EmployeeDao）
-  - 職務ランクチェック：MANAGER以上（JobRankType）
-  - 部署チェック：DIRECTORは全部署OK、MANAGERは同一部署のみ
-  - 権限不足の場合 → 403 Forbidden
-  - 新しい操作履歴を作成（STATE=APPROVED、OPERATION_TYPE=APPROVE）
-  - WorkflowDaoでINSERT
-  - **書籍マスタへの反映処理**を実行
-  - トランザクションコミット（ワークフロー履歴 + 書籍マスタ更新）
-  - ログ出力（INFO、WARN）を行う
+  - Java Record形式で実装
+  - フィールド: `updatedBy`、ワークフロータイプごとの更新項目
 
 ---
 
-### T_API006_009: rejectWorkflow()メソッドの実装
+### T_API006_004: WorkflowOperationRequestの作成
 
-- **目的**: ワークフロー却下機能を実装する
-- **対象**: WorkflowService#rejectWorkflow()、WorkflowResource#rejectWorkflow()
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「5.5 ワークフロー却下」
-- **注意事項**: 
-  - 最新の状態を取得（WorkflowDao）
-  - 状態チェック：APPLIEDでない場合 → 400 Bad Request
-  - 新しい操作履歴を作成（STATE=CREATED、OPERATION_TYPE=REJECT）
-  - WorkflowDaoでINSERT
-  - ログ出力（INFO）を行う
-
----
-
-### T_API006_010: applyToBookMaster()メソッドの実装
-
-- **目的**: 承認されたワークフローの内容を書籍マスタに反映する
-- **対象**: WorkflowService#applyToBookMaster()
+- **目的**: ワークフロー操作（申請、承認、却下）リクエスト用のDTOを実装する
+- **対象**: `pro.kensait.backoffice.api.dto.WorkflowOperationRequest`（Record）
 - **参照SPEC**: 
-  - [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「8. 書籍マスタ反映（承認時）」
-  - [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「9. トランザクション管理」
+  - [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「2.3 POST /api/workflows/{workflowId}/apply」
 - **注意事項**: 
-  - **ADD_NEW_BOOK**: 新しいBookエンティティを作成してINSERT（在庫情報も自動作成）
-  - **REMOVE_BOOK**: BookDaoで対象書籍を取得してdeletedフラグをtrueに設定
-  - **ADJUST_BOOK_PRICE**: BookDaoで対象書籍を取得してpriceフィールドを更新
-  - EntityManager#persist()、EntityManager#flush()を使用
-  - トランザクション内で実行される
+  - Java Record形式で実装
+  - フィールド: `operatedBy`、`operationReason`（オプション）
 
 ---
 
-### T_API006_011: checkApprovalAuthority()メソッドの実装
+## 2. Enum型
 
-- **目的**: 承認権限チェック機能を実装する
-- **対象**: WorkflowService#checkApprovalAuthority()
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「6. 承認権限ルール」
+### T_API006_005: [P] ワークフロー関連Enum型の作成
+
+- **目的**: ワークフロータイプ、状態、操作タイプのEnum型を実装する
+- **対象**: 
+  - `pro.kensait.backoffice.common.WorkflowType`（Enum）
+  - `pro.kensait.backoffice.common.WorkflowState`（Enum）
+  - `pro.kensait.backoffice.common.OperationType`（Enum）
+  - `pro.kensait.backoffice.common.JobRankType`（Enum）
+- **参照SPEC**: 
+  - [data_model.md](../specs/baseline/system/data_model.md) の「3.7 WORKFLOW」
 - **注意事項**: 
-  - 承認者の職務ランクを取得
-  - MANAGER未満の場合 → UnauthorizedApprovalException
-  - DIRECTORの場合 → 承認OK（全部署）
-  - MANAGERの場合 → 部署IDチェック（同一部署のみ）
-  - 権限不足の場合 → UnauthorizedApprovalException
+  - WorkflowType: ADD_NEW_BOOK, REMOVE_BOOK, ADJUST_BOOK_PRICE
+  - WorkflowState: CREATED, APPLIED, APPROVED
+  - OperationType: CREATE, APPLY, APPROVE, REJECT
+  - JobRankType: ASSOCIATE(1), MANAGER(2), DIRECTOR(3)
 
 ---
 
-### T_API006_012: getWorkflows()メソッドの実装
+## 3. ビジネスロジック（Service）
 
-- **目的**: ワークフロー一覧取得機能を実装する
-- **対象**: WorkflowResource#getWorkflows()
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「5.6 ワークフロー一覧取得」
+### T_API006_006: WorkflowServiceの作成
+
+- **目的**: ワークフロー管理ビジネスロジックを実装する
+- **対象**: `pro.kensait.backoffice.service.WorkflowService`
+- **参照SPEC**: 
+  - [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「3. ビジネスロジック」
+  - [functional_design.md](../specs/baseline/system/functional_design.md) の「3.7 F-WORKFLOW-001」～「3.10 F-WORKFLOW-008」
 - **注意事項**: 
-  - クエリパラメータからstate、workflowTypeを取得
-  - WorkflowDaoで条件に応じてフィルタリング
-  - 最新の状態のみを取得
-  - ログ出力（INFO）を行う
+  - `@ApplicationScoped`、`@Transactional`
+  - WorkflowDao、EmployeeDao、BookDao、DepartmentDaoを`@Inject`
+  - メソッド:
+    - `createWorkflow(WorkflowCreateRequest request)`: ワークフロー作成
+    - `updateWorkflow(Long workflowId, WorkflowUpdateRequest request)`: ワークフロー更新
+    - `applyWorkflow(Long workflowId, WorkflowOperationRequest request)`: ワークフロー申請
+    - `approveWorkflow(Long workflowId, WorkflowOperationRequest request)`: ワークフロー承認
+    - `rejectWorkflow(Long workflowId, WorkflowOperationRequest request)`: ワークフロー却下
+    - `getWorkflows(String state, String workflowType)`: ワークフロー一覧取得
+    - `getWorkflowHistory(Long workflowId)`: ワークフロー履歴取得
+    - `checkApprovalAuthority(Employee approver, Workflow workflow)`: 承認権限チェック
+    - `applyToBookMaster(Workflow workflow)`: 書籍マスタ反映
+  - WorkflowエンティティをWorkflowTOに変換
 
 ---
 
-### T_API006_013: getWorkflowHistory()メソッドの実装
+### T_API006_007: ワークフロー状態遷移ロジックの実装
 
-- **目的**: ワークフロー履歴取得機能を実装する
-- **対象**: WorkflowResource#getWorkflowHistory()
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「5.7 ワークフロー履歴取得」
+- **目的**: ワークフロー状態遷移のビジネスルールを実装する
+- **対象**: `WorkflowService`内のメソッド
+- **参照SPEC**: 
+  - [functional_design.md](../specs/baseline/system/functional_design.md) の「4.2 BR-WORKFLOW-001」
 - **注意事項**: 
-  - パスパラメータからworkflowIdを取得
-  - WorkflowDaoで指定したworkflowIdの全操作履歴を取得
-  - 操作日時の昇順でソート
-  - ログ出力（INFO）を行う
+  - 状態遷移: CREATED → APPLIED → APPROVED
+  - 却下: APPLIED → CREATED
+  - 不正な状態遷移の場合は`InvalidWorkflowStateException`をスロー
+  - 状態チェック:
+    - 申請: CREATEDのみ可
+    - 承認: APPLIEDのみ可
+    - 却下: APPLIEDのみ可
+    - 更新: CREATEDのみ可
 
 ---
 
-### T_API006_014: [P] ワークフローAPI単体テストの作成
+### T_API006_008: 承認権限チェックロジックの実装
 
-- **目的**: ワークフローAPIの単体テストを作成する
-- **対象**: WorkflowResourceTest.java（テストクラス）
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「12. テスト仕様」
+- **目的**: 承認権限のビジネスルールを実装する
+- **対象**: `WorkflowService#checkApprovalAuthority()`
+- **参照SPEC**: 
+  - [functional_design.md](../specs/baseline/system/functional_design.md) の「4.2 BR-WORKFLOW-002」
 - **注意事項**: 
-  - 正常系: ワークフロー作成 → 201 Created
-  - 正常系: ワークフロー申請 → 200 OK（CREATED → APPLIED）
-  - 正常系: ワークフロー承認 → 200 OK（APPLIED → APPROVED）+ 書籍マスタ反映
-  - 正常系: ワークフロー却下 → 200 OK（APPLIED → CREATED）
-  - 異常系: 不正な状態遷移 → 400 Bad Request
-  - 異常系: 承認権限不足 → 403 Forbidden
-  - 異常系: ワークフローが見つからない → 404 Not Found
+  - 職務ランクチェック:
+    - ASSOCIATE（JOB_RANK=1）: 承認不可
+    - MANAGER（JOB_RANK=2）: 同一部署のみ承認可
+    - DIRECTOR（JOB_RANK=3）: 全部署承認可
+  - 権限不足の場合は`UnauthorizedApprovalException`をスロー
 
 ---
 
-## API実装完了チェックリスト
+### T_API006_009: 書籍マスタ反映ロジックの実装
 
-- [ ] WorkflowCreateRequestが作成された
-- [ ] WorkflowTOが作成された
-- [ ] WorkflowServiceが作成された
-- [ ] WorkflowResourceが作成された
-- [ ] createWorkflow()メソッドが実装された
-  - [ ] ワークフローID採番
-  - [ ] 201 Createdレスポンス
-  - [ ] ログ出力が実装された
-- [ ] updateWorkflow()メソッドが実装された
-  - [ ] 状態チェック（CREATED）
-  - [ ] ログ出力が実装された
-- [ ] applyWorkflow()メソッドが実装された
-  - [ ] 状態遷移（CREATED → APPLIED）
-  - [ ] ログ出力が実装された
-- [ ] approveWorkflow()メソッドが実装された
-  - [ ] **承認権限チェックが実装された**
-  - [ ] 状態遷移（APPLIED → APPROVED）
-  - [ ] **書籍マスタ反映が実装された**
-  - [ ] トランザクション管理
-  - [ ] ログ出力が実装された
-- [ ] rejectWorkflow()メソッドが実装された
-  - [ ] 状態遷移（APPLIED → CREATED）
-  - [ ] ログ出力が実装された
-- [ ] applyToBookMaster()メソッドが実装された
-  - [ ] ADD_NEW_BOOK処理
-  - [ ] REMOVE_BOOK処理（論理削除）
-  - [ ] ADJUST_BOOK_PRICE処理
-- [ ] checkApprovalAuthority()メソッドが実装された
-  - [ ] 職務ランクチェック
-  - [ ] 部署チェック
-- [ ] getWorkflows()メソッドが実装された
-  - [ ] フィルタリング機能
-  - [ ] ログ出力が実装された
-- [ ] getWorkflowHistory()メソッドが実装された
-  - [ ] 履歴取得
-  - [ ] ログ出力が実装された
-- [ ] ワークフローAPI単体テストが作成された
-  - [ ] 正常系テストが実装された
-  - [ ] 異常系テストが実装された
-  - [ ] 承認権限テストが実装された
+- **目的**: 承認されたワークフローを書籍マスタに反映する
+- **対象**: `WorkflowService#applyToBookMaster()`
+- **参照SPEC**: 
+  - [functional_design.md](../specs/baseline/system/functional_design.md) の「3.10 F-WORKFLOW-008」
+- **注意事項**: 
+  - ADD_NEW_BOOK: Book + Stock INSERT
+    - 初期在庫数: 0
+    - 初期バージョン: 0
+    - deletedフラグ: false
+  - REMOVE_BOOK: Book論理削除（deleted = true）
+  - ADJUST_BOOK_PRICE: Book価格更新
+  - EntityManager.persist()、EntityManager.flush()を使用
+  - トランザクション内で実行（ワークフロー履歴追加と同時）
+
+---
+
+## 4. プレゼンテーション層（Resource）
+
+### T_API006_010: WorkflowResourceの作成
+
+- **目的**: ワークフローAPIのエンドポイントを実装する
+- **対象**: `pro.kensait.backoffice.api.WorkflowResource`
+- **参照SPEC**: 
+  - [functional_design.md](../specs/baseline/api/API_006_workflows/functional_design.md) の「2. エンドポイント仕様」
+  - [behaviors.md](../specs/baseline/api/API_006_workflows/behaviors.md) の「2. ワークフローAPI」
+- **注意事項**: 
+  - `@Path("/workflows")`、`@ApplicationScoped`
+  - WorkflowServiceを`@Inject`
+  - エンドポイント:
+    - `@POST`: ワークフロー作成（201 Created）
+    - `@PUT @Path("/{workflowId}")`: ワークフロー更新（200 OK）
+    - `@POST @Path("/{workflowId}/apply")`: ワークフロー申請（200 OK）
+    - `@POST @Path("/{workflowId}/approve")`: ワークフロー承認（200 OK）
+    - `@POST @Path("/{workflowId}/reject")`: ワークフロー却下（200 OK）
+    - `@GET`: ワークフロー一覧取得（200 OK）
+      - クエリパラメータ: `state`、`workflowType`
+    - `@GET @Path("/{workflowId}/history")`: ワークフロー履歴取得（200 OK）
+  - レスポンス: WorkflowTO または List<WorkflowTO>
+  - HTTPステータス: 200 OK、201 Created、400 Bad Request、403 Forbidden、404 Not Found
+  - ログ出力: INFO（API呼び出し）、WARN（権限不足）
+
+---
+
+## 5. テスト
+
+### T_API006_011: ワークフロー作成の単体テスト
+
+- **目的**: WorkflowService（作成）のテストケースを実装する
+- **対象**: `pro.kensait.backoffice.service.WorkflowServiceTest`
+- **参照SPEC**: 
+  - [behaviors.md](../specs/baseline/api/API_006_workflows/behaviors.md) の「2. ワークフローAPI」
+- **注意事項**: 
+  - JUnit 5 + Mockito使用
+  - WorkflowDao、EmployeeDaoをモック化
+  - テストケース:
+    - `testCreateWorkflow_AddNewBook()`: 新規書籍追加ワークフロー作成
+    - `testCreateWorkflow_RemoveBook()`: 書籍削除ワークフロー作成
+    - `testCreateWorkflow_AdjustPrice()`: 価格改定ワークフロー作成
+
+---
+
+### T_API006_012: ワークフロー申請・承認の単体テスト
+
+- **目的**: WorkflowService（申請・承認）のテストケースを実装する
+- **対象**: `pro.kensait.backoffice.service.WorkflowServiceTest`
+- **参照SPEC**: 
+  - [behaviors.md](../specs/baseline/api/API_006_workflows/behaviors.md) の「2. ワークフローAPI」
+- **注意事項**: 
+  - テストケース:
+    - `testApplyWorkflow_Success()`: 申請成功（CREATED → APPLIED）
+    - `testApplyWorkflow_InvalidState()`: 不正な状態（400 Bad Request）
+    - `testApproveWorkflow_Success()`: 承認成功（APPLIED → APPROVED）
+    - `testApproveWorkflow_Unauthorized()`: 権限不足（403 Forbidden）
+    - `testApproveWorkflow_InvalidState()`: 不正な状態（400 Bad Request）
+
+---
+
+### T_API006_013: 書籍マスタ反映の単体テスト
+
+- **目的**: WorkflowService（書籍マスタ反映）のテストケースを実装する
+- **対象**: `pro.kensait.backoffice.service.WorkflowServiceTest`
+- **参照SPEC**: 
+  - [functional_design.md](../specs/baseline/system/functional_design.md) の「3.10 F-WORKFLOW-008」
+- **注意事項**: 
+  - テストケース:
+    - `testApplyToBookMaster_AddNewBook()`: 新規書籍追加の反映
+    - `testApplyToBookMaster_RemoveBook()`: 書籍削除（論理削除）の反映
+    - `testApplyToBookMaster_AdjustPrice()`: 価格改定の反映
+
+---
+
+## 完了確認
+
+### チェックリスト
+
+#### DTO
+- [X] WorkflowTO
+- [X] WorkflowCreateRequest
+- [X] WorkflowUpdateRequest
+- [X] WorkflowOperationRequest
+
+#### Enum型
+- [X] WorkflowType
+- [X] WorkflowState
+- [X] OperationType
+- [X] JobRankType
+
+#### ビジネスロジック
+- [X] WorkflowService
+- [X] ワークフロー状態遷移ロジック
+- [X] 承認権限チェックロジック
+- [X] 書籍マスタ反映ロジック
+
+#### プレゼンテーション層
+- [X] WorkflowResource
+
+#### テスト
+- [X] ワークフロー作成の単体テスト
+- [X] ワークフロー申請・承認の単体テスト
+- [X] 書籍マスタ反映の単体テスト
+
+### 動作確認
+
+以下のcurlコマンドで動作確認:
+
+#### ワークフロー作成（新規書籍追加）
+```bash
+curl -X POST http://localhost:8080/back-office-api-sdd/api/workflows \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workflowType": "ADD_NEW_BOOK",
+    "createdBy": 1,
+    "applyReason": "新刊発売のため",
+    "bookName": "Java 21入門",
+    "author": "山田太郎",
+    "price": 3200,
+    "imageUrl": "http://example.com/image.jpg",
+    "categoryId": 3,
+    "publisherId": 1
+  }'
+```
+
+#### ワークフロー申請
+```bash
+curl -X POST http://localhost:8080/back-office-api-sdd/api/workflows/1/apply \
+  -H "Content-Type: application/json" \
+  -d '{
+    "operatedBy": 1
+  }'
+```
+
+#### ワークフロー承認
+```bash
+curl -X POST http://localhost:8080/back-office-api-sdd/api/workflows/1/approve \
+  -H "Content-Type: application/json" \
+  -d '{
+    "operatedBy": 2,
+    "operationReason": "承認します"
+  }'
+```
+
+#### ワークフロー一覧取得（状態フィルタ）
+```bash
+curl -X GET "http://localhost:8080/back-office-api-sdd/api/workflows?state=APPLIED"
+```
+
+#### ワークフロー履歴取得
+```bash
+curl -X GET http://localhost:8080/back-office-api-sdd/api/workflows/1/history
+```
 
 ---
 
 ## 次のステップ
 
-ワークフローAPIが完了したら、他のAPI実装タスクと並行して進めることができます：
-- [認証API](API_001_auth.md)
-- [書籍API](API_002_books.md)
-- [カテゴリAPI](API_003_categories.md)
-- [出版社API](API_004_publishers.md)
-- [在庫API](API_005_stocks.md)
+このAPI実装完了後、結合テストに進んでください:
 
-すべてのAPI実装が完了したら、[結合テスト](integration_tasks.md)に進んでください。
+- [integration_tasks.md](integration_tasks.md) - 結合テスト
+
+---
+
+**タスクファイル作成日:** 2025-01-10  
+**想定実行順序:** 8番目（共通機能実装後）

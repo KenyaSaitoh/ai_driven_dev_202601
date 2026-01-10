@@ -1,140 +1,164 @@
-# 在庫API タスク
+# API_005_stocks - 在庫APIタスク
 
-**担当者:** 担当者E（1名）  
+**担当者:** 1名  
 **推奨スキル:** JAX-RS、JPA、楽観的ロック  
-**想定工数:** 4時間  
+**想定工数:** 6時間  
 **依存タスク:** [common_tasks.md](common_tasks.md)
+
+---
+
+## 概要
+
+このタスクリストは、在庫API（一覧取得、詳細取得、更新）の実装タスクを含みます。楽観的ロック（`@Version`）による排他制御を実装します。
 
 ---
 
 ## タスクリスト
 
-### T_API005_001: [P] StockTOの作成
+### T_API005_001: StockTOの作成
 
-- **目的**: 在庫情報のデータ転送オブジェクトを作成する
-- **対象**: StockTO.java（DTOクラス）
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_005_stocks/functional_design.md) の「6.1 StockTO」
-- **注意事項**: 
-  - bookId、quantity、versionを含める
-  - レコード型（immutable）で実装する
-
----
-
-### T_API005_002: [P] StockUpdateRequestの作成
-
-- **目的**: 在庫更新リクエスト用のDTOクラスを作成する
-- **対象**: StockUpdateRequest.java（DTOクラス）
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_005_stocks/functional_design.md) の「6.2 StockUpdateRequest」
-- **注意事項**: 
-  - version（必須）、quantity（必須）を含める
-  - Bean Validationアノテーションを付与する
-  - レコード型（immutable）で実装する
-
----
-
-### T_API005_003: [P] StockResourceの作成
-
-- **目的**: 在庫APIのエンドポイントを実装するResourceクラスを作成する
-- **対象**: StockResource.java（JAX-RS Resourceクラス）
+- **目的**: 在庫情報レスポンス用のDTOを実装する
+- **対象**: `pro.kensait.backoffice.api.dto.StockTO`（Record）
 - **参照SPEC**: 
-  - [functional_design.md](../specs/baseline/api/API_005_stocks/functional_design.md) の「2. エンドポイント一覧」
-  - [functional_design.md](../specs/baseline/api/API_005_stocks/functional_design.md) の「3. エンドポイント詳細」
+  - [functional_design.md](../specs/baseline/api/API_005_stocks/functional_design.md) の「2.1 GET /api/stocks」
 - **注意事項**: 
-  - `@Path("/stocks")`でベースパスを設定する
-  - getAllStocks()、getStockById()、updateStock()メソッドを実装する
+  - Java Record形式で実装
+  - フィールド: 
+    - `bookId`（Integer）
+    - `bookName`（String）
+    - `quantity`（Integer）
+    - `version`（Long）- 楽観的ロック用バージョン
 
 ---
 
-### T_API005_004: getAllStocks()メソッドの実装
+### T_API005_002: StockUpdateRequestの作成
 
-- **目的**: 在庫一覧取得機能を実装する
-- **対象**: StockResource#getAllStocks()
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_005_stocks/functional_design.md) の「3.1 在庫一覧取得」
-- **注意事項**: 
-  - StockDaoのfindAll()を呼び出す
-  - StockエンティティをStockTOに変換する
-  - ログ出力（INFO）を行う
-
----
-
-### T_API005_005: getStockById()メソッドの実装
-
-- **目的**: 在庫情報取得機能を実装する
-- **対象**: StockResource#getStockById()
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_005_stocks/functional_design.md) の「3.2 在庫情報取得」
-- **注意事項**: 
-  - パスパラメータから書籍IDを取得する
-  - StockDaoのfindById()を呼び出す
-  - 在庫が見つからない場合は404 Not Foundを返す
-  - ログ出力（INFO、WARN）を行う
-
----
-
-### T_API005_006: updateStock()メソッドの実装（楽観的ロック対応）
-
-- **目的**: 在庫更新機能を実装する（楽観的ロック対応）
-- **対象**: StockResource#updateStock()
+- **目的**: 在庫更新リクエスト用のDTOを実装する
+- **対象**: `pro.kensait.backoffice.api.dto.StockUpdateRequest`（Record）
 - **参照SPEC**: 
-  - [functional_design.md](../specs/baseline/api/API_005_stocks/functional_design.md) の「3.3 在庫更新（楽観的ロック）」
-  - [functional_design.md](../specs/baseline/api/API_005_stocks/functional_design.md) の「4. 楽観的ロックの仕組み」
+  - [functional_design.md](../specs/baseline/api/API_005_stocks/functional_design.md) の「2.3 PUT /api/stocks/{bookId}」
 - **注意事項**: 
-  - **重要**: バージョンチェックを実装する
-  - パスパラメータから書籍IDを取得する
-  - リクエストボディからversionとquantityを取得する
-  - StockDaoのfindById()で在庫情報を取得する
-  - リクエストのversionとDBのversionを比較する
-  - バージョンが一致しない場合は409 Conflictを返す
-  - 在庫数を更新する（stock.setQuantity()）
-  - JPA `@Version`により自動的にversionがインクリメントされる
-  - トランザクションコミット時にUPDATE実行される
-  - ログ出力（INFO、WARN）を行う
+  - Java Record形式で実装
+  - フィールド: 
+    - `quantity`（Integer）- 更新後の在庫数
+    - `version`（Long）- 楽観的ロック用バージョン
+  - Bean Validation: `@NotNull`、`@Min(0)`
 
 ---
 
-### T_API005_007: [P] 在庫API単体テストの作成
+### T_API005_003: StockResourceの作成
 
-- **目的**: 在庫APIの単体テストを作成する
-- **対象**: StockResourceTest.java（テストクラス）
+- **目的**: 在庫APIのエンドポイントを実装する
+- **対象**: `pro.kensait.backoffice.api.StockResource`
 - **参照SPEC**: 
-  - [functional_design.md](../specs/baseline/api/API_005_stocks/functional_design.md) の「9. テスト仕様」
-  - [functional_design.md](../specs/baseline/api/API_005_stocks/functional_design.md) の「11. 動的振る舞い」
+  - [functional_design.md](../specs/baseline/api/API_005_stocks/functional_design.md) の「2. エンドポイント仕様」
+  - [behaviors.md](../specs/baseline/api/API_005_stocks/behaviors.md) の「2. 在庫API」
 - **注意事項**: 
-  - 正常系: 在庫更新（正しいバージョン） → 200 OK + versionインクリメント
-  - 異常系: 在庫更新（古いバージョン） → 409 Conflict
-  - 異常系: 存在しない書籍ID → 404 Not Found
-  - 並行更新シナリオのテスト（2ユーザーが同時に更新を試みる）
+  - `@Path("/stocks")`、`@ApplicationScoped`
+  - StockDaoを`@Inject`（Serviceレイヤーなし、直接DAO呼び出し）
+  - エンドポイント:
+    - `@GET`: 全在庫取得
+    - `@GET @Path("/{bookId}")`: 在庫取得（書籍ID指定）
+    - `@PUT @Path("/{bookId}")`: 在庫更新（楽観的ロック対応）
+      - リクエストボディ: StockUpdateRequest
+      - バージョンチェック: リクエストのversionと現在のversionが一致しない場合は409 Conflict
+  - レスポンス: List<StockTO> または StockTO
+  - HTTPステータス: 200 OK、404 Not Found（在庫が存在しない）、409 Conflict（楽観的ロック失敗）
+  - ログ出力: INFO（API呼び出し）、WARN（楽観的ロック失敗）
+  - `@Transactional`を付与（在庫更新メソッド）
 
 ---
 
-## API実装完了チェックリスト
+### T_API005_004: 在庫更新の単体テスト
 
-- [ ] StockTOが作成された
-- [ ] StockUpdateRequestが作成された
-- [ ] StockResourceが作成された
-- [ ] getAllStocks()メソッドが実装された
-  - [ ] ログ出力が実装された
-- [ ] getStockById()メソッドが実装された
-  - [ ] 404エラーハンドリング
-  - [ ] ログ出力が実装された
-- [ ] updateStock()メソッドが実装された
-  - [ ] **バージョンチェックが実装された**
-  - [ ] 409 Conflictエラーハンドリング
-  - [ ] 在庫数更新が実装された
-  - [ ] ログ出力が実装された
-- [ ] 在庫API単体テストが作成された
-  - [ ] 正常系テストが実装された
-  - [ ] 異常系テストが実装された
-  - [ ] 並行更新シナリオテストが実装された
+- **目的**: StockResourceのテストケースを実装する
+- **対象**: `pro.kensait.backoffice.api.StockResourceTest`
+- **参照SPEC**: 
+  - [behaviors.md](../specs/baseline/api/API_005_stocks/behaviors.md) の「2. 在庫API」
+- **注意事項**: 
+  - JUnit 5 + Mockito使用
+  - StockDaoをモック化
+  - テストケース:
+    - `testGetAllStocks()`: 全在庫取得
+    - `testGetStock_Found()`: 在庫取得（存在する）
+    - `testGetStock_NotFound()`: 在庫取得（存在しない）
+    - `testUpdateStock_Success()`: 在庫更新成功
+    - `testUpdateStock_OptimisticLockFailure()`: 楽観的ロック失敗（409 Conflict）
+    - `testUpdateStock_NotFound()`: 在庫が存在しない（404 Not Found）
+
+---
+
+## 完了確認
+
+### チェックリスト
+
+- [X] StockTO
+- [X] StockUpdateRequest
+- [X] StockResource
+- [X] 在庫更新の単体テスト
+
+### 動作確認
+
+以下のcurlコマンドで動作確認:
+
+#### 全在庫取得
+```bash
+curl -X GET http://localhost:8080/back-office-api-sdd/api/stocks
+```
+
+#### 在庫取得（書籍ID指定）
+```bash
+curl -X GET http://localhost:8080/back-office-api-sdd/api/stocks/1
+```
+
+#### 在庫更新（成功）
+```bash
+curl -X PUT http://localhost:8080/back-office-api-sdd/api/stocks/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "quantity": 50,
+    "version": 0
+  }'
+```
+
+期待されるレスポンス:
+```json
+{
+  "bookId": 1,
+  "bookName": "Javaプログラミング入門",
+  "quantity": 50,
+  "version": 1
+}
+```
+
+#### 在庫更新（楽観的ロック失敗）
+```bash
+# 同じversionで再度更新を試みる
+curl -X PUT http://localhost:8080/back-office-api-sdd/api/stocks/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "quantity": 60,
+    "version": 0
+  }'
+```
+
+期待されるレスポンス（409 Conflict）:
+```json
+{
+  "error": "OptimisticLockException",
+  "message": "他のユーザーによって更新されました。再度お試しください。"
+}
+```
 
 ---
 
 ## 次のステップ
 
-在庫APIが完了したら、他のAPI実装タスクと並行して進めることができます：
-- [認証API](API_001_auth.md)
-- [書籍API](API_002_books.md)
-- [カテゴリAPI](API_003_categories.md)
-- [出版社API](API_004_publishers.md)
-- [ワークフローAPI](API_006_workflows.md)
+このAPI実装完了後、以下のタスクに並行して進めます:
 
-すべてのAPI実装が完了したら、[結合テスト](integration_tasks.md)に進んでください。
+- [API_006_workflows.md](API_006_workflows.md) - ワークフローAPI
+
+---
+
+**タスクファイル作成日:** 2025-01-10  
+**想定実行順序:** 7番目（共通機能実装後）

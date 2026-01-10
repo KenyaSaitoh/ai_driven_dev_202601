@@ -120,7 +120,7 @@ GET http://localhost:8080/customer-api/customers/query_email?email=alice@gmail.c
 
 #### 4.1.5 呼び出し元
 
-**クラス**: `pro.kensait.berrybooks.api.AuthResource`
+**クラス**: `pro.kensait.berrybooks.api.AuthenResource`
 
 **メソッド**: `login(LoginRequest)`
 
@@ -192,7 +192,7 @@ GET http://localhost:8080/customer-api/customers/1
 
 #### 4.2.5 呼び出し元
 
-**クラス**: `pro.kensait.berrybooks.api.AuthResource`
+**クラス**: `pro.kensait.berrybooks.api.AuthenResource`
 
 **メソッド**: `getCurrentUser()`
 
@@ -274,7 +274,7 @@ POST /customers/
 
 #### 4.3.5 呼び出し元
 
-**クラス**: `pro.kensait.berrybooks.api.AuthResource`
+**クラス**: `pro.kensait.berrybooks.api.AuthenResource`
 
 **メソッド**: `register(RegisterRequest)`
 
@@ -509,7 +509,7 @@ INFO  Customer found: email=alice@gmail.com, password=****
    - テスト用の顧客オブジェクトを返却するよう設定
 
 2. **テスト実行**:
-   - AuthResourceのlogin()メソッドを呼び出し
+   - AuthenResourceのlogin()メソッドを呼び出し
    - ログインリクエストを渡す
 
 3. **検証**:
@@ -615,9 +615,10 @@ GET /books
     "bookId": 1,
     "bookName": "Java入門",
     "author": "山田太郎",
-    "categoryId": 1,
-    "publisherId": 1,
     "price": 3000,
+    "imageUrl": "/api/images/covers/1",
+    "quantity": 10,
+    "version": 0,
     "category": {
       "categoryId": 1,
       "categoryName": "Java"
@@ -625,15 +626,15 @@ GET /books
     "publisher": {
       "publisherId": 1,
       "publisherName": "技術評論社"
-    },
-    "stock": {
-      "bookId": 1,
-      "quantity": 10,
-      "version": 1
     }
   }
 ]
 ```
+
+**BookTO の構造**:
+- `back-office-api-sdd` の Book エンティティは `@SecondaryTable` アノテーションを使用して BOOK テーブルと STOCK テーブルを結合
+- そのため、BookTO には在庫情報（`quantity`, `version`）がフラットな構造で含まれる
+- カテゴリと出版社は内部クラス（`CategoryInfo`, `PublisherInfo`）としてネストされる
 
 ---
 
@@ -733,10 +734,13 @@ GET /stocks/{bookId}
 ```json
 {
   "bookId": 1,
+  "bookName": "Java SEディープダイブ",
   "quantity": 10,
-  "version": 1
+  "version": 0
 }
 ```
+
+**注**: `StockTO` は書籍名も含みます。これは在庫情報の表示時に便利です。
 
 ---
 
@@ -760,15 +764,17 @@ PUT /stocks/{bookId}
 
 ```json
 {
-  "version": 1,
-  "newQuantity": 8
+  "quantity": 8,
+  "version": 1
 }
 ```
 
 | フィールド | 型 | 必須 | 説明 |
 |----------|---|------|------|
+| quantity | integer | ✓ | 更新後の在庫数 |
 | version | long | ✓ | 楽観的ロック用バージョン番号 |
-| newQuantity | integer | ✓ | 更新後の在庫数 |
+
+**重要**: フィールド名は `back-office-api-sdd` の `StockUpdateRequest` と一致する必要があります。以前のバージョンでは `newQuantity` を使用していましたが、現在は `quantity` が正しいフィールド名です。
 
 #### 15.7.3 レスポンス
 
@@ -777,10 +783,13 @@ PUT /stocks/{bookId}
 ```json
 {
   "bookId": 1,
+  "bookName": "Java SEディープダイブ",
   "quantity": 8,
-  "version": 2
+  "version": 1
 }
 ```
+
+**注**: バージョン番号は更新後に自動的にインクリメントされます（0 → 1）。
 
 楽観的ロック失敗 (409 Conflict):
 
@@ -815,7 +824,111 @@ PUT /stocks/{bookId}
 
 ---
 
-## 18. 参考資料
+## 18. 実装状況と技術的対応方針
+
+**最終更新**: 2026-01-10
+
+### 18.1 実装完了状況
+
+| 外部API連携クライアント | 状態 | 連携先 | 主な機能 |
+|---------------------|------|--------|---------|
+| CustomerHubRestClient | ✅ 完了 | customer-hub-api | 顧客検索・登録 |
+| BackOfficeRestClient | ✅ 完了 | back-office-api | 書籍・在庫・カテゴリ |
+
+### 18.2 技術的対応方針
+
+#### 18.2.1 設定管理
+
+**設定ファイル**: `src/main/resources/META-INF/microprofile-config.properties`
+
+**設定項目**:
+- `customer-hub-api.base-url`: 顧客管理APIのベースURL
+- `back-office-api.base-url`: バックオフィスAPIのベースURL
+
+**設定読み込み優先順位** (MicroProfile Config標準):
+1. システムプロパティ
+2. 環境変数
+3. プロパティファイル
+4. デフォルト値
+
+**採用方式**: `ConfigProvider.getConfig()`による明示的な設定読み込み
+
+#### 18.2.2 CDI設定
+
+**beans.xml**: `src/main/webapp/WEB-INF/beans.xml`
+
+**設定内容**:
+- `bean-discovery-mode="all"`
+- Jakarta EE 10標準に準拠
+
+**役割**:
+- CDIコンテナの有効化
+- 依存性注入の動作保証
+- MicroProfile Configの正常動作に必要
+
+#### 18.2.3 エラーハンドリング
+
+**ProcessingException**: ネットワークエラー、接続タイムアウト
+- 503 Service Unavailableで応答
+- 適切なエラーメッセージを返却
+
+**WebApplicationException**: 4xx/5xxエラー
+- 外部APIのステータスコードに応じた処理
+- 404の場合は適切なNotFoundExceptionに変換
+
+#### 18.2.4 ログ出力
+
+**方針**:
+- 外部API呼び出し時にURL、メソッドをログ出力
+- エラー発生時にスタックトレースを記録
+- 初期化時にbaseURL設定値を確認
+
+### 18.3 動作確認結果
+
+**テスト実行日**: 2026-01-10
+
+| 外部API | エンドポイント | 動作状況 | 備考 |
+|---------|--------------|---------|------|
+| customer-hub-api | GET /customers/query_email | ✅ 正常 | メールアドレスで顧客検索 |
+| customer-hub-api | POST /customers | ✅ 正常 | 顧客登録 |
+| back-office-api | GET /books | ✅ 正常 | 全書籍取得 |
+| back-office-api | GET /books/{id} | ✅ 正常 | 書籍詳細取得 |
+| back-office-api | GET /categories | ✅ 正常 | カテゴリ一覧取得 |
+| back-office-api | PUT /inventory/{id}/decrement | ✅ 正常 | 在庫減算 |
+
+**確認事項**:
+- 外部API連携が正常に動作
+- 設定ファイルからのURL読み込みが正常
+- エラーハンドリングが適切に機能
+- ログ出力が適切に記録
+
+### 18.4 トラブルシューティング
+
+#### 18.4.1 設定読み込み問題
+
+**症状**: baseURLが`null`になる
+
+**原因**:
+- プロパティキーの誤記
+- beans.xmlの不在
+- 初期化タイミングの問題
+
+**対応方針**:
+- ConfigProviderを使用した明示的な読み込み
+- @PostConstructでの初期化
+- デフォルト値の設定
+
+#### 18.4.2 接続エラー
+
+**症状**: "URI is not absolute"エラー
+
+**原因**: baseURLが未設定または空文字
+
+**対応方針**: 設定値の検証と適切なデフォルト値の提供
+
+---
+
+## 19. 参考資料
 
 本外部インターフェース仕様書に関連する詳細ドキュメント：
 
@@ -825,10 +938,11 @@ PUT /stocks/{bookId}
 * [behaviors.md](behaviors.md) - 振る舞い仕様書（受入基準）
 * [data_model.md](data_model.md) - データモデル仕様書
 * [README.md](../../README.md) - プロジェクトREADME
+* MicroProfile Config: https://microprofile.io/specifications/microprofile-config/
 
 ---
 
-## 19. 連絡先
+## 20. 連絡先
 
 **customer-hub-api担当者**: [担当者名]
 

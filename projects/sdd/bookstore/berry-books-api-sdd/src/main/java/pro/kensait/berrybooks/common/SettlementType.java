@@ -1,51 +1,44 @@
 package pro.kensait.berrybooks.common;
 
 /**
- * 決済方法列挙型
+ * 決済方法Enum
  * 
- * データベースのSETTLEMENT_TYPEカラムの値と対応
+ * ORDER_TRANテーブルのSETTLEMENT_TYPEカラムに対応する。
  */
 public enum SettlementType {
-    
     BANK_TRANSFER(1, "銀行振込"),
     CREDIT_CARD(2, "クレジットカード"),
     CASH_ON_DELIVERY(3, "着払い");
-    
-    private final int code;
+
+    private final int value;
     private final String displayName;
-    
-    SettlementType(int code, String displayName) {
-        this.code = code;
+
+    SettlementType(int value, String displayName) {
+        this.value = value;
         this.displayName = displayName;
     }
-    
-    public int getCode() {
-        return code;
+
+    public int getValue() {
+        return value;
     }
-    
+
     public String getDisplayName() {
         return displayName;
     }
-    
+
     /**
-     * コードから列挙型を取得
+     * 値からSettlementTypeを取得する
      * 
-     * @param code 決済方法コード（1, 2, 3）
+     * @param value 値
      * @return SettlementType
-     * @throws IllegalArgumentException 無効なコードの場合
+     * @throws IllegalArgumentException 無効な値の場合
      */
-    public static SettlementType fromCode(int code) {
+    public static SettlementType valueOf(int value) {
         for (SettlementType type : values()) {
-            if (type.code == code) {
+            if (type.value == value) {
                 return type;
             }
         }
-        throw new IllegalArgumentException("Invalid settlement type code: " + code);
-    }
-    
-    @Override
-    public String toString() {
-        return displayName;
+        throw new IllegalArgumentException("Invalid settlement type value: " + value);
     }
 }
-

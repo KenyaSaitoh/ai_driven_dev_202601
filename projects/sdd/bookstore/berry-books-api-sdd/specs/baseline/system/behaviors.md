@@ -244,7 +244,7 @@ API単位の受入基準は、以下のドキュメントを参照してくだ�
 
 | シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
 |-----------|------|----------------|------------|---------------|
-| JWT-001 | 有効なJWT Cookieでリクエストできる | 有効なJWT Cookie | 認証必須APIにリクエスト | APIが正常に実行される<br/>SecuredResourceにcustomerIdが設定される |
+| JWT-001 | 有効なJWT Cookieでリクエストできる | 有効なJWT Cookie | 認証必須APIにリクエスト | APIが正常に実行される<br/>AuthenContextにcustomerIdが設定される |
 | JWT-002 | JWT不要なAPIは認証なしでアクセスできる | JWT Cookie未設定 | /api/books（認証不要）にリクエスト | APIが正常に実行される |
 
 #### 6.1.2 異常系

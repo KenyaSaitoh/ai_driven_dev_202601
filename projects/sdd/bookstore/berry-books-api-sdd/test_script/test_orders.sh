@@ -19,7 +19,7 @@ rm -f $COOKIES_FILE
 # ===========================================
 echo "🔐 ログイン中..."
 
-LOGIN_DATA='{"email":"alice@gmail.com","password":"password"}'
+LOGIN_DATA='{"email":"alice@example.com","password":"password"}'
 
 LOGIN_RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
   -X POST "$API_BASE/api/auth/login" \

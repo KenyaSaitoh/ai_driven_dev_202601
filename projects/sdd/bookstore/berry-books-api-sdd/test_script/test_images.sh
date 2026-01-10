@@ -46,7 +46,7 @@ else
     echo "❌ 画像取得失敗 (HTTP $HTTP_STATUS)"
     if [ "$HTTP_STATUS" == "404" ]; then
         echo "   画像ファイルが存在しません"
-        echo "   配置先: projects/java/berry-books-api-sdd/src/main/webapp/resources/images/covers/"
+        echo "   配置先: projects/sdd/bookstore/berry-books-api-sdd/src/main/webapp/resources/images/covers/"
         echo "   ファイル名: 書籍タイトル.jpg (例: Java_SEディープダイブ.jpg)"
     fi
 fi
@@ -139,7 +139,7 @@ else
     echo ""
     echo "💡 画像ファイルの配置方法:"
     echo "   1. 配置先ディレクトリ:"
-    echo "      projects/java/berry-books-api-sdd/src/main/webapp/resources/images/covers/"
+    echo "      projects/sdd/bookstore/berry-books-api-sdd/src/main/webapp/resources/images/covers/"
     echo ""
     echo "   2. ファイル名の規則:"
     echo "      書籍のタイトルをそのままファイル名にする（スペースはアンダースコアに変換）"

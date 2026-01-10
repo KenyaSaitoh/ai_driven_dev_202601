@@ -4,12 +4,10 @@ import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 
 /**
- * JAX-RS設定クラス
+ * JAX-RSアプリケーション設定クラス
  * 
- * ベースURL: /api
+ * ベースパス: /api
  */
 @ApplicationPath("/api")
 public class ApplicationConfig extends Application {
-    // デフォルトの実装を使用（全てのResourceとProviderが自動的にスキャンされる）
 }
-

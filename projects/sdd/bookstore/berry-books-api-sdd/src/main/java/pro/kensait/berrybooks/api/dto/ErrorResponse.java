@@ -1,9 +1,9 @@
 package pro.kensait.berrybooks.api.dto;
 
 /**
- * 統一的なエラーレスポンス形式
+ * 統一的なエラーレスポンスDTO
  * 
- * Java Recordを使用してイミュータブルなDTOを実装
+ * 全APIエンドポイントのエラーレスポンスで使用する。
  */
 public record ErrorResponse(
     int status,
@@ -12,4 +12,3 @@ public record ErrorResponse(
     String path
 ) {
 }
-

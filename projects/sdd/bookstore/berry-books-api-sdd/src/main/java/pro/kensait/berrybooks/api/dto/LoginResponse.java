@@ -4,8 +4,6 @@ import java.time.LocalDate;
 
 /**
  * ログインレスポンスDTO
- * 
- * Java Recordを使用してイミュータブルなDTOを実装
  */
 public record LoginResponse(
     Integer customerId,
@@ -15,4 +13,3 @@ public record LoginResponse(
     String address
 ) {
 }
-

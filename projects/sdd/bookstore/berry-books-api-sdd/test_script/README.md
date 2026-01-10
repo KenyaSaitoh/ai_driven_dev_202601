@@ -7,7 +7,7 @@ curlコマンドを使用してBerry Books APIの全エンドポイントをテ�
 ```
 test_script/
 ├── README.md           # このファイル
-├── test_auth.sh        # 認証API テスト
+├── test_authen.sh      # 認証API テスト
 ├── test_books.sh       # 書籍API テスト
 ├── test_orders.sh      # 注文API テスト
 ├── test_images.sh      # 画像API テスト
@@ -76,7 +76,7 @@ cd projects/sdd/bookstore/berry-books-api-sdd/test_script
 
 ```bash
 # 認証API テスト
-./test_auth.sh
+./test_authen.sh
 
 # 書籍API テスト
 ./test_books.sh
@@ -92,7 +92,7 @@ cd projects/sdd/bookstore/berry-books-api-sdd/test_script
 
 ## 📋 各テストスクリプトの内容
 
-### 1. test_auth.sh - 認証API
+### 1. test_authen.sh - 認証API
 
 - ✅ ユーザー登録 (`POST /api/auth/register`)
 - ✅ ログイン (`POST /api/auth/login`)
@@ -101,7 +101,7 @@ cd projects/sdd/bookstore/berry-books-api-sdd/test_script
 - ✅ ログアウト後のアクセステスト（認証エラー確認）
 
 **テストユーザー:**
-- Email: `alice@gmail.com`
+- Email: `alice@example.com`
 - Password: `password`
 
 ### 2. test_books.sh - 書籍API
@@ -135,7 +135,7 @@ cd projects/sdd/bookstore/berry-books-api-sdd/test_script
 
 | Email | Password | Customer ID |
 |-------|----------|-------------|
-| alice@gmail.com | password | 1 |
+| alice@example.com | password | 1 |
 | bob@gmail.com | password | 2 |
 | carol@gmail.com | password | 3 |
 
@@ -225,7 +225,7 @@ cd projects/sdd/bookstore/berry-books-api-sdd/test_script
 各スクリプトの以下の行を編集してください：
 
 ```bash
-LOGIN_DATA='{"email":"alice@gmail.com","password":"password"}'
+LOGIN_DATA='{"email":"alice@example.com","password":"password"}'
 ```
 
 ### API Base URLの変更
@@ -276,7 +276,7 @@ ORDER_DATA='{
 curl http://localhost:8080/customer-api/api/customers/1
 
 # データベースを初期化（テストユーザーを含む）
-./gradlew :berry-books-api:setupHsqldb
+./gradlew :berry-books-api-sdd:setupHsqldb
 
 # APIを再デプロイ
 ./gradlew :berry-books-api-sdd:deploy
@@ -335,7 +335,7 @@ projects/sdd/bookstore/berry-books-api-sdd/src/main/webapp/resources/images/cove
 
 ## 📖 関連ドキュメント
 
-- [Berry Books API-SDD README](../README.md)
+- [Berry Books API README](../README.md)
 - [Customer API README](../../customer-api/README.md)
 
 ## 📄 ライセンス

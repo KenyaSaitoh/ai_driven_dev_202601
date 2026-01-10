@@ -1,15 +1,23 @@
-# berry-books-api - データモデル仕様書
+# berry-books-api-sdd - データモデル仕様書
 
-**プロジェクトID:** berry-books-api  
-**バージョン:** 2.0.0  
-**最終更新日:** 2025-12-27  
-**ステータス:** データモデル確定
+**プロジェクトID:** berry-books-api-sdd  
+**バージョン:** 3.0.0  
+**最終更新日:** 2026-01-10  
+**ステータス:** サービス分離アーキテクチャ対応完了
+
+**変更履歴**:
+- v3.0.0 (2026-01-10): サービス分離アーキテクチャ対応
+  - サービス間の外部キー制約の削除（CUSTOMER_ID、BOOK_ID）
+  - スナップショットパターンの導入（BOOK_NAME、PUBLISHER_NAME）
+  - データ整合性をアプリケーションレイヤーで保証
+- v2.0.0 (2025-12-27): BFFパターン導入
+- v1.0.0: 初版
 
 ---
 
 ## 1. 概要
 
-本文書は、berry-books-api REST API（BFF）とバックエンドマイクロサービスのデータベーススキーマとエンティティ設計を記述する。データモデルはHSQLDB 2.7.xを使用し、Jakarta Persistence (JPA) 3.1でO/Rマッピングを実装する。
+本文書は、berry-books-api REST API（BFF）とバックエンドサービスのデータベーススキーマとエンティティ設計を記述する。データモデルはHSQLDB 2.7.xを使用し、Jakarta Persistence (JPA) 3.1でO/Rマッピングを実装する。
 
 **データベース**: HSQLDB  
 **データベース名**: testdb  
@@ -18,7 +26,7 @@
 
 ### 1.1 BFFパターンにおけるデータ管理の責務分担
 
-| マイクロサービス | 管理するテーブル | 実装方式 |
+| サービス | 管理するテーブル | 実装方式 |
 |--------------|--------------|---------|
 | **berry-books-api<br/>(BFF)** | ORDER_TRAN<br/>ORDER_DETAIL | JPAエンティティ + DAO |
 | **back-office-api** | BOOK<br/>STOCK<br/>CATEGORY<br/>PUBLISHER | JPAエンティティ + DAO<br/>（berry-books-apiからはREST API経由） |
@@ -34,12 +42,42 @@
 
 ```mermaid
 erDiagram
+    %% サービス間のリレーションシップは論理的参照のみ（外部キー制約なし）
+    ORDER_TRAN ||--o{ ORDER_DETAIL : contains
+    
+    ORDER_TRAN {
+        int ORDER_TRAN_ID PK
+        date ORDER_DATE
+        int CUSTOMER_ID "論理参照のみ（customer-hub-api）"
+        int TOTAL_PRICE
+        int DELIVERY_PRICE
+        varchar DELIVERY_ADDRESS
+        int SETTLEMENT_TYPE "1=Bank, 2=Credit, 3=COD"
+    }
+    
+    ORDER_DETAIL {
+        int ORDER_TRAN_ID PK_FK
+        int ORDER_DETAIL_ID PK
+        int BOOK_ID "論理参照のみ（back-office-api）"
+        varchar(100) BOOK_NAME "スナップショット"
+        varchar(50) PUBLISHER_NAME "スナップショット"
+        int PRICE "スナップショット"
+        int COUNT
+    }
+```
+
+**注意**: 上記のER図はberry-books-api-sddが管理するテーブルのみを示しています。書籍・在庫・カテゴリ・出版社データはback-office-api-sdd、顧客データはcustomer-hub-apiが管理します。
+
+### 2.2 他のサービスのテーブル構造（参考）
+
+以下は参考情報です。これらのテーブルはberry-books-api-sddでは管理されません。
+
+**back-office-api-sdd管理テーブル**:
+```mermaid
+erDiagram
     PUBLISHER ||--o{ BOOK : publishes
     CATEGORY ||--o{ BOOK : categorizes
     BOOK ||--|| STOCK : has
-    BOOK ||--o{ ORDER_DETAIL : "is ordered"
-    CUSTOMER ||--o{ ORDER_TRAN : places
-    ORDER_TRAN ||--o{ ORDER_DETAIL : contains
     
     PUBLISHER {
         int PUBLISHER_ID PK
@@ -65,7 +103,11 @@ erDiagram
         int QUANTITY
         bigint VERSION "Optimistic Lock"
     }
-    
+```
+
+**customer-hub-api管理テーブル**:
+```mermaid
+erDiagram
     CUSTOMER {
         int CUSTOMER_ID PK
         varchar CUSTOMER_NAME
@@ -73,24 +115,6 @@ erDiagram
         varchar EMAIL "Unique"
         date BIRTHDAY
         varchar ADDRESS
-    }
-    
-    ORDER_TRAN {
-        int ORDER_TRAN_ID PK
-        date ORDER_DATE
-        int CUSTOMER_ID FK
-        int TOTAL_PRICE
-        int DELIVERY_PRICE
-        varchar DELIVERY_ADDRESS
-        int SETTLEMENT_TYPE "1=Bank, 2=Credit, 3=COD"
-    }
-    
-    ORDER_DETAIL {
-        int ORDER_TRAN_ID PK_FK
-        int ORDER_DETAIL_ID PK
-        int BOOK_ID FK
-        int PRICE
-        int COUNT
     }
 ```
 
@@ -296,7 +320,7 @@ erDiagram
 |---------|---------|----|----|----|----|----------|------|
 | ORDER_TRAN_ID | INTEGER | ✓ | | ✓ | | IDENTITY | 注文トランザクションID（自動採番） |
 | ORDER_DATE | DATE | | | ✓ | | | 注文日 |
-| CUSTOMER_ID | INT | | ✓ | ✓ | | | 顧客ID |
+| CUSTOMER_ID | INT | | | ✓ | | | 顧客ID（論理参照のみ、外部キー制約なし） |
 | TOTAL_PRICE | INT | | | ✓ | | | 注文金額合計（配送料を含む） |
 | DELIVERY_PRICE | INT | | | ✓ | | | 配送料金 |
 | DELIVERY_ADDRESS | VARCHAR(30) | | | ✓ | | | 配送先住所 |
@@ -305,8 +329,13 @@ erDiagram
 #### 3.6.3 制約
 
 * 主キー: ORDER_TRAN_ID
-* 外部キー: CUSTOMER_ID → CUSTOMER.CUSTOMER_ID
+* 外部キー: **なし**（CUSTOMER_IDは論理参照のみ。顧客データはcustomer-hub-apiが管理）
 * 自動採番: IDENTITY（INSERT時に自動生成）
+
+**サービス分離アーキテクチャ設計方針**:
+- `CUSTOMER_ID`は顧客IDを保持しますが、データベースレベルの外部キー制約は設定しません
+- 理由: 顧客データは別のサービス（customer-hub-api）が管理するため
+- データ整合性: アプリケーションレイヤーで検証（外部API呼び出しによる顧客存在確認）
 
 #### 3.6.5 決済方法（SETTLEMENT_TYPE）
 
@@ -337,16 +366,27 @@ erDiagram
 |---------|---------|----|----|----|----|----------|------|
 | ORDER_TRAN_ID | INT | ✓ | ✓ | ✓ | | | 注文トランザクションID |
 | ORDER_DETAIL_ID | INT | ✓ | | ✓ | | | 注文明細ID（注文内で一意） |
-| BOOK_ID | INT | | ✓ | ✓ | | | 書籍ID |
-| PRICE | INT | | | ✓ | | | 価格（購入時点の価格） |
+| BOOK_ID | INT | | | ✓ | | | 書籍ID（論理参照のみ、外部キー制約なし） |
+| BOOK_NAME | VARCHAR(100) | | | ✓ | | | 書籍名（スナップショット：注文時点の名称） |
+| PUBLISHER_NAME | VARCHAR(50) | | | ✓ | | | 出版社名（スナップショット：注文時点の名称） |
+| PRICE | INT | | | ✓ | | | 価格（スナップショット：注文時点の価格） |
 | COUNT | INT | | | ✓ | | | 注文数 |
 
 #### 3.7.3 制約
 
 * 主キー: (ORDER_TRAN_ID, ORDER_DETAIL_ID)（複合主キー）
 * 外部キー:
-  - ORDER_TRAN_ID → ORDER_TRAN.ORDER_TRAN_ID
-  - BOOK_ID → BOOK.BOOK_ID
+  - ORDER_TRAN_ID → ORDER_TRAN.ORDER_TRAN_ID（サービス内の制約）
+  - BOOK_ID: **外部キー制約なし**（書籍データはback-office-api-sddが管理）
+
+**サービス分離アーキテクチャ設計方針**:
+- `BOOK_ID`は書籍IDを保持しますが、データベースレベルの外部キー制約は設定しません
+- 理由: 書籍データは別のサービス（back-office-api-sdd）が管理するため
+- **スナップショットパターン**: 注文時点の書籍名、出版社名、価格を非正規化して保持
+  - メリット1: 書籍マスタが変更されても、過去の注文履歴は影響を受けない
+  - メリット2: 書籍が削除されても、注文履歴を正常に表示できる
+  - メリット3: 注文履歴表示時に外部API呼び出しが不要（パフォーマンス向上）
+- データ整合性: 注文登録時にアプリケーションレイヤーで検証（外部API呼び出しによる書籍存在確認）
 
 #### 3.7.5 複合主キーの設計
 
@@ -363,11 +403,13 @@ JPA実装:
 
 #### 3.7.6 サンプルデータ
 
-| ORDER_TRAN_ID | ORDER_DETAIL_ID | BOOK_ID | PRICE | COUNT |
-|--------------|----------------|---------|-------|-------|
-| 1 | 1 | 1 | 3400 | 2 |
-| 1 | 2 | 3 | 3000 | 1 |
-| 2 | 1 | 2 | 4200 | 2 |
+| ORDER_TRAN_ID | ORDER_DETAIL_ID | BOOK_ID | BOOK_NAME | PUBLISHER_NAME | PRICE | COUNT |
+|--------------|----------------|---------|-----------|----------------|-------|-------|
+| 1 | 1 | 1 | Java入門 | 翔泳社 | 3400 | 2 |
+| 1 | 2 | 3 | Python基礎 | オライリー | 3000 | 1 |
+| 2 | 1 | 2 | Spring実践 | 技術評論社 | 4200 | 2 |
+
+**注**: BOOK_NAME、PUBLISHER_NAMEは注文時点のスナップショットデータです。
 
 ---
 
@@ -436,16 +478,19 @@ Stockエンティティ側の仕様:
 
 Book → Stock → Book という双方向の関係により、JSONシリアル化時に無限ループが発生する可能性があるため、Stock側のbookフィールドはJSONシリアル化から除外する必要があります（JsonbTransient相当の処理）。
 
-#### 4.2.4 OrderTran ⇔ Customer（多対一） - **berry-books-apiで部分実装**
+#### 4.2.4 OrderTran ⇔ Customer（論理参照のみ） - **berry-books-apiで論理参照のみ**
 
-**注意**: OrderTranエンティティはberry-books-apiに実装されていますが、Customerエンティティは外部API（customer-hub-api）で管理されています。そのため、JPAリレーションシップは実装されず、CUSTOMER_IDを外部キーとして保持するのみです。
+**注意**: OrderTranエンティティはberry-books-apiに実装されていますが、Customerエンティティは外部API（customer-hub-api）で管理されています。
 
-リレーションシップ仕様:
+**サービス分離アーキテクチャ設計方針**:
 * エンティティ: OrderTran
-* リレーション種別: 多対一（ManyToOne）
-* 参照先エンティティ: Customer
-* 結合カラム: CUSTOMER_ID（OrderTranテーブル内）
-* カーディナリティ: 多数のOrderTranが1つのCustomerに関連
+* リレーション種別: **JPAリレーションシップなし**（論理参照のみ）
+* 参照先エンティティ: Customer（customer-hub-apiで管理）
+* 結合カラム: CUSTOMER_ID（OrderTranテーブル内、通常のINTカラム）
+* **データベース制約**: 外部キー制約なし
+* **データ整合性**: アプリケーションレイヤーで検証
+  - 注文登録時に外部APIクライアント経由で顧客存在確認
+  - 顧客情報取得時に外部APIクライアント経由でREST API呼び出し
 
 #### 4.2.5 OrderTran ⇔ OrderDetail（一対多） - **berry-books-apiで実装**
 
@@ -464,16 +509,26 @@ OrderDetailエンティティ側の仕様:
 * 結合カラム: ORDER_TRAN_ID
 * 更新制限: insertable=false, updatable=false（複合主キーの一部のため）
 
-#### 4.2.6 OrderDetail ⇔ Book（多対一） - **berry-books-apiで部分実装**
+#### 4.2.6 OrderDetail ⇔ Book（論理参照＋スナップショット） - **berry-books-apiで論理参照＋スナップショット実装**
 
-**注意**: OrderDetailエンティティはberry-books-apiに実装されていますが、Bookエンティティは外部API（back-office-api）で管理されています。そのため、JPAリレーションシップは実装されず、BOOK_IDを外部キーとして保持するのみです。書籍情報が必要な場合は、BackOfficeRestClient経由でREST APIを呼び出します。
+**注意**: OrderDetailエンティティはberry-books-apiに実装されていますが、Bookエンティティは外部API（back-office-api-sdd）で管理されています。
 
-リレーションシップ仕様:
+**サービス分離アーキテクチャ設計方針**:
 * エンティティ: OrderDetail
-* リレーション種別: 多対一（ManyToOne）
-* 参照先エンティティ: Book
-* 結合カラム: BOOK_ID（OrderDetailテーブル内）
-* カーディナリティ: 多数のOrderDetailが1つのBookに関連
+* リレーション種別: **JPAリレーションシップなし**（論理参照＋スナップショット）
+* 参照先エンティティ: Book（back-office-api-sddで管理）
+* 結合カラム: BOOK_ID（OrderDetailテーブル内、通常のINTカラム）
+* **データベース制約**: 外部キー制約なし
+* **スナップショットカラム**:
+  - BOOK_NAME（VARCHAR(100)）: 注文時点の書籍名
+  - PUBLISHER_NAME（VARCHAR(50)）: 注文時点の出版社名
+  - PRICE（INT）: 注文時点の価格
+* **設計意図**: 
+  - 注文履歴は過去の取引記録であり、書籍マスタの変更や削除の影響を受けるべきではない
+  - 注文履歴表示時に外部API呼び出しが不要（パフォーマンス向上）
+* **データ整合性**: 
+  - 注文登録時に外部APIクライアント経由で書籍情報を取得し、スナップショットとして保存
+  - 在庫確認も外部APIクライアント経由で実施
 
 ### 4.3 楽観的ロック（バージョン管理） - **back-office-apiで実装**
 
@@ -586,14 +641,30 @@ OrderDetailエンティティ側の仕様:
 
 ### 7.1 外部キー制約
 
+#### 7.1.1 berry-books-api-sdd管理テーブル（本サービス）
+
 | 子テーブル | 親テーブル | 外部キー | 動作 |
 |----------|----------|---------|------|
-| BOOK | CATEGORY | CATEGORY_ID | CASCADE (削除時は子も削除) |
+| ORDER_DETAIL | ORDER_TRAN | ORDER_TRAN_ID | CASCADE（注文削除時に明細も削除） |
+
+**サービス分離アーキテクチャ設計方針**:
+- **ORDER_TRAN.CUSTOMER_ID**: 外部キー制約なし（customer-hub-apiが管理）
+- **ORDER_DETAIL.BOOK_ID**: 外部キー制約なし（back-office-api-sddが管理）
+- データ整合性はアプリケーションレイヤーで保証（外部API呼び出しによる検証）
+
+#### 7.1.2 他のサービス管理テーブル（参考）
+
+**back-office-api-sdd**:
+| 子テーブル | 親テーブル | 外部キー | 動作 |
+|----------|----------|---------|------|
+| BOOK | CATEGORY | CATEGORY_ID | CASCADE |
 | BOOK | PUBLISHER | PUBLISHER_ID | CASCADE |
 | STOCK | BOOK | BOOK_ID | CASCADE |
-| ORDER_TRAN | CUSTOMER | CUSTOMER_ID | RESTRICT（顧客削除時にエラー） |
-| ORDER_DETAIL | ORDER_TRAN | ORDER_TRAN_ID | CASCADE |
-| ORDER_DETAIL | BOOK | BOOK_ID | RESTRICT（書籍削除時にエラー） |
+
+**customer-hub-api**:
+| 子テーブル | 親テーブル | 外部キー | 動作 |
+|----------|----------|---------|------|
+| （単一テーブル） | - | - | - |
 
 ### 7.2 トランザクション分離レベル
 
@@ -627,15 +698,25 @@ OrderDetailエンティティ側の仕様:
 
 ### 8.2 データ削除順序
 
+#### 8.2.1 berry-books-api-sdd管理テーブル
+
 外部キー制約により、以下の順序で削除する必要がある：
 
 1. ORDER_DETAIL
 2. ORDER_TRAN
-3. CUSTOMER
-4. STOCK
-5. BOOK
-6. CATEGORY
-7. PUBLISHER
+
+#### 8.2.2 他のサービス管理テーブル（参考）
+
+**back-office-api-sdd**:
+1. STOCK
+2. BOOK
+3. CATEGORY
+4. PUBLISHER
+
+**customer-hub-api**:
+1. CUSTOMER
+
+**注意**: サービス間に外部キー制約は存在しないため、各サービスは独立してデータを削除できます。ただし、データ整合性を保つために、論理的な削除順序を考慮する必要があります（例: 注文データを削除する前に、該当する顧客や書籍が存在することを確認）。
 
 ### 8.3 データバックアップ
 
@@ -662,10 +743,23 @@ OrderDetailエンティティ側の仕様:
 * 第2正規形: 部分関数従属性なし
 * 第3正規形: 推移的関数従属性なし
 
-**例外**: ORDER_DETAIL.PRICE
+**例外: スナップショットパターン（意図的な非正規化）**
 
-* 書籍の現在価格（BOOK.PRICE）ではなく、購入時点の価格を記録
-* 履歴データとして非正規化を許容
+ORDER_DETAILテーブルでは、以下のカラムで非正規化を許容しています：
+
+* `BOOK_NAME` (VARCHAR(100)): 書籍名（back-office-api-sddのBOOKテーブルから複製）
+* `PUBLISHER_NAME` (VARCHAR(50)): 出版社名（back-office-api-sddのPUBLISHERテーブルから複製）
+* `PRICE` (INT): 価格（back-office-api-sddのBOOKテーブルから複製）
+
+**非正規化の理由**:
+1. **サービス分離アーキテクチャ**: 書籍データは別のサービス（back-office-api-sdd）が管理しており、外部キー制約を設定できない
+2. **履歴データの保護**: 注文履歴は過去の取引記録であり、書籍マスタの変更や削除の影響を受けるべきではない
+3. **パフォーマンス**: 注文履歴表示時に外部API呼び出しが不要
+4. **可用性**: back-office-api-sddが停止していても、注文履歴を表示できる
+
+**デメリットとトレードオフ**:
+- ストレージ容量の増加（許容範囲内）
+- データ更新時の整合性管理（注文データは履歴のため更新不要）
 
 ---
 

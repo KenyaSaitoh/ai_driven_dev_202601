@@ -1,8 +1,0 @@
-{
-  "name": "berry-books-spec-driven",
-  "version": "1.0.0",
-  "description": "Jakarta EE 10とJSF (Jakarta Server Faces) 4.0を使用したオンライン書店「**berry-books**」のWebアプリケーションです。 書籍検索、ショッピングカート、注文処理などのEC機能を実装しています。",
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
-}

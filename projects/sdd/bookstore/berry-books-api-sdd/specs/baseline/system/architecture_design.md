@@ -122,7 +122,7 @@ graph TB
     
     subgraph "berry-books-api (BFF)"
         subgraph "API Layer (JAX-RS Resources)"
-            AuthAPI[AuthResource<br/>認証API]
+            AuthAPI[AuthenResource<br/>認証API]
             BookAPI[BookResource<br/>書籍API プロキシ]
             CategoryAPI[CategoryResource<br/>カテゴリAPI プロキシ]
             OrderAPI[OrderResource<br/>注文API]
@@ -130,7 +130,7 @@ graph TB
         end
         
         subgraph "Security Layer"
-            JWTFilter[JwtAuthenticationFilter]
+            JWTFilter[JwtAuthenFilter]
             JWTUtil[JwtUtil]
         end
         
@@ -206,7 +206,7 @@ graph TB
 |-------------|------------|------|
 | **BookResource** | プロキシ | back-office-apiにそのまま転送、独自ロジックなし |
 | **CategoryResource** | プロキシ | back-office-apiにそのまま転送、独自ロジックなし |
-| **AuthResource** | 独自実装 + 外部連携 | JWT生成、customer-hub-apiで認証情報取得 |
+| **AuthenResource** | 独自実装 + 外部連携 | JWT生成、customer-hub-apiで認証情報取得 |
 | **OrderResource** | 独自実装 + 外部連携 | 注文処理、back-office-apiで在庫更新 |
 | **ImageResource** | 独自実装 | WAR内リソースを直接配信 |
 
@@ -307,11 +307,11 @@ classDiagram
 |---------|------|---------|
 | **BFF Pattern** | API統合・バックエンド抽象化 | berry-books-api全体 |
 | **Proxy Pattern** | 外部APIへの透過的転送 | BookResource, CategoryResource |
-| **REST Resource Pattern** | HTTPエンドポイント提供 | AuthResource, BookResource, OrderResource |
+| **REST Resource Pattern** | HTTPエンドポイント提供 | AuthenResource, BookResource, OrderResource |
 | **サービスレイヤー** | 注文ビジネスロジック集約 | OrderService, DeliveryFeeService |
 | **リポジトリ (DAO)** | 注文データアクセス | OrderTranDao, OrderDetailDao |
 | **DTO (Record)** | データ転送オブジェクト | LoginResponse, OrderResponse, CartItemRequest |
-| **JWT認証** | ステートレス認証 | JwtAuthenticationFilter, JwtUtil |
+| **JWT認証** | ステートレス認証 | JwtAuthenFilter, JwtUtil |
 | **依存性注入** | 疎結合 | @Inject (CDI) |
 | **楽観的ロック** | 並行制御（外部API側） | back-office-api の Stock エンティティ |
 | **トランザクション** | 注文データ整合性 | @Transactional（OrderService） |
@@ -329,92 +329,96 @@ classDiagram
 
 ---
 
-## 4. パッケージ構造と命名規則
+## 3. パッケージ構造
 
-### 4.1 パッケージ編成（BFF実装）
+### 3.1 ベースパッケージ
 
 ```
-pro.kensait.berrybooks/
-├── api/                        # REST API層（JAX-RS Resources）
-│   ├── ApplicationConfig       # JAX-RS設定
-│   ├── AuthenResource          # 認証API（独自実装+外部連携）
-│   ├── BookResource            # 書籍API（プロキシ → back-office-api）
-│   ├── CategoryResource        # カテゴリAPI（プロキシ → back-office-api）
-│   ├── OrderResource           # 注文API（独自実装+外部連携）
-│   ├── ImageResource           # 画像API（WAR内リソース配信）
-│   ├── dto/                    # Data Transfer Objects（Java Records）
-│   │   ├── LoginRequest
-│   │   ├── LoginResponse
-│   │   ├── RegisterRequest
-│   │   ├── OrderRequest
-│   │   ├── OrderResponse
-│   │   ├── OrderHistoryResponse
-│   │   ├── OrderDetailResponse
-│   │   ├── CartItemRequest
-│   │   └── ErrorResponse
-│   └── exception/              # Exception Mappers
-│       ├── OutOfStockExceptionMapper
-│       ├── OptimisticLockExceptionMapper
-│       ├── ValidationExceptionMapper
-│       ├── NotFoundExceptionMapper
-│       └── GenericExceptionMapper
-│
-├── security/                   # JWT認証層
-│   ├── JwtUtil                 # JWT生成・検証
-│   ├── JwtAuthenFilter         # JWT認証フィルター
-│   └── AuthenContext           # 認証コンテキスト（@RequestScoped）
-│
-├── common/                     # 共通ユーティリティと定数
-│   ├── MessageUtil             # メッセージリソースユーティリティ
-│   └── SettlementType          # 決済方法列挙型
-│
-├── util/                       # 汎用ユーティリティ
-│   └── AddressUtil             # 住所処理ユーティリティ
-│
-├── service/                    # ビジネスロジック層（注文処理のみ）
-│   ├── customer/
-│   │   └── EmailAlreadyExistsException
-│   ├── delivery/
-│   │   └── DeliveryFeeService  # 配送料金計算
-│   └── order/
-│       ├── OrderService        # 注文処理
-│       ├── OrderServiceIF      # 注文サービスインターフェース
-│       ├── OrderTO             # 注文転送オブジェクト（POJO）
-│       ├── OrderHistoryTO      # 注文履歴DTO（Record）
-│       ├── OrderSummaryTO      # 注文サマリーDTO（Record）
-│       ├── CartItem            # カートアイテム（POJO）
-│       └── OutOfStockException # 在庫切れ例外
-│
-├── dao/                        # データアクセス層（注文データのみ）
-│   ├── OrderTranDao            # 注文トランザクションデータアクセス
-│   └── OrderDetailDao          # 注文明細データアクセス
-│
-├── external/                   # 外部API連携層（BFFの核心）
-│   ├── BackOfficeRestClient    # 書籍・在庫REST APIクライアント
-│   ├── CustomerHubRestClient   # 顧客管理REST APIクライアント
-│   └── dto/
-│       ├── BookTO              # 書籍転送オブジェクト
-│       ├── StockTO             # 在庫転送オブジェクト
-│       ├── StockUpdateRequest  # 在庫更新リクエスト
-│       ├── CustomerTO          # 顧客転送オブジェクト
-│       └── ErrorResponse       # エラーレスポンス
-│
-└── entity/                     # 永続化層（注文エンティティのみ）
-    ├── OrderTran               # 注文トランザクションエンティティ
-    ├── OrderDetail             # 注文明細エンティティ
-    └── OrderDetailPK           # 注文明細複合キー
+pro.kensait.berrybooks
 ```
 
-**注意**: 以下のクラスは実装されていません（BFFパターンのため不要）:
-- `BookService`, `CategoryService` - プロキシパターンで代替
-- `BookDao`, `CategoryDao`, `StockDao` - 外部APIで管理
-- `Book`, `Category`, `Publisher`, `Stock`, `Customer` エンティティ - 外部APIで管理
+**重要**: このプロジェクトはBFF（Backend for Frontend）パターンを採用しているため、パッケージ構造は以下の特徴があります：
+- `external/` パッケージが存在（外部API連携）
+- `service/` は注文処理とデリバリーのみ（書籍・カテゴリサービスは不要）
+- `dao/` と `entity/` は注文関連のみ（書籍・在庫・顧客エンティティは不要）
 
-### 4.2 命名規則
+### 3.2 パッケージ階層（概要）
+
+```
+pro.kensait.berrybooks
+├── api                    # Presentation Layer (JAX-RS Resources)
+│   ├── dto               # Data Transfer Objects
+│   └── exception         # Exception Mappers
+├── security              # Security Layer (JWT認証)
+├── service               # Business Logic Layer（注文処理のみ）
+├── dao                   # Data Access Layer（注文データのみ）
+├── entity                # Persistence Layer（注文エンティティのみ）
+├── external              # External Integration Layer（BFFの核心）
+│   └── dto               # 外部API用DTO
+├── common                # Common Classes
+└── util                  # Utilities
+```
+
+**詳細なクラス構成**: 各API機能の`detailed_design.md`を参照してください。
+
+| API | 詳細設計書 |
+|-----|----------|
+| 認証API | [API_001_auth/detailed_design.md](../api/API_001_auth/detailed_design.md) |
+| 書籍API（プロキシ） | [API_002_books/detailed_design.md](../api/API_002_books/detailed_design.md) |
+| 注文API | [API_003_orders/detailed_design.md](../api/API_003_orders/detailed_design.md) |
+| 画像API | [API_004_images/detailed_design.md](../api/API_004_images/detailed_design.md) |
+
+### 3.3 BFF特有のパッケージ
+
+| パッケージ | 目的 | 備考 |
+|-----------|------|------|
+| `external` | 外部API連携 | **BFF特有**：back-office-api、customer-hub-apiとの連携 |
+| `external.dto` | 外部APIのDTO | 外部APIのレスポンス/リクエストをマッピング |
+| `service.order` | 注文ビジネスロジック | BFFで実装する唯一のサービス層 |
+| `dao` | 注文データアクセス | 注文関連データのみ管理 |
+| `entity` | 注文エンティティ | OrderTran、OrderDetailのみ |
+
+### 3.4 BFFパターンによる実装制約
+
+**実装されているもの**:
+- 注文関連のエンティティ（OrderTran, OrderDetail）
+- 注文処理サービス（OrderService, DeliveryFeeService）
+- 外部API連携クライアント（BackOfficeRestClient, CustomerHubRestClient）
+
+**実装されていないもの**（外部APIで管理）:
+- 書籍・在庫・カテゴリのエンティティ、DAO、サービス → back-office-apiで管理
+- 顧客のエンティティ、DAO、サービス → customer-hub-apiで管理
+
+### 3.5 パッケージング規約
+
+| レイヤー | パッケージ | 責務 | 命名規則 |
+|---------|-----------|------|---------|
+| **Presentation** | `api` | REST APIエンドポイント | `*Resource` |
+| | `api.dto` | リクエスト/レスポンスDTO | `*Request`, `*Response` |
+| | `api.exception` | API層の例外マッパー | `*ExceptionMapper` |
+| **Security** | `security` | JWT認証関連 | 用途に応じた命名 |
+| **Business Logic** | `service.*` | ビジネスロジック（注文のみ） | `*Service` |
+| **Data Access** | `dao` | データアクセス（注文のみ） | `*Dao` |
+| **Persistence** | `entity` | JPAエンティティ（注文のみ） | エンティティ名 |
+| **External Integration** | `external` | 外部API連携クライアント | `*RestClient` |
+| | `external.dto` | 外部API用DTO | `*TO`, `*Request` |
+| **Cross-Cutting** | `common` | 共通クラス | 用途に応じた命名 |
+| | `util` | ユーティリティ | `*Util` |
+
+### 3.6 インポートの推奨事項
+
+* Jakarta EEパッケージ: `jakarta.*`
+* 標準Javaライブラリ: `java.*`, `javax.*`（javax.cryptoなどレガシー）
+* プロジェクト内: `pro.kensait.berrybooks.*`
+* サードパーティ: その他（jjwt、slf4j等）
+
+## 4. 命名規則とコーディング規約
+
+### 4.1 クラス命名規則
 
 | コンポーネントタイプ | パッケージ | クラス名パターン | 例 |
 |------------------|----------|----------------|-----|
-| REST Resource | `api` | `EntityName + Resource` | `AuthResource`, `BookResource` |
+| REST Resource | `api` | `EntityName + Resource` | `AuthenResource`, `BookResource` |
 | DTO (Request) | `api.dto` | `Purpose + Request` | `LoginRequest`, `OrderRequest` |
 | DTO (Response) | `api.dto` | `Purpose + Response` | `LoginResponse`, `OrderResponse` |
 | Exception Mapper | `api.exception` | `ExceptionName + Mapper` | `OutOfStockExceptionMapper` |
@@ -427,14 +431,20 @@ pro.kensait.berrybooks/
 
 ---
 
-## 5. JWT認証アーキテクチャ
+## 5. デザインパターンと実装方針
 
-### 5.1 認証フロー
+前述の「3. デザインパターン」セクションを参照してください。
+
+---
+
+## 6. JWT認証アーキテクチャ
+
+### 6.1 認証フロー
 
 ```mermaid
 sequenceDiagram
     participant Client as React SPA
-    participant Filter as JwtAuthenticationFilter
+    participant Filter as JwtAuthenFilter
     participant JwtUtil as JwtUtil
     participant Resource as REST Resource
     participant Service as Service Layer
@@ -457,7 +467,7 @@ sequenceDiagram
     JwtUtil-->>Filter: valid
     Filter->>JwtUtil: getCustomerIdFromToken(token)
     JwtUtil-->>Filter: customerId
-    Filter->>Filter: Set SecuredResource<br/>customerId, email
+    Filter->>Filter: Set AuthenContext<br/>customerId, email
     Filter->>Resource: Proceed to resource
     Resource->>Service: getOrderHistory(customerId)
     Service-->>Resource: Order list
@@ -468,7 +478,7 @@ sequenceDiagram
     Resource-->>Client: Set-Cookie: berry-books-jwt=<empty><br/>MaxAge=0
 ```
 
-### 5.2 JWT設定
+### 6.2 JWT設定
 
 **設定ファイル:** `src/main/resources/META-INF/microprofile-config.properties`
 
@@ -515,11 +525,11 @@ JwtUtilの初期化仕様:
 * `@PostConstruct`で明示的に初期化し、安全にデフォルト値を設定
 * 設定欠落時は警告ログを出力し、運用で検知可能にする
 
-### 5.3 JWTフィルターの実装詳細
+### 6.3 JWTフィルターの実装詳細
 
 コンテキストパス対応:
 
-JwtAuthenticationFilterは、リクエストURIからコンテキストパスを除外してパスマッチングを行います。
+JwtAuthenFilterは、リクエストURIからコンテキストパスを除外してパスマッチングを行います。
 
 パス処理ロジック:
 1. HTTPリクエストからリクエストURIを取得
@@ -536,7 +546,7 @@ JwtAuthenticationFilterは、リクエストURIからコンテキストパスを
 * `/api/books`（書籍一覧・詳細は認証不要）
 * `/api/images`（画像APIは認証不要）
 
-### 5.4 セキュリティ対策
+### 6.4 セキュリティ対策
 
 | 対策 | 実装 | 目的 |
 |---------|---------------|------|
@@ -550,9 +560,9 @@ JwtAuthenticationFilterは、リクエストURIからコンテキストパスを
 
 ---
 
-## 6. トランザクション管理（BFFパターン）
+## 7. トランザクション管理（BFFパターン）
 
-### 6.1 トランザクション境界とマイクロサービス連携
+### 7.1 トランザクション境界とマイクロサービス連携
 
 BFFパターンでは、トランザクションは各マイクロサービスで独立して管理されます。
 
@@ -602,9 +612,9 @@ sequenceDiagram
     OrderResource-->>Client: 200 OK + OrderResponse
 ```
 
-### 6.2 トランザクション戦略（BFFパターン）
+### 7.2 トランザクション戦略（BFFパターン）
 
-#### 6.2.1 分散トランザクションの扱い
+#### 7.2.1 分散トランザクションの扱い
 
 BFFパターンでは、複数のマイクロサービスにまたがるトランザクションは**結果整合性（Eventual Consistency）**で管理します。
 
@@ -613,7 +623,7 @@ BFFパターンでは、複数のマイクロサービスにまたがるトラ�
 | **外部API（在庫更新）** | 外部APIの独立トランザクション | back-office-apiがトランザクション管理 |
 | **ローカル（注文作成）** | JTA宣言的トランザクション | berry-books-apiの@Transactional |
 
-#### 6.2.2 OrderService.orderBooks() の処理フロー
+#### 7.2.2 OrderService.orderBooks() の処理フロー
 
 1. **在庫可用性チェック（外部API）**: `backOfficeClient.findStockById(bookId)`
 2. **在庫更新（外部API・楽観的ロック）**: `backOfficeClient.updateStock(bookId, version, newQuantity)`
@@ -624,7 +634,7 @@ BFFパターンでは、複数のマイクロサービスにまたがるトラ�
 5. **コミット**: 正常終了時
 6. **ロールバック**: `OptimisticLockException`, `OutOfStockException` 発生時
 
-#### 6.2.3 エラーハンドリング
+#### 7.2.3 エラーハンドリング
 
 | エラー | 発生箇所 | 対応 |
 |-------|---------|------|
@@ -636,9 +646,9 @@ BFFパターンでは、複数のマイクロサービスにまたがるトラ�
 
 ---
 
-## 7. 並行制御（楽観的ロック） - 外部API管理
+## 8. 並行制御（楽観的ロック） - 外部API管理
 
-### 7.1 楽観的ロック戦略（BFFパターン）
+### 8.1 楽観的ロック戦略（BFFパターン）
 
 BFFパターンでは、在庫の楽観的ロックは**back-office-api**が管理します。berry-books-apiはクライアントから受け取ったバージョン番号を外部APIに転送します。
 
@@ -666,16 +676,16 @@ stateDiagram-v2
     ErrorResponse --> [*]
 ```
 
-### 7.2 実装詳細（BFFとしての役割）
+### 8.2 実装詳細（BFFとしての役割）
 
-#### 7.2.1 責務分担
+#### 8.2.1 責務分担
 
 | システム | 責務 |
 |---------|------|
 | **back-office-api** | • STOCKテーブル管理<br/>• @Versionによる楽観的ロック<br/>• OptimisticLockException送出 |
 | **berry-books-api (BFF)** | • バージョン番号の転送<br/>• 外部API呼び出し<br/>• 例外のプロキシ（409 Conflict） |
 
-#### 7.2.2 処理フロー
+#### 8.2.2 処理フロー
 
 1. **書籍一覧取得時**: back-office-apiからVERSION値を含む書籍・在庫情報を取得
 2. **カート追加時（SPA側）**: VERSION値をカートアイテムに保存
@@ -689,7 +699,7 @@ stateDiagram-v2
    - 成功時: 注文処理を続行
    - 失敗時: `OptimisticLockException`を再スローし、ExceptionMapperで409 Conflictレスポンス
 
-#### 7.2.3 エラーレスポンス
+#### 8.2.3 エラーレスポンス
 
 ```json
 {
@@ -702,9 +712,9 @@ stateDiagram-v2
 
 ---
 
-## 8. エラーハンドリング戦略
+## 9. エラーハンドリング戦略
 
-### 8.1 例外階層
+### 9.1 例外階層
 
 ```mermaid
 classDiagram
@@ -731,7 +741,7 @@ classDiagram
     }
 ```
 
-### 8.2 Exception Mapper
+### 9.2 Exception Mapper
 
 | Exception | HTTP Status | ExceptionMapper | エラーメッセージ例 |
 |-----------|------------|-----------------|------------------|
@@ -741,7 +751,7 @@ classDiagram
 | `EmailAlreadyExistsException` | 409 Conflict | (ServiceでハンドリングError) | "指定されたメールアドレスは既に登録されています" |
 | `Exception` (その他) | 500 Internal Server Error | `GenericExceptionMapper` | "サーバーエラーが発生しました" |
 
-### 8.3 統一的なエラーレスポンス形式
+### 9.3 統一的なエラーレスポンス形式
 
 ```json
 {
@@ -765,9 +775,9 @@ ErrorResponse構造::
 
 ---
 
-## 9. データベース構成
+## 10. データベース構成
 
-### 9.1 永続化構成
+### 10.1 永続化構成
 
 persistence.xml::
 
@@ -783,7 +793,7 @@ persistence.xml::
 </persistence-unit>
 ```
 
-### 9.2 コネクションプール
+### 10.2 コネクションプール
 
 | パラメータ | 値 | 備考 |
 |-----------|-------|-------|
@@ -796,7 +806,7 @@ persistence.xml::
 | **最小プールサイズ** | 10 | 最小接続数 |
 | **最大プールサイズ** | 50 | 最大接続数 |
 
-### 9.3 データベース制約
+### 10.3 データベース制約
 
 * トランザクション分離レベル: READ_COMMITTED（デフォルト）
 * 接続タイムアウト: 30秒
@@ -804,9 +814,9 @@ persistence.xml::
 
 ---
 
-## 10. ログ戦略
+## 11. ログ戦略
 
-### 10.1 ログフレームワーク
+### 11.1 ログフレームワーク
 
 ```
 SLF4J (API) → Log4j2 (Implementation)
@@ -817,7 +827,7 @@ SLF4J (API) → Log4j2 (Implementation)
 * `org.apache.logging.log4j:log4j-core:2.21.x` - Log4j2コア実装
 * `org.apache.logging.log4j:log4j-slf4j2-impl:2.21.x` - SLF4J 2.xバインディング
 
-### 10.2 ログレベル
+### 11.2 ログレベル
 
 | レベル | 用途 | 例 |
 |-------|-------|-----|
@@ -826,7 +836,7 @@ SLF4J (API) → Log4j2 (Implementation)
 | INFO | メソッド開始点、主要イベント | API呼び出し、注文作成、ログイン成功 |
 | DEBUG | 詳細フロー、パラメータ値 | SQLクエリ、メソッド引数、JWT検証プロセス |
 
-### 10.3 ログパターン
+### 11.3 ログパターン
 
 ```
 標準形式:
@@ -841,7 +851,7 @@ java.lang.RuntimeException: ...
     at ...
 ```
 
-### 10.4 ログ出力方針
+### 11.4 ログ出力方針
 
 出力対象::
 * 全REST APIエンドポイントのエントリ
@@ -852,9 +862,9 @@ java.lang.RuntimeException: ...
 
 ---
 
-## 11. テスト戦略
+## 12. テスト戦略
 
-### 11.1 テストピラミッド
+### 12.1 テストピラミッド
 
 ```mermaid
 graph TB
@@ -862,7 +872,7 @@ graph TB
     B --> C[Unit Tests<br/>JUnit 5 + Mockito]
 ```
 
-### 11.2 テストアプローチ
+### 12.2 テストアプローチ
 
 | テストタイプ | ツール | カバレッジ目標 | 対象 |
 |------------|--------|--------------|------|
@@ -883,9 +893,9 @@ E2Eテスト::
 
 ---
 
-## 12. ビルド＆デプロイ
+## 13. ビルド＆デプロイ
 
-### 12.1 ビルドプロセス
+### 13.1 ビルドプロセス
 
 ```bash
 # 依存関係の確認
@@ -901,7 +911,7 @@ E2Eテスト::
 ./gradlew :berry-books-api:jacocoTestReport
 ```
 
-### 12.2 デプロイアーキテクチャ
+### 13.2 デプロイアーキテクチャ
 
 ```
 Payara Server 6.x
@@ -924,9 +934,9 @@ Payara Server 6.x
 
 ---
 
-## 13. パフォーマンス考慮事項
+## 14. パフォーマンス考慮事項
 
-### 13.1 最適化戦略
+### 14.1 最適化戦略
 
 | 項目 | 戦略 | 期待効果 |
 |------|------|---------|
@@ -938,7 +948,7 @@ Payara Server 6.x
 
 ---
 
-## 14. 技術リスクと軽減策
+## 15. 技術リスクと軽減策
 
 | リスク | 確率 | 影響度 | 軽減策 |
 |--------|------|--------|--------|
@@ -949,9 +959,9 @@ Payara Server 6.x
 
 ---
 
-## 15. 開発ガイドライン
+## 16. 開発ガイドライン
 
-### 15.1 コーディング規約
+### 16.1 コーディング規約
 
 * **命名規則:**
   - クラス名: PascalCase
@@ -964,7 +974,7 @@ Payara Server 6.x
   - 行の最大長: 120文字
   - Java 21の新機能を積極的に活用（Records, Sealed Classes等）
 
-### 15.2 REST API設計原則
+### 16.2 REST API設計原則
 
 * リソース指向: エンドポイントは名詞（`/api/books`, `/api/orders`）
 * HTTPメソッド: GET（取得）、POST（作成）、PUT（更新）、DELETE（削除）
@@ -976,7 +986,7 @@ Payara Server 6.x
   - 409 Conflict: ビジネスエラー（在庫不足、楽観的ロック競合）
   - 500 Internal Server Error: システムエラー
 
-### 15.2.1 静的リソースアクセスのベストプラクティス
+### 16.2.1 静的リソースアクセスのベストプラクティス
 
 WAR内リソースへのアクセス:
 
@@ -996,14 +1006,14 @@ WAR内リソースへのアクセス:
 * ServletContextはコンテナが提供するAPIで、WAR内外のリソースに統一的にアクセス可能
 * 開発環境と本番環境で動作を統一できる
 
-### 15.3 ログ出力規約
+### 16.3 ログ出力規約
 
 * 全REST APIエンドポイントの開始点でINFOログ
 * 全サービスメソッドの開始点でINFOログ
 * ビジネス例外はWARNログ
 * システム例外はERRORログ（スタックトレース付き）
 
-### 15.4 ブランチ戦略
+### 16.4 ブランチ戦略
 
 * **ブランチモデル:** GitHub Flow
 * **ブランチ命名規則:**
@@ -1014,15 +1024,15 @@ WAR内リソースへのアクセス:
 
 ---
 
-## 16. 将来の拡張（スコープ外）
+## 17. 将来の拡張（スコープ外）
 
-### 16.1 想定される拡張機能
+### 17.1 想定される拡張機能
 
 以下の機能は現在のスコープ外であるが、将来的な拡張の可能性を考慮してアーキテクチャを設計している。
 
 * **OAuth2認証:**
   - 概要: Google, Facebook等のOAuth2プロバイダー連携
-  - 拡張ポイント: AuthResourceに新しいエンドポイント追加
+  - 拡張ポイント: AuthenResourceに新しいエンドポイント追加
 
 * **GraphQL API:**
   - 概要: REST APIに加えてGraphQL APIを提供
@@ -1036,7 +1046,7 @@ WAR内リソースへのアクセス:
   - 概要: 複数店舗・ブランドのサポート
   - 拡張ポイント: テナントIDをエンティティに追加
 
-### 16.2 アーキテクチャの拡張性
+### 17.2 アーキテクチャの拡張性
 
 * **拡張可能な領域:**
   - 新しいAPIエンドポイントの追加（JAX-RS Resource）
@@ -1050,17 +1060,135 @@ WAR内リソースへのアクセス:
 
 ---
 
-## 17. 参考資料
+## 18. 実装状況と技術的対応方針
 
-### 17.1 公式ドキュメント
+**最終更新**: 2026-01-10  
+**実装バージョン**: v3.0.0 - サービス分離アーキテクチャ完全対応版
+
+### 18.1 実装完了状況
+
+| コンポーネント | 状態 | 実装方針 |
+|-------------|------|---------|
+| 認証リソース | ✅ 完了 | JWT認証、外部サービス連携 |
+| 書籍リソース | ✅ 完了 | プロキシパターン（BFF層） |
+| カテゴリリソース | ✅ 完了 | プロキシパターン（BFF層） |
+| 注文リソース | ✅ 完了 | 注文処理、在庫管理連携、スナップショット保存 |
+| 画像リソース | ✅ 完了 | WAR内静的リソース配信 |
+| 外部API連携（書籍・在庫） | ✅ 完了 | REST Client実装 |
+| 外部API連携（顧客管理） | ✅ 完了 | REST Client実装 |
+| JWT生成・検証 | ✅ 完了 | 認証トークン管理 |
+| 認証フィルター | ✅ 完了 | リクエスト認証処理 |
+| 例外マッパー | ✅ 完了 | 統一的なエラーハンドリング |
+
+### 18.2 技術的対応方針
+
+#### 18.2.1 設定管理
+
+**設定ファイル**: MicroProfile Config仕様に準拠
+
+**管理項目**:
+- JWT設定（秘密鍵、有効期限、Cookie名）
+- 外部サービスURL（顧客管理API、書籍・在庫管理API）
+
+**実装方針**:
+- 設定値はアプリケーション初期化時に明示的に読み込み
+- デフォルト値を必ず設定し、設定ファイルがない場合でも動作可能
+- 初期化ログで設定値を確認可能にする
+
+**採用理由**: 
+- 環境間での設定値の一貫性を保証
+- デプロイ時の設定ミスを早期発見
+- 開発・テスト・本番環境での柔軟な設定変更
+
+#### 18.2.2 依存性注入（CDI）
+
+**役割**:
+- CDIコンテナの明示的有効化
+- 依存性注入の動作保証
+- 外部設定読み込み機能の有効化
+
+**設定方針**: Jakarta EE 10推奨設定を使用
+
+#### 18.2.3 エラーハンドリング統一
+
+**基本方針**:
+- すべてのエラーレスポンスでコンテンツタイプを明示
+- 統一されたエラーレスポンス形式（ErrorResponse DTO）
+- 適切なHTTPステータスコードの返却
+
+**エラー分類**:
+- ビジネスエラー: 409 Conflict（在庫不足、楽観的ロック競合）
+- バリデーションエラー: 400 Bad Request
+- 認証エラー: 401 Unauthorized
+- システムエラー: 500 Internal Server Error
+
+#### 18.2.4 認証・認可機構
+
+**公開エンドポイント**:
+- ログイン、ログアウト、ユーザー登録
+- 書籍一覧、書籍詳細、カテゴリ一覧
+- 画像リソース
+
+**認証必須エンドポイント**:
+- 注文処理、注文履歴参照
+- ユーザー情報参照
+
+**認証処理フロー**:
+1. リクエストからJWT Cookieを抽出
+2. JWTトークンの検証（署名、有効期限）
+3. 認証情報をスレッドローカルに保存
+4. 認証失敗時は401エラーを返却
+
+#### 18.2.5 スナップショットパターン
+
+**適用対象**: 注文明細データ
+
+**保存項目**:
+- 書籍ID（論理参照のみ）
+- 書籍名（注文時点のスナップショット）
+- 出版社名（注文時点のスナップショット）
+- 価格（注文時点のスナップショット）
+
+**設計意図**:
+- 注文履歴は過去の取引記録であり、書籍マスタの変更や削除の影響を受けるべきではない
+- 外部サービスが停止している場合でも注文履歴を表示可能
+- 注文履歴表示時の外部API呼び出しを削減し、パフォーマンスを向上
+
+### 18.3 動作確認結果
+
+**テスト実行日**: 2026-01-10
+
+| API分類 | 主要エンドポイント | 動作状況 | 備考 |
+|---------|------------------|---------|------|
+| 書籍API | GET /api/books | ✅ 正常 | 外部API連携 |
+| カテゴリAPI | GET /api/categories | ✅ 正常 | 外部API連携 |
+| 画像API | GET /api/images/covers/{id} | ✅ 正常 | WAR内リソース |
+| 認証API | POST /api/auth/login | ✅ 正常 | 外部API連携 |
+| ユーザー情報API | GET /api/auth/me | ✅ 正常 | JWT認証 |
+| 注文履歴API | GET /api/orders/history | ✅ 正常 | スナップショット表示 |
+| ログアウトAPI | POST /api/auth/logout | ✅ 正常 | Cookie削除 |
+
+**確認事項**:
+- BFF層のプロキシパターンが正常に機能
+- 外部サービス（書籍・在庫管理、顧客管理）との連携が正常
+- スナップショットパターンによる注文履歴表示が正常
+- エラーハンドリングが適切に機能
+- JWT認証フローが正常
+
+---
+
+## 19. 参考資料
+
+### 19.1 公式ドキュメント
 
 * Jakarta EE 10: https://jakarta.ee/specifications/platform/10/
 * JAX-RS 3.1: https://jakarta.ee/specifications/restful-ws/3.1/
 * JPA 3.1: https://jakarta.ee/specifications/persistence/3.1/
 * JWT (JSON Web Token): https://jwt.io/
 * jjwt: https://github.com/jwtk/jjwt
+* MicroProfile Config: https://microprofile.io/specifications/microprofile-config/
 
-### 17.2 関連仕様書
+### 19.2 関連仕様書
 
 * [requirements.md](requirements.md) - 要件定義書
 * [functional_design.md](functional_design.md) - 機能設計書（API仕様）
@@ -1068,6 +1196,6 @@ WAR内リソースへのアクセス:
 * [data_model.md](data_model.md) - データモデル仕様書
 * [external_interface.md](external_interface.md) - 外部インターフェース仕様書
 
-### 17.3 プロジェクトREADME
+### 19.3 プロジェクトREADME
 
 * [README.md](../../README.md) - プロジェクトREADME

@@ -1,9 +1,9 @@
-# berry-books-api-sdd プロジェクト
+# back-office-api-sdd プロジェクト
 
 ## 📖 概要
 
-Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオンライン書店「**Berry Books**」のREST APIアプリケーションです。
-書籍検索、JWT認証、注文処理などのEC機能をREST APIとして提供します。
+Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオンライン書店「**Berry Books**」のバックオフィスAPIアプリケーションです。
+書籍・在庫・カテゴリ・出版社の完全なデータ管理をREST APIとして提供するマイクロサービスです。
 
 > **Note:** このプロジェクトは**仕様駆動開発（SDD: Specification-Driven Development）**の研修用プロジェクトです。
 
@@ -11,7 +11,290 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 > - 詳細な仕様書（specs/）に基づいて、段階的にコードを生成する手法
 > - AIを活用して、仕様書からタスクリスト（tasks/）を生成し、タスクに従って実装を進める
 > - 憲章（principles/）に定められた設計原則とベストプラクティスに従う
-> - 完成版（master/berry-books-api）と同等の品質を目指す
+> - **汎用Agent Skills** (`agent_skills/jakarta-ee-standard/`) を使用した開発
+
+## 🤖 Agent Skillsを使った開発
+
+このプロジェクトは、汎用的な **Jakarta EE マイクロサービス開発 Agent Skills** を使用して開発します。
+
+開発は以下の**3段階プロセス**で進めます：
+
+```
+ステップ1: タスク分解（仕様書 → タスクリスト）
+    ↓
+ステップ2: 詳細設計（仕様書 → 詳細設計書）← AIと対話しながら
+    ↓
+ステップ3: コード生成（詳細設計書 → 実装コード）
+```
+
+---
+
+### 📋 開発フロー
+
+#### ステップ1: タスク分解（プロジェクト開始時に1回）
+
+仕様書から実装タスクリストを分解・生成します。
+
+```
+@agent_skills/jakarta-ee-standard/instructions/task_breakdown.md
+
+全タスクを分解してください。
+
+パラメータ:
+- project_root: projects/sdd/bookstore/back-office-api-sdd
+- spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs
+```
+
+**生成されるファイル**: `tasks/*.md`（タスクリスト）
+
+---
+
+#### ステップ2: 詳細設計（各APIごとに実施）
+
+各APIの詳細設計書を**AIと対話しながら**作成します。
+
+**実行順序**: `tasks/tasks.md`の「実行順序」セクションを参照してください。
+
+**対話の流れ**:
+1. AIが仕様書を読み込み、理解した内容を説明します
+2. AIが不明点を質問します
+3. あなたが回答します
+4. `specs/baseline/api/API_XXX_*/detailed_design.md` が生成されます
+
+---
+
+**全APIの詳細設計コマンド（コピペ用）**:
+
+##### API_001_auth（認証API）
+
+```
+@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
+@projects/sdd/bookstore/back-office-api-sdd/specs
+
+対象: API_001_auth
+
+認証APIの詳細設計書を作成してください。
+```
+
+##### API_002_books（書籍API - JPQL + Criteria API）
+
+```
+@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
+@projects/sdd/bookstore/back-office-api-sdd/specs
+
+対象: API_002_books
+
+書籍APIの詳細設計書を作成してください。
+JPQL検索とCriteria API検索の両方を実装する予定です。
+```
+
+##### API_003_categories（カテゴリAPI）
+
+```
+@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
+@projects/sdd/bookstore/back-office-api-sdd/specs
+
+対象: API_003_categories
+
+カテゴリAPIの詳細設計書を作成してください。
+```
+
+##### API_004_publishers（出版社API）
+
+```
+@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
+@projects/sdd/bookstore/back-office-api-sdd/specs
+
+対象: API_004_publishers
+
+出版社APIの詳細設計書を作成してください。
+```
+
+##### API_005_stocks（在庫API - 楽観的ロック）
+
+```
+@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
+@projects/sdd/bookstore/back-office-api-sdd/specs
+
+対象: API_005_stocks
+
+在庫APIの詳細設計書を作成してください。
+楽観的ロック（@Version）を使用した在庫更新を実装する予定です。
+```
+
+##### API_006_workflows（ワークフローAPI）
+
+```
+@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
+@projects/sdd/bookstore/back-office-api-sdd/specs
+
+対象: API_006_workflows
+
+ワークフローAPIの詳細設計書を作成してください。
+```
+
+**重要**: 詳細設計は**対話的なプロセス**です。AIが質問してきたら、必ず回答してください。
+
+---
+
+#### ステップ3: コード生成（詳細設計完了後）
+
+詳細設計書をもとに、実装コードを生成します。
+
+**実行順序**: 
+1. **セットアップタスク** → 2. **共通機能タスク** → 3. **各API実装**
+
+> **重要**: 共通機能タスク（エンティティ、DAO、DTO、ユーティリティ等）を先に実装してから、各API実装に進んでください。
+
+##### 3-1. セットアップタスク（最初に1回）
+
+```
+@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+
+セットアップタスクを実行してください。
+
+パラメータ:
+- project_root: projects/sdd/bookstore/back-office-api-sdd
+- task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/setup_tasks.md
+- skip_infrastructure: true
+```
+
+##### 3-2. 共通機能タスク（セットアップ後に1回）
+
+```
+@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+
+共通機能タスクを実行してください。
+
+パラメータ:
+- project_root: projects/sdd/bookstore/back-office-api-sdd
+- task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/common_tasks.md
+```
+
+**実装される共通機能**:
+- 全エンティティ（Book, Stock, Category, Publisher, Employee, Department, Workflow）
+- 全DAO（JPQLとCriteria API対応）
+- 共通DTO・例外クラス
+- セキュリティ基盤（JWT、BCrypt）
+- ユーティリティクラス
+
+##### 3-3. 各APIの実装（共通機能完了後にコピペ用）
+
+詳細設計書を参照しながら、各APIを実装します。
+
+**API_001_auth**:
+
+```
+@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_001_auth/detailed_design.md
+
+認証APIを実装してください。
+
+パラメータ:
+- project_root: projects/sdd/bookstore/back-office-api-sdd
+- task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_001_auth.md
+```
+
+**API_002_books**:
+
+```
+@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_002_books/detailed_design.md
+
+書籍APIを実装してください。
+
+パラメータ:
+- project_root: projects/sdd/bookstore/back-office-api-sdd
+- task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_002_books.md
+```
+
+**API_003_categories**:
+
+```
+@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_003_categories/detailed_design.md
+
+カテゴリAPIを実装してください。
+
+パラメータ:
+- project_root: projects/sdd/bookstore/back-office-api-sdd
+- task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_003_categories.md
+```
+
+**API_004_publishers**:
+
+```
+@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_004_publishers/detailed_design.md
+
+出版社APIを実装してください。
+
+パラメータ:
+- project_root: projects/sdd/bookstore/back-office-api-sdd
+- task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_004_publishers.md
+```
+
+**API_005_stocks**:
+
+```
+@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_005_stocks/detailed_design.md
+
+在庫APIを実装してください（楽観的ロック対応）。
+
+パラメータ:
+- project_root: projects/sdd/bookstore/back-office-api-sdd
+- task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_005_stocks.md
+```
+
+**API_006_workflows**:
+
+```
+@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_006_workflows/detailed_design.md
+
+ワークフローAPIを実装してください。
+
+パラメータ:
+- project_root: projects/sdd/bookstore/back-office-api-sdd
+- task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_006_workflows.md
+```
+
+---
+
+### 📚 詳細情報
+
+詳細は `@agent_skills/jakarta-ee-standard/README.md` を参照してください。
+
+## 🎯 プロジェクトの特徴（マイクロサービスパターン）
+
+### アーキテクチャ
+- **独立したデータ管理サービス**: 書籍・在庫・カテゴリ・出版社の完全管理
+- **マイクロサービス**: BFF（berry-books-api）から呼ばれるバックエンドサービス
+- **REST API**: データ管理機能をREST APIとして提供
+- **CORS対応**: クロスオリジンリクエストに対応
+
+### 実装する全エンティティ
+- ✅ **Book**（書籍）
+- ✅ **Stock**（在庫）- **楽観的ロック必須（@Version）**
+- ✅ **Category**（カテゴリ）
+- ✅ **Publisher**（出版社）
+
+### 重要な実装要件
+
+#### 楽観的ロック（Optimistic Locking）
+- Stockエンティティに`@Version`アノテーション使用
+- 在庫更新時の競合を検出
+- `OptimisticLockException` → HTTP 409 Conflict
+
+#### 2種類の書籍検索実装
+- **JPQL検索**（`BookDao`）: 動的クエリ、シンプル
+- **Criteria API検索**（`BookDaoCriteria`）: 型安全、コンパイル時チェック
+- **両方実装**: 比較学習が可能
+
+#### CORS設定
+- BFF（berry-books-api）からのクロスオリジンリクエスト対応
+- `CorsFilter`実装
 
 ## 🔧 使用している技術
 
@@ -25,8 +308,6 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 - **Jakarta CDI 4.0**
 - **Jakarta Bean Validation 3.0**
 - **HSQLDB 2.7.x**
-- **JWT (JSON Web Token)** - jjwt 0.12.6
-- **BCrypt** - パスワードハッシュ化
 
 ### テスト環境
 
@@ -37,92 +318,95 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 ## プロジェクト構成
 
 ```
-berry-books-api-sdd/
+back-office-api-sdd/
+├── specs/                          # 仕様書（SDD）
+│   ├── baseline/
+│   │   ├── system/
+│   │   │   ├── requirements.md
+│   │   │   ├── architecture_design.md
+│   │   │   ├── functional_design.md
+│   │   │   ├── data_model.md
+│   │   │   └── behaviors.md
+│   │   └── api/
+│   │       ├── API_001_books/
+│   │       ├── API_002_stocks/
+│   │       └── API_003_categories/
+│   └── enhancements/               # 機能拡張仕様
+├── principles/                     # 開発憲章
+│   └── constitution.md
+├── tasks/                          # タスクリスト（AI生成）
+│   ├── tasks.md
+│   ├── setup_tasks.md
+│   ├── common_tasks.md
+│   ├── API_001_books.md
+│   ├── API_002_stocks.md
+│   └── integration_tasks.md
 ├── src/
 │   ├── main/
 │   │   ├── java/
-│   │   │   └── pro/kensait/berrybooks/
+│   │   │   └── pro/kensait/backoffice/
 │   │   │       ├── api/              # JAX-RS Resources
 │   │   │       │   ├── dto/          # API DTOs (Records)
 │   │   │       │   └── exception/    # Exception Mappers
-│   │   │       ├── security/         # JWT, SecuredResource
 │   │   │       ├── service/          # Business Logic
-│   │   │       │   ├── order/
-│   │   │       │   ├── book/
-│   │   │       │   ├── category/
-│   │   │       │   ├── customer/
-│   │   │       │   └── delivery/
 │   │   │       ├── dao/              # Data Access Objects
-│   │   │       ├── entity/           # JPA Entities
-│   │   │       ├── external/         # External API Clients
-│   │   │       │   └── dto/
+│   │   │       ├── entity/           # JPA Entities (Book, Stock, Category, Publisher)
 │   │   │       ├── util/             # Utilities
 │   │   │       └── common/           # Common Classes
 │   │   ├── resources/
 │   │   │   ├── META-INF/
-│   │   │   │   ├── persistence.xml
-│   │   │   │   └── microprofile-config.properties
+│   │   │   │   └── persistence.xml
 │   │   │   ├── db/
 │   │   │   │   ├── schema.sql
 │   │   │   │   └── sample_data.sql
-│   │   │   ├── log4j2.xml
-│   │   │   └── messages.properties
+│   │   │   └── log4j2.xml
 │   │   └── webapp/
-│   │       ├── WEB-INF/
-│   │       │   └── web.xml
-│   │       └── resources/
-│   │           └── images/
-│   │               └── covers/
+│   │       └── WEB-INF/
+│   │           └── web.xml
 │   └── test/
 │       └── java/
-│           └── pro/kensait/berrybooks/
+│           └── pro/kensait/backoffice/
 ├── build.gradle
 └── README.md
 ```
 
 ## API仕様
 
-### 認証API (`/api/auth`)
-
-| メソッド | エンドポイント | 説明 | 認証 |
-|---------|--------------|------|-----|
-| POST | `/api/auth/login` | ログイン（JWT Cookie発行） | 不要 |
-| POST | `/api/auth/logout` | ログアウト（Cookie削除） | 不要 |
-| POST | `/api/auth/register` | 新規登録 | 不要 |
-| GET | `/api/auth/me` | 現在のログインユーザー情報取得 | 必須 |
-
 ### 書籍API (`/api/books`)
 
-| メソッド | エンドポイント | 説明 | 認証 |
+| メソッド | エンドポイント | 説明 |
+|---------|--------------|------|
+| GET | `/api/books` | 全書籍取得 |
+| GET | `/api/books/{id}` | 書籍詳細取得 |
+| GET | `/api/books/search/jpql` | 書籍検索（JPQL） |
+| GET | `/api/books/search/criteria` | 書籍検索（Criteria API） |
+| POST | `/api/books` | 書籍登録 |
+| PUT | `/api/books/{id}` | 書籍更新 |
+| DELETE | `/api/books/{id}` | 書籍削除 |
+
+### 在庫API (`/api/stocks`)
+
+| メソッド | エンドポイント | 説明 | 注意 |
 |---------|--------------|------|-----|
-| GET | `/api/books` | 書籍一覧取得 | 不要 |
-| GET | `/api/books/{id}` | 書籍詳細取得 | 不要 |
-| GET | `/api/books/search` | 書籍検索 | 不要 |
-| GET | `/api/books/categories` | カテゴリ一覧取得 | 不要 |
+| GET | `/api/stocks` | 全在庫取得 | |
+| GET | `/api/stocks/{bookId}` | 在庫取得 | |
+| PUT | `/api/stocks/{bookId}` | 在庫更新 | **楽観的ロック対応** |
 
-### 注文API (`/api/orders`)
+**重要**: 在庫更新時は`version`パラメータが必須。競合時はHTTP 409 Conflictを返す。
 
-| メソッド | エンドポイント | 説明 | 認証 |
-|---------|--------------|------|-----|
-| POST | `/api/orders` | 注文作成 | 必須 |
-| GET | `/api/orders/history` | 注文履歴取得 | 必須 |
-| GET | `/api/orders/{tranId}` | 注文詳細取得 | 不要 |
-| GET | `/api/orders/{tranId}/details/{detailId}` | 注文明細取得 | 不要 |
+### カテゴリAPI (`/api/categories`)
 
-### 画像API (`/api/images`)
+| メソッド | エンドポイント | 説明 |
+|---------|--------------|------|
+| GET | `/api/categories` | 全カテゴリ取得 |
+| GET | `/api/categories/{id}` | カテゴリ詳細取得 |
 
-| メソッド | エンドポイント | 説明 | 認証 |
-|---------|--------------|------|-----|
-| GET | `/api/images/covers/{bookId}` | 書籍表紙画像取得 | 不要 |
+### 出版社API (`/api/publishers`)
 
-**画像ファイル配置場所**: `src/main/webapp/resources/images/covers/`
-
-**画像ファイル命名規則**: `{bookId}.jpg`（例: `1.jpg`, `2.jpg`）
-
-**重要な実装詳細**:
-- ServletContextを使用してWAR内リソースにアクセス
-- 画像が存在しない場合は`no-image.jpg`をフォールバックとして返却
-- デプロイ後もWARアーカイブ内から画像を配信可能
+| メソッド | エンドポイント | 説明 |
+|---------|--------------|------|
+| GET | `/api/publishers` | 全出版社取得 |
+| GET | `/api/publishers/{id}` | 出版社詳細取得 |
 
 ## 🚀 セットアップとコマンド実行ガイド
 
@@ -146,13 +430,13 @@ berry-books-api-sdd/
 
 ```bash
 # 1. データベーステーブルとデータを作成
-./gradlew :berry-books-api-sdd:setupHsqldb
+./gradlew :back-office-api-sdd:setupHsqldb
 
 # 2. プロジェクトをビルド
-./gradlew :berry-books-api-sdd:war
+./gradlew :back-office-api-sdd:war
 
 # 3. プロジェクトをデプロイ
-./gradlew :berry-books-api-sdd:deploy
+./gradlew :back-office-api-sdd:deploy
 ```
 
 > **重要:** `setupHsqldb`を実行すると、`src/main/resources/db/schema.sql`と`sample_data.sql`が実行されます。
@@ -161,144 +445,67 @@ berry-books-api-sdd/
 
 ```bash
 # プロジェクトをアンデプロイ
-./gradlew :berry-books-api-sdd:undeploy
+./gradlew :back-office-api-sdd:undeploy
 ```
 
 ### ⑥ アプリケーション作成・更新のたびに実行
 
 ```bash
 # アプリケーションを再ビルドして再デプロイ
-./gradlew :berry-books-api-sdd:war
-./gradlew :berry-books-api-sdd:deploy
+./gradlew :back-office-api-sdd:war
+./gradlew :back-office-api-sdd:deploy
 ```
 
 ## 📍 APIエンドポイント
 
 デプロイ後、以下のベースURLでAPIにアクセスできます：
 
-- **ベースURL**: http://localhost:8080/berry-books-api-sdd/api
-- **ウェルカムページ**: http://localhost:8080/berry-books-api-sdd/
-
-## 🔐 JWT認証
-
-このAPIはJWT (JSON Web Token) ベースの認証を使用します。
-
-### 認証フロー
-
-1. クライアントが `/api/auth/login` にメールアドレスとパスワードを送信
-2. 認証成功時、サーバーがJWTを生成し、HttpOnly Cookieで返却
-3. 以降のリクエストで、ブラウザが自動的にCookieを送信
-4. サーバー側で`JwtAuthenticationFilter`がCookieからJWTを抽出・検証
-5. 認証必須のエンドポイントでは、JWTが有効でない場合401エラーを返す
-
-### JWT設定
-
-設定は`src/main/resources/META-INF/microprofile-config.properties`で管理されます：
-
-```properties
-# JWT秘密鍵（本番環境では環境変数で上書きすること）
-jwt.secret-key=BerryBooksSecretKeyForJWT2024MustBe32CharactersOrMore
-
-# JWT有効期限（ミリ秒）デフォルト: 24時間
-jwt.expiration-ms=86400000
-
-# JWT Cookie名
-jwt.cookie-name=berry-books-jwt
-```
-
-> **重要:** 本番環境では、システムプロパティまたは環境変数で`jwt.secret-key`を上書きしてください。
-
-### 外部API設定
-
-```properties
-customer.api.base-url=http://localhost:8080/customer-api/customers
-```
+- **ベースURL**: http://localhost:8080/back-office-api-sdd/api
+- **ウェルカムページ**: http://localhost:8080/back-office-api-sdd/
 
 ## 📝 APIの使用例（curl）
 
-### 1. 新規登録
+### 1. 全書籍取得
 
 ```bash
-curl -X POST http://localhost:8080/berry-books-api-sdd/api/auth/register \
+curl -X GET http://localhost:8080/back-office-api-sdd/api/books
+```
+
+### 2. 書籍検索（JPQL）
+
+```bash
+curl -X GET "http://localhost:8080/back-office-api-sdd/api/books/search/jpql?keyword=Java&categoryId=1"
+```
+
+### 3. 書籍検索（Criteria API）
+
+```bash
+curl -X GET "http://localhost:8080/back-office-api-sdd/api/books/search/criteria?keyword=Java&categoryId=1"
+```
+
+### 4. 在庫取得
+
+```bash
+curl -X GET http://localhost:8080/back-office-api-sdd/api/stocks/1
+```
+
+### 5. 在庫更新（楽観的ロック）
+
+```bash
+curl -X PUT http://localhost:8080/back-office-api-sdd/api/stocks/1 \
   -H "Content-Type: application/json" \
   -d '{
-    "customerName": "山田太郎",
-    "password": "password123",
-    "email": "yamada@example.com",
-    "birthday": "1990-01-01",
-    "address": "東京都渋谷区1-2-3"
-  }' \
-  -c cookies.txt
-```
-
-### 2. ログイン
-
-```bash
-curl -X POST http://localhost:8080/berry-books-api-sdd/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "alice@gmail.com",
-    "password": "password"
-  }' \
-  -c cookies.txt
-```
-
-### 3. 全書籍取得
-
-```bash
-curl -X GET http://localhost:8080/berry-books-api-sdd/api/books
-```
-
-### 4. 書籍検索（カテゴリとキーワード）
-
-```bash
-curl -X GET "http://localhost:8080/berry-books-api-sdd/api/books/search?categoryId=1&keyword=Java"
-```
-
-### 5. 現在のログインユーザー情報取得
-
-```bash
-curl -X GET http://localhost:8080/berry-books-api-sdd/api/auth/me \
-  -b cookies.txt
-```
-
-### 6. 注文作成
-
-```bash
-curl -X POST http://localhost:8080/berry-books-api-sdd/api/orders \
-  -H "Content-Type: application/json" \
-  -b cookies.txt \
-  -d '{
-    "cartItems": [
-      {
-        "bookId": 1,
-        "bookName": "Java完全理解",
-        "publisherName": "技術評論社",
-        "price": 3200,
-        "count": 2,
-        "version": 0
-      }
-    ],
-    "totalPrice": 6400,
-    "deliveryPrice": 800,
-    "deliveryAddress": "東京都渋谷区1-2-3",
-    "settlementType": 1
+    "quantity": 50,
+    "version": 0
   }'
 ```
 
-### 7. 注文履歴取得
+> **重要**: `version`パラメータが異なる場合、HTTP 409 Conflictが返されます。
+
+### 6. カテゴリ一覧取得
 
 ```bash
-curl -X GET http://localhost:8080/berry-books-api-sdd/api/orders/history \
-  -b cookies.txt
-```
-
-### 8. ログアウト
-
-```bash
-curl -X POST http://localhost:8080/berry-books-api-sdd/api/auth/logout \
-  -b cookies.txt \
-  -c cookies.txt
+curl -X GET http://localhost:8080/back-office-api-sdd/api/categories
 ```
 
 ## 🧪 テスト
@@ -310,23 +517,23 @@ curl -X POST http://localhost:8080/berry-books-api-sdd/api/auth/logout \
 #### すべてのテストを実行
 
 ```bash
-./gradlew :berry-books-api-sdd:test
+./gradlew :back-office-api-sdd:test
 ```
 
 #### 特定のテストクラスを実行
 
 ```bash
-# AddressUtilのテストのみを実行
-./gradlew :berry-books-api-sdd:test --tests "*AddressUtilTest"
+# BookServiceのテストのみを実行
+./gradlew :back-office-api-sdd:test --tests "*BookServiceTest"
 
-# DeliveryFeeServiceのテストのみを実行
-./gradlew :berry-books-api-sdd:test --tests "*DeliveryFeeServiceTest"
+# StockServiceのテストのみを実行（楽観的ロックテスト含む）
+./gradlew :back-office-api-sdd:test --tests "*StockServiceTest"
 ```
 
 #### テストの継続的実行（変更検知）
 
 ```bash
-./gradlew :berry-books-api-sdd:test --continuous
+./gradlew :back-office-api-sdd:test --continuous
 ```
 
 ### テストレポートの確認
@@ -334,7 +541,7 @@ curl -X POST http://localhost:8080/berry-books-api-sdd/api/auth/logout \
 テスト実行後、HTMLレポートが生成されます：
 
 ```
-projects/sdd/bookstore/berry-books-api-sdd/build/reports/tests/test/index.html
+projects/sdd/bookstore/back-office-api-sdd/build/reports/tests/test/index.html
 ```
 
 ブラウザで開くとテスト結果の詳細が確認できます。
@@ -343,10 +550,10 @@ projects/sdd/bookstore/berry-books-api-sdd/build/reports/tests/test/index.html
 
 ```bash
 # テストカバレッジレポートを生成
-./gradlew :berry-books-api-sdd:jacocoTestReport
+./gradlew :back-office-api-sdd:jacocoTestReport
 
 # カバレッジレポートの場所
-# projects/sdd/bookstore/berry-books-api-sdd/build/reports/jacoco/test/html/index.html
+# projects/sdd/bookstore/back-office-api-sdd/build/reports/jacoco/test/html/index.html
 ```
 
 ## 📚 アーキテクチャ
@@ -354,18 +561,18 @@ projects/sdd/bookstore/berry-books-api-sdd/build/reports/tests/test/index.html
 ### レイヤー構成
 
 ```
-REST Client / SPA
+BFF (berry-books-api)
     ↓ HTTP/JSON
 JAX-RS Resource (@Path, @ApplicationScoped)
-    ↓ JWT Authentication Filter
+    ↓ CORS Filter
 CDI Service (@ApplicationScoped)
     ↓
-DAO (@ApplicationScoped) + REST Client
-    ↓ JPA / HTTP
-Database (HSQLDB) + External Customer API
+DAO (@ApplicationScoped)
+    ↓ JPA
+Database (HSQLDB)
 ```
 
-**注:** 顧客情報は外部の`customer-api` REST API経由でアクセス（外部システム連携）
+**注:** このAPIはBFF（berry-books-api）から呼ばれるマイクロサービスです。
 
 ### 主要な設計パターン
 
@@ -373,18 +580,18 @@ Database (HSQLDB) + External Customer API
 - **Service Layer Pattern**: CDI + Transactional
 - **Repository Pattern**: DAO
 - **DTO Pattern**: Java Records
-- **JWT Authentication**: HttpOnly Cookie
 - **Dependency Injection**: CDI
-- **Optimistic Locking**: `@Version`
+- **Optimistic Locking**: `@Version`（在庫管理）
 - **Exception Mapper**: JAX-RS
+- **CORS Filter**: クロスオリジン対応
 
 ### 楽観的ロック制御
 
-在庫テーブル（`STOCK`）に`@Version`カラムを使用し、注文時の同時購入による在庫不整合を防止します。
+在庫テーブル（`STOCK`）に`@Version`カラムを使用し、更新時の同時更新による不整合を防止します。
 
 ### トランザクション管理
 
-`OrderService.orderBooks()`メソッドに`@Transactional`を適用し、注文作成と在庫更新をアトミックに実行します。
+`StockService.updateStock()`メソッドに`@Transactional`を適用し、在庫更新をアトミックに実行します。
 
 ## 📝 データソース設定について
 
@@ -411,7 +618,7 @@ Database (HSQLDB) + External Customer API
 ### アプリケーションのアンデプロイ
 
 ```bash
-./gradlew :berry-books-api-sdd:undeploy
+./gradlew :back-office-api-sdd:undeploy
 ```
 
 ### Payara Server全体を停止
@@ -451,15 +658,14 @@ rm -f hsqldb/data/testdb.*
 ./gradlew startHsqldb
 
 # 初期データをセットアップ
-./gradlew :berry-books-api-sdd:setupHsqldb
+./gradlew :back-office-api-sdd:setupHsqldb
 ```
 
 ## 📖 参考リンク
 
 - [Jakarta EE 10 Platform](https://jakarta.ee/specifications/platform/10/)
 - [Jakarta RESTful Web Services 3.1](https://jakarta.ee/specifications/restful-ws/3.1/)
-- [JWT (JSON Web Token)](https://jwt.io/)
-- [jjwt - Java JWT Library](https://github.com/jwtk/jjwt)
+- [Agent Skills Documentation](https://agentskills.io/what-are-skills)
 
 ## 📄 ライセンス
 

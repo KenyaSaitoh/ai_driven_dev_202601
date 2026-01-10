@@ -1,92 +1,125 @@
-# 出版社API タスク
+# API_004_publishers - 出版社APIタスク
 
-**担当者:** 担当者D（1名）  
+**担当者:** 1名  
 **推奨スキル:** JAX-RS、JPA  
-**想定工数:** 2時間  
+**想定工数:** 4時間  
 **依存タスク:** [common_tasks.md](common_tasks.md)
+
+---
+
+## 概要
+
+このタスクリストは、出版社API（一覧取得）の実装タスクを含みます。シンプルなマスタデータ参照APIです。
 
 ---
 
 ## タスクリスト
 
-### T_API004_001: [P] PublisherTOの作成
+### T_API004_001: PublisherTOの作成
 
-- **目的**: 出版社情報のデータ転送オブジェクトを作成する
-- **対象**: PublisherTO.java（DTOクラス）
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_004_publishers/functional_design.md) の「4. データ転送オブジェクト（DTO）」
+- **目的**: 出版社情報レスポンス用のDTOを実装する
+- **対象**: `pro.kensait.backoffice.api.dto.PublisherTO`（Record）
+- **参照SPEC**: 
+  - [functional_design.md](../specs/baseline/api/API_004_publishers/functional_design.md) の「2.1 GET /api/publishers」
 - **注意事項**: 
-  - publisherId、publisherNameを含める
-  - レコード型（immutable）で実装する
+  - Java Record形式で実装
+  - フィールド: `publisherId`（Integer）、`publisherName`（String）
 
 ---
 
-### T_API004_002: [P] PublisherServiceの作成
+### T_API004_002: PublisherServiceの作成
 
-- **目的**: 出版社管理のビジネスロジッククラスを作成する
-- **対象**: PublisherService.java（Serviceクラス）
-- **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「3.2 Business Logic Layer」
+- **目的**: 出版社管理ビジネスロジックを実装する
+- **対象**: `pro.kensait.backoffice.service.PublisherService`
+- **参照SPEC**: 
+  - [functional_design.md](../specs/baseline/api/API_004_publishers/functional_design.md) の「3. ビジネスロジック」
 - **注意事項**: 
-  - `@ApplicationScoped`でCDI管理する
-  - getPublishersAll()メソッドを実装する
-  - PublisherDaoを使用する
+  - `@ApplicationScoped`、`@Transactional`
+  - PublisherDaoを`@Inject`
+  - メソッド:
+    - `getAllPublishers()`: 全出版社取得（配列形式）
+  - PublisherエンティティをPublisherTOに変換
 
 ---
 
-### T_API004_003: [P] PublisherResourceの作成
+### T_API004_003: PublisherResourceの作成
 
-- **目的**: 出版社APIのエンドポイントを実装するResourceクラスを作成する
-- **対象**: PublisherResource.java（JAX-RS Resourceクラス）
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_004_publishers/functional_design.md) の「2. エンドポイント一覧」
+- **目的**: 出版社APIのエンドポイントを実装する
+- **対象**: `pro.kensait.backoffice.api.PublisherResource`
+- **参照SPEC**: 
+  - [functional_design.md](../specs/baseline/api/API_004_publishers/functional_design.md) の「2. エンドポイント仕様」
+  - [behaviors.md](../specs/baseline/api/API_004_publishers/behaviors.md) の「2. 出版社API」
 - **注意事項**: 
-  - `@Path("/publishers")`でベースパスを設定する
-  - getAllPublishers()メソッドを実装する
+  - `@Path("/publishers")`、`@ApplicationScoped`
+  - PublisherServiceを`@Inject`
+  - エンドポイント:
+    - `@GET`: 全出版社取得（配列形式）
+  - レスポンス: List<PublisherTO>
+  - HTTPステータス: 200 OK
+  - ログ出力: INFO（API呼び出し）
 
 ---
 
-### T_API004_004: getAllPublishers()メソッドの実装
+### T_API004_004: 出版社APIの単体テスト
 
-- **目的**: 出版社一覧取得機能を実装する
-- **対象**: PublisherResource#getAllPublishers()
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_004_publishers/functional_design.md) の「3.1 出版社一覧取得」
+- **目的**: PublisherServiceのテストケースを実装する
+- **対象**: `pro.kensait.backoffice.service.PublisherServiceTest`
+- **参照SPEC**: 
+  - [behaviors.md](../specs/baseline/api/API_004_publishers/behaviors.md) の「2. 出版社API」
 - **注意事項**: 
-  - PublisherServiceのgetPublishersAll()を呼び出す
-  - PublisherエンティティをPublisherTOに変換する
-  - 配列形式でレスポンスを返す
-  - ログ出力（INFO）を行う
+  - JUnit 5 + Mockito使用
+  - PublisherDaoをモック化
+  - テストケース:
+    - `testGetAllPublishers()`: 全出版社取得
 
 ---
 
-### T_API004_005: [P] 出版社API単体テストの作成
+## 完了確認
 
-- **目的**: 出版社APIの単体テストを作成する
-- **対象**: PublisherResourceTest.java（テストクラス）
-- **参照SPEC**: [functional_design.md](../specs/baseline/api/API_004_publishers/functional_design.md) の「6. テスト仕様」
-- **注意事項**: 
-  - 正常系: 出版社一覧取得 → 200 OK + 出版社配列
+### チェックリスト
 
----
+- [X] PublisherTO
+- [X] PublisherService
+- [X] PublisherResource
+- [X] 出版社APIの単体テスト
 
-## API実装完了チェックリスト
+### 動作確認
 
-- [ ] PublisherTOが作成された
-- [ ] PublisherServiceが作成された
-  - [ ] getPublishersAll()が実装された
-- [ ] PublisherResourceが作成された
-- [ ] getAllPublishers()メソッドが実装された
-  - [ ] 配列形式のレスポンス
-  - [ ] ログ出力が実装された
-- [ ] 出版社API単体テストが作成された
-  - [ ] 正常系テストが実装された
+以下のcurlコマンドで動作確認:
+
+#### 全出版社取得
+```bash
+curl -X GET http://localhost:8080/back-office-api-sdd/api/publishers
+```
+
+期待されるレスポンス例:
+```json
+[
+  {
+    "publisherId": 1,
+    "publisherName": "技術評論社"
+  },
+  {
+    "publisherId": 2,
+    "publisherName": "翔泳社"
+  },
+  {
+    "publisherId": 3,
+    "publisherName": "オライリー・ジャパン"
+  }
+]
+```
 
 ---
 
 ## 次のステップ
 
-出版社APIが完了したら、他のAPI実装タスクと並行して進めることができます：
-- [認証API](API_001_auth.md)
-- [書籍API](API_002_books.md)
-- [カテゴリAPI](API_003_categories.md)
-- [在庫API](API_005_stocks.md)
-- [ワークフローAPI](API_006_workflows.md)
+このAPI実装完了後、以下のタスクに並行して進めます:
 
-すべてのAPI実装が完了したら、[結合テスト](integration_tasks.md)に進んでください。
+- [API_005_stocks.md](API_005_stocks.md) - 在庫API
+- [API_006_workflows.md](API_006_workflows.md) - ワークフローAPI
+
+---
+
+**タスクファイル作成日:** 2025-01-10  
+**想定実行順序:** 6番目（共通機能実装後）

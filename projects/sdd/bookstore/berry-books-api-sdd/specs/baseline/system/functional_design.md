@@ -119,20 +119,20 @@ sequenceDiagram
     participant JwtUtil
     participant RestAPI as berry-books-rest API
     
-    Client->>AuthResource: POST /api/auth/login<br/>{email, password}
-    AuthResource->>CustomerRestClient: findByEmail(email)
+    Client->>AuthenResource: POST /api/auth/login<br/>{email, password}
+    AuthenResource->>CustomerRestClient: findByEmail(email)
     CustomerRestClient->>RestAPI: GET /customers/query_email?email={email}
     RestAPI-->>CustomerRestClient: Customer data
-    CustomerRestClient-->>AuthResource: Customer object
-    
-    AuthResource->>AuthResource: BCrypt.checkpw(password, storedPassword)
+    CustomerRestClient-->>AuthenResource: Customer object
+
+    AuthenResource->>AuthenResource: BCrypt.checkpw(password, storedPassword)
     
     alt Password match
-        AuthResource->>JwtUtil: generateToken(customerId, email)
-        JwtUtil-->>AuthResource: JWT token
-        AuthResource-->>Client: 200 OK<br/>Set-Cookie: berry-books-jwt=<token><br/>LoginResponse
+        AuthenResource->>JwtUtil: generateToken(customerId, email)
+        JwtUtil-->>AuthenResource: JWT token
+        AuthenResource-->>Client: 200 OK<br/>Set-Cookie: berry-books-jwt=<token><br/>LoginResponse
     else Password mismatch
-        AuthResource-->>Client: 401 Unauthorized<br/>ErrorResponse
+        AuthenResource-->>Client: 401 Unauthorized<br/>ErrorResponse
     end
 ```
 
@@ -326,9 +326,10 @@ GET /api/books
     "bookId": 1,
     "bookName": "Java入門",
     "author": "山田太郎",
-    "categoryId": 1,
-    "publisherId": 1,
     "price": 3000,
+    "imageUrl": "/api/images/covers/1",
+    "quantity": 10,
+    "version": 0,
     "category": {
       "categoryId": 1,
       "categoryName": "Java"
@@ -336,15 +337,12 @@ GET /api/books
     "publisher": {
       "publisherId": 1,
       "publisherName": "技術評論社"
-    },
-    "stock": {
-      "bookId": 1,
-      "quantity": 10,
-      "version": 1
     }
   }
 ]
 ```
+
+**注**: 以前のバージョンでは `stock` オブジェクトがネストされていましたが、現在は `quantity` と `version` がフラットな構造で含まれています。これは `back-office-api-sdd` の Book エンティティが `@SecondaryTable` アノテーションを使用して STOCK テーブルと結合しているためです。
 
 ---
 
@@ -377,9 +375,10 @@ GET /api/books/{id}
   "bookId": 1,
   "bookName": "Java入門",
   "author": "山田太郎",
-  "categoryId": 1,
-  "publisherId": 1,
   "price": 3000,
+  "imageUrl": "/api/images/covers/1",
+  "quantity": 10,
+  "version": 0,
   "category": {
     "categoryId": 1,
     "categoryName": "Java"
@@ -387,11 +386,6 @@ GET /api/books/{id}
   "publisher": {
     "publisherId": 1,
     "publisherName": "技術評論社"
-  },
-  "stock": {
-    "bookId": 1,
-    "quantity": 10,
-    "version": 1
   }
 }
 ```

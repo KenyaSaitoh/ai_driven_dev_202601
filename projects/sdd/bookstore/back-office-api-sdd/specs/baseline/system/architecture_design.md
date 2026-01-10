@@ -66,9 +66,59 @@ flowchart TD
     Persistence -->|JDBC| DB
 ```
 
-## 3. レイヤー設計
+## 3. パッケージ構造
 
-### 3.1 Presentation Layer（プレゼンテーション層）
+### 3.1 ベースパッケージ
+
+```
+pro.kensait.backoffice
+```
+
+### 3.2 パッケージ階層（概要）
+
+```
+pro.kensait.backoffice
+├── api                    # Presentation Layer (JAX-RS Resources)
+│   ├── dto               # Data Transfer Objects
+│   └── exception         # Exception Mappers
+├── service               # Business Logic Layer
+├── dao                   # Data Access Layer
+├── entity                # Persistence Layer (JPA Entities)
+├── security              # Security (JWT, Authentication)
+├── exception             # General Exception Mappers
+├── common                # Common Classes
+└── util                  # Utilities
+```
+
+**詳細なクラス構成**: 各API機能の`detailed_design.md`を参照してください。
+
+| API | 詳細設計書 |
+|-----|----------|
+| 認証API | [API_001_auth/detailed_design.md](../api/API_001_auth/detailed_design.md) |
+| 書籍API | [API_002_books/detailed_design.md](../api/API_002_books/detailed_design.md) |
+| カテゴリAPI | [API_003_categories/detailed_design.md](../api/API_003_categories/detailed_design.md) |
+| 出版社API | [API_004_publishers/detailed_design.md](../api/API_004_publishers/detailed_design.md) |
+| 在庫API | [API_005_stocks/detailed_design.md](../api/API_005_stocks/detailed_design.md) |
+| ワークフローAPI | [API_006_workflows/detailed_design.md](../api/API_006_workflows/detailed_design.md) |
+
+### 3.3 パッケージング規約
+
+| レイヤー | パッケージ | 責務 | 命名規則 |
+|---------|-----------|------|---------|
+| **Presentation** | `api` | REST APIエンドポイント | `*Resource` |
+| | `api.dto` | データ転送オブジェクト | `*Request`, `*Response`, `*TO` |
+| | `api.exception` | API例外ハンドリング | `*ExceptionMapper` |
+| **Business Logic** | `service.*` | ビジネスロジック | `*Service` |
+| **Data Access** | `dao` | データアクセス | `*Dao` |
+| **Persistence** | `entity` | JPAエンティティ | エンティティ名 |
+| **Cross-Cutting** | `security` | セキュリティ | 用途に応じた命名 |
+| | `exception` | 汎用例外ハンドリング | `*ExceptionMapper` |
+| | `common` | 共通機能 | 用途に応じた命名 |
+| | `util` | ユーティリティ | `*Util` |
+
+## 4. レイヤー設計
+
+### 4.1 Presentation Layer（プレゼンテーション層）
 
 **責務**: クライアントからのHTTPリクエストを受け取り、レスポンスを返す
 
@@ -87,7 +137,7 @@ flowchart TD
 * ビジネスロジックはServiceレイヤーに委譲
 * 例外処理はException Mapperで統一的に処理
 
-### 3.2 Business Logic Layer（ビジネスロジック層）
+### 4.2 Business Logic Layer（ビジネスロジック層）
 
 **責務**: ビジネスルール、業務ロジックの実装
 
@@ -103,7 +153,7 @@ flowchart TD
 * ビジネスルールの検証と実行
 * DAOレイヤーを使用してデータアクセス
 
-### 3.3 Data Access Layer（データアクセス層）
+### 4.3 Data Access Layer（データアクセス層）
 
 **責務**: データベースへのCRUD操作
 
@@ -121,7 +171,7 @@ flowchart TD
 * JPQL、Named Query、Criteria APIによるクエリ実行
 * エンティティとDTOの変換
 
-### 3.4 Persistence Layer（永続化層）
+### 4.4 Persistence Layer（永続化層）
 
 **責務**: データベーステーブルとJavaオブジェクトのマッピング
 
@@ -140,7 +190,7 @@ flowchart TD
 * `@SecondaryTable`による複数テーブルマッピング（Bookエンティティ）
 * `@Version`による楽観的ロック
 
-### 3.5 Cross-Cutting Concerns（横断的関心事）
+### 4.5 Cross-Cutting Concerns（横断的関心事）
 
 セキュリティ:
 * `JwtUtil`: JWT生成・検証
@@ -157,9 +207,9 @@ flowchart TD
 * `messages.properties`: 日本語メッセージ
 * `ValidationMessages_ja.properties`: バリデーションメッセージ
 
-## 4. 技術スタック
+## 5. 技術スタック
 
-### 4.1 フレームワーク・ライブラリ
+### 5.1 フレームワーク・ライブラリ
 
 | 技術 | バージョン | 用途 |
 |------|-----------|------|
@@ -173,7 +223,7 @@ flowchart TD
 | BCrypt | 0.10.x | パスワードハッシュ化 |
 | JJWT | 0.12.x | JWT生成・検証 |
 
-### 4.2 実行環境
+### 5.2 実行環境
 
 | コンポーネント | 製品/技術 |
 |---------------|----------|
@@ -181,7 +231,7 @@ flowchart TD
 | Database | HSQLDB 2.x |
 | JDK | Java 17+ |
 
-### 4.3 設定ファイル
+### 5.3 設定ファイル
 
 | ファイル | 用途 |
 |---------|------|
@@ -190,9 +240,9 @@ flowchart TD
 | `beans.xml` | CDI設定 |
 | `web.xml` | Webアプリケーション設定 |
 
-## 5. データフロー
+## 6. データフロー
 
-### 5.1 典型的なリクエストフロー（書籍一覧取得の例）
+### 6.1 典型的なリクエストフロー（書籍一覧取得の例）
 
 ```mermaid
 flowchart TD
@@ -206,7 +256,7 @@ flowchart TD
     H -->|"HTTP Response"| I["9. Client"]
 ```
 
-### 5.2 ワークフロー承認フロー
+### 6.2 ワークフロー承認フロー
 
 ```mermaid
 flowchart TD
@@ -231,9 +281,9 @@ flowchart TD
     D --> E["5. Client"]
 ```
 
-## 6. セキュリティアーキテクチャ
+## 7. セキュリティアーキテクチャ
 
-### 6.1 認証フロー
+### 7.1 認証フロー
 
 ```mermaid
 flowchart TD
@@ -260,7 +310,7 @@ flowchart TD
     G --> H["8. Client<br/>(Cookie保存)"]
 ```
 
-### 6.2 JWT構造
+### 7.2 JWT構造
 
 ```json
 {
@@ -279,7 +329,7 @@ flowchart TD
 }
 ```
 
-### 6.3 権限制御
+### 7.3 権限制御
 
 | 職務ランク | 値 | 権限 |
 |-----------|---|------|
@@ -287,27 +337,27 @@ flowchart TD
 | MANAGER | 2 | ASSOCIATE権限 + 同一部署のワークフロー承認 |
 | DIRECTOR | 3 | MANAGER権限 + 全部署のワークフロー承認 |
 
-## 7. トランザクション設計
+## 8. トランザクション設計
 
-### 7.1 トランザクション境界
+### 8.1 トランザクション境界
 * Serviceレイヤーのメソッドを`@Transactional`でマーク
 * デフォルト: `@Transactional(TxType.REQUIRED)`
 * JTAトランザクションマネージャーによる管理
 
-### 7.2 楽観的ロック
+### 8.2 楽観的ロック
 * `Stock`エンティティに`@Version`フィールド
 * 更新時にバージョンチェック
 * 競合発生時は`OptimisticLockException`をスロー
 
-### 7.3 ワークフロートランザクション
+### 8.3 ワークフロートランザクション
 * ワークフロー承認時は以下を1トランザクションで実行:
   1. 操作履歴の追加（WORKFLOW INSERT）
   2. 書籍マスタへの反映（BOOK UPDATE/INSERT/DELETE）
 * ロールバック時は両方とも取り消される
 
-## 8. エラーハンドリング
+## 9. エラーハンドリング
 
-### 8.1 例外マッピング
+### 9.1 例外マッピング
 
 | Exception | HTTP Status | Mapper |
 |-----------|-------------|--------|
@@ -319,7 +369,7 @@ flowchart TD
 | `UnauthorizedApprovalException` | 403 Forbidden | WorkflowExceptionMapper |
 | 一般的な例外 | 500 Internal Server Error | GenericExceptionMapper |
 
-### 8.2 エラーレスポンス形式
+### 9.2 エラーレスポンス形式
 
 ```json
 {
@@ -328,15 +378,15 @@ flowchart TD
 }
 ```
 
-## 9. ログ設計
+## 10. ログ設計
 
-### 9.1 ログレベル
+### 10.1 ログレベル
 * INFO: API呼び出しログ、重要な処理の開始/終了
 * WARN: 楽観的ロック失敗、認証失敗など
 * ERROR: 予期しないエラー、システムエラー
 * DEBUG: 詳細なデバッグ情報
 
-### 9.2 ログ形式
+### 10.2 ログ形式
 ```
 [クラス名#メソッド名] ログメッセージ: パラメータ=値, ...
 ```
@@ -347,63 +397,63 @@ flowchart TD
 [ WorkflowService#approveWorkflow ] workflowId=123
 ```
 
-## 10. パフォーマンス考慮事項
+## 11. パフォーマンス考慮事項
 
-### 10.1 データベースアクセス
+### 11.1 データベースアクセス
 * N+1問題の回避: JOINによる一括取得、JPQL `JOIN FETCH`の活用
 * Bookエンティティ: `@SecondaryTable`でBOOK + STOCK結合
 * インデックス: 主キー、外部キー、検索条件フィールド
 
-### 10.2 キャッシング
+### 11.2 キャッシング
 現状はキャッシング未実装。将来的な実装候補:
 * JPAセカンドレベルキャッシュ（Category, Publisherなどの参照マスタ）
 * アプリケーションレベルキャッシュ（メモリキャッシュ）
 
-### 10.3 接続プール
+### 11.3 接続プール
 * アプリケーションサーバーの接続プール機能を使用
 * JNDI名: `jdbc/HsqldbDS`
 
-## 11. デプロイメント構成
+## 12. デプロイメント構成
 
-### 11.1 デプロイメント形式
+### 12.1 デプロイメント形式
 * WARファイル形式
 * Payara Serverにデプロイ
 
-### 11.2 設定の外部化
+### 12.2 設定の外部化
 * `microprofile-config.properties`: デフォルト設定
 * 環境変数: 本番環境での設定上書き（JWT秘密鍵など）
 * システムプロパティ: 起動時のオプション設定
 
-## 12. 拡張性・保守性
+## 13. 拡張性・保守性
 
-### 12.1 レイヤーの分離
+### 13.1 レイヤーの分離
 * 各レイヤーは疎結合
 * インターフェース（暗黙的にServiceとDAOで分離）
 * DTOによるAPI仕様とエンティティの分離
 
-### 12.2 依存性注入
+### 13.2 依存性注入
 * CDIによる依存性注入
 * テスト時のモック化が容易
 
-### 12.3 設定の一元管理
+### 13.3 設定の一元管理
 * MicroProfile Configによる設定管理
 * プロパティファイルで設定を外部化
 
-## 13. 今後の拡張予定
+## 14. 今後の拡張予定
 
-### 13.1 認証フィルタの実装
+### 14.1 認証フィルタの実装
 * JWT認証フィルタ（`@PreMatching`）
 * 現在のログインユーザー情報取得エンドポイントの有効化
 
-### 13.2 監査ログ
+### 14.2 監査ログ
 * すべてのAPI呼び出しの監査ログ
 * ワークフロー操作ログの強化
 
-### 13.3 通知機能
+### 14.3 通知機能
 * ワークフロー申請時のメール通知
 * ワークフロー承認/却下時の通知
 
-## 14. 参考資料
+## 15. 参考資料
 
 * Jakarta EE 10 Specification: https://jakarta.ee/specifications/platform/10/
 * JAX-RS 3.1 Specification: https://jakarta.ee/specifications/restful-ws/3.1/

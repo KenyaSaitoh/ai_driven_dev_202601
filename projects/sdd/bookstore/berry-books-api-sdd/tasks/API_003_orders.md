@@ -1,261 +1,242 @@
-# 注文API (API_003_orders) タスク
+# API_003_orders - 注文APIタスク
 
 **担当者:** 担当者C（1名）  
-**推奨スキル:** Jakarta EE、JAX-RS、JPA、トランザクション管理、楽観的ロック  
-**想定工数:** 7時間  
+**推奨スキル:** JAX-RS、JPA、トランザクション管理、楽観的ロック  
+**想定工数:** 8時間  
 **依存タスク:** [common_tasks.md](common_tasks.md)
 
 ---
 
-## 概要
+## タスク一覧
 
-注文APIを実装します。注文作成、注文履歴取得、注文詳細取得、注文明細取得の4つのエンドポイントを含みます。楽観的ロック制御、トランザクション管理、在庫管理を実装します。
+### DTO作成
 
----
-
-## タスクリスト
-
-### 4.1 DTO/Record実装
-
-- [ ] [P] **T_API003_001**: OrderRequest レコードの作成
-  - **目的**: 注文リクエストDTOを実装する
-  - **対象**: `pro.kensait.berrybooks.api.dto.OrderRequest`
-  - **参照SPEC**: [api/API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「4.1 OrderRequest」
-  - **注意事項**: @Valid, @NotNull, @NotBlank アノテーションを使用
-
-- [ ] [P] **T_API003_002**: CartItemRequest レコードの作成
+- [X] [P] **T_API003_001**: CartItemRequestの作成
   - **目的**: カートアイテムリクエストDTOを実装する
-  - **対象**: `pro.kensait.berrybooks.api.dto.CartItemRequest`
-  - **参照SPEC**: [api/API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「4.2 CartItemRequest」
-  - **注意事項**: @NotNull, @NotBlank アノテーションを使用
+  - **対象**: CartItemRequest.java（Record）
+  - **参照SPEC**: [API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「4.2 CartItemRequest」
+  - **注意事項**: bookId、bookName、publisherName、price、count、versionフィールド、Bean Validation
 
-- [ ] [P] **T_API003_003**: OrderResponse レコードの作成
-  - **目的**: 注文レスポンスDTOを実装する
-  - **対象**: `pro.kensait.berrybooks.api.dto.OrderResponse`
-  - **参照SPEC**: [api/API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「4.3 OrderResponse」
-  - **注意事項**: Java Record を使用
+---
 
-- [ ] [P] **T_API003_004**: OrderDetailResponse レコードの作成
+- [X] [P] **T_API003_002**: OrderRequestの作成
+  - **目的**: 注文リクエストDTOを実装する
+  - **対象**: OrderRequest.java（Record）
+  - **参照SPEC**: [API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「4.1 OrderRequest」
+  - **注意事項**: cartItems、totalPrice、deliveryPrice、deliveryAddress、settlementTypeフィールド、Bean Validation
+
+---
+
+- [X] [P] **T_API003_003**: OrderDetailResponseの作成
   - **目的**: 注文明細レスポンスDTOを実装する
-  - **対象**: `pro.kensait.berrybooks.api.dto.OrderDetailResponse`
-  - **参照SPEC**: [api/API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「4.5 OrderDetailResponse」
-  - **注意事項**: Java Record を使用
+  - **対象**: OrderDetailResponse.java（Record）
+  - **参照SPEC**: [API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「4.5 OrderDetailResponse」
+  - **注意事項**: orderDetailId、bookId、bookName、publisherName、price、countフィールド
 
 ---
 
-### 4.2 例外クラス実装
-
-- [ ] [P] **T_API003_005**: OutOfStockException の作成
-  - **目的**: 在庫不足例外を実装する
-  - **対象**: `pro.kensait.berrybooks.service.order.OutOfStockException`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「8.1 例外階層」
-  - **注意事項**: RuntimeException を継承、bookId と bookName を保持
-
-- [ ] [P] **T_API003_006**: OutOfStockExceptionMapper の作成
-  - **目的**: 在庫不足例外マッパーを実装する
-  - **対象**: `pro.kensait.berrybooks.api.exception.OutOfStockExceptionMapper`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「8.2 Exception Mapper」
-  - **注意事項**: @Provider を使用、409 Conflict を返す
-
-- [ ] [P] **T_API003_007**: OptimisticLockExceptionMapper の作成
-  - **目的**: 楽観的ロック競合例外マッパーを実装する
-  - **対象**: `pro.kensait.berrybooks.api.exception.OptimisticLockExceptionMapper`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「8.2 Exception Mapper」
-  - **注意事項**: @Provider を使用、409 Conflict を返す
+- [X] [P] **T_API003_004**: OrderResponseの作成
+  - **目的**: 注文レスポンスDTOを実装する
+  - **対象**: OrderResponse.java（Record）
+  - **参照SPEC**: [API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「4.3 OrderResponse」
+  - **注意事項**: orderTranId、orderDate、totalPrice、deliveryPrice、deliveryAddress、settlementType、orderDetailsフィールド
 
 ---
 
-### 4.3 転送オブジェクト実装
+- [X] [P] **T_API003_005**: OrderHistoryResponseの作成
+  - **目的**: 注文履歴レスポンスDTO（非正規化）を実装する
+  - **対象**: OrderHistoryResponse.java（Record）
+  - **参照SPEC**: [API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「4.4 OrderHistoryResponse」
+  - **注意事項**: orderDate、orderTranId、orderDetailId、bookName、publisherName、price、countフィールド
 
-- [ ] [P] **T_API003_008**: OrderTO クラスの作成
-  - **目的**: 注文転送オブジェクト（POJO）を実装する
-  - **対象**: `pro.kensait.berrybooks.service.order.OrderTO`
-  - **参照SPEC**: [api/API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3.1 注文作成」
-  - **注意事項**: サービス層で使用するPOJO、CartItemリストを保持
+---
 
-- [ ] [P] **T_API003_009**: CartItem クラスの作成
-  - **目的**: カートアイテム（POJO）を実装する
-  - **対象**: `pro.kensait.berrybooks.service.order.CartItem`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「4.1 パッケージ編成」
-  - **注意事項**: bookId, count, version を保持
+### Service作成
 
-- [ ] [P] **T_API003_010**: OrderHistoryTO レコードの作成
-  - **目的**: 注文履歴DTO（非正規化）を実装する
-  - **対象**: `pro.kensait.berrybooks.service.order.OrderHistoryTO`
+- [X] **T_API003_006**: DeliveryFeeServiceの作成
+  - **目的**: 配送料金計算サービスを実装する
+  - **対象**: DeliveryFeeService.java（@ApplicationScoped）
   - **参照SPEC**: 
-    - [api/API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「4.4 OrderHistoryResponse」
-    - [data_model.md](../specs/baseline/system/data_model.md) の「5.2 注文履歴取得（非正規化DTO）」
-  - **注意事項**: Java Record を使用、1注文明細=1レコード
-
-- [ ] [P] **T_API003_011**: OrderSummaryTO レコードの作成
-  - **目的**: 注文サマリーDTOを実装する
-  - **対象**: `pro.kensait.berrybooks.service.order.OrderSummaryTO`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「4.1 パッケージ編成」
-  - **注意事項**: Java Record を使用
+    - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「2.3 コンポーネントの責務」
+    - [behaviors.md](../specs/baseline/system/behaviors.md) の「7. 配送料金計算」
+  - **注意事項**: calculateDeliveryFeeメソッドを実装、購入金額10,000円未満で800円、10,000円以上で無料、沖縄県の場合は特別料金
 
 ---
 
-### 4.4 DAOクラス実装
-
-- [ ] **T_API003_012**: StockDao の作成
-  - **目的**: 在庫データアクセスクラスを実装する
-  - **対象**: `pro.kensait.berrybooks.dao.StockDao`
-  - **参照SPEC**: [api/API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「6. 楽観的ロック制御」
-  - **注意事項**: 
-    - @ApplicationScoped を使用
-    - findByBookId(), updateStock(bookId, quantity, version) メソッドを実装
-    - updateStock() は WHERE VERSION = :version で楽観的ロックを実装
-
-- [ ] **T_API003_013**: OrderTranDao の作成
-  - **目的**: 注文トランザクションデータアクセスクラスを実装する
-  - **対象**: `pro.kensait.berrybooks.dao.OrderTranDao`
-  - **参照SPEC**: [api/API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3.2 注文履歴取得」
-  - **注意事項**: 
-    - @ApplicationScoped を使用
-    - insert(), findByCustomerId(), findByOrderTranId() メソッドを実装
-
-- [ ] **T_API003_014**: OrderDetailDao の作成
-  - **目的**: 注文明細データアクセスクラスを実装する
-  - **対象**: `pro.kensait.berrybooks.dao.OrderDetailDao`
-  - **参照SPEC**: [api/API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3.4 注文明細取得」
-  - **注意事項**: 
-    - @ApplicationScoped を使用
-    - insert(), findByOrderDetailId() メソッドを実装
-
----
-
-### 4.5 Serviceクラス実装
-
-- [ ] **T_API003_015**: OrderServiceIF インターフェースの作成
-  - **目的**: 注文サービスインターフェースを定義する
-  - **対象**: `pro.kensait.berrybooks.service.order.OrderServiceIF`
-  - **参照SPEC**: [architecture_design.md](../specs/baseline/system/architecture_design.md) の「4.1 パッケージ編成」
-  - **注意事項**: orderBooks(), getOrderHistory() メソッドを定義
-
-- [ ] **T_API003_016**: OrderService の作成
-  - **目的**: 注文ビジネスロジックを実装する
-  - **対象**: `pro.kensait.berrybooks.service.order.OrderService`
+- [X] **T_API003_007**: OrderServiceの作成
+  - **目的**: 注文処理サービスを実装する
+  - **対象**: OrderService.java（@ApplicationScoped）
   - **参照SPEC**: 
-    - [api/API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「7. トランザクション管理」
-    - [api/API_003_orders/behaviors.md](../specs/baseline/api/API_003_orders/behaviors.md) の「2. 注文作成」
-  - **注意事項**: 
-    - @ApplicationScoped, @Transactional を使用
-    - orderBooks() メソッド: 在庫チェック、在庫更新（楽観的ロック）、注文作成
-    - OutOfStockException, OptimisticLockException をスロー
-    - DeliveryFeeService を注入して配送料金を計算
+    - [API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3.1.6 シーケンス図」
+    - [API_003_orders/behaviors.md](../specs/baseline/api/API_003_orders/behaviors.md) の「4.1 注文作成」
+  - **注意事項**: OrderTranDao、OrderDetailDao、BackOfficeRestClientをインジェクション、@Transactionalを使用
 
 ---
 
-### 4.6 Resourceクラス実装
+### 注文処理ビジネスロジック
 
-- [ ] **T_API003_017**: OrderResource の作成（注文作成機能）
+- [X] **T_API003_008**: orderBooksメソッドの実装
+  - **目的**: 注文作成ビジネスロジックを実装する
+  - **対象**: OrderService.orderBooks()
+  - **参照SPEC**: 
+    - [API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3.1.5 ビジネスルール」
+    - [architecture_design.md](../specs/baseline/system/architecture_design.md) の「7. トランザクション管理」
+  - **注意事項**: 在庫チェック、在庫更新（楽観的ロック）、注文トランザクション作成、注文明細作成、トランザクション境界（@Transactional）
+
+---
+
+- [X] **T_API003_009**: findOrderHistoryByCustomerIdメソッドの実装
+  - **目的**: 注文履歴取得ロジックを実装する
+  - **対象**: OrderService.findOrderHistoryByCustomerId()
+  - **参照SPEC**: 
+    - [API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3.2.5 ビジネスルール」
+    - [data_model.md](../specs/baseline/system/data_model.md) の「5.2 注文履歴取得」
+  - **注意事項**: OrderTranDao.findByCustomerId()を呼び出し、外部APIで書籍情報を取得してDTOを返却
+
+---
+
+- [X] **T_API003_010**: findOrderByIdメソッドの実装
+  - **目的**: 注文詳細取得ロジックを実装する
+  - **対象**: OrderService.findOrderById()
+  - **参照SPEC**: [API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3.3 注文詳細取得」
+  - **注意事項**: OrderTranDao.findById()を呼び出し、OrderResponseに変換、外部APIで書籍情報を取得
+
+---
+
+- [X] **T_API003_011**: findOrderDetailByIdメソッドの実装
+  - **目的**: 注文明細取得ロジックを実装する
+  - **対象**: OrderService.findOrderDetailById()
+  - **参照SPEC**: [API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3.4 注文明細取得」
+  - **注意事項**: OrderDetailDao.findByOrderDetailPK()を呼び出し、OrderDetailResponseに変換、外部APIで書籍情報を取得
+
+---
+
+### Resource作成
+
+- [X] **T_API003_012**: OrderResourceの作成
+  - **目的**: 注文APIエンドポイントを実装する
+  - **対象**: OrderResource.java（@Path("/orders"), @ApplicationScoped）
+  - **参照SPEC**: 
+    - [API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3. API仕様」
+    - [API_003_orders/behaviors.md](../specs/baseline/api/API_003_orders/behaviors.md) の「4. 注文API」
+  - **注意事項**: OrderServiceをインジェクション、AuthenContextをインジェクション（認証情報取得）
+
+---
+
+### エンドポイント実装
+
+- [X] **T_API003_013**: createOrderメソッドの実装
   - **目的**: 注文作成エンドポイントを実装する
-  - **対象**: `pro.kensait.berrybooks.api.OrderResource` の createOrder() メソッド
-  - **参照SPEC**: 
-    - [api/API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3.1 注文作成」
-    - [api/API_003_orders/behaviors.md](../specs/baseline/api/API_003_orders/behaviors.md) の「2. 注文作成」
-  - **注意事項**: 
-    - @Path("/orders"), @POST を使用
-    - SecuredResource から customerId を取得（認証必須）
-    - OrderService を注入
-    - OutOfStockException, OptimisticLockException を捕捉して409 Conflict
+  - **対象**: OrderResource.createOrder()
+  - **参照SPEC**: [API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3.1 注文作成」
+  - **注意事項**: JWT認証必須、AuthenContextからcustomerIdを取得、OrderService.orderBooks()呼び出し
 
-- [ ] **T_API003_018**: OrderResource の作成（注文履歴取得機能）
+---
+
+- [X] **T_API003_014**: getOrderHistoryメソッドの実装
   - **目的**: 注文履歴取得エンドポイントを実装する
-  - **対象**: `pro.kensait.berrybooks.api.OrderResource` の getOrderHistory() メソッド
-  - **参照SPEC**: 
-    - [api/API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3.2 注文履歴取得」
-    - [api/API_003_orders/behaviors.md](../specs/baseline/api/API_003_orders/behaviors.md) の「3. 注文履歴取得」
-  - **注意事項**: 
-    - @GET, @Path("/history") を使用
-    - SecuredResource から customerId を取得（認証必須）
-    - 非正規化DTO（OrderHistoryTO）を返す
+  - **対象**: OrderResource.getOrderHistory()
+  - **参照SPEC**: [API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3.2 注文履歴取得」
+  - **注意事項**: JWT認証必須、AuthenContextからcustomerIdを取得、OrderService.findOrderHistoryByCustomerId()呼び出し
 
-- [ ] **T_API003_019**: OrderResource の作成（注文詳細取得機能）
+---
+
+- [X] **T_API003_015**: getOrderByIdメソッドの実装
   - **目的**: 注文詳細取得エンドポイントを実装する
-  - **対象**: `pro.kensait.berrybooks.api.OrderResource` の getOrderDetail() メソッド
-  - **参照SPEC**: 
-    - [api/API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3.3 注文詳細取得」
-    - [api/API_003_orders/behaviors.md](../specs/baseline/api/API_003_orders/behaviors.md) の「4. 注文詳細取得」
-  - **注意事項**: 
-    - @GET, @Path("/{tranId}") を使用
-    - 認証不要
-    - 注文が見つからない場合は404 Not Found
+  - **対象**: OrderResource.getOrderById()
+  - **参照SPEC**: [API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3.3 注文詳細取得」
+  - **注意事項**: 認証不要、OrderService.findOrderById()呼び出し、404エラーハンドリング
 
-- [ ] **T_API003_020**: OrderResource の作成（注文明細取得機能）
+---
+
+- [X] **T_API003_016**: getOrderDetailByIdメソッドの実装
   - **目的**: 注文明細取得エンドポイントを実装する
-  - **対象**: `pro.kensait.berrybooks.api.OrderResource` の getOrderDetailItem() メソッド
-  - **参照SPEC**: 
-    - [api/API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3.4 注文明細取得」
-    - [api/API_003_orders/behaviors.md](../specs/baseline/api/API_003_orders/behaviors.md) の「5. 注文明細取得」
-  - **注意事項**: 
-    - @GET, @Path("/{tranId}/details/{detailId}") を使用
-    - 認証不要
-    - 注文明細が見つからない場合は404 Not Found
+  - **対象**: OrderResource.getOrderDetailById()
+  - **参照SPEC**: [API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) の「3.4 注文明細取得」
+  - **注意事項**: 認証不要、OrderService.findOrderDetailById()呼び出し、404エラーハンドリング
 
 ---
 
-### 4.7 ユニットテスト
+### 単体テスト
 
-- [ ] [P] **T_API003_021**: OrderService のユニットテスト（注文作成）
-  - **目的**: 注文作成ビジネスロジックのテストを実装する
-  - **対象**: `pro.kensait.berrybooks.service.order.OrderServiceTest`
-  - **参照SPEC**: [api/API_003_orders/behaviors.md](../specs/baseline/api/API_003_orders/behaviors.md) の「2. 注文作成」
-  - **注意事項**: 
-    - JUnit 5 + Mockito を使用
-    - StockDao, OrderTranDao, OrderDetailDao をモック
-    - 正常系、在庫不足、楽観的ロック競合のテスト
-
-- [ ] [P] **T_API003_022**: OrderService のユニットテスト（トランザクションロールバック）
-  - **目的**: トランザクションロールバックのテストを実装する
-  - **対象**: `pro.kensait.berrybooks.service.order.OrderServiceTest`
-  - **参照SPEC**: [api/API_003_orders/behaviors.md](../specs/baseline/api/API_003_orders/behaviors.md) の「7. トランザクション管理」
-  - **注意事項**: 
-    - JUnit 5 + Mockito を使用
-    - 在庫不足時に全ての変更がロールバックされることを確認
-
-- [ ] [P] **T_API003_023**: OrderResource のユニットテスト
-  - **目的**: 注文APIエンドポイントのテストを実装する
-  - **対象**: `pro.kensait.berrybooks.api.OrderResourceTest`
-  - **参照SPEC**: [api/API_003_orders/behaviors.md](../specs/baseline/api/API_003_orders/behaviors.md)
-  - **注意事項**: 
-    - JUnit 5 + Mockito を使用
-    - OrderService をモック
-    - 正常系、認証エラー、ビジネス例外のテスト
+- [ ] [P] **T_API003_017**: DeliveryFeeServiceのテスト
+  - **目的**: 配送料金計算サービスの単体テストを実装する
+  - **対象**: DeliveryFeeServiceTest.java（JUnit 5）
+  - **参照SPEC**: [behaviors.md](../specs/baseline/system/behaviors.md) の「7. 配送料金計算」
+  - **注意事項**: 購入金額10,000円未満/以上、沖縄県/その他の地域のテスト
 
 ---
 
-### 4.8 APIテスト（E2E）
-
-- [ ] **T_API003_024**: 注文APIのE2Eテスト
-  - **目的**: 注文API全体のE2Eテストを実装する
-  - **対象**: E2Eテストスクリプト（JUnit 5またはPlaywright）
-  - **参照SPEC**: [api/API_003_orders/behaviors.md](../specs/baseline/api/API_003_orders/behaviors.md)
-  - **注意事項**: 
-    - ログイン → 注文作成 → 注文履歴取得 のフローをテスト
-    - 在庫不足エラーのテスト
-    - 楽観的ロック競合エラーのテスト（並行実行）
-    - トランザクションロールバックのテスト
+- [ ] [P] **T_API003_018**: OrderServiceのテスト（注文作成）
+  - **目的**: 注文作成ビジネスロジックの単体テストを実装する
+  - **対象**: OrderServiceTest.java（JUnit 5 + Mockito）
+  - **参照SPEC**: [API_003_orders/behaviors.md](../specs/baseline/api/API_003_orders/behaviors.md) の「4.1 注文作成」
+  - **注意事項**: OrderTranDao、OrderDetailDao、BackOfficeRestClientをモック、在庫不足、楽観的ロック競合のテスト
 
 ---
 
-## 完了条件
+- [ ] [P] **T_API003_019**: OrderResourceのテスト
+  - **目的**: OrderResourceの単体テストを実装する
+  - **対象**: OrderResourceTest.java（JUnit 5 + Mockito）
+  - **参照SPEC**: [API_003_orders/behaviors.md](../specs/baseline/api/API_003_orders/behaviors.md) の「4. 注文API」
+  - **注意事項**: OrderServiceをモック、認証必須エンドポイントのテスト
 
-以下の全ての条件を満たしていること：
+---
 
-- [ ] 全てのDTO/Record、例外クラスが作成されている
-- [ ] StockDao、OrderTranDao、OrderDetailDao、OrderServiceが実装されている
-- [ ] OrderResourceの全てのエンドポイント（注文作成、履歴、詳細、明細）が実装されている
-- [ ] 楽観的ロック制御が正常に機能する
-- [ ] トランザクション管理が正常に機能する（ロールバック含む）
-- [ ] ユニットテストが実装され、カバレッジが80%以上である
-- [ ] E2Eテストが実装され、主要フローが正常に動作する
+### APIテスト（オプション）
+
+- [ ] [P] **T_API003_020**: 注文APIのE2Eテスト
+  - **目的**: 注文APIのE2Eテストを実装する（オプション）
+  - **対象**: OrderApiE2ETest.java（JUnit 5 + REST Assured）
+  - **参照SPEC**: [API_003_orders/behaviors.md](../specs/baseline/api/API_003_orders/behaviors.md) の「4. 注文API」
+  - **注意事項**: ログイン → 注文作成 → 注文履歴取得のシナリオテスト、在庫不足・楽観的ロック競合のテスト、@Tag("e2e")でタグ付け
+
+---
+
+## 実装時の注意事項
+
+### トランザクション管理
+
+**@Transactionalの適用:**
+```java
+@Transactional
+public OrderTran orderBooks(OrderRequest orderRequest, Integer customerId) {
+    // トランザクション境界
+}
+```
+
+**トランザクション範囲:**
+1. 在庫可用性チェック（外部API呼び出し）
+2. 在庫更新（外部API呼び出し・楽観的ロック）
+3. 注文トランザクション作成（ローカルDB）
+4. 注文明細作成（ローカルDB）
+5. コミット（正常終了時）
+6. ロールバック（例外発生時）
+
+### 楽観的ロック制御
+
+**楽観的ロックはback-office-api側で実装されています。**
+
+**処理フロー:**
+1. カート追加時: VERSION値を取得しカートアイテムに保存
+2. 注文確定時: 保存したVERSION値でBackOfficeRestClient.updateStock()呼び出し
+3. 成功時: 在庫数が減算され、VERSION値が自動インクリメント
+4. 失敗時: 409 Conflict（OptimisticLockException）、ユーザーにエラー表示
+
+### 在庫不足エラーハンドリング
+
+```java
+StockTO stock = backOfficeRestClient.findStockById(bookId);
+if (stock.quantity() < count) {
+    throw new OutOfStockException(bookId, bookName);
+}
+```
 
 ---
 
 ## 参考資料
 
-- [api/API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) - 注文API機能設計書
-- [api/API_003_orders/behaviors.md](../specs/baseline/api/API_003_orders/behaviors.md) - 注文API受入基準
-- [architecture_design.md](../specs/baseline/system/architecture_design.md) - アーキテクチャ設計書
+- [API_003_orders/functional_design.md](../specs/baseline/api/API_003_orders/functional_design.md) - 注文API機能設計書
+- [API_003_orders/behaviors.md](../specs/baseline/api/API_003_orders/behaviors.md) - 注文API受入基準
+- [architecture_design.md](../specs/baseline/system/architecture_design.md) - トランザクション管理・楽観的ロック
 - [data_model.md](../specs/baseline/system/data_model.md) - データモデル仕様書

@@ -1,138 +1,174 @@
 #!/bin/bash
 # ===========================================
-# Berry Books API 簡易テストスクリプト
+# Back Office API 簡易テストスクリプト
 # Windows Git Bash対応版
 # ===========================================
 
-API_BASE="http://localhost:8080/berry-books-api-sdd"
-COOKIES="cookies.txt"
+API_BASE="http://localhost:8080/back-office-api-sdd"
 
 echo "========================================="
-echo "  Berry Books API 簡易テスト"
+echo "  Back Office API 簡易テスト"
 echo "========================================="
 echo ""
 
-# クリーンアップ
-rm -f $COOKIES
-
 # ===========================================
-# 1. ログイン
+# 1. 書籍一覧取得
 # ===========================================
-echo "1. ログイン"
+echo "1. 書籍一覧取得（最初の500文字）"
 echo "-------------------------------------------"
 
-curl -s -X POST "$API_BASE/api/auth/login" \
+curl -s "$API_BASE/api/books" | head -c 500
+echo ""
+echo "..."
+echo ""
+echo ""
+
+# ===========================================
+# 2. 書籍詳細取得
+# ===========================================
+echo "2. 書籍詳細取得（Book ID: 1）"
+echo "-------------------------------------------"
+
+curl -s "$API_BASE/api/books/1"
+echo ""
+echo ""
+
+# ===========================================
+# 3. カテゴリ一覧取得
+# ===========================================
+echo "3. カテゴリ一覧取得"
+echo "-------------------------------------------"
+
+curl -s "$API_BASE/api/categories"
+echo ""
+echo ""
+
+# ===========================================
+# 4. 出版社一覧取得
+# ===========================================
+echo "4. 出版社一覧取得"
+echo "-------------------------------------------"
+
+curl -s "$API_BASE/api/publishers"
+echo ""
+echo ""
+
+# ===========================================
+# 5. 在庫一覧取得
+# ===========================================
+echo "5. 在庫一覧取得（最初の600文字）"
+echo "-------------------------------------------"
+
+curl -s "$API_BASE/api/stocks" | head -c 600
+echo ""
+echo "..."
+echo ""
+echo ""
+
+# ===========================================
+# 6. 在庫詳細取得
+# ===========================================
+echo "6. 在庫詳細取得（Book ID: 1）"
+echo "-------------------------------------------"
+
+curl -s "$API_BASE/api/stocks/1"
+echo ""
+echo ""
+
+# ===========================================
+# 7. ワークフロー作成（書籍追加）
+# ===========================================
+echo "7. ワークフロー作成（書籍追加）"
+echo "-------------------------------------------"
+
+curl -s -X POST "$API_BASE/api/workflows" \
   -H "Content-Type: application/json" \
-  -d '{"email":"alice@gmail.com","password":"password"}' \
-  -c $COOKIES \
+  -d '{
+    "workflowType": "ADD_NEW_BOOK",
+    "bookName": "テスト書籍",
+    "author": "テスト著者",
+    "categoryId": 1,
+    "publisherId": 1,
+    "price": 3000,
+    "applyReason": "テスト用の書籍追加",
+    "createdBy": 6
+  }' \
   -w "\nHTTP Status: %{http_code}\n"
 
 echo ""
 echo ""
 
 # ===========================================
-# 2. 書籍一覧取得
+# 8. ワークフロー一覧取得（NEW状態）
 # ===========================================
-echo "2. 書籍一覧取得（最初の500文字）"
+echo "8. ワークフロー一覧取得（状態: NEW）"
 echo "-------------------------------------------"
 
-curl -s "$API_BASE/api/books" -b $COOKIES | head -c 500
+curl -s "$API_BASE/api/workflows?state=NEW" | head -c 800
 echo ""
 echo "..."
 echo ""
 echo ""
 
 # ===========================================
-# 3. 書籍詳細取得
+# 9. ワークフロー全件取得
 # ===========================================
-echo "3. 書籍詳細取得（Book ID: 1）"
+echo "9. ワークフロー全件取得（最初の1000文字）"
 echo "-------------------------------------------"
 
-curl -s "$API_BASE/api/books/1" -b $COOKIES
-echo ""
-echo ""
-
-# ===========================================
-# 4. カテゴリフィルタ
-# ===========================================
-echo "4. カテゴリフィルタ（Category ID: 1）"
-echo "-------------------------------------------"
-
-curl -s "$API_BASE/api/books?categoryId=1" -b $COOKIES | head -c 400
+curl -s "$API_BASE/api/workflows" | head -c 1000
 echo ""
 echo "..."
 echo ""
 echo ""
 
 # ===========================================
-# 5. 現在のユーザー情報
+# 10. 各種HTTPステータスの確認
 # ===========================================
-echo "5. 現在のユーザー情報"
+echo "10. 各種HTTPステータスの確認"
 echo "-------------------------------------------"
 
-curl -s "$API_BASE/api/auth/me" -b $COOKIES
-echo ""
-echo ""
+echo "📖 書籍一覧:"
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/books")
+if [ "$HTTP_STATUS" == "200" ]; then
+    echo "  ✅ 正常 (HTTP $HTTP_STATUS)"
+else
+    echo "  ❌ エラー (HTTP $HTTP_STATUS)"
+fi
 
-# ===========================================
-# 6. 注文作成
-# ===========================================
-echo "6. 注文作成"
-echo "-------------------------------------------"
+echo "📂 カテゴリ一覧:"
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/categories")
+if [ "$HTTP_STATUS" == "200" ]; then
+    echo "  ✅ 正常 (HTTP $HTTP_STATUS)"
+else
+    echo "  ❌ エラー (HTTP $HTTP_STATUS)"
+fi
 
-curl -s -X POST "$API_BASE/api/orders" \
-  -H "Content-Type: application/json" \
-  -d '{"cartItems":[{"bookId":1,"quantity":2},{"bookId":5,"quantity":1}]}' \
-  -b $COOKIES \
-  -w "\nHTTP Status: %{http_code}\n"
+echo "📚 出版社一覧:"
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/publishers")
+if [ "$HTTP_STATUS" == "200" ]; then
+    echo "  ✅ 正常 (HTTP $HTTP_STATUS)"
+else
+    echo "  ❌ エラー (HTTP $HTTP_STATUS)"
+fi
 
-echo ""
-echo ""
+echo "📦 在庫一覧:"
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/stocks")
+if [ "$HTTP_STATUS" == "200" ]; then
+    echo "  ✅ 正常 (HTTP $HTTP_STATUS)"
+else
+    echo "  ❌ エラー (HTTP $HTTP_STATUS)"
+fi
 
-# ===========================================
-# 7. 注文履歴取得
-# ===========================================
-echo "7. 注文履歴取得（最初の600文字）"
-echo "-------------------------------------------"
-
-curl -s "$API_BASE/api/orders/history" -b $COOKIES | head -c 600
-echo ""
-echo "..."
-echo ""
-echo ""
-
-# ===========================================
-# 8. 画像API（認証不要）
-# ===========================================
-echo "8. 書籍表紙画像の確認"
-echo "-------------------------------------------"
-
-for BOOK_ID in 1 2 3 5 10; do
-    HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/images/covers/$BOOK_ID")
-    if [ "$HTTP_STATUS" == "200" ]; then
-        echo "  Book ID $BOOK_ID: ✅ 画像あり"
-    else
-        echo "  Book ID $BOOK_ID: ❌ 画像なし (HTTP $HTTP_STATUS)"
-    fi
-done
+echo "🔄 ワークフロー一覧:"
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/api/workflows")
+if [ "$HTTP_STATUS" == "200" ]; then
+    echo "  ✅ 正常 (HTTP $HTTP_STATUS)"
+else
+    echo "  ❌ エラー (HTTP $HTTP_STATUS)"
+fi
 
 echo ""
-echo ""
-
-# ===========================================
-# 9. ログアウト
-# ===========================================
-echo "9. ログアウト"
-echo "-------------------------------------------"
-
-curl -s -X POST "$API_BASE/api/auth/logout" \
-  -b $COOKIES \
-  -w "HTTP Status: %{http_code}\n"
-
-echo ""
-
-# クリーンアップ
-rm -f $COOKIES
 
 echo "========================================="
 echo "✨ テスト完了"

@@ -46,10 +46,10 @@ echo "┃  1. 認証API テスト                      ┃"
 echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 echo ""
 
-if [ -f "$SCRIPT_DIR/test_auth.sh" ]; then
-    bash "$SCRIPT_DIR/test_auth.sh"
+if [ -f "$SCRIPT_DIR/test_authen.sh" ]; then
+    bash "$SCRIPT_DIR/test_authen.sh"
 else
-    echo "❌ test_auth.sh が見つかりません"
+    echo "❌ test_authen.sh が見つかりません"
 fi
 
 echo ""
@@ -149,7 +149,7 @@ echo "   3. 注文API (作成, 履歴, 詳細)"
 echo "   4. 画像API (表紙画像取得)"
 echo ""
 echo "💡 個別にテストを実行する場合:"
-echo "   bash test_auth.sh"
+echo "   bash test_authen.sh"
 echo "   bash test_books.sh"
 echo "   bash test_orders.sh"
 echo "   bash test_images.sh"

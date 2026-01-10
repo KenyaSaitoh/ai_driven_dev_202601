@@ -277,8 +277,11 @@ erDiagram
 
 #### Employee ↔ Department
 * 関係: Many-to-One
-* Employee側: `@ManyToOne`
+* Employee側: `@ManyToOne(fetch = FetchType.EAGER)`
 * 外部キー: EMPLOYEE.DEPARTMENT_ID → DEPARTMENT.DEPARTMENT_ID
+* **フェッチタイプ**: EAGER（即時ロード）
+  - 理由: 認証APIのログインレスポンスに部署情報（departmentId, departmentName）を含める必要があるため
+  - LAZY（遅延ロード）を使用すると、JSON-B シリアライゼーション時に「Generating incomplete JSON」エラーが発生します
 
 #### Department ↔ Employee
 * 関係: One-to-Many
@@ -347,6 +350,17 @@ erDiagram
 すべての外部キー参照は制約として定義:
 * ON DELETE: NO ACTION（参照整合性保証）
 * ON UPDATE: CASCADE（ID更新時の連鎖更新）
+
+**テーブル削除時の注意事項**:
+* テーブルをDROP する際は、外部キー制約のため、以下のいずれかの対応が必要です：
+  1. **CASCADE オプション**: `DROP TABLE テーブル名 IF EXISTS CASCADE;` を使用
+     - 依存する外部キー制約も同時に削除されます
+     - 初期化スクリプト（`1_BACK_OFFICE_DROP.sql`）ではこの方式を採用
+  2. **削除順序の制御**: 外部キーを持つテーブルから先に削除
+     - 例: WORKFLOW → STOCK → BOOK → CATEGORY/PUBLISHER
+     - 例: EMPLOYEE → DEPARTMENT
+
+**推奨**: 開発環境のスキーマ初期化では、`CASCADE` オプションの使用を推奨します。本番環境では誤削除防止のため、削除順序を制御する方式も検討してください。
 
 ## 7. インデックス設計
 

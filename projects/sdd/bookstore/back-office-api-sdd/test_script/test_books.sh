@@ -3,182 +3,354 @@
 # 書籍API テストスクリプト
 # ===========================================
 
-API_BASE="http://localhost:8080/berry-books-api-sdd"
-COOKIES_FILE="cookies_books.txt"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/_common.sh"
 
-echo "========================================="
+API_BASE="http://localhost:8080/back-office-api-sdd"
+
+echo "==========================================="
 echo "  書籍API テスト"
-echo "========================================="
-echo ""
-
-# クリーンアップ
-rm -f $COOKIES_FILE
-
-# ===========================================
-# 事前準備: ログイン
-# ===========================================
-echo "🔐 ログイン中..."
-
-LOGIN_DATA='{"email":"alice@gmail.com","password":"password"}'
-
-LOGIN_RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
-  -X POST "$API_BASE/api/auth/login" \
-  -H "Content-Type: application/json" \
-  -d "$LOGIN_DATA" \
-  -c $COOKIES_FILE)
-
-HTTP_STATUS=$(echo "$LOGIN_RESPONSE" | grep -oP 'HTTP_STATUS:\K\d+')
-
-if [ "$HTTP_STATUS" != "200" ]; then
-    echo "❌ ログインに失敗しました (HTTP $HTTP_STATUS)"
-    exit 1
-fi
-
-echo "✅ ログイン成功"
-echo ""
+echo "==========================================="
 echo ""
 
 # ===========================================
-# 1. 書籍一覧取得 (GET /api/books)
+# 1. 書籍一覧取得
 # ===========================================
 echo "1️⃣  書籍一覧取得（全件）"
 echo "-------------------------------------------"
 
-BOOKS_RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
-  "$API_BASE/api/books" \
-  -b $COOKIES_FILE)
-
-HTTP_STATUS=$(echo "$BOOKS_RESPONSE" | grep -oP 'HTTP_STATUS:\K\d+')
-RESPONSE_BODY=$(echo "$BOOKS_RESPONSE" | sed 's/HTTP_STATUS:[0-9]*//')
+RESPONSE=$(api_get "$API_BASE/api/books")
+HTTP_STATUS=$(extract_http_status "$RESPONSE")
+BODY=$(extract_response_body "$RESPONSE")
 
 if [ "$HTTP_STATUS" == "200" ]; then
-    echo "✅ 書籍一覧取得成功 (HTTP $HTTP_STATUS)"
-    echo ""
-    echo "レスポンス（最初の3冊）:"
-    # 最初の1000文字を表示
-    echo "$RESPONSE_BODY" | head -c 1000
-    echo ""
-    echo "..."
-    echo ""
-    # 書籍数をカウント
-    BOOK_COUNT=$(echo "$RESPONSE_BODY" | grep -o '"bookId"' | wc -l)
-    echo "📚 取得した書籍数: $BOOK_COUNT 冊"
-else
-    echo "❌ 書籍一覧取得失敗 (HTTP $HTTP_STATUS)"
-    echo "$RESPONSE_BODY"
-fi
-echo ""
-echo ""
-
-# ===========================================
-# 2. 書籍一覧取得（カテゴリフィルタ付き）
-# ===========================================
-echo "2️⃣  書籍一覧取得（カテゴリID=1でフィルタ）"
-echo "-------------------------------------------"
-
-FILTERED_RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
-  "$API_BASE/api/books?categoryId=1" \
-  -b $COOKIES_FILE)
-
-HTTP_STATUS=$(echo "$FILTERED_RESPONSE" | grep -oP 'HTTP_STATUS:\K\d+')
-RESPONSE_BODY=$(echo "$FILTERED_RESPONSE" | sed 's/HTTP_STATUS:[0-9]*//')
-
-if [ "$HTTP_STATUS" == "200" ]; then
-    echo "✅ フィルタ付き書籍一覧取得成功 (HTTP $HTTP_STATUS)"
+    print_success "書籍一覧取得成功 (HTTP $HTTP_STATUS)"
     echo ""
     echo "レスポンス（最初の800文字）:"
-    echo "$RESPONSE_BODY" | head -c 800
+    echo "$BODY" | head -c 800
     echo ""
     echo "..."
+    
+    # 書籍数をカウント
+    BOOK_COUNT=$(echo "$BODY" | grep -o '"bookId":' | wc -l)
     echo ""
-    BOOK_COUNT=$(echo "$RESPONSE_BODY" | grep -o '"bookId"' | wc -l)
-    echo "📚 カテゴリID=1 の書籍数: $BOOK_COUNT 冊"
+    print_info "取得した書籍数: $BOOK_COUNT 冊"
 else
-    echo "❌ フィルタ付き書籍一覧取得失敗 (HTTP $HTTP_STATUS)"
-    echo "$RESPONSE_BODY"
+    print_error "書籍一覧取得失敗 (HTTP $HTTP_STATUS)"
+    echo "$BODY"
 fi
+
 echo ""
 echo ""
 
 # ===========================================
-# 3. 書籍詳細取得 (GET /api/books/{id})
+# 2. 書籍詳細取得
 # ===========================================
-echo "3️⃣  書籍詳細取得（Book ID: 1）"
+echo "2️⃣  書籍詳細取得（Book ID: 1）"
 echo "-------------------------------------------"
 
-BOOK_DETAIL=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
-  "$API_BASE/api/books/1" \
-  -b $COOKIES_FILE)
-
-HTTP_STATUS=$(echo "$BOOK_DETAIL" | grep -oP 'HTTP_STATUS:\K\d+')
-RESPONSE_BODY=$(echo "$BOOK_DETAIL" | sed 's/HTTP_STATUS:[0-9]*//')
+RESPONSE=$(api_get "$API_BASE/api/books/1")
+HTTP_STATUS=$(extract_http_status "$RESPONSE")
+BODY=$(extract_response_body "$RESPONSE")
 
 if [ "$HTTP_STATUS" == "200" ]; then
-    echo "✅ 書籍詳細取得成功 (HTTP $HTTP_STATUS)"
+    print_success "書籍詳細取得成功 (HTTP $HTTP_STATUS)"
     echo ""
     echo "レスポンス:"
-    echo "$RESPONSE_BODY"
+    echo "$BODY"
 else
-    echo "❌ 書籍詳細取得失敗 (HTTP $HTTP_STATUS)"
-    echo "$RESPONSE_BODY"
+    print_error "書籍詳細取得失敗 (HTTP $HTTP_STATUS)"
+    echo "$BODY"
 fi
+
 echo ""
 echo ""
 
 # ===========================================
-# 4. 存在しない書籍ID（エラーテスト）
+# 3. 書籍詳細取得（複数）
 # ===========================================
-echo "4️⃣  存在しない書籍IDでのアクセステスト"
-echo "-------------------------------------------"
-echo "   Book ID: 99999（404エラーが正常）"
-echo ""
-
-NOT_FOUND=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
-  "$API_BASE/api/books/99999" \
-  -b $COOKIES_FILE)
-
-HTTP_STATUS=$(echo "$NOT_FOUND" | grep -oP 'HTTP_STATUS:\K\d+')
-RESPONSE_BODY=$(echo "$NOT_FOUND" | sed 's/HTTP_STATUS:[0-9]*//')
-
-if [ "$HTTP_STATUS" == "404" ]; then
-    echo "✅ 正常：404エラーが発生しました"
-    echo "レスポンス:"
-    echo "$RESPONSE_BODY"
-else
-    echo "⚠️  予期しないステータス: HTTP $HTTP_STATUS"
-    echo "$RESPONSE_BODY"
-fi
-echo ""
-echo ""
-
-# ===========================================
-# 5. 複数の書籍詳細を取得
-# ===========================================
-echo "5️⃣  複数の書籍詳細を連続取得"
+echo "3️⃣  書籍詳細取得（複数の書籍）"
 echo "-------------------------------------------"
 
-for BOOK_ID in 1 5 10 15 20; do
-    DETAIL=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
-      "$API_BASE/api/books/$BOOK_ID" \
-      -b $COOKIES_FILE)
+for BOOK_ID in 2 5 10; do
+    echo ""
+    echo "📖 Book ID: $BOOK_ID"
     
-    HTTP_STATUS=$(echo "$DETAIL" | grep -oP 'HTTP_STATUS:\K\d+')
-    RESPONSE_BODY=$(echo "$DETAIL" | sed 's/HTTP_STATUS:[0-9]*//')
+    RESPONSE=$(api_get "$API_BASE/api/books/$BOOK_ID")
+    HTTP_STATUS=$(extract_http_status "$RESPONSE")
+    BODY=$(extract_response_body "$RESPONSE")
     
     if [ "$HTTP_STATUS" == "200" ]; then
-        BOOK_NAME=$(echo "$RESPONSE_BODY" | grep -oP '"bookName":"\K[^"]+' | head -1)
-        PRICE=$(echo "$RESPONSE_BODY" | grep -oP '"price":\K[0-9]+' | head -1)
-        echo "  📖 Book ID $BOOK_ID: $BOOK_NAME (¥$PRICE)"
+        print_success "取得成功 (HTTP $HTTP_STATUS)"
+        echo "$BODY" | head -c 300
+        echo ""
+        echo "..."
     else
-        echo "  ⚠️  Book ID $BOOK_ID: HTTP $HTTP_STATUS"
+        print_error "取得失敗 (HTTP $HTTP_STATUS)"
     fi
 done
+
+echo ""
 echo ""
 
-# クリーンアップ
-rm -f $COOKIES_FILE
+# ===========================================
+# 4. 存在しない書籍IDでエラーテスト
+# ===========================================
+echo "4️⃣  存在しない書籍IDでエラーテスト（Book ID: 99999）"
+echo "-------------------------------------------"
 
-echo "========================================="
+RESPONSE=$(api_get "$API_BASE/api/books/99999")
+HTTP_STATUS=$(extract_http_status "$RESPONSE")
+BODY=$(extract_response_body "$RESPONSE")
+
+if [ "$HTTP_STATUS" == "404" ]; then
+    print_success "404エラーが正しく返されました (HTTP $HTTP_STATUS)"
+    echo ""
+    echo "レスポンス:"
+    echo "$BODY"
+else
+    print_warning "予期しないステータスコード: $HTTP_STATUS"
+    echo "$BODY"
+fi
+
+echo ""
+echo ""
+
+# ===========================================
+# 5. カテゴリ一覧取得
+# ===========================================
+echo "5️⃣  カテゴリ一覧取得"
+echo "-------------------------------------------"
+
+RESPONSE=$(api_get "$API_BASE/api/categories")
+HTTP_STATUS=$(extract_http_status "$RESPONSE")
+BODY=$(extract_response_body "$RESPONSE")
+
+if [ "$HTTP_STATUS" == "200" ]; then
+    print_success "カテゴリ一覧取得成功 (HTTP $HTTP_STATUS)"
+    echo ""
+    echo "レスポンス:"
+    echo "$BODY"
+else
+    print_error "カテゴリ一覧取得失敗 (HTTP $HTTP_STATUS)"
+    echo "$BODY"
+fi
+
+echo ""
+echo ""
+
+# ===========================================
+# 6. 書籍検索（デフォルト - JPQL）
+# ===========================================
+echo "6️⃣  書籍検索（デフォルト - JPQL）"
+echo "-------------------------------------------"
+
+# キーワードのみで検索
+echo ""
+echo "🔍 キーワード検索: 'Java'"
+
+RESPONSE=$(api_get "$API_BASE/api/books/search?keyword=Java")
+HTTP_STATUS=$(extract_http_status "$RESPONSE")
+BODY=$(extract_response_body "$RESPONSE")
+
+if [ "$HTTP_STATUS" == "200" ]; then
+    print_success "キーワード検索成功 (HTTP $HTTP_STATUS)"
+    echo ""
+    BOOK_COUNT=$(echo "$BODY" | grep -o '"bookId":' | wc -l)
+    print_info "検索結果: $BOOK_COUNT 冊"
+    echo ""
+    echo "レスポンス（最初の500文字）:"
+    echo "$BODY" | head -c 500
+    echo ""
+    echo "..."
+else
+    print_error "キーワード検索失敗 (HTTP $HTTP_STATUS)"
+    echo "$BODY"
+fi
+
+echo ""
+
+# カテゴリIDとキーワードで検索
+echo ""
+echo "🔍 カテゴリ + キーワード検索: categoryId=1, keyword='Java'"
+
+RESPONSE=$(api_get "$API_BASE/api/books/search?categoryId=1&keyword=Java")
+HTTP_STATUS=$(extract_http_status "$RESPONSE")
+BODY=$(extract_response_body "$RESPONSE")
+
+if [ "$HTTP_STATUS" == "200" ]; then
+    print_success "カテゴリ + キーワード検索成功 (HTTP $HTTP_STATUS)"
+    echo ""
+    BOOK_COUNT=$(echo "$BODY" | grep -o '"bookId":' | wc -l)
+    print_info "検索結果: $BOOK_COUNT 冊"
+    echo ""
+    echo "レスポンス（最初の500文字）:"
+    echo "$BODY" | head -c 500
+    echo ""
+    echo "..."
+else
+    print_error "カテゴリ + キーワード検索失敗 (HTTP $HTTP_STATUS)"
+    echo "$BODY"
+fi
+
+echo ""
+
+# カテゴリIDのみで検索
+echo ""
+echo "🔍 カテゴリ検索: categoryId=2"
+
+RESPONSE=$(api_get "$API_BASE/api/books/search?categoryId=2")
+HTTP_STATUS=$(extract_http_status "$RESPONSE")
+BODY=$(extract_response_body "$RESPONSE")
+
+if [ "$HTTP_STATUS" == "200" ]; then
+    print_success "カテゴリ検索成功 (HTTP $HTTP_STATUS)"
+    echo ""
+    BOOK_COUNT=$(echo "$BODY" | grep -o '"bookId":' | wc -l)
+    print_info "検索結果: $BOOK_COUNT 冊"
+else
+    print_error "カテゴリ検索失敗 (HTTP $HTTP_STATUS)"
+    echo "$BODY"
+fi
+
+echo ""
+echo ""
+
+# ===========================================
+# 7. 書籍検索（JPQL - 明示的）
+# ===========================================
+echo "7️⃣  書籍検索（JPQL - 明示的）"
+echo "-------------------------------------------"
+
+RESPONSE=$(api_get "$API_BASE/api/books/search/jpql?keyword=Spring")
+HTTP_STATUS=$(extract_http_status "$RESPONSE")
+BODY=$(extract_response_body "$RESPONSE")
+
+if [ "$HTTP_STATUS" == "200" ]; then
+    print_success "JPQL検索成功 (HTTP $HTTP_STATUS)"
+    echo ""
+    BOOK_COUNT=$(echo "$BODY" | grep -o '"bookId":' | wc -l)
+    print_info "検索結果: $BOOK_COUNT 冊"
+    echo ""
+    echo "レスポンス（最初の500文字）:"
+    echo "$BODY" | head -c 500
+    echo ""
+    echo "..."
+else
+    print_error "JPQL検索失敗 (HTTP $HTTP_STATUS)"
+    echo "$BODY"
+fi
+
+echo ""
+echo ""
+
+# ===========================================
+# 8. 書籍検索（Criteria API）
+# ===========================================
+echo "8️⃣  書籍検索（Criteria API - 動的クエリ）"
+echo "-------------------------------------------"
+
+# キーワードのみで検索
+echo ""
+echo "🔍 Criteria検索（キーワード: 'データベース'）"
+
+RESPONSE=$(api_get "$API_BASE/api/books/search/criteria?keyword=データベース")
+HTTP_STATUS=$(extract_http_status "$RESPONSE")
+BODY=$(extract_response_body "$RESPONSE")
+
+if [ "$HTTP_STATUS" == "200" ]; then
+    print_success "Criteria検索成功 (HTTP $HTTP_STATUS)"
+    echo ""
+    BOOK_COUNT=$(echo "$BODY" | grep -o '"bookId":' | wc -l)
+    print_info "検索結果: $BOOK_COUNT 冊"
+    echo ""
+    echo "レスポンス（最初の500文字）:"
+    echo "$BODY" | head -c 500
+    echo ""
+    echo "..."
+else
+    print_error "Criteria検索失敗 (HTTP $HTTP_STATUS)"
+    echo "$BODY"
+fi
+
+echo ""
+
+# カテゴリとキーワードで検索
+echo ""
+echo "🔍 Criteria検索（categoryId=3, keyword='SQL'）"
+
+RESPONSE=$(api_get "$API_BASE/api/books/search/criteria?categoryId=3&keyword=SQL")
+HTTP_STATUS=$(extract_http_status "$RESPONSE")
+BODY=$(extract_response_body "$RESPONSE")
+
+if [ "$HTTP_STATUS" == "200" ]; then
+    print_success "Criteria検索成功 (HTTP $HTTP_STATUS)"
+    echo ""
+    BOOK_COUNT=$(echo "$BODY" | grep -o '"bookId":' | wc -l)
+    print_info "検索結果: $BOOK_COUNT 冊"
+else
+    print_error "Criteria検索失敗 (HTTP $HTTP_STATUS)"
+    echo "$BODY"
+fi
+
+echo ""
+
+# カテゴリのみで検索
+echo ""
+echo "🔍 Criteria検索（categoryId=1）"
+
+RESPONSE=$(api_get "$API_BASE/api/books/search/criteria?categoryId=1")
+HTTP_STATUS=$(extract_http_status "$RESPONSE")
+BODY=$(extract_response_body "$RESPONSE")
+
+if [ "$HTTP_STATUS" == "200" ]; then
+    print_success "Criteria検索成功 (HTTP $HTTP_STATUS)"
+    echo ""
+    BOOK_COUNT=$(echo "$BODY" | grep -o '"bookId":' | wc -l)
+    print_info "検索結果: $BOOK_COUNT 冊"
+else
+    print_error "Criteria検索失敗 (HTTP $HTTP_STATUS)"
+    echo "$BODY"
+fi
+
+echo ""
+echo ""
+
+# ===========================================
+# 9. 書籍のカテゴリ一覧取得（/books/categories）
+# ===========================================
+echo "9️⃣  書籍のカテゴリ一覧取得（/books/categories）"
+echo "-------------------------------------------"
+
+RESPONSE=$(api_get "$API_BASE/api/books/categories")
+HTTP_STATUS=$(extract_http_status "$RESPONSE")
+BODY=$(extract_response_body "$RESPONSE")
+
+if [ "$HTTP_STATUS" == "200" ]; then
+    print_success "カテゴリ一覧取得成功 (HTTP $HTTP_STATUS)"
+    echo ""
+    echo "レスポンス:"
+    echo "$BODY"
+else
+    print_error "カテゴリ一覧取得失敗 (HTTP $HTTP_STATUS)"
+    echo "$BODY"
+fi
+
+echo ""
+echo ""
+
+echo "==========================================="
 echo "✨ 書籍APIテスト完了"
-echo "========================================="
+echo "==========================================="
+echo ""
+print_info "テストされたエンドポイント:"
+echo "   ✓ GET /api/books"
+echo "   ✓ GET /api/books/{id}"
+echo "   ✓ GET /api/books/search (キーワード, カテゴリ+キーワード, カテゴリのみ)"
+echo "   ✓ GET /api/books/search/jpql"
+echo "   ✓ GET /api/books/search/criteria (キーワード, カテゴリ+キーワード, カテゴリのみ)"
+echo "   ✓ GET /api/books/categories"
+echo "   ✓ GET /api/categories"
+echo ""
+
 

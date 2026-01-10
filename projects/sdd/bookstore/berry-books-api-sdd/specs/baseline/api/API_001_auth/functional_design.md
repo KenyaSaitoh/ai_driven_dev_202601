@@ -108,20 +108,20 @@ sequenceDiagram
     participant JwtUtil
     participant RestAPI as berry-books-rest API
     
-    Client->>AuthResource: POST /api/auth/login<br/>{email, password}
-    AuthResource->>CustomerRestClient: findByEmail(email)
+    Client->>AuthenResource: POST /api/auth/login<br/>{email, password}
+    AuthenResource->>CustomerRestClient: findByEmail(email)
     CustomerRestClient->>RestAPI: GET /customers/query_email?email={email}
     RestAPI-->>CustomerRestClient: Customer data
-    CustomerRestClient-->>AuthResource: Customer object
-    
-    AuthResource->>AuthResource: BCrypt.checkpw(password, storedPassword)
+    CustomerRestClient-->>AuthenResource: Customer object
+
+    AuthenResource->>AuthenResource: BCrypt.checkpw(password, storedPassword)
     
     alt Password match
-        AuthResource->>JwtUtil: generateToken(customerId, email)
-        JwtUtil-->>AuthResource: JWT token
-        AuthResource-->>Client: 200 OK<br/>Set-Cookie: berry-books-jwt=<token><br/>LoginResponse
+        AuthenResource->>JwtUtil: generateToken(customerId, email)
+        JwtUtil-->>AuthenResource: JWT token
+        AuthenResource-->>Client: 200 OK<br/>Set-Cookie: berry-books-jwt=<token><br/>LoginResponse
     else Password mismatch
-        AuthResource-->>Client: 401 Unauthorized<br/>ErrorResponse
+        AuthenResource-->>Client: 401 Unauthorized<br/>ErrorResponse
     end
 ```
 

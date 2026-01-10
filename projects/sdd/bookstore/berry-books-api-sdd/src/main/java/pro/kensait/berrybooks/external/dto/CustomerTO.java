@@ -3,10 +3,9 @@ package pro.kensait.berrybooks.external.dto;
 import java.time.LocalDate;
 
 /**
- * 顧客転送オブジェクト
+ * 顧客情報転送用DTO（Transfer Object）
  * 
- * 外部API（berry-books-rest）とのデータ転送に使用
- * Java Recordを使用してイミュータブルなDTOを実装
+ * customer-hub-apiとのデータ転送に使用する。
  */
 public record CustomerTO(
     Integer customerId,
@@ -17,4 +16,3 @@ public record CustomerTO(
     String address
 ) {
 }
-
