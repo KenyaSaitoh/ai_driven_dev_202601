@@ -1,10 +1,10 @@
 # API_003_orders - 注文API受入基準
 
-**API ID:** API_003_orders  
-**API名:** 注文API  
-**ベースパス:** `/api/orders`  
-**バージョン:** 2.0.0  
-**最終更新日:** 2025-12-27
+* API ID: API_003_orders  
+* API名: 注文API  
+* ベースパス: `/api/orders`  
+* バージョン: 2.0.0  
+* 最終更新日: 2025-12-27
 
 ---
 

@@ -41,11 +41,11 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 全タスクを分解してください。
 
 パラメータ:
-- project_root: projects/sdd/bookstore/back-office-api-sdd
-- spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs
 ```
 
-**生成されるファイル**: `tasks/*.md`（タスクリスト）
+* 生成されるファイル: `tasks/*.md`（タスクリスト）
 
 ---
 
@@ -53,17 +53,17 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 各APIの詳細設計書を**AIと対話しながら**作成します。
 
-**実行順序**: `tasks/tasks.md`の「実行順序」セクションを参照してください。
+* 実行順序: `tasks/tasks.md`の「実行順序」セクションを参照してください。
 
-**対話の流れ**:
-1. AIが仕様書を読み込み、理解した内容を説明します
-2. AIが不明点を質問します
-3. あなたが回答します
-4. `specs/baseline/api/API_XXX_*/detailed_design.md` が生成されます
+* 対話の流れ:
+  1. AIが仕様書を読み込み、理解した内容を説明します
+  2. AIが不明点を質問します
+  3. あなたが回答します
+  4. `specs/baseline/api/API_XXX_*/detailed_design.md` が生成されます
 
 ---
 
-**全APIの詳細設計コマンド（コピペ用）**:
+* 全APIの詳細設計コマンド（コピペ用）:
 
 ##### API_001_auth（認証API）
 
@@ -133,7 +133,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 ワークフローAPIの詳細設計書を作成してください。
 ```
 
-**重要**: 詳細設計は**対話的なプロセス**です。AIが質問してきたら、必ず回答してください。
+* 重要: 詳細設計は**対話的なプロセス**です。AIが質問してきたら、必ず回答してください。
 
 ---
 
@@ -141,7 +141,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 
 詳細設計書をもとに、実装コードを生成します。
 
-**実行順序**: 
+* 実行順序: 
 1. **セットアップタスク** → 2. **共通機能タスク** → 3. **各API実装**
 
 > **重要**: 共通機能タスク（エンティティ、DAO、DTO、ユーティリティ等）を先に実装してから、各API実装に進んでください。
@@ -154,9 +154,9 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 セットアップタスクを実行してください。
 
 パラメータ:
-- project_root: projects/sdd/bookstore/back-office-api-sdd
-- task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/setup_tasks.md
-- skip_infrastructure: true
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/setup_tasks.md
+* skip_infrastructure: true
 ```
 
 ##### 3-2. 共通機能タスク（セットアップ後に1回）
@@ -167,22 +167,22 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 共通機能タスクを実行してください。
 
 パラメータ:
-- project_root: projects/sdd/bookstore/back-office-api-sdd
-- task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/common_tasks.md
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/common_tasks.md
 ```
 
-**実装される共通機能**:
-- 全エンティティ（Book, Stock, Category, Publisher, Employee, Department, Workflow）
-- 全DAO（JPQLとCriteria API対応）
-- 共通DTO・例外クラス
-- セキュリティ基盤（JWT、BCrypt）
-- ユーティリティクラス
+* 実装される共通機能:
+  * 全エンティティ（Book, Stock, Category, Publisher, Employee, Department, Workflow）
+  * 全DAO（JPQLとCriteria API対応）
+  * 共通DTO・例外クラス
+  * セキュリティ基盤（JWT、BCrypt）
+  * ユーティリティクラス
 
 ##### 3-3. 各APIの実装（共通機能完了後にコピペ用）
 
 詳細設計書を参照しながら、各APIを実装します。
 
-**API_001_auth**:
+* API_001_auth:
 
 ```
 @agent_skills/jakarta-ee-standard/instructions/code_generation.md
@@ -191,11 +191,11 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 認証APIを実装してください。
 
 パラメータ:
-- project_root: projects/sdd/bookstore/back-office-api-sdd
-- task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_001_auth.md
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_001_auth.md
 ```
 
-**API_002_books**:
+* API_002_books:
 
 ```
 @agent_skills/jakarta-ee-standard/instructions/code_generation.md
@@ -204,11 +204,11 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 書籍APIを実装してください。
 
 パラメータ:
-- project_root: projects/sdd/bookstore/back-office-api-sdd
-- task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_002_books.md
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_002_books.md
 ```
 
-**API_003_categories**:
+* API_003_categories:
 
 ```
 @agent_skills/jakarta-ee-standard/instructions/code_generation.md
@@ -217,11 +217,11 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 カテゴリAPIを実装してください。
 
 パラメータ:
-- project_root: projects/sdd/bookstore/back-office-api-sdd
-- task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_003_categories.md
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_003_categories.md
 ```
 
-**API_004_publishers**:
+* API_004_publishers:
 
 ```
 @agent_skills/jakarta-ee-standard/instructions/code_generation.md
@@ -230,11 +230,11 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 出版社APIを実装してください。
 
 パラメータ:
-- project_root: projects/sdd/bookstore/back-office-api-sdd
-- task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_004_publishers.md
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_004_publishers.md
 ```
 
-**API_005_stocks**:
+* API_005_stocks:
 
 ```
 @agent_skills/jakarta-ee-standard/instructions/code_generation.md
@@ -243,11 +243,11 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 在庫APIを実装してください（楽観的ロック対応）。
 
 パラメータ:
-- project_root: projects/sdd/bookstore/back-office-api-sdd
-- task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_005_stocks.md
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_005_stocks.md
 ```
 
-**API_006_workflows**:
+* API_006_workflows:
 
 ```
 @agent_skills/jakarta-ee-standard/instructions/code_generation.md
@@ -256,8 +256,8 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 ワークフローAPIを実装してください。
 
 パラメータ:
-- project_root: projects/sdd/bookstore/back-office-api-sdd
-- task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_006_workflows.md
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_006_workflows.md
 ```
 
 ---
@@ -269,51 +269,51 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 ## 🎯 プロジェクトの特徴（マイクロサービスパターン）
 
 ### アーキテクチャ
-- **独立したデータ管理サービス**: 書籍・在庫・カテゴリ・出版社の完全管理
-- **マイクロサービス**: BFF（berry-books-api）から呼ばれるバックエンドサービス
-- **REST API**: データ管理機能をREST APIとして提供
-- **CORS対応**: クロスオリジンリクエストに対応
+* **独立したデータ管理サービス**: 書籍・在庫・カテゴリ・出版社の完全管理
+* **マイクロサービス**: BFF（berry-books-api）から呼ばれるバックエンドサービス
+* **REST API**: データ管理機能をREST APIとして提供
+* **CORS対応**: クロスオリジンリクエストに対応
 
 ### 実装する全エンティティ
-- ✅ **Book**（書籍）
-- ✅ **Stock**（在庫）- **楽観的ロック必須（@Version）**
-- ✅ **Category**（カテゴリ）
-- ✅ **Publisher**（出版社）
+* ✅ **Book**（書籍）
+* ✅ **Stock**（在庫）- **楽観的ロック必須（@Version）**
+* ✅ **Category**（カテゴリ）
+* ✅ **Publisher**（出版社）
 
 ### 重要な実装要件
 
 #### 楽観的ロック（Optimistic Locking）
-- Stockエンティティに`@Version`アノテーション使用
-- 在庫更新時の競合を検出
-- `OptimisticLockException` → HTTP 409 Conflict
+* Stockエンティティに`@Version`アノテーション使用
+* 在庫更新時の競合を検出
+* `OptimisticLockException` → HTTP 409 Conflict
 
 #### 2種類の書籍検索実装
-- **JPQL検索**（`BookDao`）: 動的クエリ、シンプル
-- **Criteria API検索**（`BookDaoCriteria`）: 型安全、コンパイル時チェック
-- **両方実装**: 比較学習が可能
+* **JPQL検索**（`BookDao`）: 動的クエリ、シンプル
+* **Criteria API検索**（`BookDaoCriteria`）: 型安全、コンパイル時チェック
+* **両方実装**: 比較学習が可能
 
 #### CORS設定
-- BFF（berry-books-api）からのクロスオリジンリクエスト対応
-- `CorsFilter`実装
+* BFF（berry-books-api）からのクロスオリジンリクエスト対応
+* `CorsFilter`実装
 
 ## 🔧 使用している技術
 
 ### 本番環境
 
-- **Jakarta EE 10**
-- **Payara Server 6**
-- **JAX-RS (Jakarta RESTful Web Services) 3.1** - REST API
-- **Jakarta Persistence (JPA) 3.1** - Hibernate実装
-- **Jakarta Transactions (JTA)**
-- **Jakarta CDI 4.0**
-- **Jakarta Bean Validation 3.0**
-- **HSQLDB 2.7.x**
+* **Jakarta EE 10**
+* **Payara Server 6**
+* **JAX-RS (Jakarta RESTful Web Services) 3.1** - REST API
+* **Jakarta Persistence (JPA) 3.1** - Hibernate実装
+* **Jakarta Transactions (JTA)**
+* **Jakarta CDI 4.0**
+* **Jakarta Bean Validation 3.0**
+* **HSQLDB 2.7.x**
 
 ### テスト環境
 
-- **JUnit 5** - テストフレームワーク
-- **Mockito** - モックライブラリ
-- **JaCoCo** - カバレッジツール（オプション）
+* **JUnit 5** - テストフレームワーク
+* **Mockito** - モックライブラリ
+* **JaCoCo** - カバレッジツール（オプション）
 
 ## プロジェクト構成
 
@@ -392,7 +392,7 @@ back-office-api-sdd/
 | GET | `/api/stocks/{bookId}` | 在庫取得 | |
 | PUT | `/api/stocks/{bookId}` | 在庫更新 | **楽観的ロック対応** |
 
-**重要**: 在庫更新時は`version`パラメータが必須。競合時はHTTP 409 Conflictを返す。
+* 重要: 在庫更新時は`version`パラメータが必須。競合時はHTTP 409 Conflictを返す。
 
 ### カテゴリAPI (`/api/categories`)
 
@@ -412,10 +412,10 @@ back-office-api-sdd/
 
 ### 前提条件
 
-- JDK 21以上
-- Gradle 8.x以上
-- Payara Server 6（プロジェクトルートの`payara6/`に配置）
-- HSQLDB（プロジェクトルートの`hsqldb/`に配置）
+* JDK 21以上
+* Gradle 8.x以上
+* Payara Server 6（プロジェクトルートの`payara6/`に配置）
+* HSQLDB（プロジェクトルートの`hsqldb/`に配置）
 
 > **Note:** ① と ② の手順は、ルートの`README.md`を参照してください。
 
@@ -423,8 +423,8 @@ back-office-api-sdd/
 
 このプロジェクトを開始する前に、以下が起動していることを確認してください：
 
-- **① HSQLDBサーバー** （`./gradlew startHsqldb`）
-- **② Payara Server** （`./gradlew startPayara`）
+* **① HSQLDBサーバー** （`./gradlew startHsqldb`）
+* **② Payara Server** （`./gradlew startPayara`）
 
 ### ④ プロジェクトを開始するときに1回だけ実行
 
@@ -460,8 +460,8 @@ back-office-api-sdd/
 
 デプロイ後、以下のベースURLでAPIにアクセスできます：
 
-- **ベースURL**: http://localhost:8080/back-office-api-sdd/api
-- **ウェルカムページ**: http://localhost:8080/back-office-api-sdd/
+* **ベースURL**: http://localhost:8080/back-office-api-sdd/api
+* **ウェルカムページ**: http://localhost:8080/back-office-api-sdd/
 
 ## 📝 APIの使用例（curl）
 
@@ -576,14 +576,14 @@ Database (HSQLDB)
 
 ### 主要な設計パターン
 
-- **REST Resource Pattern**: JAX-RS
-- **Service Layer Pattern**: CDI + Transactional
-- **Repository Pattern**: DAO
-- **DTO Pattern**: Java Records
-- **Dependency Injection**: CDI
-- **Optimistic Locking**: `@Version`（在庫管理）
-- **Exception Mapper**: JAX-RS
-- **CORS Filter**: クロスオリジン対応
+* **REST Resource Pattern**: JAX-RS
+* **Service Layer Pattern**: CDI + Transactional
+* **Repository Pattern**: DAO
+* **DTO Pattern**: Java Records
+* **Dependency Injection**: CDI
+* **Optimistic Locking**: `@Version`（在庫管理）
+* **Exception Mapper**: JAX-RS
+* **CORS Filter**: クロスオリジン対応
 
 ### 楽観的ロック制御
 
@@ -599,19 +599,19 @@ Database (HSQLDB)
 
 ### 設定内容
 
-- **JNDI名**: `jdbc/HsqldbDS`
-- **データベース**: `testdb`
-- **ユーザー**: `SA`
-- **パスワード**: （空文字）
-- **TCPサーバー**: `localhost:9001`
+* **JNDI名**: `jdbc/HsqldbDS`
+* **データベース**: `testdb`
+* **ユーザー**: `SA`
+* **パスワード**: （空文字）
+* **TCPサーバー**: `localhost:9001`
 
 データソースはPayara Serverのドメイン設定に登録されます。
 
 ### ⚠️ 注意事項
 
-- HSQLDB Databaseサーバーが起動している必要があります
-- データソース作成はPayara Server起動後に実行してください
-- 初回のみ実行が必要です（2回目以降は不要）
+* HSQLDB Databaseサーバーが起動している必要があります
+* データソース作成はPayara Server起動後に実行してください
+* 初回のみ実行が必要です（2回目以降は不要）
 
 ## 🛑 アプリケーションを停止する
 
@@ -663,9 +663,9 @@ rm -f hsqldb/data/testdb.*
 
 ## 📖 参考リンク
 
-- [Jakarta EE 10 Platform](https://jakarta.ee/specifications/platform/10/)
-- [Jakarta RESTful Web Services 3.1](https://jakarta.ee/specifications/restful-ws/3.1/)
-- [Agent Skills Documentation](https://agentskills.io/what-are-skills)
+* [Jakarta EE 10 Platform](https://jakarta.ee/specifications/platform/10/)
+* [Jakarta RESTful Web Services 3.1](https://jakarta.ee/specifications/restful-ws/3.1/)
+* [Agent Skills Documentation](https://agentskills.io/what-are-skills)
 
 ## 📄 ライセンス
 

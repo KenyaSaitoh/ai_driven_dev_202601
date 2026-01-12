@@ -1,10 +1,10 @@
 # API_004 画像API - 詳細設計書（静的リソース配信）
 
-**API ID**: API_004  
-**API名**: 画像API  
-**パターン**: 静的リソース配信（WAR内リソース）  
-**バージョン**: 1.0.0  
-**最終更新**: 2025-01-10
+* API ID: API_004  
+* API名: 画像API  
+* パターン: 静的リソース配信（WAR内リソース）  
+* バージョン: 1.0.0  
+* 最終更新: 2025-01-10
 
 ---
 
@@ -18,7 +18,7 @@ pro.kensait.berrybooks
     └── ImageResource.java            # 画像リソース
 ```
 
-**注**: このAPIは外部API連携なし、DAO層なし、サービス層なし、エンティティなしです。WAR内の静的リソースを配信するだけです。
+* 注: このAPIは外部API連携なし、DAO層なし、サービス層なし、エンティティなしです。WAR内の静的リソースを配信するだけです。
 
 ---
 
@@ -26,16 +26,16 @@ pro.kensait.berrybooks
 
 ### 2.1 ImageResource（JAX-RS Resource）
 
-**責務**: 画像ファイルの配信
+* 責務: 画像ファイルの配信
 
-**アノテーション**:
-- `@Path("/images")` - ベースパス
-- `@ApplicationScoped` - CDIスコープ
+* アノテーション:
+  * `@Path("/images")` - ベースパス
+  * `@ApplicationScoped` - CDIスコープ
 
-**主要フィールド**:
-- `ServletContext servletContext` - サーブレットコンテキスト（@Context）
+* 主要フィールド:
+  * `ServletContext servletContext` - サーブレットコンテキスト（@Context）
 
-**主要メソッド**:
+* 主要メソッド:
 
 #### getCoverImage() - 書籍表紙画像取得
 
@@ -45,33 +45,33 @@ pro.kensait.berrybooks
 @Produces("image/jpeg")
 ```
 
-**パラメータ**:
-- `@PathParam("bookId") String bookIdStr` - 書籍ID（文字列、"no-image"の場合はフォールバック画像）
+* パラメータ:
+  * `@PathParam("bookId") String bookIdStr` - 書籍ID（文字列、"no-image"の場合はフォールバック画像）
 
-**処理フロー**:
-1. bookIdStrが"no-image"の場合、`getNoImage()`を呼び出してフォールバック画像を返却
-2. ServletContextから`/resources/images/covers/{bookId}.jpg`を取得
+* 処理フロー:
+  1. bookIdStrが"no-image"の場合、`getNoImage()`を呼び出してフォールバック画像を返却
+  2. ServletContextから`/resources/images/covers/{bookId}.jpg`を取得
    ```java
    InputStream inputStream = servletContext.getResourceAsStream(
        "/resources/images/covers/" + bookIdStr + ".jpg");
    ```
-3. InputStreamが`null`の場合、フォールバック画像（no-image.jpg）を返却
-4. InputStreamから全バイトを読み取り、バイナリデータとして返却
+  3. InputStreamが`null`の場合、フォールバック画像（no-image.jpg）を返却
+  4. InputStreamから全バイトを読み取り、バイナリデータとして返却
 
-**レスポンス**: `byte[]`（画像バイナリ）
+* レスポンス: `byte[]`（画像バイナリ）
 
-**Content-Type**: `image/jpeg`
+* Content-Type: `image/jpeg`
 
-**フォールバック処理**:
-- 画像が存在しない場合 → `no-image.jpg`を返却
-- `no-image.jpg`も存在しない場合 → `404 Not Found`
+* フォールバック処理:
+  * 画像が存在しない場合 → `no-image.jpg`を返却
+  * `no-image.jpg`も存在しない場合 → `404 Not Found`
 
-**特別なリクエスト**:
-- `GET /api/images/covers/no-image` → 直接フォールバック画像を返却
+* 特別なリクエスト:
+  * `GET /api/images/covers/no-image` → 直接フォールバック画像を返却
 
-**エラーケース**:
-- 画像読み取り失敗 → `500 Internal Server Error`
-- フォールバック画像も存在しない → `404 Not Found`
+* エラーケース:
+  * 画像読み取り失敗 → `500 Internal Server Error`
+  * フォールバック画像も存在しない → `404 Not Found`
 
 ---
 
@@ -97,17 +97,17 @@ berry-books-api-sdd/
 
 ### 3.2 ファイル命名規則
 
-**フォーマット**: `{bookId}.jpg`
+* フォーマット: `{bookId}.jpg`
 
-**例**:
-- `1.jpg` - 書籍ID: 1（Java SEディープダイブ）
-- `2.jpg` - 書籍ID: 2（JVMとバイトコードの探求）
-- `3.jpg` - 書籍ID: 3（Javaアーキテクトのための設計原理）
+* 例:
+  * `1.jpg` - 書籍ID: 1（Java SEディープダイブ）
+  * `2.jpg` - 書籍ID: 2（JVMとバイトコードの探求）
+  * `3.jpg` - 書籍ID: 3（Javaアーキテクトのための設計原理）
 
-**フォールバック画像**:
-- `no-image.jpg` - 画像が存在しない書籍用の代替画像
+* フォールバック画像:
+  * `no-image.jpg` - 画像が存在しない書籍用の代替画像
 
-**注**: 書籍IDはゼロ埋めなし、数値のみ
+* 注: 書籍IDはゼロ埋めなし、数値のみ
 
 ---
 
@@ -170,14 +170,14 @@ public class ImageResource {
 
 ### 5.1 パストラバーサル攻撃対策
 
-**脅威**:
+* 脅威:
 ```
 GET /api/images/../../../etc/passwd
 ```
 
-**対策**:
-1. ServletContextは自動的にコンテキストルート外へのアクセスを防止
-2. 追加の検証が必要な場合:
+* 対策:
+  1. ServletContextは自動的にコンテキストルート外へのアクセスを防止
+  2. 追加の検証が必要な場合:
    ```java
    if (filename.contains("..") || filename.contains("/")) {
        return Response.status(Response.Status.BAD_REQUEST).build();
@@ -186,11 +186,11 @@ GET /api/images/../../../etc/passwd
 
 ### 5.2 認証要否
 
-**現状**: 認証不要（公開リソース）
+* 現状: 認証不要（公開リソース）
 
-**理由**:
-- 書籍の表紙画像は公開情報
-- パフォーマンスのため認証スキップ
+* 理由:
+  * 書籍の表紙画像は公開情報
+  * パフォーマンスのため認証スキップ
 
 ---
 
@@ -198,7 +198,7 @@ GET /api/images/../../../etc/passwd
 
 ### 6.1 キャッシュ制御
 
-**推奨**: HTTPヘッダーでキャッシュを設定
+* 推奨: HTTPヘッダーでキャッシュを設定
 
 ```java
 return Response.ok(inputStream)
@@ -208,9 +208,9 @@ return Response.ok(inputStream)
 
 ### 6.2 CDN連携
 
-**将来の検討**:
-- 画像をCDN（Cloudflare, AWS CloudFront等）に配置
-- ImageResourceをCDNリダイレクトに変更
+* 将来の検討:
+  * 画像をCDN（Cloudflare, AWS CloudFront等）に配置
+  * ImageResourceをCDNリダイレクトに変更
 
 ---
 
@@ -229,16 +229,16 @@ return Response.ok(inputStream)
 
 ### 8.1 ユニットテスト
 
-**対象**: なし（ビジネスロジックなし）
+* 対象: なし（ビジネスロジックなし）
 
 ### 8.2 統合テスト
 
-**対象**: `ImageResource`
+* 対象: `ImageResource`
 
-- 画像取得API呼び出し（正常系）
-- 画像取得API呼び出し（存在しないファイル）
-- Content-Type検証（JPEG）
-- Content-Type検証（PNG）
+* 画像取得API呼び出し（正常系）
+* 画像取得API呼び出し（存在しないファイル）
+* Content-Type検証（JPEG）
+* Content-Type検証（PNG）
 
 ---
 
@@ -246,12 +246,12 @@ return Response.ok(inputStream)
 
 ### 9.1 フロントエンドでの使用
 
-**React/Vue/Angular**:
+* React/Vue/Angular:
 ```html
 <img src="http://localhost:8080/berry-books-api-sdd/api/images/book001.jpg" alt="書籍画像">
 ```
 
-**動的な画像URL生成**:
+* 動的な画像URL生成:
 ```javascript
 const imageUrl = `${API_BASE_URL}/images/book${String(bookId).padStart(3, '0')}.jpg`;
 ```
@@ -260,6 +260,6 @@ const imageUrl = `${API_BASE_URL}/images/book${String(bookId).padStart(3, '0')}.
 
 ## 10. 参考資料
 
-- [functional_design.md](functional_design.md) - 機能設計書
-- [behaviors.md](behaviors.md) - 振る舞い仕様書
-- [ServletContext仕様](https://jakarta.ee/specifications/servlet/6.0/)
+* [functional_design.md](functional_design.md) - 機能設計書
+* [behaviors.md](behaviors.md) - 振る舞い仕様書
+* [ServletContext仕様](https://jakarta.ee/specifications/servlet/6.0/)

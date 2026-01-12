@@ -1,9 +1,9 @@
 # API_003 カテゴリAPI - 詳細設計書
 
-**API ID**: API_003  
-**API名**: カテゴリAPI  
-**バージョン**: 1.0.0  
-**最終更新**: 2025-01-10
+* API ID: API_003  
+* API名: カテゴリAPI  
+* バージョン: 1.0.0  
+* 最終更新: 2025-01-10
 
 ---
 
@@ -30,11 +30,11 @@ pro.kensait.backoffice
 
 ### 2.1 CategoryResource（JAX-RS Resource）
 
-**ベースパス**: `/categories`
+* ベースパス: `/categories`
 
-**エンドポイント**:
-- `GET /categories` - 全カテゴリ取得
-- `GET /categories/{id}` - カテゴリ詳細取得
+* エンドポイント:
+  * `GET /categories` - 全カテゴリ取得
+  * `GET /categories/{id}` - カテゴリ詳細取得
 
 ### 2.2 CategoryTO（DTO - Record）
 
@@ -47,24 +47,24 @@ public record CategoryTO(
 
 ### 2.3 CategoryService
 
-**主要メソッド**:
-- `List<CategoryTO> getCategoriesAll()` - 全カテゴリ取得
-- `CategoryTO getCategoryById(Integer categoryId)` - カテゴリ詳細取得
+* 主要メソッド:
+  * `List<CategoryTO> getCategoriesAll()` - 全カテゴリ取得
+  * `CategoryTO getCategoryById(Integer categoryId)` - カテゴリ詳細取得
 
 ### 2.4 CategoryDao
 
-**主要メソッド**:
-- `List<Category> findAll()` - 全カテゴリ取得
-- `Category findById(Integer categoryId)` - カテゴリ取得
+* 主要メソッド:
+  * `List<Category> findAll()` - 全カテゴリ取得
+  * `Category findById(Integer categoryId)` - カテゴリ取得
 
-**JPQL**:
+* JPQL:
 ```sql
 SELECT c FROM Category c ORDER BY c.categoryId
 ```
 
 ### 2.5 Category（エンティティ）
 
-**テーブル**: `CATEGORY`
+* テーブル: `CATEGORY`
 
 | フィールド名 | 型 | カラム名 | 制約 |
 |------------|---|---------|-----|
@@ -75,5 +75,5 @@ SELECT c FROM Category c ORDER BY c.categoryId
 
 ## 3. 参考資料
 
-- [functional_design.md](functional_design.md) - 機能設計書
-- [behaviors.md](behaviors.md) - 振る舞い仕様書
+* [functional_design.md](functional_design.md) - 機能設計書
+* [behaviors.md](behaviors.md) - 振る舞い仕様書

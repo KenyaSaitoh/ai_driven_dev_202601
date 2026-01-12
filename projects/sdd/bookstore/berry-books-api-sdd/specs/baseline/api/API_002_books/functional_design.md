@@ -1,10 +1,10 @@
 # API_002_books - 書籍API機能設計書
 
-**API ID:** API_002_books  
-**API名:** 書籍API  
-**ベースパス:** `/api/books`  
-**バージョン:** 2.0.0  
-**最終更新日:** 2025-12-27
+* API ID: API_002_books  
+* API名: 書籍API  
+* ベースパス: `/api/books`  
+* バージョン: 2.0.0  
+* 最終更新日: 2025-12-27
 
 ---
 
@@ -12,7 +12,7 @@
 
 書籍APIは、書籍の一覧取得、詳細取得、検索、カテゴリ一覧取得を提供する。すべてのエンドポイントは認証不要で、公開APIとして利用できる。
 
-**認証要否**: 不要（公開API）
+* 認証要否: 不要（公開API）
 
 ---
 
@@ -26,7 +26,7 @@
 | GET | `/api/books/search/criteria?categoryId={id}&keyword={keyword}` | 書籍検索（Criteria API版・プロキシ） | 不要 |
 | GET | `/api/categories` | カテゴリ一覧取得（プロキシ） | 不要 |
 
-**注意**: 書籍APIは全てback-office-apiへのプロキシとして機能します。
+* 注意: 書籍APIは全てback-office-apiへのプロキシとして機能します。
 
 ---
 
@@ -46,11 +46,11 @@ GET /api/books
 
 #### 3.1.3 リクエスト
 
-**リクエストパラメータ**: なし
+* リクエストパラメータ: なし
 
 #### 3.1.4 レスポンス
 
-成功時 (200 OK):
+* 成功時 (200 OK):
 
 ```json
 [
@@ -94,7 +94,7 @@ GET /api/books/{id}
 
 #### 3.2.3 リクエスト
 
-パスパラメータ:
+* パスパラメータ:
 
 | パラメータ | 型 | 説明 |
 |----------|---|------|
@@ -102,7 +102,7 @@ GET /api/books/{id}
 
 #### 3.2.4 レスポンス
 
-成功時 (200 OK):
+* 成功時 (200 OK):
 
 ```json
 {
@@ -128,7 +128,7 @@ GET /api/books/{id}
 }
 ```
 
-エラー時 (404 Not Found):
+* エラー時 (404 Not Found):
 
 ```json
 {
@@ -152,14 +152,14 @@ GET /api/books/search/jpql?categoryId={id}&keyword={keyword}
 
 #### 3.3.3 リクエスト
 
-クエリパラメータ:
+* クエリパラメータ:
 
 | パラメータ | 型 | 必須 | 説明 |
 |----------|---|------|------|
 | categoryId | integer | - | カテゴリID（0または未指定=全カテゴリ） |
 | keyword | string | - | キーワード（書籍名、著者名で部分一致検索） |
 
-検索パターン:
+* 検索パターン:
 
 | categoryId | keyword | 動作 |
 |-----------|---------|------|
@@ -170,7 +170,7 @@ GET /api/books/search/jpql?categoryId={id}&keyword={keyword}
 
 #### 3.3.4 レスポンス
 
-成功時 (200 OK):
+* 成功時 (200 OK):
 
 ```json
 [
@@ -222,14 +222,14 @@ GET /api/books/search/criteria?categoryId={id}&keyword={keyword}
 
 #### 3.4.3 リクエスト
 
-クエリパラメータ:
+* クエリパラメータ:
 
 | パラメータ | 型 | 必須 | 説明 |
 |----------|---|------|------|
 | categoryId | integer | - | カテゴリID（0または未指定=全カテゴリ） |
 | keyword | string | - | キーワード（書籍名、著者名で部分一致検索） |
 
-検索パターン:
+* 検索パターン:
 
 | categoryId | keyword | 動作 |
 |-----------|---------|------|
@@ -240,7 +240,7 @@ GET /api/books/search/criteria?categoryId={id}&keyword={keyword}
 
 #### 3.4.4 レスポンス
 
-成功時 (200 OK):
+* 成功時 (200 OK):
 
 ```json
 [
@@ -295,7 +295,7 @@ GET /api/books/search/criteria?categoryId={id}&keyword={keyword}
 GET /api/categories
 ```
 
-**注意**: エンドポイントパスは`/api/categories`です（`/api/books/categories`ではありません）。
+* 注意: エンドポイントパスは`/api/categories`です（`/api/books/categories`ではありません）。
 
 #### 3.5.2 概要
 
@@ -303,7 +303,7 @@ GET /api/categories
 
 #### 3.5.3 レスポンス
 
-成功時 (200 OK):
+* 成功時 (200 OK):
 
 ```json
 {
@@ -372,19 +372,19 @@ GET /api/categories
 
 ### 6.1 N+1問題の回避
 
-**問題**: 書籍一覧取得時に、カテゴリ、出版社、在庫を個別にSELECT（N+1問題）
+* 問題: 書籍一覧取得時に、カテゴリ、出版社、在庫を個別にSELECT（N+1問題）
 
-**解決策**: JOIN FETCHを使用して一括取得
+* 解決策: JOIN FETCHを使用して一括取得
 
-クエリ仕様:
-* 対象エンティティ: Book
-* JOIN FETCH対象:
-  - category（内部結合）
-  - publisher（内部結合）
-  - stock（外部結合、LEFT JOIN）
-* WHERE条件: category.categoryId = パラメータ値
-* 戻り値: Bookエンティティのリスト
-* 効果: 関連エンティティを1回のSQLで取得、N+1問題を回避
+* クエリ仕様:
+  * 対象エンティティ: Book
+  * JOIN FETCH対象:
+  * category（内部結合）
+  * publisher（内部結合）
+  * stock（外部結合、LEFT JOIN）
+  * WHERE条件: category.categoryId = パラメータ値
+  * 戻り値: Bookエンティティのリスト
+  * 効果: 関連エンティティを1回のSQLで取得、N+1問題を回避
 
 ---
 

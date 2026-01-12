@@ -1,9 +1,9 @@
 # API_002 書籍API - 詳細設計書
 
-**API ID**: API_002  
-**API名**: 書籍API  
-**バージョン**: 1.0.0  
-**最終更新**: 2025-01-10
+* API ID: API_002  
+* API名: 書籍API  
+* バージョン: 1.0.0  
+* 最終更新: 2025-01-10
 
 ---
 
@@ -38,13 +38,13 @@ pro.kensait.backoffice
 
 ### 2.1 BookResource（JAX-RS Resource）
 
-**責務**: 書籍APIのエンドポイント提供
+* 責務: 書籍APIのエンドポイント提供
 
-**アノテーション**:
-- `@Path("/books")` - ベースパス
-- `@ApplicationScoped` - CDIスコープ
+* アノテーション:
+  * `@Path("/books")` - ベースパス
+  * `@ApplicationScoped` - CDIスコープ
 
-**主要メソッド**:
+* 主要メソッド:
 
 #### getAllBooks() - 全書籍取得
 
@@ -53,11 +53,11 @@ pro.kensait.backoffice
 @Produces(MediaType.APPLICATION_JSON)
 ```
 
-**処理フロー**:
-1. BookServiceで全書籍を取得
-2. BookTOリストを返却
+* 処理フロー:
+  1. BookServiceで全書籍を取得
+  2. BookTOリストを返却
 
-**レスポンス**: `List<BookTO>`
+* レスポンス: `List<BookTO>`
 
 #### getBookById() - 書籍詳細取得
 
@@ -67,15 +67,15 @@ pro.kensait.backoffice
 @Produces(MediaType.APPLICATION_JSON)
 ```
 
-**パラメータ**:
-- `@PathParam("id") Integer bookId` - 書籍ID
+* パラメータ:
+  * `@PathParam("id") Integer bookId` - 書籍ID
 
-**処理フロー**:
-1. BookServiceで書籍を取得
-2. 存在しない場合は404エラー
-3. BookTOを返却
+* 処理フロー:
+  1. BookServiceで書籍を取得
+  2. 存在しない場合は404エラー
+  3. BookTOを返却
 
-**レスポンス**: `BookTO`
+* レスポンス: `BookTO`
 
 #### searchBooks() - 書籍検索（JPQL）
 
@@ -85,15 +85,15 @@ pro.kensait.backoffice
 @Produces(MediaType.APPLICATION_JSON)
 ```
 
-**クエリパラメータ**:
-- `@QueryParam("keyword") String keyword` - キーワード（オプション）
-- `@QueryParam("categoryId") Integer categoryId` - カテゴリID（オプション）
+* クエリパラメータ:
+  * `@QueryParam("keyword") String keyword` - キーワード（オプション）
+  * `@QueryParam("categoryId") Integer categoryId` - カテゴリID（オプション）
 
-**処理フロー**:
-1. BookServiceでJPQL検索を実行
-2. BookTOリストを返却
+* 処理フロー:
+  1. BookServiceでJPQL検索を実行
+  2. BookTOリストを返却
 
-**レスポンス**: `List<BookTO>`
+* レスポンス: `List<BookTO>`
 
 #### searchBooksCriteria() - 書籍検索（Criteria API）
 
@@ -103,15 +103,15 @@ pro.kensait.backoffice
 @Produces(MediaType.APPLICATION_JSON)
 ```
 
-**クエリパラメータ**:
-- `@QueryParam("keyword") String keyword` - キーワード（オプション）
-- `@QueryParam("categoryId") Integer categoryId` - カテゴリID（オプション）
+* クエリパラメータ:
+  * `@QueryParam("keyword") String keyword` - キーワード（オプション）
+  * `@QueryParam("categoryId") Integer categoryId` - カテゴリID（オプション）
 
-**処理フロー**:
-1. BookServiceでCriteria API検索を実行
-2. BookTOリストを返却
+* 処理フロー:
+  1. BookServiceでCriteria API検索を実行
+  2. BookTOリストを返却
 
-**レスポンス**: `List<BookTO>`
+* レスポンス: `List<BookTO>`
 
 ---
 
@@ -133,95 +133,95 @@ public record BookTO(
 ) {}
 ```
 
-**フィールド説明**:
-- `bookId`: 書籍ID
-- `bookName`: 書籍名
-- `author`: 著者
-- `price`: 価格
-- `isbn`: ISBN
-- `categoryId`: カテゴリID
-- `categoryName`: カテゴリ名
-- `publisherId`: 出版社ID
-- `publisherName`: 出版社名
-- `quantity`: 在庫数
-- `version`: 楽観的ロックバージョン
+* フィールド説明:
+  * `bookId`: 書籍ID
+  * `bookName`: 書籍名
+  * `author`: 著者
+  * `price`: 価格
+  * `isbn`: ISBN
+  * `categoryId`: カテゴリID
+  * `categoryName`: カテゴリ名
+  * `publisherId`: 出版社ID
+  * `publisherName`: 出版社名
+  * `quantity`: 在庫数
+  * `version`: 楽観的ロックバージョン
 
 ---
 
 ### 2.3 BookService（ビジネスロジック層）
 
-**責務**: 書籍検索ビジネスロジック
+* 責務: 書籍検索ビジネスロジック
 
-**アノテーション**:
-- `@ApplicationScoped`
+* アノテーション:
+  * `@ApplicationScoped`
 
-**主要メソッド**:
+* 主要メソッド:
 
 #### getBooksAll()
 
-**シグネチャ**:
+* シグネチャ:
 ```java
 public List<BookTO> getBooksAll()
 ```
 
-**処理**:
-1. BookDaoで全書籍を取得
-2. BookエンティティをBookTOに変換
-3. BookTOリストを返却
+* 処理:
+  1. BookDaoで全書籍を取得
+  2. BookエンティティをBookTOに変換
+  3. BookTOリストを返却
 
 #### getBookById()
 
-**シグネチャ**:
+* シグネチャ:
 ```java
 public BookTO getBookById(Integer bookId)
 ```
 
-**処理**:
-1. BookDaoで書籍を取得
-2. 存在しない場合はnullを返却
-3. BookエンティティをBookTOに変換
+* 処理:
+  1. BookDaoで書籍を取得
+  2. 存在しない場合はnullを返却
+  3. BookエンティティをBookTOに変換
 
 #### searchBooksJpql()
 
-**シグネチャ**:
+* シグネチャ:
 ```java
 public List<BookTO> searchBooksJpql(String keyword, Integer categoryId)
 ```
 
-**処理**:
-1. BookDaoでJPQL検索を実行
-2. BookエンティティリストをBookTOリストに変換
+* 処理:
+  1. BookDaoでJPQL検索を実行
+  2. BookエンティティリストをBookTOリストに変換
 
 #### searchBooksCriteria()
 
-**シグネチャ**:
+* シグネチャ:
 ```java
 public List<BookTO> searchBooksCriteria(String keyword, Integer categoryId)
 ```
 
-**処理**:
-1. BookDaoでCriteria API検索を実行
-2. BookエンティティリストをBookTOリストに変換
+* 処理:
+  1. BookDaoでCriteria API検索を実行
+  2. BookエンティティリストをBookTOリストに変換
 
 ---
 
 ### 2.4 BookDao（データアクセス層）
 
-**責務**: 書籍データのCRUD操作
+* 責務: 書籍データのCRUD操作
 
-**アノテーション**:
-- `@ApplicationScoped`
+* アノテーション:
+  * `@ApplicationScoped`
 
-**主要メソッド**:
+* 主要メソッド:
 
 #### findAll()
 
-**シグネチャ**:
+* シグネチャ:
 ```java
 public List<Book> findAll()
 ```
 
-**JPQL**:
+* JPQL:
 ```sql
 SELECT b FROM Book b 
 JOIN FETCH b.category 
@@ -231,12 +231,12 @@ ORDER BY b.bookId
 
 #### findById()
 
-**シグネチャ**:
+* シグネチャ:
 ```java
 public Book findById(Integer bookId)
 ```
 
-**JPQL**:
+* JPQL:
 ```sql
 SELECT b FROM Book b 
 JOIN FETCH b.category 
@@ -246,12 +246,12 @@ WHERE b.bookId = :bookId
 
 #### searchByJpql()
 
-**シグネチャ**:
+* シグネチャ:
 ```java
 public List<Book> searchByJpql(String keyword, Integer categoryId)
 ```
 
-**JPQL（動的クエリ）**:
+* JPQL（動的クエリ）:
 ```sql
 SELECT b FROM Book b 
 JOIN FETCH b.category 
@@ -263,29 +263,29 @@ ORDER BY b.bookId
 
 #### searchByCriteria()
 
-**シグネチャ**:
+* シグネチャ:
 ```java
 public List<Book> searchByCriteria(String keyword, Integer categoryId)
 ```
 
-**Criteria API実装**:
-1. CriteriaBuilderを取得
-2. CriteriaQueryを作成
-3. Rootを定義
-4. JOIN FETCHでcategoryとpublisherを取得
-5. 動的にWHERE句を構築
-   - keywordが指定されている場合: bookNameまたはauthorに部分一致
-   - categoryIdが指定されている場合: categoryIdで完全一致
-6. ORDER BY bookIdを追加
-7. TypedQueryを実行
+* Criteria API実装:
+  1. CriteriaBuilderを取得
+  2. CriteriaQueryを作成
+  3. Rootを定義
+  4. JOIN FETCHでcategoryとpublisherを取得
+  5. 動的にWHERE句を構築
+     * keywordが指定されている場合: bookNameまたはauthorに部分一致
+     * categoryIdが指定されている場合: categoryIdで完全一致
+  6. ORDER BY bookIdを追加
+  7. TypedQueryを実行
 
 ---
 
 ### 2.5 Book（エンティティ）
 
-**テーブル**: `BOOK` + `STOCK`（@SecondaryTable）
+* テーブル: `BOOK` + `STOCK`（@SecondaryTable）
 
-**主要フィールド**:
+* 主要フィールド:
 
 | フィールド名 | 型 | カラム名 | テーブル | 制約 | 説明 |
 |------------|---|---------|---------|-----|------|
@@ -299,16 +299,16 @@ public List<Book> searchByCriteria(String keyword, Integer categoryId)
 | `quantity` | `Integer` | `QUANTITY` | STOCK | `@Column(table="STOCK")` | 在庫数 |
 | `version` | `Integer` | `VERSION` | STOCK | `@Column(table="STOCK") @Version` | 楽観的ロックバージョン |
 
-**アノテーション**:
+* アノテーション:
 ```java
 @Entity
 @Table(name = "BOOK")
 @SecondaryTable(name = "STOCK", pkJoinColumns = @PrimaryKeyJoinColumn(name = "BOOK_ID"))
 ```
 
-**リレーション**:
-- `@ManyToOne` - Category（多対一）
-- `@ManyToOne` - Publisher（多対一）
+* リレーション:
+  * `@ManyToOne` - Category（多対一）
+  * `@ManyToOne` - Publisher（多対一）
 
 ---
 
@@ -316,12 +316,12 @@ public List<Book> searchByCriteria(String keyword, Integer categoryId)
 
 ### 3.1 JPQL検索
 
-**特徴**:
-- 文字列ベースのクエリ
-- 動的クエリの構築が容易
-- 可読性が高い
+* 特徴:
+  * 文字列ベースのクエリ
+  * 動的クエリの構築が容易
+  * 可読性が高い
 
-**実装例**:
+* 実装例:
 ```java
 String jpql = "SELECT b FROM Book b " +
               "JOIN FETCH b.category " +
@@ -333,12 +333,12 @@ String jpql = "SELECT b FROM Book b " +
 
 ### 3.2 Criteria API検索
 
-**特徴**:
-- 型安全なクエリ
-- コンパイル時のチェック
-- 動的クエリの構築が複雑
+* 特徴:
+  * 型安全なクエリ
+  * コンパイル時のチェック
+  * 動的クエリの構築が複雑
 
-**実装例**:
+* 実装例:
 ```java
 CriteriaBuilder cb = em.getCriteriaBuilder();
 CriteriaQuery<Book> cq = cb.createQuery(Book.class);
@@ -380,30 +380,30 @@ cq.orderBy(cb.asc(book.get("bookId")));
 
 ### 5.1 ユニットテスト
 
-**対象**: `BookService`
+* 対象: `BookService`
 
-- 全書籍取得テスト
-- 書籍詳細取得テスト（正常系）
-- 書籍詳細取得テスト（存在しない書籍）
-- JPQL検索テスト（キーワードのみ）
-- JPQL検索テスト（カテゴリIDのみ）
-- JPQL検索テスト（両方指定）
-- Criteria API検索テスト（同上）
+* 全書籍取得テスト
+* 書籍詳細取得テスト（正常系）
+* 書籍詳細取得テスト（存在しない書籍）
+* JPQL検索テスト（キーワードのみ）
+* JPQL検索テスト（カテゴリIDのみ）
+* JPQL検索テスト（両方指定）
+* Criteria API検索テスト（同上）
 
 ### 5.2 統合テスト
 
-**対象**: `BookResource` + `BookService` + `BookDao`
+* 対象: `BookResource` + `BookService` + `BookDao`
 
-- 全書籍取得API呼び出し
-- 書籍詳細取得API呼び出し
-- 書籍検索API呼び出し（JPQL）
-- 書籍検索API呼び出し（Criteria API）
+* 全書籍取得API呼び出し
+* 書籍詳細取得API呼び出し
+* 書籍検索API呼び出し（JPQL）
+* 書籍検索API呼び出し（Criteria API）
 
 ---
 
 ## 6. 参考資料
 
-- [functional_design.md](functional_design.md) - 機能設計書
-- [behaviors.md](behaviors.md) - 振る舞い仕様書
-- [JPA仕様](https://jakarta.ee/specifications/persistence/3.1/)
-- [Criteria API](https://jakarta.ee/specifications/persistence/3.1/jakarta-persistence-spec-3.1.html#a6652)
+* [functional_design.md](functional_design.md) - 機能設計書
+* [behaviors.md](behaviors.md) - 振る舞い仕様書
+* [JPA仕様](https://jakarta.ee/specifications/persistence/3.1/)
+* [Criteria API](https://jakarta.ee/specifications/persistence/3.1/jakarta-persistence-spec-3.1.html#a6652)

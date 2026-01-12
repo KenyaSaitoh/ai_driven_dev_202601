@@ -1,10 +1,10 @@
 # API_006_workflows - ワークフローAPI受入基準
 
-**API ID:** API_006_workflows  
-**API名:** ワークフローAPI  
-**ベースパス:** `/api/workflows`  
-**バージョン:** 2.0.0  
-**最終更新日:** 2025-01-02
+* API ID: API_006_workflows  
+* API名: ワークフローAPI  
+* ベースパス: `/api/workflows`  
+* バージョン: 2.0.0  
+* 最終更新日: 2025-01-02
 
 ---
 

@@ -51,13 +51,13 @@ cd projects/sdd/bookstore/berry-books-api-sdd/test_script
 ```
 
 このスクリプトは以下をテストします：
-- ログイン
-- 書籍一覧・詳細取得
-- カテゴリフィルタ
-- ユーザー情報取得
-- 注文作成・履歴取得
-- 画像API
-- ログアウト
+* ログイン
+* 書籍一覧・詳細取得
+* カテゴリフィルタ
+* ユーザー情報取得
+* 注文作成・履歴取得
+* 画像API
+* ログアウト
 
 ### 全APIテストの実行（詳細版）
 
@@ -94,38 +94,38 @@ cd projects/sdd/bookstore/berry-books-api-sdd/test_script
 
 ### 1. test_authen.sh - 認証API
 
-- ✅ ユーザー登録 (`POST /api/auth/register`)
-- ✅ ログイン (`POST /api/auth/login`)
-- ✅ 現在のユーザー情報取得 (`GET /api/auth/me`)
-- ✅ ログアウト (`POST /api/auth/logout`)
-- ✅ ログアウト後のアクセステスト（認証エラー確認）
+* ✅ ユーザー登録 (`POST /api/auth/register`)
+* ✅ ログイン (`POST /api/auth/login`)
+* ✅ 現在のユーザー情報取得 (`GET /api/auth/me`)
+* ✅ ログアウト (`POST /api/auth/logout`)
+* ✅ ログアウト後のアクセステスト（認証エラー確認）
 
 **テストユーザー:**
-- Email: `alice@example.com`
-- Password: `password`
+* Email: `alice@example.com`
+* Password: `password`
 
 ### 2. test_books.sh - 書籍API
 
-- ✅ 書籍一覧取得 (`GET /api/books`)
-- ✅ 書籍一覧取得（カテゴリフィルタ付き）(`GET /api/books?categoryId=1`)
-- ✅ 書籍詳細取得 (`GET /api/books/{id}`)
-- ✅ 存在しない書籍IDでのエラーテスト（404確認）
-- ✅ 複数の書籍詳細を連続取得
+* ✅ 書籍一覧取得 (`GET /api/books`)
+* ✅ 書籍一覧取得（カテゴリフィルタ付き）(`GET /api/books?categoryId=1`)
+* ✅ 書籍詳細取得 (`GET /api/books/{id}`)
+* ✅ 存在しない書籍IDでのエラーテスト（404確認）
+* ✅ 複数の書籍詳細を連続取得
 
 ### 3. test_orders.sh - 注文API
 
-- ✅ 注文作成 (`POST /api/orders`)
-- ✅ 注文履歴取得 (`GET /api/orders/history`)
-- ✅ 注文詳細取得 (`GET /api/orders/{id}`)
-- ✅ 存在しない注文IDでのエラーテスト（404確認）
-- ✅ 在庫不足エラーのテスト
+* ✅ 注文作成 (`POST /api/orders`)
+* ✅ 注文履歴取得 (`GET /api/orders/history`)
+* ✅ 注文詳細取得 (`GET /api/orders/{id}`)
+* ✅ 存在しない注文IDでのエラーテスト（404確認）
+* ✅ 在庫不足エラーのテスト
 
 ### 4. test_images.sh - 画像API
 
-- ✅ 書籍表紙画像取得 (`GET /api/images/covers/{bookId}`)
-- ✅ 複数の書籍画像を連続取得
-- ✅ 存在しない書籍IDでのエラーテスト（404確認）
-- ✅ 画像ダウンロードテスト
+* ✅ 書籍表紙画像取得 (`GET /api/images/covers/{bookId}`)
+* ✅ 複数の書籍画像を連続取得
+* ✅ 存在しない書籍IDでのエラーテスト（404確認）
+* ✅ 画像ダウンロードテスト
 
 **注意:** 画像APIは認証不要です。
 
@@ -239,9 +239,9 @@ API_BASE="http://localhost:8080/berry-books-api-sdd"
 異なるホスト/ポート/コンテキストパスを使用する場合は、各スクリプトのこの行を編集してください。
 
 **例：**
-- 別のポート: `API_BASE="http://localhost:9090/berry-books-api-sdd"`
-- ルートコンテキスト: `API_BASE="http://localhost:8080"`
-- リモートサーバー: `API_BASE="https://example.com/berry-books-api-sdd"`
+* 別のポート: `API_BASE="http://localhost:9090/berry-books-api-sdd"`
+* ルートコンテキスト: `API_BASE="http://localhost:8080"`
+* リモートサーバー: `API_BASE="https://example.com/berry-books-api-sdd"`
 
 ### 注文内容のカスタマイズ
 
@@ -263,9 +263,9 @@ ORDER_DATA='{
 ### ログインに失敗する
 
 **原因:**
-- Payara Serverが起動していない
-- Berry Books APIまたはCustomer APIがデプロイされていない
-- データベースにテストユーザーが登録されていない
+* Payara Serverが起動していない
+* Berry Books APIまたはCustomer APIがデプロイされていない
+* データベースにテストユーザーが登録されていない
 
 **解決策:**
 ```bash
@@ -286,8 +286,8 @@ curl http://localhost:8080/customer-api/api/customers/1
 ### 書籍一覧が取得できない
 
 **原因:**
-- Berry Books APIがデプロイされていない
-- 認証に失敗している
+* Berry Books APIがデプロイされていない
+* 認証に失敗している
 
 **解決策:**
 ```bash
@@ -305,7 +305,7 @@ curl http://localhost:8080/berry-books-api-sdd/api/books
 ### 画像が取得できない（404エラー）
 
 **原因:**
-- 画像ファイルが配置されていない
+* 画像ファイルが配置されていない
 
 **解決策:**
 
@@ -319,24 +319,24 @@ projects/sdd/bookstore/berry-books-api-sdd/src/main/webapp/resources/images/cove
 ```
 書籍のタイトルをそのままファイル名にする（スペースはアンダースコアに変換）
 
-例:
-- Java_SEディープダイブ.jpg
-- Jakarta_EEによるアーキテクチャ設計.jpg
-- SpringBootでのAPI実践.jpg
+* 例:
+* Java_SEディープダイブ.jpg
+* Jakarta_EEによるアーキテクチャ設計.jpg
+* SpringBootでのAPI実践.jpg
 ```
 
 推奨仕様：
-- 形式: JPG
-- サイズ: 幅400px以上
-- アスペクト比: 2:3 または 3:4
-- ファイルサイズ: 500KB以下
+* 形式: JPG
+* サイズ: 幅400px以上
+* アスペクト比: 2:3 または 3:4
+* ファイルサイズ: 500KB以下
 
 > **Note:** 画像ファイル名は書籍データベースの`BOOK_NAME`カラムの値と一致させる必要があります。
 
 ## 📖 関連ドキュメント
 
-- [Berry Books API README](../README.md)
-- [Customer API README](../../customer-api/README.md)
+* [Berry Books API README](../README.md)
+* [Customer API README](../../customer-api/README.md)
 
 ## 📄 ライセンス
 

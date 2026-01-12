@@ -50,11 +50,11 @@ cd projects/sdd/bookstore/back-office-api-sdd/test_script
 ```
 
 このスクリプトは以下をテストします：
-- 書籍一覧・詳細取得
-- カテゴリ一覧取得
-- 在庫一覧・詳細取得
-- ワークフロー作成・一覧取得
-- HTTPステータスコード確認
+* 書籍一覧・詳細取得
+* カテゴリ一覧取得
+* 在庫一覧・詳細取得
+* ワークフロー作成・一覧取得
+* HTTPステータスコード確認
 
 ### 全APIテストの実行（詳細版）
 
@@ -94,64 +94,64 @@ cd projects/sdd/bookstore/back-office-api-sdd/test_script
 
 ### 1. test_authen.sh - 認証API
 
-- ✅ ログイン（成功） (`POST /api/auth/login`)
-- ✅ ログイン（失敗 - 存在しない社員コード）
-- ✅ ログイン（失敗 - 間違ったパスワード）
-- ✅ 現在のログインユーザー情報取得 (`GET /api/auth/me`) - 未実装
-- ✅ ログアウト (`POST /api/auth/logout`)
-- ✅ 複数社員でのログインテスト
+* ✅ ログイン（成功） (`POST /api/auth/login`)
+* ✅ ログイン（失敗 - 存在しない社員コード）
+* ✅ ログイン（失敗 - 間違ったパスワード）
+* ✅ 現在のログインユーザー情報取得 (`GET /api/auth/me`) - 未実装
+* ✅ ログアウト (`POST /api/auth/logout`)
+* ✅ 複数社員でのログインテスト
 
 ### 2. test_books.sh - 書籍API
 
-- ✅ 書籍一覧取得 (`GET /api/books`)
-- ✅ 書籍詳細取得 (`GET /api/books/{id}`)
-- ✅ 存在しない書籍IDでのエラーテスト（404確認）
-- ✅ 複数の書籍詳細を連続取得
-- ✅ カテゴリ一覧取得 (`GET /api/categories`)
-- ✅ 書籍検索（デフォルト - JPQL） (`GET /api/books/search`)
-  - キーワードのみで検索
-  - カテゴリ + キーワードで検索
-  - カテゴリのみで検索
-- ✅ 書籍検索（JPQL - 明示的） (`GET /api/books/search/jpql`)
-- ✅ 書籍検索（Criteria API - 動的クエリ） (`GET /api/books/search/criteria`)
-- ✅ 書籍のカテゴリ一覧取得 (`GET /api/books/categories`)
+* ✅ 書籍一覧取得 (`GET /api/books`)
+* ✅ 書籍詳細取得 (`GET /api/books/{id}`)
+* ✅ 存在しない書籍IDでのエラーテスト（404確認）
+* ✅ 複数の書籍詳細を連続取得
+* ✅ カテゴリ一覧取得 (`GET /api/categories`)
+* ✅ 書籍検索（デフォルト - JPQL） (`GET /api/books/search`)
+  * キーワードのみで検索
+  * カテゴリ + キーワードで検索
+  * カテゴリのみで検索
+* ✅ 書籍検索（JPQL - 明示的） (`GET /api/books/search/jpql`)
+* ✅ 書籍検索（Criteria API - 動的クエリ） (`GET /api/books/search/criteria`)
+* ✅ 書籍のカテゴリ一覧取得 (`GET /api/books/categories`)
 
 ### 3. test_publishers.sh - 出版社API
 
-- ✅ 出版社一覧取得 (`GET /api/publishers`)
-- ✅ 出版社データの妥当性チェック
+* ✅ 出版社一覧取得 (`GET /api/publishers`)
+* ✅ 出版社データの妥当性チェック
 
 ### 4. test_stocks.sh - 在庫API
 
-- ✅ 在庫一覧取得 (`GET /api/stocks`)
-- ✅ 在庫詳細取得 (`GET /api/stocks/{bookId}`)
-- ✅ 在庫更新 (`PUT /api/stocks/{bookId}`)
-- ✅ 楽観ロックテスト（バージョン競合エラー確認）
-- ✅ 存在しない書籍IDでのエラーテスト（404確認）
+* ✅ 在庫一覧取得 (`GET /api/stocks`)
+* ✅ 在庫詳細取得 (`GET /api/stocks/{bookId}`)
+* ✅ 在庫更新 (`PUT /api/stocks/{bookId}`)
+* ✅ 楽観ロックテスト（バージョン競合エラー確認）
+* ✅ 存在しない書籍IDでのエラーテスト（404確認）
 
 ### 5. test_workflow.sh - ワークフローAPI
 
-- ✅ ワークフロー作成 (`POST /api/workflows`)
-  - 新規書籍の追加（ADD_NEW_BOOK）
-  - 書籍価格の改定（ADJUST_BOOK_PRICE）
-  - 既存書籍の削除（REMOVE_BOOK）
-- ✅ ワークフロー一覧取得 (`GET /api/workflows?state={state}`)
-  - NEW状態
-  - APPLIED状態
-  - APPROVED状態
-  - 全件取得
-- ✅ ワークフロー更新 (`PUT /api/workflows/{workflowId}`)
-- ✅ ワークフロー履歴取得 (`GET /api/workflows/{workflowId}/history`)
-- ✅ ワークフロー申請 (`POST /api/workflows/{workflowId}/apply`)
-- ✅ ワークフロー承認 (`POST /api/workflows/{workflowId}/approve`)
-- ✅ ワークフロー却下 (`POST /api/workflows/{workflowId}/reject`)
+* ✅ ワークフロー作成 (`POST /api/workflows`)
+  * 新規書籍の追加（ADD_NEW_BOOK）
+  * 書籍価格の改定（ADJUST_BOOK_PRICE）
+  * 既存書籍の削除（REMOVE_BOOK）
+* ✅ ワークフロー一覧取得 (`GET /api/workflows?state={state}`)
+  * NEW状態
+  * APPLIED状態
+  * APPROVED状態
+  * 全件取得
+* ✅ ワークフロー更新 (`PUT /api/workflows/{workflowId}`)
+* ✅ ワークフロー履歴取得 (`GET /api/workflows/{workflowId}/history`)
+* ✅ ワークフロー申請 (`POST /api/workflows/{workflowId}/apply`)
+* ✅ ワークフロー承認 (`POST /api/workflows/{workflowId}/approve`)
+* ✅ ワークフロー却下 (`POST /api/workflows/{workflowId}/reject`)
 
 **注意:** ワークフローAPIは認証不要でテスト可能ですが、本番環境では認証が必要になります。
 
 **ワークフロータイプの詳細:**
-- `ADD_NEW_BOOK`: 新規書籍の追加（書籍名、著者、カテゴリ、出版社、価格を指定）
-- `ADJUST_BOOK_PRICE`: 書籍価格の改定（書籍ID、新価格、開始日、終了日を指定）
-- `REMOVE_BOOK`: 既存書籍の削除（書籍IDを指定）
+* `ADD_NEW_BOOK`: 新規書籍の追加（書籍名、著者、カテゴリ、出版社、価格を指定）
+* `ADJUST_BOOK_PRICE`: 書籍価格の改定（書籍ID、新価格、開始日、終了日を指定）
+* `REMOVE_BOOK`: 既存書籍の削除（書籍IDを指定）
 
 ## 🔧 テスト用データ
 
@@ -217,7 +217,7 @@ cd projects/sdd/bookstore/back-office-api-sdd/test_script
 -------------------------------------------
 ✅ ログイン成功 (HTTP 200)
 
-レスポンス:
+* レスポンス:
 {"employeeId":1,"employeeCode":"E00001","employeeName":"山田太郎",...}
 
 📝 ログインした社員ID: 1
@@ -283,9 +283,9 @@ API_BASE="http://localhost:8080/back-office-api-sdd"
 異なるホスト/ポート/コンテキストパスを使用する場合は、各スクリプトのこの行を編集してください。
 
 **例：**
-- 別のポート: `API_BASE="http://localhost:9090/back-office-api"`
-- ルートコンテキスト: `API_BASE="http://localhost:8080"`
-- リモートサーバー: `API_BASE="https://example.com/back-office-api"`
+* 別のポート: `API_BASE="http://localhost:9090/back-office-api"`
+* ルートコンテキスト: `API_BASE="http://localhost:8080"`
+* リモートサーバー: `API_BASE="https://example.com/back-office-api"`
 
 ### ワークフロー作成内容のカスタマイズ
 
@@ -318,9 +318,9 @@ UPDATE_DATA="{
 ### 書籍一覧が取得できない
 
 **原因:**
-- Payara Serverが起動していない
-- Back Office APIがデプロイされていない
-- データベースが初期化されていない
+* Payara Serverが起動していない
+* Back Office APIがデプロイされていない
+* データベースが初期化されていない
 
 **解決策:**
 ```bash
@@ -341,8 +341,8 @@ curl http://localhost:8080/back-office-api/api/books
 ### 在庫更新で楽観ロックエラーが発生する
 
 **原因:**
-- 他のユーザーまたはプロセスが同時に在庫を更新した
-- バージョン番号が古い
+* 他のユーザーまたはプロセスが同時に在庫を更新した
+* バージョン番号が古い
 
 **解決策:**
 
@@ -356,14 +356,14 @@ curl http://localhost:8080/back-office-api/api/books
 ### ワークフロー承認で403エラーが発生する
 
 **原因:**
-- 承認権限のない社員IDで承認しようとしている
-- 承認者の所属部署や役職が不適切
+* 承認権限のない社員IDで承認しようとしている
+* 承認者の所属部署や役職が不適切
 
 **解決策:**
 
 承認ルール：
-- 申請と同じ部署の社員は承認不可
-- 役職が2（MANAGER）以上の社員のみ承認可能
+* 申請と同じ部署の社員は承認不可
+* 役職が2（MANAGER）以上の社員のみ承認可能
 
 適切な承認者を選択してください：
 ```bash
@@ -375,9 +375,9 @@ APPROVE_DATA='{
 ### ワークフローが作成できない
 
 **原因:**
-- 必須パラメータが不足している
-- 存在しないカテゴリIDや出版社IDを指定している
-- 書籍削除（DELETE）で存在しない書籍IDを指定している
+* 必須パラメータが不足している
+* 存在しないカテゴリIDや出版社IDを指定している
+* 書籍削除（DELETE）で存在しない書籍IDを指定している
 
 **解決策:**
 ```bash
@@ -402,41 +402,41 @@ APPLIED
 APPROVED  ←→  NEW (却下時)
 ```
 
-- **NEW**: 作成直後の状態。APPLY操作のみ可能。
-- **APPLIED**: 申請済みの状態。APPROVE または REJECT 操作が可能。
-- **APPROVED**: 承認済みの状態。書籍マスターに反映される。
-- **REJECT**: 却下すると状態がNEWに戻る。
+* **NEW**: 作成直後の状態。APPLY操作のみ可能。
+* **APPLIED**: 申請済みの状態。APPROVE または REJECT 操作が可能。
+* **APPROVED**: 承認済みの状態。書籍マスターに反映される。
+* **REJECT**: 却下すると状態がNEWに戻る。
 
 ## 🆕 新機能（2025年1月版）
 
 ### 追加されたテストスクリプト
 
 1. **test_authen.sh** - 認証API（`/api/auth`）の包括的なテスト
-   - ログイン成功/失敗のケース
-   - ログアウト
-   - Cookie認証の確認
+   * ログイン成功/失敗のケース
+   * ログアウト
+   * Cookie認証の確認
 
 2. **test_publishers.sh** - 出版社API（`/api/publishers`）のテスト
-   - 出版社一覧取得
-   - データ妥当性チェック
+   * 出版社一覧取得
+   * データ妥当性チェック
 
 ### 拡張されたテストスクリプト
 
 1. **test_books.sh** - 書籍検索機能を追加
-   - `/api/books/search` - デフォルト検索（JPQL）
-   - `/api/books/search/jpql` - JPQL明示的検索
-   - `/api/books/search/criteria` - Criteria API動的検索
-   - キーワード、カテゴリ、組み合わせ検索のテスト
+   * `/api/books/search` - デフォルト検索（JPQL）
+   * `/api/books/search/jpql` - JPQL明示的検索
+   * `/api/books/search/criteria` - Criteria API動的検索
+   * キーワード、カテゴリ、組み合わせ検索のテスト
 
 2. **test_workflow.sh** - ワークフロー更新機能を追加
-   - `PUT /api/workflows/{workflowId}` - 一時保存機能のテスト
-   - ワークフロー履歴取得の正しいエンドポイント（`/history`）を使用
+   * `PUT /api/workflows/{workflowId}` - 一時保存機能のテスト
+   * ワークフロー履歴取得の正しいエンドポイント（`/history`）を使用
 
 ## 📖 関連ドキュメント
 
-- [Back Office API README](../README.md)
-- [Berry Books API README](../../berry-books-api/README.md)
-- [Customer Hub API README](../../customer-hub-api/README.md)
+* [Back Office API README](../README.md)
+* [Berry Books API README](../../berry-books-api/README.md)
+* [Customer Hub API README](../../customer-hub-api/README.md)
 
 ## 📄 ライセンス
 

@@ -90,7 +90,7 @@ pro.kensait.backoffice
 └── util                  # Utilities
 ```
 
-**詳細なクラス構成**: 各API機能の`detailed_design.md`を参照してください。
+* 詳細なクラス構成: 各API機能の`detailed_design.md`を参照してください。
 
 | API | 詳細設計書 |
 |-----|----------|
@@ -105,13 +105,13 @@ pro.kensait.backoffice
 
 | レイヤー | パッケージ | 責務 | 命名規則 |
 |---------|-----------|------|---------|
-| **Presentation** | `api` | REST APIエンドポイント | `*Resource` |
+| Presentation | `api` | REST APIエンドポイント | `*Resource` |
 | | `api.dto` | データ転送オブジェクト | `*Request`, `*Response`, `*TO` |
 | | `api.exception` | API例外ハンドリング | `*ExceptionMapper` |
-| **Business Logic** | `service.*` | ビジネスロジック | `*Service` |
-| **Data Access** | `dao` | データアクセス | `*Dao` |
-| **Persistence** | `entity` | JPAエンティティ | エンティティ名 |
-| **Cross-Cutting** | `security` | セキュリティ | 用途に応じた命名 |
+| Business Logic | `service.*` | ビジネスロジック | `*Service` |
+| Data Access | `dao` | データアクセス | `*Dao` |
+| Persistence | `entity` | JPAエンティティ | エンティティ名 |
+| Cross-Cutting | `security` | セキュリティ | 用途に応じた命名 |
 | | `exception` | 汎用例外ハンドリング | `*ExceptionMapper` |
 | | `common` | 共通機能 | 用途に応じた命名 |
 | | `util` | ユーティリティ | `*Util` |
@@ -120,92 +120,92 @@ pro.kensait.backoffice
 
 ### 4.1 Presentation Layer（プレゼンテーション層）
 
-**責務**: クライアントからのHTTPリクエストを受け取り、レスポンスを返す
+* 責務: クライアントからのHTTPリクエストを受け取り、レスポンスを返す
 
-主要コンポーネント:
-* `ApplicationConfig`: JAX-RSアプリケーション設定（ベースパス: `/api`）
-* `AuthenResource`: 認証API（`/api/auth`）
-* `BookResource`: 書籍API（`/api/books`）
-* `CategoryResource`: カテゴリAPI（`/api/categories`）
-* `PublisherResource`: 出版社API（`/api/publishers`）
-* `StockResource`: 在庫API（`/api/stocks`）
-* `WorkflowResource`: ワークフローAPI（`/api/workflows`）
+* 主要コンポーネント:
+  * `ApplicationConfig`: JAX-RSアプリケーション設定（ベースパス: `/api`）
+  * `AuthenResource`: 認証API（`/api/auth`）
+  * `BookResource`: 書籍API（`/api/books`）
+  * `CategoryResource`: カテゴリAPI（`/api/categories`）
+  * `PublisherResource`: 出版社API（`/api/publishers`）
+  * `StockResource`: 在庫API（`/api/stocks`）
+  * `WorkflowResource`: ワークフローAPI（`/api/workflows`）
 
-設計方針:
-* JAX-RS（`@Path`, `@GET`, `@POST`, `@PUT`, `@DELETE`）を使用
-* DTOオブジェクトでリクエスト/レスポンスをマッピング
-* ビジネスロジックはServiceレイヤーに委譲
-* 例外処理はException Mapperで統一的に処理
+* 設計方針:
+  * JAX-RS（`@Path`, `@GET`, `@POST`, `@PUT`, `@DELETE`）を使用
+  * DTOオブジェクトでリクエスト/レスポンスをマッピング
+  * ビジネスロジックはServiceレイヤーに委譲
+  * 例外処理はException Mapperで統一的に処理
 
 ### 4.2 Business Logic Layer（ビジネスロジック層）
 
-**責務**: ビジネスルール、業務ロジックの実装
+* 責務: ビジネスルール、業務ロジックの実装
 
-主要コンポーネント:
-* `BookService`: 書籍検索ロジック
-* `CategoryService`: カテゴリ管理ロジック
-* `PublisherService`: 出版社管理ロジック
-* `WorkflowService`: ワークフロー管理ロジック（状態遷移、承認権限チェック、書籍マスタ反映）
+* 主要コンポーネント:
+  * `BookService`: 書籍検索ロジック
+  * `CategoryService`: カテゴリ管理ロジック
+  * `PublisherService`: 出版社管理ロジック
+  * `WorkflowService`: ワークフロー管理ロジック（状態遷移、承認権限チェック、書籍マスタ反映）
 
-設計方針:
-* `@ApplicationScoped`でCDI管理
-* `@Transactional`でトランザクション境界を制御
-* ビジネスルールの検証と実行
-* DAOレイヤーを使用してデータアクセス
+* 設計方針:
+  * `@ApplicationScoped`でCDI管理
+  * `@Transactional`でトランザクション境界を制御
+  * ビジネスルールの検証と実行
+  * DAOレイヤーを使用してデータアクセス
 
 ### 4.3 Data Access Layer（データアクセス層）
 
-**責務**: データベースへのCRUD操作
+* 責務: データベースへのCRUD操作
 
-主要コンポーネント:
-* `BookDao`: 書籍データアクセス
-* `CategoryDao`: カテゴリデータアクセス
-* `PublisherDao`: 出版社データアクセス
-* `StockDao`: 在庫データアクセス
-* `WorkflowDao`: ワークフローデータアクセス
-* `EmployeeDao`: 社員データアクセス
-* `DepartmentDao`: 部署データアクセス
+* 主要コンポーネント:
+  * `BookDao`: 書籍データアクセス
+  * `CategoryDao`: カテゴリデータアクセス
+  * `PublisherDao`: 出版社データアクセス
+  * `StockDao`: 在庫データアクセス
+  * `WorkflowDao`: ワークフローデータアクセス
+  * `EmployeeDao`: 社員データアクセス
+  * `DepartmentDao`: 部署データアクセス
 
-設計方針:
-* JPA（`EntityManager`）を使用
-* JPQL、Named Query、Criteria APIによるクエリ実行
-* エンティティとDTOの変換
+* 設計方針:
+  * JPA（`EntityManager`）を使用
+  * JPQL、Named Query、Criteria APIによるクエリ実行
+  * エンティティとDTOの変換
 
 ### 4.4 Persistence Layer（永続化層）
 
-**責務**: データベーステーブルとJavaオブジェクトのマッピング
+* 責務: データベーステーブルとJavaオブジェクトのマッピング
 
-主要エンティティ:
-* `Book`: 書籍情報（BOOK + STOCK結合）
-* `Category`: カテゴリ情報
-* `Publisher`: 出版社情報
-* `Stock`: 在庫情報（楽観的ロック対応）
-* `Employee`: 社員情報
-* `Department`: 部署情報
-* `Workflow`: ワークフロー履歴情報
+* 主要エンティティ:
+  * `Book`: 書籍情報（BOOK + STOCK結合）
+  * `Category`: カテゴリ情報
+  * `Publisher`: 出版社情報
+  * `Stock`: 在庫情報（楽観的ロック対応）
+  * `Employee`: 社員情報
+  * `Department`: 部署情報
+  * `Workflow`: ワークフロー履歴情報
 
-設計方針:
-* JPA `@Entity`アノテーションによるマッピング
-* `@ManyToOne`, `@OneToMany`によるリレーションシップ
-* `@SecondaryTable`による複数テーブルマッピング（Bookエンティティ）
-* `@Version`による楽観的ロック
+* 設計方針:
+  * JPA `@Entity`アノテーションによるマッピング
+  * `@ManyToOne`, `@OneToMany`によるリレーションシップ
+  * `@SecondaryTable`による複数テーブルマッピング（Bookエンティティ）
+  * `@Version`による楽観的ロック
 
 ### 4.5 Cross-Cutting Concerns（横断的関心事）
 
-セキュリティ:
-* `JwtUtil`: JWT生成・検証
-* パスワード認証: BCryptハッシュ
+* セキュリティ:
+  * `JwtUtil`: JWT生成・検証
+  * パスワード認証: BCryptハッシュ
 
-例外処理:
-* `GenericExceptionMapper`: 一般的な例外ハンドリング
-* `OptimisticLockExceptionMapper`: 楽観的ロック例外ハンドリング
-* `WorkflowExceptionMapper`: ワークフロー例外ハンドリング
-* `NotFoundExceptionMapper`: 404エラーハンドリング
+* 例外処理:
+  * `GenericExceptionMapper`: 一般的な例外ハンドリング
+  * `OptimisticLockExceptionMapper`: 楽観的ロック例外ハンドリング
+  * `WorkflowExceptionMapper`: ワークフロー例外ハンドリング
+  * `NotFoundExceptionMapper`: 404エラーハンドリング
 
-メッセージ管理:
-* `MessageUtil`: プロパティファイルからのメッセージ取得
-* `messages.properties`: 日本語メッセージ
-* `ValidationMessages_ja.properties`: バリデーションメッセージ
+* メッセージ管理:
+  * `MessageUtil`: プロパティファイルからのメッセージ取得
+  * `messages.properties`: 日本語メッセージ
+  * `ValidationMessages_ja.properties`: バリデーションメッセージ
 
 ## 5. 技術スタック
 
@@ -353,7 +353,7 @@ flowchart TD
 * ワークフロー承認時は以下を1トランザクションで実行:
   1. 操作履歴の追加（WORKFLOW INSERT）
   2. 書籍マスタへの反映（BOOK UPDATE/INSERT/DELETE）
-* ロールバック時は両方とも取り消される
+  * ロールバック時は両方とも取り消される
 
 ## 9. エラーハンドリング
 
@@ -391,7 +391,7 @@ flowchart TD
 [クラス名#メソッド名] ログメッセージ: パラメータ=値, ...
 ```
 
-例:
+* 例:
 ```
 [ AuthenResource#login ] employeeCode: E0001
 [ WorkflowService#approveWorkflow ] workflowId=123
@@ -405,9 +405,9 @@ flowchart TD
 * インデックス: 主キー、外部キー、検索条件フィールド
 
 ### 11.2 キャッシング
-現状はキャッシング未実装。将来的な実装候補:
-* JPAセカンドレベルキャッシュ（Category, Publisherなどの参照マスタ）
-* アプリケーションレベルキャッシュ（メモリキャッシュ）
+* 現状はキャッシング未実装。将来的な実装候補:
+  * JPAセカンドレベルキャッシュ（Category, Publisherなどの参照マスタ）
+  * アプリケーションレベルキャッシュ（メモリキャッシュ）
 
 ### 11.3 接続プール
 * アプリケーションサーバーの接続プール機能を使用

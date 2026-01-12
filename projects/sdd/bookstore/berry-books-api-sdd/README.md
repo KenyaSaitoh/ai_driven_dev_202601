@@ -41,11 +41,11 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 全タスクを分解してください。
 
 パラメータ:
-- project_root: projects/sdd/bookstore/berry-books-api-sdd
-- spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs
+* project_root: projects/sdd/bookstore/berry-books-api-sdd
+* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs
 ```
 
-**生成されるファイル**: `tasks/*.md`（タスクリスト）
+* 生成されるファイル: `tasks/*.md`（タスクリスト）
 
 ---
 
@@ -53,17 +53,17 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 各APIの詳細設計書を**AIと対話しながら**作成します。
 
-**実行順序**: `tasks/tasks.md`の「実行順序」セクションを参照してください。
+* 実行順序: `tasks/tasks.md`の「実行順序」セクションを参照してください。
 
-**対話の流れ**:
-1. AIが仕様書を読み込み、理解した内容を説明します
-2. AIが不明点を質問します
-3. あなたが回答します
-4. `specs/baseline/api/API_XXX_*/detailed_design.md` が生成されます
+* 対話の流れ:
+  1. AIが仕様書を読み込み、理解した内容を説明します
+  2. AIが不明点を質問します
+  3. あなたが回答します
+  4. `specs/baseline/api/API_XXX_*/detailed_design.md` が生成されます
 
 ---
 
-**全APIの詳細設計コマンド（コピペ用）**:
+* 全APIの詳細設計コマンド（コピペ用）:
 
 ##### API_001_auth（認証API）
 
@@ -113,7 +113,7 @@ BackOfficeRestClientを使用したプロキシパターンで実装する予定
 ServletContextを使用してWAR内リソースを配信する予定です。
 ```
 
-**重要**: 詳細設計は**対話的なプロセス**です。AIが質問してきたら、必ず回答してください。
+* 重要: 詳細設計は**対話的なプロセス**です。AIが質問してきたら、必ず回答してください。
 
 ---
 
@@ -121,7 +121,7 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 
 詳細設計書をもとに、実装コードを生成します。
 
-**実行順序**: 
+* 実行順序: 
 1. **セットアップタスク** → 2. **共通機能タスク** → 3. **各API実装**
 
 > **重要**: 共通機能タスク（注文エンティティ、JWT認証基盤、外部API連携クライアント等）を先に実装してから、各API実装に進んでください。
@@ -134,9 +134,9 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 セットアップタスクを実行してください。
 
 パラメータ:
-- project_root: projects/sdd/bookstore/berry-books-api-sdd
-- task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/setup_tasks.md
-- skip_infrastructure: true
+* project_root: projects/sdd/bookstore/berry-books-api-sdd
+* task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/setup_tasks.md
+* skip_infrastructure: true
 ```
 
 ##### 3-2. 共通機能タスク（セットアップ後に1回）
@@ -147,23 +147,23 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 共通機能タスクを実行してください。
 
 パラメータ:
-- project_root: projects/sdd/bookstore/berry-books-api-sdd
-- task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/common_tasks.md
+* project_root: projects/sdd/bookstore/berry-books-api-sdd
+* task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/common_tasks.md
 ```
 
-**実装される共通機能**:
-- 注文エンティティ（OrderTran, OrderDetail）
-- 注文DAO
-- JWT認証基盤（JwtUtil, JwtAuthenFilter）
-- 外部API連携クライアント（BackOfficeRestClient, CustomerHubRestClient）
-- 共通DTO・ユーティリティ
-- 例外ハンドラ・フィルター
+* 実装される共通機能:
+  * 注文エンティティ（OrderTran, OrderDetail）
+  * 注文DAO
+  * JWT認証基盤（JwtUtil, JwtAuthenFilter）
+  * 外部API連携クライアント（BackOfficeRestClient, CustomerHubRestClient）
+  * 共通DTO・ユーティリティ
+  * 例外ハンドラ・フィルター
 
 ##### 3-3. 各APIの実装（共通機能完了後にコピペ用）
 
 詳細設計書を参照しながら、各APIを実装します。
 
-**API_001_auth**:
+* API_001_auth:
 
 ```
 @agent_skills/jakarta-ee-standard/instructions/code_generation.md
@@ -172,11 +172,11 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 認証APIを実装してください（JWT + 外部API連携）。
 
 パラメータ:
-- project_root: projects/sdd/bookstore/berry-books-api-sdd
-- task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/API_001_auth.md
+* project_root: projects/sdd/bookstore/berry-books-api-sdd
+* task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/API_001_auth.md
 ```
 
-**API_002_books**:
+* API_002_books:
 
 ```
 @agent_skills/jakarta-ee-standard/instructions/code_generation.md
@@ -185,11 +185,11 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 書籍APIを実装してください（プロキシパターン）。
 
 パラメータ:
-- project_root: projects/sdd/bookstore/berry-books-api-sdd
-- task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/API_002_books.md
+* project_root: projects/sdd/bookstore/berry-books-api-sdd
+* task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/API_002_books.md
 ```
 
-**API_003_orders**:
+* API_003_orders:
 
 ```
 @agent_skills/jakarta-ee-standard/instructions/code_generation.md
@@ -198,11 +198,11 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 注文APIを実装してください（分散トランザクション対応）。
 
 パラメータ:
-- project_root: projects/sdd/bookstore/berry-books-api-sdd
-- task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/API_003_orders.md
+* project_root: projects/sdd/bookstore/berry-books-api-sdd
+* task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/API_003_orders.md
 ```
 
-**API_004_images**:
+* API_004_images:
 
 ```
 @agent_skills/jakarta-ee-standard/instructions/code_generation.md
@@ -211,8 +211,8 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 画像APIを実装してください（静的リソース配信）。
 
 パラメータ:
-- project_root: projects/sdd/bookstore/berry-books-api-sdd
-- task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/API_004_images.md
+* project_root: projects/sdd/bookstore/berry-books-api-sdd
+* task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/API_004_images.md
 ```
 
 ---
@@ -224,54 +224,54 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 ## 🎯 プロジェクトの特徴（BFFパターン）
 
 ### アーキテクチャ
-- **BFF（Backend for Frontend）**: フロントエンド（berry-books-spa）の唯一のエントリーポイント
-- **マイクロサービス統合**: 複数のバックエンドマイクロサービスを統合
-- **フロントエンド最適化**: フロントエンド向けに最適化されたAPIを提供
+* **BFF（Backend for Frontend）**: フロントエンド（berry-books-spa）の唯一のエントリーポイント
+* **マイクロサービス統合**: 複数のバックエンドマイクロサービスを統合
+* **フロントエンド最適化**: フロントエンド向けに最適化されたAPIを提供
 
 ### 実装パターン
 
 #### プロキシパターン（外部APIへ透過的転送）
-- **BookResource**: 書籍情報 → `back-office-api`へ転送
-- **CategoryResource**: カテゴリ情報 → `back-office-api`へ転送
+* **BookResource**: 書籍情報 → `back-office-api`へ転送
+* **CategoryResource**: カテゴリ情報 → `back-office-api`へ転送
 
 #### 独自実装パターン（ビジネスロジックを持つ）
-- **AuthenResource**: JWT認証 + `customer-hub-api`連携
-- **OrderResource**: 注文処理 + 在庫管理連携
-- **ImageResource**: WAR内リソース配信
+* **AuthenResource**: JWT認証 + `customer-hub-api`連携
+* **OrderResource**: 注文処理 + 在庫管理連携
+* **ImageResource**: WAR内リソース配信
 
 ### データ管理の制約
-- **実装する**: OrderTran、OrderDetail（注文関連のみ）
-- **実装しない**: Book、Stock、Category、Customer（外部API管理）
+* **実装する**: OrderTran、OrderDetail（注文関連のみ）
+* **実装しない**: Book、Stock、Category、Customer（外部API管理）
 
 ### 外部API連携
-- **BackOfficeRestClient**: `back-office-api`との連携（書籍・在庫・カテゴリ管理）
-- **CustomerHubRestClient**: `customer-hub-api`との連携（顧客管理）
+* **BackOfficeRestClient**: `back-office-api`との連携（書籍・在庫・カテゴリ管理）
+* **CustomerHubRestClient**: `customer-hub-api`との連携（顧客管理）
 
 ### JWT認証
-- JWT生成・検証はBFF層で実装
-- HttpOnly Cookieで安全に管理
-- 認証必須エンドポイントの保護
+* JWT生成・検証はBFF層で実装
+* HttpOnly Cookieで安全に管理
+* 認証必須エンドポイントの保護
 
 ## 🔧 使用している技術
 
 ### 本番環境
 
-- **Jakarta EE 10**
-- **Payara Server 6**
-- **JAX-RS (Jakarta RESTful Web Services) 3.1** - REST API
-- **Jakarta Persistence (JPA) 3.1** - Hibernate実装
-- **Jakarta Transactions (JTA)**
-- **Jakarta CDI 4.0**
-- **Jakarta Bean Validation 3.0**
-- **HSQLDB 2.7.x**
-- **JWT (JSON Web Token)** - jjwt 0.12.6
-- **BCrypt** - パスワードハッシュ化
+* **Jakarta EE 10**
+* **Payara Server 6**
+* **JAX-RS (Jakarta RESTful Web Services) 3.1** - REST API
+* **Jakarta Persistence (JPA) 3.1** - Hibernate実装
+* **Jakarta Transactions (JTA)**
+* **Jakarta CDI 4.0**
+* **Jakarta Bean Validation 3.0**
+* **HSQLDB 2.7.x**
+* **JWT (JSON Web Token)** - jjwt 0.12.6
+* **BCrypt** - パスワードハッシュ化
 
 ### テスト環境
 
-- **JUnit 5** - テストフレームワーク
-- **Mockito** - モックライブラリ
-- **JaCoCo** - カバレッジツール（オプション）
+* **JUnit 5** - テストフレームワーク
+* **Mockito** - モックライブラリ
+* **JaCoCo** - カバレッジツール（オプション）
 
 ## プロジェクト構成
 
@@ -346,7 +346,7 @@ berry-books-api-sdd/
 
 ## 📊 実装状況
 
-**最終更新**: 2026-01-10
+* 最終更新: 2026-01-10
 
 ### ✅ 実装完了コンポーネント
 
@@ -369,34 +369,34 @@ berry-books-api-sdd/
 
 #### 1. MicroProfile Config読み込み方式の変更
 
-- `@ConfigProperty`から`ConfigProvider.getConfig()`方式へ変更
-- `@PostConstruct`で明示的に設定を読み込み
-- 環境依存の問題を回避し、より確実な設定読み込みを実現
+* `@ConfigProperty`から`ConfigProvider.getConfig()`方式へ変更
+* `@PostConstruct`で明示的に設定を読み込み
+* 環境依存の問題を回避し、より確実な設定読み込みを実現
 
-**対象**: `BackOfficeRestClient.java`, `CustomerHubRestClient.java`
+* 対象: `BackOfficeRestClient.java`, `CustomerHubRestClient.java`
 
 #### 2. CDI有効化（beans.xml追加）
 
-- `src/main/webapp/WEB-INF/beans.xml`を追加
-- CDIコンテナの有効化（`@Inject`、`@ApplicationScoped`の動作に必須）
-- MicroProfile Configの正常動作に必要
+* `src/main/webapp/WEB-INF/beans.xml`を追加
+* CDIコンテナの有効化（`@Inject`、`@ApplicationScoped`の動作に必須）
+* MicroProfile Configの正常動作に必要
 
 #### 3. エラーレスポンスのMediaType明示
 
-- 全ExceptionMapperで`.type(MediaType.APPLICATION_JSON)`を追加
-- PayaraがJSONシリアライザーを判断できるように修正
+* 全ExceptionMapperで`.type(MediaType.APPLICATION_JSON)`を追加
+* PayaraがJSONシリアライザーを判断できるように修正
 
-**対象**:
-- `GenericExceptionMapper`, `OutOfStockExceptionMapper`, `ValidationExceptionMapper`, `OptimisticLockExceptionMapper`, `JwtAuthenFilter`
+* 対象:
+  * `GenericExceptionMapper`, `OutOfStockExceptionMapper`, `ValidationExceptionMapper`, `OptimisticLockExceptionMapper`, `JwtAuthenFilter`
 
 #### 4. JwtAuthenFilterのPUBLIC_ENDPOINTS拡張
 
-- `/api`プレフィックスあり・なし両方のパスを登録
-- Payaraのコンテキストパス処理に対応
+* `/api`プレフィックスあり・なし両方のパスを登録
+* Payaraのコンテキストパス処理に対応
 
 ### 🧪 動作確認済みAPI
 
-**テスト実行日**: 2026-01-10
+* テスト実行日: 2026-01-10
 
 | API | エンドポイント | HTTPステータス | 備考 |
 |-----|--------------|---------------|------|
@@ -447,23 +447,23 @@ berry-books-api-sdd/
 |---------|--------------|------|-----|
 | GET | `/api/images/covers/{bookId}` | 書籍表紙画像取得 | 不要 |
 
-**画像ファイル配置場所**: `src/main/webapp/resources/images/covers/`
+* 画像ファイル配置場所: `src/main/webapp/resources/images/covers/`
 
-**画像ファイル命名規則**: `{bookId}.jpg`（例: `1.jpg`, `2.jpg`）
+* 画像ファイル命名規則: `{bookId}.jpg`（例: `1.jpg`, `2.jpg`）
 
-**重要な実装詳細**:
-- ServletContextを使用してWAR内リソースにアクセス
-- 画像が存在しない場合は`no-image.jpg`をフォールバックとして返却
-- デプロイ後もWARアーカイブ内から画像を配信可能
+* 重要な実装詳細:
+  * ServletContextを使用してWAR内リソースにアクセス
+  * 画像が存在しない場合は`no-image.jpg`をフォールバックとして返却
+  * デプロイ後もWARアーカイブ内から画像を配信可能
 
 ## 🚀 セットアップとコマンド実行ガイド
 
 ### 前提条件
 
-- JDK 21以上
-- Gradle 8.x以上
-- Payara Server 6（プロジェクトルートの`payara6/`に配置）
-- HSQLDB（プロジェクトルートの`hsqldb/`に配置）
+* JDK 21以上
+* Gradle 8.x以上
+* Payara Server 6（プロジェクトルートの`payara6/`に配置）
+* HSQLDB（プロジェクトルートの`hsqldb/`に配置）
 
 > **Note:** ① と ② の手順は、ルートの`README.md`を参照してください。
 
@@ -471,8 +471,8 @@ berry-books-api-sdd/
 
 このプロジェクトを開始する前に、以下が起動していることを確認してください：
 
-- **① HSQLDBサーバー** （`./gradlew startHsqldb`）
-- **② Payara Server** （`./gradlew startPayara`）
+* **① HSQLDBサーバー** （`./gradlew startHsqldb`）
+* **② Payara Server** （`./gradlew startPayara`）
 
 ### ④ プロジェクトを開始するときに1回だけ実行
 
@@ -508,8 +508,8 @@ berry-books-api-sdd/
 
 デプロイ後、以下のベースURLでAPIにアクセスできます：
 
-- **ベースURL**: http://localhost:8080/berry-books-api-sdd/api
-- **ウェルカムページ**: http://localhost:8080/berry-books-api-sdd/
+* **ベースURL**: http://localhost:8080/berry-books-api-sdd/api
+* **ウェルカムページ**: http://localhost:8080/berry-books-api-sdd/
 
 ## 🔐 JWT認証
 
@@ -706,33 +706,33 @@ Database (HSQLDB) ← 注文データのみ管理
 ```
 
 **BFFの役割:**
-- フロントエンドの唯一のエントリーポイント
-- 複数のバックエンドマイクロサービスを統合
-- 一部の機能は外部APIへプロキシ転送
-- 一部の機能は独自のビジネスロジックを実装
+* フロントエンドの唯一のエントリーポイント
+* 複数のバックエンドマイクロサービスを統合
+* 一部の機能は外部APIへプロキシ転送
+* 一部の機能は独自のビジネスロジックを実装
 
 ### 主要な設計パターン
 
-- **BFF Pattern**: Backend for Frontend
-- **Proxy Pattern**: 外部APIへの透過的転送（BookResource、CategoryResource）
-- **REST Resource Pattern**: JAX-RS
-- **Service Layer Pattern**: CDI + Transactional（注文処理のみ）
-- **Repository Pattern**: DAO（注文関連のみ）
-- **DTO Pattern**: Java Records
-- **JWT Authentication**: HttpOnly Cookie（BFF層で実装）
-- **Dependency Injection**: CDI
-- **REST Client Pattern**: 外部API連携
-- **Exception Mapper**: JAX-RS
+* **BFF Pattern**: Backend for Frontend
+* **Proxy Pattern**: 外部APIへの透過的転送（BookResource、CategoryResource）
+* **REST Resource Pattern**: JAX-RS
+* **Service Layer Pattern**: CDI + Transactional（注文処理のみ）
+* **Repository Pattern**: DAO（注文関連のみ）
+* **DTO Pattern**: Java Records
+* **JWT Authentication**: HttpOnly Cookie（BFF層で実装）
+* **Dependency Injection**: CDI
+* **REST Client Pattern**: 外部API連携
+* **Exception Mapper**: JAX-RS
 
 ### データ管理の分離
 
 **BFFで管理するデータ:**
-- 注文トランザクション（ORDER_TRAN）
-- 注文明細（ORDER_DETAIL）
+* 注文トランザクション（ORDER_TRAN）
+* 注文明細（ORDER_DETAIL）
 
 **外部APIで管理するデータ（BFFでは管理しない）:**
-- 書籍・在庫・カテゴリ（back-office-api）
-- 顧客情報（customer-hub-api）
+* 書籍・在庫・カテゴリ（back-office-api）
+* 顧客情報（customer-hub-api）
 
 ### トランザクション管理
 
@@ -745,19 +745,19 @@ Database (HSQLDB) ← 注文データのみ管理
 
 ### 設定内容
 
-- **JNDI名**: `jdbc/HsqldbDS`
-- **データベース**: `testdb`
-- **ユーザー**: `SA`
-- **パスワード**: （空文字）
-- **TCPサーバー**: `localhost:9001`
+* **JNDI名**: `jdbc/HsqldbDS`
+* **データベース**: `testdb`
+* **ユーザー**: `SA`
+* **パスワード**: （空文字）
+* **TCPサーバー**: `localhost:9001`
 
 データソースはPayara Serverのドメイン設定に登録されます。
 
 ### ⚠️ 注意事項
 
-- HSQLDB Databaseサーバーが起動している必要があります
-- データソース作成はPayara Server起動後に実行してください
-- 初回のみ実行が必要です（2回目以降は不要）
+* HSQLDB Databaseサーバーが起動している必要があります
+* データソース作成はPayara Server起動後に実行してください
+* 初回のみ実行が必要です（2回目以降は不要）
 
 ## 🛑 アプリケーションを停止する
 
@@ -809,12 +809,12 @@ rm -f hsqldb/data/testdb.*
 
 ## 📖 参考リンク
 
-- [Jakarta EE 10 Platform](https://jakarta.ee/specifications/platform/10/)
-- [Jakarta RESTful Web Services 3.1](https://jakarta.ee/specifications/restful-ws/3.1/)
-- [JWT (JSON Web Token)](https://jwt.io/)
-- [jjwt - Java JWT Library](https://github.com/jwtk/jjwt)
-- [Agent Skills Documentation](https://agentskills.io/what-are-skills)
-- [BFF Pattern](https://samnewman.io/patterns/architectural/bff/)
+* [Jakarta EE 10 Platform](https://jakarta.ee/specifications/platform/10/)
+* [Jakarta RESTful Web Services 3.1](https://jakarta.ee/specifications/restful-ws/3.1/)
+* [JWT (JSON Web Token)](https://jwt.io/)
+* [jjwt - Java JWT Library](https://github.com/jwtk/jjwt)
+* [Agent Skills Documentation](https://agentskills.io/what-are-skills)
+* [BFF Pattern](https://samnewman.io/patterns/architectural/bff/)
 
 ## 📄 ライセンス
 

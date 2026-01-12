@@ -1,9 +1,9 @@
 # API_006 ワークフローAPI - 詳細設計書
 
-**API ID**: API_006  
-**API名**: ワークフローAPI  
-**バージョン**: 1.0.0  
-**最終更新**: 2025-01-10
+* API ID: API_006  
+* API名: ワークフローAPI  
+* バージョン: 1.0.0  
+* 最終更新: 2025-01-10
 
 ---
 
@@ -47,14 +47,14 @@ pro.kensait.backoffice
 
 ### 2.1 WorkflowResource（JAX-RS Resource）
 
-**ベースパス**: `/workflows`
+* ベースパス: `/workflows`
 
-**エンドポイント**:
-- `GET /workflows` - ワークフロー一覧取得
-- `GET /workflows/{workflowId}` - ワークフロー詳細取得
-- `POST /workflows` - ワークフロー作成
-- `POST /workflows/{workflowId}/approve` - ワークフロー承認
-- `POST /workflows/{workflowId}/reject` - ワークフロー却下
+* エンドポイント:
+  * `GET /workflows` - ワークフロー一覧取得
+  * `GET /workflows/{workflowId}` - ワークフロー詳細取得
+  * `POST /workflows` - ワークフロー作成
+  * `POST /workflows/{workflowId}/approve` - ワークフロー承認
+  * `POST /workflows/{workflowId}/reject` - ワークフロー却下
 
 ### 2.2 WorkflowTO（DTO - Record）
 
@@ -77,28 +77,28 @@ public record WorkflowTO(
 
 ### 2.3 WorkflowService
 
-**主要メソッド**:
-- `List<WorkflowTO> getWorkflowsAll()` - 全ワークフロー取得
-- `WorkflowTO getWorkflowById(Integer workflowId)` - ワークフロー詳細取得
-- `WorkflowTO createWorkflow(WorkflowCreateRequest request, Integer employeeId)` - ワークフロー作成
-- `WorkflowTO approveWorkflow(Integer workflowId, Integer employeeId)` - ワークフロー承認
-- `WorkflowTO rejectWorkflow(Integer workflowId, Integer employeeId)` - ワークフロー却下
+* 主要メソッド:
+  * `List<WorkflowTO> getWorkflowsAll()` - 全ワークフロー取得
+  * `WorkflowTO getWorkflowById(Integer workflowId)` - ワークフロー詳細取得
+  * `WorkflowTO createWorkflow(WorkflowCreateRequest request, Integer employeeId)` - ワークフロー作成
+  * `WorkflowTO approveWorkflow(Integer workflowId, Integer employeeId)` - ワークフロー承認
+  * `WorkflowTO rejectWorkflow(Integer workflowId, Integer employeeId)` - ワークフロー却下
 
-**ビジネスルール**:
-1. **状態遷移**: APPLIED → APPROVED/REJECTED
-2. **承認権限チェック**:
-   - MANAGER以上の職務ランクが必要
-   - DIRECTORは全部署のワークフローを承認可能
-   - MANAGERは同一部署のワークフローのみ承認可能
-3. **書籍マスタ反映**:
-   - APPROVED時に書籍マスタに反映
-   - ADD_NEW_BOOK: 書籍INSERT
-   - REMOVE_BOOK: 書籍論理削除
-   - ADJUST_BOOK_PRICE: 書籍価格UPDATE
+* ビジネスルール:
+  1. 状態遷移: APPLIED → APPROVED/REJECTED
+  2. 承認権限チェック:
+   * MANAGER以上の職務ランクが必要
+   * DIRECTORは全部署のワークフローを承認可能
+   * MANAGERは同一部署のワークフローのみ承認可能
+  3. 書籍マスタ反映:
+   * APPROVED時に書籍マスタに反映
+   * ADD_NEW_BOOK: 書籍INSERT
+   * REMOVE_BOOK: 書籍論理削除
+   * ADJUST_BOOK_PRICE: 書籍価格UPDATE
 
 ### 2.4 Workflow（エンティティ）
 
-**テーブル**: `WORKFLOW`
+* テーブル: `WORKFLOW`
 
 | フィールド名 | 型 | カラム名 | 制約 | 説明 |
 |------------|---|---------|-----|------|
@@ -165,17 +165,17 @@ public enum JobRankType {
 
 ### 4.1 承認権限チェック
 
-**条件**:
-1. 承認者の職務ランクがMANAGER以上
-2. DIRECTORの場合: 全部署のワークフローを承認可能
-3. MANAGERの場合: 申請者と同一部署のワークフローのみ承認可能
+* 条件:
+  1. 承認者の職務ランクがMANAGER以上
+  2. DIRECTORの場合: 全部署のワークフローを承認可能
+  3. MANAGERの場合: 申請者と同一部署のワークフローのみ承認可能
 
-**例外**:
-- `UnauthorizedApprovalException` - 承認権限不足
+* 例外:
+  * `UnauthorizedApprovalException` - 承認権限不足
 
 ### 4.2 書籍マスタ反映
 
-**ADD_NEW_BOOK**:
+* ADD_NEW_BOOK:
 ```java
 Book newBook = new Book();
 newBook.setBookName(workflow.getBookName());
@@ -184,14 +184,14 @@ newBook.setPrice(workflow.getPrice());
 bookDao.insert(newBook);
 ```
 
-**REMOVE_BOOK**:
+* REMOVE_BOOK:
 ```java
 Book book = bookDao.findById(workflow.getBookId());
 book.setDeleted(true);  // 論理削除
 bookDao.update(book);
 ```
 
-**ADJUST_BOOK_PRICE**:
+* ADJUST_BOOK_PRICE:
 ```java
 Book book = bookDao.findById(workflow.getBookId());
 book.setPrice(workflow.getPrice());
@@ -216,20 +216,20 @@ bookDao.update(book);
 
 ### 6.1 ユニットテスト
 
-**対象**: `WorkflowService`
+* 対象: `WorkflowService`
 
-- ワークフロー作成テスト
-- ワークフロー承認テスト（DIRECTOR）
-- ワークフロー承認テスト（MANAGER・同一部署）
-- ワークフロー承認テスト（MANAGER・異なる部署→例外）
-- ワークフロー承認テスト（ASSOCIATE→例外）
-- 書籍マスタ反映テスト（ADD_NEW_BOOK）
-- 書籍マスタ反映テスト（REMOVE_BOOK）
-- 書籍マスタ反映テスト（ADJUST_BOOK_PRICE）
+* ワークフロー作成テスト
+* ワークフロー承認テスト（DIRECTOR）
+* ワークフロー承認テスト（MANAGER・同一部署）
+* ワークフロー承認テスト（MANAGER・異なる部署→例外）
+* ワークフロー承認テスト（ASSOCIATE→例外）
+* 書籍マスタ反映テスト（ADD_NEW_BOOK）
+* 書籍マスタ反映テスト（REMOVE_BOOK）
+* 書籍マスタ反映テスト（ADJUST_BOOK_PRICE）
 
 ---
 
 ## 7. 参考資料
 
-- [functional_design.md](functional_design.md) - 機能設計書
-- [behaviors.md](behaviors.md) - 振る舞い仕様書
+* [functional_design.md](functional_design.md) - 機能設計書
+* [behaviors.md](behaviors.md) - 振る舞い仕様書

@@ -6,36 +6,36 @@
 書籍の新規作成・削除・価格調整のワークフロー管理機能を提供します。
 
 **技術スタック:**
-- React 18
-- TypeScript
-- Vite
-- React Router
-- Axios
-- Tailwind CSS
+* React 18
+* TypeScript
+* Vite
+* React Router
+* Axios
+* Tailwind CSS
 
 **デザイン:**
-- **テーマカラー**: Berry Books ストロベリーレッド (#CF3F4E)
-- **スタイリング**: Tailwind CSS
-- **レスポンシブデザイン**: モダンなグラデーションとシャドウ効果
+* **テーマカラー**: Berry Books ストロベリーレッド (#CF3F4E)
+* **スタイリング**: Tailwind CSS
+* **レスポンシブデザイン**: モダンなグラデーションとシャドウ効果
 
 ## 主な機能
 
 ### 認証・認可
-- 社員コード + パスワードによるログイン認証
-- JWT（Cookie）による認証状態管理
-- ロールベースアクセス制御（RBAC）
+* 社員コード + パスワードによるログイン認証
+* JWT（Cookie）による認証状態管理
+* ロールベースアクセス制御（RBAC）
 
 ### ワークフロー管理
-- **ワークフロー作成**: 新規書籍作成、書籍削除、価格調整のワークフローを作成
-- **ワークフロー一覧**: 状態・種別でフィルタリング可能な一覧表示
-- **ワークフロー詳細**: 詳細情報と操作履歴の表示
-- **申請**: 作成済みワークフローを上司に申請
-- **承認/差戻**: マネージャー以上が申請を承認または差戻
+* **ワークフロー作成**: 新規書籍作成、書籍削除、価格調整のワークフローを作成
+* **ワークフロー一覧**: 状態・種別でフィルタリング可能な一覧表示
+* **ワークフロー詳細**: 詳細情報と操作履歴の表示
+* **申請**: 作成済みワークフローを上司に申請
+* **承認/差戻**: マネージャー以上が申請を承認または差戻
 
 ### 権限管理
-- **CREATED状態**: 作成者本人のみ参照可能
-- **APPLIED状態**: 作成者と同じ部署の直属の上司（マネージャー以上）のみ参照・操作可能
-- **APPROVED状態**: 全員参照可能
+* **CREATED状態**: 作成者本人のみ参照可能
+* **APPLIED状態**: 作成者と同じ部署の直属の上司（マネージャー以上）のみ参照・操作可能
+* **APPROVED状態**: 全員参照可能
 
 ## ディレクトリ構成
 
@@ -67,8 +67,8 @@ src/
 
 ### 前提条件
 
-- Node.js 16+ / npm 8+
-- バックエンドAPI (`back-office-api-sdd`) が起動している必要があります
+* Node.js 16+ / npm 8+
+* バックエンドAPI (`back-office-api-sdd`) が起動している必要があります
 
 ### 依存関係のインストール
 
@@ -122,23 +122,23 @@ export default defineConfig({
 
 ### バックエンドAPI
 
-- **ベースURL**: `http://localhost:8080/back-office-api-sdd`
-- **認証**: Cookie（JWT）による認証
-- **認証エンドポイント**:
-  - `POST /api/auth/login` - ログイン
-  - `POST /api/auth/logout` - ログアウト
-  - `GET /api/auth/me` - 現在のユーザー情報取得（未実装）
-- **ワークフローエンドポイント**:
-  - `GET /api/workflows` - ワークフロー一覧取得
-  - `GET /api/workflows/{workflowId}` - ワークフロー履歴取得
-  - `POST /api/workflows` - ワークフロー作成
-  - `POST /api/workflows/{workflowId}/apply` - 申請
-  - `POST /api/workflows/{workflowId}/approve` - 承認
-  - `POST /api/workflows/{workflowId}/reject` - 差戻
-- **マスターデータエンドポイント**:
-  - `GET /api/categories` - カテゴリ一覧
-  - `GET /api/publishers` - 出版社一覧（要実装）
-  - `GET /api/books` - 書籍一覧
+* **ベースURL**: `http://localhost:8080/back-office-api-sdd`
+* **認証**: Cookie（JWT）による認証
+* **認証エンドポイント**:
+  * `POST /api/auth/login` - ログイン
+  * `POST /api/auth/logout` - ログアウト
+  * `GET /api/auth/me` - 現在のユーザー情報取得（未実装）
+  * **ワークフローエンドポイント**:
+    * `GET /api/workflows` - ワークフロー一覧取得
+    * `GET /api/workflows/{workflowId}` - ワークフロー履歴取得
+    * `POST /api/workflows` - ワークフロー作成
+    * `POST /api/workflows/{workflowId}/apply` - 申請
+    * `POST /api/workflows/{workflowId}/approve` - 承認
+    * `POST /api/workflows/{workflowId}/reject` - 差戻
+    * **マスターデータエンドポイント**:
+      * `GET /api/categories` - カテゴリ一覧
+      * `GET /api/publishers` - 出版社一覧（要実装）
+      * `GET /api/books` - 書籍一覧
 
 ## ワークフローの状態と操作
 
@@ -198,33 +198,33 @@ export default defineConfig({
 
 ### 認証エラー（401）
 
-- バックエンドAPIが起動しているか確認
-- 社員コードとパスワードが正しいか確認
-- Cookieが正しく設定されているか確認（開発者ツール）
+* バックエンドAPIが起動しているか確認
+* 社員コードとパスワードが正しいか確認
+* Cookieが正しく設定されているか確認（開発者ツール）
 
 ### プロキシエラー
 
-- `vite.config.ts`のプロキシ設定を確認
-- バックエンドAPIのベースURLが正しいか確認
+* `vite.config.ts`のプロキシ設定を確認
+* バックエンドAPIのベースURLが正しいか確認
 
 ### ビルドエラー
 
-- `node_modules/`を削除して`npm install`を再実行
-- TypeScriptの型エラーを修正
+* `node_modules/`を削除して`npm install`を再実行
+* TypeScriptの型エラーを修正
 
 ## 今後の改善点
 
-- [ ] `/api/auth/me`エンドポイントの実装と統合
-- [ ] `/api/publishers`エンドポイントの実装
-- [ ] ワークフロー一覧でのページネーション
-- [ ] より詳細な権限チェック（部署IDベース）
-- [ ] ワークフロー検索機能
-- [ ] ワークフロー統計・レポート機能
-- [ ] 通知機能（申請・承認時）
-- [ ] ユニットテスト・E2Eテストの追加
-- [x] Tailwind CSSへの移行
-- [x] Berry Booksテーマカラーの適用
-- [x] カテゴリAPIのArray形式対応
+* [ ] `/api/auth/me`エンドポイントの実装と統合
+* [ ] `/api/publishers`エンドポイントの実装
+* [ ] ワークフロー一覧でのページネーション
+* [ ] より詳細な権限チェック（部署IDベース）
+* [ ] ワークフロー検索機能
+* [ ] ワークフロー統計・レポート機能
+* [ ] 通知機能（申請・承認時）
+* [ ] ユニットテスト・E2Eテストの追加
+* [x] Tailwind CSSへの移行
+* [x] Berry Booksテーマカラーの適用
+* [x] カテゴリAPIのArray形式対応
 
 ## ライセンス
 

@@ -1,0 +1,54 @@
+openapi: 3.0.3
+info:
+  title: Berry Books API - 画像API
+  description: |
+    Berry Books書店 BFF（Backend for Frontend）の画像API仕様
+    
+    書籍表紙画像の取得を提供する。認証不要で、公開APIとして利用できる。
+  version: 2.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:8080/api
+    description: 開発環境
+  - url: https://api.berrybooks.example.com/api
+    description: 本番環境
+
+tags:
+  - name: images
+    description: 画像操作
+
+paths:
+  /images/covers/{bookId}:
+    get:
+      tags:
+        - images
+      summary: 書籍表紙画像取得
+      description: |
+        指定された書籍IDの表紙画像を取得する。認証不要。
+        
+        画像が存在しない場合はフォールバック画像（no-image.jpg）を返す。
+      operationId: getBookCoverImage
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          description: 書籍ID
+          schema:
+            type: integer
+            format: int32
+            example: 1
+      responses:
+        '200':
+          description: 画像取得成功
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+                description: 画像バイナリデータ
+
+components:
+  schemas: {}

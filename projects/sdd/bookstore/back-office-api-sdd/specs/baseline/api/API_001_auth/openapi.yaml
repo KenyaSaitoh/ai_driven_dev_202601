@@ -1,0 +1,186 @@
+openapi: 3.0.3
+info:
+  title: Books Stock API - 認証API
+  description: |
+    バックオフィス書籍在庫管理システムの認証API仕様
+    
+    社員の認証（ログイン/ログアウト）およびユーザー情報取得機能を提供する。
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:8080/api
+    description: 開発環境
+  - url: https://api.example.com/api
+    description: 本番環境
+
+tags:
+  - name: auth
+    description: 認証操作
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: ログイン
+      description: 社員コードとパスワードで認証し、JWTトークンを発行する
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: ログイン成功
+          headers:
+            Set-Cookie:
+              description: JWTトークンを含むCookie
+              schema:
+                type: string
+                example: back-office-jwt=<JWT_TOKEN>; Path=/; Max-Age=86400; HttpOnly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeInfo'
+        '401':
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: サーバー内部エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: ログアウト
+      description: JWTトークンを無効化してログアウトする
+      operationId: logout
+      responses:
+        '200':
+          description: ログアウト成功
+          headers:
+            Set-Cookie:
+              description: Cookieを削除
+              schema:
+                type: string
+                example: back-office-jwt=; Path=/; Max-Age=0; HttpOnly
+
+  /auth/me:
+    get:
+      tags:
+        - auth
+      summary: 現在のユーザー情報取得
+      description: JWT Cookieから現在ログイン中の社員情報を取得する（未実装）
+      operationId: getCurrentUser
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: ユーザー情報取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeInfo'
+        '401':
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '501':
+          description: 未実装
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: back-office-jwt
+      description: JWT (JSON Web Token) を含むHttpOnly Cookie
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - employeeCode
+        - password
+      properties:
+        employeeCode:
+          type: string
+          description: 社員コード
+          maxLength: 20
+          example: E0001
+        password:
+          type: string
+          description: パスワード
+          format: password
+          maxLength: 100
+          example: password123
+
+    EmployeeInfo:
+      type: object
+      properties:
+        employeeId:
+          type: integer
+          format: int64
+          description: 社員ID
+          example: 1
+        employeeCode:
+          type: string
+          description: 社員コード
+          example: E0001
+        employeeName:
+          type: string
+          description: 社員名
+          example: 山田太郎
+        email:
+          type: string
+          format: email
+          description: メールアドレス
+          example: yamada@example.com
+        jobRank:
+          type: integer
+          description: |
+            職務ランク
+            * 1 - ASSOCIATE（一般社員）
+            * 2 - MANAGER（マネージャー）
+            * 3 - DIRECTOR（ディレクター）
+          enum: [1, 2, 3]
+          example: 2
+        departmentId:
+          type: integer
+          format: int64
+          description: 部署ID
+          example: 1
+        departmentName:
+          type: string
+          description: 部署名
+          example: 営業部
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: エラータイプ
+          example: Unauthorized
+        message:
+          type: string
+          description: エラーメッセージ（日本語）
+          example: 社員コードまたはパスワードが正しくありません

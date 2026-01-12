@@ -1,10 +1,10 @@
 # API_003 注文API - 詳細設計書（BFFパターン - 独自実装）
 
-**API ID**: API_003  
-**API名**: 注文API  
-**パターン**: BFF（Backend for Frontend） - 独自実装 + 外部API連携  
-**バージョン**: 1.0.0  
-**最終更新**: 2025-01-10
+* API ID: API_003  
+* API名: 注文API  
+* パターン: BFF（Backend for Frontend） - 独自実装 + 外部API連携  
+* バージョン: 1.0.0  
+* 最終更新: 2025-01-10
 
 ---
 
@@ -58,13 +58,13 @@ pro.kensait.berrybooks
 
 ### 2.1 OrderResource（JAX-RS Resource）
 
-**責務**: 注文APIのエンドポイント提供
+* 責務: 注文APIのエンドポイント提供
 
-**アノテーション**:
-- `@Path("/orders")` - ベースパス
-- `@ApplicationScoped` - CDIスコープ
+* アノテーション:
+  * `@Path("/orders")` - ベースパス
+  * `@ApplicationScoped` - CDIスコープ
 
-**主要メソッド**:
+* 主要メソッド:
 
 #### createOrder() - 注文作成
 
@@ -74,21 +74,21 @@ pro.kensait.berrybooks
 @Produces(MediaType.APPLICATION_JSON)
 ```
 
-**認証**: 必須（JwtAuthenFilterで検証）
+* 認証: 必須（JwtAuthenFilterで検証）
 
-**パラメータ**:
-- `OrderRequest request` - 注文リクエスト
+* パラメータ:
+  * `OrderRequest request` - 注文リクエスト
 
-**処理フロー**:
-1. AuthenContextから顧客IDを取得
-2. OrderServiceで注文処理を実行
-   - 在庫チェック（BackOfficeRestClient経由）
-   - 在庫更新（BackOfficeRestClient経由、楽観的ロック）
-   - 注文トランザクション作成（ローカルDB）
-   - 注文明細作成（ローカルDB）
-3. OrderResponseを返却
+* 処理フロー:
+  1. AuthenContextから顧客IDを取得
+  2. OrderServiceで注文処理を実行
+   * 在庫チェック（BackOfficeRestClient経由）
+   * 在庫更新（BackOfficeRestClient経由、楽観的ロック）
+   * 注文トランザクション作成（ローカルDB）
+   * 注文明細作成（ローカルDB）
+  3. OrderResponseを返却
 
-**レスポンス**: `OrderResponse`
+* レスポンス: `OrderResponse`
 
 #### getOrderHistory() - 注文履歴取得
 
@@ -98,14 +98,14 @@ pro.kensait.berrybooks
 @Produces(MediaType.APPLICATION_JSON)
 ```
 
-**認証**: 必須
+* 認証: 必須
 
-**処理フロー**:
-1. AuthenContextから顧客IDを取得
-2. OrderServiceで注文履歴を取得
-3. OrderHistoryResponseリストを返却
+* 処理フロー:
+  1. AuthenContextから顧客IDを取得
+  2. OrderServiceで注文履歴を取得
+  3. OrderHistoryResponseリストを返却
 
-**レスポンス**: `List<OrderHistoryResponse>`
+* レスポンス: `List<OrderHistoryResponse>`
 
 #### getOrderById() - 注文詳細取得
 
@@ -115,10 +115,10 @@ pro.kensait.berrybooks
 @Produces(MediaType.APPLICATION_JSON)
 ```
 
-**パラメータ**:
-- `@PathParam("tranId") Integer tranId` - 注文ID
+* パラメータ:
+  * `@PathParam("tranId") Integer tranId` - 注文ID
 
-**レスポンス**: `OrderResponse`
+* レスポンス: `OrderResponse`
 
 ---
 
@@ -182,29 +182,29 @@ public record OrderResponse(
 ) {}
 ```
 
-**注**: フィールド名は SPA の期待する構造に合わせています（`orderTranId`, `orderDate`, `orderDetails`）。
+* 注: フィールド名は SPA の期待する構造に合わせています（`orderTranId`, `orderDate`, `orderDetails`）。
 
 ---
 
 ### 2.5 OrderService（ビジネスロジック層）
 
-**責務**: 注文処理ビジネスロジック（BFF独自実装）
+* 責務: 注文処理ビジネスロジック（BFF独自実装）
 
-**アノテーション**:
-- `@ApplicationScoped`
+* アノテーション:
+  * `@ApplicationScoped`
 
-**主要メソッド**:
+* 主要メソッド:
 
 #### orderBooks()
 
-**シグネチャ**:
+* シグネチャ:
 ```java
 @Transactional
 public OrderTO orderBooks(OrderTO orderTO)
 ```
 
-**処理フロー**:
-1. 在庫チェック（BackOfficeRestClient経由）
+* 処理フロー:
+  1. 在庫チェック（BackOfficeRestClient経由）
    ```java
    for (CartItem item : orderTO.getCartItems()) {
        BookTO book = backOfficeClient.findBookById(item.getBookId());
@@ -227,7 +227,7 @@ public OrderTO orderBooks(OrderTO orderTO)
    }
    ```
 
-**BackOfficeRestClient.updateStock() の実装**:
+* BackOfficeRestClient.updateStock() の実装:
 ```java
 public StockTO updateStock(Integer bookId, Long version, Integer newQuantity) {
     String url = baseUrl + "/stocks/" + bookId;
@@ -245,9 +245,9 @@ public StockTO updateStock(Integer bookId, Long version, Integer newQuantity) {
 }
 ```
 
-**注**: 
-- 以前のバージョンでは `StockTO` を使用していましたが、現在は `BookTO` に在庫情報（`quantity`, `version`）が含まれているため、`BookTO` を使用します
-- リクエストボディのフィールド名は `back-office-api-sdd` の `StockUpdateRequest` と一致する必要があります（`quantity` と `version`）
+* 注: 
+* 以前のバージョンでは `StockTO` を使用していましたが、現在は `BookTO` に在庫情報（`quantity`, `version`）が含まれているため、`BookTO` を使用します
+* リクエストボディのフィールド名は `back-office-api-sdd` の `StockUpdateRequest` と一致する必要があります（`quantity` と `version`）
 
 3. 注文トランザクション作成（ローカルDB）
    ```java
@@ -284,25 +284,25 @@ public StockTO updateStock(Integer bookId, Long version, Integer newQuantity) {
    }
    ```
    
-   **スナップショットパターン**: 注文時点の書籍名、出版社名、価格をDBに保存します。
-   - メリット1: 書籍マスタが変更されても、過去の注文履歴は影響を受けない
-   - メリット2: 書籍が削除されても、注文履歴を正常に表示できる
-   - メリット3: 注文履歴表示時に外部API呼び出しが不要（パフォーマンス向上）
+   スナップショットパターン: 注文時点の書籍名、出版社名、価格をDBに保存します。
+   * メリット1: 書籍マスタが変更されても、過去の注文履歴は影響を受けない
+   * メリット2: 書籍が削除されても、注文履歴を正常に表示できる
+   * メリット3: 注文履歴表示時に外部API呼び出しが不要（パフォーマンス向上）
 
-**エラーハンドリング**:
-- `OutOfStockException` - 在庫不足時にスロー
-- `OptimisticLockException` - 楽観的ロック競合時（外部APIから）
-- トランザクションロールバック - エラー時
+* エラーハンドリング:
+  * `OutOfStockException` - 在庫不足時にスロー
+  * `OptimisticLockException` - 楽観的ロック競合時（外部APIから）
+  * トランザクションロールバック - エラー時
 
 #### findOrderHistoryByCustomerId()
 
-**シグネチャ**:
+* シグネチャ:
 ```java
 public List<OrderHistoryResponse> findOrderHistoryByCustomerId(Integer customerId)
 ```
 
-**処理フロー**:
-1. 注文トランザクション取得（ローカルDB）
+* 処理フロー:
+  1. 注文トランザクション取得（ローカルDB）
    ```java
    List<OrderTran> orders = orderTranDao.findByCustomerId(customerId);
    ```
@@ -327,19 +327,19 @@ public List<OrderHistoryResponse> findOrderHistoryByCustomerId(Integer customerI
    }
    ```
 
-**パフォーマンス最適化**:
-- 外部API呼び出しが不要（スナップショットデータを使用）
-- 書籍マスタの変更や削除に影響されない
+* パフォーマンス最適化:
+  * 外部API呼び出しが不要（スナップショットデータを使用）
+  * 書籍マスタの変更や削除に影響されない
 
 #### findOrderById()
 
-**シグネチャ**:
+* シグネチャ:
 ```java
 public OrderResponse findOrderById(Integer tranId)
 ```
 
-**処理フロー**:
-1. 注文トランザクション取得（ローカルDB）
+* 処理フロー:
+  1. 注文トランザクション取得（ローカルDB）
    ```java
    OrderTran orderTran = orderTranDao.findById(tranId);
    ```
@@ -365,21 +365,21 @@ public OrderResponse findOrderById(Integer tranId)
 
 ### 2.6 DeliveryFeeService（配送料金計算）
 
-**責務**: 配送料金の計算（BFF独自実装）
+* 責務: 配送料金の計算（BFF独自実装）
 
-**アノテーション**:
-- `@ApplicationScoped`
+* アノテーション:
+  * `@ApplicationScoped`
 
-**主要メソッド**:
+* 主要メソッド:
 
 #### calculateDeliveryFee()
 
-**シグネチャ**:
+* シグネチャ:
 ```java
 public Integer calculateDeliveryFee(String address)
 ```
 
-**計算ロジック**:
+* 計算ロジック:
 ```java
 if (AddressUtil.isTokyoMetropolitanArea(address)) {
     return 500;  // 東京都内: 500円
@@ -394,7 +394,7 @@ if (AddressUtil.isTokyoMetropolitanArea(address)) {
 
 ### 2.7 OrderTran（エンティティ）
 
-**テーブル**: `ORDER_TRAN`
+* テーブル: `ORDER_TRAN`
 
 | フィールド名 | 型 | カラム名 | 制約 | 説明 |
 |------------|---|---------|-----|------|
@@ -410,7 +410,7 @@ if (AddressUtil.isTokyoMetropolitanArea(address)) {
 
 ### 2.8 OrderDetail（エンティティ）
 
-**テーブル**: `ORDER_DETAIL`
+* テーブル: `ORDER_DETAIL`
 
 | フィールド名 | 型 | カラム名 | 制約 | 説明 |
 |------------|---|---------|-----|------|
@@ -422,11 +422,11 @@ if (AddressUtil.isTokyoMetropolitanArea(address)) {
 | `price` | `Integer` | `PRICE` | `@Column(nullable=false)` | 単価（スナップショット） |
 | `count` | `Integer` | `COUNT` | `@Column(nullable=false)` | 数量 |
 
-**複合キー**: `OrderDetailPK`（orderTranId, orderDetailId）
+* 複合キー: `OrderDetailPK`（orderTranId, orderDetailId）
 
-**スナップショットパターン**: `BOOK_NAME`、`PUBLISHER_NAME`、`PRICE`は注文時点のデータを保持します。
-- 目的: 書籍マスタの変更や削除に影響されない注文履歴の保持
-- 実装: 注文登録時に外部API（back-office-api-sdd）から取得した書籍情報を保存
+* スナップショットパターン: `BOOK_NAME`、`PUBLISHER_NAME`、`PRICE`は注文時点のデータを保持します。
+* 目的: 書籍マスタの変更や削除に影響されない注文履歴の保持
+* 実装: 注文登録時に外部API（back-office-api-sdd）から取得した書籍情報を保存
 
 ---
 
@@ -434,25 +434,25 @@ if (AddressUtil.isTokyoMetropolitanArea(address)) {
 
 ### 3.1 トランザクション分離
 
-**外部API（在庫更新）**:
-- `back-office-api`が独立してトランザクション管理
-- BFF層からは制御不可
+* 外部API（在庫更新）:
+  * `back-office-api`が独立してトランザクション管理
+  * BFF層からは制御不可
 
-**ローカルDB（注文作成）**:
-- `@Transactional`でBFF層がトランザクション管理
+* ローカルDB（注文作成）:
+  * `@Transactional`でBFF層がトランザクション管理
 
 ### 3.2 結果整合性（Eventual Consistency）
 
-**問題**:
-- 在庫更新成功 → 注文作成失敗の場合、不整合が発生
+* 問題:
+  * 在庫更新成功 → 注文作成失敗の場合、不整合が発生
 
-**現状の対応**:
-- エラーログを記録
-- 運用でのリカバリー
+* 現状の対応:
+  * エラーログを記録
+  * 運用でのリカバリー
 
-**将来の対応**:
-- Sagaパターンの導入
-- 補償トランザクションの実装
+* 将来の対応:
+  * Sagaパターンの導入
+  * 補償トランザクションの実装
 
 ---
 
@@ -473,28 +473,28 @@ if (AddressUtil.isTokyoMetropolitanArea(address)) {
 
 ### 5.1 ユニットテスト
 
-**対象**: `OrderService`, `DeliveryFeeService`
+* 対象: `OrderService`, `DeliveryFeeService`
 
-- 注文処理テスト（正常系）
-- 在庫不足テスト
-- 配送料金計算テスト（東京都内）
-- 配送料金計算テスト（関東圏）
-- 配送料金計算テスト（その他）
+* 注文処理テスト（正常系）
+* 在庫不足テスト
+* 配送料金計算テスト（東京都内）
+* 配送料金計算テスト（関東圏）
+* 配送料金計算テスト（その他）
 
 ### 5.2 統合テスト
 
-**対象**: `OrderResource` + `OrderService` + `BackOfficeRestClient`
+* 対象: `OrderResource` + `OrderService` + `BackOfficeRestClient`
 
-- 注文作成API呼び出し（正常系、外部API連携）
-- 注文作成API呼び出し（在庫不足）
-- 注文作成API呼び出し（楽観的ロック競合）
-- 注文履歴取得API呼び出し
+* 注文作成API呼び出し（正常系、外部API連携）
+* 注文作成API呼び出し（在庫不足）
+* 注文作成API呼び出し（楽観的ロック競合）
+* 注文履歴取得API呼び出し
 
 ---
 
 ## 6. 参考資料
 
-- [functional_design.md](functional_design.md) - 機能設計書
-- [behaviors.md](behaviors.md) - 振る舞い仕様書
-- [BFFパターン](https://samnewman.io/patterns/architectural/bff/)
-- [Sagaパターン](https://microservices.io/patterns/data/saga.html)
+* [functional_design.md](functional_design.md) - 機能設計書
+* [behaviors.md](behaviors.md) - 振る舞い仕様書
+* [BFFパターン](https://samnewman.io/patterns/architectural/bff/)
+* [Sagaパターン](https://microservices.io/patterns/data/saga.html)

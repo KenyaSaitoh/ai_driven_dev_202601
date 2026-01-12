@@ -31,22 +31,22 @@
 
 #### 3.1.2 リクエスト
 
-**ヘッダー**: なし
+* ヘッダー: なし
 
-**クエリパラメータ**: なし
+* クエリパラメータ: なし
 
-**ボディ**: なし
+* ボディ: なし
 
 #### 3.1.3 レスポンス
 
-成功（200 OK）:
+* 成功（200 OK）:
 
-ヘッダー:
+* ヘッダー:
 ```
 Content-Type: application/json; charset=UTF-8
 ```
 
-ボディ:
+* ボディ:
 ```json
 [
   {
@@ -64,7 +64,7 @@ Content-Type: application/json; charset=UTF-8
 ]
 ```
 
-レスポンススキーマ:
+* レスポンススキーマ:
 | フィールド | 型 | 必須 | 説明 |
 |-----------|---|------|------|
 | publisherId | Integer | Yes | 出版社ID |
@@ -75,11 +75,11 @@ Content-Type: application/json; charset=UTF-8
 1. PublisherResourceを呼び出し（`getAllPublishers()`）
 2. PublisherServiceを呼び出し（`getPublishersAll()`）
 3. PublisherDaoで全出版社を取得
-   - JPQL: `SELECT p FROM Publisher p`
-   - Named Query: `Publisher.findAll`
+   * JPQL: `SELECT p FROM Publisher p`
+   * Named Query: `Publisher.findAll`
 4. Publisherエンティティのリストを取得
 5. 各PublisherエンティティをPublisherTOに変換
-   - ストリームAPIで変換: `.stream().map(p -> new PublisherTO(...)).toList()`
+   * ストリームAPIで変換: `.stream().map(p -> new PublisherTO(...)).toList()`
 6. 配列形式でJSON変換してレスポンス
 
 #### 3.1.5 ビジネスルール
@@ -100,18 +100,18 @@ Content-Type: application/json; charset=UTF-8
 
 ### 4.1 PublisherTO
 
-**パッケージ**: `pro.kensait.backoffice.api.dto`
+* パッケージ: `pro.kensait.backoffice.api.dto`
 
-**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+* 構造種別: レコード型（immutableなデータ転送オブジェクト）
 
-フィールド構成:
+* フィールド構成:
 
 | フィールド名 | 型 | 説明 |
 |------------|---|------|
 | publisherId | Integer | 出版社ID |
 | publisherName | String | 出版社名 |
 
-例:
+* 例:
 ```json
 {
   "publisherId": 1,
@@ -125,18 +125,18 @@ Content-Type: application/json; charset=UTF-8
 
 ### 5.1 Publisher
 
-**パッケージ**: `pro.kensait.backoffice.entity`
+* パッケージ: `pro.kensait.backoffice.entity`
 
-**マッピング対象テーブル**: PUBLISHER
+* マッピング対象テーブル: PUBLISHER
 
-エンティティ構成:
+* エンティティ構成:
 
 | フィールド名 | 型 | カラム名 | 制約 | 説明 |
 |------------|---|---------|-----|------|
 | publisherId | int | PUBLISHER_ID | PRIMARY KEY | 出版社ID |
 | publisherName | String | PUBLISHER_NAME | - | 出版社名 |
 
-**エンティティ種別**: 永続化エンティティ（JPAエンティティ）
+* エンティティ種別: 永続化エンティティ（JPAエンティティ）
 
 ---
 
@@ -159,17 +159,17 @@ Content-Type: application/json; charset=UTF-8
 |-----------|---------------|-----------|
 | 予期しないエラー | 500 Internal Server Error | エラーメッセージ |
 
-**備考**: 出版社一覧取得は基本的にエラーが発生しない（マスタデータ）
+* 備考: 出版社一覧取得は基本的にエラーが発生しない（マスタデータ）
 
 ### 7.2 ログ出力
 
-INFOレベル:
+* INFOレベル:
 ```
 [ PublisherResource#getAllPublishers ]
 [ PublisherService#getPublishersAll ]
 ```
 
-DEBUGレベル:
+* DEBUGレベル:
 ```
 [ PublisherDao#findAll ] Executing JPQL: SELECT p FROM Publisher p
 [ PublisherDao#findAll ] Result count: 10
@@ -186,8 +186,8 @@ DEBUGレベル:
 ### 8.2 キャッシング
 * 現状: キャッシュなし
 * 将来: アプリケーションレベルキャッシュ推奨
-  - マスタデータのため変更頻度が低い
-  - メモリキャッシュで高速化可能
+  * マスタデータのため変更頻度が低い
+  * メモリキャッシュで高速化可能
 
 ### 8.3 データ量
 * 想定レコード数: 10-100件
@@ -218,22 +218,22 @@ DEBUGレベル:
 
 ### 10.1 クエリ仕様（JPQL）
 
-クエリ内容:
-* 対象エンティティ: Publisher
-* 取得フィールド: 全フィールド
-* WHERE条件: なし（全件取得）
+* クエリ内容:
+  * 対象エンティティ: Publisher
+  * 取得フィールド: 全フィールド
+  * WHERE条件: なし（全件取得）
 
 ### 10.2 実行されるSQLの論理構造
 
-SELECT句:
-* PUBLISHER_ID
-* PUBLISHER_NAME
+* SELECT句:
+  * PUBLISHER_ID
+  * PUBLISHER_NAME
 
-FROM句:
-* PUBLISHER テーブル
+* FROM句:
+  * PUBLISHER テーブル
 
-ORDER BY句:
-* PUBLISHER_ID の昇順
+* ORDER BY句:
+  * PUBLISHER_ID の昇順
 
 ---
 
@@ -241,12 +241,12 @@ ORDER BY句:
 
 ### 11.1 出版社詳細取得
 
-特定の出版社詳細取得:
+* 特定の出版社詳細取得:
 ```
 GET /api/publishers/{publisherId}
 ```
 
-レスポンス:
+* レスポンス:
 ```json
 {
   "publisherId": 1,
@@ -259,14 +259,14 @@ GET /api/publishers/{publisherId}
 
 ### 11.2 出版社検索
 
-出版社名での検索:
+* 出版社名での検索:
 ```
 GET /api/publishers?search=出版社A
 ```
 
 ### 11.3 出版社統計情報
 
-出版社別の書籍数を含む:
+* 出版社別の書籍数を含む:
 ```json
 {
   "publisherId": 1,
@@ -288,9 +288,9 @@ GET /api/publishers?search=出版社A
 
 ### 12.1 認証・認可
 
-現状は認証不要だが、将来的にJWT認証フィルタを実装:
-* すべてのエンドポイントで認証必須
-* 全社員が参照可能（職務ランクによる制限なし）
+* 現状は認証不要だが、将来的にJWT認証フィルタを実装:
+  * すべてのエンドポイントで認証必須
+  * 全社員が参照可能（職務ランクによる制限なし）
 
 ### 12.2 データ保護
 
@@ -309,10 +309,10 @@ GET /api/publishers?search=出版社A
 
 ### 13.2 マイグレーション
 
-出版社マスタの変更時:
-1. 既存の書籍との関連を確認
-2. 出版社変更の影響範囲を分析
-3. データ移行スクリプトの作成
+* 出版社マスタの変更時:
+  1. 既存の書籍との関連を確認
+  2. 出版社変更の影響範囲を分析
+  3. データ移行スクリプトの作成
 
 ### 13.3 データ整合性
 
@@ -330,7 +330,7 @@ GET /api/publishers?search=出版社A
 
 ## 15. カテゴリAPIとの類似点
 
-カテゴリAPIと出版社APIは構造が非常に似ている:
+* カテゴリAPIと出版社APIは構造が非常に似ている:
 
 | 項目 | カテゴリAPI | 出版社API |
 |------|-----------|----------|
@@ -341,11 +341,11 @@ GET /api/publishers?search=出版社A
 | パフォーマンス | 同等 | 同等 |
 | キャッシング | 推奨 | 推奨 |
 
-共通設計パターン:
-* マスタデータの参照API
-* シンプルな一覧取得
-* 配列形式のレスポンス
-* ステートレス設計
+* 共通設計パターン:
+  * マスタデータの参照API
+  * シンプルな一覧取得
+  * 配列形式のレスポンス
+  * ステートレス設計
 
 ---
 
@@ -410,7 +410,7 @@ graph TD
 
 ### 16.4 状態管理
 
-出版社APIは状態を持たない（ステートレス）:
+* 出版社APIは状態を持たない（ステートレス）:
 
 ```mermaid
 graph LR

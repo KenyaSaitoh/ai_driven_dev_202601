@@ -36,15 +36,15 @@
 
 #### 3.1.2 リクエスト
 
-**ヘッダー**: なし
+* ヘッダー: なし
 
-**クエリパラメータ**: なし
+* クエリパラメータ: なし
 
-**ボディ**: なし
+* ボディ: なし
 
 #### 3.1.3 レスポンス
 
-成功（200 OK）:
+* 成功（200 OK）:
 ```json
 [
   {
@@ -84,7 +84,7 @@
 ]
 ```
 
-レスポンススキーマ:
+* レスポンススキーマ:
 | フィールド | 型 | 説明 |
 |-----------|---|------|
 | bookId | Integer | 書籍ID |
@@ -107,19 +107,19 @@
 2. BookDaoで全書籍を取得（JPQL: `SELECT b FROM Book b`）
 3. Bookエンティティのリストを取得
 4. 各BookエンティティをBookTOに変換
-   - カテゴリ情報をネスト構造で設定
-   - 出版社情報をネスト構造で設定
-   - 在庫情報（quantity, version）を設定
+   * カテゴリ情報をネスト構造で設定
+   * 出版社情報をネスト構造で設定
+   * 在庫情報（quantity, version）を設定
 5. BookTOのリストをJSON形式でレスポンス
 
 #### 3.1.5 ビジネスルール
 
 * BR-BOOK-001: 論理削除された書籍（deleted=true）は除外する
-  - 書籍の削除は論理削除（DELETEDフラグ）で行われる
-  - APIレスポンスには論理削除された書籍は含まれない
-  - 物理削除は行わない（データ保持のため）
+  * 書籍の削除は論理削除（DELETEDフラグ）で行われる
+  * APIレスポンスには論理削除された書籍は含まれない
+  * 物理削除は行わない（データ保持のため）
 * BR-BOOK-002: 在庫情報はSecondaryTableで結合
-  - BOOKテーブルとSTOCKテーブルを自動結合
+  * BOOKテーブルとSTOCKテーブルを自動結合
 
 #### 3.1.6 関連コンポーネント
 
@@ -138,18 +138,18 @@
 
 #### 3.2.2 リクエスト
 
-パスパラメータ:
+* パスパラメータ:
 | パラメータ | 型 | 必須 | 説明 |
 |-----------|---|------|------|
 | id | Integer | Yes | 書籍ID |
 
-例:
-* `/api/books/1`
-* `/api/books/123`
+* 例:
+  * `/api/books/1`
+  * `/api/books/123`
 
 #### 3.2.3 レスポンス
 
-成功（200 OK）:
+* 成功（200 OK）:
 ```json
 {
   "bookId": 1,
@@ -170,7 +170,7 @@
 }
 ```
 
-失敗（404 Not Found）:
+* 失敗（404 Not Found）:
 ```json
 {
   "error": "書籍が見つかりません"
@@ -189,8 +189,8 @@
 #### 3.2.5 ビジネスルール
 
 * BR-BOOK-003: 論理削除された書籍の詳細取得について
-  - 詳細取得APIでは論理削除フラグによる除外は行わない
-  - 存在する書籍IDであれば、論理削除された書籍も取得可能
+  * 詳細取得APIでは論理削除フラグによる除外は行わない
+  * 存在する書籍IDであれば、論理削除された書籍も取得可能
 * BR-BOOK-004: 存在しない書籍IDは404エラー
 
 #### 3.2.6 関連コンポーネント
@@ -210,21 +210,21 @@
 
 #### 3.3.2 リクエスト
 
-クエリパラメータ:
+* クエリパラメータ:
 | パラメータ | 型 | 必須 | 説明 |
 |-----------|---|------|------|
 | categoryId | Integer | No | カテゴリID（0または未指定で全カテゴリ） |
 | keyword | String | No | 検索キーワード（書籍名で部分一致） |
 
-例:
-* `/api/books/search?categoryId=1&keyword=サンプル`
-* `/api/books/search?categoryId=1`
-* `/api/books/search?keyword=サンプル`
-* `/api/books/search` （全件取得）
+* 例:
+  * `/api/books/search?categoryId=1&keyword=サンプル`
+  * `/api/books/search?categoryId=1`
+  * `/api/books/search?keyword=サンプル`
+  * `/api/books/search` （全件取得）
 
 #### 3.3.3 レスポンス
 
-成功（200 OK）:
+* 成功（200 OK）:
 ```json
 [
   {
@@ -251,10 +251,10 @@
 
 1. クエリパラメータからcategoryIdとkeywordを取得
 2. 検索条件に応じてBookServiceのメソッドを呼び分け:
-   - categoryId + keyword → `searchBook(categoryId, keyword)`
-   - categoryIdのみ → `searchBook(categoryId)`
-   - keywordのみ → `searchBook(keyword)`
-   - 条件なし → `getBooksAll()`
+   * categoryId + keyword → `searchBook(categoryId, keyword)`
+   * categoryIdのみ → `searchBook(categoryId)`
+   * keywordのみ → `searchBook(keyword)`
+   * 条件なし → `getBooksAll()`
 3. BookDaoで対応するJPQLクエリを実行
 4. Bookエンティティのリストを取得
 5. 各BookエンティティをBookTOに変換
@@ -268,21 +268,21 @@
 
 #### 3.3.6 クエリロジック
 
-カテゴリ + キーワード指定時:
-* 対象エンティティ: Book
-* WHERE条件:
-  - categoryIdがパラメータ値と一致
-  - AND 書籍名がキーワードに部分一致
+* カテゴリ + キーワード指定時:
+  * 対象エンティティ: Book
+  * WHERE条件:
+  * categoryIdがパラメータ値と一致
+  * AND 書籍名がキーワードに部分一致
 
-カテゴリのみ指定時:
-* 対象エンティティ: Book
-* WHERE条件:
-  - categoryIdがパラメータ値と一致
+* カテゴリのみ指定時:
+  * 対象エンティティ: Book
+  * WHERE条件:
+  * categoryIdがパラメータ値と一致
 
-キーワードのみ指定時:
-* 対象エンティティ: Book
-* WHERE条件:
-  - 書籍名がキーワードに部分一致
+* キーワードのみ指定時:
+  * 対象エンティティ: Book
+  * WHERE条件:
+  * 書籍名がキーワードに部分一致
 
 #### 3.3.7 関連コンポーネント
 
@@ -334,17 +334,17 @@
 
 #### 3.5.2 リクエスト
 
-クエリパラメータ:
+* クエリパラメータ:
 | パラメータ | 型 | 必須 | 説明 |
 |-----------|---|------|------|
 | categoryId | Integer | No | カテゴリID（0または未指定で全カテゴリ） |
 | keyword | String | No | 検索キーワード（書籍名で部分一致） |
 
-例:
-* `/api/books/search/criteria?categoryId=1&keyword=サンプル`
-* `/api/books/search/criteria?categoryId=1`
-* `/api/books/search/criteria?keyword=サンプル`
-* `/api/books/search/criteria` （全件取得）
+* 例:
+  * `/api/books/search/criteria?categoryId=1&keyword=サンプル`
+  * `/api/books/search/criteria?categoryId=1`
+  * `/api/books/search/criteria?keyword=サンプル`
+  * `/api/books/search/criteria` （全件取得）
 
 #### 3.5.3 レスポンス
 
@@ -355,9 +355,9 @@
 1. クエリパラメータからcategoryIdとkeywordを取得
 2. BookServiceを呼び出し（`searchBookWithCriteria(categoryId, keyword)`）
 3. BookDaoでCriteria APIを使用して動的にクエリを構築
-   - `CriteriaBuilder`でクエリを構築
-   - categoryIdが指定されている場合、条件を追加
-   - keywordが指定されている場合、LIKE条件を追加（OR）
+   * `CriteriaBuilder`でクエリを構築
+   * categoryIdが指定されている場合、条件を追加
+   * keywordが指定されている場合、LIKE条件を追加（OR）
 4. クエリを実行してBookエンティティのリストを取得
 5. 各BookエンティティをBookTOに変換
 6. JSON形式でレスポンス
@@ -368,20 +368,20 @@
 
 #### 3.5.6 動的クエリ構築ロジック
 
-クエリ構築手順:
-1. Criteria APIを使用してクエリビルダーを初期化
-2. 対象エンティティとしてBookを指定
-3. 動的に述語（Predicate）のリストを構築:
-   - **カテゴリ条件**: categoryIdがnullでなく、かつ0でない場合、等価条件を追加
-   - **キーワード条件**: keywordがnullでなく、かつ空でない場合:
-     - 書籍名の部分一致条件を作成
+* クエリ構築手順:
+  1. Criteria APIを使用してクエリビルダーを初期化
+  2. 対象エンティティとしてBookを指定
+  3. 動的に述語（Predicate）のリストを構築:
+   * カテゴリ条件: categoryIdがnullでなく、かつ0でない場合、等価条件を追加
+   * キーワード条件: keywordがnullでなく、かつ空でない場合:
+     * 書籍名の部分一致条件を作成
 4. すべての述語をAND結合してWHERE句を構成
 5. クエリを実行して結果リストを返却
 
-動的クエリの特徴:
-* パラメータの有無に応じて条件を動的に追加
-* 複数条件はANDで結合
-* タイプセーフなクエリ構築が可能
+* 動的クエリの特徴:
+  * パラメータの有無に応じて条件を動的に追加
+  * 複数条件はANDで結合
+  * タイプセーフなクエリ構築が可能
 
 #### 3.5.7 用途
 
@@ -406,15 +406,15 @@
 
 #### 3.6.2 リクエスト
 
-**ヘッダー**: なし
+* ヘッダー: なし
 
-**クエリパラメータ**: なし
+* クエリパラメータ: なし
 
-**ボディ**: なし
+* ボディ: なし
 
 #### 3.6.3 レスポンス
 
-成功（200 OK）:
+* 成功（200 OK）:
 ```json
 {
   "文学": 1,
@@ -424,7 +424,7 @@
 }
 ```
 
-**備考**: カテゴリ名をキー、カテゴリIDを値とするMap形式
+* 備考: カテゴリ名をキー、カテゴリIDを値とするMap形式
 
 #### 3.6.4 処理フロー
 
@@ -455,11 +455,11 @@
 
 ### 4.1 BookTO
 
-**パッケージ**: `pro.kensait.backoffice.api.dto`
+* パッケージ: `pro.kensait.backoffice.api.dto`
 
-**構造種別**: データ転送オブジェクト（ネスト構造を含む）
+* 構造種別: データ転送オブジェクト（ネスト構造を含む）
 
-フィールド構成:
+* フィールド構成:
 
 | フィールド名 | 型 | 説明 |
 |------------|---|------|
@@ -473,14 +473,14 @@
 | category | CategoryInfo | カテゴリ情報（ネスト） |
 | publisher | PublisherInfo | 出版社情報（ネスト） |
 
-ネスト構造 - CategoryInfo:
+* ネスト構造 - CategoryInfo:
 
 | フィールド名 | 型 | 説明 |
 |------------|---|------|
 | categoryId | Integer | カテゴリID |
 | categoryName | String | カテゴリ名 |
 
-ネスト構造 - PublisherInfo:
+* ネスト構造 - PublisherInfo:
 
 | フィールド名 | 型 | 説明 |
 |------------|---|------|
@@ -524,7 +524,7 @@
 
 ### 6.2 ログ出力
 
-INFOレベル:
+* INFOレベル:
 ```
 [ BookResource#getAllBooks ]
 [ BookResource#getBookById ] id: 1
@@ -593,12 +593,12 @@ INFOレベル:
 
 ### 9.1 ページネーション
 
-大量データ対応のため、ページネーションを実装:
+* 大量データ対応のため、ページネーションを実装:
 ```
 GET /api/books?page=1&size=20
 ```
 
-レスポンス:
+* レスポンス:
 ```json
 {
   "content": [...],
@@ -611,7 +611,7 @@ GET /api/books?page=1&size=20
 
 ### 9.2 ソート機能
 
-ソート条件の指定:
+* ソート条件の指定:
 ```
 GET /api/books?sort=bookName,asc&sort=price,desc
 ```
@@ -634,9 +634,9 @@ GET /api/books?sort=bookName,asc&sort=price,desc
 
 ### 10.1 認証・認可
 
-現状は認証不要だが、将来的にJWT認証フィルタを実装:
-* すべてのエンドポイントで認証必須
-* 職務ランクに応じたアクセス制御（現状は全社員が参照可能）
+* 現状は認証不要だが、将来的にJWT認証フィルタを実装:
+  * すべてのエンドポイントで認証必須
+  * 職務ランクに応じたアクセス制御（現状は全社員が参照可能）
 
 ### 10.2 SQLインジェクション対策
 

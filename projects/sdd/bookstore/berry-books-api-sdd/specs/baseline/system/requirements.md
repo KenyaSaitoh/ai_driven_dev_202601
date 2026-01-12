@@ -1,9 +1,9 @@
 # berry-books-api - 要件定義書
 
-**プロジェクトID:** berry-books-api  
-**バージョン:** 2.0.0  
-**最終更新日:** 2025-12-27  
-**ステータス:** REST API仕様確定
+プロジェクトID: berry-books-api  
+バージョン: 2.0.0  
+最終更新日: 2025-12-27  
+ステータス: REST API仕様確定
 
 ---
 
@@ -11,17 +11,17 @@
 
 ### 1.1 構築するもの
 
-berry-books-apiは、オンライン書店「Berry Books」の**BFF（Backend for Frontend）**として機能するREST APIアプリケーションです。フロントエンド（berry-books-spa）の唯一のエントリーポイントとして、複数のバックエンドマイクロサービスを統合し、JWT認証、注文処理、API統合などのEC機能をREST APIとして提供します。
+berry-books-apiは、オンライン書店「Berry Books」のBFF（Backend for Frontend）として機能するREST APIアプリケーションです。フロントエンド（berry-books-spa）の唯一のエントリーポイントとして、複数のバックエンドマイクロサービスを統合し、JWT認証、注文処理、API統合などのEC機能をREST APIとして提供します。
 
 ### 1.2 プロジェクトの目的
 
 本システムは、フロントエンド（React SPA等）から利用されるバックエンドAPIを提供し、以下を実現することを目的とします：
 
-* **BFFパターン**: フロントエンドに最適化された単一のAPIエントリーポイント
-* **マイクロサービス統合**: 複数のバックエンドAPI（back-office-api、customer-hub-api）を統合
-* **API-First開発**: 明確なAPI仕様に基づく開発
-* **JWT認証**: ステートレスな認証機構による水平スケーラビリティ
-* **プロキシパターン**: 書籍・在庫情報はバックエンドAPIに透過的に転送
+* BFFパターン: フロントエンドに最適化された単一のAPIエントリーポイント
+* マイクロサービス統合: 複数のバックエンドAPI（back-office-api、customer-hub-api）を統合
+* API-First開発: 明確なAPI仕様に基づく開発
+* JWT認証: ステートレスな認証機構による水平スケーラビリティ
+* プロキシパターン: 書籍・在庫情報はバックエンドAPIに透過的に転送
 
 ---
 
@@ -52,35 +52,35 @@ berry-books-apiは、オンライン書店「Berry Books」の**BFF（Backend fo
 
 ### 3.1 フロントエンド開発者
 
-プロフィール::
-* 役割: React/Vue.js等のSPAフロントエンド開発者
-* 目的: バックエンドAPIを利用してユーザーインターフェースを構築
-* 技術レベル: REST API、JWT認証の知識あり
+* プロフィール:
+  * 役割: React/Vue.js等のSPAフロントエンド開発者
+  * 目的: バックエンドAPIを利用してユーザーインターフェースを構築
+  * 技術レベル: REST API、JWT認証の知識あり
 
-ニーズ::
-* 明確で一貫性のあるAPI仕様
-* 詳細なエラーメッセージ
-* APIドキュメントの充実
-* CORS対応
+* ニーズ:
+  * 明確で一貫性のあるAPI仕様
+  * 詳細なエラーメッセージ
+  * APIドキュメントの充実
+  * CORS対応
 
-課題::
-* API仕様が不明瞭
-* エラーハンドリングが困難
-* 認証フローが複雑
+* 課題:
+  * API仕様が不明瞭
+  * エラーハンドリングが困難
+  * 認証フローが複雑
 
 ### 3.2 エンドユーザー（間接的）
 
-プロフィール::
-* 年齢: 20-50代
-* 目的: 技術書・専門書の購入
-* デバイス: PC、タブレット、スマートフォン
-* 技術レベル: 基本的なWeb操作ができる
+* プロフィール:
+  * 年齢: 20-50代
+  * 目的: 技術書・専門書の購入
+  * デバイス: PC、タブレット、スマートフォン
+  * 技術レベル: 基本的なWeb操作ができる
 
-ニーズ::
-* 高速なレスポンス
-* 安全な認証・決済
-* 正確な在庫情報
-* 過去の注文履歴参照
+* ニーズ:
+  * 高速なレスポンス
+  * 安全な認証・決済
+  * 正確な在庫情報
+  * 過去の注文履歴参照
 
 ---
 
@@ -227,37 +227,37 @@ berry-books-apiは、オンライン書店「Berry Books」の**BFF（Backend fo
 
 ### 7.1 customer-hub-api連携
 
-**連携先:** customer-hub-api
+* 連携先: customer-hub-api
 
-**連携方式:** REST API (JAX-RS 3.1)
+* 連携方式: REST API (JAX-RS 3.1)
 
-**目的:** CUSTOMERテーブルへのアクセス（顧客情報取得、認証、登録）
+* 目的: CUSTOMERテーブルへのアクセス（顧客情報取得、認証、登録）
 
-主要エンドポイント::
-* `GET /customers/{customerId}` - 顧客取得
-* `GET /customers/query_email?email={email}` - メールアドレス検索（ログイン用）
-* `POST /customers/` - 顧客新規登録
+* 主要エンドポイント:
+  * `GET /customers/{customerId}` - 顧客取得
+  * `GET /customers/query_email?email={email}` - メールアドレス検索（ログイン用）
+  * `POST /customers/` - 顧客新規登録
 
-**詳細:** [external_interface.md](external_interface.md) を参照
+* 詳細: [external_interface.md](external_interface.md) を参照
 
 ### 7.2 back-office-api連携
 
-**連携先:** back-office-api
+* 連携先: back-office-api
 
-**連携方式:** REST API (JAX-RS 3.1)
+* 連携方式: REST API (JAX-RS 3.1)
 
-**目的:** BOOK、STOCK、CATEGORY、PUBLISHERテーブルへのアクセス（書籍・在庫管理）
+* 目的: BOOK、STOCK、CATEGORY、PUBLISHERテーブルへのアクセス（書籍・在庫管理）
 
-主要エンドポイント::
-* `GET /books` - 全書籍取得
-* `GET /books/{bookId}` - 書籍詳細取得
-* `GET /books/search/jpql` - 書籍検索（JPQL版）
-* `GET /books/search/criteria` - 書籍検索（Criteria API版）
-* `GET /categories` - カテゴリ一覧取得
-* `GET /stocks/{bookId}` - 在庫取得
-* `PUT /stocks/{bookId}` - 在庫更新（楽観的ロック対応）
+* 主要エンドポイント:
+  * `GET /books` - 全書籍取得
+  * `GET /books/{bookId}` - 書籍詳細取得
+  * `GET /books/search/jpql` - 書籍検索（JPQL版）
+  * `GET /books/search/criteria` - 書籍検索（Criteria API版）
+  * `GET /categories` - カテゴリ一覧取得
+  * `GET /stocks/{bookId}` - 在庫取得
+  * `PUT /stocks/{bookId}` - 在庫更新（楽観的ロック対応）
 
-**詳細:** [external_interface.md](external_interface.md) を参照
+* 詳細: [external_interface.md](external_interface.md) を参照
 
 ---
 

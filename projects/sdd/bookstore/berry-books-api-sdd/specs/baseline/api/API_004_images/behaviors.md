@@ -1,10 +1,10 @@
 # API_004_images - 画像API受入基準
 
-**API ID:** API_004_images  
-**API名:** 画像API  
-**ベースパス:** `/api/images`  
-**バージョン:** 2.0.0  
-**最終更新日:** 2025-12-27
+* API ID: API_004_images  
+* API名: 画像API  
+* ベースパス: `/api/images`  
+* バージョン: 2.0.0  
+* 最終更新日: 2025-12-27
 
 ---
 

@@ -73,19 +73,19 @@
 2. 社員コードで社員情報をデータベースから検索
 3. 社員が存在しない場合 → 401 Unauthorized
 4. パスワード照合
-   - BCryptハッシュの場合：`BCrypt.checkpw()`で検証
-   - 平文パスワードの場合：文字列比較（開発環境のみ）
+   * BCryptハッシュの場合：`BCrypt.checkpw()`で検証
+   * 平文パスワードの場合：文字列比較（開発環境のみ）
 5. パスワードが一致しない場合 → 401 Unauthorized
 6. JWT生成
-   - Payload: employeeId, employeeCode, departmentId
-   - 署名: HMAC-SHA256（秘密鍵: `jwt.secret-key`）
-   - 有効期限: 24時間（`jwt.expiration-ms`）
+   * Payload: employeeId, employeeCode, departmentId
+   * 署名: HMAC-SHA256（秘密鍵: `jwt.secret-key`）
+   * 有効期限: 24時間（`jwt.expiration-ms`）
 7. HttpOnly Cookieを生成
-   - Name: `back-office-jwt`
-   - Value: JWT文字列
-   - HttpOnly: true
-   - Secure: false（開発環境）、true（本番環境）
-   - MaxAge: 86400秒
+   * Name: `back-office-jwt`
+   * Value: JWT文字列
+   * HttpOnly: true
+   * Secure: false（開発環境）、true（本番環境）
+   * MaxAge: 86400秒
 8. レスポンス生成（社員情報 + Set-Cookie）
 
 #### 3.1.4 出力
@@ -129,9 +129,9 @@
 1. BookServiceを呼び出し
 2. BookDaoで全書籍を取得（JPQL）
 3. BookエンティティをBookTOに変換
-   - カテゴリ情報（CategoryInfo）
-   - 出版社情報（PublisherInfo）
-   - 在庫情報（quantity, version）
+   * カテゴリ情報（CategoryInfo）
+   * 出版社情報（PublisherInfo）
+   * 在庫情報（quantity, version）
 4. リスト形式でレスポンス生成
 
 #### 3.3.4 出力
@@ -179,10 +179,10 @@
 #### 3.5.3 処理フロー
 1. クエリパラメータから検索条件を取得
 2. 検索条件に応じてBookServiceのメソッドを呼び分け
-   - カテゴリID + キーワード → `searchBook(categoryId, keyword)`
-   - カテゴリIDのみ → `searchBook(categoryId)`
-   - キーワードのみ → `searchBook(keyword)`
-   - 条件なし → `getBooksAll()`
+   * カテゴリID + キーワード → `searchBook(categoryId, keyword)`
+   * カテゴリIDのみ → `searchBook(categoryId)`
+   * キーワードのみ → `searchBook(keyword)`
+   * 条件なし → `getBooksAll()`
 3. BookDaoでJPQLクエリ実行
 4. BookエンティティをBookTOに変換
 5. リスト形式でレスポンス生成
@@ -211,7 +211,7 @@
 3. StockDaoで指定IDの在庫情報を取得
 4. 在庫が存在しない場合 → 404 Not Found
 5. バージョンチェック
-   - 現在のバージョンとリクエストのバージョンが一致しない → 409 Conflict
+   * 現在のバージョンとリクエストのバージョンが一致しない → 409 Conflict
 6. 在庫数を更新
 7. JPAの`@Version`アノテーションによりバージョンが自動インクリメント
 8. トランザクションコミット時にUPDATE実行
@@ -233,27 +233,27 @@
 新規ワークフローを作成する。3種類のワークフロータイプに対応。
 
 #### 3.7.2 入力
-共通:
-* ワークフロータイプ（workflowType）: String
-* 作成者ID（createdBy）: Long
-* 申請理由（applyReason）: String
+* 共通:
+  * ワークフロータイプ（workflowType）: String
+  * 作成者ID（createdBy）: Long
+  * 申請理由（applyReason）: String
 
-ADD_NEW_BOOK:
-* 書籍名（bookName）: String
-* 著者（author）: String
-* 価格（price）: BigDecimal
-* 画像URL（imageUrl）: String
-* カテゴリID（categoryId）: Integer
-* 出版社ID（publisherId）: Integer
+* ADD_NEW_BOOK:
+  * 書籍名（bookName）: String
+  * 著者（author）: String
+  * 価格（price）: BigDecimal
+  * 画像URL（imageUrl）: String
+  * カテゴリID（categoryId）: Integer
+  * 出版社ID（publisherId）: Integer
 
-REMOVE_BOOK:
-* 書籍ID（bookId）: Integer
+* REMOVE_BOOK:
+  * 書籍ID（bookId）: Integer
 
-ADJUST_BOOK_PRICE:
-* 書籍ID（bookId）: Integer
-* 価格（price）: BigDecimal
-* 適用開始日（startDate）: LocalDate
-* 適用終了日（endDate）: LocalDate
+* ADJUST_BOOK_PRICE:
+  * 書籍ID（bookId）: Integer
+  * 価格（price）: BigDecimal
+  * 適用開始日（startDate）: LocalDate
+  * 適用終了日（endDate）: LocalDate
 
 #### 3.7.3 処理フロー
 1. リクエストボディから入力データを取得
@@ -261,11 +261,11 @@ ADJUST_BOOK_PRICE:
 3. ワークフロータイプのバリデーション
 4. 次のワークフローIDを採番（WorkflowDao）
 5. Workflowエンティティを生成
-   - WORKFLOW_ID: 採番したID
-   - STATE: CREATED
-   - OPERATION_TYPE: CREATE
-   - OPERATED_AT: 現在日時
-   - OPERATED_BY: 作成者ID
+   * WORKFLOW_ID: 採番したID
+   * STATE: CREATED
+   * OPERATION_TYPE: CREATE
+   * OPERATED_AT: 現在日時
+   * OPERATED_BY: 作成者ID
 6. ワークフロータイプごとの項目設定
 7. WorkflowDaoでINSERT
 8. WorkflowエンティティをWorkflowTOに変換
@@ -300,8 +300,8 @@ ADJUST_BOOK_PRICE:
 4. 状態チェック：CREATEDでない場合 → 400 Bad Request
 5. 更新者の存在チェック（EmployeeDao）
 6. 既存のCREATEレコードを直接更新
-   - 操作日時のみ更新（操作者は作成者のまま）
-   - ワークフロータイプごとの項目を更新
+   * 操作日時のみ更新（操作者は作成者のまま）
+   * ワークフロータイプごとの項目を更新
 7. EntityManagerのflushで即座に反映
 8. WorkflowエンティティをWorkflowTOに変換
 9. レスポンス生成
@@ -333,23 +333,23 @@ ADJUST_BOOK_PRICE:
 3. ワークフローが存在しない場合 → 404 Not Found
 4. 状態チェック：APPLIEDでない場合 → 400 Bad Request
 5. 承認権限チェック
-   - 承認者の取得（EmployeeDao）
-   - 職務ランクチェック：MANAGER以上（JobRankType）
-   - 部署チェック：
-     - DIRECTOR → 全部署OK
-     - MANAGER → 同一部署のみ
-   - 権限不足の場合 → 403 Forbidden
+   * 承認者の取得（EmployeeDao）
+   * 職務ランクチェック：MANAGER以上（JobRankType）
+   * 部署チェック：
+     * DIRECTOR → 全部署OK
+     * MANAGER → 同一部署のみ
+   * 権限不足の場合 → 403 Forbidden
 6. 新しい操作履歴を作成
-   - STATE: APPROVED
-   - OPERATION_TYPE: APPROVE
-   - OPERATED_AT: 現在日時
-   - OPERATED_BY: 承認者ID
-   - その他のフィールドは最新の状態からコピー
+   * STATE: APPROVED
+   * OPERATION_TYPE: APPROVE
+   * OPERATED_AT: 現在日時
+   * OPERATED_BY: 承認者ID
+   * その他のフィールドは最新の状態からコピー
 7. WorkflowDaoでINSERT
 8. 書籍マスタへの反映処理
-   - ADD_NEW_BOOK → Book + Stock INSERT
-   - REMOVE_BOOK → Book論理削除（DELETED=true）
-   - ADJUST_BOOK_PRICE → Book価格UPDATE
+   * ADD_NEW_BOOK → Book + Stock INSERT
+   * REMOVE_BOOK → Book論理削除（DELETED=true）
+   * ADJUST_BOOK_PRICE → Book価格UPDATE
 9. トランザクションコミット（ワークフロー履歴 + 書籍マスタ更新）
 10. WorkflowエンティティをWorkflowTOに変換
 11. レスポンス生成
@@ -380,30 +380,30 @@ ADJUST_BOOK_PRICE:
 
 #### 3.10.3 処理フロー
 
-ADD_NEW_BOOK（新規書籍追加）:
-1. 新しいBookエンティティを作成
-2. ワークフローから項目を設定
-   - bookName, author, price, imageUrl
-   - category（EntityManagerで取得）
-   - publisher（EntityManagerで取得）
-   - deleted: false
+* ADD_NEW_BOOK（新規書籍追加）:
+  1. 新しいBookエンティティを作成
+  2. ワークフローから項目を設定
+   * bookName, author, price, imageUrl
+   * category（EntityManagerで取得）
+   * publisher（EntityManagerで取得）
+   * deleted: false
 3. 在庫情報も設定（SecondaryTable）
-   - quantity: 0
-   - version: 0
+   * quantity: 0
+   * version: 0
 4. EntityManager.persist()でINSERT
 5. flush()してBOOK_IDを取得
 
-REMOVE_BOOK（既存書籍削除）:
-1. BookDaoで対象書籍を取得
-2. 書籍が存在する場合
-3. deletedフラグをtrueに設定
-4. トランザクションコミット時にUPDATE
+* REMOVE_BOOK（既存書籍削除）:
+  1. BookDaoで対象書籍を取得
+  2. 書籍が存在する場合
+  3. deletedフラグをtrueに設定
+  4. トランザクションコミット時にUPDATE
 
-ADJUST_BOOK_PRICE（価格改定）:
-1. BookDaoで対象書籍を取得
-2. 書籍が存在する場合
-3. priceフィールドを更新
-4. トランザクションコミット時にUPDATE
+* ADJUST_BOOK_PRICE（価格改定）:
+  1. BookDaoで対象書籍を取得
+  2. 書籍が存在する場合
+  3. priceフィールドを更新
+  4. トランザクションコミット時にUPDATE
 
 #### 3.10.4 出力
 なし（副作用としてデータベースを更新）
@@ -519,7 +519,7 @@ stateDiagram-v2
 | その他の例外 | 500 Internal Server Error | 内部エラーが発生しました |
 
 ### 6.2 エラーレスポンス
-すべてのエラーは統一的なJSON形式で返却:
+* すべてのエラーは統一的なJSON形式で返却:
 ```json
 {
   "error": "エラータイプ",
@@ -537,9 +537,9 @@ stateDiagram-v2
 ### 7.2 重要なトランザクション処理
 
 #### ワークフロー承認
-以下を1トランザクションで実行:
-1. ワークフロー操作履歴の追加
-2. 書籍マスタへの反映
+* 以下を1トランザクションで実行:
+  1. ワークフロー操作履歴の追加
+  2. 書籍マスタへの反映
 
 どちらか一方が失敗した場合、両方ともロールバックされる。
 

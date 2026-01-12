@@ -1,10 +1,10 @@
 # API_005_stocks - 在庫API受入基準
 
-**API ID:** API_005_stocks  
-**API名:** 在庫API  
-**ベースパス:** `/api/stocks`  
-**バージョン:** 2.0.0  
-**最終更新日:** 2025-01-02
+* API ID: API_005_stocks  
+* API名: 在庫API  
+* ベースパス: `/api/stocks`  
+* バージョン: 2.0.0  
+* 最終更新日: 2025-01-02
 
 ---
 

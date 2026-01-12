@@ -1,9 +1,9 @@
 # berry-books-api - 振る舞い仕様書（受入基準）
 
-**プロジェクトID:** berry-books-api  
-**バージョン:** 2.0.0  
-**最終更新日:** 2025-12-27  
-**ステータス:** REST API受入基準確定
+プロジェクトID: berry-books-api  
+バージョン: 2.0.0  
+最終更新日: 2025-12-27  
+ステータス: REST API受入基準確定
 
 ---
 
@@ -15,10 +15,10 @@
 
 API単位の受入基準は、以下のドキュメントを参照してください：
 
-* **[API_001_auth](../api/API_001_auth/behaviors.md)** - 認証APIの受入基準
-* **[API_002_books](../api/API_002_books/behaviors.md)** - 書籍APIの受入基準
-* **[API_003_orders](../api/API_003_orders/behaviors.md)** - 注文APIの受入基準
-* **[API_004_images](../api/API_004_images/behaviors.md)** - 画像APIの受入基準
+* [API_001_auth](../api/API_001_auth/behaviors.md) - 認証APIの受入基準
+* [API_002_books](../api/API_002_books/behaviors.md) - 書籍APIの受入基準
+* [API_003_orders](../api/API_003_orders/behaviors.md) - 注文APIの受入基準
+* [API_004_images](../api/API_004_images/behaviors.md) - 画像APIの受入基準
 
 ---
 

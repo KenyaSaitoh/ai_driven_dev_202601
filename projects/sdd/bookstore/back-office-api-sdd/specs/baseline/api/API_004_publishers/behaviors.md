@@ -1,10 +1,10 @@
 # API_004_publishers - 出版社API受入基準
 
-**API ID:** API_004_publishers  
-**API名:** 出版社API  
-**ベースパス:** `/api/publishers`  
-**バージョン:** 2.0.0  
-**最終更新日:** 2025-01-02
+* API ID: API_004_publishers  
+* API名: 出版社API  
+* ベースパス: `/api/publishers`  
+* バージョン: 2.0.0  
+* 最終更新日: 2025-01-02
 
 ---
 

@@ -47,9 +47,9 @@ stateDiagram-v2
 
 ### 5.1 ワークフロー作成
 
-**エンドポイント**: `POST /api/workflows`
+* エンドポイント: `POST /api/workflows`
 
-リクエスト（新規書籍追加）:
+* リクエスト（新規書籍追加）:
 ```json
 {
   "workflowType": "ADD_NEW_BOOK",
@@ -64,7 +64,7 @@ stateDiagram-v2
 }
 ```
 
-レスポンス（201 Created）:
+* レスポンス（201 Created）:
 ```json
 {
   "operationId": 1,
@@ -81,9 +81,9 @@ stateDiagram-v2
 
 ### 5.2 ワークフロー承認
 
-**エンドポイント**: `POST /api/workflows/{workflowId}/approve`
+* エンドポイント: `POST /api/workflows/{workflowId}/approve`
 
-リクエスト:
+* リクエスト:
 ```json
 {
   "operatedBy": 2,
@@ -91,21 +91,21 @@ stateDiagram-v2
 }
 ```
 
-処理フロー:
-1. 最新の状態を取得（APPLIEDか？）
-2. 承認権限チェック
-   - 職務ランク: MANAGER以上
-   - 部署: DIRECTORは全部署、MANAGERは同一部署のみ
+* 処理フロー:
+  1. 最新の状態を取得（APPLIEDか？）
+  2. 承認権限チェック
+   * 職務ランク: MANAGER以上
+   * 部署: DIRECTORは全部署、MANAGERは同一部署のみ
 3. 新しい操作履歴を作成（STATE=APPROVED）
 4. 書籍マスタへの反映
-   - ADD_NEW_BOOK → Book + Stock INSERT
-   - REMOVE_BOOK → Book論理削除（DELETED=true）
-   - ADJUST_BOOK_PRICE → Book価格UPDATE
+   * ADD_NEW_BOOK → Book + Stock INSERT
+   * REMOVE_BOOK → Book論理削除（DELETED=true）
+   * ADJUST_BOOK_PRICE → Book価格UPDATE
 5. トランザクションコミット（ワークフロー + 書籍マスタ）
 
-**レスポンス（200 OK）**: WorkflowTO
+* レスポンス（200 OK）: WorkflowTO
 
-レスポンス（403 Forbidden）:
+* レスポンス（403 Forbidden）:
 ```json
 {
   "error": "UnauthorizedApprovalException",
@@ -138,7 +138,7 @@ flowchart TD
 
 ## 7. ワークフロー履歴
 
-ワークフローの操作履歴は全て保存される（監査目的）:
+* ワークフローの操作履歴は全て保存される（監査目的）:
 
 | 操作 | STATE | OPERATION_TYPE |
 |------|-------|---------------|
@@ -148,7 +148,7 @@ flowchart TD
 | 承認 | APPROVED | APPROVE |
 | 却下 | CREATED | REJECT |
 
-例:
+* 例:
 ```
 OPERATION_ID  WORKFLOW_ID  STATE     OPERATION_TYPE  OPERATED_AT
 1             1            CREATED   CREATE          2025-01-01 10:00
@@ -160,39 +160,39 @@ OPERATION_ID  WORKFLOW_ID  STATE     OPERATION_TYPE  OPERATED_AT
 
 ### 8.1 ADD_NEW_BOOK
 
-書籍テーブルへの挿入処理:
-* 対象テーブル: BOOK
-* 挿入カラム: BOOK_NAME, AUTHOR, PRICE, CATEGORY_ID, PUBLISHER_ID, IMAGE_URL, DELETED
-* 初期値: DELETEDはfalse
+* 書籍テーブルへの挿入処理:
+  * 対象テーブル: BOOK
+  * 挿入カラム: BOOK_NAME, AUTHOR, PRICE, CATEGORY_ID, PUBLISHER_ID, IMAGE_URL, DELETED
+  * 初期値: DELETEDはfalse
 
-**在庫テーブルへの挿入処理**（自動実行）:
-* 対象テーブル: STOCK
-* 挿入カラム: BOOK_ID, QUANTITY, VERSION
-* 初期値: QUANTITY=0, VERSION=0
-* 備考: SecondaryTableマッピングにより自動的に実行される
+* 在庫テーブルへの挿入処理（自動実行）:
+  * 対象テーブル: STOCK
+  * 挿入カラム: BOOK_ID, QUANTITY, VERSION
+  * 初期値: QUANTITY=0, VERSION=0
+  * 備考: SecondaryTableマッピングにより自動的に実行される
 
 ### 8.2 REMOVE_BOOK
 
-書籍の論理削除処理:
-* 対象テーブル: BOOK
-* 更新カラム: DELETED = true
-* WHERE条件: BOOK_IDが対象書籍ID
-* 備考: 物理削除は行わず、論理削除フラグを設定する
-  - 論理削除後、書籍はAPIレスポンス（一覧・検索）から除外される
-  - 詳細取得APIでは引き続き参照可能
+* 書籍の論理削除処理:
+  * 対象テーブル: BOOK
+  * 更新カラム: DELETED = true
+  * WHERE条件: BOOK_IDが対象書籍ID
+  * 備考: 物理削除は行わず、論理削除フラグを設定する
+  * 論理削除後、書籍はAPIレスポンス（一覧・検索）から除外される
+  * 詳細取得APIでは引き続き参照可能
 
 ### 8.3 ADJUST_BOOK_PRICE
 
-書籍価格の更新処理:
-* 対象テーブル: BOOK
-* 更新カラム: PRICE = 新しい価格
-* WHERE条件: BOOK_IDが対象書籍ID
+* 書籍価格の更新処理:
+  * 対象テーブル: BOOK
+  * 更新カラム: PRICE = 新しい価格
+  * WHERE条件: BOOK_IDが対象書籍ID
 
 ## 9. トランザクション管理
 
-承認処理は1トランザクション:
-1. ワークフロー履歴INSERT
-2. 書籍マスタ更新
+* 承認処理は1トランザクション:
+  1. ワークフロー履歴INSERT
+  2. 書籍マスタ更新
 
 どちらか失敗した場合、両方ロールバック。
 
@@ -200,11 +200,11 @@ OPERATION_ID  WORKFLOW_ID  STATE     OPERATION_TYPE  OPERATED_AT
 
 ### 10.1 WorkflowCreateRequest
 
-**パッケージ**: `pro.kensait.backoffice.api.dto`
+* パッケージ: `pro.kensait.backoffice.api.dto`
 
-**構造種別**: リクエストデータ転送オブジェクト
+* 構造種別: リクエストデータ転送オブジェクト
 
-フィールド構成:
+* フィールド構成:
 
 | フィールド名 | 型 | 説明 |
 |------------|---|------|
@@ -223,11 +223,11 @@ OPERATION_ID  WORKFLOW_ID  STATE     OPERATION_TYPE  OPERATED_AT
 
 ### 10.2 WorkflowTO
 
-**パッケージ**: `pro.kensait.backoffice.api.dto`
+* パッケージ: `pro.kensait.backoffice.api.dto`
 
-**構造種別**: データ転送オブジェクト
+* 構造種別: データ転送オブジェクト
 
-主要フィールド構成:
+* 主要フィールド構成:
 
 | フィールド名 | 型 | 説明 |
 |------------|---|------|
@@ -242,7 +242,7 @@ OPERATION_ID  WORKFLOW_ID  STATE     OPERATION_TYPE  OPERATED_AT
 | operatorName | String | 操作者名 |
 | operatedAt | LocalDateTime | 操作日時 |
 
-**備考**: その他のフィールドも含む（詳細は実装参照）
+* 備考: その他のフィールドも含む（詳細は実装参照）
 
 ## 11. ビジネスルール
 

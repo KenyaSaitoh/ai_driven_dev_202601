@@ -1,9 +1,9 @@
 # [PROJECT_NAME] - 画面仕様書
 
-**プロジェクトID:** [PROJECT_ID]  
-**バージョン:** 1.0.0  
-**最終更新日:** [DATE]  
-**フォーマット:** PlantUML (draw.io インポート可能)
+プロジェクトID: [PROJECT_ID]  
+バージョン: 1.0.0  
+最終更新日: [DATE]  
+フォーマット: PlantUML (draw.io インポート可能)
 
 ---
 
@@ -12,10 +12,10 @@
 ### PlantUMLレンダリング
 各ワイヤーフレームは PlantUML の `salt` 記法で記述されています。
 
-レンダリング方法：:
-1. [PlantUML Online Editor](https://www.plantuml.com/plantuml/uml/)
-2. VS Code PlantUML拡張機能
-3. draw.io（File → Import → PlantUML）
+* レンダリング方法：:
+  1. [PlantUML Online Editor](https://www.plantuml.com/plantuml/uml/)
+  2. VS Code PlantUML拡張機能
+  3. draw.io（File → Import → PlantUML）
 
 ### draw.ioへのインポート
 ```
@@ -37,8 +37,8 @@
 
 ## 1. 画面名1
 
-**ファイル名:** `[FILENAME]`  
-**目的:** [画面の目的]
+ファイル名: `[FILENAME]`  
+目的: [画面の目的]
 
 ### PlantUML
 
@@ -171,8 +171,8 @@
 
 ## 6. エラー画面
 
-**ファイル名:** `error.xhtml`  
-**目的:** システムエラー発生時の表示
+ファイル名: `error.xhtml`  
+目的: システムエラー発生時の表示
 
 ### PlantUML
 
@@ -198,7 +198,7 @@
 @endsalt
 ```
 
-**注記:** エラー画面が不要な場合は、このセクションを「該当なし」とする。
+注記: エラー画面が不要な場合は、このセクションを「該当なし」とする。
 
 ---
 
@@ -210,10 +210,10 @@
 | Tablet | 768px - 1023px | タブレット | [NOTE] |
 | Mobile | 767px以下 | スマートフォン | [NOTE] |
 
-レスポンシブ対応方針::
-* [RESPONSIVE_POLICY]
+* レスポンシブ対応方針:
+  * [RESPONSIVE_POLICY]
 
-**注記:** レスポンシブ対応が不要な場合は、このセクションを「該当なし」とする。
+注記: レスポンシブ対応が不要な場合は、このセクションを「該当なし」とする。
 
 ---
 
@@ -233,11 +233,11 @@
 
 ### 8.3 コントラスト比
 
-* **テキストと背景:** 4.5:1 以上
-* **大きなテキストと背景:** 3:1 以上
+* テキストと背景: 4.5:1 以上
+* 大きなテキストと背景: 3:1 以上
 
 ### 8.4 WCAG準拠レベル
 
-**準拠レベル:** WCAG 2.1 Level AA
+準拠レベル: WCAG 2.1 Level AA
 
-**注記:** アクセシビリティ要件が不要な場合は、このセクションを「該当なし」とする。
+注記: アクセシビリティ要件が不要な場合は、このセクションを「該当なし」とする。

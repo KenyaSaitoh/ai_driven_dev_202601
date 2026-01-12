@@ -1,10 +1,10 @@
 # API_001_auth - 認証API機能設計書
 
-**API ID:** API_001_auth  
-**API名:** 認証API  
-**ベースパス:** `/api/auth`  
-**バージョン:** 2.0.0  
-**最終更新日:** 2025-12-27
+* API ID: API_001_auth  
+* API名: 認証API  
+* ベースパス: `/api/auth`  
+* バージョン: 2.0.0  
+* 最終更新日: 2025-12-27
 
 ---
 
@@ -12,9 +12,8 @@
 
 認証APIは、ユーザーのログイン、ログアウト、新規登録、現在のログインユーザー情報取得を提供する。JWT（JSON Web Token）ベースの認証を使用し、HttpOnly Cookieでトークンを管理する。
 
-**認証方式**: JWT（HttpOnly Cookie）
-
-**外部連携**: berry-books-rest API（顧客情報管理）
+* 認証方式: JWT（HttpOnly Cookie）
+* 外部連携: berry-books-rest API（顧客情報管理）
 
 ---
 
@@ -45,9 +44,9 @@ POST /api/auth/login
 
 #### 3.1.3 リクエスト
 
-**Content-Type**: `application/json`
+* Content-Type: `application/json`
 
-リクエストボディ:
+* リクエストボディ:
 
 ```json
 {
@@ -63,9 +62,9 @@ POST /api/auth/login
 
 #### 3.1.4 レスポンス
 
-成功時 (200 OK):
+* 成功時 (200 OK):
 
-**Set-Cookie**: `berry-books-jwt=<JWT Token>; Path=/; Max-Age=86400; HttpOnly`
+* Set-Cookie: `berry-books-jwt=<JWT Token>; Path=/; Max-Age=86400; HttpOnly`
 
 ```json
 {
@@ -77,7 +76,7 @@ POST /api/auth/login
 }
 ```
 
-エラー時 (401 Unauthorized):
+* エラー時 (401 Unauthorized):
 
 ```json
 {
@@ -141,15 +140,15 @@ JWT Cookieを削除（MaxAge=0）してログアウトする。
 
 #### 3.2.3 リクエスト
 
-**Content-Type**: `application/json`
+* Content-Type: `application/json`
 
-**リクエストボディ**: なし
+* リクエストボディ: なし
 
 #### 3.2.4 レスポンス
 
-成功時 (200 OK):
+* 成功時 (200 OK):
 
-**Set-Cookie**: `berry-books-jwt=; Path=/; Max-Age=0; HttpOnly`
+* Set-Cookie: `berry-books-jwt=; Path=/; Max-Age=0; HttpOnly`
 
 ```json
 {}
@@ -171,9 +170,9 @@ POST /api/auth/register
 
 #### 3.3.3 リクエスト
 
-**Content-Type**: `application/json`
+* Content-Type: `application/json`
 
-リクエストボディ:
+* リクエストボディ:
 
 ```json
 {
@@ -195,9 +194,9 @@ POST /api/auth/register
 
 #### 3.3.4 レスポンス
 
-成功時 (200 OK):
+* 成功時 (200 OK):
 
-**Set-Cookie**: `berry-books-jwt=<JWT Token>; Path=/; Max-Age=86400; HttpOnly`
+* Set-Cookie: `berry-books-jwt=<JWT Token>; Path=/; Max-Age=86400; HttpOnly`
 
 ```json
 {
@@ -209,7 +208,7 @@ POST /api/auth/register
 }
 ```
 
-エラー時 (409 Conflict):
+* エラー時 (409 Conflict):
 
 ```json
 {
@@ -220,7 +219,7 @@ POST /api/auth/register
 }
 ```
 
-エラー時 (400 Bad Request):
+* エラー時 (400 Bad Request):
 
 ```json
 {
@@ -256,13 +255,13 @@ JWT Cookieから顧客情報を取得する。認証必須。
 
 #### 3.4.3 リクエスト
 
-**Cookie**: `berry-books-jwt=<JWT Token>`
+* Cookie: `berry-books-jwt=<JWT Token>`
 
-**リクエストボディ**: なし
+* リクエストボディ: なし
 
 #### 3.4.4 レスポンス
 
-成功時 (200 OK):
+* 成功時 (200 OK):
 
 ```json
 {
@@ -274,7 +273,7 @@ JWT Cookieから顧客情報を取得する。認証必須。
 }
 ```
 
-エラー時 (401 Unauthorized):
+* エラー時 (401 Unauthorized):
 
 ```json
 {
@@ -291,9 +290,9 @@ JWT Cookieから顧客情報を取得する。認証必須。
 
 ### 4.1 LoginRequest
 
-**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+* 構造種別: レコード型（immutableなデータ転送オブジェクト）
 
-フィールド構成:
+* フィールド構成:
 
 | フィールド名 | 型 | 制約 | 説明 |
 |------------|---|------|------|
@@ -302,9 +301,9 @@ JWT Cookieから顧客情報を取得する。認証必須。
 
 ### 4.2 LoginResponse
 
-**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+* 構造種別: レコード型（immutableなデータ転送オブジェクト）
 
-フィールド構成:
+* フィールド構成:
 
 | フィールド名 | 型 | 説明 |
 |------------|---|------|
@@ -316,9 +315,9 @@ JWT Cookieから顧客情報を取得する。認証必須。
 
 ### 4.3 RegisterRequest
 
-**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+* 構造種別: レコード型（immutableなデータ転送オブジェクト）
 
-フィールド構成:
+* フィールド構成:
 
 | フィールド名 | 型 | 制約 | 説明 |
 |------------|---|------|------|
@@ -330,9 +329,9 @@ JWT Cookieから顧客情報を取得する。認証必須。
 
 ### 4.4 ErrorResponse
 
-**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+* 構造種別: レコード型（immutableなデータ転送オブジェクト）
 
-フィールド構成:
+* フィールド構成:
 
 | フィールド名 | 型 | 説明 |
 |------------|---|------|
@@ -361,7 +360,7 @@ JWT Cookieから顧客情報を取得する。認証必須。
 
 ### 6.1 JWT設定
 
-**設定ファイル**: `src/main/resources/META-INF/microprofile-config.properties`
+* 設定ファイル: `src/main/resources/META-INF/microprofile-config.properties`
 
 ```properties
 # JWT秘密鍵（本番環境では環境変数で上書きすること）
@@ -380,10 +379,10 @@ jwt.cookie-name=berry-books-jwt
 * Cost: 10（デフォルト）
 * ハッシュ長: 60文字
 
-ハッシュ化処理:
-* BCryptアルゴリズムを使用して平文パスワードをハッシュ化
-* ソルト生成はBCryptが自動的に実行
-* 戻り値: ハッシュ化されたパスワード文字列（60文字）
+* ハッシュ化処理:
+  * BCryptアルゴリズムを使用して平文パスワードをハッシュ化
+  * ソルト生成はBCryptが自動的に実行
+  * 戻り値: ハッシュ化されたパスワード文字列（60文字）
 
 ### 6.3 Cookie設定
 

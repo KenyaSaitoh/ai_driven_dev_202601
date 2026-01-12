@@ -34,12 +34,12 @@
 
 #### 3.1.2 リクエスト
 
-ヘッダー:
+* ヘッダー:
 ```
 Content-Type: application/json
 ```
 
-ボディ:
+* ボディ:
 ```json
 {
   "employeeCode": "E0001",
@@ -47,7 +47,7 @@ Content-Type: application/json
 }
 ```
 
-リクエストスキーマ:
+* リクエストスキーマ:
 | フィールド | 型 | 必須 | 説明 | バリデーション |
 |-----------|---|------|------|--------------|
 | employeeCode | String | Yes | 社員コード | NotBlank, Size(max=20) |
@@ -55,15 +55,15 @@ Content-Type: application/json
 
 #### 3.1.3 レスポンス
 
-成功（200 OK）:
+* 成功（200 OK）:
 
-ヘッダー:
+* ヘッダー:
 ```
 Set-Cookie: back-office-jwt=<JWT_TOKEN>; Path=/; Max-Age=86400; HttpOnly
 Content-Type: application/json; charset=UTF-8
 ```
 
-ボディ:
+* ボディ:
 ```json
 {
   "employeeId": 1,
@@ -76,7 +76,7 @@ Content-Type: application/json; charset=UTF-8
 }
 ```
 
-レスポンススキーマ:
+* レスポンススキーマ:
 | フィールド | 型 | 説明 |
 |-----------|---|------|
 | employeeId | Long | 社員ID |
@@ -87,7 +87,7 @@ Content-Type: application/json; charset=UTF-8
 | departmentId | Long | 部署ID |
 | departmentName | String | 部署名 |
 
-失敗（401 Unauthorized）:
+* 失敗（401 Unauthorized）:
 ```json
 {
   "error": "Unauthorized",
@@ -95,7 +95,7 @@ Content-Type: application/json; charset=UTF-8
 }
 ```
 
-失敗（500 Internal Server Error）:
+* 失敗（500 Internal Server Error）:
 ```json
 {
   "error": "Internal Server Error",
@@ -109,35 +109,35 @@ Content-Type: application/json; charset=UTF-8
 2. 社員コードで社員情報を検索（`EmployeeDao.findByCode()`）
 3. 社員が存在しない場合 → 401 Unauthorized
 4. パスワード照合
-   - BCryptハッシュの場合（`$2a$`, `$2b$`, `$2y$`で始まる）: `BCrypt.checkpw()`
-   - 平文パスワードの場合: 文字列比較（開発環境のみ）
+   * BCryptハッシュの場合（`$2a$`, `$2b$`, `$2y$`で始まる）: `BCrypt.checkpw()`
+   * 平文パスワードの場合: 文字列比較（開発環境のみ）
 5. パスワードが一致しない場合 → 401 Unauthorized
 6. JWT生成（`JwtUtil.generateToken()`）
-   - Payload: employeeId, employeeCode, departmentId
-   - 署名アルゴリズム: HMAC-SHA256
-   - 秘密鍵: `jwt.secret-key`
-   - 有効期限: 24時間（`jwt.expiration-ms`）
+   * Payload: employeeId, employeeCode, departmentId
+   * 署名アルゴリズム: HMAC-SHA256
+   * 秘密鍵: `jwt.secret-key`
+   * 有効期限: 24時間（`jwt.expiration-ms`）
 7. HttpOnly Cookieを生成
-   - Name: `back-office-jwt`（`jwt.cookie-name`）
-   - Value: JWT文字列
-   - HttpOnly: true
-   - Secure: false（開発環境）、true（本番環境）
-   - MaxAge: 86400秒
+   * Name: `back-office-jwt`（`jwt.cookie-name`）
+   * Value: JWT文字列
+   * HttpOnly: true
+   * Secure: false（開発環境）、true（本番環境）
+   * MaxAge: 86400秒
 8. レスポンス生成（LoginResponse + Set-Cookie）
 
 #### 3.1.5 ビジネスルール
 
 * BR-AUTH-001: パスワードはBCryptハッシュまたは平文で保存
-  - BCryptハッシュの判定: `$2a$`, `$2b$`, `$2y$`で始まる
-  - 平文パスワードは開発環境のみサポート（本番環境では非推奨）
+  * BCryptハッシュの判定: `$2a$`, `$2b$`, `$2y$`で始まる
+  * 平文パスワードは開発環境のみサポート（本番環境では非推奨）
 * BR-AUTH-002: JWT有効期限はデフォルト24時間
-  - `jwt.expiration-ms`プロパティで変更可能
+  * `jwt.expiration-ms`プロパティで変更可能
 * BR-AUTH-003: 認証失敗時はセキュリティ上、詳細な理由を返さない
-  - 社員コード不存在もパスワード不一致も同じエラーメッセージ
+  * 社員コード不存在もパスワード不一致も同じエラーメッセージ
 
 #### 3.1.6 JWT構造
 
-ヘッダー:
+* ヘッダー:
 ```json
 {
   "alg": "HS256",
@@ -145,7 +145,7 @@ Content-Type: application/json; charset=UTF-8
 }
 ```
 
-ペイロード:
+* ペイロード:
 ```json
 {
   "sub": "1",
@@ -164,7 +164,7 @@ Content-Type: application/json; charset=UTF-8
 | iat | Issued At（発行日時） |
 | exp | Expiration（有効期限） |
 
-シグネチャ:
+* シグネチャ:
 ```
 HMACSHA256(
   base64UrlEncode(header) + "." + base64UrlEncode(payload),
@@ -192,15 +192,15 @@ HMACSHA256(
 
 #### 3.2.2 リクエスト
 
-**ヘッダー**: なし
+* ヘッダー: なし
 
-**ボディ**: なし
+* ボディ: なし
 
 #### 3.2.3 レスポンス
 
-成功（200 OK）:
+* 成功（200 OK）:
 
-ヘッダー:
+* ヘッダー:
 ```
 Set-Cookie: back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 ```
@@ -210,17 +210,17 @@ Set-Cookie: back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 #### 3.2.4 処理フロー
 
 1. HttpOnly Cookieを削除
-   - Name: `back-office-jwt`
-   - Value: 空文字
-   - MaxAge: 0（即座に削除）
+   * Name: `back-office-jwt`
+   * Value: 空文字
+   * MaxAge: 0（即座に削除）
 2. 空のレスポンスを返却
 
 #### 3.2.5 ビジネスルール
 
 * BR-AUTH-004: ログアウトは単にCookieを削除するのみ
-  - JWTトークン自体は無効化されない（ステートレス設計）
-  - 有効期限まではトークンは技術的には有効
-  - Cookieが削除されるためブラウザから送信されなくなる
+  * JWTトークン自体は無効化されない（ステートレス設計）
+  * 有効期限まではトークンは技術的には有効
+  * Cookieが削除されるためブラウザから送信されなくなる
 
 #### 3.2.6 関連コンポーネント
 
@@ -239,16 +239,16 @@ Set-Cookie: back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 
 #### 3.3.2 リクエスト
 
-ヘッダー:
+* ヘッダー:
 ```
 Cookie: back-office-jwt=<JWT_TOKEN>
 ```
 
-**ボディ**: なし
+* ボディ: なし
 
 #### 3.3.3 レスポンス
 
-現在（501 Not Implemented）:
+* 現在（501 Not Implemented）:
 ```json
 {
   "error": "Not Implemented",
@@ -256,7 +256,7 @@ Cookie: back-office-jwt=<JWT_TOKEN>
 }
 ```
 
-将来の実装予定（200 OK）:
+* 将来の実装予定（200 OK）:
 ```json
 {
   "employeeId": 1,
@@ -281,10 +281,10 @@ Cookie: back-office-jwt=<JWT_TOKEN>
 
 #### 3.3.5 TODO
 
-JWT認証フィルタの実装後に以下を行う:
-* JWT認証フィルタで認証済みの社員IDをSecurityContextに設定
-* `getCurrentUser()`メソッドでSecurityContextから社員IDを取得
-* 社員情報をデータベースから取得して返却
+* JWT認証フィルタの実装後に以下を行う:
+  * JWT認証フィルタで認証済みの社員IDをSecurityContextに設定
+  * `getCurrentUser()`メソッドでSecurityContextから社員IDを取得
+  * 社員情報をデータベースから取得して返却
 
 #### 3.3.6 関連コンポーネント
 
@@ -300,28 +300,28 @@ JWT認証フィルタの実装後に以下を行う:
 
 ### 4.1 LoginRequest
 
-**パッケージ**: `pro.kensait.backoffice.api.dto`
+* パッケージ: `pro.kensait.backoffice.api.dto`
 
-**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+* 構造種別: レコード型（immutableなデータ転送オブジェクト）
 
-フィールド構成:
+* フィールド構成:
 
 | フィールド名 | 型 | 制約 | 説明 |
 |------------|---|------|------|
 | employeeCode | String | NotBlank, Size(max=20) | 社員コード |
 | password | String | NotBlank, Size(max=100) | パスワード |
 
-バリデーション要件:
-* employeeCodeは空白不可、最大20文字
-* passwordは空白不可、最大100文字
+* バリデーション要件:
+  * employeeCodeは空白不可、最大20文字
+  * passwordは空白不可、最大100文字
 
 ### 4.2 LoginResponse
 
-**パッケージ**: `pro.kensait.backoffice.api.dto`
+* パッケージ: `pro.kensait.backoffice.api.dto`
 
-**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+* 構造種別: レコード型（immutableなデータ転送オブジェクト）
 
-フィールド構成:
+* フィールド構成:
 
 | フィールド名 | 型 | 説明 |
 |------------|---|------|
@@ -335,11 +335,11 @@ JWT認証フィルタの実装後に以下を行う:
 
 ### 4.3 ErrorResponse
 
-**パッケージ**: `pro.kensait.backoffice.api.dto`
+* パッケージ: `pro.kensait.backoffice.api.dto`
 
-**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+* 構造種別: レコード型（immutableなデータ転送オブジェクト）
 
-フィールド構成:
+* フィールド構成:
 
 | フィールド名 | 型 | 説明 |
 |------------|---|------|
@@ -392,20 +392,20 @@ JWT認証フィルタの実装後に以下を行う:
 
 ### 6.2 ログ出力
 
-INFOレベル:
+* INFOレベル:
 ```
 [ AuthenResource#login ] employeeCode: E0001
 [ AuthenResource#logout ]
 [ AuthenResource#getCurrentUser ]
 ```
 
-WARNレベル:
+* WARNレベル:
 ```
 [ AuthenResource#login ] Employee not found: E0001
 [ AuthenResource#login ] Password mismatch for employeeCode: E0001
 ```
 
-ERRORレベル:
+* ERRORレベル:
 ```
 [ AuthenResource#login ] Unexpected error
 java.lang.Exception: ...
@@ -417,7 +417,7 @@ java.lang.Exception: ...
 
 ### 7.1 MicroProfile Config
 
-**ファイル**: `microprofile-config.properties`
+* ファイル: `microprofile-config.properties`
 
 ```properties
 # JWT秘密鍵（本番環境では環境変数で上書き）
@@ -433,7 +433,7 @@ jwt.cookie-name=back-office-jwt
 
 ### 7.2 環境変数（本番環境）
 
-本番環境では以下の環境変数を設定してデフォルト値を上書き:
+* 本番環境では以下の環境変数を設定してデフォルト値を上書き:
 
 ```bash
 export JWT_SECRET_KEY="ProductionSecretKeyMustBeVeryStrong"
@@ -468,9 +468,9 @@ export JWT_COOKIE_NAME="back-office-jwt"
 ## 9. パフォーマンス要件
 
 * ログインレスポンスタイム: 500ms以内
-  - データベースクエリ: 100ms以内
-  - パスワード照合（BCrypt）: 200ms以内
-  - JWT生成: 50ms以内
+  * データベースクエリ: 100ms以内
+  * パスワード照合（BCrypt）: 200ms以内
+  * JWT生成: 50ms以内
 * ログアウトレスポンスタイム: 50ms以内
 
 ---
@@ -631,10 +631,10 @@ stateDiagram-v2
     LoggedOut --> [*]
 ```
 
-備考:
-* ログアウト時はCookieを削除するだけで、JWTトークン自体は無効化されない
-* トークンは有効期限まで技術的には有効（ステートレス設計）
-* Cookieが削除されればブラウザから送信されなくなる
+* 備考:
+  * ログアウト時はCookieを削除するだけで、JWTトークン自体は無効化されない
+  * トークンは有効期限まで技術的には有効（ステートレス設計）
+  * Cookieが削除されればブラウザから送信されなくなる
 
 #### 10.5.2 JWT状態遷移図
 
@@ -677,13 +677,13 @@ flowchart TD
 
 ### 11.1 JWT認証フィルタ
 
-すべてのAPIエンドポイントで認証を要求する場合、以下を実装:
-* `@PreMatching`フィルタでCookieからJWTを抽出
-* JWTを検証（`JwtUtil.validateToken()`）
-* 有効な場合、SecurityContextに社員情報を設定
-* 無効な場合、401 Unauthorizedを返す
+* すべてのAPIエンドポイントで認証を要求する場合、以下を実装:
+  * `@PreMatching`フィルタでCookieからJWTを抽出
+  * JWTを検証（`JwtUtil.validateToken()`）
+  * 有効な場合、SecurityContextに社員情報を設定
+  * 無効な場合、401 Unauthorizedを返す
 
-実装予定シーケンス:
+* 実装予定シーケンス:
 
 ```mermaid
 sequenceDiagram
@@ -706,12 +706,12 @@ sequenceDiagram
 
 ### 11.2 リフレッシュトークン
 
-長期間のログインを維持する場合、リフレッシュトークンを実装:
-* アクセストークン（短期間: 1時間）
-* リフレッシュトークン（長期間: 7日間）
-* リフレッシュトークンでアクセストークンを再発行
+* 長期間のログインを維持する場合、リフレッシュトークンを実装:
+  * アクセストークン（短期間: 1時間）
+  * リフレッシュトークン（長期間: 7日間）
+  * リフレッシュトークンでアクセストークンを再発行
 
-実装予定シーケンス:
+* 実装予定シーケンス:
 
 ```mermaid
 sequenceDiagram
@@ -736,13 +736,13 @@ sequenceDiagram
 
 ### 11.3 多要素認証（MFA）
 
-セキュリティ強化のため、多要素認証を実装:
-* TOTP（Time-based One-Time Password）
-* SMS認証
-* メール認証
+* セキュリティ強化のため、多要素認証を実装:
+  * TOTP（Time-based One-Time Password）
+  * SMS認証
+  * メール認証
 
 ### 11.4 ソーシャルログイン
 
-外部認証プロバイダーとの連携:
-* OAuth 2.0
-* OpenID Connect
+* 外部認証プロバイダーとの連携:
+  * OAuth 2.0
+  * OpenID Connect

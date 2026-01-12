@@ -31,22 +31,22 @@
 
 #### 3.1.2 リクエスト
 
-**ヘッダー**: なし
+* ヘッダー: なし
 
-**クエリパラメータ**: なし
+* クエリパラメータ: なし
 
-**ボディ**: なし
+* ボディ: なし
 
 #### 3.1.3 レスポンス
 
-成功（200 OK）:
+* 成功（200 OK）:
 
-ヘッダー:
+* ヘッダー:
 ```
 Content-Type: application/json; charset=UTF-8
 ```
 
-ボディ:
+* ボディ:
 ```json
 [
   {
@@ -68,7 +68,7 @@ Content-Type: application/json; charset=UTF-8
 ]
 ```
 
-レスポンススキーマ:
+* レスポンススキーマ:
 | フィールド | 型 | 必須 | 説明 |
 |-----------|---|------|------|
 | categoryId | Integer | Yes | カテゴリID |
@@ -79,11 +79,11 @@ Content-Type: application/json; charset=UTF-8
 1. CategoryResourceを呼び出し（`getAllCategories()`）
 2. CategoryServiceを呼び出し（`getCategoriesAll()`）
 3. CategoryDaoで全カテゴリを取得
-   - JPQL: `SELECT c FROM Category c`
-   - Named Query: `Category.findAll`
+   * JPQL: `SELECT c FROM Category c`
+   * Named Query: `Category.findAll`
 4. Categoryエンティティのリストを取得
 5. 各CategoryエンティティをCategoryTOに変換
-   - ストリームAPIで変換: `.stream().map(c -> new CategoryTO(...)).toList()`
+   * ストリームAPIで変換: `.stream().map(c -> new CategoryTO(...)).toList()`
 6. 配列形式でJSON変換してレスポンス
 
 #### 3.1.5 ビジネスルール
@@ -104,18 +104,18 @@ Content-Type: application/json; charset=UTF-8
 
 ### 4.1 CategoryTO
 
-**パッケージ**: `pro.kensait.backoffice.api.dto`
+* パッケージ: `pro.kensait.backoffice.api.dto`
 
-**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+* 構造種別: レコード型（immutableなデータ転送オブジェクト）
 
-フィールド構成:
+* フィールド構成:
 
 | フィールド名 | 型 | 説明 |
 |------------|---|------|
 | categoryId | Integer | カテゴリID |
 | categoryName | String | カテゴリ名 |
 
-例:
+* 例:
 ```json
 {
   "categoryId": 1,
@@ -129,18 +129,18 @@ Content-Type: application/json; charset=UTF-8
 
 ### 5.1 Category
 
-**パッケージ**: `pro.kensait.backoffice.entity`
+* パッケージ: `pro.kensait.backoffice.entity`
 
-**マッピング対象テーブル**: CATEGORY
+* マッピング対象テーブル: CATEGORY
 
-エンティティ構成:
+* エンティティ構成:
 
 | フィールド名 | 型 | カラム名 | 制約 | 説明 |
 |------------|---|---------|-----|------|
 | categoryId | Integer | CATEGORY_ID | PRIMARY KEY | カテゴリID |
 | categoryName | String | CATEGORY_NAME | - | カテゴリ名 |
 
-**エンティティ種別**: 永続化エンティティ（JPAエンティティ）
+* エンティティ種別: 永続化エンティティ（JPAエンティティ）
 
 ---
 
@@ -164,17 +164,17 @@ Content-Type: application/json; charset=UTF-8
 |-----------|---------------|-----------|
 | 予期しないエラー | 500 Internal Server Error | エラーメッセージ |
 
-**備考**: カテゴリ一覧取得は基本的にエラーが発生しない（マスタデータ）
+* 備考: カテゴリ一覧取得は基本的にエラーが発生しない（マスタデータ）
 
 ### 7.2 ログ出力
 
-INFOレベル:
+* INFOレベル:
 ```
 [ CategoryResource#getAllCategories ]
 [ CategoryService#getCategoriesAll ]
 ```
 
-DEBUGレベル:
+* DEBUGレベル:
 ```
 [ CategoryDao#findAll ] Executing JPQL: SELECT c FROM Category c
 [ CategoryDao#findAll ] Result count: 4
@@ -191,8 +191,8 @@ DEBUGレベル:
 ### 8.2 キャッシング
 * 現状: キャッシュなし
 * 将来: アプリケーションレベルキャッシュ推奨
-  - マスタデータのため変更頻度が低い
-  - メモリキャッシュで高速化可能
+  * マスタデータのため変更頻度が低い
+  * メモリキャッシュで高速化可能
 
 ### 8.3 データ量
 * 想定レコード数: 10-50件
@@ -245,7 +245,7 @@ DEBUGレベル:
 }
 ```
 
-**推奨事項**: 新規開発では`/api/categories`を使用
+* 推奨事項: 新規開発では`/api/categories`を使用
 
 ---
 
@@ -253,22 +253,22 @@ DEBUGレベル:
 
 ### 11.1 クエリ仕様（JPQL）
 
-クエリ内容:
-* 対象エンティティ: Category
-* 取得フィールド: 全フィールド
-* WHERE条件: なし（全件取得）
+* クエリ内容:
+  * 対象エンティティ: Category
+  * 取得フィールド: 全フィールド
+  * WHERE条件: なし（全件取得）
 
 ### 11.2 実行されるSQLの論理構造
 
-SELECT句:
-* CATEGORY_ID
-* CATEGORY_NAME
+* SELECT句:
+  * CATEGORY_ID
+  * CATEGORY_NAME
 
-FROM句:
-* CATEGORY テーブル
+* FROM句:
+  * CATEGORY テーブル
 
-ORDER BY句:
-* CATEGORY_ID の昇順
+* ORDER BY句:
+  * CATEGORY_ID の昇順
 
 ---
 
@@ -276,7 +276,7 @@ ORDER BY句:
 
 ### 12.1 カテゴリ階層構造
 
-親子関係を持つカテゴリ構造の実装:
+* 親子関係を持つカテゴリ構造の実装:
 ```json
 {
   "categoryId": 1,
@@ -299,7 +299,7 @@ ORDER BY句:
 
 ### 12.2 カテゴリ統計情報
 
-カテゴリ別の書籍数を含む:
+* カテゴリ別の書籍数を含む:
 ```json
 {
   "categoryId": 1,
@@ -310,14 +310,14 @@ ORDER BY句:
 
 ### 12.3 カテゴリ詳細取得
 
-特定のカテゴリ詳細取得:
+* 特定のカテゴリ詳細取得:
 ```
 GET /api/categories/{categoryId}
 ```
 
 ### 12.4 カテゴリ検索
 
-カテゴリ名での検索:
+* カテゴリ名での検索:
 ```
 GET /api/categories?search=文学
 ```
@@ -328,9 +328,9 @@ GET /api/categories?search=文学
 
 ### 13.1 認証・認可
 
-現状は認証不要だが、将来的にJWT認証フィルタを実装:
-* すべてのエンドポイントで認証必須
-* 全社員が参照可能（職務ランクによる制限なし）
+* 現状は認証不要だが、将来的にJWT認証フィルタを実装:
+  * すべてのエンドポイントで認証必須
+  * 全社員が参照可能（職務ランクによる制限なし）
 
 ### 13.2 データ保護
 
@@ -349,10 +349,10 @@ GET /api/categories?search=文学
 
 ### 14.2 マイグレーション
 
-カテゴリマスタの変更時:
-1. 既存の書籍との関連を確認
-2. カテゴリ変更の影響範囲を分析
-3. データ移行スクリプトの作成
+* カテゴリマスタの変更時:
+  1. 既存の書籍との関連を確認
+  2. カテゴリ変更の影響範囲を分析
+  3. データ移行スクリプトの作成
 
 ---
 
@@ -441,7 +441,7 @@ flowchart TD
 
 ### 16.5 状態管理
 
-カテゴリAPIは状態を持たない（ステートレス）:
+* カテゴリAPIは状態を持たない（ステートレス）:
 
 ```mermaid
 graph LR

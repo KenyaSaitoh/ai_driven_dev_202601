@@ -1,9 +1,9 @@
 # [PROJECT_NAME] - データモデル仕様書
 
-**プロジェクトID:** [PROJECT_ID]  
-**バージョン:** 1.0.0  
-**最終更新日:** [DATE]  
-**ステータス:** [STATUS]
+プロジェクトID: [PROJECT_ID]  
+バージョン: 1.0.0  
+最終更新日: [DATE]  
+ステータス: [STATUS]
 
 ---
 
@@ -60,7 +60,7 @@ classDiagram
 
 ### 3.1 [TABLE_NAME_1] ([テーブル名])
 
-**目的:** [テーブルの目的と説明]
+目的: [テーブルの目的と説明]
 
 | カラム | 型 | 制約 | 説明 |
 |--------|------|-------------|-------------|
@@ -68,25 +68,25 @@ classDiagram
 | [COLUMN_NAME_2] | [TYPE] | NOT NULL | [説明] |
 | [COLUMN_NAME_3] | [TYPE] | NULL | [説明] |
 
-外部キー::
-* `[COLUMN_NAME]` → `[REF_TABLE]([REF_COLUMN])`
+* 外部キー:
+  * `[COLUMN_NAME]` → `[REF_TABLE]([REF_COLUMN])`
 
-ビジネスルール::
-* [ルール1]
-* [ルール2]
+* ビジネスルール:
+  * [ルール1]
+  * [ルール2]
 
-サンプルデータ::
+* サンプルデータ:
 ```
 [サンプルデータの例]
 ```
 
-インデックス::
-* PRIMARY KEY: `[COLUMN_NAME]`
-* UNIQUE KEY: `[COLUMN_NAME]`
-* INDEX: `[COLUMN_NAME]`
+* インデックス:
+  * PRIMARY KEY: `[COLUMN_NAME]`
+  * UNIQUE KEY: `[COLUMN_NAME]`
+  * INDEX: `[COLUMN_NAME]`
 
-外部キー制約::
-* `[FK_NAME]`: `[COLUMN]` → `[REF_TABLE]([REF_COLUMN])`
+* 外部キー制約:
+  * `[FK_NAME]`: `[COLUMN]` → `[REF_TABLE]([REF_COLUMN])`
 
 ---
 
@@ -100,11 +100,11 @@ classDiagram
 
 ### 4.1 [ENTITY_CLASS_NAME_1]
 
-**パッケージ:** `[package.name]`  
-**クラス名:** `[ClassName]`  
-**テーブルマッピング:** `[TABLE_NAME]`
+パッケージ: `[package.name]`  
+クラス名: `[ClassName]`  
+テーブルマッピング: `[TABLE_NAME]`
 
-フィールド::
+* フィールド:
 
 | フィールド名 | 型 | アノテーション | 説明 |
 |------------|-----|-------------|------|
@@ -112,14 +112,14 @@ classDiagram
 | [fieldName2] | [Type] | @Column(name="...") | [説明] |
 | [fieldName3] | [Type] | @ManyToOne | [説明] |
 
-リレーションシップ::
-* `@ManyToOne`: [RelatedEntity] ([説明])
-* `@OneToMany`: [RelatedEntity] ([説明])
+* リレーションシップ:
+  * `@ManyToOne`: [RelatedEntity] ([説明])
+  * `@OneToMany`: [RelatedEntity] ([説明])
 
-制約::
-* `@NotNull`
-* `@Size(min=X, max=Y)`
-* `@Email`
+* 制約:
+  * `@NotNull`
+  * `@Size(min=X, max=Y)`
+  * `@Email`
 
 ---
 
@@ -151,33 +151,33 @@ classDiagram
 
 ### 6.1 マスタデータ ([TABLE_NAME_1])
 
-データ挿入仕様:
-* 対象テーブル: [TABLE_NAME_1]
-* 挿入対象カラム: [COLUMN1], [COLUMN2]
-* データ例:
-  - レコード1: [VALUE1], '[VALUE2]'
-  - レコード2: [VALUE1], '[VALUE2]'
-  - レコード3: [VALUE1], '[VALUE2]'
+* データ挿入仕様:
+  * 対象テーブル: [TABLE_NAME_1]
+  * 挿入対象カラム: [COLUMN1], [COLUMN2]
+  * データ例:
+  * レコード1: [VALUE1], '[VALUE2]'
+  * レコード2: [VALUE1], '[VALUE2]'
+  * レコード3: [VALUE1], '[VALUE2]'
 
 ### 6.2 テストデータ (CUSTOMER例)
 
-データ挿入仕様:
-* 対象テーブル: CUSTOMER
-* 挿入対象カラム: CUSTOMER_ID, CUSTOMER_NAME, EMAIL, PASSWORD, BIRTHDAY, ADDRESS
-* サンプルレコード:
-  - ID=1: Alice, alice@gmail.com, パスワード, 1998-04-10, 東京都中央区1-1-1
-  - ID=2: Bob, bob@gmail.com, パスワード, 1988-05-10, 東京都杉並区2-2-2
+* データ挿入仕様:
+  * 対象テーブル: CUSTOMER
+  * 挿入対象カラム: CUSTOMER_ID, CUSTOMER_NAME, EMAIL, PASSWORD, BIRTHDAY, ADDRESS
+  * サンプルレコード:
+  * ID=1: Alice, alice@gmail.com, パスワード, 1998-04-10, 東京都中央区1-1-1
+  * ID=2: Bob, bob@gmail.com, パスワード, 1988-05-10, 東京都杉並区2-2-2
 
 ### 6.3 テストデータ (BOOK例)
 
-データ挿入仕様:
-* 対象テーブル: BOOK
-* 挿入対象カラム: BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE
-* サンプルレコード:
-  - ID=1: 'Java SEディープダイブ', Michael Johnson, カテゴリ1, 出版社3, 3400円
-  - ID=9: 'SpringBoot in Cloud', Paul Martin, カテゴリ2, 出版社3, 3000円
+* データ挿入仕様:
+  * 対象テーブル: BOOK
+  * 挿入対象カラム: BOOK_ID, BOOK_NAME, AUTHOR, CATEGORY_ID, PUBLISHER_ID, PRICE
+  * サンプルレコード:
+  * ID=1: 'Java SEディープダイブ', Michael Johnson, カテゴリ1, 出版社3, 3400円
+  * ID=9: 'SpringBoot in Cloud', Paul Martin, カテゴリ2, 出版社3, 3000円
 
-**注記:** 詳細なサンプルデータは実際のDMLスクリプトを参照する。
+注記: 詳細なサンプルデータは実際のDMLスクリプトを参照する。
 
 ---
 
@@ -188,15 +188,15 @@ classDiagram
 | [PARENT_TABLE_1] | [CHILD_TABLE_1] | [RELATIONSHIP] | [CARDINALITY] | [FK_COLUMN] |
 | [PARENT_TABLE_2] | [CHILD_TABLE_2] | [RELATIONSHIP] | [CARDINALITY] | [FK_COLUMN] |
 
-カーディナリティの表記::
-* `1:1` - 1対1
-* `1:N` - 1対多
-* `N:M` - 多対多
+* カーディナリティの表記:
+  * `1:1` - 1対1
+  * `1:N` - 1対多
+  * `N:M` - 多対多
 
-外部キー制約::
-* `ON DELETE CASCADE` - 親レコード削除時に子レコードも削除
-* `ON DELETE SET NULL` - 親レコード削除時に外部キーをNULLに設定
-* `ON DELETE RESTRICT` - 子レコードが存在する場合、親レコードの削除を拒否
+* 外部キー制約:
+  * `ON DELETE CASCADE` - 親レコード削除時に子レコードも削除
+  * `ON DELETE SET NULL` - 親レコード削除時に外部キーをNULLに設定
+  * `ON DELETE RESTRICT` - 子レコードが存在する場合、親レコードの削除を拒否
 
 ---
 
@@ -242,10 +242,10 @@ classDiagram
 | [TABLE_1] | [INDEX_NAME] | [COLUMNS] | [TYPE] | [PURPOSE] |
 | [TABLE_2] | [INDEX_NAME] | [COLUMNS] | [TYPE] | [PURPOSE] |
 
-インデックスタイプ::
-* B-Tree: 範囲検索、等値検索
-* Hash: 等値検索のみ
-* Full-text: 全文検索
+* インデックスタイプ:
+  * B-Tree: 範囲検索、等値検索
+  * Hash: 等値検索のみ
+  * Full-text: 全文検索
 
 ---
 
@@ -256,10 +256,10 @@ classDiagram
 | [TABLE_1] | [INITIAL] | [ANNUAL_GROWTH] | [3Y_PROJECTION] | [NOTE] |
 | [TABLE_2] | [INITIAL] | [ANNUAL_GROWTH] | [3Y_PROJECTION] | [NOTE] |
 
-ストレージ見積もり::
-* 総データ量: [TOTAL_SIZE]
-* インデックスサイズ: [INDEX_SIZE]
-* バックアップサイズ: [BACKUP_SIZE]
+* ストレージ見積もり:
+  * 総データ量: [TOTAL_SIZE]
+  * インデックスサイズ: [INDEX_SIZE]
+  * バックアップサイズ: [BACKUP_SIZE]
 
 ---
 
@@ -267,15 +267,15 @@ classDiagram
 
 ### 11.1 マイグレーション戦略
 
-* **ツール:** [MIGRATION_TOOL] (例: Flyway, Liquibase)
-* **バージョニング:** [VERSIONING_STRATEGY]
-* **ロールバック:** [ROLLBACK_STRATEGY]
+* ツール: [MIGRATION_TOOL] (例: Flyway, Liquibase)
+* バージョニング: [VERSIONING_STRATEGY]
+* ロールバック: [ROLLBACK_STRATEGY]
 
 ### 11.2 スキーマ変更ポリシー
 
-* **後方互換性:** [BACKWARD_COMPATIBILITY_POLICY]
-* **ダウンタイム:** [DOWNTIME_POLICY]
-* **変更手順:** [CHANGE_PROCEDURE]
+* 後方互換性: [BACKWARD_COMPATIBILITY_POLICY]
+* ダウンタイム: [DOWNTIME_POLICY]
+* 変更手順: [CHANGE_PROCEDURE]
 
 ---
 
@@ -290,9 +290,9 @@ classDiagram
 
 ### 12.2 アーカイブ戦略
 
-* **アーカイブトリガー:** [TRIGGER]
-* **アーカイブ先:** [DESTINATION]
-* **復元手順:** [RESTORE_PROCEDURE]
+* アーカイブトリガー: [TRIGGER]
+* アーカイブ先: [DESTINATION]
+* 復元手順: [RESTORE_PROCEDURE]
 
 ---
 
@@ -307,9 +307,9 @@ classDiagram
 
 ### 13.2 暗号化
 
-* **保存時暗号化:** [ENCRYPTION_AT_REST]
-* **転送時暗号化:** [ENCRYPTION_IN_TRANSIT]
-* **暗号化アルゴリズム:** [ALGORITHM]
+* 保存時暗号化: [ENCRYPTION_AT_REST]
+* 転送時暗号化: [ENCRYPTION_IN_TRANSIT]
+* 暗号化アルゴリズム: [ALGORITHM]
 
 ---
 
@@ -324,9 +324,9 @@ classDiagram
 
 ### 14.2 モニタリング指標
 
-* **レスポンスタイム:** [TARGET]
-* **スループット:** [TARGET]
-* **接続数:** [TARGET]
+* レスポンスタイム: [TARGET]
+* スループット: [TARGET]
+* 接続数: [TARGET]
 
 ---
 
@@ -334,18 +334,18 @@ classDiagram
 
 ### 15.1 ユニットテストデータ
 
-* **目的:** [PURPOSE]
-* **データ量:** [VOLUME]
-* **特徴:** [CHARACTERISTICS]
+* 目的: [PURPOSE]
+* データ量: [VOLUME]
+* 特徴: [CHARACTERISTICS]
 
 ### 15.2 結合テストデータ
 
-* **目的:** [PURPOSE]
-* **データ量:** [VOLUME]
-* **特徴:** [CHARACTERISTICS]
+* 目的: [PURPOSE]
+* データ量: [VOLUME]
+* 特徴: [CHARACTERISTICS]
 
 ### 15.3 パフォーマンステストデータ
 
-* **目的:** [PURPOSE]
-* **データ量:** [VOLUME]
-* **特徴:** [CHARACTERISTICS]
+* 目的: [PURPOSE]
+* データ量: [VOLUME]
+* 特徴: [CHARACTERISTICS]

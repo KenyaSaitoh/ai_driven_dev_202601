@@ -1,10 +1,10 @@
 # API_003_orders - 注文API機能設計書
 
-**API ID:** API_003_orders  
-**API名:** 注文API  
-**ベースパス:** `/api/orders`  
-**バージョン:** 2.0.0  
-**最終更新日:** 2025-12-27
+* API ID: API_003_orders  
+* API名: 注文API  
+* ベースパス: `/api/orders`  
+* バージョン: 2.0.0  
+* 最終更新日: 2025-12-27
 
 ---
 
@@ -12,7 +12,7 @@
 
 注文APIは、注文作成、注文履歴取得、注文詳細取得、注文明細取得を提供する。注文作成と注文履歴取得は認証必須。
 
-**認証要否**: 注文作成・注文履歴は必須、注文詳細・注文明細は不要
+* 認証要否: 注文作成・注文履歴は必須、注文詳細・注文明細は不要
 
 ---
 
@@ -43,11 +43,11 @@ POST /api/orders
 
 #### 3.1.3 リクエスト
 
-**Content-Type**: `application/json`
+* Content-Type: `application/json`
 
-**Cookie**: `berry-books-jwt=<JWT Token>`
+* Cookie: `berry-books-jwt=<JWT Token>`
 
-リクエストボディ:
+* リクエストボディ:
 
 ```json
 {
@@ -84,7 +84,7 @@ POST /api/orders
 
 #### 3.1.4 レスポンス
 
-成功時 (200 OK):
+* 成功時 (200 OK):
 
 ```json
 {
@@ -107,7 +107,7 @@ POST /api/orders
 }
 ```
 
-エラー時 (409 Conflict - 在庫不足):
+* エラー時 (409 Conflict - 在庫不足):
 
 ```json
 {
@@ -118,7 +118,7 @@ POST /api/orders
 }
 ```
 
-エラー時 (409 Conflict - 楽観的ロック競合):
+* エラー時 (409 Conflict - 楽観的ロック競合):
 
 ```json
 {
@@ -129,7 +129,7 @@ POST /api/orders
 }
 ```
 
-エラー時 (401 Unauthorized):
+* エラー時 (401 Unauthorized):
 
 ```json
 {
@@ -227,13 +227,13 @@ GET /api/orders/history
 
 #### 3.2.3 リクエスト
 
-**Cookie**: `berry-books-jwt=<JWT Token>`
+* Cookie: `berry-books-jwt=<JWT Token>`
 
-**リクエストパラメータ**: なし
+* リクエストパラメータ: なし
 
 #### 3.2.4 レスポンス
 
-成功時 (200 OK):
+* 成功時 (200 OK):
 
 ```json
 [
@@ -258,7 +258,7 @@ GET /api/orders/history
 ]
 ```
 
-エラー時 (401 Unauthorized):
+* エラー時 (401 Unauthorized):
 
 ```json
 {
@@ -294,7 +294,7 @@ GET /api/orders/{tranId}
 
 #### 3.3.3 リクエスト
 
-パスパラメータ:
+* パスパラメータ:
 
 | パラメータ | 型 | 説明 |
 |----------|---|------|
@@ -302,7 +302,7 @@ GET /api/orders/{tranId}
 
 #### 3.3.4 レスポンス
 
-成功時 (200 OK):
+* 成功時 (200 OK):
 
 ```json
 {
@@ -333,7 +333,7 @@ GET /api/orders/{tranId}
 }
 ```
 
-エラー時 (404 Not Found):
+* エラー時 (404 Not Found):
 
 ```json
 {
@@ -360,7 +360,7 @@ GET /api/orders/{tranId}/details/{detailId}
 
 #### 3.4.3 リクエスト
 
-パスパラメータ:
+* パスパラメータ:
 
 | パラメータ | 型 | 説明 |
 |----------|---|------|
@@ -369,7 +369,7 @@ GET /api/orders/{tranId}/details/{detailId}
 
 #### 3.4.4 レスポンス
 
-成功時 (200 OK):
+* 成功時 (200 OK):
 
 ```json
 {
@@ -382,7 +382,7 @@ GET /api/orders/{tranId}/details/{detailId}
 }
 ```
 
-エラー時 (404 Not Found):
+* エラー時 (404 Not Found):
 
 ```json
 {
@@ -399,9 +399,9 @@ GET /api/orders/{tranId}/details/{detailId}
 
 ### 4.1 OrderRequest
 
-**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+* 構造種別: レコード型（immutableなデータ転送オブジェクト）
 
-フィールド構成:
+* フィールド構成:
 
 | フィールド名 | 型 | 制約 | 説明 |
 |------------|---|------|------|
@@ -413,9 +413,9 @@ GET /api/orders/{tranId}/details/{detailId}
 
 ### 4.2 CartItemRequest
 
-**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+* 構造種別: レコード型（immutableなデータ転送オブジェクト）
 
-フィールド構成:
+* フィールド構成:
 
 | フィールド名 | 型 | 制約 | 説明 |
 |------------|---|------|------|
@@ -428,9 +428,9 @@ GET /api/orders/{tranId}/details/{detailId}
 
 ### 4.3 OrderResponse
 
-**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+* 構造種別: レコード型（immutableなデータ転送オブジェクト）
 
-フィールド構成:
+* フィールド構成:
 
 | フィールド名 | 型 | 説明 |
 |------------|---|------|
@@ -444,9 +444,9 @@ GET /api/orders/{tranId}/details/{detailId}
 
 ### 4.4 OrderHistoryResponse
 
-**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+* 構造種別: レコード型（immutableなデータ転送オブジェクト）
 
-フィールド構成:
+* フィールド構成:
 
 | フィールド名 | 型 | 説明 |
 |------------|---|------|
@@ -460,9 +460,9 @@ GET /api/orders/{tranId}/details/{detailId}
 
 ### 4.5 OrderDetailResponse
 
-**構造種別**: レコード型（immutableなデータ転送オブジェクト）
+* 構造種別: レコード型（immutableなデータ転送オブジェクト）
 
-フィールド構成:
+* フィールド構成:
 
 | フィールド名 | 型 | 説明 |
 |------------|---|------|
@@ -493,25 +493,25 @@ GET /api/orders/{tranId}/details/{detailId}
 
 ### 6.1 楽観的ロック戦略
 
-**対象テーブル**: STOCK
+* 対象テーブル: STOCK
 
-**VERSIONカラム**: BIGINT NOT NULL
+* VERSIONカラム: BIGINT NOT NULL
 
-処理フロー:
+* 処理フロー:
 
 1. カート追加時: VERSION値を取得しカートアイテムに保存
 2. 注文確定時: 保存したVERSION値で在庫を更新
 3. 成功時: 在庫数を減算、VERSION値を自動インクリメント
 4. 失敗時: OptimisticLockException、ユーザーにエラー表示
 
-更新処理の論理構造:
-* 対象テーブル: STOCK
-* SET句:
-  - QUANTITY = QUANTITY - (減算数量)
-  - VERSION = VERSION + 1
-* WHERE句:
-  - BOOK_ID = (対象の書籍ID)
-  - VERSION = (保存したバージョン番号)
+* 更新処理の論理構造:
+  * 対象テーブル: STOCK
+  * SET句:
+  * QUANTITY = QUANTITY - (減算数量)
+  * VERSION = VERSION + 1
+  * WHERE句:
+    * BOOK_ID = (対象の書籍ID)
+    * VERSION = (保存したバージョン番号)
 
 ---
 
@@ -519,9 +519,9 @@ GET /api/orders/{tranId}/details/{detailId}
 
 ### 7.1 トランザクション境界
 
-**トランザクション境界**: サービスレイヤーの `@Transactional`
+* トランザクション境界: サービスレイヤーの `@Transactional`
 
-OrderService.orderBooks()の処理:
+* OrderService.orderBooks()の処理:
 
 1. 在庫可用性チェック
 2. 在庫更新（楽観的ロック付き）

@@ -1,9 +1,9 @@
 # [PROJECT_NAME] - アーキテクチャ設計書
 
-**プロジェクトID:** [PROJECT_ID]  
-**バージョン:** 1.0.0  
-**最終更新日:** [DATE]  
-**ステータス:** [STATUS]
+プロジェクトID: [PROJECT_ID]  
+バージョン: 1.0.0  
+最終更新日: [DATE]  
+ステータス: [STATUS]
 
 ---
 
@@ -13,11 +13,11 @@
 
 | レイヤー | 技術 | バージョン | 選定理由 |
 |-------|-----------|---------|-----------|
-| **ランタイム** | [RUNTIME] | [VERSION] | [REASON] |
-| **プラットフォーム** | [PLATFORM] | [VERSION] | [REASON] |
-| **アプリサーバー** | [SERVER] | [VERSION] | [REASON] |
-| **データベース** | [DATABASE] | [VERSION] | [REASON] |
-| **ビルドツール** | [BUILD_TOOL] | [VERSION] | [REASON] |
+| ランタイム | [RUNTIME] | [VERSION] | [REASON] |
+| プラットフォーム | [PLATFORM] | [VERSION] | [REASON] |
+| アプリサーバー | [SERVER] | [VERSION] | [REASON] |
+| データベース | [DATABASE] | [VERSION] | [REASON] |
+| ビルドツール | [BUILD_TOOL] | [VERSION] | [REASON] |
 
 ### 1.2 フレームワーク仕様
 
@@ -73,9 +73,9 @@ graph TB
 
 | レイヤー | 責務 | 禁止事項 |
 |-------|-----------------|-------------------|
-| **[LAYER_1]** | • [RESPONSIBILITY_1]<br/>• [RESPONSIBILITY_2] | • [FORBIDDEN_1]<br/>• [FORBIDDEN_2] |
-| **[LAYER_2]** | • [RESPONSIBILITY_1]<br/>• [RESPONSIBILITY_2] | • [FORBIDDEN_1]<br/>• [FORBIDDEN_2] |
-| **[LAYER_3]** | • [RESPONSIBILITY_1]<br/>• [RESPONSIBILITY_2] | • [FORBIDDEN_1]<br/>• [FORBIDDEN_2] |
+| [LAYER_1] | • [RESPONSIBILITY_1]<br/>• [RESPONSIBILITY_2] | • [FORBIDDEN_1]<br/>• [FORBIDDEN_2] |
+| [LAYER_2] | • [RESPONSIBILITY_1]<br/>• [RESPONSIBILITY_2] | • [FORBIDDEN_1]<br/>• [FORBIDDEN_2] |
+| [LAYER_3] | • [RESPONSIBILITY_1]<br/>• [RESPONSIBILITY_2] | • [FORBIDDEN_1]<br/>• [FORBIDDEN_2] |
 
 ---
 
@@ -314,17 +314,17 @@ graph TB
 
 ### 16.1 コーディング規約
 
-* **命名規則:**
-  - [NAMING_CONVENTION_1]
-  - [NAMING_CONVENTION_2]
+* 命名規則:
+  * [NAMING_CONVENTION_1]
+  * [NAMING_CONVENTION_2]
 
-* **コードフォーマット:**
-  - [FORMAT_RULE_1]
-  - [FORMAT_RULE_2]
+* コードフォーマット:
+  * [FORMAT_RULE_1]
+  * [FORMAT_RULE_2]
 
 ### 16.2 コミット規約
 
-* **コミットメッセージフォーマット:**
+* コミットメッセージフォーマット:
   ```
   [TYPE]: [SUBJECT]
   
@@ -333,33 +333,33 @@ graph TB
   [FOOTER]
   ```
 
-* **コミットタイプ:**
-  - `feat`: 新機能
-  - `fix`: バグ修正
-  - `docs`: ドキュメント変更
-  - `style`: コードフォーマット
-  - `refactor`: リファクタリング
-  - `test`: テスト追加・修正
-  - `chore`: ビルドプロセス・補助ツール変更
+* コミットタイプ:
+  * `feat`: 新機能
+  * `fix`: バグ修正
+  * `docs`: ドキュメント変更
+  * `style`: コードフォーマット
+  * `refactor`: リファクタリング
+  * `test`: テスト追加・修正
+  * `chore`: ビルドプロセス・補助ツール変更
 
 ### 16.3 ブランチ戦略
 
-* **ブランチモデル:** [BRANCH_MODEL] (例: Git Flow, GitHub Flow)
-* **ブランチ命名規則:**
-  - `main`: 本番環境
-  - `develop`: 開発環境
-  - `feature/[FEATURE_NAME]`: 機能開発
-  - `bugfix/[BUG_NAME]`: バグ修正
-  - `hotfix/[ISSUE_NAME]`: 緊急修正
+* ブランチモデル: [BRANCH_MODEL] (例: Git Flow, GitHub Flow)
+* ブランチ命名規則:
+  * `main`: 本番環境
+  * `develop`: 開発環境
+  * `feature/[FEATURE_NAME]`: 機能開発
+  * `bugfix/[BUG_NAME]`: バグ修正
+  * `hotfix/[ISSUE_NAME]`: 緊急修正
 
 ### 16.4 コードレビュー
 
-* **レビュー観点:**
-  - [REVIEW_POINT_1]
-  - [REVIEW_POINT_2]
+* レビュー観点:
+  * [REVIEW_POINT_1]
+  * [REVIEW_POINT_2]
 
-* **承認ルール:**
-  - [APPROVAL_RULE]
+* 承認ルール:
+  * [APPROVAL_RULE]
 
 ---
 
@@ -369,23 +369,23 @@ graph TB
 
 以下の機能は現在のスコープ外であるが、将来的な拡張の可能性を考慮してアーキテクチャを設計している。
 
-* **[FUTURE_FEATURE_1]:**
-  - 概要: [DESCRIPTION]
-  - 拡張ポイント: [EXTENSION_POINT]
+* [FUTURE_FEATURE_1]:
+  * 概要: [DESCRIPTION]
+  * 拡張ポイント: [EXTENSION_POINT]
 
-* **[FUTURE_FEATURE_2]:**
-  - 概要: [DESCRIPTION]
-  - 拡張ポイント: [EXTENSION_POINT]
+* [FUTURE_FEATURE_2]:
+  * 概要: [DESCRIPTION]
+  * 拡張ポイント: [EXTENSION_POINT]
 
 ### 17.2 アーキテクチャの拡張性
 
-* **拡張可能な領域:**
-  - [EXTENSIBLE_AREA_1]
-  - [EXTENSIBLE_AREA_2]
+* 拡張可能な領域:
+  * [EXTENSIBLE_AREA_1]
+  * [EXTENSIBLE_AREA_2]
 
-* **拡張時の注意点:**
-  - [CONSIDERATION_1]
-  - [CONSIDERATION_2]
+* 拡張時の注意点:
+  * [CONSIDERATION_1]
+  * [CONSIDERATION_2]
 
 ---
 

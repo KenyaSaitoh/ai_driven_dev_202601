@@ -1,0 +1,265 @@
+openapi: 3.0.3
+info:
+  title: Berry Books API - 書籍API
+  description: |
+    Berry Books書店 BFF（Backend for Frontend）の書籍API仕様
+    
+    書籍の一覧取得、詳細取得、検索、カテゴリ一覧取得を提供する。
+    すべてのエンドポイントは認証不要で、back-office-apiへのプロキシとして機能する。
+  version: 2.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:8080/api
+    description: 開発環境
+  - url: https://api.berrybooks.example.com/api
+    description: 本番環境
+
+tags:
+  - name: books
+    description: 書籍操作
+  - name: categories
+    description: カテゴリ操作
+
+paths:
+  /books:
+    get:
+      tags:
+        - books
+      summary: 全書籍取得
+      description: 全書籍を取得する（back-office-apiへのプロキシ）
+      operationId: getAllBooks
+      responses:
+        '200':
+          description: 書籍一覧取得成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+
+  /books/{id}:
+    get:
+      tags:
+        - books
+      summary: 書籍詳細取得
+      description: 指定されたIDの書籍を取得する（back-office-apiへのプロキシ）
+      operationId: getBookById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 書籍ID
+          schema:
+            type: integer
+            format: int32
+            example: 1
+      responses:
+        '200':
+          description: 書籍詳細取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: 書籍が見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /books/search/jpql:
+    get:
+      tags:
+        - books
+      summary: 書籍検索（JPQL版）
+      description: JPQLを使用してカテゴリIDまたはキーワードで書籍を検索する（back-office-apiへのプロキシ）
+      operationId: searchBooksJpql
+      parameters:
+        - name: categoryId
+          in: query
+          description: カテゴリID（0または未指定=全カテゴリ）
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 1
+        - name: keyword
+          in: query
+          description: 検索キーワード（書籍名、著者名で部分一致検索）
+          required: false
+          schema:
+            type: string
+            example: Java
+      responses:
+        '200':
+          description: 検索成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+
+  /books/search/criteria:
+    get:
+      tags:
+        - books
+      summary: 書籍検索（Criteria API版）
+      description: Criteria APIを使用してカテゴリIDまたはキーワードで書籍を検索する（back-office-apiへのプロキシ）
+      operationId: searchBooksCriteria
+      parameters:
+        - name: categoryId
+          in: query
+          description: カテゴリID（0または未指定=全カテゴリ）
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 1
+        - name: keyword
+          in: query
+          description: 検索キーワード（書籍名、著者名で部分一致検索）
+          required: false
+          schema:
+            type: string
+            example: Java
+      responses:
+        '200':
+          description: 検索成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+
+  /categories:
+    get:
+      tags:
+        - categories
+      summary: カテゴリ一覧取得
+      description: カテゴリ一覧をマップ形式で取得する（back-office-apiへのプロキシ）
+      operationId: getAllCategories
+      responses:
+        '200':
+          description: カテゴリ一覧取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                description: カテゴリ名をキー、カテゴリIDを値とするマップ
+                example:
+                  Java: 1
+                  SpringBoot: 2
+                  SQL: 3
+
+components:
+  schemas:
+    Book:
+      type: object
+      properties:
+        bookId:
+          type: integer
+          format: int32
+          description: 書籍ID
+          example: 1
+        bookName:
+          type: string
+          description: 書籍名
+          example: Java入門
+        author:
+          type: string
+          description: 著者名
+          example: 山田太郎
+        categoryId:
+          type: integer
+          format: int32
+          description: カテゴリID
+          example: 1
+        publisherId:
+          type: integer
+          format: int32
+          description: 出版社ID
+          example: 1
+        price:
+          type: number
+          format: double
+          description: 価格（円）
+          example: 3000
+        category:
+          $ref: '#/components/schemas/Category'
+        publisher:
+          $ref: '#/components/schemas/Publisher'
+        stock:
+          $ref: '#/components/schemas/Stock'
+
+    Category:
+      type: object
+      properties:
+        categoryId:
+          type: integer
+          format: int32
+          description: カテゴリID
+          example: 1
+        categoryName:
+          type: string
+          description: カテゴリ名
+          example: Java
+
+    Publisher:
+      type: object
+      properties:
+        publisherId:
+          type: integer
+          format: int32
+          description: 出版社ID
+          example: 1
+        publisherName:
+          type: string
+          description: 出版社名
+          example: 技術評論社
+
+    Stock:
+      type: object
+      properties:
+        bookId:
+          type: integer
+          format: int32
+          description: 書籍ID
+          example: 1
+        quantity:
+          type: integer
+          format: int32
+          description: 在庫数
+          example: 10
+        version:
+          type: integer
+          format: int64
+          description: バージョン（楽観的ロック用）
+          example: 1
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: HTTPステータスコード
+          example: 404
+        error:
+          type: string
+          description: エラータイプ
+          example: NotFound
+        message:
+          type: string
+          description: エラーメッセージ（日本語）
+          example: 書籍が見つかりません
+        path:
+          type: string
+          description: リクエストパス
+          example: /api/books/999

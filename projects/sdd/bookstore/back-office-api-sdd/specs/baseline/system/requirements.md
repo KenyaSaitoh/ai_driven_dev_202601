@@ -26,8 +26,8 @@ Books Stock API - バックオフィス書籍在庫管理システム
 * FR-BOOK-001: 書籍一覧取得機能
 * FR-BOOK-002: 書籍詳細情報取得機能
 * FR-BOOK-003: 書籍検索機能（カテゴリ・キーワード）
-  - JPQL（静的クエリ）による検索
-  - Criteria API（動的クエリ）による検索
+  * JPQL（静的クエリ）による検索
+  * Criteria API（動的クエリ）による検索
 
 ### 2.3 カテゴリ管理機能
 * FR-CATEGORY-001: カテゴリ一覧取得機能
@@ -42,18 +42,18 @@ Books Stock API - バックオフィス書籍在庫管理システム
 
 ### 2.6 ワークフロー管理機能
 * FR-WORKFLOW-001: ワークフロー作成機能
-  - 新規書籍追加（ADD_NEW_BOOK）
-  - 既存書籍削除（REMOVE_BOOK）
-  - 書籍価格改定（ADJUST_BOOK_PRICE）
+  * 新規書籍追加（ADD_NEW_BOOK）
+  * 既存書籍削除（REMOVE_BOOK）
+  * 書籍価格改定（ADJUST_BOOK_PRICE）
 * FR-WORKFLOW-002: ワークフロー更新機能（一時保存）
 * FR-WORKFLOW-003: ワークフロー申請機能
 * FR-WORKFLOW-004: ワークフロー承認機能
-  - 承認権限チェック（MANAGER以上）
-  - 部署制限（DIRECTORは全部署可、MANAGERは同一部署のみ）
+  * 承認権限チェック（MANAGER以上）
+  * 部署制限（DIRECTORは全部署可、MANAGERは同一部署のみ）
 * FR-WORKFLOW-005: ワークフロー却下（差戻）機能
 * FR-WORKFLOW-006: ワークフロー一覧取得機能
-  - 状態・タイプによるフィルタリング
-  - 権限に応じた表示制限
+  * 状態・タイプによるフィルタリング
+  * 権限に応じた表示制限
 * FR-WORKFLOW-007: ワークフロー履歴取得機能
 * FR-WORKFLOW-008: ワークフロー承認後の書籍マスタ反映機能
 

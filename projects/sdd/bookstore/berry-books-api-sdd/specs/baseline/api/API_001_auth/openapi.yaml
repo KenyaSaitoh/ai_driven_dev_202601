@@ -1,0 +1,241 @@
+openapi: 3.0.3
+info:
+  title: Berry Books API - 認証API
+  description: |
+    Berry Books書店 BFF（Backend for Frontend）の認証API仕様
+    
+    ユーザーのログイン、ログアウト、新規登録、現在のログインユーザー情報取得を提供する。
+    JWT（JSON Web Token）ベースの認証を使用し、HttpOnly Cookieでトークンを管理する。
+  version: 2.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:8080/api
+    description: 開発環境
+  - url: https://api.berrybooks.example.com/api
+    description: 本番環境
+
+tags:
+  - name: auth
+    description: 認証操作
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: ログイン
+      description: メールアドレスとパスワードで認証し、JWT Cookieを発行する
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: ログイン成功
+          headers:
+            Set-Cookie:
+              description: JWTトークンを含むCookie
+              schema:
+                type: string
+                example: berry-books-jwt=<JWT_TOKEN>; Path=/; Max-Age=86400; HttpOnly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerInfo'
+        '401':
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: ログアウト
+      description: JWT Cookieを削除してログアウトする
+      operationId: logout
+      responses:
+        '200':
+          description: ログアウト成功
+          headers:
+            Set-Cookie:
+              description: Cookieを削除
+              schema:
+                type: string
+                example: berry-books-jwt=; Path=/; Max-Age=0; HttpOnly
+
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: 新規登録
+      description: 新規顧客を登録し、JWT Cookieを発行する
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: 登録成功
+          headers:
+            Set-Cookie:
+              description: JWTトークンを含むCookie
+              schema:
+                type: string
+                example: berry-books-jwt=<JWT_TOKEN>; Path=/; Max-Age=86400; HttpOnly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerInfo'
+        '409':
+          description: メールアドレス重複
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/me:
+    get:
+      tags:
+        - auth
+      summary: 現在のログインユーザー情報取得
+      description: JWT Cookieから現在ログイン中の顧客情報を取得する
+      operationId: getCurrentUser
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: ユーザー情報取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerInfo'
+        '401':
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: berry-books-jwt
+      description: JWT (JSON Web Token) を含むHttpOnly Cookie
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: メールアドレス
+          maxLength: 30
+          example: alice@gmail.com
+        password:
+          type: string
+          description: パスワード
+          format: password
+          minLength: 1
+          maxLength: 60
+          example: password
+
+    RegisterRequest:
+      type: object
+      required:
+        - customerName
+        - email
+        - password
+      properties:
+        customerName:
+          type: string
+          description: 顧客名
+          maxLength: 30
+          example: 山田太郎
+        email:
+          type: string
+          format: email
+          description: メールアドレス
+          maxLength: 30
+          example: yamada@example.com
+        password:
+          type: string
+          description: パスワード
+          format: password
+          minLength: 1
+          maxLength: 60
+          example: password123
+        birthday:
+          type: string
+          format: date
+          description: 生年月日（ISO 8601形式）
+          example: "1990-01-01"
+        address:
+          type: string
+          description: 住所
+          maxLength: 200
+          example: 東京都渋谷区1-2-3
+
+    CustomerInfo:
+      type: object
+      properties:
+        customerId:
+          type: integer
+          format: int32
+          description: 顧客ID
+          example: 1
+        customerName:
+          type: string
+          description: 顧客名
+          example: Alice
+        email:
+          type: string
+          format: email
+          description: メールアドレス
+          example: alice@gmail.com
+        birthday:
+          type: string
+          format: date
+          description: 生年月日（ISO 8601形式）
+          example: "1990-01-01"
+        address:
+          type: string
+          description: 住所
+          example: 東京都渋谷区1-2-3
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: HTTPステータスコード
+          example: 401
+        error:
+          type: string
+          description: エラータイプ
+          example: Unauthorized
+        message:
+          type: string
+          description: エラーメッセージ（日本語）
+          example: メールアドレスまたはパスワードが正しくありません
+        path:
+          type: string
+          description: リクエストパス
+          example: /api/auth/login

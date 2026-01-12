@@ -1,0 +1,357 @@
+openapi: 3.0.3
+info:
+  title: Berry Books API - 注文API
+  description: |
+    Berry Books書店 BFF（Backend for Frontend）の注文API仕様
+    
+    注文作成、注文履歴取得、注文詳細取得、注文明細取得を提供する。
+    注文作成と注文履歴取得は認証必須。
+  version: 2.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:8080/api
+    description: 開発環境
+  - url: https://api.berrybooks.example.com/api
+    description: 本番環境
+
+tags:
+  - name: orders
+    description: 注文操作
+
+paths:
+  /orders:
+    post:
+      tags:
+        - orders
+      summary: 注文作成
+      description: |
+        カート内の書籍を注文する。認証必須。
+        在庫引き当て、在庫減算、注文レコード作成を実行する。
+      operationId: createOrder
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+      responses:
+        '200':
+          description: 注文作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '401':
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: 在庫不足または楽観的ロック競合
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders/history:
+    get:
+      tags:
+        - orders
+      summary: 注文履歴取得
+      description: ログイン中の顧客の注文履歴を取得する。認証必須。
+      operationId: getOrderHistory
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: 注文履歴取得成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderHistoryItem'
+        '401':
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders/{tranId}:
+    get:
+      tags:
+        - orders
+      summary: 注文詳細取得
+      description: 指定された注文IDの注文詳細を取得する。認証不要。
+      operationId: getOrderDetail
+      parameters:
+        - name: tranId
+          in: path
+          required: true
+          description: 注文トランザクションID
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: 注文詳細取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: 注文が見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders/{tranId}/details/{detailId}:
+    get:
+      tags:
+        - orders
+      summary: 注文明細取得
+      description: 指定された注文明細IDの詳細を取得する。認証不要。
+      operationId: getOrderDetailItem
+      parameters:
+        - name: tranId
+          in: path
+          required: true
+          description: 注文トランザクションID
+          schema:
+            type: integer
+            format: int64
+            example: 1
+        - name: detailId
+          in: path
+          required: true
+          description: 注文明細ID
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: 注文明細取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetail'
+        '404':
+          description: 注文明細が見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: berry-books-jwt
+      description: JWT (JSON Web Token) を含むHttpOnly Cookie
+
+  schemas:
+    OrderRequest:
+      type: object
+      required:
+        - cartItems
+        - totalPrice
+        - deliveryPrice
+        - deliveryAddress
+        - settlementType
+      properties:
+        cartItems:
+          type: array
+          description: カート内の書籍リスト
+          items:
+            $ref: '#/components/schemas/CartItem'
+        totalPrice:
+          type: integer
+          description: 商品合計金額
+          example: 6000
+        deliveryPrice:
+          type: integer
+          description: 配送料金
+          example: 800
+        deliveryAddress:
+          type: string
+          description: 配送先住所
+          maxLength: 200
+          example: 東京都渋谷区1-2-3
+        settlementType:
+          type: integer
+          description: |
+            決済方法
+            * 1 - 銀行振込
+            * 2 - クレジットカード
+            * 3 - 着払い
+          enum: [1, 2, 3]
+          example: 1
+
+    CartItem:
+      type: object
+      required:
+        - bookId
+        - bookName
+        - publisherName
+        - price
+        - count
+        - version
+      properties:
+        bookId:
+          type: integer
+          format: int32
+          description: 書籍ID
+          example: 1
+        bookName:
+          type: string
+          description: 書籍名
+          example: Java入門
+        publisherName:
+          type: string
+          description: 出版社名
+          example: 技術評論社
+        price:
+          type: integer
+          description: 価格
+          example: 3000
+        count:
+          type: integer
+          description: 注文数
+          minimum: 1
+          example: 2
+        version:
+          type: integer
+          format: int64
+          description: 在庫バージョン（楽観的ロック用）
+          example: 1
+
+    OrderResponse:
+      type: object
+      properties:
+        orderTranId:
+          type: integer
+          format: int64
+          description: 注文トランザクションID
+          example: 1
+        orderDate:
+          type: string
+          format: date
+          description: 注文日（ISO 8601形式）
+          example: "2025-12-27"
+        totalPrice:
+          type: integer
+          description: 商品合計金額
+          example: 6000
+        deliveryPrice:
+          type: integer
+          description: 配送料金
+          example: 800
+        deliveryAddress:
+          type: string
+          description: 配送先住所
+          example: 東京都渋谷区1-2-3
+        settlementType:
+          type: integer
+          description: 決済方法（1:銀行振込, 2:クレジットカード, 3:着払い）
+          example: 1
+        orderDetails:
+          type: array
+          description: 注文明細リスト
+          items:
+            $ref: '#/components/schemas/OrderDetail'
+
+    OrderDetail:
+      type: object
+      properties:
+        orderDetailId:
+          type: integer
+          format: int64
+          description: 注文明細ID
+          example: 1
+        bookId:
+          type: integer
+          format: int32
+          description: 書籍ID
+          example: 1
+        bookName:
+          type: string
+          description: 書籍名
+          example: Java入門
+        publisherName:
+          type: string
+          description: 出版社名
+          example: 技術評論社
+        price:
+          type: integer
+          description: 価格
+          example: 3000
+        count:
+          type: integer
+          description: 注文数
+          example: 2
+
+    OrderHistoryItem:
+      type: object
+      properties:
+        orderDate:
+          type: string
+          format: date
+          description: 注文日（ISO 8601形式）
+          example: "2025-12-27"
+        orderTranId:
+          type: integer
+          format: int64
+          description: 注文トランザクションID
+          example: 1
+        orderDetailId:
+          type: integer
+          format: int64
+          description: 注文明細ID
+          example: 1
+        bookName:
+          type: string
+          description: 書籍名
+          example: Java入門
+        publisherName:
+          type: string
+          description: 出版社名
+          example: 技術評論社
+        price:
+          type: integer
+          description: 価格
+          example: 3000
+        count:
+          type: integer
+          description: 注文数
+          example: 2
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: HTTPステータスコード
+          example: 409
+        error:
+          type: string
+          description: エラータイプ
+          example: Conflict
+        message:
+          type: string
+          description: エラーメッセージ（日本語）
+          example: 在庫が不足しています：Java入門
+        path:
+          type: string
+          description: リクエストパス
+          example: /api/orders

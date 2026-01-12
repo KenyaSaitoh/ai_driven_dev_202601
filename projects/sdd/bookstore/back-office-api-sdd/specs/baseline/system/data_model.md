@@ -98,15 +98,15 @@ erDiagram
 | IMAGE_URL | VARCHAR | YES | - | 画像URL |
 | DELETED | BOOLEAN | YES | - | 削除フラグ（論理削除） |
 
-制約:
-* PRIMARY KEY: BOOK_ID
-* FOREIGN KEY: CATEGORY_ID → CATEGORY(CATEGORY_ID)
-* FOREIGN KEY: PUBLISHER_ID → PUBLISHER(PUBLISHER_ID)
+* 制約:
+  * PRIMARY KEY: BOOK_ID
+  * FOREIGN KEY: CATEGORY_ID → CATEGORY(CATEGORY_ID)
+  * FOREIGN KEY: PUBLISHER_ID → PUBLISHER(PUBLISHER_ID)
 
-インデックス:
-* IDX_BOOK_CATEGORY: CATEGORY_ID
-* IDX_BOOK_PUBLISHER: PUBLISHER_ID
-* IDX_BOOK_DELETED: DELETED
+* インデックス:
+  * IDX_BOOK_CATEGORY: CATEGORY_ID
+  * IDX_BOOK_PUBLISHER: PUBLISHER_ID
+  * IDX_BOOK_DELETED: DELETED
 
 ### 3.2 STOCK（在庫マスタ）
 
@@ -118,14 +118,14 @@ erDiagram
 | QUANTITY | INTEGER | YES | - | 在庫数 |
 | VERSION | BIGINT | YES | - | バージョン（楽観的ロック用） |
 
-制約:
-* PRIMARY KEY: BOOK_ID
-* FOREIGN KEY: BOOK_ID → BOOK(BOOK_ID)
+* 制約:
+  * PRIMARY KEY: BOOK_ID
+  * FOREIGN KEY: BOOK_ID → BOOK(BOOK_ID)
 
-備考:
-* BOOKテーブルと1:1の関係
-* VERSIONカラムはJPAの`@Version`アノテーションで自動管理
-* 更新時にバージョンが一致しない場合、`OptimisticLockException`が発生
+* 備考:
+  * BOOKテーブルと1:1の関係
+  * VERSIONカラムはJPAの`@Version`アノテーションで自動管理
+  * 更新時にバージョンが一致しない場合、`OptimisticLockException`が発生
 
 ### 3.3 CATEGORY（カテゴリマスタ）
 
@@ -136,14 +136,14 @@ erDiagram
 | CATEGORY_ID | INTEGER | NO | PK | カテゴリID |
 | CATEGORY_NAME | VARCHAR | YES | - | カテゴリ名 |
 
-制約:
-* PRIMARY KEY: CATEGORY_ID
+* 制約:
+  * PRIMARY KEY: CATEGORY_ID
 
-データ例:
-* 1: 文学
-* 2: ビジネス
-* 3: 技術
-* 4: 歴史
+* データ例:
+  * 1: 文学
+  * 2: ビジネス
+  * 3: 技術
+  * 4: 歴史
 
 ### 3.4 PUBLISHER（出版社マスタ）
 
@@ -154,8 +154,8 @@ erDiagram
 | PUBLISHER_ID | INTEGER | NO | PK | 出版社ID |
 | PUBLISHER_NAME | VARCHAR | YES | - | 出版社名 |
 
-制約:
-* PRIMARY KEY: PUBLISHER_ID
+* 制約:
+  * PRIMARY KEY: PUBLISHER_ID
 
 ### 3.5 EMPLOYEE（社員マスタ）
 
@@ -171,18 +171,18 @@ erDiagram
 | JOB_RANK | INTEGER | YES | - | 職務ランク（1:ASSOCIATE, 2:MANAGER, 3:DIRECTOR） |
 | DEPARTMENT_ID | BIGINT | YES | FK | 部署ID |
 
-制約:
-* PRIMARY KEY: EMPLOYEE_ID
-* UNIQUE KEY: EMPLOYEE_CODE
-* FOREIGN KEY: DEPARTMENT_ID → DEPARTMENT(DEPARTMENT_ID)
+* 制約:
+  * PRIMARY KEY: EMPLOYEE_ID
+  * UNIQUE KEY: EMPLOYEE_CODE
+  * FOREIGN KEY: DEPARTMENT_ID → DEPARTMENT(DEPARTMENT_ID)
 
-インデックス:
-* UK_EMPLOYEE_CODE: EMPLOYEE_CODE (UNIQUE)
-* IDX_EMPLOYEE_DEPT: DEPARTMENT_ID
+* インデックス:
+  * UK_EMPLOYEE_CODE: EMPLOYEE_CODE (UNIQUE)
+  * IDX_EMPLOYEE_DEPT: DEPARTMENT_ID
 
-備考:
-* PASSWORDはBCryptでハッシュ化して保存
-* 開発環境では平文パスワードもサポート（本番環境では非推奨）
+* 備考:
+  * PASSWORDはBCryptでハッシュ化して保存
+  * 開発環境では平文パスワードもサポート（本番環境では非推奨）
 
 ### 3.6 DEPARTMENT（部署マスタ）
 
@@ -193,13 +193,13 @@ erDiagram
 | DEPARTMENT_ID | BIGINT | NO | PK | 部署ID |
 | DEPARTMENT_NAME | VARCHAR | YES | - | 部署名 |
 
-制約:
-* PRIMARY KEY: DEPARTMENT_ID
+* 制約:
+  * PRIMARY KEY: DEPARTMENT_ID
 
-データ例:
-* 1: 営業部
-* 2: 管理部
-* 3: 物流部
+* データ例:
+  * 1: 営業部
+  * 2: 管理部
+  * 3: 物流部
 
 ### 3.7 WORKFLOW（ワークフロー履歴）
 
@@ -226,23 +226,23 @@ erDiagram
 | OPERATED_AT | TIMESTAMP | YES | - | 操作日時 |
 | OPERATION_REASON | VARCHAR | YES | - | 操作理由（承認・却下時） |
 
-制約:
-* PRIMARY KEY: OPERATION_ID
-* FOREIGN KEY: BOOK_ID → BOOK(BOOK_ID)
-* FOREIGN KEY: CATEGORY_ID → CATEGORY(CATEGORY_ID)
-* FOREIGN KEY: PUBLISHER_ID → PUBLISHER(PUBLISHER_ID)
-* FOREIGN KEY: OPERATED_BY → EMPLOYEE(EMPLOYEE_ID)
+* 制約:
+  * PRIMARY KEY: OPERATION_ID
+  * FOREIGN KEY: BOOK_ID → BOOK(BOOK_ID)
+  * FOREIGN KEY: CATEGORY_ID → CATEGORY(CATEGORY_ID)
+  * FOREIGN KEY: PUBLISHER_ID → PUBLISHER(PUBLISHER_ID)
+  * FOREIGN KEY: OPERATED_BY → EMPLOYEE(EMPLOYEE_ID)
 
-インデックス:
-* IDX_WORKFLOW_ID: WORKFLOW_ID
-* IDX_WORKFLOW_STATE: STATE
-* IDX_WORKFLOW_TYPE: WORKFLOW_TYPE
-* IDX_WORKFLOW_OPERATED_BY: OPERATED_BY
+* インデックス:
+  * IDX_WORKFLOW_ID: WORKFLOW_ID
+  * IDX_WORKFLOW_STATE: STATE
+  * IDX_WORKFLOW_TYPE: WORKFLOW_TYPE
+  * IDX_WORKFLOW_OPERATED_BY: OPERATED_BY
 
-備考:
-* 同じWORKFLOW_IDを持つ複数の行が履歴として保存される
-* 最新の状態は最大のOPERATION_IDまたは最新のOPERATED_ATを持つ行
-* 監査ログとして全操作履歴を保持
+* 備考:
+  * 同じWORKFLOW_IDを持つ複数の行が履歴として保存される
+  * 最新の状態は最大のOPERATION_IDまたは最新のOPERATED_ATを持つ行
+  * 監査ログとして全操作履歴を保持
 
 ## 4. エンティティ関連図（JPA）
 
@@ -279,9 +279,9 @@ erDiagram
 * 関係: Many-to-One
 * Employee側: `@ManyToOne(fetch = FetchType.EAGER)`
 * 外部キー: EMPLOYEE.DEPARTMENT_ID → DEPARTMENT.DEPARTMENT_ID
-* **フェッチタイプ**: EAGER（即時ロード）
-  - 理由: 認証APIのログインレスポンスに部署情報（departmentId, departmentName）を含める必要があるため
-  - LAZY（遅延ロード）を使用すると、JSON-B シリアライゼーション時に「Generating incomplete JSON」エラーが発生します
+* フェッチタイプ: EAGER（即時ロード）
+  * 理由: 認証APIのログインレスポンスに部署情報（departmentId, departmentName）を含める必要があるため
+  * LAZY（遅延ロード）を使用すると、JSON-B シリアライゼーション時に「Generating incomplete JSON」エラーが発生します
 
 #### Department ↔ Employee
 * 関係: One-to-Many
@@ -326,15 +326,15 @@ erDiagram
 
 ### 6.1 NOT NULL制約
 
-必須項目:
-* すべてのPRIMARY KEY
-* EMPLOYEE.EMPLOYEE_CODE
-* その他のフィールドは基本的にNULL許可（柔軟性のため）
+* 必須項目:
+  * すべてのPRIMARY KEY
+  * EMPLOYEE.EMPLOYEE_CODE
+  * その他のフィールドは基本的にNULL許可（柔軟性のため）
 
 ### 6.2 UNIQUE制約
 
-一意性保証:
-* EMPLOYEE.EMPLOYEE_CODE（ログインIDとして使用）
+* 一意性保証:
+  * EMPLOYEE.EMPLOYEE_CODE（ログインIDとして使用）
 
 ### 6.3 CHECK制約
 
@@ -347,20 +347,20 @@ erDiagram
 
 ### 6.4 外部キー制約
 
-すべての外部キー参照は制約として定義:
-* ON DELETE: NO ACTION（参照整合性保証）
-* ON UPDATE: CASCADE（ID更新時の連鎖更新）
+* すべての外部キー参照は制約として定義:
+  * ON DELETE: NO ACTION（参照整合性保証）
+  * ON UPDATE: CASCADE（ID更新時の連鎖更新）
 
-**テーブル削除時の注意事項**:
-* テーブルをDROP する際は、外部キー制約のため、以下のいずれかの対応が必要です：
-  1. **CASCADE オプション**: `DROP TABLE テーブル名 IF EXISTS CASCADE;` を使用
-     - 依存する外部キー制約も同時に削除されます
-     - 初期化スクリプト（`1_BACK_OFFICE_DROP.sql`）ではこの方式を採用
-  2. **削除順序の制御**: 外部キーを持つテーブルから先に削除
-     - 例: WORKFLOW → STOCK → BOOK → CATEGORY/PUBLISHER
-     - 例: EMPLOYEE → DEPARTMENT
+* テーブル削除時の注意事項:
+  * テーブルをDROP する際は、外部キー制約のため、以下のいずれかの対応が必要です：
+    1. CASCADE オプション: `DROP TABLE テーブル名 IF EXISTS CASCADE;` を使用
+       * 依存する外部キー制約も同時に削除されます
+       * 初期化スクリプト（`1_BACK_OFFICE_DROP.sql`）ではこの方式を採用
+    2. 削除順序の制御: 外部キーを持つテーブルから先に削除
+       * 例: WORKFLOW → STOCK → BOOK → CATEGORY/PUBLISHER
+       * 例: EMPLOYEE → DEPARTMENT
 
-**推奨**: 開発環境のスキーマ初期化では、`CASCADE` オプションの使用を推奨します。本番環境では誤削除防止のため、削除順序を制御する方式も検討してください。
+* 推奨: 開発環境のスキーマ初期化では、`CASCADE` オプションの使用を推奨します。本番環境では誤削除防止のため、削除順序を制御する方式も検討してください。
 
 ## 7. インデックス設計
 
@@ -379,98 +379,25 @@ erDiagram
 * WORKFLOW.WORKFLOW_TYPE: タイプ別検索
 * WORKFLOW.OPERATED_BY: 操作者別検索
 
-## 8. データ容量見積もり
+## 8. データライフサイクル
 
-### 8.1 想定レコード数
-
-| テーブル | 初期 | 1年後 | 5年後 |
-|---------|------|-------|-------|
-| BOOK | 1,000 | 5,000 | 20,000 |
-| STOCK | 1,000 | 5,000 | 20,000 |
-| CATEGORY | 10 | 20 | 50 |
-| PUBLISHER | 50 | 100 | 500 |
-| EMPLOYEE | 20 | 50 | 100 |
-| DEPARTMENT | 5 | 10 | 20 |
-| WORKFLOW | 100 | 5,000 | 50,000 |
-
-### 8.2 ストレージ見積もり
-
-| テーブル | 行サイズ(byte) | 5年後レコード数 | 容量見積もり |
-|---------|---------------|----------------|-------------|
-| BOOK | 500 | 20,000 | 10 MB |
-| STOCK | 100 | 20,000 | 2 MB |
-| CATEGORY | 100 | 50 | < 1 MB |
-| PUBLISHER | 100 | 500 | < 1 MB |
-| EMPLOYEE | 300 | 100 | < 1 MB |
-| DEPARTMENT | 100 | 20 | < 1 MB |
-| WORKFLOW | 800 | 50,000 | 40 MB |
-
-**合計**: 約55 MB（5年後想定）
-
-## 9. データライフサイクル
-
-### 9.1 論理削除
+### 8.1 論理削除
 * BOOK: DELETEDフラグで論理削除を実施
 * 論理削除された書籍はAPIレスポンス（一覧・検索）から除外される
 * 書籍詳細取得APIでは論理削除された書籍も参照可能
 * 物理削除は実施しない（データ保持・履歴保持のため）
 
-### 9.2 履歴保持
+### 8.2 履歴保持
 * WORKFLOW: 全操作履歴を永続的に保持（監査目的）
-* 将来的にはアーカイブテーブルへの移行も検討
 
-### 9.3 マスタデータ更新
-* CATEGORY, PUBLISHER: 手動メンテナンス（管理者）
-* EMPLOYEE, DEPARTMENT: 人事システムからの連携（将来）
+## 9. データセキュリティ
 
-## 10. データセキュリティ
-
-### 10.1 機密データ
+### 9.1 機密データ
 * EMPLOYEE.PASSWORD: BCryptハッシュで保存（不可逆変換）
 * EMPLOYEE.EMAIL: 個人情報として扱う
 
-### 10.2 監査ログ
+### 9.2 監査ログ
 * WORKFLOW: 全操作履歴を保持
-  - 操作者（OPERATED_BY）
-  - 操作日時（OPERATED_AT）
-  - 操作内容（OPERATION_TYPE, OPERATION_REASON）
-
-## 11. データ移行
-
-### 11.1 初期データ投入
-以下のマスタデータは初期投入が必要:
-* CATEGORY（カテゴリマスタ）
-* PUBLISHER（出版社マスタ）
-* DEPARTMENT（部署マスタ）
-* EMPLOYEE（社員マスタ）
-* BOOK（書籍マスタ）
-* STOCK（在庫マスタ）
-
-### 11.2 テストデータ
-開発・テスト環境用のテストデータを準備:
-* サンプル社員（各職務ランク）
-* サンプル書籍（各カテゴリ）
-* サンプルワークフロー（各状態）
-
-## 12. バックアップ・リカバリ
-
-### 12.1 バックアップ戦略
-* フルバックアップ: 日次（深夜）
-* トランザクションログ: リアルタイム
-
-### 12.2 リカバリポイント
-* RPO（Recovery Point Objective）: 24時間以内
-* RTO（Recovery Time Objective）: 2時間以内
-
-## 13. データベース管理
-
-### 13.1 統計情報更新
-* 定期的な統計情報の更新（クエリ最適化のため）
-
-### 13.2 インデックス再構築
-* 断片化が進んだ場合のインデックス再構築
-
-### 13.3 容量監視
-* ディスク使用量の監視
-* テーブルサイズの監視
-* 成長率の分析
+  * 操作者（OPERATED_BY）
+  * 操作日時（OPERATED_AT）
+  * 操作内容（OPERATION_TYPE, OPERATION_REASON）

@@ -1,10 +1,10 @@
 # API_004_images - 画像API機能設計書
 
-**API ID:** API_004_images  
-**API名:** 画像API  
-**ベースパス:** `/api/images`  
-**バージョン:** 2.0.0  
-**最終更新日:** 2025-12-27
+* API ID: API_004_images  
+* API名: 画像API  
+* ベースパス: `/api/images`  
+* バージョン: 2.0.0  
+* 最終更新日: 2025-12-27
 
 ---
 
@@ -12,7 +12,7 @@
 
 画像APIは、書籍表紙画像の取得を提供する。認証不要で、公開APIとして利用できる。
 
-**認証要否**: 不要（公開API）
+* 認証要否: 不要（公開API）
 
 ---
 
@@ -40,7 +40,7 @@ GET /api/images/covers/{bookId}
 
 #### 3.1.3 リクエスト
 
-パスパラメータ:
+* パスパラメータ:
 
 | パラメータ | 型 | 説明 |
 |----------|---|------|
@@ -48,13 +48,13 @@ GET /api/images/covers/{bookId}
 
 #### 3.1.4 レスポンス
 
-成功時 (200 OK):
+* 成功時 (200 OK):
 
-**Content-Type**: `image/jpeg`
+* Content-Type: `image/jpeg`
 
-**Body**: 画像バイナリデータ
+* Body: 画像バイナリデータ
 
-エラー時 (404 Not Found):
+* エラー時 (404 Not Found):
 
 フォールバック画像（`no-image.jpg`）を返す
 
@@ -69,33 +69,33 @@ GET /api/images/covers/{bookId}
 
 #### 3.1.6 実装詳細
 
-リソースアクセス方法:
+* リソースアクセス方法:
 
 ImageResourceは、デプロイ後のWARファイル内のリソースにアクセスするため、ServletContext.getResourceAsStream()を使用します。
 
-実装仕様:
-* RESTパス: `/images`
-* 画像ベースパス定数: `/resources/images/covers/`
-* ServletContextをインジェクション
+* 実装仕様:
+  * RESTパス: `/images`
+  * 画像ベースパス定数: `/resources/images/covers/`
+  * ServletContextをインジェクション
 
-エンドポイント処理:
-* HTTPメソッド: GET
-* パス: `/covers/{bookId}`
-* Content-Type: `image/jpeg`
+* エンドポイント処理:
+  * HTTPメソッド: GET
+  * パス: `/covers/{bookId}`
+  * Content-Type: `image/jpeg`
 
-処理フロー:
-1. bookIdからイメージパスを構築（ベースパス + bookId + ".jpg"）
-2. ServletContext.getResourceAsStream()でInputStreamを取得
-3. InputStreamがnullの場合（画像が存在しない場合）:
-   - フォールバック画像（no-image.jpg）のInputStreamを取得
+* 処理フロー:
+  1. bookIdからイメージパスを構築（ベースパス + bookId + ".jpg"）
+  2. ServletContext.getResourceAsStream()でInputStreamを取得
+  3. InputStreamがnullの場合（画像が存在しない場合）:
+   * フォールバック画像（no-image.jpg）のInputStreamを取得
 4. InputStreamから全バイトを読み取り
 5. HTTPレスポンス（200 OK）として画像バイナリを返却
 
-重要な設計上の決定:
+* 重要な設計上の決定:
 
-1. **ファイルシステムの相対パスは使用しない**: `new File("src/main/webapp/...")` はデプロイ後に機能しない
-2. **ServletContextを使用**: WARファイル内のリソースに正しくアクセス
-3. **パスは `/` から始まる**: WAR内の絶対パス形式
+1. ファイルシステムの相対パスは使用しない: `new File("src/main/webapp/...")` はデプロイ後に機能しない
+2. ServletContextを使用: WARファイル内のリソースに正しくアクセス
+3. パスは `/` から始まる: WAR内の絶対パス形式
 
 ---
 
@@ -103,23 +103,23 @@ ImageResourceは、デプロイ後のWARファイル内のリソースにアク�
 
 ### 4.1 画像ファイル名
 
-**形式**: `{bookId}.jpg`
+* 形式: `{bookId}.jpg`
 
-例:
-* `1.jpg` - Book ID 1の表紙画像
-* `2.jpg` - Book ID 2の表紙画像
-* `10.jpg` - Book ID 10の表紙画像
-* `no-image.jpg` - フォールバック画像（必須）
+* 例:
+  * `1.jpg` - Book ID 1の表紙画像
+  * `2.jpg` - Book ID 2の表紙画像
+  * `10.jpg` - Book ID 10の表紙画像
+  * `no-image.jpg` - フォールバック画像（必須）
 
 ### 4.2 画像格納場所
 
-**ディレクトリ**: `src/main/webapp/resources/images/covers/`
+* ディレクトリ: `src/main/webapp/resources/images/covers/`
 
-**WAR内パス**: `/resources/images/covers/`
+* WAR内パス: `/resources/images/covers/`
 
-フルパス例:
-* ソースコード: `src/main/webapp/resources/images/covers/1.jpg`
-* WAR内: `/resources/images/covers/1.jpg`
+* フルパス例:
+  * ソースコード: `src/main/webapp/resources/images/covers/1.jpg`
+  * WAR内: `/resources/images/covers/1.jpg`
 
 ---
 
@@ -127,9 +127,9 @@ ImageResourceは、デプロイ後のWARファイル内のリソースにアク�
 
 ### 5.1 画像が存在しない場合
 
-**動作**: フォールバック画像（`no-image.jpg`）を返す
+* 動作: フォールバック画像（`no-image.jpg`）を返す
 
-**HTTPステータス**: 200 OK（エラーではなく正常レスポンス）
+* HTTPステータス: 200 OK（エラーではなく正常レスポンス）
 
 ---
 
@@ -137,28 +137,28 @@ ImageResourceは、デプロイ後のWARファイル内のリソースにアク�
 
 ### 6.1 WAR内リソースアクセス
 
-**問題**: ファイルシステムの相対パス（`src/main/webapp/...`）はデプロイ後に機能しない
+* 問題: ファイルシステムの相対パス（`src/main/webapp/...`）はデプロイ後に機能しない
 
-理由:
-* WARファイルはアーカイブ（ZIPのような形式）
-* ファイルシステムAPIでは直接アクセスできない
-* デプロイ先サーバーのディレクトリ構造は開発環境と異なる
+* 理由:
+  * WARファイルはアーカイブ（ZIPのような形式）
+  * ファイルシステムAPIでは直接アクセスできない
+  * デプロイ先サーバーのディレクトリ構造は開発環境と異なる
 
-**解決策**: ServletContextを使用
+* 解決策: ServletContextを使用
 
-非推奨アプローチ:
-* ファイルシステムの相対パスを使用したFileオブジェクトの生成
-* パス例: `src/main/webapp/resources/images/covers/1.jpg`
-* 問題点: 開発環境でのみ動作、デプロイ後は動作しない
+* 非推奨アプローチ:
+  * ファイルシステムの相対パスを使用したFileオブジェクトの生成
+  * パス例: `src/main/webapp/resources/images/covers/1.jpg`
+  * 問題点: 開発環境でのみ動作、デプロイ後は動作しない
 
-推奨アプローチ:
-* ServletContext.getResourceAsStream()を使用
-* パス例: `/resources/images/covers/1.jpg`（WARルート相対）
-* 利点: デプロイ後も正常に動作
+* 推奨アプローチ:
+  * ServletContext.getResourceAsStream()を使用
+  * パス例: `/resources/images/covers/1.jpg`（WARルート相対）
+  * 利点: デプロイ後も正常に動作
 
 ### 6.2 パフォーマンス考慮事項
 
-将来の拡張:
+* 将来の拡張:
 
 * ブラウザキャッシュ: `Cache-Control` ヘッダーで長期キャッシュ（例: 1日）
 * CDN: 静的画像をCDNで配信
