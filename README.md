@@ -58,14 +58,14 @@ ai_driven_dev_202601/
 │   │       ├── jsf-person/                          # Person管理（JSF + JPA）【完成版】
 │   │       └── struts-person/                       # Person管理（Struts 1.3 + EJB）【完成版】
 │   ├── sdd/                                         # 仕様駆動開発（SDD）プロジェクト（研修用）
-│   │   ├── accounting/                              # 会計ドメイン
-│   │   │   └── accounting_etl_sdd/                  # ERP会計統合ETL（SDD研修用）
 │   │   ├── bookstore/                               # 書店ドメイン
-│   │   │   └── berry-books-api-sdd/                 # Berry Books REST API（SDD研修用）
+│   │   │   ├── berry-books-api-sdd/                 # REST API: 注文管理（SDD研修用）
+│   │   │   ├── berry-books-spa/                     # SPA: 注文管理フロントエンド (React+TS, SDD研修用)
+│   │   │   ├── back-office-api-sdd/                 # REST API: 書籍・在庫管理（SDD研修用）
+│   │   │   └── back-office-spa/                     # SPA: 書籍管理フロントエンド (React+TS, SDD研修用)
 │   │   └── person/                                  # 人物管理ドメイン
-│   │       └── struts-to-jsf-person-sdd/            # Struts→Jakarta EE移行（SDD研修用）
+│   │       └── jsf-person-sdd/                      # Person管理（JSF + JPA, SDD研修用）
 │   └── vibe/                                        # Vibe Coding（バイブコーディング）プロジェクト（研修用）
-│       ├── accounting/                              # 会計ドメイン（プレースホルダー）
 │       └── bookstore/                               # 書店ドメイン
 │           ├── berry-books-api-vibe/                # REST API: 注文管理（Vibe Coding研修用）
 │           └── customer-hub-spa-vibe/               # SPA: 顧客管理 (React+TS, Vibe Coding研修用）

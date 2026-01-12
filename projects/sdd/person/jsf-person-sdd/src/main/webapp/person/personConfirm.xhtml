@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+
+<h:head>
+    <meta charset="UTF-8"/>
+    <title>PERSON確認</title>
+    <h:outputStylesheet name="css/style.css"/>
+</h:head>
+
+<h:body>
+    <h1>PERSON確認</h1>
+    
+    <!-- Error Messages -->
+    <h:messages globalOnly="false" 
+                showSummary="true" 
+                showDetail="false" 
+                styleClass="error-messages"/>
+    
+    <!-- Confirmation Information Display -->
+    <div class="info-group">
+        <label>名前:</label>
+        <h:outputText value="#{personConfirmBean.personName}"/>
+    </div>
+    
+    <div class="info-group">
+        <label>年齢:</label>
+        <h:outputText value="#{personConfirmBean.age}"/>
+    </div>
+    
+    <div class="info-group">
+        <label>性別:</label>
+        <h:outputText value="男性" rendered="#{personConfirmBean.gender == 'male'}"/>
+        <h:outputText value="女性" rendered="#{personConfirmBean.gender == 'female'}"/>
+    </div>
+    
+    <!-- Form with Hidden Fields and Action Buttons -->
+    <h:form>
+        <!-- Hidden fields to preserve data for save operation -->
+        <h:inputHidden value="#{personConfirmBean.personId}"/>
+        <h:inputHidden value="#{personConfirmBean.personName}"/>
+        <h:inputHidden value="#{personConfirmBean.age}"/>
+        <h:inputHidden value="#{personConfirmBean.gender}"/>
+        
+        <!-- Action Buttons -->
+        <div class="button-group">
+            <h:commandButton value="登録" 
+                             action="#{personConfirmBean.save}" 
+                             styleClass="button"/>
+            <h:button value="戻る" 
+                      onclick="history.back(); return false;" 
+                      styleClass="button back"/>
+        </div>
+    </h:form>
+</h:body>
+</html>

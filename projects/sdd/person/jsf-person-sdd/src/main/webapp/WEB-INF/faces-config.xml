@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config xmlns="https://jakarta.ee/xml/ns/jakartaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+                                  https://jakarta.ee/xml/ns/jakartaee/web-facesconfig_4_0.xsd"
+              version="4.0">
+
+    <!-- JSF 4.0 Configuration -->
+    
+    <!-- Application Configuration -->
+    <application>
+        <locale-config>
+            <default-locale>ja</default-locale>
+        </locale-config>
+    </application>
+
+    <!-- 
+        Note: Navigation rules are not defined here.
+        Navigation is controlled by action method return values.
+        Example: return "personList?faces-redirect=true";
+    -->
+
+</faces-config>

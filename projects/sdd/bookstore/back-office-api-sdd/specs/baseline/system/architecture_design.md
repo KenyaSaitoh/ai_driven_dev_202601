@@ -439,21 +439,7 @@ flowchart TD
 * MicroProfile Configによる設定管理
 * プロパティファイルで設定を外部化
 
-## 14. 今後の拡張予定
-
-### 14.1 認証フィルタの実装
-* JWT認証フィルタ（`@PreMatching`）
-* 現在のログインユーザー情報取得エンドポイントの有効化
-
-### 14.2 監査ログ
-* すべてのAPI呼び出しの監査ログ
-* ワークフロー操作ログの強化
-
-### 14.3 通知機能
-* ワークフロー申請時のメール通知
-* ワークフロー承認/却下時の通知
-
-## 15. 参考資料
+## 14. 参考資料
 
 * Jakarta EE 10 Specification: https://jakarta.ee/specifications/platform/10/
 * JAX-RS 3.1 Specification: https://jakarta.ee/specifications/restful-ws/3.1/

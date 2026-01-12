@@ -1024,43 +1024,7 @@ Payara Server 6.x
 
 ---
 
-## 17. 将来の拡張（スコープ外）
-
-### 17.1 想定される拡張機能
-
-以下の機能は現在のスコープ外であるが、将来的な拡張の可能性を考慮してアーキテクチャを設計している。
-
-* OAuth2認証:
-  * 概要: Google, Facebook等のOAuth2プロバイダー連携
-  * 拡張ポイント: AuthenResourceに新しいエンドポイント追加
-
-* GraphQL API:
-  * 概要: REST APIに加えてGraphQL APIを提供
-  * 拡張ポイント: 新しいAPI層の追加、既存サービス層を再利用
-
-* リアルタイム通知:
-  * 概要: WebSocketによる在庫更新通知
-  * 拡張ポイント: Jakarta WebSocketの追加
-
-* マルチテナント対応:
-  * 概要: 複数店舗・ブランドのサポート
-  * 拡張ポイント: テナントIDをエンティティに追加
-
-### 17.2 アーキテクチャの拡張性
-
-* 拡張可能な領域:
-  * 新しいAPIエンドポイントの追加（JAX-RS Resource）
-  * 新しいビジネスロジックの追加（Service層）
-  * 外部API連携の追加（external層）
-
-* 拡張時の注意点:
-  * トランザクション境界を適切に設計
-  * JWT Claimsの拡張（テナントID等）
-  * データベーススキーマの互換性維持
-
----
-
-## 18. 実装状況と技術的対応方針
+## 17. 実装状況と技術的対応方針
 
 * 最終更新: 2026-01-10  
 * 実装バージョン: v3.0.0 - サービス分離アーキテクチャ完全対応版
@@ -1177,9 +1141,9 @@ Payara Server 6.x
 
 ---
 
-## 19. 参考資料
+## 18. 参考資料
 
-### 19.1 公式ドキュメント
+### 18.1 公式ドキュメント
 
 * Jakarta EE 10: https://jakarta.ee/specifications/platform/10/
 * JAX-RS 3.1: https://jakarta.ee/specifications/restful-ws/3.1/
@@ -1188,7 +1152,7 @@ Payara Server 6.x
 * jjwt: https://github.com/jwtk/jjwt
 * MicroProfile Config: https://microprofile.io/specifications/microprofile-config/
 
-### 19.2 関連仕様書
+### 18.2 関連仕様書
 
 * [requirements.md](requirements.md) - 要件定義書
 * [functional_design.md](functional_design.md) - 機能設計書（API仕様）
@@ -1196,6 +1160,6 @@ Payara Server 6.x
 * [data_model.md](data_model.md) - データモデル仕様書
 * [external_interface.md](external_interface.md) - 外部インターフェース仕様書
 
-### 19.3 プロジェクトREADME
+### 18.3 プロジェクトREADME
 
 * [README.md](../../README.md) - プロジェクトREADME

@@ -15,6 +15,7 @@ include 'struts-person'
 // SDD: 仕様駆動開発（Specification-Driven Development）プロジェクト
 include 'berry-books-api-sdd'
 include 'back-office-api-sdd'
+include 'jsf-person-sdd'
 include 'struts-to-jsf-person-sdd'
 
 // Vibe: Vibe Coding（バイブコーディング）プロジェクト
@@ -32,7 +33,7 @@ project(':struts-person').projectDir = file('projects/master/person/struts-perso
 // SDD: 仕様駆動開発（Specification-Driven Development）プロジェクト（ドメイン別に整理）
 project(':berry-books-api-sdd').projectDir = file('projects/sdd/bookstore/berry-books-api-sdd')
 project(':back-office-api-sdd').projectDir = file('projects/sdd/bookstore/back-office-api-sdd')
-project(':struts-to-jsf-person-sdd').projectDir = file('projects/sdd/person/struts-to-jsf-person-sdd')
+project(':jsf-person-sdd').projectDir = file('projects/sdd/person/jsf-person-sdd')
 
 // Vibe: Vibe Coding（バイブコーディング）プロジェクト（ドメイン別に整理）
 project(':berry-books-api-vibe').projectDir = file('projects/vibe/bookstore/berry-books-api-vibe')

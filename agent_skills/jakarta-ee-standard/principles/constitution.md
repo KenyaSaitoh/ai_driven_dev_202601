@@ -1,14 +1,16 @@
-# berry-books 仕様駆動開発憲章
+# Jakarta EE 仕様駆動開発憲章
 
 バージョン: 1.0.0  
 制定日: 2025-12-13  
-最終更新日: 2025-12-13
+最終更新日: 2026-01-12
 
-## プロジェクト概要
+## 概要
 
-プロジェクト名: berry-books Spec-Driven  
-説明: Jakarta EE 10とJSF (Jakarta Server Faces) 4.0を使用したオンライン書店アプリケーション  
-技術スタック: Jakarta EE 10, JSF 4.0, JPA 3.1, Payara Server 6, HSQLDB
+この憲章は、Jakarta EE標準Agent Skillsを使用するすべてのプロジェクトで共通的に適用される開発原則とドキュメント規約を定義します。
+
+* 対象技術スタック: Jakarta EE 10, JPA 3.1, JAX-RS 3.1, CDI 4.0, Bean Validation 3.0
+* 対応アプリケーションサーバー: Payara Server 6, WildFly等
+* 開発スタイル: 仕様駆動開発（Spec-Driven Development）
 
 ## 開発原則
 

@@ -352,50 +352,7 @@ GET /api/images/covers/{bookId}
 
 ---
 
-## 7. データフロー
-
-### 7.1 注文処理全体フロー
-
-```mermaid
-flowchart TD
-    Start([React SPA]) --> Login[POST /api/auth/login]
-    Login --> SearchBooks[GET /api/books/search]
-    SearchBooks --> AddCart[カートに追加<br/>フロント側で管理]
-    AddCart --> MoreBooks{他の書籍を<br/>追加？}
-    MoreBooks -->|はい| SearchBooks
-    MoreBooks -->|いいえ| CreateOrder[POST /api/orders]
-    
-    CreateOrder --> CheckStock{在庫チェック}
-    CheckStock -->|在庫不足| ErrorStock[409 Conflict<br/>OutOfStockException]
-    ErrorStock --> End1([エラー表示])
-    
-    CheckStock -->|在庫あり| LockCheck{楽観的ロック<br/>チェック}
-    LockCheck -->|VERSION不一致| ErrorLock[409 Conflict<br/>OptimisticLockException]
-    ErrorLock --> End2([エラー表示])
-    
-    LockCheck -->|成功| UpdateStock[在庫減算]
-    UpdateStock --> CreateOrderTran[注文レコード作成]
-    CreateOrderTran --> CreateOrderDetail[注文明細作成]
-    CreateOrderDetail --> Success[200 OK<br/>OrderResponse]
-    Success --> ViewHistory[GET /api/orders/history]
-    ViewHistory --> End3([注文履歴表示])
-```
-
----
-
-## 8. バッチ処理
-
-### 8.1 バッチ処理一覧
-
-| バッチID | バッチ名 | 実行タイミング | 目的 | 優先度 |
-|---------|---------|-------------|------|-------|
-| なし | なし | - | - | - |
-
-注意: バッチ処理の要件がない場合は、このセクションを「該当なし」として残す。
-
----
-
-## 9. 参考資料
+## 7. 参考資料
 
 本機能設計書に関連する詳細ドキュメント：
 
