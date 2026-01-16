@@ -1,6 +1,6 @@
 ---
 name: jakarta-ee-api-service-development
-description: Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービス開発を支援。単体API、マイクロサービス、BFFなど多様なアーキテクチャに対応。仕様書からタスク分解、詳細設計、コード実装まで3段階で一貫サポート。
+description: Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービス開発を支援。エンティティ実装、外部API連携など多様な実装要件に対応。仕様書からタスク分解、詳細設計、コード実装まで3段階で一貫サポート。
 ---
 
 # Jakarta EE API サービス開発 Agent Skill

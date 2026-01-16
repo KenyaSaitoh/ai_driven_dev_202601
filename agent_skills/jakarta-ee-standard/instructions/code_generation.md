@@ -310,31 +310,30 @@ architecture_design.mdを参照して以下を確認すること
 
 ---
 
-## アーキテクチャパターン別の実装ガイド
+## 実装要件に応じたガイド
 
-このスキルは、仕様書（`{project_root}/specs/baseline/system/architecture_design.md`）に記載されたアーキテクチャパターンに自動的に適応する
+このスキルは、仕様書（`{project_root}/specs/baseline/system/architecture_design.md`）に記載された実装要件に自動的に適応する
 
-### マイクロサービスパターンの場合
+### エンティティ実装が必要な場合
 
-* 識別方法: architecture_design.mdに「マイクロサービス」「独立したデータ管理」「全エンティティ実装」等の記載がある
-
-* 実装の特徴
-  * 全エンティティを実装する
-  * 全Dao、Service、Resourceを実装する
-  * CORS設定でクロスオリジンリクエスト対応
-  * 並行制御を実装する
-  * 複数種類の検索実装
-
-### BFFパターンの場合
-
-* 識別方法: architecture_design.mdに「BFF」「Backend for Frontend」「プロキシ」「外部API統合」等の記載がある
+* 識別方法: data_model.mdが存在する、またはarchitecture_design.mdに「エンティティ実装」「JPA」等の記載がある
 
 * 実装の特徴
-  * プロキシパターン: 特定のResourceは外部APIへ透過的転送のみ実装する
-  * 独自実装パターン: 特定のResourceはビジネスロジックを実装する
-  * エンティティ制限: 一部のエンティティのみ実装、他は外部API管理
-  * 外部API連携: RestClientを実装する
-  * 認証基盤を実装する
+  * エンティティを実装する
+  * Dao、Service、Resourceを実装する
+  * トランザクション管理を実装する
+  * 必要に応じて並行制御（楽観的ロック）を実装する
+  * 必要に応じて複数種類の検索実装（JPQL、Criteria API）
+
+### 外部API連携が必要な場合
+
+* 識別方法: external_interface.mdが存在する、またはarchitecture_design.mdに「外部API連携」「RestClient」等の記載がある
+
+* 実装の特徴
+  * プロキシ転送: 特定のResourceは外部APIへ透過的転送のみ実装する
+  * 独自実装: 特定のResourceはビジネスロジックを実装する
+  * RestClientを実装する
+  * 必要に応じて認証基盤を実装する
 
 * データ管理の制約
   * functional_design.mdとexternal_interface.mdを参照して、どのエンティティを実装するか判断する

@@ -8,14 +8,13 @@ Jakarta EE 10とJAX-RS 3.1を使ったREST API サービスプロジェクト全
 * instructions/: 3段階の開発インストラクション（タスク分解、詳細設計、コード生成）
 * principles/: Jakarta EE開発の共通憲章（全プロジェクトで遵守すべき開発原則、品質基準、アーキテクチャ方針）
 
-実装可能なアーキテクチャパターン:
+対応する実装要件:
 
-Jakarta EE-based REST APIサービスを実装することで、結果的に以下のようなアーキテクチャパターンを実現できます：
-
-* 単体REST APIサービス: 独立したバックエンドAPI
-* マイクロサービス: 独立したデータ管理サービス
-* BFF（Backend for Frontend）: フロントエンド最適化API
-* API統合サービス: 複数の外部APIを統合
+* エンティティ実装（JPA/EntityManager）
+* 外部API連携（RestClient）
+* JWT認証・認可
+* CORS対応
+* トランザクション管理
 
 ---
 
@@ -184,7 +183,7 @@ AI: 承知しました。detailed_design.mdを作成しました。
 書籍APIを実装してください。
 ```
 
-### 例2: フロントエンド最適化API（BFFパターン - 3段階）
+### 例2: 外部API連携（3段階）
 
 ステップ1: タスク分解
 ```
@@ -205,7 +204,7 @@ AI: 承知しました。detailed_design.mdを作成しました。
 対象: API_003_orders
 
 注文APIの詳細設計書を作成してください。
-独自実装 + 外部API連携で、結果的にBFFパターンになります。
+独自実装 + 外部API連携を実装します。
 ```
 
 AIとの対話:
@@ -213,7 +212,7 @@ AIとの対話:
 AI: 理解した内容を説明します...
     【API概要】
     * 注文API（/api/orders）
-    * REST APIサービス（結果的にBFFパターン）
+    * REST APIサービス（独自実装 + 外部API連携）
     
     【実装するクラス】
     * OrderResource, OrderService, OrderDao
@@ -267,7 +266,7 @@ AIが自動実装：
 * ✅ OptimisticLockExceptionMapper（HTTP 409 Conflict）
 * ✅ 各種テスト（競合シナリオ含む）
 
-### 例5: 外部API統合 + JWT認証（BFFパターン化）
+### 例5: 外部API統合 + JWT認証
 
 ```
 @agent_skills/jakarta-ee-standard/instructions/code_generation.md
@@ -408,20 +407,19 @@ API_001を実装してください。
 ## 🎯 対応する主要機能
 
 ### Jakarta EE-based REST API
-本質的にはJakarta EE 10とJAX-RS 3.1を使ったREST APIサービスの開発を支援します。
-実装方法により、結果的に以下のようなパターンを実現できます：
+Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービスの開発を支援します。
 
-### 独立したデータ管理API（マイクロサービス化可能）
-* REST APIとしてのデータ提供
-* CORS設定でクロスオリジン対応
-* 全エンティティの完全管理
+### エンティティ実装
+* JPA/EntityManagerによるデータ永続化
+* CRUD操作の実装
+* トランザクション管理
 * 独立したデータベース管理
 
-### フロントエンド最適化API（BFFパターン化可能）
-* フロントエンド向けに最適化されたエンドポイント
-* 複数の外部APIを統合
-* プロキシパターン: 外部APIへの透過的転送
-* 独自実装パターン: JWT認証、独自ビジネスロジック
+### 外部API連携
+* RestClientによる外部API呼び出し
+* プロキシ転送
+* 独自ビジネスロジックの実装
+* 複数のAPIを統合
 
 ### 楽観的ロック（Optimistic Locking）
 * `@Version`アノテーションを使用
@@ -443,7 +441,7 @@ API_001を実装してください。
 
 ### REST API統合
 * 外部APIクライアント（JAX-RS Client）
-* マイクロサービス間連携
+* API間連携
 * タイムアウト、リトライ処理
 * エラーハンドリング
 
