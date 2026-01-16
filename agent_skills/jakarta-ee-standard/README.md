@@ -407,21 +407,25 @@ API_001を実装してください。
 ## 🎯 対応する主要機能
 
 ### Jakarta EE-based REST API
+
 Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービスの開発を支援します。
 
 ### エンティティ実装
+
 * JPA/EntityManagerによるデータ永続化
 * CRUD操作の実装
 * トランザクション管理
 * 独立したデータベース管理
 
 ### 外部API連携
+
 * RestClientによる外部API呼び出し
 * プロキシ転送
 * 独自ビジネスロジックの実装
 * 複数のAPIを統合
 
 ### 楽観的ロック（Optimistic Locking）
+
 * `@Version`アノテーションを使用
 * 更新時の競合を検出
 * `OptimisticLockException`を適切に処理
@@ -430,28 +434,33 @@ Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービスの開発を支援し�
 ### 2種類の検索実装
 
 #### JPQL検索
+
 * JPQLクエリで動的検索を実装
 * シンプルで読みやすいコード
 
 #### Criteria API検索
+
 * JPA Criteria APIで型安全な検索を実装
 * コンパイル時の型チェックが効く
 
 両方の実装を比較学習できる設計！
 
 ### REST API統合
+
 * 外部APIクライアント（JAX-RS Client）
 * API間連携
 * タイムアウト、リトライ処理
 * エラーハンドリング
 
 ### JWT認証
+
 * JWT生成・検証
 * 認証フィルター
 * 認証コンテキスト
 * 権限チェック
 
 ### CORS対応
+
 * クロスオリジンリクエスト許可
 * レスポンスヘッダー設定
 * プリフライトリクエスト対応
@@ -477,6 +486,7 @@ agent_skills/jakarta-ee-standard/
 ## 🔑 重要な実装ポイント
 
 ### 1. 楽観的ロック
+
 ```java
 @Entity
 public class Stock {
@@ -509,6 +519,7 @@ public class BookDaoCriteria {
 ```
 
 ### 3. CORS設定
+
 ```java
 @Provider
 public class CorsFilter implements ContainerResponseFilter {
@@ -517,6 +528,7 @@ public class CorsFilter implements ContainerResponseFilter {
 ```
 
 ### 4. 外部API連携
+
 ```java
 @ApplicationScoped
 public class BackOfficeRestClient {
@@ -532,6 +544,7 @@ public class BackOfficeRestClient {
 ```
 
 ### 5. JWT認証
+
 ```java
 @Provider
 @Priority(Priorities.AUTHENTICATION)

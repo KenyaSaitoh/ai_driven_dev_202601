@@ -47,6 +47,7 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
 注意: `{project_root}` は、パラメータで指定されたパスに置き換える。全てのパスはそのプロジェクトルートを基準とした相対パスである
 
 ### Agent Skills憲章（最優先で確認）
+
 * @agent_skills/jakarta-ee-standard/principles/ - Jakarta EE開発の共通原則、アーキテクチャ方針、品質基準を確認する
   * `constitution.md` - Jakarta EE開発憲章
   * その他、組織やチームで共通的に使われる憲章ファイル
@@ -54,6 +55,7 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
   * 注意: Agent Skills配下の憲章は全プロジェクト共通。プロジェクト固有の憲章がある場合は `{project_root}/principles/` も確認すること
 
 ### 必須ドキュメント（system/配下）
+
 * architecture_design.md - 技術スタック、アーキテクチャパターン、ライブラリを確認する
   * アーキテクチャパターンを識別する
   * データ管理方針を確認する
@@ -61,11 +63,13 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
 * functional_design.md - システム全体の機能設計概要と各APIへのリンクを確認する
 
 ### オプションドキュメント（system/配下、存在する場合）
+
 * data_model.md - エンティティとデータベーススキーマを確認する
 * behaviors.md - システム全体の振る舞い概要と各APIへのリンクを確認する
 * external_interface.md - 外部連携とAPI仕様を確認する
 
 ### API単位ドキュメント（api/配下）
+
 * api/API_XXX_yyyy/ - 各API単位のディレクトリ
   * functional_design.md - 各APIの詳細な機能設計
   * behaviors.md - 各APIの振る舞い仕様
@@ -88,6 +92,7 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
 複数人が並行して作業できるように、以下のようにタスクファイルを分割して生成してください：
 
 ### 2.1 メインタスクリスト
+
 `tasks/tasks.md` （指定された出力先に配置）
 * プロジェクト全体の実行順序を示すメインタスクリスト
 * 各タスクと担当者割り当ての概要
@@ -95,6 +100,7 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
 * タスク間の依存関係を明示する
 
 ### 2.2 セットアップタスク
+
 `tasks/setup_tasks.md`
 * プロジェクト初期化（全員が実行前に1回だけ）
 * 開発環境セットアップ
@@ -104,6 +110,7 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
 * 静的リソース配置
 
 ### 2.3 共通機能タスク
+
 `tasks/common_tasks.md`
 * 複数機能で共有される共通コンポーネント
 * エンティティ: architecture_design.mdとdata_model.mdから実装対象を判断する
@@ -122,6 +129,7 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
 SPECから機能（API）を抽出してタスクファイルを生成：
 
 #### 機能の識別と抽出
+
 1. 機能（API）の識別
    * requirements.md、api/ ディレクトリ、functional_design.mdから機能を抽出する
    * 各APIの範囲と責務を分析する
@@ -147,6 +155,7 @@ SPECから機能（API）を抽出してタスクファイルを生成：
    * 大規模プロジェクト（10+ API）: APIグループごとにディレクトリ分割も検討
 
 ### 2.5 結合テストタスク
+
 `tasks/integration_tasks.md`
 * API間結合テスト
 * E2E APIテスト - 主要な業務フローをAPIシーケンスでテストする
@@ -231,6 +240,7 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 各タスクファイルには以下の情報を含める
 
 ### 4.1 ヘッダー情報
+
 ```markdown
 # [タスクファイル名]
 
@@ -241,6 +251,7 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 ```
 
 ### 4.2 タスクリスト
+
 ```markdown
 * [ ] [P] タスク X.X.X: [タスク名]
   * 目的: [このタスクで実現する機能・目的]
@@ -296,6 +307,7 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 ## 全体構成と担当割り当て
 
 ### タスク概要
+
 | タスク | タスクファイル | 担当者 | 並行実行 | 想定工数 |
 |---------|--------------|--------|---------|---------|
 | 0. セットアップ | setup_tasks.md | 全員 | 不可 | [分析から算出] |
@@ -306,12 +318,14 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 | N. 結合テスト | integration_tasks.md | 全員 | 一部可能 | [分析から算出] |
 
 ### 実行順序
+
 1. タスク0: セットアップ（全員で実行）
 2. タスク1: 共通機能（共通機能チームが実装）
 3. タスク2～N-1: API別実装（各担当者が並行実行） ← ここが並行化のポイント
 4. タスクN: 結合テスト（全員で実施）
 
 ### タスクファイル一覧
+
 * [セットアップタスク](setup_tasks.md)
 * [共通機能タスク](common_tasks.md)
 * [API_001のタスク](API_001_xxx.md)
@@ -320,6 +334,7 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 * [結合テストタスク](integration_tasks.md)
 
 ## 依存関係図
+
 [Mermaid形式で依存関係を図示]
 \```
 
@@ -358,10 +373,12 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 ## 8. 重要な注意事項
 
 ### 命名規則
+
 * ファイル名・タスクIDは全てアンダースコア区切り（例: `setup_tasks.md`, `T_SETUP_001`）
 * ハイフン（`-`）は使用しない
 
 ### SPEC参照の記述
+
 全てのタスクの「参照SPEC」は以下の形式で記述する
 * Markdownリンク形式でクリック可能にする（例: `[functional_design.md](相対パス)`）
 * 具体的なセクション番号とセクション名を明記する（例: `の「2.2 StockDao」`）
@@ -369,6 +386,7 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 * system/とapi/配下の両方のドキュメントを適切に参照する
 
 ### タスク分解の原則
+
 * 憲章遵守: `@agent_skills/jakarta-ee-standard/principles/` 配下の共通憲章（開発原則、品質基準、組織標準）を必ず遵守する。プロジェクト固有の憲章がある場合は `{project_root}/principles/` も併せて遵守する
 * 抽象度の維持: タスクは「何を作るか」のみを記述する。ソースコードや詳細な実装手順は記述しない
 * アーキテクチャ適応: architecture_design.mdからアーキテクチャパターンを識別し、適切なタスクを分解・生成する
@@ -376,11 +394,13 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 * APIテスト設定: E2E APIテストは通常ビルドから除外し、個別実行可能にする設定を明記する
 
 ### REST API特有の注意点
+
 * 画面（UI）は含まれないため、View/XHTMLに関するタスクは生成しない
 * API エンドポイント（Resource）のテストは REST Assured や JAX-RS Client を使用する
 * JWT認証、CORS、HTTPステータスコードの適切な使用を考慮する
 
 ### プロジェクトルートの扱い
+
 * `{project_root}` は、パラメータで明示的に指定されたパスに置き換える
 * 相対パスでも絶対パスでも構わない
 * 全てのファイル操作は、このプロジェクトルートを基準に行う
