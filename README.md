@@ -1,4 +1,4 @@
-﻿# Jakarta EE 10 Web Projects - Payara Server Edition
+# Jakarta EE 10 Web Projects - Payara Server Edition
 
 ## 📖 概要
 
@@ -12,15 +12,16 @@ Jakarta EE 10とReactを使用したフルスタックWebアプリケーショ�
 
 **Bookstoreドメイン**のフルスタックプロジェクトから始めることをお勧めします：
    
-- **REST API**（バックエンド）: berry-books-api、back-office-api、customer-hub-api
-- **SPA**（フロントエンド）: berry-books-spa、back-office-spa、customer-hub-spa
+- **REST API**（バックエンド）: `berry-books-api`、`back-office-api`、`customer-hub-api`
+- **SPA**（フロントエンド）: `berry-books-spa`、`back-office-spa`、`customer-hub-spa`（master/bookstoreのみ）
+- **Desktop**（Swing）: `customer-hub-swing`
    
 詳細は [projects/master/bookstore/README.md](projects/master/bookstore/README.md) を参照してください。
 
 ## 📁 プロジェクト構成
 
 このリポジトリは複数の技術スタックを含むマルチプロジェクト構成です。
-プロジェクトは以下の3つのカテゴリに分類されています。
+プロジェクトは以下の2つのカテゴリに分類されています。
 
 > **Note**: このREADMEでは、環境全体のセットアップと基本的なコマンドを説明します。個別のプロジェクトについては、各ドメインフォルダやプロジェクトのREADME.mdを参照してください（例：[projects/master/bookstore/README.md](projects/master/bookstore/README.md)）。
 
@@ -34,18 +35,12 @@ Jakarta EE 10とReactを使用したフルスタックWebアプリケーショ�
    - 仕様書からコードを生成する手法を学習
    - AIを活用した段階的な実装プロセスを体験
 
-3. **vibe/** - Vibe Coding（バイブコーディング）プロジェクト（研修用）
-   - AIとの自然な対話を通じてコーディングを進める手法
-   - インタラクティブな開発体験を重視
-
 ### ディレクトリ構造
 
 ```
 ai_driven_dev_202601/
 ├── projects/
 │   ├── master/                                      # 完成版プロジェクト（参照用）
-│   │   ├── accounting/                              # 会計ドメイン
-│   │   │   └── accounting_etl/                      # ERP会計統合ETL【完成版】
 │   │   ├── bookstore/                               # 書店ドメイン
 │   │   │   ├── berry-books-api/                     # REST API: 注文管理【完成版】
 │   │   │   ├── berry-books-spa/                     # SPA: 注文管理フロントエンド (React+TS)【完成版】
@@ -57,18 +52,14 @@ ai_driven_dev_202601/
 │   │   └── person/                                  # 人物管理ドメイン
 │   │       ├── jsf-person/                          # Person管理（JSF + JPA）【完成版】
 │   │       └── struts-person/                       # Person管理（Struts 1.3 + EJB）【完成版】
-│   ├── sdd/                                         # 仕様駆動開発（SDD）プロジェクト（研修用）
-│   │   ├── bookstore/                               # 書店ドメイン
-│   │   │   ├── berry-books-api-sdd/                 # REST API: 注文管理（SDD研修用）
-│   │   │   ├── berry-books-spa/                     # SPA: 注文管理フロントエンド (React+TS, SDD研修用)
-│   │   │   ├── back-office-api-sdd/                 # REST API: 書籍・在庫管理（SDD研修用）
-│   │   │   └── back-office-spa/                     # SPA: 書籍管理フロントエンド (React+TS, SDD研修用)
-│   │   └── person/                                  # 人物管理ドメイン
-│   │       └── jsf-person-sdd/                      # Person管理（JSF + JPA, SDD研修用）
-│   └── vibe/                                        # Vibe Coding（バイブコーディング）プロジェクト（研修用）
-│       └── bookstore/                               # 書店ドメイン
-│           ├── berry-books-api-vibe/                # REST API: 注文管理（Vibe Coding研修用）
-│           └── customer-hub-spa-vibe/               # SPA: 顧客管理 (React+TS, Vibe Coding研修用）
+│   └── sdd/                                         # 仕様駆動開発（SDD）プロジェクト（研修用）
+│       ├── bookstore/                               # 書店ドメイン
+│       │   ├── berry-books-api-sdd/                 # REST API: 注文管理（SDD研修用）
+│       │   └── back-office-api-sdd/                 # REST API: 書籍・在庫管理（SDD研修用）
+│       └── person/                                  # 人物管理ドメイン
+│           └── jsf-person-sdd/                      # Person管理（JSF + JPA, SDD研修用）
+│
+├── struts-to-jsf-person-sdd/                        # マイグレーションプロジェクト（Struts → JSF）
 │
 ├── payara6/                                         # Payara Server 6
 ├── hsqldb/                                          # HSQLDB Database Server
@@ -163,9 +154,11 @@ chmod +x projects/sdd/accounting/accounting_etl_sdd/*.sh
 
 #### フロントエンド（SPA）
 
+> **Note**: SPAプロジェクトは現在 `master/bookstore` ディレクトリにのみ存在します。
+
 ```bash
 # SPAプロジェクトディレクトリに移動
-cd projects/master/<domain>/<spa-project-name>
+cd projects/master/bookstore/<spa-project-name>
 
 # 依存関係をインストール（初回のみ）
 npm install
@@ -204,14 +197,19 @@ npm run dev
 
 ## 🧹 仕様駆動開発（SDD）プロジェクトの成果物クリーンアップ
 
-**berry-books-api-sdd** プロジェクトは、仕様駆動開発により何度でも再実装できます。
+SDDプロジェクト（**berry-books-api-sdd**、**back-office-api-sdd**、**jsf-person-sdd**）は、仕様駆動開発により何度でも再実装できます。
 
 ```bash
-# berry-books-api-sddの成果物をクリーンアップ
+# 各SDDプロジェクトの成果物をクリーンアップ
 ./gradlew :berry-books-api-sdd:cleanSddArtifacts
+./gradlew :back-office-api-sdd:cleanSddArtifacts
+./gradlew :jsf-person-sdd:cleanSddArtifacts
 ```
 
-詳細は [projects/sdd/bookstore/berry-books-api-sdd/README.md](projects/sdd/bookstore/berry-books-api-sdd/README.md) を参照してください。
+詳細は各プロジェクトのREADME.mdを参照してください：
+- [projects/sdd/bookstore/berry-books-api-sdd/README.md](projects/sdd/bookstore/berry-books-api-sdd/README.md)
+- [projects/sdd/bookstore/back-office-api-sdd/README.md](projects/sdd/bookstore/back-office-api-sdd/README.md)
+- [projects/sdd/person/jsf-person-sdd/README.md](projects/sdd/person/jsf-person-sdd/README.md)
 
 ---
 

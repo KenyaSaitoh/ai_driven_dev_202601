@@ -141,7 +141,6 @@ subprojects {
         
         // JWT and BCrypt dependencies for projects that need authentication
         if (project.name == "berry-books-api" || 
-            project.name == "berry-books-api-vibe" || 
             project.name == "berry-books-api-sdd" ||
             project.name == "back-office-api" ||
             project.name == "back-office-api-sdd") {

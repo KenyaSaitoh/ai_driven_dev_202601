@@ -18,9 +18,6 @@ include 'back-office-api-sdd'
 include 'jsf-person-sdd'
 include 'struts-to-jsf-person-sdd'
 
-// Vibe: Vibe Coding（バイブコーディング）プロジェクト
-include 'berry-books-api-vibe'
-
 // プロジェクトの物理的な場所を指定
 // Master: 完成版プロジェクト（ドメイン別に整理）
 project(':berry-books-api').projectDir = file('projects/master/bookstore/berry-books-api')
@@ -34,6 +31,4 @@ project(':struts-person').projectDir = file('projects/master/person/struts-perso
 project(':berry-books-api-sdd').projectDir = file('projects/sdd/bookstore/berry-books-api-sdd')
 project(':back-office-api-sdd').projectDir = file('projects/sdd/bookstore/back-office-api-sdd')
 project(':jsf-person-sdd').projectDir = file('projects/sdd/person/jsf-person-sdd')
-
-// Vibe: Vibe Coding（バイブコーディング）プロジェクト（ドメイン別に整理）
-project(':berry-books-api-vibe').projectDir = file('projects/vibe/bookstore/berry-books-api-vibe')
+project(':struts-to-jsf-person-sdd').projectDir = file('struts-to-jsf-person-sdd')
