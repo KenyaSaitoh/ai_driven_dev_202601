@@ -1,7 +1,0 @@
--- 一括ドロップ
-DROP TABLE PERSON IF EXISTS;
-
-
-
-
-

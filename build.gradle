@@ -601,10 +601,16 @@ subprojects {
     }
 
     // Specification-Driven Development: Clean artifacts while preserving directory structure
-    if (project.name == "berry-books-mvc-sdd") {
+    def sddProjects = [
+        "back-office-api-sdd",
+        "berry-books-api-sdd",
+        "jsf-person-sdd"
+    ]
+    
+    if (project.name in sddProjects) {
         task cleanSddArtifacts {
             group = "sdd"
-            description = "Clean SDD artifacts (src/ and sql/hsqldb/) while preserving directory structure"
+            description = "Clean SDD artifacts (src/, tasks/) while preserving main directory structure"
             
             doLast {
                 println "Cleaning SDD artifacts for ${project.name}..."
@@ -616,12 +622,12 @@ subprojects {
                 // Define directory structure to preserve
                 def preservedDirs = [
                     "$projectDir/src/main/java",
-                    "$projectDir/src/main/resources/META-INF",
-                    "$projectDir/src/main/webapp/resources",
-                    "$projectDir/src/main/webapp/WEB-INF",
+                    "$projectDir/src/main/resources",
+                    "$projectDir/src/main/webapp",
                     "$projectDir/src/test/java",
                     "$projectDir/src/test/resources"
                 ]
+                
                 
                 // Create directories if they don't exist
                 preservedDirs.each { dirPath ->
@@ -632,32 +638,105 @@ subprojects {
                     }
                 }
                 
-                // Delete files under src/ (preserve directories)
+                // Delete files and subdirectories under src/ (preserve main structure)
                 def srcDir = file("$projectDir/src")
                 if (srcDir.exists()) {
                     println ""
                     println "Cleaning src/ directory..."
-                    srcDir.eachFileRecurse(groovy.io.FileType.FILES) { file ->
-                        // Delete all files except .gitkeep
+                    
+                    // src/main/java配下のパッケージとファイルを削除（javaフォルダ自体は残す）
+                    def mainJavaDir = file("$projectDir/src/main/java")
+                    if (mainJavaDir.exists()) {
+                        mainJavaDir.listFiles().each { file ->
+                            println "  Deleting: /src/main/java/${file.name}"
+                            if (file.isDirectory()) {
+                                file.deleteDir()
+                            } else {
+                                file.delete()
+                            }
+                            deletedFilesCount++
+                        }
+                    }
+                    
+                    // src/main/resources配下を削除（resourcesフォルダ自体は残す）
+                    def mainResourcesDir = file("$projectDir/src/main/resources")
+                    if (mainResourcesDir.exists()) {
+                        mainResourcesDir.listFiles().each { file ->
+                            println "  Deleting: /src/main/resources/${file.name}"
+                            if (file.isDirectory()) {
+                                file.deleteDir()
+                            } else {
+                                file.delete()
+                            }
+                            deletedFilesCount++
+                        }
+                    }
+                    
+                    // src/main/webapp配下を削除（webappフォルダ自体は残す）
+                    def mainWebappDir = file("$projectDir/src/main/webapp")
+                    if (mainWebappDir.exists()) {
+                        mainWebappDir.listFiles().each { file ->
+                            println "  Deleting: /src/main/webapp/${file.name}"
+                            if (file.isDirectory()) {
+                                file.deleteDir()
+                            } else {
+                                file.delete()
+                            }
+                            deletedFilesCount++
+                        }
+                    }
+                    
+                    // src/test/java配下を削除（javaフォルダ自体は残す）
+                    def testJavaDir = file("$projectDir/src/test/java")
+                    if (testJavaDir.exists()) {
+                        testJavaDir.listFiles().each { file ->
+                            println "  Deleting: /src/test/java/${file.name}"
+                            if (file.isDirectory()) {
+                                file.deleteDir()
+                            } else {
+                                file.delete()
+                            }
+                            deletedFilesCount++
+                        }
+                    }
+                    
+                    // src/test/resources配下を削除（resourcesフォルダ自体は残す）
+                    def testResourcesDir = file("$projectDir/src/test/resources")
+                    if (testResourcesDir.exists()) {
+                        testResourcesDir.listFiles().each { file ->
+                            println "  Deleting: /src/test/resources/${file.name}"
+                            if (file.isDirectory()) {
+                                file.deleteDir()
+                            } else {
+                                file.delete()
+                            }
+                            deletedFilesCount++
+                        }
+                    }
+                }
+                
+                // Delete files under tasks/ directory
+                def tasksDir = file("$projectDir/tasks")
+                if (tasksDir.exists()) {
+                    println ""
+                    println "Cleaning tasks/ directory..."
+                    tasksDir.eachFileRecurse(groovy.io.FileType.FILES) { file ->
                         if (file.name != ".gitkeep") {
-                            println "  Deleting: ${file.absolutePath.replace(projectDir.toString(), '')}"
+                            println "  Deleting: ${file.name}"
                             file.delete()
                             deletedFilesCount++
                         }
                     }
                 }
                 
-                // Delete files under sql/hsqldb/ (preserve directories)
-                def sqlDir = file("$projectDir/sql/hsqldb")
-                if (sqlDir.exists()) {
-                    println ""
-                    println "Cleaning sql/hsqldb/ directory..."
-                    sqlDir.eachFileRecurse(groovy.io.FileType.FILES) { file ->
-                        if (file.name != ".gitkeep") {
-                            println "  Deleting: ${file.name}"
-                            file.delete()
-                            deletedFilesCount++
-                        }
+                // Delete bin, build, logs directories
+                println ""
+                println "Cleaning build artifacts..."
+                ['bin', 'build', 'logs'].each { dirName ->
+                    def dir = file("$projectDir/$dirName")
+                    if (dir.exists()) {
+                        println "  Deleting: ${dirName}/"
+                        dir.deleteDir()
                     }
                 }
                 
@@ -676,12 +755,12 @@ subprojects {
                     }
                 }
                 
-                // Place .gitkeep in sql/hsqldb/ if empty
-                if (sqlDir.exists() && sqlDir.listFiles().length == 0) {
-                    def gitkeepFile = new File(sqlDir, ".gitkeep")
+                // Place .gitkeep in tasks/ if empty
+                if (tasksDir.exists() && tasksDir.listFiles().length == 0) {
+                    def gitkeepFile = new File(tasksDir, ".gitkeep")
                     if (!gitkeepFile.exists()) {
                         gitkeepFile.createNewFile()
-                        println "  .gitkeep created: sql/hsqldb/"
+                        println "  .gitkeep created: tasks/"
                         preservedDirsCount++
                     }
                 }
@@ -694,20 +773,17 @@ subprojects {
                 println "  Preserved directories: ${preservedDirsCount}"
                 println ""
                 println "[INFO] Directory structure has been preserved:"
-                println "    - src/main/java"
-                println "    - src/main/resources/META-INF"
-                println "    - src/main/webapp/resources"
-                println "    - src/main/webapp/WEB-INF"
-                println "    - src/test/java"
-                println "    - src/test/resources"
-                println "    - sql/hsqldb"
+                preservedDirs.each { dirPath ->
+                    println "    - ${dirPath.replace(projectDir.toString(), '')}"
+                }
                 println ""
                 println "[INFO] Empty directories contain .gitkeep files."
                 println ""
                 println "Ready for re-implementation from SPEC!"
                 println "Next steps:"
-                println "  1. @instructions/tasks.md - Generate implementation tasks"
-                println "  2. @instructions/implement.md - Implement from tasks"
+                println "  1. Review specs/baseline/ for specifications"
+                println "  2. Review sql/ for database scripts"
+                println "  3. Use AI tools to regenerate implementation"
             }
         }
     }
@@ -899,6 +975,35 @@ task initHsqldb doLast {
 
 // タスクをグループ化する
 [startHsqldb, stopHsqldb, initHsqldb]*.group = "hsqldb"
+
+// 全sddプロジェクトのソースをクリーンアップするタスク
+task cleanupAllSddProjects {
+    group = "sdd"
+    description = "Clean all SDD projects (back-office-api-sdd, berry-books-api-sdd, jsf-person-sdd)"
+    
+    doFirst {
+        println ""
+        println "===================================="
+        println "Cleaning All SDD Projects"
+        println "===================================="
+        println ""
+    }
+    
+    dependsOn subprojects.findAll { 
+        it.name in ["back-office-api-sdd", "berry-books-api-sdd", "jsf-person-sdd"]
+    }.collect { it.tasks.findByName('cleanSddArtifacts') }.findAll { it != null }
+    
+    doLast {
+        println ""
+        println "===================================="
+        println "All SDD Projects Cleanup Completed!"
+        println "===================================="
+        println "  ✓ back-office-api-sdd"
+        println "  ✓ berry-books-api-sdd"
+        println "  ✓ jsf-person-sdd"
+        println ""
+    }
+}
 
 // Payara Serverを起動する（バックグラウンド）
 task startPayara doLast {
