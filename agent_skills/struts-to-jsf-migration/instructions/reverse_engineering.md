@@ -2,37 +2,37 @@
 
 ## パラメータ設定
 
-実行前に以下のパラメータを設定してください:
+実行前に以下のパラメータを設定する
 
 ```yaml
 struts_project_root: "ここに既存Strutsプロジェクトのルートパスを入力"
 spec_output_directory: "ここに仕様書の出力先パスを入力"
 ```
 
-* 例:
+* 例
 ```yaml
 struts_project_root: "projects/legacy/struts-app"
 spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 ```
 
-注意: 
-* パス区切りはOS環境に応じて調整してください（Windows: `\`, Unix/Linux/Mac: `/`）
-* 以降、`{struts_project_root}` と表記されている箇所は、上記で設定した値に置き換えてください
-* 以降、`{spec_output_directory}` と表記されている箇所は、上記で設定した値に置き換えてください
+注意
+* パス区切りはOS環境に応じて調整する（Windows: `\`, Unix/Linux/Mac: `/`）
+* 以降、`{struts_project_root}` と表記されている箇所は、上記で設定した値に置き換える
+* 以降、`{spec_output_directory}` と表記されている箇所は、上記で設定した値に置き換える
 
 ---
 
 ## 概要
 
-このインストラクションは、既存のApache Struts 1.xプロジェクトから抽象的・論理的な仕様書を生成するためのものです。
+このインストラクションは、既存のApache Struts 1.xプロジェクトから抽象的・論理的な仕様書を生成するためのものである
 
-重要な方針:
-* Code-to-Codeの直接変換ではなく、まず仕様書を生成
-* Strutsの実装詳細に囚われず、ビジネスロジックとビジネスルールを抽出
+重要な方針
+* Code-to-Codeの直接変換ではなく、まず仕様書を生成する
+* Strutsの実装詳細に囚われず、ビジネスロジックとビジネスルールを抽出する
 * 生成された仕様書は、JSFフレームワークに依存しない抽象的なものとする
-* 技術スタックの記載は移行先（Jakarta EE 10、JSF 4.0）を前提とする
+* 技術スタックの記載は移行先を前提とする
 
-出力先:
+出力先
 * `{spec_output_directory}/baseline/system/` - システムレベルの仕様書
 * `{spec_output_directory}/baseline/screen/` - 画面単位の仕様書
 
@@ -40,25 +40,25 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 
 ## 1. Strutsプロジェクトの分析
 
-パラメータで指定されたStrutsプロジェクトを分析してください。
+パラメータで指定されたStrutsプロジェクトを分析する
 
-注意: `{struts_project_root}` は、パラメータで指定されたパスに置き換えてください。
+注意: `{struts_project_root}` は、パラメータで指定されたパスに置き換える
 
 ### 1.1 Agent Skills憲章（最優先で確認）
 
-* @agent_skills/struts-to-jsf-migration/principles/ - マイグレーション原則、マッピング規則を確認
+* @agent_skills/struts-to-jsf-migration/principles/ - マイグレーション原則、マッピング規則を確認する
   * `constitution.md` - マイグレーション憲章
-  * Code-to-Spec-to-Codeアプローチ、マッピング規則、Markdownフォーマット規約を確認
+  * Code-to-Spec-to-Codeアプローチ、マッピング規則、Markdownフォーマット規約を確認する
 
 ### 1.2 Strutsプロジェクト構造の把握
 
-以下のディレクトリとファイルを探索してください：
+以下のディレクトリとファイルを探索する
 
-* ソースコード:
+* ソースコード
   * `{struts_project_root}/src/main/java/` - Javaソースコード
   * `{struts_project_root}/src/main/webapp/` - JSP、設定ファイル
 
-* 主要な構成要素:
+* 主要な構成要素
   * Action: `*Action.java` - コントローラークラス
   * ActionForm: `*Form.java` - フォームクラス
   * EJB Service: `*Service.java`, `*ServiceBean.java` - ビジネスロジック
@@ -66,29 +66,29 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
   * Model/Entity: `*.java`（パッケージ: model, entity等）
   * JSP: `*.jsp` - ビューファイル
 
-* 設定ファイル:
+* 設定ファイル
   * `struts-config.xml` - Strutsマッピング設定
   * `web.xml` - Webアプリケーション設定
   * `ejb-jar.xml` - EJB設定（存在する場合）
   * `ApplicationResources.properties` - メッセージリソース
 
-* SQLスクリプト:
+* SQLスクリプト
   * `{struts_project_root}/sql/` - データベーススキーマ、初期データ
 
 ### 1.3 コンポーネント間の関係を把握
 
-以下の関係を分析してください：
+以下の関係を分析する
 
-* 画面遷移:
+* 画面遷移
   * struts-config.xmlのaction-mappings
   * ActionのActionForward
   * JSPのリンクとフォームアクション
 
-* データフロー:
+* データフロー
   * ActionForm → Action → Service → DAO → Database
   * Database → DAO → Service → Action → JSP
 
-* ビジネスロジック:
+* ビジネスロジック
   * Serviceクラスのメソッド
   * バリデーションロジック
   * トランザクション境界
@@ -99,49 +99,42 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 
 ### 2.1 システムレベルの仕様書
 
-以下の仕様書を `{spec_output_directory}/baseline/system/` に生成してください：
+以下の仕様書を `{spec_output_directory}/baseline/system/` に生成する
 
 #### requirements.md
 
-* システムの目的:
-  * Strutsプロジェクトの全体的な目的を記述
-  * READMEやドキュメントから抽出
+* システムの目的
+  * Strutsプロジェクトの全体的な目的を記述する
+  * READMEやドキュメントから抽出する
 
-* 機能要件:
+* 機能要件
   * 実装されている機能の一覧
-  * Actionクラス、JSPから抽出
+  * Actionクラス、JSPから抽出する
 
-* 非機能要件:
-  * データベース種類（HSQLDBなど）
+* 非機能要件
+  * データベース種類
   * 認証・認可の有無
   * トランザクション要件
 
 #### architecture_design.md
 
-* 技術スタック（移行先を記載）:
-  * Java 21
-  * Jakarta EE 10
-  * Jakarta Faces (JSF) 4.0
-  * Jakarta Persistence (JPA) 3.1
-  * Jakarta CDI 4.0
-  * Payara Server 6（またはWildFly）
-  * データベース: 既存のまま（例: HSQLDB 2.7.x）
+* 技術スタック（移行先を記載）
+  * 移行先の技術スタックを記載する
 
-* パッケージ構造:
-  * Strutsのパッケージ構造を参考に、JSF向けに最適化
-  * 例: `com.example.app.bean`, `com.example.app.entity`, `com.example.app.service`
+* パッケージ構造
+  * Strutsのパッケージ構造を参考に、JSF向けに最適化する
 
-* レイヤー構成:
+* レイヤー構成
   * Presentation Layer: JSF Managed Bean
-  * Business Logic Layer: CDI Service（`@Transactional`）
+  * Business Logic Layer: CDI Service
   * Data Access Layer: JPA Entity、EntityManager
   * Database Layer: 既存データベース
 
-* アーキテクチャパターン:
+* アーキテクチャパターン
   * MVC（Model-View-Controller）
   * CDIによる依存性注入
   * JPAによる永続化
-  * トランザクション管理（`@Transactional`）
+  * トランザクション管理
 
 #### functional_design.md
 
@@ -365,21 +358,21 @@ JSFへのマッピング:
 
 ### 4.1 抽象化の原則
 
-* Strutsの実装詳細は含めない:
+* Strutsの実装詳細は含めない
   * ❌ 「ActionForwardを返す」
   * ✅ 「画面XXXに遷移する」
 
-* ビジネスロジックに焦点を当てる:
+* ビジネスロジックに焦点を当てる
   * ❌ 「JNDIルックアップでEJBを取得し、メソッドを呼び出す」
   * ✅ 「PersonServiceを使用して全PERSONを取得する」
 
-* フレームワーク非依存の記述:
+* フレームワーク非依存の記述
   * ❌ 「request.setAttribute()でデータを設定」
   * ✅ 「画面に表示するデータを準備する」
 
 ### 4.2 JSFアーキテクチャへの適応
 
-仕様書には、JSFの技術スタックを前提とした設計を記載します：
+仕様書には、JSFの技術スタックを前提とした設計を記載する
 
 * Managed Bean: `@Named`, `@ViewScoped`
 * CDI: `@Inject`
@@ -390,24 +383,24 @@ JSFへのマッピング:
 ### 4.3 データモデルの継続性
 
 * データベーススキーマは変更しない
-* テーブル名、カラム名は既存のまま使用
-* JPA Entityは既存テーブルにマッピング
+* テーブル名、カラム名は既存のまま使用する
+* JPA Entityは既存テーブルにマッピングする
 
 ### 4.4 ビジネスロジックの保全
 
-* StrutsのServiceクラスやEJBのビジネスロジックを正確に抽出
-* バリデーションルール、計算ロジック、状態遷移を仕様書に記載
-* ビジネスルールを失わないように注意
+* StrutsのServiceクラスやEJBのビジネスロジックを正確に抽出する
+* バリデーションルール、計算ロジック、状態遷移を仕様書に記載する
+* ビジネスルールを失わないように注意する
 
 ---
 
 ## 5. 生成手順
 
-1. Strutsプロジェクト探索: `{struts_project_root}` 配下のファイルを探索し、構造を把握
-2. コンポーネント分析: Action、ActionForm、EJB、DAO、JSPを分析
-3. 関係抽出: 画面遷移、データフロー、ビジネスロジックの関係を抽出
-4. 仕様書生成: システムレベルと画面単位の仕様書を生成
-5. 検証: 生成された仕様書の完全性を確認（次のステップで実施）
+1. Strutsプロジェクト探索: `{struts_project_root}` 配下のファイルを探索し、構造を把握する
+2. コンポーネント分析: Action、ActionForm、EJB、DAO、JSPを分析する
+3. 関係抽出: 画面遷移、データフロー、ビジネスロジックの関係を抽出する
+4. 仕様書生成: システムレベルと画面単位の仕様書を生成する
+5. 検証: 生成された仕様書の完全性を確認する（次のステップで実施）
 
 ---
 
@@ -415,40 +408,40 @@ JSFへのマッピング:
 
 ### Markdownフォーマット規約
 
-生成する仕様書は、憲章に記載されたフォーマット規約に従ってください：
+生成する仕様書は、憲章に記載されたフォーマット規約に従う
 
-* 箇条書きはアスタリスク（`*`）を使用（ハイフン `–` は使用しない）
+* 箇条書きはアスタリスク（`*`）を使用する（ハイフン `–` は使用しない）
 * ボールド（太字）は使用しない
-* 見出しレベル（`#`、`##`、`###`）で構造化
-* コード例の前には箇条書き形式で説明を記載
+* 見出しレベル（`#`、`##`、`###`）で構造化する
+* コード例の前には箇条書き形式で説明を記載する
 
 ### プロジェクトルートの扱い
 
-* `{struts_project_root}` は、パラメータで明示的に指定されたパスに置き換えてください
-* `{spec_output_directory}` は、パラメータで明示的に指定されたパスに置き換えてください
-* 相対パスでも絶対パスでも構いません
+* `{struts_project_root}` は、パラメータで明示的に指定されたパスに置き換える
+* `{spec_output_directory}` は、パラメータで明示的に指定されたパスに置き換える
+* 相対パスでも絶対パスでも構わない
 
 ### 既存ドキュメントの活用
 
-* READMEファイルがあれば、システムの目的や概要を抽出
-* SQLスクリプトがあれば、テーブル定義を抽出
-* ドキュメントフォルダがあれば、参考資料として活用
+* READMEファイルがあれば、システムの目的や概要を抽出する
+* SQLスクリプトがあれば、テーブル定義を抽出する
+* ドキュメントフォルダがあれば、参考資料として活用する
 
 ### 不明点の扱い
 
-* コードから抽出できない情報（例: 業務ルールの背景、非機能要件の詳細）は、仕様書に「要確認」として記載
-* 次のステップ（仕様書検証）でユーザーに質問して補完
+* コードから抽出できない情報は、仕様書に「要確認」として記載する
+* 次のステップ（仕様書検証）でユーザーに質問して補完する
 
 ---
 
 ## 7. 成果物チェックリスト
 
-生成された仕様書が満たすべき要件：
+生成された仕様書が満たすべき要件
 
-* システムレベルの仕様書（requirements.md、architecture_design.md、functional_design.md、data_model.md、behaviors.md）が生成されている
-* 各画面単位の仕様書（screen_design.md、functional_design.md、behaviors.md）が生成されている
+* システムレベルの仕様書が生成されている
+* 各画面単位の仕様書が生成されている
 * Strutsの実装詳細に囚われず、抽象的・論理的な記述になっている
-* JSFアーキテクチャ（Managed Bean、CDI、JPA、Facelets）を前提とした設計になっている
+* JSFアーキテクチャを前提とした設計になっている
 * データベーススキーマは既存のまま継続される設計になっている
 * ビジネスロジックとビジネスルールが正確に抽出されている
 * Markdownフォーマット規約に従っている

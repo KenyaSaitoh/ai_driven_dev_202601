@@ -2,15 +2,15 @@
 
 ## 概要
 
-このインストラクションは、仕様書からJSFコードを生成する方法を説明します。
+このインストラクションは、仕様書からJSFコードを生成する方法を説明する
 
-重要: 実際のコード生成には、`@agent_skills/jakarta-ee-standard/instructions/code_generation.md` を使用します。
+重要: 実際のコード生成には、`@agent_skills/jakarta-ee-standard/instructions/code_generation.md` を使用する
 
 ---
 
 ## コード生成の流れ
 
-マイグレーションの全体フローは以下の通りです：
+マイグレーションの全体フローは以下の通りである
 
 ```
 ステップ1: reverse_engineering.md（Strutsコードから仕様書を生成）
@@ -24,31 +24,31 @@
 
 ### ステップ1: タスク分解
 
-仕様書から、実装タスクを分解します。
+仕様書から、実装タスクを分解する
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/task_breakdown.md
 
-全タスクを分解してください。
+全タスクを分解してください
 
-パラメータ:
+パラメータ
 * project_root: <JSFプロジェクトのルート>
 * spec_directory: <仕様書ディレクトリ>
 * output_directory: <タスク出力先>（オプション）
 ```
 
-例:
+例
 ```
 @agent_skills/struts-to-jsf-migration/instructions/task_breakdown.md
 
-全タスクを分解してください。
+全タスクを分解してください
 
-パラメータ:
+パラメータ
 * project_root: projects/sdd/person/jsf-person-sdd
 * spec_directory: projects/sdd/person/jsf-person-sdd/specs
 ```
 
-結果:
+結果
 ```
 tasks/
 ├── tasks.md              ← メインタスクリスト
@@ -61,77 +61,77 @@ tasks/
 
 ### ステップ2: 詳細設計（画面単位、AIと対話）
 
-画面単位で詳細設計書を作成します。AIと対話しながら不明点を確認します。
+画面単位で詳細設計書を作成する。AIと対話しながら不明点を確認する
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/detailed_design.md
 
-画面の詳細設計書を作成してください。
+画面の詳細設計書を作成してください
 
-パラメータ:
+パラメータ
 * project_root: <JSFプロジェクトのルート>
 * screen_id: <対象画面ID>
 ```
 
-例:
+例
 ```
 @agent_skills/struts-to-jsf-migration/instructions/detailed_design.md
 
-Person一覧画面の詳細設計書を作成してください。
+Person一覧画面の詳細設計書を作成してください
 
-パラメータ:
+パラメータ
 * project_root: projects/sdd/person/jsf-person-sdd
 * screen_id: SCREEN_001_PersonList
 ```
 
-結果:
+結果
 * `specs/baseline/screen/SCREEN_001_PersonList/detailed_design.md` が生成される
 
 ### ステップ3: コード生成
 
-タスクファイルに従ってJSFコードを実装します。
+タスクファイルに従ってJSFコードを実装する
 
 ```
 @agent_skills/jakarta-ee-standard/instructions/code_generation.md
 
-タスクを実行してください。
+タスクを実行してください
 
-パラメータ:
+パラメータ
 * project_root: <JSFプロジェクトのルート>
 * task_file: <実行するタスクファイル>
 * skip_infrastructure: true  # インフラセットアップをスキップ
 ```
 
-例（セットアップ）:
+例（セットアップ）
 ```
 @agent_skills/jakarta-ee-standard/instructions/code_generation.md
 
-セットアップタスクを実行してください。
+セットアップタスクを実行してください
 
-パラメータ:
+パラメータ
 * project_root: projects/sdd/person/jsf-person-sdd
 * task_file: projects/sdd/person/jsf-person-sdd/tasks/setup_tasks.md
 * skip_infrastructure: true
 ```
 
-例（共通機能）:
+例（共通機能）
 ```
 @agent_skills/jakarta-ee-standard/instructions/code_generation.md
 
-共通機能を実装してください。
+共通機能を実装してください
 
-パラメータ:
+パラメータ
 * project_root: projects/sdd/person/jsf-person-sdd
 * task_file: projects/sdd/person/jsf-person-sdd/tasks/common_tasks.md
 ```
 
-例（画面別実装）:
+例（画面別実装）
 ```
 @agent_skills/jakarta-ee-standard/instructions/code_generation.md
 
-Person一覧画面を実装してください。
+Person一覧画面を実装してください
 
-パラメータ:
+パラメータ
 * project_root: projects/sdd/person/jsf-person-sdd
 * task_file: projects/sdd/person/jsf-person-sdd/tasks/SCREEN_001_PersonList.md
 ```
@@ -358,37 +358,37 @@ public class PersonTableBean implements Serializable {
 
 ### 1. データソース設定の継続
 
-* Strutsで使用していたJNDIデータソース（例: `jdbc/HsqldbDS`）をそのまま使用
-* `persistence.xml`の`<jta-data-source>`で参照
+* Strutsで使用していたJNDIデータソースをそのまま使用する
+* `persistence.xml`の`<jta-data-source>`で参照する
 
 ### 2. トランザクション管理の移行
 
-* Strutsの場合:
+* Strutsの場合
   * EJBコンテナがトランザクション管理
-  * `@Stateless`のメソッドがトランザクション境界
+  * メソッドがトランザクション境界
 
-* JSFの場合:
+* JSFの場合
   * `@Transactional`でトランザクション管理
   * Serviceクラスのメソッドがトランザクション境界
 
 ### 3. 画面遷移の移行
 
-* Strutsの場合:
+* Strutsの場合
   * `struts-config.xml`でマッピング
   * `ActionForward`で遷移先を指定
 
-* JSFの場合:
+* JSFの場合
   * アクションメソッドの戻り値（画面ID）で遷移
   * `faces-config.xml`でナビゲーションルール定義（オプション）
   * 暗黙的ナビゲーション（画面ID = XHTMLファイル名）
 
 ### 4. データ受け渡しの移行
 
-* Strutsの場合:
+* Strutsの場合
   * `request.setAttribute()` - リクエストスコープ
   * `session.setAttribute()` - セッションスコープ
 
-* JSFの場合:
+* JSFの場合
   * Managed Beanのプロパティ - ViewScoped
   * Flash Scope - 画面間のデータ受け渡し
   * Session Scope - セッション保持
@@ -397,13 +397,13 @@ public class PersonTableBean implements Serializable {
 
 ## テストの実装
 
-マイグレーション後のシステムが、元のシステムと同等の機能を持つことを、テストで検証します。
+マイグレーション後のシステムが、元のシステムと同等の機能を持つことを、テストで検証する
 
 ### ユニットテスト
 
-* Serviceクラスのビジネスロジックをテスト
+* Serviceクラスのビジネスロジックをテストする
 * JUnit 5 + Mockito
-* EntityManagerをモック化
+* EntityManagerをモック化する
 
 ### 統合テスト
 

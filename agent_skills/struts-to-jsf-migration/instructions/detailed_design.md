@@ -2,37 +2,37 @@
 
 ## パラメータ設定
 
-実行前に以下のパラメータを設定してください:
+実行前に以下のパラメータを設定する
 
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
 screen_id: "ここに対象画面のIDを入力（例: SCREEN_001_PersonList）"
 ```
 
-* 例:
+* 例
 ```yaml
 project_root: "projects/sdd/person/jsf-person-sdd"
 screen_id: "SCREEN_001_PersonList"
 ```
 
-注意: 
-* パス区切りはOS環境に応じて調整してください（Windows: `\`, Unix/Linux/Mac: `/`）
-* 以降、`{project_root}` と表記されている箇所は、上記で設定した値に置き換えてください
-* `{screen_id}` は対象画面のID（例: SCREEN_001_PersonList, SCREEN_002_PersonInput）に置き換えてください
+注意
+* パス区切りはOS環境に応じて調整する（Windows: `\`, Unix/Linux/Mac: `/`）
+* 以降、`{project_root}` と表記されている箇所は、上記で設定した値に置き換える
+* `{screen_id}` は対象画面のIDに置き換える
 
 ---
 
 ## 概要
 
-このインストラクションは、仕様書（screen_design.md、functional_design.md、behaviors.md）から画面の詳細設計書（detailed_design.md）を生成するためのものです。
+このインストラクションは、仕様書（screen_design.md、functional_design.md、behaviors.md）から画面の詳細設計書（detailed_design.md）を生成するためのものである
 
-重要な方針:
-* AIが仕様を理解し、人と対話しながら妥当性・充足性を確認
-* 不足情報を補いながら詳細設計を作成
+重要な方針
+* AIが仕様を理解し、人と対話しながら妥当性・充足性を確認する
+* 不足情報を補いながら詳細設計を作成する
 * 仕様書は抽象的、detailed_design.mdは具体的
-* 推測せず、不明点は必ずユーザーに質問
+* 推測せず、不明点は必ずユーザーに質問する
 
-出力先:
+出力先
 * `{project_root}/specs/baseline/screen/{screen_id}/detailed_design.md`
 
 ---
