@@ -44,13 +44,20 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 
 注意: `{struts_project_root}` は、パラメータで指定されたパスに置き換える
 
-### 1.1 Agent Skills憲章（最優先で確認）
+### 1.1 Agent Skillsルール（最優先で確認）
 
-* @agent_skills/struts-to-jsf-migration/principles/ - マイグレーション原則、マッピング規則を確認する
-  * `constitution.md` - マイグレーション憲章
+* @agent_skills/struts-to-jsf-migration/principles/ - マイグレーションルール、アーキテクチャ標準、マッピング規則、セキュリティ標準を確認する
+  * このフォルダ配下のすべてのMarkdownファイルを読み込み、マイグレーションルールを遵守すること
   * Code-to-Spec-to-Codeアプローチ、マッピング規則、Markdownフォーマット規約を確認する
 
-### 1.2 Strutsプロジェクト構造の把握
+### 1.2 フレームワーク仕様（該当する場合）
+
+* @agent_skills/struts-to-jsf-migration/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+* @agent_skills/jakarta-ee-api-basic/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+  * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
+  * 仕様書生成時に、フレームワーク仕様を考慮した設計を記載する
+
+### 1.3 Strutsプロジェクト構造の把握
 
 以下のディレクトリとファイルを探索する
 
@@ -75,7 +82,37 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 * SQLスクリプト
   * `{struts_project_root}/sql/` - データベーススキーマ、初期データ
 
-### 1.3 コンポーネント間の関係を把握
+### 1.4 データソースとJNDI名の特定
+
+移行先でJPAのpersistence.xmlを設定するために、既存のデータソース設定を正確に把握する
+
+* JNDI名は複数箇所で定義される可能性があり、決め打ちはできない。以下の全箇所を調査すること
+
+調査対象:
+* `web.xml` - `<resource-ref>` 要素
+  * `<res-ref-name>` タグで参照名を確認（例: `jdbc/HsqldbDS`）
+  * `<res-type>` タグでDataSource型を確認
+  
+* DAOクラス - JNDIルックアップコード
+  * `InitialContext.lookup("java:comp/env/jdbc/...")` のような記述
+  * 実際に使用されているJNDI名を確認
+  
+* `ejb-jar.xml` - `<resource-ref>` 要素（存在する場合）
+  * EJBからのデータソース参照設定
+  
+* アプリケーションサーバー設定ファイル（存在する場合）
+  * `context.xml`, `tomee.xml` 等
+  * 実際のデータソースリソース定義（JDBCドライバー、接続URL、認証情報）
+
+抽出すべき情報:
+* JNDI参照名（例: `jdbc/HsqldbDS`）
+* 完全修飾JNDI名（例: `java:comp/env/jdbc/HsqldbDS`）
+* データベース種類（HSQLDB、PostgreSQL、MySQL等）
+* JTAマネージドかどうか
+
+注意: プロジェクトによってJNDI名の命名規則は異なるため、必ず実際のコードと設定ファイルから抽出すること
+
+### 1.5 コンポーネント間の関係を把握
 
 以下の関係を分析する
 
@@ -136,6 +173,14 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
   * JPAによる永続化
   * トランザクション管理
 
+* データソース設定
+  * 移行元で使用しているJNDI名を明記する
+  * JNDI参照名（例: `jdbc/HsqldbDS`）
+  * 完全修飾JNDI名（例: `java:comp/env/jdbc/HsqldbDS` または `java:app/jdbc/testdb`）
+  * データベース種類（HSQLDB、PostgreSQL、MySQL等）
+  * JTAマネージド: true/false
+  * 注意: この情報はpersistence.xml生成時に必須となる
+
 #### functional_design.md
 
 * 画面一覧:
@@ -168,6 +213,13 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 * JPA設計:
   * `@Entity`, `@Table`, `@Id`, `@Column`アノテーション
   * リレーションアノテーション（`@ManyToOne`, `@OneToMany`等）
+
+* persistence.xml設定情報:
+  * 移行元で使用しているJNDI名を明記する
+  * `<jta-data-source>` に設定するJNDI名（例: `java:app/jdbc/testdb`）
+  * Persistence Unit名（例: `PersonPU`）
+  * トランザクションタイプ: JTA（通常）
+  * 注意: JNDI名はweb.xml、DAOクラス、アプリケーションサーバー設定から正確に抽出すること
 
 #### behaviors.md
 
@@ -304,6 +356,9 @@ JSFへのマッピング:
 * JDBC操作: `PreparedStatement`, `ResultSet`
 
 抽出すべき情報:
+* JNDIルックアップで使用されている完全なJNDI名（例: `java:comp/env/jdbc/HsqldbDS`）
+  * この情報は必ずarchitecture_design.mdに記載すること
+  * 複数のDAOがある場合、全てのJNDI名を確認すること（通常は統一されているが、例外もある）
 * SQLクエリ
 * CRUD操作（Create, Read, Update, Delete）
 * ResultSetからオブジェクトへのマッピング
@@ -313,6 +368,7 @@ JSFへのマッピング:
 * SQL → JPQL
 * `PreparedStatement` → `em.createQuery()`
 * 手動マッピング → 自動マッピング（Entity）
+* JNDIデータソース → persistence.xmlの`<jta-data-source>`で同じJNDI名を使用
 
 ### 3.5 JSP分析
 
@@ -356,7 +412,7 @@ JSFへのマッピング:
 
 ## 4. 仕様書生成のガイドライン
 
-### 4.1 抽象化の原則
+### 4.1 抽象化のルール
 
 * Strutsの実装詳細は含めない
   * ❌ 「ActionForwardを返す」
@@ -408,7 +464,7 @@ JSFへのマッピング:
 
 ### Markdownフォーマット規約
 
-生成する仕様書は、憲章に記載されたフォーマット規約に従う
+生成する仕様書は、ルールドキュメントに記載されたフォーマット規約に従う
 
 * 箇条書きはアスタリスク（`*`）を使用する（ハイフン `–` は使用しない）
 * ボールド（太字）は使用しない
@@ -450,7 +506,7 @@ JSFへのマッピング:
 
 ## 参考資料
 
-* [マイグレーション憲章](../principles/constitution.md) - マッピング規則、原則
+* [マイグレーションルール](../principles/) - マッピング規則、マイグレーションルール
 * [タスク分解インストラクション](task_breakdown.md) - 次のステップ（ステップ2）
 * [詳細設計インストラクション](detailed_design.md) - 次のステップ（ステップ3）
 * [コード生成インストラクション](code_generation.md) - 次のステップ（ステップ4）

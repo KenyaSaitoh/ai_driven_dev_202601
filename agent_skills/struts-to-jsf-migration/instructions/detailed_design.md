@@ -43,17 +43,24 @@ screen_id: "SCREEN_001_PersonList"
 
 注意: `{project_root}` および `{screen_id}` は、パラメータで指定された値に置き換えてください。
 
-### 1.1 Agent Skills憲章（最優先で確認）
+### 1.1 Agent Skillsルール（最優先で確認）
 
-* @agent_skills/struts-to-jsf-migration/principles/ - マイグレーション原則、マッピング規則を確認
-  * `constitution.md` - マイグレーション憲章
+* @agent_skills/struts-to-jsf-migration/principles/ - マイグレーションルール、アーキテクチャ標準、マッピング規則、セキュリティ標準を確認
+  * このフォルダ配下のすべてのMarkdownファイルを読み込み、マイグレーションルールを遵守すること
   * Code-to-Spec-to-Codeアプローチ、マッピング規則を確認
-* @agent_skills/jakarta-ee-standard/principles/ - Jakarta EE開発の共通原則
-  * `constitution.md` - Jakarta EE開発憲章
-  * 重要: 詳細設計においても、憲章に記載された原則（命名規則、設計パターン、コーディング規約など）を遵守すること
-  * 注意: Agent Skills配下の憲章は全プロジェクト共通。プロジェクト固有の憲章がある場合は `{project_root}/principles/` も確認すること
+* @agent_skills/jakarta-ee-api-basic/principles/ - Jakarta EE開発の共通ルール
+  * このフォルダ配下のすべてのMarkdownファイルを読み込み、開発ルールを遵守すること
+  * 重要: 詳細設計においても、ルールドキュメントに記載されたすべてのルール（命名規則、設計パターン、コーディング規約など）を遵守すること
+  * 注意: Agent Skills配下のルールは全プロジェクト共通。プロジェクト固有のルールがある場合は `{project_root}/principles/` も確認すること
 
-### 1.2 システムレベルの仕様
+### 1.2 フレームワーク仕様（該当する場合）
+
+* @agent_skills/struts-to-jsf-migration/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+* @agent_skills/jakarta-ee-api-basic/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+  * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
+  * 詳細設計時に、フレームワーク仕様に従った設計を行う
+
+### 1.3 システムレベルの仕様
 
 以下のファイルを読み込み、システム全体の設計を理解してください：
 
@@ -62,6 +69,7 @@ screen_id: "SCREEN_001_PersonList"
   * パッケージ階層の規約
   * 使用技術スタック（Jakarta EE 10、JPA、JSF等）
   * セッション管理方針（ViewScoped、Flash Scope等）
+  * データソース設定セクションでJNDI名を確認（Service実装時に参照）
 
 * functional_design.md - システム全体の機能設計概要を確認
   * 画面遷移図
@@ -71,8 +79,9 @@ screen_id: "SCREEN_001_PersonList"
   * 対象エンティティのテーブル定義
   * フィールド、型、制約
   * リレーション（@ManyToOne、@OneToMany等）
+  * persistence.xml設定情報セクションでJNDI名とPersistence Unit名を確認
 
-### 1.3 対象画面の仕様
+### 1.4 対象画面の仕様
 
 以下のファイルを読み込み、対象画面の詳細を理解してください：
 
@@ -178,6 +187,11 @@ screen_id: "SCREEN_001_PersonList"
 8. セッション管理
    * 「画面間のデータ受け渡しは以下でよろしいでしょうか？」
    * Flash Scope、Session Scope、リクエストパラメータ
+
+9. データソース設定
+   * 「persistence.xmlで使用するJNDI名は以下でよろしいでしょうか？」
+   * architecture_design.mdまたはdata_model.mdから抽出したJNDI名を確認
+   * 移行元で実際に使用されているJNDI名であることを確認
 
 ### 2.3 不足情報の補完
 
@@ -509,8 +523,8 @@ FacesContext.getCurrentInstance().addMessage(null,
 
 ## 参考資料
 
-* [マイグレーション憲章](../principles/constitution.md) - マッピング規則、原則
-* [Jakarta EE開発憲章](../../jakarta-ee-standard/principles/constitution.md) - 開発原則
+* [マイグレーションルール](../principles/) - マッピング規則、マイグレーションルール
+* [Jakarta EE開発ルール](../../jakarta-ee-api-basic/principles/) - 開発ルール
 * [task_breakdown.md](task_breakdown.md) - タスク分解（前工程）
 * [code_generation.md](code_generation.md) - コード生成（次工程）
 * [Jakarta EE 10仕様](https://jakarta.ee/specifications/)

@@ -46,15 +46,22 @@ output_directory: "projects/sdd/person/jsf-person-sdd/tasks"
 
 注意: `{project_root}` は、パラメータで指定されたパスに置き換えてください。全てのパスはそのプロジェクトルートを基準とした相対パスです。
 
-### Agent Skills憲章（最優先で確認）
+### Agent Skillsルール（最優先で確認）
 
-* @agent_skills/struts-to-jsf-migration/principles/ - マイグレーション原則、マッピング規則を確認
-  * `constitution.md` - マイグレーション憲章
+* @agent_skills/struts-to-jsf-migration/principles/ - マイグレーションルール、アーキテクチャ標準、マッピング規則、セキュリティ標準を確認
+  * このフォルダ配下のすべてのMarkdownファイルを読み込み、マイグレーションルールを遵守すること
   * Code-to-Spec-to-Codeアプローチ、マッピング規則を確認
-* @agent_skills/jakarta-ee-standard/principles/ - Jakarta EE開発の共通原則
-  * `constitution.md` - Jakarta EE開発憲章
-  * 重要: タスク分解においても、憲章に記載された原則（テストカバレッジ基準、アーキテクチャパターン、コーディング規約など）を遵守すること
-  * 注意: Agent Skills配下の憲章は全プロジェクト共通。プロジェクト固有の憲章がある場合は `{project_root}/principles/` も確認すること
+* @agent_skills/jakarta-ee-api-basic/principles/ - Jakarta EE開発の共通ルール
+  * このフォルダ配下のすべてのMarkdownファイルを読み込み、開発ルールを遵守すること
+  * 重要: タスク分解においても、ルールドキュメントに記載されたすべてのルール（テストカバレッジ基準、アーキテクチャパターン、コーディング規約など）を遵守すること
+  * 注意: Agent Skills配下のルールは全プロジェクト共通。プロジェクト固有のルールがある場合は `{project_root}/principles/` も確認すること
+
+### フレームワーク仕様（該当する場合）
+
+* @agent_skills/struts-to-jsf-migration/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+* @agent_skills/jakarta-ee-api-basic/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+  * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
+  * タスク分解時に、フレームワーク固有の実装要件を考慮する
 
 ### 必須ドキュメント（system/配下）
 
@@ -62,12 +69,14 @@ output_directory: "projects/sdd/person/jsf-person-sdd/tasks"
   * アーキテクチャパターン: サーバーサイドMVC（JSF）
   * データ管理方針を確認: エンティティ実装、JPA/EntityManager
   * セッション管理方針を確認: ViewScoped、Flash Scope等
+  * データソース設定セクションでJNDI名を確認（persistence.xml設定に必要）
 * functional_design.md - システム全体の機能設計概要と各画面へのリンクを確認
 
 ### オプションドキュメント（system/配下、存在する場合）
 
 * requirements.md - システムの目的、機能要件
 * data_model.md - エンティティとデータベーススキーマを確認
+  * persistence.xml設定情報セクションでJNDI名を確認（persistence.xml設定に必要）
 * behaviors.md - システム全体の振る舞い概要と各画面へのリンクを確認
 
 ### 画面単位ドキュメント（screen/配下）
@@ -122,7 +131,13 @@ output_directory: "projects/sdd/person/jsf-person-sdd/tasks"
 * 共通ユーティリティ: MessageUtil、ValidationUtil等
 * 設定ファイル: persistence.xml、beans.xml、web.xml等
 
-* 重要: 共通コンポーネントの具体的な内容は、architecture_design.md、functional_design.md、data_model.mdから判断してください。
+* 注意: 共通コンポーネントの具体的な内容は、architecture_design.md、functional_design.md、data_model.mdから判断してください。
+
+* persistence.xmlのJNDI名設定
+  * architecture_design.mdまたはdata_model.mdに記載されているJNDI名を使用すること
+  * 移行元で実際に使用されているJNDI名を正確に設定すること
+  * 決め打ちや推測でJNDI名を設定してはならない
+  * 参照SPEC: architecture_design.mdの「データソース設定」セクション、またはdata_model.mdの「persistence.xml設定情報」セクション
 
 ### 2.4 画面別タスク
 
@@ -354,7 +369,7 @@ SPECから画面を抽出してタスクファイルを生成：
 
 ## 7. 生成手順
 
-1. 憲章とSPEC分析: `@agent_skills/struts-to-jsf-migration/principles/` と `@agent_skills/jakarta-ee-standard/principles/` 配下の共通憲章と全SPECファイル（system/とscreen/）を読み込み、開発原則と機能全体を把握
+1. ルールとSPEC分析: `@agent_skills/struts-to-jsf-migration/principles/` と `@agent_skills/jakarta-ee-api-basic/principles/` 配下の共通ルールドキュメントと全SPECファイル（system/とscreen/）を読み込み、開発ルールと機能全体を把握
 2. アーキテクチャ識別: architecture_design.mdからアーキテクチャパターン（サーバーサイドMVC: JSF）を識別
 3. 画面抽出: 実装が必要な画面を抽出し、依存関係と共通コンポーネントを識別
 4. タスク分割: 画面数に応じた適切なファイル分割方法を決定（小規模: 少数ファイル、中規模: 画面別、大規模: グループ別）
@@ -381,9 +396,9 @@ SPECから画面を抽出してタスクファイルを生成：
 * 複数SPEC参照の場合は箇条書きで列挙
 * system/とscreen/配下の両方のドキュメントを適切に参照する
 
-### タスク分解の原則
+### タスク分解のルール
 
-* 憲章遵守: `@agent_skills/struts-to-jsf-migration/principles/` と `@agent_skills/jakarta-ee-standard/principles/` 配下の共通憲章（開発原則、品質基準、組織標準）を必ず遵守。プロジェクト固有の憲章がある場合は `{project_root}/principles/` も併せて遵守
+* ルール遵守: `@agent_skills/struts-to-jsf-migration/principles/` と `@agent_skills/jakarta-ee-api-basic/principles/` 配下の共通ルールドキュメント（開発ルール、マイグレーションルール、品質基準、セキュリティ標準、組織標準）を必ず遵守。プロジェクト固有のルールがある場合は `{project_root}/principles/` も併せて遵守
 * 抽象度の維持: タスクは「何を作るか」のみを記述。ソースコードや詳細な実装手順は記述しない
 * アーキテクチャ適応: architecture_design.mdからアーキテクチャパターンを識別し、適切なタスクを分解・生成
   * サーバーサイドMVC（JSF）: Managed Bean、Facelets XHTML、CDI + JPA、セッション管理
@@ -406,6 +421,6 @@ SPECから画面を抽出してタスクファイルを生成：
 
 ## 参考資料
 
-* [マイグレーション憲章](../principles/constitution.md) - マッピング規則、原則
-* [Jakarta EE開発憲章](../../jakarta-ee-standard/principles/constitution.md) - 開発原則
+* [マイグレーションルール](../principles/) - マッピング規則、マイグレーションルール
+* [Jakarta EE開発ルール](../../jakarta-ee-api-basic/principles/) - 開発ルール
 * [code_generation.md](code_generation.md) - 次のステップ（コード生成）

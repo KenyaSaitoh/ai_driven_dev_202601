@@ -4,7 +4,7 @@
 
 このインストラクションは、仕様書からJSFコードを生成する方法を説明する
 
-重要: 実際のコード生成には、`@agent_skills/jakarta-ee-standard/instructions/code_generation.md` を使用する
+重要: 実際のコード生成には、`@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md` を使用する
 
 ---
 
@@ -13,16 +13,55 @@
 マイグレーションの全体フローは以下の通りである
 
 ```
-ステップ1: reverse_engineering.md（Strutsコードから仕様書を生成）
+ステップ1: リバースエンジニアリング（reverse_engineering.md）- Strutsコードから仕様書を生成
     ↓
-ステップ2: task_breakdown.md（画面単位でタスクリストを作成）
+ステップ2: タスク分解（task_breakdown.md）- 画面単位でタスクリストを作成
     ↓
-ステップ3: detailed_design.md（AIと対話しながら画面単位で詳細設計）← 対話的
+ステップ3: 詳細設計（detailed_design.md）- AIと対話しながら画面単位で詳細設計 ← 対話的
     ↓
-ステップ4: code_generation.md（コード生成）← このステップ
+ステップ4: コード生成（code_generation.md）- タスクに従ってJSFコードを生成 ← このステップ
 ```
 
-### ステップ1: タスク分解
+### ステップ1: リバースエンジニアリング
+
+既存のStrutsプロジェクトから仕様書を生成する
+
+```
+@agent_skills/struts-to-jsf-migration/instructions/reverse_engineering.md
+
+既存のStrutsプロジェクトから仕様書を生成してください
+
+パラメータ
+* struts_project_root: <既存Strutsプロジェクトのルート>
+* spec_output_directory: <仕様書の出力先>
+```
+
+例
+```
+@agent_skills/struts-to-jsf-migration/instructions/reverse_engineering.md
+
+既存のStrutsプロジェクトから仕様書を生成してください
+
+パラメータ
+* struts_project_root: projects/master/person/struts-person
+* spec_output_directory: projects/sdd/person/jsf-person-sdd/specs
+```
+
+結果
+```
+specs/
+├── baseline/
+│   ├── system/
+│   │   ├── architecture_design.md
+│   │   ├── data_model.md
+│   │   └── functional_design.md
+│   └── screen/
+│       ├── SCREEN_001_PersonList/
+│       ├── SCREEN_002_PersonInput/
+│       └── ...
+```
+
+### ステップ2: タスク分解
 
 仕様書から、実装タスクを分解する
 
@@ -59,7 +98,7 @@ tasks/
 └── integration_tasks.md  ← 結合テスト
 ```
 
-### ステップ2: 詳細設計（画面単位、AIと対話）
+### ステップ3: 詳細設計（画面単位、AIと対話）
 
 画面単位で詳細設計書を作成する。AIと対話しながら不明点を確認する
 
@@ -87,12 +126,12 @@ Person一覧画面の詳細設計書を作成してください
 結果
 * `specs/baseline/screen/SCREEN_001_PersonList/detailed_design.md` が生成される
 
-### ステップ3: コード生成
+### ステップ4: コード生成
 
-タスクファイルに従ってJSFコードを実装する
+タスクファイルに従ってJSFコードを生成する
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
 
 タスクを実行してください
 
@@ -104,7 +143,7 @@ Person一覧画面の詳細設計書を作成してください
 
 例（セットアップ）
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
 
 セットアップタスクを実行してください
 
@@ -116,7 +155,7 @@ Person一覧画面の詳細設計書を作成してください
 
 例（共通機能）
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
 
 共通機能を実装してください
 
@@ -127,7 +166,7 @@ Person一覧画面の詳細設計書を作成してください
 
 例（画面別実装）
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
 
 Person一覧画面を実装してください
 
@@ -352,6 +391,15 @@ public class PersonTableBean implements Serializable {
 </persistence>
 ```
 
+* JNDI名の設定
+  * `<jta-data-source>` には、移行元で実際に使用されているJNDI名を設定すること
+  * JNDI名は architecture_design.md または data_model.md の該当セクションから取得すること
+  * 決め打ちや推測でJNDI名を設定してはならない
+  * 例: 
+    * 移行元が `java:comp/env/jdbc/HsqldbDS` を使用 → そのまま使用
+    * 移行元が `jdbc/HsqldbDS` を使用 → アプリケーションサーバーの名前空間に応じて完全修飾名に変換（例: `java:app/jdbc/HsqldbDS`）
+  * Persistence Unit名も仕様書に記載されている場合はそれに従うこと
+
 ---
 
 ## マイグレーションのポイント
@@ -415,8 +463,8 @@ public class PersonTableBean implements Serializable {
 
 ## 参考資料
 
-* [マイグレーション憲章](../principles/constitution.md) - マッピング規則、原則
-* [既存コード分析インストラクション](reverse_engineering.md) - ステップ1: 仕様書生成
+* [マイグレーションルール](../principles/) - マッピング規則、マイグレーションルール
+* [リバースエンジニアリングインストラクション](reverse_engineering.md) - ステップ1: 既存コード分析
 * [タスク分解インストラクション](task_breakdown.md) - ステップ2: タスク分解
 * [詳細設計インストラクション](detailed_design.md) - ステップ3: 詳細設計
-* [jakarta-ee-standard/instructions/code_generation.md](../../jakarta-ee-standard/instructions/code_generation.md) - コード生成（実行用）
+* [jakarta-ee-api-basic/instructions/code_generation.md](../../jakarta-ee-api-basic/instructions/code_generation.md) - コード生成（実行用）

@@ -46,13 +46,18 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
 
 注意: `{project_root}` は、パラメータで指定されたパスに置き換える。全てのパスはそのプロジェクトルートを基準とした相対パスである
 
-### Agent Skills憲章（最優先で確認）
+### Agent Skillsルール（最優先で確認）
 
-* @agent_skills/jakarta-ee-standard/principles/ - Jakarta EE開発の共通原則、アーキテクチャ方針、品質基準を確認する
-  * `constitution.md` - Jakarta EE開発憲章
-  * その他、組織やチームで共通的に使われる憲章ファイル
-  * 重要: タスク分解においても、憲章に記載された原則を遵守すること
-  * 注意: Agent Skills配下の憲章は全プロジェクト共通。プロジェクト固有の憲章がある場合は `{project_root}/principles/` も確認すること
+* @agent_skills/jakarta-ee-api-basic/principles/ - Jakarta EE開発の共通ルール、アーキテクチャ標準、品質基準、セキュリティ標準を確認する
+  * このフォルダ配下のすべてのMarkdownファイルを読み込み、開発ルールを遵守すること
+  * 重要: タスク分解においても、ルールドキュメントに記載されたすべてのルールを遵守すること
+  * 注意: Agent Skills配下のルールは全プロジェクト共通。プロジェクト固有のルールがある場合は `{project_root}/principles/` も確認すること
+
+### フレームワーク仕様（該当する場合）
+
+* @agent_skills/jakarta-ee-api-basic/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+  * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
+  * タスク分解時に、フレームワーク固有の実装要件を考慮する
 
 ### 必須ドキュメント（system/配下）
 
@@ -358,7 +363,7 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 
 ## 7. 生成手順
 
-1. 憲章とSPEC分析: `@agent_skills/jakarta-ee-standard/principles/` 配下の共通憲章と全SPECファイル（system/とapi/）を読み込み、開発原則と機能全体を把握する
+1. ルールとSPEC分析: `@agent_skills/jakarta-ee-api-basic/principles/` 配下の共通ルールドキュメントと全SPECファイル（system/とapi/）を読み込み、開発ルールと機能全体を把握する
 2. アーキテクチャ識別: architecture_design.mdからアーキテクチャパターンを識別する
 3. 機能（API）抽出: 実装が必要なAPIを抽出し、依存関係と共通コンポーネントを識別する
 4. タスク分割: API数に応じた適切なファイル分割方法を決定する
@@ -385,9 +390,9 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 * 複数SPEC参照の場合は箇条書きで列挙する
 * system/とapi/配下の両方のドキュメントを適切に参照する
 
-### タスク分解の原則
+### タスク分解のルール
 
-* 憲章遵守: `@agent_skills/jakarta-ee-standard/principles/` 配下の共通憲章（開発原則、品質基準、組織標準）を必ず遵守する。プロジェクト固有の憲章がある場合は `{project_root}/principles/` も併せて遵守する
+* ルール遵守: `@agent_skills/jakarta-ee-api-basic/principles/` 配下の共通ルールドキュメント（開発ルール、品質基準、セキュリティ標準、組織標準）を必ず遵守する。プロジェクト固有のルールがある場合は `{project_root}/principles/` も併せて遵守する
 * 抽象度の維持: タスクは「何を作るか」のみを記述する。ソースコードや詳細な実装手順は記述しない
 * アーキテクチャ適応: architecture_design.mdからアーキテクチャパターンを識別し、適切なタスクを分解・生成する
 * 既存コード考慮: 既存実装がある場合は、修正タスクと新規作成タスクを明確に区別する

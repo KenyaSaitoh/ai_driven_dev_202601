@@ -88,7 +88,7 @@ AIと対話しながら：
 詳細設計書に基づいてJSFコードを生成します。
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
 
 セットアップタスクを実行してください。
 
@@ -101,7 +101,7 @@ AIと対話しながら：
 その後、画面別にコードを生成：
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
 
 Person一覧画面を実装してください。
 
@@ -134,7 +134,7 @@ agent_skills/struts-to-jsf-migration/
 ├── README.md                         # このファイル
 ├── SKILL.md                          # 詳細ガイド
 ├── principles/
-│   └── constitution.md              # マイグレーション憲章
+│   └── common_rules.md              # マイグレーション共通ルール
 └── instructions/
     ├── reverse_engineering.md        # ステップ1: 既存コード分析
     ├── task_breakdown.md             # ステップ2: タスク分解
@@ -190,7 +190,7 @@ Person一覧画面の詳細設計書を作成してください。
 #### ステップ4: JSFコード生成
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
 
 セットアップタスクを実行してください。
 
@@ -201,7 +201,7 @@ Person一覧画面の詳細設計書を作成してください。
 ```
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
 
 Person一覧画面を実装してください。
 
@@ -244,7 +244,7 @@ Person一覧画面を実装してください。
 ## 📖 参考資料
 
 * [SKILL.md](SKILL.md) - 詳細ガイド
-* [principles/constitution.md](principles/constitution.md) - マイグレーション憲章
+* [principles/common_rules.md](principles/common_rules.md) - マイグレーション共通ルール
 * [Jakarta EE 10仕様](https://jakarta.ee/specifications/platform/10/)
 * [Jakarta Faces 4.0仕様](https://jakarta.ee/specifications/faces/4.0/)
 

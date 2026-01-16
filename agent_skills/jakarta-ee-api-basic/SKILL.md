@@ -1,6 +1,6 @@
 ---
 name: jakarta-ee-api-service-development
-description: Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービス開発を支援。エンティティ実装、外部API連携など多様な実装要件に対応。仕様書からタスク分解、詳細設計、コード実装まで3段階で一貫サポート。
+description: Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービス開発を支援。エンティティ実装、外部API連携など多様な実装要件に対応。仕様書からタスク分解、詳細設計、コード生成まで3段階で一貫サポート。
 ---
 
 # Jakarta EE API サービス開発 Agent Skill
@@ -10,7 +10,7 @@ description: Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービス開発を
 ### ステップ1: タスク分解
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/task_breakdown.md
+@agent_skills/jakarta-ee-api-basic/instructions/task_breakdown.md
 
 タスクを分解してください
 
@@ -20,31 +20,33 @@ description: Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービス開発を
 * output_directory: <タスク出力先パス>
 ```
 
-AIが自動で以下を実行する
-1. 仕様書を読み込む
-2. タスクファイルを分解・生成する
-3. `tasks/`フォルダに保存する
+AIが自動で以下を実行
+1. 仕様書を読み込み
+2. タスクファイルを分解・生成
+3. `tasks/`フォルダに保存
 
 ### ステップ2: 詳細設計
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
+@agent_skills/jakarta-ee-api-basic/instructions/detailed_design.md
 
-対象: <API_ID>（例: API_001_auth）
+API詳細設計書を作成してください
 
-このAPIの詳細設計書を作成してください
+パラメータ
+* project_root: <プロジェクトルートパス>
+* api_id: <API_ID>（例: API_001_auth）
 ```
 
-AIと対話しながら以下を実施する
-1. 仕様書を読み込み、理解内容を説明する
-2. 不明点をユーザーに質問する
-3. 対話で妥当性・充足性を確認する
-4. `detailed_design.md`を生成する
+AIと対話しながら以下を実施（対話的プロセス）
+1. 仕様書を読み込み、理解内容を説明
+2. 不明点をユーザーに質問
+3. 対話で妥当性・充足性を確認
+4. `detailed_design.md`を生成
 
 ### ステップ3: コード生成
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
 
 セットアップタスクを実行してください
 
@@ -53,18 +55,18 @@ AIと対話しながら以下を実施する
 * task_file: <タスクファイルパス>
 ```
 
-AIが以下を実施する
-1. タスクと詳細設計を読み込む
-2. コードを実装する
-3. テストを作成する
-4. タスクを完了としてマークする
+AIが自動で以下を実行
+1. タスクと詳細設計を読み込み
+2. コードを生成
+3. テストを作成
+4. タスクを完了としてマーク
 
 ---
 
 ## 実践例
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/task_breakdown.md
+@agent_skills/jakarta-ee-api-basic/instructions/task_breakdown.md
 
 全タスクを分解してください
 
@@ -94,11 +96,11 @@ AIが以下を実施する
 ## ディレクトリ構造
 
 ```
-agent_skills/jakarta-ee-standard/
+agent_skills/jakarta-ee-api-basic/
 ├── SKILL.md                          # このファイル
 ├── README.md                         # クイックスタートガイド
-├── principles/                       # 開発憲章（全プロジェクト共通）
-│   └── constitution.md              # Jakarta EE開発憲章
+├── principles/                       # 開発ルール（全プロジェクト共通）
+│   └── common_rules.md              # Jakarta EE開発ルール
 └── instructions/
     ├── task_breakdown.md             # ステップ1: タスク分解
     ├── detailed_design.md            # ステップ2: 詳細設計

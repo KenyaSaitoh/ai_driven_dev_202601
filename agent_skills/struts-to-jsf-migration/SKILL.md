@@ -1,13 +1,13 @@
 ---
 name: struts-to-jsf-migration
-description: Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを支援。仕様駆動アプローチ（Spec-Driven Migration）により、リバースエンジニアリング、仕様書検証、フォワードエンジニアリングの3段階で確実なマイグレーションを実現。
+description: Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを支援。仕様駆動アプローチ（Spec-Driven Migration）により、リバースエンジニアリング、タスク分解、詳細設計、コード生成の4段階で確実なマイグレーションを実現。
 ---
 
 # Struts to JSF マイグレーション Agent Skill
 
 ## 使い方（4段階プロセス）
 
-### ステップ1: 既存コード分析（Struts → 仕様書）
+### ステップ1: リバースエンジニアリング
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/reverse_engineering.md
@@ -20,10 +20,10 @@ description: Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレー
 * spec_output_directory: projects/jsf-migration/struts-app-jsf/specs
 ```
 
-AIが自動で以下を実行する
-1. Strutsコード（Action、ActionForm、JSP、EJB、DAO）を分析する
-2. 抽象的・論理的な仕様書を生成する
-3. `specs/`フォルダに保存する
+AIが自動で以下を実行
+1. Strutsコード（Action、ActionForm、JSP、EJB、DAO）を分析
+2. 抽象的・論理的な仕様書を生成
+3. `specs/`フォルダに保存
 
 ### ステップ2: タスク分解
 
@@ -37,26 +37,28 @@ AIが自動で以下を実行する
 * spec_directory: projects/jsf-migration/struts-app-jsf/specs
 ```
 
-AIが自動で以下を実行する
-1. 仕様書を読み込む
-2. タスクファイルを分解・生成する
-3. `tasks/`フォルダに保存する
+AIが自動で以下を実行
+1. 仕様書を読み込み
+2. タスクファイルを分解・生成
+3. `tasks/`フォルダに保存
 
 ### ステップ3: 詳細設計
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/detailed_design.md
 
-対象: <SCREEN_ID>（例: SCREEN_001_PersonList）
+画面の詳細設計書を作成してください
 
-この画面の詳細設計書を作成してください
+パラメータ
+* project_root: projects/jsf-migration/struts-app-jsf
+* screen_id: SCREEN_001_PersonList
 ```
 
-AIと対話しながら以下を実施する
-1. 仕様書を読み込み、理解内容を説明する
-2. 不明点をユーザーに質問する
-3. 対話で妥当性・充足性を確認する
-4. `detailed_design.md`を生成する
+AIと対話しながら以下を実施（対話的プロセス）
+1. 仕様書を読み込み、理解内容を説明
+2. 不明点をユーザーに質問
+3. 対話で妥当性・充足性を確認
+4. `detailed_design.md`を生成
 
 ### ステップ4: コード生成
 
@@ -70,11 +72,11 @@ AIと対話しながら以下を実施する
 * task_file: projects/jsf-migration/struts-app-jsf/tasks/setup_tasks.md
 ```
 
-AIが以下を実施する
-1. タスクと詳細設計を読み込む
-2. JSFコードを実装する（Managed Bean、Entity、Service等）
-3. テストを作成する
-4. タスクを完了としてマークする
+AIが自動で以下を実行
+1. タスクと詳細設計を読み込み
+2. JSFコードを生成（Managed Bean、Entity、Service等）
+3. テストを作成
+4. タスクを完了としてマーク
 
 ---
 
@@ -126,10 +128,10 @@ AIが以下を実施する
 agent_skills/struts-to-jsf-migration/
 ├── SKILL.md                          # このファイル
 ├── README.md                         # クイックスタートガイド
-├── principles/                       # マイグレーション憲章
-│   └── constitution.md              # マイグレーション原則、マッピング規則
+├── principles/                       # マイグレーション共通ルール
+│   └── common_rules.md              # マイグレーションルール、マッピング規則
 └── instructions/
-    ├── reverse_engineering.md        # ステップ1: 既存コード分析（仕様書生成）
+    ├── reverse_engineering.md        # ステップ1: リバースエンジニアリング
     ├── task_breakdown.md             # ステップ2: タスク分解
     ├── detailed_design.md            # ステップ3: 詳細設計
     └── code_generation.md            # ステップ4: コード生成

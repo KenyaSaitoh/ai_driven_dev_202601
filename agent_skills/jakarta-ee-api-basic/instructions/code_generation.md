@@ -33,13 +33,17 @@ skip_infrastructure: true  # インフラセットアップをスキップ
 
 #### 読み込むべきドキュメント（優先順）
 
-1. 最優先: `@agent_skills/jakarta-ee-standard/principles/` 配下の共通憲章ファイルでJakarta EE開発の原則、アーキテクチャ方針、品質基準を確認する。プロジェクト固有の憲章がある場合は `{project_root}/principles/` も併せて確認する
+1. 最優先: `@agent_skills/jakarta-ee-api-basic/principles/` 配下のすべてのルールドキュメントでJakarta EE開発のルール、アーキテクチャ標準、品質基準、セキュリティ標準を確認する。プロジェクト固有のルールがある場合は `{project_root}/principles/` も併せて確認する
 
-2. 必須: 指定されたタスクファイルで完全なタスクリストと実行計画を確認する
+2. フレームワーク仕様（該当する場合）: `@agent_skills/jakarta-ee-api-basic/frameworks/` 配下に格納されたフレームワーク固有の仕様書やサンプルコードを確認する
+   * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
+   * 詳細設計やコード生成時に、フレームワーク仕様に従った実装を行う
+
+3. 必須: 指定されたタスクファイルで完全なタスクリストと実行計画を確認する
    * タスクの「参照SPEC」はMarkdownリンク形式で記述されている（クリック可能）
    * リンク先のSPECファイルと指定されたセクションを必ず参照する
 
-3. 必須: `{project_root}/specs/baseline/system/architecture_design.md` で以下を確認する
+4. 必須: `{project_root}/specs/baseline/system/architecture_design.md` で以下を確認する
    * 技術スタック（言語、バージョン、フレームワーク、ライブラリ）
    * アーキテクチャパターンとレイヤー構成
    * パッケージ構造と命名規則
@@ -48,19 +52,19 @@ skip_infrastructure: true  # インフラセットアップをスキップ
    * テスト戦略（テストフレームワーク、カバレッジ目標、テスト方針）
    * コード生成時は、ここで定義された技術スタックを厳密に遵守すること
 
-4. 必須: `{project_root}/specs/baseline/system/requirements.md` で機能要件と成功基準を確認する
+5. 必須: `{project_root}/specs/baseline/system/requirements.md` で機能要件と成功基準を確認する
 
-5. 必須: `{project_root}/specs/baseline/system/functional_design.md` でシステム全体の機能設計概要を確認する
+6. 必須: `{project_root}/specs/baseline/system/functional_design.md` でシステム全体の機能設計概要を確認する
 
-6. 必須: `{project_root}/specs/baseline/api/*/functional_design.md` でクラス設計、メソッド、エンドポイント仕様を確認する
+7. 必須: `{project_root}/specs/baseline/api/*/functional_design.md` でクラス設計、メソッド、エンドポイント仕様を確認する
 
-7. 存在する場合: `{project_root}/specs/baseline/system/data_model.md` でエンティティと関係を確認する
+8. 存在する場合: `{project_root}/specs/baseline/system/data_model.md` でエンティティと関係を確認する
 
-8. 存在する場合: `{project_root}/specs/baseline/api/*/behaviors.md` で受入基準とテストシナリオを確認する
+9. 存在する場合: `{project_root}/specs/baseline/api/*/behaviors.md` で受入基準とテストシナリオを確認する
 
-9. 存在する場合: `{project_root}/specs/baseline/system/external_interface.md` で外部連携仕様とAPI仕様を確認する
+10. 存在する場合: `{project_root}/specs/baseline/system/external_interface.md` で外部連携仕様とAPI仕様を確認する
 
-10. 静的リソース: `{project_root}/resources/` フォルダの静的ファイル（画像等）を確認し、セットアップ時に適切な場所にコピーする
+11. 静的リソース: `{project_root}/resources/` フォルダの静的ファイル（画像等）を確認し、セットアップ時に適切な場所にコピーする
 
 * 注意: `{project_root}` は、パラメータで明示的に指定されたプロジェクトルートのパスに置き換える
 
@@ -100,12 +104,12 @@ architecture_design.mdに記載された技術スタックを厳密に遵守す�
 * データベース: architecture_design.mdを確認する
 * 記載されたバージョン番号を正確に使用する: 異なるバージョンを使用しない
 
-#### 憲章の遵守
+#### ルールの遵守
 
-`@agent_skills/jakarta-ee-standard/principles/` 配下の共通憲章に記載された開発原則を全ての実装で遵守する
+`@agent_skills/jakarta-ee-api-basic/principles/` 配下の共通ルールドキュメントに記載された開発ルールを全ての実装で遵守する
 * テストカバレッジ基準、アーキテクチャパターン、コーディング規約に従う
 * 品質基準、セキュリティ要件、パフォーマンス基準を満たす
-* プロジェクト固有の憲章（`{project_root}/principles/`）がある場合は、それも併せて遵守する
+* プロジェクト固有のルール（`{project_root}/principles/`）がある場合は、それも併せて遵守する
 
 #### 仕様書修正の制約
 
@@ -302,7 +306,7 @@ architecture_design.mdを参照して以下を確認すること
 
 ## 完了検証
 
-* 憲章の原則と品質基準が遵守されていることを確認する
+* ルールドキュメントのルールと品質基準が遵守されていることを確認する
 * 全ての必須タスクが完了していることを確認する
 * 実装された機能が要件定義と一致することを確認する
 * テストがパスし、カバレッジが要件を満たすことを検証する
