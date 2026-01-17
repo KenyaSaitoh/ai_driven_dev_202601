@@ -49,7 +49,6 @@ POST /api/orders
 
 * リクエストボディ:
 
-
 | フィールド | 型 | 必須 | 説明 |
 |----------|---|------|------|
 | cartItems | array | ✓ | カート内の書籍リスト |
@@ -68,15 +67,11 @@ POST /api/orders
 
 * 成功時 (200 OK):
 
-
 * エラー時 (409 Conflict - 在庫不足):
-
 
 * エラー時 (409 Conflict - 楽観的ロック競合):
 
-
 * エラー時 (401 Unauthorized):
-
 
 #### 3.1.5 ビジネスルール
 
@@ -173,9 +168,7 @@ GET /api/orders/history
 
 * 成功時 (200 OK):
 
-
 * エラー時 (401 Unauthorized):
-
 
 #### 3.2.5 ビジネスルール
 
@@ -212,9 +205,7 @@ GET /api/orders/{tranId}
 
 * 成功時 (200 OK):
 
-
 * エラー時 (404 Not Found):
-
 
 ---
 
@@ -243,9 +234,7 @@ GET /api/orders/{tranId}/details/{detailId}
 
 * 成功時 (200 OK):
 
-
 * エラー時 (404 Not Found):
-
 
 ---
 
@@ -392,4 +381,3 @@ GET /api/orders/{tranId}/details/{detailId}
 * [../../system/functional_design.md](../../system/functional_design.md) - 全体機能設計書
 * [../../system/architecture_design.md](../../system/architecture_design.md) - アーキテクチャ設計書
 * [../../system/data_model.md](../../system/data_model.md) - データモデル仕様書
-

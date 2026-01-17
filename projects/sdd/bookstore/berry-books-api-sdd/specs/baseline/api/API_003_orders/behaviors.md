@@ -139,4 +139,3 @@
 * [functional_design.md](functional_design.md) - 注文API機能設計書
 * [../../system/behaviors.md](../../system/behaviors.md) - 全体受入基準
 * [../../system/architecture_design.md](../../system/architecture_design.md) - アーキテクチャ設計書
-

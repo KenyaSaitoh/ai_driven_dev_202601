@@ -45,9 +45,7 @@ POST /api/auth/login
 #### 3.1.3 リクエスト
 
 * Content-Type: `application/json`
-
 * リクエストボディ:
-
 
 | フィールド | 型 | 必須 | 検証ルール |
 |----------|---|------|----------|
@@ -57,12 +55,8 @@ POST /api/auth/login
 #### 3.1.4 レスポンス
 
 * 成功時 (200 OK):
-
 * Set-Cookie: `berry-books-jwt=<JWT Token>; Path=/; Max-Age=86400; HttpOnly`
-
-
 * エラー時 (401 Unauthorized):
-
 
 #### 3.1.5 ビジネスルール
 
@@ -118,15 +112,12 @@ JWT Cookieを削除（MaxAge=0）してログアウトする。
 #### 3.2.3 リクエスト
 
 * Content-Type: `application/json`
-
 * リクエストボディ: なし
 
 #### 3.2.4 レスポンス
 
 * 成功時 (200 OK):
-
 * Set-Cookie: `berry-books-jwt=; Path=/; Max-Age=0; HttpOnly`
-
 
 ---
 
@@ -145,9 +136,7 @@ POST /api/auth/register
 #### 3.3.3 リクエスト
 
 * Content-Type: `application/json`
-
 * リクエストボディ:
-
 
 | フィールド | 型 | 必須 | 検証ルール |
 |----------|---|------|----------|
@@ -160,15 +149,9 @@ POST /api/auth/register
 #### 3.3.4 レスポンス
 
 * 成功時 (200 OK):
-
 * Set-Cookie: `berry-books-jwt=<JWT Token>; Path=/; Max-Age=86400; HttpOnly`
-
-
 * エラー時 (409 Conflict):
-
-
 * エラー時 (400 Bad Request):
-
 
 #### 3.3.5 ビジネスルール
 
@@ -202,10 +185,7 @@ JWT Cookieから顧客情報を取得する。認証必須。
 #### 3.4.4 レスポンス
 
 * 成功時 (200 OK):
-
-
 * エラー時 (401 Unauthorized):
-
 
 ---
 
@@ -214,7 +194,6 @@ JWT Cookieから顧客情報を取得する。認証必須。
 ### 4.1 LoginRequest
 
 * 構造種別: レコード型（immutableなデータ転送オブジェクト）
-
 * フィールド構成:
 
 | フィールド名 | 型 | 制約 | 説明 |
@@ -225,7 +204,6 @@ JWT Cookieから顧客情報を取得する。認証必須。
 ### 4.2 LoginResponse
 
 * 構造種別: レコード型（immutableなデータ転送オブジェクト）
-
 * フィールド構成:
 
 | フィールド名 | 型 | 説明 |
@@ -239,7 +217,6 @@ JWT Cookieから顧客情報を取得する。認証必須。
 ### 4.3 RegisterRequest
 
 * 構造種別: レコード型（immutableなデータ転送オブジェクト）
-
 * フィールド構成:
 
 | フィールド名 | 型 | 制約 | 説明 |
@@ -253,7 +230,6 @@ JWT Cookieから顧客情報を取得する。認証必須。
 ### 4.4 ErrorResponse
 
 * 構造種別: レコード型（immutableなデータ転送オブジェクト）
-
 * フィールド構成:
 
 | フィールド名 | 型 | 説明 |
@@ -304,7 +280,6 @@ jwt.cookie-name=berry-books-jwt
 * アルゴリズム: BCrypt
 * Cost: 10（デフォルト）
 * ハッシュ長: 60文字
-
 * ハッシュ化処理:
   * BCryptアルゴリズムを使用して平文パスワードをハッシュ化
   * ソルト生成はBCryptが自動的に実行
@@ -327,4 +302,3 @@ jwt.cookie-name=berry-books-jwt
 * [../../system/functional_design.md](../../system/functional_design.md) - 全体機能設計書
 * [../../system/architecture_design.md](../../system/architecture_design.md) - アーキテクチャ設計書
 * [../../system/external_interface.md](../../system/external_interface.md) - 外部API連携仕様
-

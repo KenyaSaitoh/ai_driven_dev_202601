@@ -52,7 +52,6 @@ GET /api/books
 
 * 成功時 (200 OK):
 
-
 ---
 
 ### 3.2 書籍詳細取得
@@ -78,10 +77,7 @@ GET /api/books/{id}
 #### 3.2.4 レスポンス
 
 * 成功時 (200 OK):
-
-
 * エラー時 (404 Not Found):
-
 
 ---
 
@@ -118,7 +114,6 @@ GET /api/books/search/jpql?categoryId={id}&keyword={keyword}
 #### 3.3.4 レスポンス
 
 * 成功時 (200 OK):
-
 
 #### 3.3.5 ビジネスルール
 
@@ -164,7 +159,6 @@ GET /api/books/search/criteria?categoryId={id}&keyword={keyword}
 
 * 成功時 (200 OK):
 
-
 #### 3.4.5 JPQL版との違い
 
 | 項目 | JPQL版 | Criteria API版 |
@@ -201,7 +195,6 @@ GET /api/categories
 #### 3.5.3 レスポンス
 
 * 成功時 (200 OK):
-
 
 ---
 
@@ -281,4 +274,3 @@ GET /api/categories
 * [../../system/functional_design.md](../../system/functional_design.md) - 全体機能設計書
 * [../../system/architecture_design.md](../../system/architecture_design.md) - アーキテクチャ設計書
 * [../../system/data_model.md](../../system/data_model.md) - データモデル仕様書
-

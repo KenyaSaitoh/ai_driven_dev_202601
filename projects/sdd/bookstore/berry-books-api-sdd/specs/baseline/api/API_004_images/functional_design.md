@@ -172,4 +172,3 @@ ImageResourceは、デプロイ後のWARファイル内のリソースにアク�
 * [behaviors.md](behaviors.md) - 画像APIの受入基準
 * [../../system/functional_design.md](../../system/functional_design.md) - 全体機能設計書
 * [../../system/architecture_design.md](../../system/architecture_design.md) - アーキテクチャ設計書
-

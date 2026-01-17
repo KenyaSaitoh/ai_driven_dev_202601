@@ -97,7 +97,6 @@ requirements.mdから、システム全体とAPI単位の仕様書を**AIと対�
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
 認証APIの詳細設計書を作成してください。
-JWT認証とCustomerHubRestClientの連携を実装する予定です。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/berry-books-api-sdd
@@ -111,7 +110,6 @@ JWT認証とCustomerHubRestClientの連携を実装する予定です。
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
 書籍APIの詳細設計書を作成してください。
-BackOfficeRestClientを使用して外部APIを呼び出します。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/berry-books-api-sdd
@@ -125,7 +123,6 @@ BackOfficeRestClientを使用して外部APIを呼び出します。
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
 注文APIの詳細設計書を作成してください。
-在庫管理との連携と分散トランザクションを実装する予定です。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/berry-books-api-sdd

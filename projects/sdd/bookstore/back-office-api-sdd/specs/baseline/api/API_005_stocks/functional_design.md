@@ -321,4 +321,3 @@ stateDiagram-v2
     UpdateSuccess --> [*]: version+1で完了
     UpdateFailed --> ReadStock: 再取得して再試行
 ```
-
