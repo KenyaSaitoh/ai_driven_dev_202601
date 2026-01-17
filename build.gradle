@@ -729,6 +729,40 @@ subprojects {
                     }
                 }
                 
+                // Delete detailed_design.md files from API specs
+                def specsApiDir = file("$projectDir/specs/baseline/api")
+                if (specsApiDir.exists()) {
+                    println ""
+                    println "Cleaning API detailed_design.md files..."
+                    specsApiDir.eachDir { apiDir ->
+                        if (apiDir.name.startsWith("API_")) {
+                            def detailedDesignFile = new File(apiDir, "detailed_design.md")
+                            if (detailedDesignFile.exists()) {
+                                println "  Deleting: ${apiDir.name}/detailed_design.md"
+                                detailedDesignFile.delete()
+                                deletedFilesCount++
+                            }
+                        }
+                    }
+                }
+                
+                // Delete detailed_design.md files from SCREEN specs
+                def specsScreenDir = file("$projectDir/specs/baseline/screen")
+                if (specsScreenDir.exists()) {
+                    println ""
+                    println "Cleaning SCREEN detailed_design.md files..."
+                    specsScreenDir.eachDir { screenDir ->
+                        if (screenDir.name.startsWith("SCREEN_")) {
+                            def detailedDesignFile = new File(screenDir, "detailed_design.md")
+                            if (detailedDesignFile.exists()) {
+                                println "  Deleting: ${screenDir.name}/detailed_design.md"
+                                detailedDesignFile.delete()
+                                deletedFilesCount++
+                            }
+                        }
+                    }
+                }
+                
                 // Delete bin, build, logs directories
                 println ""
                 println "Cleaning build artifacts..."
