@@ -390,22 +390,69 @@ subprojects {
     
     task cleanCode {
         group = "sdd"
-        description = "Clean generated code (src/, build/) - keeps SPEC (basic_design/, detailed_design/)"
+        description = "Clean generated code (src/, build/) - keeps SPEC and empty directory structure"
         doLast {
             println "Cleaning generated code for ${project.name}..."
             
-            // src/main を削除
-            def srcMainDir = file("${projectDir}/src/main")
-            if (srcMainDir.exists()) {
-                println "  Deleting: ${srcMainDir.absolutePath}"
-                delete srcMainDir
+            // src/main配下のディレクトリ定義
+            def srcMainDirs = [
+                file("${projectDir}/src/main/java"),
+                file("${projectDir}/src/main/resources"),
+                file("${projectDir}/src/main/webapp")
+            ]
+            
+            // src/test配下のディレクトリ定義
+            def srcTestDirs = [
+                file("${projectDir}/src/test/java"),
+                file("${projectDir}/src/test/resources")
+            ]
+            
+            // src/main配下の内容を削除（ディレクトリ自体は保持）
+            srcMainDirs.each { dir ->
+                if (dir.exists()) {
+                    println "  Cleaning: ${dir.absolutePath}"
+                    dir.listFiles().each { file ->
+                        if (file.name != ".gitkeep") {
+                            delete file
+                        }
+                    }
+                    // 空ディレクトリの場合、.gitkeepを作成
+                    if (dir.listFiles().length == 0) {
+                        def gitkeepFile = new File(dir, ".gitkeep")
+                        gitkeepFile.createNewFile()
+                        println "    Created: .gitkeep"
+                    }
+                } else {
+                    // ディレクトリが存在しない場合は作成して.gitkeepを配置
+                    dir.mkdirs()
+                    def gitkeepFile = new File(dir, ".gitkeep")
+                    gitkeepFile.createNewFile()
+                    println "  Created: ${dir.absolutePath} with .gitkeep"
+                }
             }
             
-            // src/test を削除
-            def srcTestDir = file("${projectDir}/src/test")
-            if (srcTestDir.exists()) {
-                println "  Deleting: ${srcTestDir.absolutePath}"
-                delete srcTestDir
+            // src/test配下の内容を削除（ディレクトリ自体は保持）
+            srcTestDirs.each { dir ->
+                if (dir.exists()) {
+                    println "  Cleaning: ${dir.absolutePath}"
+                    dir.listFiles().each { file ->
+                        if (file.name != ".gitkeep") {
+                            delete file
+                        }
+                    }
+                    // 空ディレクトリの場合、.gitkeepを作成
+                    if (dir.listFiles().length == 0) {
+                        def gitkeepFile = new File(dir, ".gitkeep")
+                        gitkeepFile.createNewFile()
+                        println "    Created: .gitkeep"
+                    }
+                } else {
+                    // ディレクトリが存在しない場合は作成して.gitkeepを配置
+                    dir.mkdirs()
+                    def gitkeepFile = new File(dir, ".gitkeep")
+                    gitkeepFile.createNewFile()
+                    println "  Created: ${dir.absolutePath} with .gitkeep"
+                }
             }
             
             // build を削除（標準のcleanと同じ）
@@ -415,7 +462,14 @@ subprojects {
                 delete buildDir
             }
             
+            println ""
             println "✓ Generated code cleaned"
+            println "✓ Directory structure preserved:"
+            println "    - src/main/java/ (with .gitkeep)"
+            println "    - src/main/resources/ (with .gitkeep)"
+            println "    - src/main/webapp/ (with .gitkeep)"
+            println "    - src/test/java/ (with .gitkeep)"
+            println "    - src/test/resources/ (with .gitkeep)"
             println "✓ SPEC files are preserved (basic_design/, detailed_design/)"
         }
     }

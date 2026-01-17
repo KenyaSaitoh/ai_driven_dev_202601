@@ -229,7 +229,7 @@ SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-s
 
 ### タイプ3: 実装コードのクリーンアップ
 
-生成された実装コード（src/、build/）を削除します。
+生成された実装コード（src/、build/）を削除します。ディレクトリ構造は空のまま保持されます。
 
 ```bash
 ./gradlew :berry-books-api-sdd:cleanCode
@@ -237,8 +237,8 @@ SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-s
 ./gradlew :jsf-person-sdd:cleanCode
 ```
 
-削除されるもの: `src/main/`, `src/test/`, `build/`
-保持されるもの: `specs/*/basic_design/`, `specs/*/detailed_design/`, `tasks/`
+削除されるもの: `src/main/`配下の内容、`src/test/`配下の内容、`build/`
+保持されるもの: `specs/*/basic_design/`, `specs/*/detailed_design/`, `tasks/`, `src/`のディレクトリ構造（.gitkeep付き）
 
 ### すべてをクリーンアップ（基本設計SPECは保護）
 
@@ -250,9 +250,9 @@ SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-s
 ./gradlew :jsf-person-sdd:cleanAllSdd
 ```
 
-削除されるもの: `tasks/`の中身、`specs/*/detailed_design/`の中身、`src/`、`build/`
+削除されるもの: `tasks/`の中身、`specs/*/detailed_design/`の中身、`src/`配下の内容、`build/`
 保持されるもの: `specs/*/basic_design/` （基本設計SPECは絶対に削除されない）
-空のまま残るフォルダ: `tasks/`, `specs/*/detailed_design/`
+空のまま残るフォルダ: `tasks/`, `specs/*/detailed_design/`, `src/`のディレクトリ構造（.gitkeep付き）
 
 詳細は各プロジェクトのREADME.mdを参照してください：
 - [projects/sdd/bookstore/berry-books-api-sdd/README.md](projects/sdd/bookstore/berry-books-api-sdd/README.md)
