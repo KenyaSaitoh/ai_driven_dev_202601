@@ -274,3 +274,4 @@ GET /api/categories
 * [../../system/functional_design.md](../../system/functional_design.md) - 全体機能設計書
 * [../../system/architecture_design.md](../../system/architecture_design.md) - アーキテクチャ設計書
 * [../../system/data_model.md](../../system/data_model.md) - データモデル仕様書
+

@@ -45,7 +45,7 @@
           <mxGeometry x="790" y="120" width="260" height="60" as="geometry"/>
         </mxCell>
         
-        <mxCell id="security_standard" value="security_standard.md&#xa;(セキュリティ標準)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="security_standard" value="security.md&#xa;(セキュリティ標準)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="790" y="190" width="260" height="60" as="geometry"/>
         </mxCell>
         

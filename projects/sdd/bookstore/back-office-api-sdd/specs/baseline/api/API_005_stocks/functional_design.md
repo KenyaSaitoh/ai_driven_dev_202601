@@ -20,7 +20,6 @@
 
 * エンドポイント: `GET /api/stocks`
 * 認証: 不要（将来:必要）
-
 * レスポンス（200 OK）:
 
 ---
@@ -29,9 +28,7 @@
 
 * エンドポイント: `GET /api/stocks/{bookId}`
 * 認証: 不要（将来:必要）
-
 * レスポンス（200 OK）:
-
 * レスポンス（404 Not Found）:
 
 ---
@@ -40,21 +37,18 @@
 
 * エンドポイント: `PUT /api/stocks/{bookId}`
 * 認証: 不要（将来:必要）
-
 * リクエスト:
-
 * 処理フロー:
   1. パスパラメータから書籍IDを取得
-  2. StockDaoで在庫情報を取得
+  2. 在庫情報をデータベースから取得
   3. 在庫が存在しない → 404 Not Found
   4. バージョンチェック: リクエストのversionとDBのversionを比較
   5. バージョンが一致しない → 409 Conflict（楽観的ロック失敗）
-  6. 在庫数を更新（`stock.setQuantity()`）
-  7. JPA `@Version`により自動的にversionがインクリメント
+  6. 在庫数を更新
+  7. 楽観的ロックメカニズムにより自動的にversionがインクリメント
   8. トランザクションコミット時にUPDATE実行
 
 * レスポンス（200 OK）:
-
 * レスポンス（409 Conflict）:
 
 ## 4. 楽観的ロックの仕組み
@@ -62,9 +56,7 @@
 ### 4.1 エンティティのバージョン管理
 
 * エンティティ: Stock
-
 * マッピング対象テーブル: STOCK
-
 * フィールド構成:
 
 | フィールド名 | 型 | カラム名 | 制約 | 説明 |
@@ -94,7 +86,7 @@
 
 * バージョンチェックの動作:
   * WHERE句のVERSION条件により、バージョンが一致しない場合はUPDATE対象が0件となる
-  * 更新件数が0の場合、永続化フレームワークは楽観的ロック例外を発生させる
+  * 更新件数が0の場合、システムは楽観的ロック例外を発生させる
 
 ### 4.3 並行更新の例
 
@@ -123,36 +115,7 @@ t11                                      → 成功 (ver=3に更新)
 | BR-STOCK-004 | 在庫数は0以上の整数 |
 | BR-STOCK-005 | 負の値は許可しない |
 
-## 6. DTO
-
-### 6.1 StockTO
-
-* パッケージ: `pro.kensait.backoffice.api.dto`
-
-* 構造種別: データ転送オブジェクト
-
-* フィールド構成:
-
-| フィールド名 | 型 | 説明 |
-|------------|---|------|
-| bookId | Integer | 書籍ID |
-| quantity | Integer | 在庫数 |
-| version | Long | 楽観的ロック用バージョン番号 |
-
-### 6.2 StockUpdateRequest
-
-* パッケージ: `pro.kensait.backoffice.api.dto`
-
-* 構造種別: リクエストデータ転送オブジェクト
-
-* フィールド構成:
-
-| フィールド名 | 型 | 必須 | 説明 |
-|------------|---|-----|------|
-| version | Long | Yes | 楽観的ロック用バージョン番号 |
-| quantity | Integer | Yes | 新しい在庫数 |
-
-## 7. エラーハンドリング
+## 6. エラーハンドリング
 
 | エラー | HTTPステータス | メッセージ |
 |-------|---------------|-----------|
@@ -160,12 +123,12 @@ t11                                      → 成功 (ver=3に更新)
 | バージョン不一致 | 409 Conflict | 在庫が他のユーザーによって更新されました |
 | 予期しないエラー | 500 Internal Server Error | 在庫更新中にエラーが発生しました |
 
-## 8. 関連コンポーネント
+## 7. 関連コンポーネント
 
-* `StockResource#updateStock()`
-* `StockDao#findById()`
-* JPA `@Version`
-* `OptimisticLockExceptionMapper`
+* 在庫リソース（在庫更新）
+* 在庫データアクセス（ID検索）
+* 楽観的ロックメカニズム
+* 楽観的ロック例外マッパー
 
 ## 9. テスト仕様
 
@@ -175,21 +138,21 @@ t11                                      → 成功 (ver=3に更新)
 |------------|---------|
 | 在庫更新（正しいバージョン） | 200 OK + versionインクリメント |
 
-### 9.2 異常系
+### 8.2 異常系
 
 | テストケース | 期待結果 |
 |------------|---------|
 | 在庫更新（古いバージョン） | 409 Conflict |
 | 存在しない書籍ID | 404 Not Found |
 
-## 10. パフォーマンス要件
+## 9. パフォーマンス要件
 
 * 在庫更新レスポンスタイム: 200ms以内
 * 楽観的ロック失敗時の再試行: クライアント側で実装
 
 ---
 
-## 11. 動的振る舞い
+## 10. 動的振る舞い
 
 ### 11.1 在庫一覧取得シーケンス
 
@@ -262,7 +225,7 @@ sequenceDiagram
     StockResource->>StockResource: バージョンチェック<br/>request.version == stock.version
     Note over StockResource: version一致
     
-    StockResource->>StockResource: stock.setQuantity(15)
+    StockResource->>StockResource: 在庫数更新(15)
     StockResource->>Database: UPDATE STOCK<br/>SET QUANTITY = 15,<br/>    VERSION = 2<br/>WHERE BOOK_ID = 1<br/>  AND VERSION = 1
     Database-->>StockResource: Update success
     StockResource-->>Client: 200 OK<br/>{bookId: 1, quantity: 15, version: 2}

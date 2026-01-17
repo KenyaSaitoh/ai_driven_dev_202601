@@ -5,8 +5,16 @@
 最終更新日: [DATE]  
 ステータス: [STATUS]
 
-* 変更履歴:
-  * v1.0.0 ([DATE]): 初版
+---
+
+## 概要
+
+このドキュメントは、[PROJECT_NAME]プロジェクト固有のアーキテクチャ設計を記述する。
+
+* 共通的な技術スタック、開発ガイドライン、技術的対応方針については、以下を参照すること：
+  * [architecture.md](../../../../../agent_skills/jakarta-ee-api-base/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
+  * [common_rules.md](../../../../../agent_skills/jakarta-ee-api-base/principles/common_rules.md) - 共通ルール
+  * [security.md](../../../../../agent_skills/jakarta-ee-api-base/principles/security.md) - セキュリティ標準
 
 ---
 
@@ -29,7 +37,7 @@
 
 ### 2.1 システム構成図
 
-[Mermaid図でシステム全体の構成を表示]
+[プロジェクト固有のシステム構成をMermaid図で表示]
 
 ```mermaid
 flowchart TD
@@ -61,8 +69,6 @@ flowchart TD
     DataAccess --> Persistence
     Persistence --> DB
 ```
-
-注意: 実際のプロジェクトに応じて、より詳細な構成図を記述してください
 
 ### 2.2 アーキテクチャパターンの説明
 
@@ -111,439 +117,186 @@ flowchart TD
 | [API_NAME_1] | [../api/API_XXX/detailed_design.md](../api/API_XXX/detailed_design.md) |
 | [API_NAME_2] | [../api/API_YYY/detailed_design.md](../api/API_YYY/detailed_design.md) |
 
+### 3.3 プロジェクト固有のパッケージ
+
+[プロジェクト固有のパッケージ構造、特殊な設計がある場合に記述]
+
+| パッケージ | 目的 | 備考 |
+|-----------|------|------|
+| [PACKAGE_1] | [PURPOSE] | [NOTE] |
+| [PACKAGE_2] | [PURPOSE] | [NOTE] |
+
 ---
 
-## 4. 技術スタック
+## 4. レイヤー設計
 
-### 1.1 コアプラットフォーム
+[プロジェクト固有のレイヤー設計、責務分担を記述]
 
-| レイヤー | 技術 | バージョン | 選定理由 |
-|-------|-----------|---------|-----------|
-| ランタイム | [RUNTIME] | [VERSION] | [REASON] |
-| プラットフォーム | [PLATFORM] | [VERSION] | [REASON] |
-| アプリサーバー | [SERVER] | [VERSION] | [REASON] |
-| データベース | [DATABASE] | [VERSION] | [REASON] |
-| ビルドツール | [BUILD_TOOL] | [VERSION] | [REASON] |
+### 4.1 Presentation Layer
 
-### 1.2 フレームワーク仕様
+* 責務: [プロジェクト固有の責務]
+* 主要コンポーネント:
+  * [COMPONENT_1]
+  * [COMPONENT_2]
 
-[必要に応じてMermaid図を追加]
+### 4.2 Business Logic Layer
+
+* 責務: [プロジェクト固有の責務]
+* 主要コンポーネント:
+  * [COMPONENT_1]
+  * [COMPONENT_2]
+
+### 4.3 Data Access Layer
+
+* 責務: [プロジェクト固有の責務]
+* 主要コンポーネント:
+  * [COMPONENT_1]
+  * [COMPONENT_2]
+
+### 4.4 Persistence Layer
+
+* 責務: [プロジェクト固有の責務]
+* 主要エンティティ:
+  * [ENTITY_1]
+  * [ENTITY_2]
+
+### 4.5 Cross-Cutting Concerns
+
+[プロジェクト固有の横断的関心事]
+
+---
+
+## 5. データフロー
+
+[プロジェクト固有の典型的なデータフロー]
+
+### 5.1 典型的なリクエストフロー
 
 ```mermaid
-graph TD
-    A[Main Platform] --> B[Framework 1]
-    A --> C[Framework 2]
-    A --> D[Framework 3]
+flowchart TD
+    A["Client"] --> B["Resource"]
+    B --> C["Service"]
+    C --> D["DAO"]
+    D --> E["Database"]
 ```
-
-| 仕様 | バージョン | 目的 |
-|--------------|---------|---------|
-| [SPEC_1] | [VERSION] | [PURPOSE] |
-| [SPEC_2] | [VERSION] | [PURPOSE] |
-| [SPEC_3] | [VERSION] | [PURPOSE] |
-
-### 1.3 追加ライブラリ
-
-| ライブラリ | 目的 | 選定理由 |
-|---------|---------|-----------|
-| [LIBRARY_1] | [PURPOSE] | [REASON] |
-| [LIBRARY_2] | [PURPOSE] | [REASON] |
 
 ---
 
-## 2. アーキテクチャ設計
+## 6. セキュリティアーキテクチャ
 
-### 2.1 アーキテクチャパターン
+[プロジェクト固有のセキュリティ設計]
 
-[レイヤードアーキテクチャ、マイクロサービス、イベント駆動などの説明]
-
-```mermaid
-graph TB
-    subgraph "Layer 1"
-        A[Component A]
-    end
-    
-    subgraph "Layer 2"
-        B[Component B]
-    end
-    
-    subgraph "Layer 3"
-        C[Component C]
-    end
-    
-    A --> B
-    B --> C
-```
-
-### 2.2 コンポーネントの責務
-
-| レイヤー | 責務 | 禁止事項 |
-|-------|-----------------|-------------------|
-| [LAYER_1] | • [RESPONSIBILITY_1]<br/>• [RESPONSIBILITY_2] | • [FORBIDDEN_1]<br/>• [FORBIDDEN_2] |
-| [LAYER_2] | • [RESPONSIBILITY_1]<br/>• [RESPONSIBILITY_2] | • [FORBIDDEN_1]<br/>• [FORBIDDEN_2] |
-| [LAYER_3] | • [RESPONSIBILITY_1]<br/>• [RESPONSIBILITY_2] | • [FORBIDDEN_1]<br/>• [FORBIDDEN_2] |
-
----
-
-## 3. デザインパターン
-
-### 3.1 適用パターン
-
-[Mermaid図でパターンの関係を表示]
-
-```mermaid
-classDiagram
-    class Pattern1 {
-        <<pattern>>
-        +description
-    }
-    
-    class Pattern2 {
-        <<pattern>>
-        +description
-    }
-    
-    Pattern1 --> Pattern2
-```
-
-| パターン | 目的 | 適用箇所 |
-|---------|------|---------|
-| [PATTERN_1] | [PURPOSE] | [LOCATION] |
-| [PATTERN_2] | [PURPOSE] | [LOCATION] |
-| [PATTERN_3] | [PURPOSE] | [LOCATION] |
-
----
-
-## 4. パッケージ構造と命名規則
-
-### 4.1 パッケージ構成
-
-```
-[BASE_PACKAGE]/
-├── entity/          # [DESCRIPTION]
-├── dao/             # [DESCRIPTION]
-├── service/         # [DESCRIPTION]
-├── bean/            # [DESCRIPTION]
-├── util/            # [DESCRIPTION]
-└── filter/          # [DESCRIPTION]
-```
-
-### 4.2 命名規則
-
-| コンポーネントタイプ | パッケージ | クラス名パターン | 例 |
-|------------------|----------|----------------|-----|
-| [TYPE_1] | `[package]` | `[Pattern]` | `[Example]` |
-| [TYPE_2] | `[package]` | `[Pattern]` | `[Example]` |
-| [TYPE_3] | `[package]` | `[Pattern]` | `[Example]` |
-
----
-
-## 5. 状態管理
-
-### 5.1 状態管理戦略
-
-[セッション、アプリケーションスコープなどの説明]
-
-| スコープ | 用途 | ライフサイクル | 例 |
-|---------|------|--------------|-----|
-| [SCOPE_1] | [USAGE] | [LIFECYCLE] | [EXAMPLE] |
-| [SCOPE_2] | [USAGE] | [LIFECYCLE] | [EXAMPLE] |
-
----
-
-## 6. トランザクション管理
-
-### 6.1 トランザクション戦略
-
-[トランザクション境界の説明]
+### 6.1 認証フロー
 
 ```mermaid
 sequenceDiagram
     participant Client
+    participant Filter
     participant Service
-    participant DAO
     participant DB
     
-    Client->>Service: request
-    Service->>Service: begin transaction
-    Service->>DAO: operation
-    DAO->>DB: query
-    DB-->>DAO: result
-    DAO-->>Service: result
-    Service->>Service: commit
-    Service-->>Client: response
+    Client->>Filter: request
+    Filter->>Service: authenticate
+    Service->>DB: query
+    DB-->>Service: result
+    Service-->>Filter: authenticated
+    Filter-->>Client: response
 ```
 
----
+### 6.2 認証除外エンドポイント
 
-## 7. 並行制御
+[プロジェクト固有の公開エンドポイント]
 
-### 7.1 並行制御戦略
-
-[楽観的ロック、悲観的ロックなどの説明]
-
-| 戦略 | 適用箇所 | 実装方法 |
-|------|---------|---------|
-| [STRATEGY_1] | [LOCATION] | [METHOD] |
-| [STRATEGY_2] | [LOCATION] | [METHOD] |
+* [ENDPOINT_1]
+* [ENDPOINT_2]
 
 ---
 
-## 8. エラーハンドリング戦略
+## 7. トランザクション管理
 
-### 8.1 例外階層
+[プロジェクト固有のトランザクション設計]
 
-```mermaid
-classDiagram
-    Exception <|-- ApplicationException
-    ApplicationException <|-- BusinessException1
-    ApplicationException <|-- BusinessException2
-```
+### 7.1 トランザクション境界
 
-### 8.2 エラーハンドリングフロー
+[プロジェクト固有のトランザクション境界の説明]
 
-[エラー処理の流れを説明]
+### 7.2 トランザクション戦略
+
+[プロジェクト固有のトランザクション戦略]
 
 ---
 
-## 9. セキュリティアーキテクチャ
+## 8. 並行制御
 
-### 9.1 認証・認可
+[プロジェクト固有の並行制御設計]
 
-| 項目 | 実装方法 | 詳細 |
-|------|---------|------|
-| 認証 | [METHOD] | [DETAILS] |
-| 認可 | [METHOD] | [DETAILS] |
-| セッション管理 | [METHOD] | [DETAILS] |
+### 8.1 楽観的ロック戦略
 
-### 9.2 セキュリティフロー
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Filter
-    participant Session
-    participant Service
-    
-    User->>Filter: request
-    Filter->>Session: check auth
-    alt authenticated
-        Filter->>Service: proceed
-    else not authenticated
-        Filter->>User: redirect to login
-    end
-```
+[プロジェクト固有の楽観的ロック設計]
 
 ---
 
-## 10. データベース構成
+## 9. エラーハンドリング
 
-### 10.1 接続設定
+[プロジェクト固有のエラーハンドリング]
 
-| 項目 | 設定値 | 説明 |
-|------|--------|------|
-| データベース種別 | [DATABASE] | [DESCRIPTION] |
-| 接続方式 | JDBC（JPA経由） | - |
-| データソース名（JNDI） | [JNDI_NAME] | 例: java:app/jdbc/testdb |
-| 接続プール管理 | アプリケーションサーバー | - |
-| トランザクション分離レベル | [ISOLATION_LEVEL] | - |
+### 9.1 例外マッピング
 
-### 10.2 persistence.xml設定
-
-* ファイル: `src/main/resources/META-INF/persistence.xml`
-* Persistence Unit名: [PERSISTENCE_UNIT_NAME]
-* JNDI名: [JNDI_NAME]
-
-### 10.3 アクセステーブル
-
-本システムがアクセスするテーブル：
-
-| テーブル名 | 用途 | アクセス権限 |
-|----------|------|------------|
-| [TABLE_1] | [PURPOSE] | READ, WRITE |
-| [TABLE_2] | [PURPOSE] | READ |
+| Exception | HTTP Status | Mapper |
+|-----------|-------------|--------|
+| [EXCEPTION_1] | [STATUS] | [MAPPER] |
+| [EXCEPTION_2] | [STATUS] | [MAPPER] |
 
 ---
 
-## 11. ログ戦略
+## 10. パフォーマンス考慮事項
 
-### 11.1 ロギング設定
+[プロジェクト固有のパフォーマンス最適化]
 
-| ログレベル | 用途 | 例 |
-|----------|------|-----|
-| ERROR | [USAGE] | [EXAMPLE] |
-| WARN | [USAGE] | [EXAMPLE] |
-| INFO | [USAGE] | [EXAMPLE] |
-| DEBUG | [USAGE] | [EXAMPLE] |
+### 10.1 データベースアクセス
 
----
+[プロジェクト固有の最適化戦略]
 
-## 12. ビルド＆デプロイ
+### 10.2 キャッシング
 
-### 12.1 ビルドプロセス
-
-```
-[BUILD_COMMAND_1]
-[BUILD_COMMAND_2]
-[BUILD_COMMAND_3]
-```
-
-### 12.2 デプロイアーキテクチャ
-
-[デプロイ構成の説明]
+[プロジェクト固有のキャッシング戦略]
 
 ---
 
-## 13. テスト戦略
+## 11. 拡張性・保守性
 
-### 13.1 テストピラミッド
-
-```mermaid
-graph TB
-    A[Manual Tests] --> B[Integration Tests]
-    B --> C[Unit Tests]
-```
-
-### 13.2 テストアプローチ
-
-| テストタイプ | ツール | カバレッジ目標 | 対象 |
-|------------|--------|--------------|------|
-| [TYPE_1] | [TOOL] | [COVERAGE] | [TARGET] |
-| [TYPE_2] | [TOOL] | [COVERAGE] | [TARGET] |
+[プロジェクト固有の拡張性・保守性の考慮事項]
 
 ---
 
-## 14. パフォーマンス考慮事項
+## 12. 実装状況
 
-### 14.1 最適化戦略
+* 最終更新: [DATE]
+* 実装バージョン: [VERSION]
 
-| 項目 | 戦略 | 期待効果 |
-|------|------|---------|
-| [ITEM_1] | [STRATEGY] | [EFFECT] |
-| [ITEM_2] | [STRATEGY] | [EFFECT] |
-
----
-
-## 15. 技術リスクと軽減策
-
-| リスク | 確率 | 影響度 | 軽減策 |
-|--------|------|--------|--------|
-| [RISK_1] | [PROBABILITY] | [IMPACT] | [MITIGATION] |
-| [RISK_2] | [PROBABILITY] | [IMPACT] | [MITIGATION] |
+| コンポーネント | 状態 | 実装方針 |
+|-------------|------|---------|
+| [COMPONENT_1] | [STATUS] | [APPROACH] |
+| [COMPONENT_2] | [STATUS] | [APPROACH] |
 
 ---
 
-## 16. 開発ガイドライン
+## 13. 参考資料
 
-### 16.1 コーディング規約
-
-* 命名規則:
-  * [NAMING_CONVENTION_1]
-  * [NAMING_CONVENTION_2]
-
-* コードフォーマット:
-  * [FORMAT_RULE_1]
-  * [FORMAT_RULE_2]
-
-### 16.2 コミット規約
-
-* コミットメッセージフォーマット:
-  ```
-  [TYPE]: [SUBJECT]
-  
-  [BODY]
-  
-  [FOOTER]
-  ```
-
-* コミットタイプ:
-  * `feat`: 新機能
-  * `fix`: バグ修正
-  * `docs`: ドキュメント変更
-  * `style`: コードフォーマット
-  * `refactor`: リファクタリング
-  * `test`: テスト追加・修正
-  * `chore`: ビルドプロセス・補助ツール変更
-
-### 16.3 ブランチ戦略
-
-* ブランチモデル: [BRANCH_MODEL] (例: Git Flow, GitHub Flow)
-* ブランチ命名規則:
-  * `main`: 本番環境
-  * `develop`: 開発環境
-  * `feature/[FEATURE_NAME]`: 機能開発
-  * `bugfix/[BUG_NAME]`: バグ修正
-  * `hotfix/[ISSUE_NAME]`: 緊急修正
-
-### 16.4 コードレビュー
-
-* レビュー観点:
-  * [REVIEW_POINT_1]
-  * [REVIEW_POINT_2]
-
-* 承認ルール:
-  * [APPROVAL_RULE]
-
----
-
-## 17. 将来の拡張（スコープ外）
-
-### 17.1 想定される拡張機能
-
-以下の機能は現在のスコープ外であるが、将来的な拡張の可能性を考慮してアーキテクチャを設計している。
-
-* [FUTURE_FEATURE_1]:
-  * 概要: [DESCRIPTION]
-  * 拡張ポイント: [EXTENSION_POINT]
-
-* [FUTURE_FEATURE_2]:
-  * 概要: [DESCRIPTION]
-  * 拡張ポイント: [EXTENSION_POINT]
-
-### 17.2 アーキテクチャの拡張性
-
-* 拡張可能な領域:
-  * [EXTENSIBLE_AREA_1]
-  * [EXTENSIBLE_AREA_2]
-
-* 拡張時の注意点:
-  * [CONSIDERATION_1]
-  * [CONSIDERATION_2]
-
----
-
-## 18. API仕様書（OpenAPI）
-
-### 18.1 本システムが公開するAPI仕様
-
-本システムが外部に公開するAPI仕様については、各APIディレクトリ配下のOpenAPI (YAML) 仕様書を参照してください：
-
-| API | OpenAPI仕様書 | 説明 |
-|-----|-------------|------|
-| [API_NAME_1] | [../api/API_XXX/openapi.yaml](../api/API_XXX/openapi.yaml) | [DESCRIPTION] |
-| [API_NAME_2] | [../api/API_YYY/openapi.yaml](../api/API_YYY/openapi.yaml) | [DESCRIPTION] |
-
-注意: OpenAPI仕様書が不要な場合は、このセクションを「該当なし」とする
-
----
-
-## 19. 参考資料
-
-### 19.1 公式ドキュメント
-
-* Jakarta EE 10: https://jakarta.ee/specifications/platform/10/
-* JAX-RS 3.1: https://jakarta.ee/specifications/restful-ws/3.1/
-* JPA 3.1: https://jakarta.ee/specifications/persistence/3.1/
-* CDI 4.0: https://jakarta.ee/specifications/cdi/4.0/
-
-### 19.2 関連仕様書
+### 13.1 関連仕様書
 
 * [requirements.md](requirements.md) - 要件定義書
-* [functional_design.md](functional_design.md) - 機能設計書
+* [functional_design.md](functional_design.md) - 機能設計書（API仕様）
+* [behaviors.md](behaviors.md) - 振る舞い仕様書（受入基準）
 * [data_model.md](data_model.md) - データモデル仕様書
-* [external_interface.md](external_interface.md) - 外部インターフェース仕様書
+* [external_interface.md](external_interface.md) - 外部インターフェース仕様書（該当する場合）
 
-### 19.3 サンプルコード・リポジトリ
+### 13.2 プロジェクトREADME
 
-* [SAMPLE_1]: [URL]
-* [SAMPLE_2]: [URL]
+* [README.md](../../README.md) - プロジェクトREADME
+
+### 13.3 共通原則・標準
+
+* [architecture.md](../../../../../agent_skills/jakarta-ee-api-base/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
+* [common_rules.md](../../../../../agent_skills/jakarta-ee-api-base/principles/common_rules.md) - 共通ルール
+* [security.md](../../../../../agent_skills/jakarta-ee-api-base/principles/security.md) - セキュリティ標準

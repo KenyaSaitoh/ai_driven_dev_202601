@@ -12,14 +12,14 @@
 
 ## 1. 概要
 
-本文書は、[PROJECT_NAME]のデータベーススキーマ（論理設計）を記述する。
+本文書は、[PROJECT_NAME]のデータベーススキーマ（RDB論理設計）を記述する。テーブル定義、制約、リレーションを定義する。
 
-* データベース: [DATABASE_TYPE]  
-* データベース名: [DATABASE_NAME]  
-* 接続URL: [CONNECTION_URL]  
-* JNDI名: [JNDI_NAME]
+* データベース種別: [DATABASE_TYPE] (例: HSQLDB、PostgreSQL、MySQL)
+* データベース名: [DATABASE_NAME]
 
-注意: JPAエンティティクラスの設計については、functional_design.mdの「クラス設計」セクションを参照してください。
+注意: 
+* JPAエンティティクラスの設計（@Entity、@Column等のアノテーション、Javaクラス構造）は詳細設計フェーズで実施します
+* データソース設定（JNDI名、接続URL、接続プール等）はarchitecture_design.mdに記載します
 
 ---
 
@@ -56,53 +56,70 @@ erDiagram
 
 ### 3.1 [TABLE_NAME_1] ([テーブル日本語名])
 
+#### 3.1.1 テーブル概要
+
 [テーブルの目的と説明を記述]
 
-| カラム名 | データ型 | NULL | キー | 説明 |
-|---------|---------|------|------|------|
-| [COLUMN_NAME_1] | [TYPE] | NO | PK | [説明]（自動採番） |
-| [COLUMN_NAME_2] | [TYPE] | NO | - | [説明] |
-| [COLUMN_NAME_3] | [TYPE] | YES | FK | [説明] |
+#### 3.1.2 テーブル構造
 
+| カラム名 | データ型 | PK | FK | NN | UQ | デフォルト | 説明 |
+|---------|---------|----|----|----|----|----------|------|
+| [COLUMN_NAME_1] | [TYPE] | ✓ | | ✓ | | IDENTITY | [説明]（自動採番） |
+| [COLUMN_NAME_2] | [TYPE] | | | ✓ | | | [説明] |
+| [COLUMN_NAME_3] | [TYPE] | | ✓ | ✓ | | | [説明]（外部キー） |
+
+#### 3.1.3 制約
+
+* 主キー: [COLUMN_NAME_1]
 * 外部キー:
-  * `[COLUMN_NAME]` → `[REF_TABLE]([REF_COLUMN])`
+  * [COLUMN_NAME_3] → [REF_TABLE].[REF_COLUMN]
+* 自動採番: IDENTITY（INSERT時に自動生成）
 
-* インデックス:
-  * PRIMARY KEY: `[COLUMN_NAME]`
-  * UNIQUE KEY: `[COLUMN_NAME]`
-  * INDEX: `[COLUMN_NAME]`
+#### 3.1.4 インデックス
 
-* ビジネスルール:
-  * [ルール1]
-  * [ルール2]
+* PK_[TABLE_NAME]: [COLUMN_NAME_1]（主キーインデックス）
+* IDX_[COLUMN_NAME_3]: [COLUMN_NAME_3]（外部キーインデックス）
 
 ---
 
-### 3.2 [TABLE_NAME_2]
+### 3.2 [TABLE_NAME_2] ([テーブル日本語名])
 
 [必要に応じてテーブルを追加]
 
 ---
 
-## 4. データ整合性ルール
+## 4. インデックス設計
 
-### 4.1 トランザクション整合性
+### 4.1 インデックス一覧
 
-| ルール | 説明 | 実装方法 |
-|--------|------|---------|
-| [RULE_1] | [DESCRIPTION] | [IMPLEMENTATION] |
-| [RULE_2] | [DESCRIPTION] | [IMPLEMENTATION] |
+| テーブル | インデックス名 | カラム | タイプ | 目的 |
+|---------|--------------|--------|--------|------|
+| [TABLE_1] | PK_[TABLE_1] | [COLUMN_1] | PRIMARY KEY | 主キー |
+| [TABLE_2] | PK_[TABLE_2] | [COLUMN_1] | PRIMARY KEY | 主キー |
+| [TABLE_2] | IDX_[COLUMN] | [COLUMN] | INDEX | 検索最適化 |
 
-### 4.2 参照整合性
+### 4.2 検索最適化
 
-| 関係 | カスケードルール | 説明 |
-|------|--------------|------|
-| [TABLE1] → [TABLE2] | [CASCADE/RESTRICT/SET NULL] | [説明] |
-| [TABLE2] → [TABLE3] | [CASCADE/RESTRICT/SET NULL] | [説明] |
+[頻出検索パターンとインデックス戦略を記述]
 
 ---
 
-## 5. リレーションシップカーディナリティ
+## 5. データ整合性ルール
+
+### 5.1 外部キー制約
+
+| 子テーブル | 親テーブル | 外部キー | 動作 |
+|----------|----------|---------|------|
+| [CHILD_TABLE] | [PARENT_TABLE] | [FK_COLUMN] | CASCADE / RESTRICT / SET NULL |
+
+### 5.2 トランザクション分離レベル
+
+* 分離レベル: [ISOLATION_LEVEL]（例: READ_COMMITTED）
+* 説明: [説明]
+
+---
+
+## 6. リレーションシップカーディナリティ
 
 | 親テーブル | 子テーブル | リレーションシップ | カーディナリティ | 外部キー |
 |-----------|-----------|------------------|----------------|---------|
@@ -121,33 +138,28 @@ erDiagram
 
 ---
 
-## 6. データ整合性制約
+## 7. データベース設計原則
 
-### 6.1 一意性制約
+### 7.1 命名規則
 
-| テーブル | カラム | 制約名 | 説明 |
-|---------|--------|--------|------|
-| [TABLE_1] | [COLUMN_1] | [CONSTRAINT_NAME] | [DESCRIPTION] |
-| [TABLE_2] | [COLUMN_2] | [CONSTRAINT_NAME] | [DESCRIPTION] |
+* テーブル名: 英語大文字、単数形（BOOK, ORDER_TRAN）
+* カラム名: 英語大文字、スネークケース（BOOK_NAME, ORDER_DATE）
+* 主キー: テーブル名 + _ID（BOOK_ID, CUSTOMER_ID）
+* 外部キー制約: FK_カラム名（FK_CATEGORY_ID）
 
-### 6.2 CHECK制約
+### 7.2 正規化
 
-| テーブル | 制約式 | 説明 |
-|---------|--------|------|
-| [TABLE_1] | [CHECK_EXPRESSION] | [DESCRIPTION] |
-| [TABLE_2] | [CHECK_EXPRESSION] | [DESCRIPTION] |
+* 第1正規形: 原子性を満たす（繰り返しフィールドなし）
+* 第2正規形: 部分関数従属性なし
+* 第3正規形: 推移的関数従属性なし
 
-### 8.3 NOT NULL制約
+### 7.3 非正規化（該当する場合）
 
-必須項目はテーブル定義のNULL許可列で「いいえ」と記載する。
-
-### 6.4 参照整合性
-
-全ての外部キーには参照整合性制約を定義する。
+[必要に応じて非正規化の理由と対象カラムを記述]
 
 ---
 
-## 7. 参考資料
+## 8. 参考資料
 
 * [requirements.md](requirements.md) - 要件定義書
 * [architecture_design.md](architecture_design.md) - アーキテクチャ設計書

@@ -54,15 +54,21 @@ skip_infrastructure: true  # インフラセットアップをスキップ
 
 5. 必須: `{project_root}/specs/baseline/system/requirements.md` で機能要件と成功基準を確認する
 
-6. 必須: `{project_root}/specs/baseline/system/functional_design.md` でシステム全体の機能設計概要を確認する
+6. 必須: `{project_root}/specs/baseline/system/functional_design.md` でシステム全体の機能設計、共通サービス、ドメインモデルの機能設計を確認する
 
-7. 必須: `{project_root}/specs/baseline/api/*/functional_design.md` でクラス設計、メソッド、エンドポイント仕様を確認する
+7. 必須: `{project_root}/specs/baseline/system/detailed_design.md` で共通処理、JPAエンティティ、Dao、共通Serviceの詳細設計を確認する（存在する場合）
 
-8. 存在する場合: `{project_root}/specs/baseline/system/data_model.md` でエンティティと関係を確認する
+8. 必須: `{project_root}/specs/baseline/api/*/functional_design.md` でAPI固有のエンドポイント仕様、リクエスト/レスポンス、ビジネスルールを確認する
 
-9. 存在する場合: `{project_root}/specs/baseline/api/*/behaviors.md` で受入基準とテストシナリオを確認する
+9. 必須: `{project_root}/specs/baseline/api/*/detailed_design.md` でAPI固有のResource、DTO、API特有のServiceの詳細設計を確認する（存在する場合）
 
-10. 存在する場合: `{project_root}/specs/baseline/system/external_interface.md` で外部連携仕様とAPI仕様を確認する
+10. 存在する場合: `{project_root}/specs/baseline/system/data_model.md` でテーブル定義とERDを確認する
+
+11. 存在する場合: `{project_root}/specs/baseline/system/behaviors.md` でシステム全体の振る舞い、共通処理の振る舞い、受入基準を確認する
+
+12. 存在する場合: `{project_root}/specs/baseline/api/*/behaviors.md` でAPI固有の受入基準とテストシナリオを確認する
+
+13. 存在する場合: `{project_root}/specs/baseline/system/external_interface.md` で外部連携仕様とAPI仕様を確認する
 
 11. 静的リソース: `{project_root}/resources/` フォルダの静的ファイル（画像等）を確認し、セットアップ時に適切な場所にコピーする
 

@@ -17,17 +17,15 @@
 
 ## 1. 概要
 
-本文書は、berry-books-api REST APIのデータベーススキーマ（論理設計）を記述する。
+本文書は、berry-books-api REST APIのデータベーススキーマ（RDB論理設計）を記述する。
 
-* データベース: HSQLDB  
-* データベース名: testdb  
-* 接続URL: jdbc:hsqldb:hsql://localhost:9001/testdb  
-* JNDI名: jdbc/HsqldbDS
+* データベース種別: HSQLDB
 
 注意: 
-* JPAエンティティクラスの設計については、functional_design.mdの「クラス設計」セクションを参照してください。
-* データ管理の責務分担（マイクロサービスアーキテクチャ）については、architecture_design.mdを参照してください。
-* berry-books-apiは注文データ（ORDER_TRAN、ORDER_DETAIL）のみを直接管理します。書籍・在庫・カテゴリ・顧客データは外部APIを通じてアクセスします。
+* JPAエンティティクラスの設計（@Entity、@Column等のアノテーション、Javaクラス構造）は詳細設計フェーズで実施します
+* データソース設定（JNDI名、接続URL、接続プール等）はarchitecture_design.mdに記載します
+* データ管理の責務分担（サービス分離アーキテクチャ）については、architecture_design.mdを参照してください
+* berry-books-apiは注文データ（ORDER_TRAN、ORDER_DETAIL）のみを直接管理します。書籍・在庫・カテゴリ・顧客データは外部APIを通じてアクセスします
 
 ---
 

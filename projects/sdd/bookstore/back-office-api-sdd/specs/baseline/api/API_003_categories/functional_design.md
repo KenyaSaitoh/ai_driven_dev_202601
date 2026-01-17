@@ -37,22 +37,18 @@
 #### 3.1.2 リクエスト
 
 * ヘッダー: なし
-
 * クエリパラメータ: なし
-
 * ボディ: なし
 
 #### 3.1.3 レスポンス
 
 * 成功（200 OK）:
-
 * ヘッダー:
 ```
 Content-Type: application/json; charset=UTF-8
 ```
 
 * ボディ:
-
 * レスポンススキーマ:
 | フィールド | 型 | 必須 | 説明 |
 |-----------|---|------|------|
@@ -61,11 +57,10 @@ Content-Type: application/json; charset=UTF-8
 
 #### 3.1.4 処理フロー
 
-1. CategoryResourceを呼び出し（`getAllCategories()`）
-2. CategoryServiceを呼び出し（`getCategoriesAll()`）
-3. CategoryDaoで全カテゴリを取得
-   * JPQL: `SELECT c FROM Category c`
-   * Named Query: `Category.findAll`
+1. カテゴリリソースを呼び出し
+2. カテゴリサービスを呼び出し
+3. カテゴリデータアクセスで全カテゴリを取得
+   * 全カテゴリを取得
 4. Categoryエンティティのリストを取得
 5. 各CategoryエンティティをCategoryTOに変換
    * ストリームAPIで変換: `.stream().map(c -> new CategoryTO(...)).toList()`
@@ -79,51 +74,13 @@ Content-Type: application/json; charset=UTF-8
 
 #### 3.1.6 関連コンポーネント
 
-* `CategoryResource#getAllCategories()`
-* `CategoryService#getCategoriesAll()`
-* `CategoryDao#findAll()`
+* カテゴリリソース（カテゴリ一覧取得）
+* カテゴリサービス（ビジネスロジック）
+* カテゴリデータアクセス（全件取得）
 
 ---
 
-## 4. データ転送オブジェクト（DTO）
-
-### 4.1 CategoryTO
-
-* パッケージ: `pro.kensait.backoffice.api.dto`
-
-* 構造種別: レコード型（immutableなデータ転送オブジェクト）
-
-* フィールド構成:
-
-| フィールド名 | 型 | 説明 |
-|------------|---|------|
-| categoryId | Integer | カテゴリID |
-| categoryName | String | カテゴリ名 |
-
-* 例:
-
----
-
-## 5. エンティティ
-
-### 5.1 Category
-
-* パッケージ: `pro.kensait.backoffice.entity`
-
-* マッピング対象テーブル: CATEGORY
-
-* エンティティ構成:
-
-| フィールド名 | 型 | カラム名 | 制約 | 説明 |
-|------------|---|---------|-----|------|
-| categoryId | Integer | CATEGORY_ID | PRIMARY KEY | カテゴリID |
-| categoryName | String | CATEGORY_NAME | - | カテゴリ名 |
-
-* エンティティ種別: 永続化エンティティ（JPAエンティティ）
-
----
-
-## 6. ビジネスルール
+## 4. ビジネスルール
 
 | ルールID | ルール内容 |
 |---------|-----------|
@@ -135,7 +92,7 @@ Content-Type: application/json; charset=UTF-8
 
 ---
 
-## 7. エラーハンドリング
+## 5. エラーハンドリング
 
 ### 7.1 エラーケース
 
@@ -149,14 +106,14 @@ Content-Type: application/json; charset=UTF-8
 
 * INFOレベル:
 ```
-[ CategoryResource#getAllCategories ]
-[ CategoryService#getCategoriesAll ]
+[ CategoryResource ] getAllCategories
+[ CategoryService ] getCategoriesAll
 ```
 
 * DEBUGレベル:
 ```
-[ CategoryDao#findAll ] Executing JPQL: SELECT c FROM Category c
-[ CategoryDao#findAll ] Result count: 4
+[ CategoryDao ] 全カテゴリ取得実行
+[ CategoryDao ] 取得件数: 4
 ```
 
 ---
@@ -183,7 +140,7 @@ Content-Type: application/json; charset=UTF-8
 
 ---
 
-## 9. テスト仕様
+## 7. テスト仕様
 
 ### 9.1 正常系テスト
 
@@ -219,16 +176,16 @@ Content-Type: application/json; charset=UTF-8
 
 ---
 
-## 11. データベースクエリ
+## 9. データベースクエリ
 
-### 11.1 クエリ仕様（JPQL）
+### 11.1 クエリ仕様
 
 * クエリ内容:
   * 対象エンティティ: Category
   * 取得フィールド: 全フィールド
   * WHERE条件: なし（全件取得）
 
-### 11.2 実行されるSQLの論理構造
+### 11.2 実行されるクエリの論理構造
 
 * SELECT句:
   * CATEGORY_ID
@@ -242,7 +199,7 @@ Content-Type: application/json; charset=UTF-8
 
 ---
 
-## 12. 将来の拡張
+## 10. 将来の拡張
 
 ### 12.1 カテゴリ階層構造
 
@@ -268,7 +225,7 @@ GET /api/categories?search=文学
 
 ---
 
-## 13. セキュリティ考慮事項
+## 11. セキュリティ考慮事項
 
 ### 13.1 認証・認可
 
@@ -300,7 +257,7 @@ GET /api/categories?search=文学
 
 ---
 
-## 15. 関連API
+## 13. 関連API
 
 * 書籍API: `/api/books` - カテゴリで絞り込み検索に使用
 * 書籍API（カテゴリ一覧）: `/api/books/categories` - Map形式で取得
@@ -308,63 +265,63 @@ GET /api/categories?search=文学
 
 ---
 
-## 16. 動的振る舞い
+## 14. 動的振る舞い
 
-### 16.1 カテゴリ一覧取得シーケンス
+### 14.1 カテゴリ一覧取得シーケンス
 
 ```mermaid
 sequenceDiagram
-    participant Client
-    participant CategoryResource
-    participant CategoryService
-    participant CategoryDao
-    participant Database
+    participant Client as クライアント
+    participant API as カテゴリAPI
+    participant BizLogic as ビジネスロジック
+    participant DataAccess as データアクセス
+    participant Database as データベース
 
-    Client->>CategoryResource: GET /api/categories
-    Note over CategoryResource: LOG INFO<br/>[CategoryResource#getAllCategories]
-    CategoryResource->>CategoryService: getAllCategories()
-    Note over CategoryService: LOG INFO<br/>[CategoryService#getCategoriesAll]
-    CategoryService->>CategoryDao: getCategoriesAll()
-    CategoryDao->>Database: findAll()<br/>Named Query: Category.findAll<br/>SELECT c FROM CATEGORY c<br/>ORDER BY c.CATEGORY_ID
-    Database-->>CategoryDao: List<Category> (4 records)
-    CategoryDao-->>CategoryService: List<Category>
-    CategoryService-->>CategoryResource: List<Category>
+    Client->>API: GET /api/categories
+    Note over API: LOG INFO<br/>カテゴリ一覧取得
+    API->>BizLogic: カテゴリ一覧取得
+    Note over BizLogic: LOG INFO<br/>全件取得処理
+    BizLogic->>DataAccess: 全件取得
+    DataAccess->>Database: 全件検索<br/>ORDER BY CATEGORY_ID
+    Database-->>DataAccess: List<Category> (4 records)
+    DataAccess-->>BizLogic: カテゴリリスト
+    BizLogic-->>API: カテゴリリスト
     
-    CategoryResource->>CategoryResource: Stream & Map<br/>categories.stream()<br/>.map(c -> new CategoryTO(<br/>  c.getCategoryId(),<br/>  c.getCategoryName()))<br/>.toList()
+    API->>API: データ変換<br/>内部表現 → レスポンス形式
     
-    CategoryResource-->>Client: 200 OK<br/>[{CategoryTO}]<br/>Content-Type: application/json
+    API-->>Client: 200 OK<br/>JSON配列<br/>Content-Type: application/json
 ```
 
-### 16.2 処理フローチャート
+### 14.2 処理フローチャート
 
 ```mermaid
 flowchart TD
     A[開始] --> B[リクエスト受信<br/>GET /categories]
-    B --> C[CategoryResource<br/>getAllCategories]
-    C --> D[CategoryService<br/>getCategoriesAll]
-    D --> E[CategoryDao<br/>findAll]
-    E --> F[DB Query実行<br/>SELECT c FROM CATEGORY]
-    F --> G[List&lt;Category&gt;取得]
-    G --> H[Stream API変換処理<br/>Category → CategoryTO]
-    H --> I[List&lt;CategoryTO&gt;生成]
-    I --> J[JSON Serialize]
+    B --> C[APIレイヤー<br/>カテゴリ一覧取得]
+    C --> D[ビジネスロジック<br/>全件取得処理]
+    D --> E[データアクセス<br/>全件取得]
+    E --> F[DBクエリ実行<br/>SELECT * FROM CATEGORY]
+    F --> G[カテゴリリスト取得]
+    G --> H[データ変換処理<br/>内部表現 → レスポンス形式]
+    H --> I[レスポンスデータ生成]
+    I --> J[JSON変換]
     J --> K[200 OK<br/>レスポンス返却]
 ```
 
-### 16.3 データフロー全体図
+### 14.3 データフロー全体図
 
 ```mermaid
 graph TD
-    Client[Client]
-    Resource[CategoryResource<br/>- getAllCategories]
-    Service[CategoryService<br/>- getCategoriesAll]
-    Dao[CategoryDao<br/>- findAll]
-    DB[Database<br/>- CATEGORY table]
+    Client[クライアント]
+    API[カテゴリAPI]
+    BizLogic[ビジネスロジック]
+    DataAccess[データアクセス]
+    DB[データベース<br/>CATEGORY]
     
-    Client -->|HTTP GET<br/>/api/categories| Resource
-    Resource -->|@Inject| Service
-    Service -->|@Inject| Dao
-    Dao -->|EntityManager / JPQL| DB
+    Client -->|HTTP GET<br/>/api/categories| API
+    API -->|呼び出し| BizLogic
+    BizLogic -->|呼び出し| DataAccess
+    DataAccess -->|クエリ実行| DB
 ```
 
 ### 16.4 APIの用途比較
@@ -383,20 +340,20 @@ flowchart TD
     OldUI --> BooksCategories
 ```
 
-### 16.5 状態管理
+### 14.5 状態管理
 
 * カテゴリAPIは状態を持たない（ステートレス）:
 
 ```mermaid
 graph LR
-    R1[Request 1] --> CR1[Category<br/>Resource]
-    CR1 --> DB1[Database]
+    R1[Request 1] --> API1[カテゴリAPI]
+    API1 --> DB1[Database]
     
-    R2[Request 2] --> CR2[Category<br/>Resource]
-    CR2 --> DB2[Database]
+    R2[Request 2] --> API2[カテゴリAPI]
+    API2 --> DB2[Database]
     
-    R3[Request 3] --> CR3[Category<br/>Resource]
-    CR3 --> DB3[Database]
+    R3[Request 3] --> API3[カテゴリAPI]
+    API3 --> DB3[Database]
 ```
 
 各リクエストは独立して処理される

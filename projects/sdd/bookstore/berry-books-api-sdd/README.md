@@ -252,6 +252,23 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 
 詳細は `@agent_skills/jakarta-ee-api-base/README.md` を参照してください。
 
+#### 開発原則
+
+このプロジェクトは、以下の原則に従って開発されます：
+
+* **場所**: `@agent_skills/jakarta-ee-api-base/principles/`
+  * [architecture.md](../../../agent_skills/jakarta-ee-api-base/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
+  * [security.md](../../../agent_skills/jakarta-ee-api-base/principles/security.md) - セキュリティ標準
+  * [common_rules.md](../../../agent_skills/jakarta-ee-api-base/principles/common_rules.md) - 共通ルール
+
+* **主な内容**:
+  * 標準技術スタック（Jakarta EE 10、JPA 3.1、JAX-RS 3.1）
+  * レイヤードアーキテクチャ（API、Security、Service、DAO、Entity）
+  * 開発標準（命名規則、コーディング規約、バリデーション、エラーハンドリング）
+  * セキュリティ実装（JWT認証、HttpOnly Cookie、認証フィルター）
+  * トランザクション管理、外部API連携
+  * テスト戦略、パフォーマンス考慮事項
+
 ## 🎯 プロジェクトの特徴
 
 ### アーキテクチャ
@@ -838,11 +855,21 @@ rm -f hsqldb/data/testdb.*
 
 ## 📖 参考リンク
 
+### Agent Skills
+
+* [Agent Skills README](../../../agent_skills/jakarta-ee-api-base/README.md) - 使い方ガイド
+* [開発原則](../../../agent_skills/jakarta-ee-api-base/principles/)
+  * [architecture.md](../../../agent_skills/jakarta-ee-api-base/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
+  * [security.md](../../../agent_skills/jakarta-ee-api-base/principles/security.md) - セキュリティ標準
+  * [common_rules.md](../../../agent_skills/jakarta-ee-api-base/principles/common_rules.md) - 共通ルール
+
+### Jakarta EE仕様
+
 * [Jakarta EE 10 Platform](https://jakarta.ee/specifications/platform/10/)
 * [Jakarta RESTful Web Services 3.1](https://jakarta.ee/specifications/restful-ws/3.1/)
+* [Jakarta Persistence 3.1](https://jakarta.ee/specifications/persistence/3.1/)
 * [JWT (JSON Web Token)](https://jwt.io/)
 * [jjwt - Java JWT Library](https://github.com/jwtk/jjwt)
-* [Agent Skills Documentation](https://agentskills.io/what-are-skills)
 
 ## 📄 ライセンス
 

@@ -173,13 +173,19 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
   * JPAによる永続化
   * トランザクション管理
 
-* データソース設定
-  * 移行元で使用しているJNDI名を明記する
+* データソース設定（インフラ構成）
+  * 移行元で使用しているJNDI名を明記する（web.xml、DAOクラス、アプリケーションサーバー設定から抽出）
   * JNDI参照名（例: `jdbc/HsqldbDS`）
   * 完全修飾JNDI名（例: `java:comp/env/jdbc/HsqldbDS` または `java:app/jdbc/testdb`）
   * データベース種類（HSQLDB、PostgreSQL、MySQL等）
+  * JDBCドライバークラス、接続URL
   * JTAマネージド: true/false
-  * 注意: この情報はpersistence.xml生成時に必須となる
+  
+* persistence.xml設定情報
+  * `<jta-data-source>` に設定するJNDI名（上記データソース設定から取得）
+  * Persistence Unit名（例: `personPU`）
+  * トランザクションタイプ: JTA（通常）
+  * 注意: この情報は詳細設計フェーズでpersistence.xml生成時に使用される
 
 #### functional_design.md
 
@@ -198,28 +204,24 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 
 #### data_model.md
 
-* エンティティ一覧:
+* エンティティ一覧（論理名）:
   * StrutsのModel/Entityクラスから抽出
   * または、DAOクラスとSQLスクリプトから推測
+  * 注意: 論理エンティティ名のみ。JPAエンティティクラス名は詳細設計で決定
 
-* テーブル定義:
+* テーブル定義（RDB論理設計）:
   * SQLスクリプト（`CREATE TABLE`）から抽出
   * カラム名、データ型、制約（PRIMARY KEY、FOREIGN KEY、NOT NULL等）
+  * インデックス定義
 
-* エンティティリレーション:
-  * テーブル間の関係（OneToMany、ManyToOne等）
-  * SQLスクリプトのFOREIGN KEY制約から抽出
+* テーブル間のリレーション:
+  * FOREIGN KEY制約から抽出
+  * カーディナリティ（1:1、1:N、N:M）
 
-* JPA設計:
-  * `@Entity`, `@Table`, `@Id`, `@Column`アノテーション
-  * リレーションアノテーション（`@ManyToOne`, `@OneToMany`等）
-
-* persistence.xml設定情報:
-  * 移行元で使用しているJNDI名を明記する
-  * `<jta-data-source>` に設定するJNDI名（例: `java:app/jdbc/testdb`）
-  * Persistence Unit名（例: `PersonPU`）
-  * トランザクションタイプ: JTA（通常）
-  * 注意: JNDI名はweb.xml、DAOクラス、アプリケーションサーバー設定から正確に抽出すること
+注意: 
+* data_model.mdはRDB論理設計（テーブル、カラム、制約）のみを記述
+* JPAエンティティクラスの設計（@Entity、@Column等のアノテーション、Javaクラス構造）は詳細設計フェーズで実施
+* persistence.xml設定情報（JNDI名、Persistence Unit名）はarchitecture_design.mdに記載
 
 #### behaviors.md
 

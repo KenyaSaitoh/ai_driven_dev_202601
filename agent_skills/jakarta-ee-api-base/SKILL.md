@@ -46,7 +46,7 @@ AIが自動で以下を実行
 2. タスクファイルを分解・生成
 3. `tasks/`フォルダに保存
 
-### ステップ2: 詳細設計
+### ステップ3: 詳細設計
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
@@ -122,6 +122,8 @@ agent_skills/jakarta-ee-api-base/
 ├── SKILL.md                          # このファイル
 ├── README.md                         # クイックスタートガイド
 ├── principles/                       # 原則（全プロジェクト共通）
+│   ├── architecture.md              # Jakarta EE APIアーキテクチャ標準
+│   ├── security.md                  # セキュリティ標準
 │   └── common_rules.md              # 共通ルール
 ├── templates/                        # 仕様書テンプレート
 │   ├── architecture_design.md
@@ -140,6 +142,10 @@ agent_skills/jakarta-ee-api-base/
 
 ## 参考資料
 
+* [開発原則](principles/) - アーキテクチャ標準、セキュリティ標準、共通ルール
+  * [architecture.md](principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
+  * [security.md](principles/security.md) - セキュリティ標準
+  * [common_rules.md](principles/common_rules.md) - 共通ルール
 * [Jakarta EE 10仕様](https://jakarta.ee/specifications/platform/10/)
 * [JAX-RS 3.1仕様](https://jakarta.ee/specifications/restful-ws/3.1/)
 * [Jakarta Persistence 3.1仕様](https://jakarta.ee/specifications/persistence/3.1/)

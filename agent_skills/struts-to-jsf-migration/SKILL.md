@@ -130,6 +130,8 @@ agent_skills/struts-to-jsf-migration/
 ├── SKILL.md                          # このファイル
 ├── README.md                         # クイックスタートガイド
 ├── principles/                       # マイグレーション原則
+│   ├── architecture.md              # Jakarta EE APIアーキテクチャ標準
+│   ├── security.md                  # セキュリティ標準
 │   └── common_rules.md              # マイグレーションルール、マッピング規則
 └── instructions/
     ├── reverse_engineering.md        # ステップ1: リバースエンジニアリング
@@ -142,6 +144,10 @@ agent_skills/struts-to-jsf-migration/
 
 ## 参考資料
 
+* [マイグレーション原則](principles/) - マイグレーションルール、アーキテクチャ標準、セキュリティ標準
+  * [architecture.md](principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
+  * [security.md](principles/security.md) - セキュリティ標準
+  * [common_rules.md](principles/common_rules.md) - 共通ルール、マッピング規則
 * [Jakarta EE 10仕様](https://jakarta.ee/specifications/platform/10/)
 * [Jakarta Faces 4.0仕様](https://jakarta.ee/specifications/faces/4.0/)
 * [Jakarta Persistence 3.1仕様](https://jakarta.ee/specifications/persistence/3.1/)

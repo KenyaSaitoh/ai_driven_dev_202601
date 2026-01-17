@@ -2,7 +2,9 @@
 
 ## 1. 概要
 
-本ドキュメントは、人材管理システム（JSF Person）の機能設計を定義する。画面一覧、画面遷移、コンポーネント設計を記述する。
+本ドキュメントは、人材管理システム（JSF Person）の機能設計（基本設計）を定義する。画面一覧、画面遷移、画面の役割と機能を記述する。
+
+注意: 実装クラス（Managed Bean、Service、Dao等）の詳細、メソッドシグネチャ、アノテーションは詳細設計書（detailed_design.md）で記述します。
 
 ## 2. 画面一覧
 
@@ -11,27 +13,18 @@
 * SCREEN_001_PersonList: PERSON一覧画面
   * URL: /personList.xhtml
   * 目的: 全PERSON情報を一覧表示し、追加・編集・削除のエントリーポイントを提供
-  * Managed Bean: PersonListBean
-  * スコープ: @ViewScoped
+  * 主要機能: 一覧表示、新規追加、編集、削除
 
 * SCREEN_002_PersonInput: PERSON入力画面
   * URL: /personInput.xhtml
   * 目的: PERSON情報の入力または編集を行う
-  * Managed Bean: PersonInputBean
-  * スコープ: @ViewScoped
   * モード: 新規追加モードと編集モード
+  * 主要機能: データ入力、バリデーション、確認画面への遷移
 
 * SCREEN_003_PersonConfirm: PERSON確認画面
   * URL: /personConfirm.xhtml
   * 目的: 入力または編集されたPERSON情報を確認し、登録・更新を実行する
-  * Managed Bean: PersonConfirmBean
-  * スコープ: @ViewScoped
-
-### 2.2 画面とManaged Beanの対応
-
-* personList.xhtml ↔ PersonListBean
-* personInput.xhtml ↔ PersonInputBean
-* personConfirm.xhtml ↔ PersonConfirmBean
+  * 主要機能: 入力内容確認、登録実行、入力画面への戻り
 
 ## 3. 画面遷移図
 
@@ -91,269 +84,194 @@ graph TD
   * 確認画面 → 入力画面（戻るボタン）
   * JavaScript: history.back()
 
-## 4. コンポーネント設計
+## 4. 画面機能詳細
+
+注意: 以下は論理レベルの記述です。実装クラス（Managed Bean、Service、Dao）の詳細は詳細設計書（detailed_design.md）を参照してください。
 
 ### 4.1 SCREEN_001_PersonList（PERSON一覧画面）
 
-#### 4.1.1 Managed Bean: PersonListBean
+#### 4.1.1 画面の役割
 
-* パッケージ: pro.kensait.jsf.person.bean
-* アノテーション:
-  * @Named("personListBean")
-  * @ViewScoped
-  * implements Serializable
+全PERSON情報を一覧表示し、新規追加・編集・削除の操作を提供する。
 
-* フィールド:
-  * personService: PersonService（@Inject）
-  * personList: List<Person>
+#### 4.1.2 画面初期表示
 
-* メソッド:
-  * init(): void（@PostConstruct）
-    * 画面初期表示時に全PERSONを取得
-    * personService.getAllPersons()を呼び出し
-    * 結果をpersonListフィールドに設定
+1. 画面表示時に全PERSON情報をデータベースから取得
+2. PERSON_ID昇順でソート
+3. 一覧形式で表示
 
-  * getPersonList(): List<Person>
-    * personListフィールドを返す
-    * ビューから#{personListBean.personList}でアクセス
+#### 4.1.3 主要機能
 
-  * deletePerson(Integer personId): String
-    * 指定されたPERSONを削除
-    * personService.deletePerson(personId)を呼び出し
-    * 削除後に再度getAllPersons()を呼び出してリストを更新
-    * 戻り値: null（同じページをリロード）
+* 新規追加
+  * 新規追加ボタンをクリック
+  * PERSON入力画面へ遷移（新規追加モード）
 
-#### 4.1.2 Service: PersonService
+* 編集
+  * 各行の編集ボタンをクリック
+  * 選択されたPERSON_IDをパラメータとして渡す
+  * PERSON入力画面へ遷移（編集モード）
 
-* メソッド呼び出し:
-  * getAllPersons(): List<Person>
-    * 全PERSONを取得するJPQLクエリを実行
-    * "SELECT p FROM Person p ORDER BY p.personId"
+* 削除
+  * 各行の削除ボタンをクリック
+  * 指定されたPERSONをデータベースから削除
+  * 削除後、一覧を再表示
 
-  * deletePerson(Integer personId): void
-    * 指定されたPERSONを削除
-    * em.find()でエンティティを取得
-    * em.remove()で削除
+#### 4.1.4 表示項目
 
-#### 4.1.3 ビュー: personList.xhtml
-
-* JSFタグライブラリ:
-  * xmlns:h="jakarta.faces.html"
-  * xmlns:f="jakarta.faces.core"
-  * xmlns:ui="jakarta.faces.facelets"
-
-* 主要コンポーネント:
-  * <h:head>: ページヘッダー（タイトル、スタイルシート）
-  * <h:body>: ページボディ
-  * <h:form>: フォーム
-  * <h:commandButton>: 新規追加ボタン
-  * <h:dataTable>: PERSONリストの表示
-    * value="#{personListBean.personList}"
-    * var="person"
-    * カラム: ID、名前、年齢、性別、操作
-  * <h:commandButton>: 編集ボタン、削除ボタン
+* PERSON_ID（人材ID）
+* PERSON_NAME（人材名）
+* AGE（年齢）
+* GENDER（性別）
+* 操作ボタン（編集、削除）
 
 ### 4.2 SCREEN_002_PersonInput（PERSON入力画面）
 
-#### 4.2.1 Managed Bean: PersonInputBean
+#### 4.2.1 画面の役割
 
-* パッケージ: pro.kensait.jsf.person.bean
-* アノテーション:
-  * @Named("personInputBean")
-  * @ViewScoped
-  * implements Serializable
+PERSON情報の入力または編集を行う。新規追加モードと編集モードの2つのモードをサポート。
 
-* フィールド:
-  * personService: PersonService（@Inject）
-  * personId: Integer（編集モードの場合に設定）
-  * personName: String
-  * age: Integer
-  * gender: String
+#### 4.2.2 画面初期表示
 
-* メソッド:
-  * init(): void（@PostConstruct）
-    * 編集モードの場合（personIdが指定されている場合）
-      * リクエストパラメータからpersonIdを取得
-      * personService.getPersonById(personId)を呼び出し
-      * 取得したPersonデータをフィールドに設定
-    * 新規追加モードの場合
-      * フィールドを初期化（nullまたはデフォルト値）
+* 編集モードの場合
+  1. URLパラメータからPERSON_IDを取得
+  2. 指定されたPERSON情報をデータベースから取得
+  3. 取得したデータを入力フィールドに設定
 
-  * confirm(): String
-    * 確認画面に遷移
-    * 入力データをFlash Scopeに保存（または@ViewScopedのままConfirmBeanに渡す）
-    * 戻り値: "personConfirm"
+* 新規追加モードの場合
+  1. 全入力フィールドを空の状態で表示
 
-  * cancel(): String
-    * 一覧画面に戻る
-    * 戻り値: "personList?faces-redirect=true"
+#### 4.2.3 主要機能
 
-#### 4.2.2 Service: PersonService
+* 入力項目
+  * PERSON_NAME（人材名）: テキスト入力
+  * AGE（年齢）: 数値入力
+  * GENDER（性別）: ラジオボタン選択（男性/女性）
 
-* メソッド呼び出し:
-  * getPersonById(Integer personId): Person
-    * 指定されたIDのPERSONを取得
-    * em.find(Person.class, personId)
+* 確認画面へ
+  * 確認画面へボタンをクリック
+  * 入力値をセッションまたはスコープに保存
+  * PERSON確認画面へ遷移
 
-#### 4.2.3 ビュー: personInput.xhtml
+* キャンセル
+  * キャンセルボタンをクリック
+  * PERSON一覧画面へリダイレクト（入力内容は破棄）
 
-* JSFタグライブラリ:
-  * xmlns:h="jakarta.faces.html"
-  * xmlns:f="jakarta.faces.core"
+#### 4.2.4 バリデーション
 
-* 主要コンポーネント:
-  * <h:form>: フォーム
-  * <h:inputHidden>: personId（編集モードの場合に値を保持）
-  * <h:inputText>: personName（名前入力フィールド）
-  * <h:inputText>: age（年齢入力フィールド）
-  * <h:selectOneRadio>: gender（性別選択ラジオボタン）
-    * 選択肢: male（男性）、female（女性）
-  * <h:commandButton>: 確認画面へボタン（action="#{personInputBean.confirm}"）
-  * <h:commandButton>: キャンセルボタン（action="#{personInputBean.cancel}"）
+* PERSON_NAME: 必須、最大50文字
+* AGE: 必須、0以上150以下の整数
+* GENDER: 必須、選択肢から選択
 
 ### 4.3 SCREEN_003_PersonConfirm（PERSON確認画面）
 
-#### 4.3.1 Managed Bean: PersonConfirmBean
+#### 4.3.1 画面の役割
 
-* パッケージ: pro.kensait.jsf.person.bean
-* アノテーション:
-  * @Named("personConfirmBean")
-  * @ViewScoped
-  * implements Serializable
+入力または編集されたPERSON情報を確認し、登録・更新を実行する。
 
-* フィールド:
-  * personService: PersonService（@Inject）
-  * personId: Integer
-  * personName: String
-  * age: Integer
-  * gender: String
+#### 4.3.2 画面初期表示
 
-* メソッド:
-  * init(): void（@PostConstruct）
-    * PersonInputBeanから渡されたデータをフィールドに設定
-    * Flash Scopeまたはリクエストパラメータからデータを取得
+1. PERSON入力画面から渡されたデータを取得
+2. 入力内容を確認用に表示
+3. 編集モードか新規追加モードかを判定
 
-  * save(): String
-    * Personオブジェクトを作成
-    * personIdがnullの場合: 新規追加
-      * personService.addPerson(person)を呼び出し
-    * personIdがnull以外の場合: 更新
-      * personService.updatePerson(person)を呼び出し
-    * 戻り値: "personList?faces-redirect=true"
+#### 4.3.3 主要機能
 
-  * back(): void
-    * 入力画面に戻る
-    * JavaScript: history.back()を使用
+* 確認表示項目
+  * PERSON_NAME（人材名）: 読み取り専用表示
+  * AGE（年齢）: 読み取り専用表示
+  * GENDER（性別）: 読み取り専用表示（male→男性、female→女性に変換）
 
-#### 4.3.2 Service: PersonService
+* 登録/更新
+  * 登録ボタンをクリック
+  * 新規追加モードの場合: データベースに新規PERSON登録
+  * 編集モードの場合: 既存PERSONを更新
+  * 登録/更新成功後、PERSON一覧画面へリダイレクト
 
-* メソッド呼び出し:
-  * addPerson(Person person): void
-    * 新しいPERSONを追加
-    * em.persist(person)
+* 戻る
+  * 戻るボタンをクリック
+  * PERSON入力画面へ戻る（入力内容は保持）
+  * ブラウザの履歴を使用して戻る
 
-  * updatePerson(Person person): void
-    * 既存のPERSONを更新
-    * em.merge(person)
+#### 4.3.4 トランザクション管理
 
-#### 4.3.3 ビュー: personConfirm.xhtml
+* 登録/更新処理は単一トランザクションで実行
+* エラー発生時は自動ロールバック
+* 成功時はコミット後に一覧画面へ遷移
 
-* JSFタグライブラリ:
-  * xmlns:h="jakarta.faces.html"
-  * xmlns:f="jakarta.faces.core"
+## 5. 処理フロー
 
-* 主要コンポーネント:
-  * <h:form>: フォーム
-  * <h:inputHidden>: personId（編集モードの場合に値を保持）
-  * <h:inputHidden>: personName（確認後の登録のためにhiddenフィールドで保持）
-  * <h:inputHidden>: age
-  * <h:inputHidden>: gender
-  * <h:outputText>: personName（名前表示）
-  * <h:outputText>: age（年齢表示）
-  * <h:outputText>: gender（性別表示、male→男性、female→女性に変換）
-  * <h:commandButton>: 登録ボタン（action="#{personConfirmBean.save}"）
-  * <h:button>: 戻るボタン（onclick="history.back(); return false;"）
-
-## 5. データフロー
+注意: 以下は論理レベルの処理フローです。実装クラス名やメソッド名は詳細設計書（detailed_design.md）を参照してください。
 
 ### 5.1 PERSON一覧表示フロー
 
 ```
-PersonListBean.init()
+一覧画面表示
   ↓
-PersonService.getAllPersons()
+データベースから全PERSON取得
   ↓
-EntityManager.createQuery("SELECT p FROM Person p ORDER BY p.personId")
+PERSON_ID昇順でソート
   ↓
-List<Person> personList
-  ↓
-PersonListBean.personList に設定
-  ↓
-personList.xhtml でリストを表示
+画面に一覧表示
 ```
 
 ### 5.2 PERSON追加フロー
 
 ```
-personInput.xhtml（入力画面）
+一覧画面で新規追加ボタンをクリック
   ↓
-PersonInputBean.confirm()
+入力画面表示（新規追加モード）
   ↓
-personConfirm.xhtml（確認画面）に遷移
+PERSON情報を入力
   ↓
-PersonConfirmBean.save()
+確認画面へボタンをクリック
   ↓
-PersonService.addPerson(person)
+確認画面で入力内容を表示
   ↓
-EntityManager.persist(person)
+登録ボタンをクリック
   ↓
-personList.xhtml（一覧画面）にリダイレクト
+データベースに新規PERSON登録
+  ↓
+一覧画面へリダイレクト
 ```
 
 ### 5.3 PERSON編集フロー
 
 ```
-personList.xhtml（一覧画面）
-  ↓ personId指定
-personInput.xhtml（入力画面）
+一覧画面で編集ボタンをクリック
   ↓
-PersonInputBean.init()
+PERSON_IDをパラメータとして渡す
   ↓
-PersonService.getPersonById(personId)
+入力画面表示（編集モード）
   ↓
-EntityManager.find(Person.class, personId)
+既存PERSON情報をデータベースから取得
   ↓
-フィールドに既存データを設定
+入力フィールドに既存データを設定
   ↓
-PersonInputBean.confirm()
+PERSON情報を編集
   ↓
-personConfirm.xhtml（確認画面）に遷移
+確認画面へボタンをクリック
   ↓
-PersonConfirmBean.save()
+確認画面で編集内容を表示
   ↓
-PersonService.updatePerson(person)
+登録ボタンをクリック
   ↓
-EntityManager.merge(person)
+データベースの既存PERSONを更新
   ↓
-personList.xhtml（一覧画面）にリダイレクト
+一覧画面へリダイレクト
 ```
 
 ### 5.4 PERSON削除フロー
 
 ```
-personList.xhtml（一覧画面）
-  ↓ personId指定
-PersonListBean.deletePerson(personId)
+一覧画面で削除ボタンをクリック
   ↓
-PersonService.deletePerson(personId)
+PERSON_IDをパラメータとして渡す
   ↓
-EntityManager.find(Person.class, personId)
+データベースから指定PERSONを削除
   ↓
-EntityManager.remove(person)
+一覧を再取得
   ↓
-PersonListBean.init()（リストを再取得）
-  ↓
-personList.xhtml（一覧画面）をリロード
+一覧画面をリロード
 ```
 
 ## 6. 画面間データ受け渡し
@@ -361,123 +279,149 @@ personList.xhtml（一覧画面）をリロード
 ### 6.1 データ受け渡し方式
 
 * 一覧画面 → 入力画面（編集モード）
-  * URLパラメータ: personInput.xhtml?personId=xxx
-  * <f:viewParam>でpersonIdを受け取り
-  * @PostConstructでデータを取得
+  * URLパラメータでPERSON_IDを渡す
+  * 例: personInput.xhtml?personId=123
+  * 入力画面の初期化時にPERSON_IDから既存データを取得
 
 * 入力画面 → 確認画面
-  * Flash Scopeまたは@ViewScopedのBeanプロパティ
-  * PersonInputBeanとPersonConfirmBeanが同じデータを参照
+  * 入力されたPERSON情報をセッションスコープまたは画面スコープで保持
+  * 確認画面で入力データを参照
 
 * 確認画面 → 一覧画面
-  * リダイレクト遷移のため、データ受け渡しなし
+  * リダイレクト遷移（データ受け渡しなし）
   * 一覧画面で再度データベースからデータを取得
 
-### 6.2 スコープの使い分け
+### 6.2 データ保持スコープ
 
-* @ViewScoped
+* 画面スコープ
   * 画面単位のライフサイクル
-  * PersonListBean、PersonInputBean、PersonConfirmBeanに使用
-  * Ajax通信、画面リロードを考慮
+  * 一覧画面、入力画面、確認画面で使用
+  * 画面間遷移で状態を維持
 
-* @RequestScoped
+* リクエストスコープ
   * リクエスト単位のライフサイクル
-  * PersonServiceに使用
+  * ビジネスロジック層で使用
   * ステートレス、トランザクション境界
 
-* Flash Scope
+* フラッシュスコープ
   * リダイレクト前後でデータを引き継ぐ
   * 入力画面 → 確認画面のデータ受け渡しに使用可能
 
-## 7. バリデーション設計
+## 7. バリデーション
 
 ### 7.1 入力検証ルール
 
-* personName（名前）
-  * 必須: @NotNull
-  * 最大長: @Size(max = 30)
+* PERSON_NAME（名前）
+  * 必須入力
+  * 最大長: 30文字
 
-* age（年齢）
-  * 必須: @NotNull
-  * 最小値: @Min(0)
-  * 最大値: @Max(150)
+* AGE（年齢）
+  * 必須入力
+  * 最小値: 0
+  * 最大値: 150
 
-* gender（性別）
-  * 必須: @NotNull
-  * 値: "male" または "female"
+* GENDER（性別）
+  * 必須入力
+  * 許可値: "male"（男性）または "female"（女性）
 
-### 7.2 バリデーション方式
+### 7.2 バリデーション実行タイミング
 
-* Bean Validationアノテーション
-  * PersonInputBeanのフィールドにアノテーションを付加
-  * JSFが自動的にバリデーションを実行
+* クライアントサイド
+  * 入力画面でリアルタイムバリデーション（オプション）
+  * JavaScriptによる基本チェック
 
-* カスタムバリデーター
-  * 必要に応じてカスタムバリデーターを作成
-  * @FacesValidatorアノテーションで定義
+* サーバーサイド
+  * 確認画面へ遷移時に実行
+  * すべての入力値を検証
+  * バリデーションエラー時は入力画面に戻る
 
 ### 7.3 エラーメッセージ表示
 
-* <h:messages>コンポーネント
-  * personInput.xhtmlに配置
-  * バリデーションエラーメッセージを表示
+* 入力画面上部にエラーメッセージ領域を配置
+* バリデーションエラー時、該当フィールドとメッセージを表示
+* エラーフィールドは赤色でハイライト
 
-* FacesContext.addMessage()
-  * プログラムからメッセージを追加
+## 8. アーキテクチャ概要
 
-## 8. コンポーネント間の依存関係
+注意: 実装クラスの詳細は詳細設計書（detailed_design.md）を参照してください。
 
-### 8.1 依存関係図
+### 8.1 レイヤー構成
 
 ```mermaid
 graph LR
-    subgraph "Presentation Layer"
-        PL[PersonListBean]
-        PI[PersonInputBean]
-        PC[PersonConfirmBean]
+    subgraph "プレゼンテーション層"
+        List[一覧画面]
+        Input[入力画面]
+        Confirm[確認画面]
     end
     
-    subgraph "Business Logic Layer"
-        PS[PersonService]
+    subgraph "ビジネスロジック層"
+        Service[PERSON管理サービス]
     end
     
-    subgraph "Data Access Layer"
-        PE[Person Entity]
-        EM[EntityManager]
+    subgraph "データアクセス層"
+        Entity[PERSONエンティティ]
+        DB[データベース]
     end
     
-    PL -->|@Inject| PS
-    PI -->|@Inject| PS
-    PC -->|@Inject| PS
-    PS -->|@PersistenceContext| EM
-    EM -->|JPQL| PE
+    List -->|依存| Service
+    Input -->|依存| Service
+    Confirm -->|依存| Service
+    Service -->|依存| Entity
+    Entity -->|マッピング| DB
 ```
 
-### 8.2 依存性注入
+### 8.2 レイヤー間の責務
 
-* PersonListBean → PersonService（@Inject）
-* PersonInputBean → PersonService（@Inject）
-* PersonConfirmBean → PersonService（@Inject）
-* PersonService → EntityManager（@PersistenceContext）
+* プレゼンテーション層
+  * 画面表示とユーザー操作の制御
+  * 入力データのバリデーション
+  * ビジネスロジック層への処理委譲
 
-## 9. 非機能設計
+* ビジネスロジック層
+  * PERSON管理のビジネスロジック
+  * トランザクション管理
+  * データアクセス層への処理委譲
+
+* データアクセス層
+  * データベースへのCRUD操作
+  * PERSONエンティティの永続化管理
+
+## 9. 非機能要件
 
 ### 9.1 トランザクション管理
 
-* PersonServiceのメソッドレベルで@Transactionalを適用
-* データベース操作は必ずトランザクション内で実行される
+* ビジネスロジック層でトランザクション境界を定義
+* データベース操作は必ずトランザクション内で実行
 * 例外発生時は自動的にロールバック
+* 成功時はコミット
 
 ### 9.2 エラーハンドリング
 
-* try-catchブロックでRuntimeExceptionをキャッチ
-* FacesContext.addMessage()でエラーメッセージを追加
-* <h:messages>でユーザーにエラーを通知
+* システムエラー
+  * データベース接続エラー
+  * 予期しない例外
+  * エラーメッセージを画面に表示
+  * ログにエラー詳細を記録
+
+* 業務エラー
+  * バリデーションエラー
+  * データ不整合エラー
+  * エラーメッセージを画面に表示
+  * 入力画面またはエラー画面に遷移
 
 ### 9.3 ロギング
 
-* PersonServiceの主要メソッドでログを出力
-* ログレベル: INFO（登録・更新・削除）、SEVERE（エラー）
+* ログ出力レベル
+  * INFO: 登録・更新・削除の成功
+  * WARN: バリデーションエラー、業務エラー
+  * ERROR: システムエラー、予期しない例外
+
+* ログ出力内容
+  * 操作種別（追加/更新/削除）
+  * 対象PERSON_ID
+  * 操作日時
+  * エラー詳細（エラー時）
 
 ## 10. 参考資料
 

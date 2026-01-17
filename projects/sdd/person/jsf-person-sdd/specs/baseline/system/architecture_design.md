@@ -325,38 +325,27 @@ public class PersonService {
 
 ## 6. データベース接続設定
 
-### 6.1 JPA設定（persistence.xml）
+### 6.1 データソース設定（インフラ構成）
 
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<persistence version="3.1"
-             xmlns="https://jakarta.ee/xml/ns/persistence"
-             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
-                                 https://jakarta.ee/xml/ns/persistence/persistence_3_1.xsd">
-    <persistence-unit name="personPU" transaction-type="JTA">
-        <jta-data-source>java:app/jdbc/testdb</jta-data-source>
-        <class>pro.kensait.jsf.person.entity.Person</class>
-        <properties>
-            <property name="jakarta.persistence.schema-generation.database.action" value="none"/>
-        </properties>
-    </persistence-unit>
-</persistence>
-```
-
-### 6.2 データソース設定
-
-* データソース名: java:app/jdbc/testdb
-* 接続先: HSQLDB（jdbc:hsqldb:hsql://localhost:9001/testdb）
-* ユーザー: SA
+* JNDI名: `java:app/jdbc/testdb`
+* データベース種別: HSQLDB 2.7.x
+* JDBCドライバー: org.hsqldb.jdbc.JDBCDriver
+* 接続URL: jdbc:hsqldb:hsql://localhost:9001/testdb
+* ユーザー名: SA
 * パスワード: （空文字）
 * 接続プール管理: Payara Server
+* JTAマネージド: true
 
-### 6.3 トランザクション種別
+注意: 接続プール設定（最小/最大接続数、タイムアウト等）の詳細は、インフラ構築時またはデプロイメント設定で決定します。
 
-* JTA（Jakarta Transactions）を使用
-* transaction-type="JTA"をpersistence.xmlに指定
-* アプリケーションサーバーによるトランザクション管理
+### 6.2 persistence.xml設定情報
+
+* Persistence Unit名: personPU
+* `<jta-data-source>`: java:app/jdbc/testdb（上記データソース設定のJNDI名）
+* トランザクションタイプ: JTA（Jakarta Transactions）
+* スキーマ自動生成: none（既存スキーマを使用）
+
+注意: persistence.xmlの具体的なXMLコード、エンティティクラスの登録、詳細プロパティ設定は詳細設計フェーズで記述します。
 
 ## 7. ビュー技術（Facelets）
 

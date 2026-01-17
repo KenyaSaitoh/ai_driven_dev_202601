@@ -40,16 +40,25 @@ api_id: "API_005_alerts"
 重要な方針
 * AIが仕様を理解し、人と対話しながら妥当性・充足性を確認する
 * 不足情報を補いながら詳細設計を作成する
-* 仕様書は抽象的、detailed_design.mdは具体的
+* 基本設計（functional_design.md等）は論理レベル、detailed_design.mdは実装レベル
 * 推測せず、不明点は必ずユーザーに質問する
 * アーキテクチャパターンは仕様書から判断する（パラメータ指定不要）
 
-出力先
-* `{spec_directory}/api/{api_id}/detailed_design.md`
+基本設計と詳細設計の分界点:
+* 基本設計: 機能要件、ビジネスルール、テーブル定義（RDB論理設計）、API仕様（エンドポイント、リクエスト/レスポンス構造）
+* 詳細設計: 実装クラス設計（Resource, Service, Dao, JPAエンティティ、DTO）、メソッドシグネチャ、アノテーション（@Entity, @Path, @Transactional等）、JPQL、依存性注入
+
+出力先の分離
+* `{spec_directory}/system/detailed_design.md` - ドメインモデル、エンティティ、Dao、共通Service、ユーティリティクラスの詳細設計
+* `{spec_directory}/api/{api_id}/detailed_design.md` - API固有の詳細設計（Resource、DTO、API特有のビジネスロジック）
 
 注意
-* ベースライン（初回リリース版）の場合: `{project_root}/specs/baseline/api/{api_id}/detailed_design.md`
-* 拡張機能の場合: `{project_root}/specs/enhancements/[拡張名]/api/{api_id}/detailed_design.md`
+* ベースライン（初回リリース版）の場合: 
+  * `{project_root}/specs/baseline/system/detailed_design.md`（ドメインモデル・共通処理）
+  * `{project_root}/specs/baseline/api/{api_id}/detailed_design.md`（API固有）
+* 拡張機能の場合: 
+  * `{project_root}/specs/enhancements/[拡張名]/system/detailed_design.md`（ドメインモデル・共通処理）
+  * `{project_root}/specs/enhancements/[拡張名]/api/{api_id}/detailed_design.md`（API固有）
 * `{spec_directory}` パラメータで柔軟に指定可能
 
 ---
@@ -79,28 +88,37 @@ api_id: "API_005_alerts"
 
 * {spec_directory}/system/architecture_design.md - 技術スタック、パッケージ構造、セキュリティ方式を確認する
 
-* {spec_directory}/system/functional_design.md - システム全体の機能設計概要を確認する
+* {spec_directory}/system/functional_design.md - システム全体の機能設計、共通サービス、ドメインモデルの機能設計を確認する
+  * システム全体の機能概要
+  * 共通サービスの機能設計（認証、ログ、エラーハンドリング等）
+  * ドメインモデルの機能設計（ビジネスルール、バリデーション、状態遷移等）
 
 * {spec_directory}/system/data_model.md - テーブル定義とERDを確認し、JPAエンティティクラスを設計する
+  * 注意: data_model.mdはRDB論理設計（テーブル、カラム、制約）のみ記述
+  * JPAエンティティクラスの設計（@Entity, @Column, @ManyToOne等のアノテーション、Java型、リレーションマッピング）はsystem/detailed_design.mdで実施
+
+* {spec_directory}/system/behaviors.md - システム全体の振る舞い、共通処理の振る舞いを確認する（該当する場合）
 
 注意: 
 * 拡張機能の場合、システムレベルの仕様が存在しない場合がある。その場合はベースラインの仕様を参照する
-* data_model.mdはRDB論理設計（ERD、テーブル、制約）のみを記述。JPAエンティティクラスは詳細設計フェーズでERDから設計する
+* data_model.mdはRDB論理設計（ERD、テーブル、制約）のみを記述。JPAエンティティクラスはsystem/detailed_design.mdでERDから設計する
 
 ### 1.4 対象APIの仕様
 
 以下のファイルを読み込み、対象APIの詳細を理解する
 
 * {spec_directory}/api/{api_id}/functional_design.md - API機能設計書
-  * APIのベースパス
-  * エンドポイント一覧
-  * リクエスト/レスポンス形式
-  * ビジネスルール
+  * API固有のベースパス
+  * API固有のエンドポイント一覧
+  * API固有のリクエスト/レスポンス形式
+  * API固有のビジネスルール
 
-* {spec_directory}/api/{api_id}/behaviors.md - API振る舞い仕様書
-  * エラーケース
-  * 外部API連携の有無
-  * 受入基準
+* {spec_directory}/api/{api_id}/behaviors.md - API振る舞い仕様書（該当する場合）
+  * API固有のエラーケース
+  * API固有の外部API連携
+  * API固有の受入基準
+
+注意: システム全体の機能設計、共通処理の振る舞いはsystem/functional_design.md、system/behaviors.mdを参照する
 
 ---
 
@@ -183,9 +201,27 @@ api_id: "API_005_alerts"
 
 ## 3. detailed_design.mdの生成
 
-### 3.1 出力先
+### 3.1 出力先の分離
 
-以下の場所に`detailed_design.md`を作成する
+詳細設計書は以下の2つに分けて作成する
+
+#### 3.1.1 システム全体の詳細設計
+
+```
+{spec_directory}/system/detailed_design.md
+```
+
+* ベースラインの例: `{project_root}/specs/baseline/system/detailed_design.md`
+* 拡張機能の例: `{project_root}/specs/enhancements/202512_inventory_alert/system/detailed_design.md`
+
+* 記載内容:
+  * ドメインモデル（JPAエンティティ）の詳細設計
+  * Daoクラスの詳細設計
+  * 共通的なServiceクラスの詳細設計
+  * ユーティリティクラス、共通例外クラスの詳細設計
+  * セキュリティコンポーネント（JWT、認証フィルター等）の詳細設計
+
+#### 3.1.2 API固有の詳細設計
 
 ```
 {spec_directory}/api/{api_id}/detailed_design.md
@@ -194,10 +230,153 @@ api_id: "API_005_alerts"
 * ベースラインの例: `{project_root}/specs/baseline/api/API_002_books/detailed_design.md`
 * 拡張機能の例: `{project_root}/specs/enhancements/202512_inventory_alert/api/API_005_alerts/detailed_design.md`
 
-### 3.2 詳細設計書のテンプレート
+* 記載内容:
+  * Resourceクラス（JAX-RS）の詳細設計
+  * API固有のDTOクラス（Request、Response）の詳細設計
+  * API固有のビジネスロジック（Serviceメソッド）の詳細設計
+  * 外部API連携クライアント（該当する場合）の詳細設計
+
+### 3.2 システム全体の詳細設計書テンプレート
 
 ```markdown
-# {api_id} <API名> - 詳細設計書
+# システム詳細設計書
+
+* プロジェクトID: {project_id}  
+* バージョン: 1.0.0  
+* 最終更新: <日付>
+
+---
+
+## 1. ドメインモデル（JPAエンティティ）
+
+### 1.1 <Entity名>
+
+* テーブル: \`<テーブル名>\`
+
+* 主要フィールド:
+
+|| フィールド名 | 型 | カラム名 | 制約 | 説明 |
+||------------|---|---------|-----|------|
+|| \`<フィールド>\` | \`<型>\` | \`<カラム>\` | \`<制約>\` | <説明> |
+
+* アノテーション:
+\`\`\`java
+@Entity
+@Table(name = "<テーブル名>")
+\`\`\`
+
+* リレーション:
+  * \`@ManyToOne\` - <関連エンティティ>
+
+---
+
+## 2. データアクセス層（Dao）
+
+### 2.1 <Dao名>
+
+* 責務: <責務の説明>
+
+* アノテーション:
+  * \`@ApplicationScoped\`（依存性注入）
+
+* 主要メソッド:
+
+#### <メソッド名>()
+
+* シグネチャ:
+\`\`\`java
+public <戻り値型> <メソッド名>(<引数>)
+\`\`\`
+
+* JPQL:
+\`\`\`sql
+<JPQLクエリ>
+\`\`\`
+
+---
+
+## 3. ビジネスロジック層（共通Service）
+
+### 3.1 <Service名>
+
+* 責務: <責務の説明>
+
+* アノテーション:
+  * \`@ApplicationScoped\`（依存性注入）
+  * \`@Transactional\`（該当する場合）
+
+* 主要メソッド:
+
+#### <メソッド名>()
+
+* シグネチャ:
+\`\`\`java
+public <戻り値型> <メソッド名>(<引数>)
+\`\`\`
+
+* 処理:
+  1. <ステップ1>
+  2. <ステップ2>
+
+---
+
+## 4. セキュリティコンポーネント
+
+### 4.1 JwtUtil
+
+* 責務: JWT生成・検証
+
+* 主要メソッド:
+
+#### generateToken()
+
+* シグネチャ:
+\`\`\`java
+public String generateToken(Long userId, String email)
+\`\`\`
+
+---
+
+## 5. ユーティリティクラス
+
+### 5.1 <Utility名>
+
+* 責務: <責務の説明>
+
+* 主要メソッド:
+
+---
+
+## 6. 共通例外クラス
+
+### 6.1 <Exception名>
+
+* 責務: <責務の説明>
+
+---
+
+## 7. 設定情報
+
+### 7.1 MicroProfile Config
+
+* ファイル: \`src/main/resources/META-INF/microprofile-config.properties\`
+
+\`\`\`properties
+<設定項目>
+\`\`\`
+
+---
+
+## 8. 参考資料
+
+* [data_model.md](data_model.md) - データモデル仕様書
+* [architecture_design.md](architecture_design.md) - アーキテクチャ設計書
+```
+
+### 3.3 API固有の詳細設計書テンプレート
+
+```markdown
+# {api_id} <API名> - API詳細設計書
 
 * API ID: {api_id}  
 * API名: <API名>  
@@ -206,9 +385,17 @@ api_id: "API_005_alerts"
 
 ---
 
-## 1. パッケージ構造
+## 1. API概要
 
-### 1.1 関連パッケージ
+* ベースパス: \`<パス>\`
+* 認証: <要/不要>
+* 実装パターン: <完全なCRUD実装 / プロキシ転送 / 独自実装 + 外部連携 / 静的リソース配信>
+
+---
+
+## 2. パッケージ構造
+
+### 2.1 API固有パッケージ
 
 \`\`\`
 <ベースパッケージ>
@@ -218,27 +405,29 @@ api_id: "API_005_alerts"
 │   │   ├── <Request名>.java
 │   │   └── <Response名>.java
 │   └── exception
-│       └── <ExceptionMapper名>.java
-├── service
+│       └── <ExceptionMapper名>.java（該当する場合）
+├── service（API固有のビジネスロジックがある場合）
 │   └── <パッケージ>
 │       └── <Service名>.java
-├── dao
-│   └── <Dao名>.java
-└── entity
-    └── <Entity名>.java
+└── external（外部API連携がある場合）
+    ├── <RestClient名>.java
+    └── dto
+        └── <外部API用DTO名>.java
 \`\`\`
+
+注意: エンティティ、Dao、共通Serviceは[system/detailed_design.md](../../system/detailed_design.md)を参照
 
 ---
 
-## 2. クラス設計
+## 3. Resourceクラス設計
 
-### 2.1 <Resource名>（JAX-RS Resource）
+### 3.1 <Resource名>（JAX-RS Resource）
 
 * 責務: <責務の説明>
 
 * アノテーション:
   * \`@Path("<パス>")\` - ベースパス
-  * \`@ApplicationScoped\` - CDIスコープ
+  * \`@ApplicationScoped\` - CDIスコープ（依存性注入）
 
 * 主要メソッド:
 
@@ -266,7 +455,9 @@ api_id: "API_005_alerts"
 
 ---
 
-### 2.2 <Request/Response名>（DTO - Record）
+## 4. DTO設計
+
+### 4.1 <Request名>（リクエストDTO - Record）
 
 \`\`\`java
 public record <名前>(
@@ -284,7 +475,7 @@ public record <名前>(
 * 責務: <責務の説明>
 
 * アノテーション:
-  * \`@ApplicationScoped\`
+  * \`@ApplicationScoped\`（依存性注入）
 
 * 主要メソッド:
 
@@ -306,7 +497,7 @@ public <戻り値型> <メソッド名>(<引数>)
 * 責務: <責務の説明>
 
 * アノテーション:
-  * \`@ApplicationScoped\`
+  * \`@ApplicationScoped\`（依存性注入）
 
 * 主要メソッド:
 
@@ -393,11 +584,64 @@ public <戻り値型> <メソッド名>(<引数>)
 
 ---
 
-## 4. 仕様書からの実装範囲判定
+## 4. systemとapiの使い分け（まとめ）
+
+### 4.1 system配下の詳細設計
+
+システム全体、共通処理、ドメインモデルに関する詳細設計を記述します。
+
+* 出力先: `{spec_directory}/system/detailed_design.md`
+
+* 記載内容:
+  * ドメインモデル（JPAエンティティ）の詳細設計
+  * Daoクラスの詳細設計
+  * 共通Serviceクラスの詳細設計（複数のAPIで共有されるビジネスロジックのみ）
+  * セキュリティコンポーネント（JwtUtil、JwtAuthenFilter等）の詳細設計
+  * ユーティリティクラスの詳細設計
+  * 共通例外クラス、Exception Mapperの詳細設計
+  * 設定情報（MicroProfile Config、persistence.xml等）
+
+注意: API固有のビジネスロジック（Serviceメソッド）は、並行作業を考慮して、api/{api_id}/detailed_design.mdに記述してください。
+
+### 4.2 api配下の詳細設計
+
+API固有の設計情報を記述します。
+
+* 出力先: `{spec_directory}/api/{api_id}/detailed_design.md`
+
+* 記載内容:
+  * Resourceクラス（JAX-RS）の詳細設計
+  * API固有のDTOクラス（Request、Response）の詳細設計
+  * API固有のビジネスロジック（Serviceメソッド）の詳細設計（このAPIのみで使用されるビジネスロジック）
+  * 外部API連携クライアント（該当する場合）の詳細設計
+  * API固有のエラーハンドリング
+  * API固有のテスト要件
+
+注意: 複数のAPIで共有されるビジネスロジックは、system/detailed_design.mdに記述してください。並行作業を考慮して、API固有のServiceメソッドはこのファイルに記述します。
+
+### 4.3 使い分けの判断基準
+
+| 設計対象 | 配置場所 | 理由 |
+|---------|---------|------|
+| JPAエンティティ | system/detailed_design.md | ドメインモデルはシステムの核心 |
+| Dao | system/detailed_design.md | データアクセスは複数のAPIで共有される |
+| 共通Service | system/detailed_design.md | 複数のAPIで共有されるビジネスロジック |
+| セキュリティコンポーネント | system/detailed_design.md | システム全体で共有される |
+| ユーティリティクラス | system/detailed_design.md | システム全体で共有される |
+| Resource（JAX-RS） | api/{api_id}/detailed_design.md | 特定のAPIにのみ関連する |
+| API固有のDTO | api/{api_id}/detailed_design.md | 特定のAPIにのみ関連する |
+| API固有のService | api/{api_id}/detailed_design.md | 特定のAPIにのみ関連するビジネスロジック（並行作業を考慮） |
+| 外部API連携クライアント | api/{api_id}/detailed_design.md または system/detailed_design.md | 特定のAPIで使用される場合はapi/、複数のAPIで共有される場合はsystem/ |
+
+重要: 並行作業を考慮して、API固有のビジネスロジック（Serviceメソッド）は、そのAPIを担当する開発者が独立して作業できるように、api/{api_id}/detailed_design.mdに記述します。
+
+---
+
+## 5. 仕様書からの実装範囲判定
 
 AIは以下の情報から、実装すべきクラスを判断する
 
-### 4.1 data_model.mdの確認
+### 5.1 data_model.mdの確認
 
 * テーブル定義（ERD）がある場合
   * ✅ JPAエンティティクラスの設計が必要（ERDからマッピング）
@@ -409,7 +653,7 @@ AIは以下の情報から、実装すべきクラスを判断する
 * エンティティ定義がない場合
   * ❌ Entity, Dao, Service不要
 
-### 4.2 external_interface.mdの確認
+### 5.2 external_interface.mdの確認
 
 * 外部API定義がある場合
   * ✅ RestClient実装が必要
@@ -419,7 +663,7 @@ AIは以下の情報から、実装すべきクラスを判断する
 * 外部API定義がない場合
   * ❌ RestClient不要
 
-### 4.3 実装パターンの判定
+### 5.3 実装パターンの判定
 
 | data_model.md | external_interface.md | 実装パターン | 例 |
 |--------------|---------------------|----------|---|
@@ -450,7 +694,7 @@ AIは以下の情報から、実装すべきクラスを判断する
 
 ---
 
-## 5. 実装チェックリスト
+## 6. 実装チェックリスト
 
 詳細設計書を作成する前に、以下を確認する
 
@@ -492,7 +736,7 @@ AIは以下の情報から、実装すべきクラスを判断する
 
 ---
 
-## 6. 注意事項
+## 7. 注意事項
 
 ### 仕様書の優先順位
 
@@ -518,7 +762,10 @@ AIは以下の情報から、実装すべきクラスを判断する
 * {spec_directory}/system/external_interface.md: 外部API定義の有無 → RestClient実装の必要性
 * {spec_directory}/api/{api_id}/functional_design.md: エンドポイント定義 → Resource実装の必要性
 
-注意: data_model.mdのERD（テーブル定義）からJPAエンティティクラスを設計します。基本設計書にはJPAエンティティの詳細は含まれていません。
+重要な分界点:
+* 基本設計（data_model.md）: RDB論理設計のみ（テーブル、カラム、型、制約、リレーション）
+* 詳細設計（detailed_design.md）: JPAエンティティクラス設計（@Entity, @Table, @Column, @ManyToOne等のアノテーション、Java型、フィールド名、リレーションマッピング）
+* JPAエンティティクラスの設計は、data_model.mdのERD（テーブル定義）から詳細設計フェーズでマッピングして作成します
 
 「マイクロサービス」「BFF」といったラベルに依存せず、仕様書の内容から判断する
 

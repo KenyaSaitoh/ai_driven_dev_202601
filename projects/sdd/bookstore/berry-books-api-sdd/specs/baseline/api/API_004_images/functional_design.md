@@ -71,12 +71,12 @@ GET /api/images/covers/{bookId}
 
 * リソースアクセス方法:
 
-ImageResourceは、デプロイ後のWARファイル内のリソースにアクセスするため、ServletContext.getResourceAsStream()を使用します。
+画像リソースは、デプロイ後のWARファイル内のリソースにアクセスするため、サーブレットコンテキストを使用します。
 
 * 実装仕様:
   * RESTパス: `/images`
-  * 画像ベースパス定数: `/resources/images/covers/`
-  * ServletContextをインジェクション
+  * 画像ベースパス: `/resources/images/covers/`
+  * WARファイル内リソースアクセス機能を使用
 
 * エンドポイント処理:
   * HTTPメソッド: GET
@@ -85,10 +85,10 @@ ImageResourceは、デプロイ後のWARファイル内のリソースにアク�
 
 * 処理フロー:
   1. bookIdからイメージパスを構築（ベースパス + bookId + ".jpg"）
-  2. ServletContext.getResourceAsStream()でInputStreamを取得
-  3. InputStreamがnullの場合（画像が存在しない場合）:
-   * フォールバック画像（no-image.jpg）のInputStreamを取得
-4. InputStreamから全バイトを読み取り
+  2. WARファイル内リソースから画像を取得
+  3. 画像が存在しない場合:
+   * フォールバック画像（no-image.jpg）を取得
+4. 画像データを読み取り
 5. HTTPレスポンス（200 OK）として画像バイナリを返却
 
 * 重要な設計上の決定:
@@ -147,12 +147,12 @@ ImageResourceは、デプロイ後のWARファイル内のリソースにアク�
 * 解決策: ServletContextを使用
 
 * 非推奨アプローチ:
-  * ファイルシステムの相対パスを使用したFileオブジェクトの生成
+  * ファイルシステムの相対パスを使用
   * パス例: `src/main/webapp/resources/images/covers/1.jpg`
   * 問題点: 開発環境でのみ動作、デプロイ後は動作しない
 
 * 推奨アプローチ:
-  * ServletContext.getResourceAsStream()を使用
+  * WARファイル内リソースアクセス機能を使用
   * パス例: `/resources/images/covers/1.jpg`（WARルート相対）
   * 利点: デプロイ後も正常に動作
 

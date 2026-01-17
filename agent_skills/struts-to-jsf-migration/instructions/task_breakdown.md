@@ -134,10 +134,10 @@ output_directory: "projects/sdd/person/jsf-person-sdd/tasks"
 * 注意: 共通コンポーネントの具体的な内容は、architecture_design.md、functional_design.md、data_model.mdから判断してください。
 
 * persistence.xmlのJNDI名設定
-  * architecture_design.mdまたはdata_model.mdに記載されているJNDI名を使用すること
+  * architecture_design.mdに記載されているJNDI名を使用すること
   * 移行元で実際に使用されているJNDI名を正確に設定すること
   * 決め打ちや推測でJNDI名を設定してはならない
-  * 参照SPEC: architecture_design.mdの「データソース設定」セクション、またはdata_model.mdの「persistence.xml設定情報」セクション
+  * 参照SPEC: architecture_design.mdの「データソース設定」セクションまたは「persistence.xml設定情報」セクション
 
 ### 2.4 画面別タスク
 

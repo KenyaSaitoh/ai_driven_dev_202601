@@ -1,4 +1,22 @@
-# アーキテクチャ設計書
+# back-office-api - アーキテクチャ設計書
+
+プロジェクトID: back-office-api  
+バージョン: 2.0.0  
+最終更新日: 2026-01-17  
+ステータス: REST API アーキテクチャ確定
+
+---
+
+## 概要
+
+このドキュメントは、back-office-apiプロジェクト固有のアーキテクチャ設計を記述する。
+
+* 共通的な技術スタック、開発ガイドライン、技術的対応方針については、以下を参照すること：
+  * [jee_api_architecture.md](../../../../../agent_skills/jakarta-ee-api-base/principles/jee_api_architecture.md) - Jakarta EE APIアーキテクチャ標準
+  * [common_rules.md](../../../../../agent_skills/jakarta-ee-api-base/principles/common_rules.md) - 共通ルール
+  * [security_standard.md](../../../../../agent_skills/jakarta-ee-api-base/principles/security_standard.md) - セキュリティ標準
+
+---
 
 ## 1. システム概要
 
@@ -12,6 +30,8 @@ Books Stock API - バックオフィス書籍在庫管理システム
 * API設計: RESTful API
 * データアクセス: JPA（Jakarta Persistence API）
 * 認証方式: JWT（JSON Web Token）+ Cookie認証
+
+---
 
 ## 2. 全体アーキテクチャ
 
@@ -68,6 +88,8 @@ flowchart TD
     Persistence -->|JDBC| DB
 ```
 
+---
+
 ## 3. パッケージ構造
 
 ### 3.1 ベースパッケージ
@@ -103,20 +125,7 @@ pro.kensait.backoffice
 | 在庫API | [API_005_stocks/detailed_design.md](../api/API_005_stocks/detailed_design.md) |
 | ワークフローAPI | [API_006_workflows/detailed_design.md](../api/API_006_workflows/detailed_design.md) |
 
-### 3.3 パッケージング規約
-
-| レイヤー | パッケージ | 責務 | 命名規則 |
-|---------|-----------|------|---------|
-| Presentation | `api` | REST APIエンドポイント | `*Resource` |
-| | `api.dto` | データ転送オブジェクト | `*Request`, `*Response`, `*TO` |
-| | `api.exception` | API例外ハンドリング | `*ExceptionMapper` |
-| Business Logic | `service.*` | ビジネスロジック | `*Service` |
-| Data Access | `dao` | データアクセス | `*Dao` |
-| Persistence | `entity` | JPAエンティティ | エンティティ名 |
-| Cross-Cutting | `security` | セキュリティ | 用途に応じた命名 |
-| | `exception` | 汎用例外ハンドリング | `*ExceptionMapper` |
-| | `common` | 共通機能 | 用途に応じた命名 |
-| | `util` | ユーティリティ | `*Util` |
+---
 
 ## 4. レイヤー設計
 
@@ -196,6 +205,8 @@ pro.kensait.backoffice
 
 * セキュリティ:
   * `JwtUtil`: JWT生成・検証
+  * `AuthenContext`: 認証情報管理（`@RequestScoped` CDI Bean）
+  * `JwtAuthenFilter`: JWT認証フィルター（JAX-RS ContainerRequestFilter）
   * パスワード認証: BCryptハッシュ
 
 * 例外処理:
@@ -209,42 +220,11 @@ pro.kensait.backoffice
   * `messages.properties`: 日本語メッセージ
   * `ValidationMessages_ja.properties`: バリデーションメッセージ
 
-## 5. 技術スタック
+---
 
-### 5.1 フレームワーク・ライブラリ
+## 5. データフロー
 
-| 技術 | バージョン | 用途 |
-|------|-----------|------|
-| Jakarta EE | 10 | エンタープライズJavaプラットフォーム |
-| JAX-RS | 3.1 | RESTful Webサービス |
-| JPA (Jakarta Persistence) | 3.1 | ORM（Object-Relational Mapping） |
-| CDI (Context and Dependency Injection) | 4.0 | 依存性注入 |
-| Bean Validation | 3.0 | バリデーション |
-| MicroProfile Config | 3.0 | 設定管理 |
-| SLF4J | 2.x | ロギングファサード |
-| BCrypt | 0.10.x | パスワードハッシュ化 |
-| JJWT | 0.12.x | JWT生成・検証 |
-
-### 5.2 実行環境
-
-| コンポーネント | 製品/技術 |
-|---------------|----------|
-| Application Server | Payara Server 6.x |
-| Database | HSQLDB 2.x |
-| JDK | Java 17+ |
-
-### 5.3 設定ファイル
-
-| ファイル | 用途 |
-|---------|------|
-| `persistence.xml` | JPA設定（データソース、プロパティ） |
-| `microprofile-config.properties` | MicroProfile設定（JWT設定） |
-| `beans.xml` | CDI設定 |
-| `web.xml` | Webアプリケーション設定 |
-
-## 6. データフロー
-
-### 6.1 典型的なリクエストフロー（書籍一覧取得の例）
+### 5.1 典型的なリクエストフロー（書籍一覧取得の例）
 
 ```mermaid
 flowchart TD
@@ -258,7 +238,7 @@ flowchart TD
     H -->|"HTTP Response"| I["9. Client"]
 ```
 
-### 6.2 ワークフロー承認フロー
+### 5.2 ワークフロー承認フロー
 
 ```mermaid
 flowchart TD
@@ -283,9 +263,22 @@ flowchart TD
     D --> E["5. Client"]
 ```
 
-## 7. セキュリティアーキテクチャ
+---
 
-### 7.1 認証フロー
+## 6. セキュリティアーキテクチャ
+
+### 6.1 認証コンテキスト管理
+
+* 認証情報を`@RequestScoped` CDI Beanで管理
+* リクエストスコープのため、リクエスト終了時に自動的にクリーンアップされる
+* 認証フィルター（`JwtAuthenFilter`）で認証情報を設定
+* Resourceクラスでインジェクションして認証情報を取得
+
+* 主要コンポーネント:
+  * `AuthenContext`: 認証済み社員情報を保持（employeeId, employeeCode, departmentId）
+  * `JwtAuthenFilter`: JWT検証と認証情報設定を行うフィルター
+
+### 6.2 認証フロー
 
 ```mermaid
 flowchart TD
@@ -312,13 +305,13 @@ flowchart TD
     G --> H["8. Client<br/>(Cookie保存)"]
 ```
 
-### 7.2 JWT構造
+### 6.2 JWT構造
 
 * ヘッダー: alg=HS256, typ=JWT
 * ペイロード: sub(employeeId), employeeCode, departmentId, iat, exp
 * シグネチャ: HMACSHA256
 
-### 7.3 権限制御
+### 6.5 権限制御
 
 | 職務ランク | 値 | 権限 |
 |-----------|---|------|
@@ -326,30 +319,34 @@ flowchart TD
 | MANAGER | 2 | ASSOCIATE権限 + 同一部署のワークフロー承認 |
 | DIRECTOR | 3 | MANAGER権限 + 全部署のワークフロー承認 |
 
-## 8. トランザクション設計
+---
 
-### 8.1 トランザクション境界
+## 7. トランザクション設計
+
+### 7.1 トランザクション境界
 
 * Serviceレイヤーのメソッドを`@Transactional`でマーク
 * デフォルト: `@Transactional(TxType.REQUIRED)`
 * JTAトランザクションマネージャーによる管理
 
-### 8.2 楽観的ロック
+### 7.2 楽観的ロック
 
 * `Stock`エンティティに`@Version`フィールド
 * 更新時にバージョンチェック
 * 競合発生時は`OptimisticLockException`をスロー
 
-### 8.3 ワークフロートランザクション
+### 7.3 ワークフロートランザクション
 
 * ワークフロー承認時は以下を1トランザクションで実行:
   1. 操作履歴の追加（WORKFLOW INSERT）
   2. 書籍マスタへの反映（BOOK UPDATE/INSERT/DELETE）
   * ロールバック時は両方とも取り消される
 
-## 9. エラーハンドリング
+---
 
-### 9.1 例外マッピング
+## 8. エラーハンドリング
+
+### 8.1 例外マッピング
 
 | Exception | HTTP Status | Mapper |
 |-----------|-------------|--------|
@@ -361,84 +358,64 @@ flowchart TD
 | `UnauthorizedApprovalException` | 403 Forbidden | WorkflowExceptionMapper |
 | 一般的な例外 | 500 Internal Server Error | GenericExceptionMapper |
 
-### 9.2 エラーレスポンス形式
+### 8.2 エラーレスポンス形式
 
 * error: エラータイプ
 * message: エラーメッセージ（日本語）
 
-## 10. ログ設計
+---
 
-### 10.1 ログレベル
+## 9. パフォーマンス考慮事項
 
-* INFO: API呼び出しログ、重要な処理の開始/終了
-* WARN: 楽観的ロック失敗、認証失敗など
-* ERROR: 予期しないエラー、システムエラー
-* DEBUG: 詳細なデバッグ情報
-
-### 10.2 ログ形式
-```
-[クラス名#メソッド名] ログメッセージ: パラメータ=値, ...
-```
-
-* 例:
-```
-[ AuthenResource#login ] employeeCode: E0001
-[ WorkflowService#approveWorkflow ] workflowId=123
-```
-
-## 11. パフォーマンス考慮事項
-
-### 11.1 データベースアクセス
+### 9.1 データベースアクセス
 
 * N+1問題の回避: JOINによる一括取得、JPQL `JOIN FETCH`の活用
 * Bookエンティティ: `@SecondaryTable`でBOOK + STOCK結合
 * インデックス: 主キー、外部キー、検索条件フィールド
 
-### 11.2 キャッシング
+### 9.2 キャッシング
 
 * 現状はキャッシング未実装。将来的な実装候補:
   * JPAセカンドレベルキャッシュ（Category, Publisherなどの参照マスタ）
   * アプリケーションレベルキャッシュ（メモリキャッシュ）
 
-### 11.3 接続プール
+---
 
-* アプリケーションサーバーの接続プール機能を使用
-* JNDI名: `jdbc/HsqldbDS`
+## 10. 拡張性・保守性
 
-## 12. デプロイメント構成
-
-### 12.1 デプロイメント形式
-
-* WARファイル形式
-* Payara Serverにデプロイ
-
-### 12.2 設定の外部化
-
-* `microprofile-config.properties`: デフォルト設定
-* 環境変数: 本番環境での設定上書き（JWT秘密鍵など）
-* システムプロパティ: 起動時のオプション設定
-
-## 13. 拡張性・保守性
-
-### 13.1 レイヤーの分離
+### 10.1 レイヤーの分離
 
 * 各レイヤーは疎結合
 * インターフェース（暗黙的にServiceとDAOで分離）
 * DTOによるAPI仕様とエンティティの分離
 
-### 13.2 依存性注入
+### 10.2 依存性注入
 
 * CDIによる依存性注入
 * テスト時のモック化が容易
 
-### 13.3 設定の一元管理
+### 10.3 設定の一元管理
 
 * MicroProfile Configによる設定管理
 * プロパティファイルで設定を外部化
 
-## 14. 参考資料
+---
 
-* Jakarta EE 10 Specification: https://jakarta.ee/specifications/platform/10/
-* JAX-RS 3.1 Specification: https://jakarta.ee/specifications/restful-ws/3.1/
-* JPA 3.1 Specification: https://jakarta.ee/specifications/persistence/3.1/
-* MicroProfile Config: https://microprofile.io/specifications/microprofile-config/
+## 11. 参考資料
+
+### 11.1 関連仕様書
+
+* [requirements.md](requirements.md) - 要件定義書
+* [functional_design.md](functional_design.md) - 機能設計書（API仕様）
+* [behaviors.md](behaviors.md) - 振る舞い仕様書（受入基準）
+* [data_model.md](data_model.md) - データモデル仕様書
+
+### 11.2 プロジェクトREADME
+
+* [README.md](../../README.md) - プロジェクトREADME
+
+### 11.3 共通原則・標準
+
+* [architecture.md](../../../../../agent_skills/jakarta-ee-api-base/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
+* [common_rules.md](../../../../../agent_skills/jakarta-ee-api-base/principles/common_rules.md) - 共通ルール
+* [security.md](../../../../../agent_skills/jakarta-ee-api-base/principles/security.md) - セキュリティ標準

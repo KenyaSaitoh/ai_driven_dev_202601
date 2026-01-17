@@ -393,7 +393,7 @@ public class PersonTableBean implements Serializable {
 
 * JNDI名の設定
   * `<jta-data-source>` には、移行元で実際に使用されているJNDI名を設定すること
-  * JNDI名は architecture_design.md または data_model.md の該当セクションから取得すること
+  * JNDI名は architecture_design.md のデータソース設定セクションまたはpersistence.xml設定情報セクションから取得すること
   * 決め打ちや推測でJNDI名を設定してはならない
   * 例: 
     * 移行元が `java:comp/env/jdbc/HsqldbDS` を使用 → そのまま使用
@@ -463,7 +463,10 @@ public class PersonTableBean implements Serializable {
 
 ## 参考資料
 
-* [マイグレーションルール](../principles/) - マッピング規則、マイグレーションルール
+* [マイグレーション原則](../principles/) - マイグレーションルール、アーキテクチャ標準、セキュリティ標準、マッピング規則
+  * [architecture.md](../principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
+  * [security.md](../principles/security.md) - セキュリティ標準
+  * [common_rules.md](../principles/common_rules.md) - 共通ルール、マッピング規則
 * [リバースエンジニアリングインストラクション](reverse_engineering.md) - ステップ1: 既存コード分析
 * [タスク分解インストラクション](task_breakdown.md) - ステップ2: タスク分解
 * [詳細設計インストラクション](detailed_design.md) - ステップ3: 詳細設計

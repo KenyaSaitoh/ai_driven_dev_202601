@@ -76,19 +76,19 @@
 2. 社員コードで社員情報をデータベースから検索
 3. 社員が存在しない場合 → 401 Unauthorized
 4. パスワード照合
-   * BCryptハッシュの場合：`BCrypt.checkpw()`で検証
-   * 平文パスワードの場合：文字列比較（開発環境のみ）
+   * ハッシュ化パスワード：ハッシュアルゴリズムで検証
+   * 平文パスワード：文字列比較（開発環境のみ）
 5. パスワードが一致しない場合 → 401 Unauthorized
 6. JWT生成
    * Payload: employeeId, employeeCode, departmentId
-   * 署名: HMAC-SHA256（秘密鍵: `jwt.secret-key`）
-   * 有効期限: 24時間（`jwt.expiration-ms`）
+   * 署名: HMAC-SHA256
+   * 有効期限: 24時間
 7. HttpOnly Cookieを生成
-   * Name: `back-office-jwt`
+   * Cookie名: アプリケーション固有の名前
    * Value: JWT文字列
    * HttpOnly: true
-   * Secure: false（開発環境）、true（本番環境）
-   * MaxAge: 86400秒
+   * Secure: 本番環境ではtrue
+   * MaxAge: 24時間（秒単位）
 8. レスポンス生成（社員情報 + Set-Cookie）
 
 #### 3.1.4 出力
@@ -99,10 +99,10 @@
 
 #### 3.1.5 関連コンポーネント
 
-* `AuthenResource#login()`
-* `EmployeeDao#findByCode()`
-* `JwtUtil#generateToken()`
-* `BCrypt.checkpw()`
+* 認証リソース（ログイン処理）
+* 社員データアクセス（社員コード検索）
+* JWTユーティリティ（トークン生成）
+* パスワードハッシュ検証
 
 ### 3.2 F-AUTH-002: ログアウト
 
@@ -125,7 +125,7 @@
 
 #### 3.2.5 関連コンポーネント
 
-* `AuthenResource#logout()`
+* 認証リソース（ログアウト処理）
 
 ### 3.3 F-BOOK-001: 書籍一覧取得
 
@@ -153,9 +153,9 @@
 
 #### 3.3.5 関連コンポーネント
 
-* `BookResource#getAllBooks()`
-* `BookService#getBooksAll()`
-* `BookDao#findAll()`
+* 書籍リソース（書籍一覧取得）
+* 書籍サービス（ビジネスロジック）
+* 書籍データアクセス（全件取得）
 
 ### 3.4 F-BOOK-002: 書籍詳細取得
 
@@ -183,9 +183,9 @@
 
 #### 3.4.5 関連コンポーネント
 
-* `BookResource#getBookById()`
-* `BookService#getBook()`
-* `BookDao#findById()`
+* 書籍リソース（書籍詳細取得）
+* 書籍サービス（ビジネスロジック）
+* 書籍データアクセス（ID検索）
 
 ### 3.5 F-BOOK-003: 書籍検索（JPQL）
 
@@ -216,9 +216,9 @@
 
 #### 3.5.5 関連コンポーネント
 
-* `BookResource#searchBooksJpql()`
-* `BookService#searchBook()`
-* `BookDao#findByCategoryAndKeyword()` etc.
+* 書籍リソース（書籍検索）
+* 書籍サービス（検索ロジック）
+* 書籍データアクセス（動的検索）
 
 ### 3.6 F-STOCK-003: 在庫更新
 
@@ -241,7 +241,7 @@
 5. バージョンチェック
    * 現在のバージョンとリクエストのバージョンが一致しない → 409 Conflict
 6. 在庫数を更新
-7. JPAの`@Version`アノテーションによりバージョンが自動インクリメント
+7. 楽観的ロックメカニズムによりバージョンが自動インクリメント
 8. トランザクションコミット時にUPDATE実行
 9. 更新後の在庫情報をレスポンス
 
@@ -253,9 +253,9 @@
 
 #### 3.6.5 関連コンポーネント
 
-* `StockResource#updateStock()`
-* `StockDao#findById()`
-* JPA `@Version`
+* 在庫リソース（在庫更新）
+* 在庫データアクセス（ID検索）
+* 楽観的ロックメカニズム
 
 ### 3.7 F-WORKFLOW-001: ワークフロー作成
 
@@ -312,11 +312,10 @@
 
 #### 3.7.5 関連コンポーネント
 
-* `WorkflowResource#createWorkflow()`
-* `WorkflowService#createWorkflow()`
-* `WorkflowDao#getNextWorkflowId()`
-* `WorkflowDao#insert()`
-* `EmployeeDao#findById()`
+* ワークフローリソース（ワークフロー作成）
+* ワークフローサービス（ビジネスロジック）
+* ワークフローデータアクセス（ID採番、挿入）
+* 社員データアクセス（ID検索）
 
 ### 3.8 F-WORKFLOW-002: ワークフロー更新
 
@@ -352,10 +351,10 @@
 
 #### 3.8.5 関連コンポーネント
 
-* `WorkflowResource#updateWorkflow()`
-* `WorkflowService#updateWorkflow()`
-* `WorkflowDao#findLatestByWorkflowId()`
-* `EntityManager#flush()`
+* ワークフローリソース（ワークフロー更新）
+* ワークフローサービス（ビジネスロジック）
+* ワークフローデータアクセス（最新レコード取得）
+* 永続化メカニズム（即時反映）
 
 ### 3.9 F-WORKFLOW-004: ワークフロー承認
 
@@ -406,14 +405,13 @@
 
 #### 3.9.5 関連コンポーネント
 
-* `WorkflowResource#approveWorkflow()`
-* `WorkflowService#approveWorkflow()`
-* `WorkflowService#checkApprovalAuthority()`
-* `WorkflowService#applyToBookMaster()`
-* `WorkflowDao#findLatestByWorkflowId()`
-* `WorkflowDao#insert()`
-* `BookDao#findById()`
-* `EntityManager#persist()`, `EntityManager#flush()`
+* ワークフローリソース（ワークフロー承認）
+* ワークフローサービス（承認ロジック）
+* ワークフローサービス（承認権限チェック）
+* ワークフローサービス（書籍マスタ反映）
+* ワークフローデータアクセス（最新レコード取得、挿入）
+* 書籍データアクセス（ID検索）
+* 永続化メカニズム
 
 ### 3.10 F-WORKFLOW-008: 書籍マスタ反映
 
@@ -431,14 +429,14 @@
   1. 新しいBookエンティティを作成
   2. ワークフローから項目を設定
    * bookName, author, price, imageUrl
-   * category（EntityManagerで取得）
-   * publisher（EntityManagerで取得）
+   * category（データベースから取得）
+   * publisher（データベースから取得）
    * deleted: false
-3. 在庫情報も設定（SecondaryTable）
+3. 在庫情報も設定（書籍と在庫の結合）
    * quantity: 0
    * version: 0
-4. EntityManager.persist()でINSERT
-5. flush()してBOOK_IDを取得
+4. 永続化してINSERT
+5. BOOK_IDを取得
 
 * REMOVE_BOOK（既存書籍削除）:
   1. BookDaoで対象書籍を取得
@@ -458,9 +456,9 @@
 
 #### 3.10.5 関連コンポーネント
 
-* `WorkflowService#applyToBookMaster()`
-* `BookDao#findById()`
-* `EntityManager#persist()`, `EntityManager#find()`
+* ワークフローサービス（書籍マスタ反映処理）
+* 書籍データアクセス（ID検索）
+* 永続化メカニズム
 
 ## 4. ビジネスルール
 
@@ -468,13 +466,13 @@
 
 #### BR-AUTH-001: パスワード照合
 
-* BCryptハッシュ（`$2a$`, `$2b$`, `$2y$`で始まる）の場合：`BCrypt.checkpw()`で検証
-* 平文パスワードの場合：文字列比較（開発環境のみ、本番環境では非推奨）
+* ハッシュ化パスワード：ハッシュアルゴリズムで検証
+* 平文パスワード：文字列比較（開発環境のみ、本番環境では非推奨）
 
 #### BR-AUTH-002: JWT有効期限
 
-* デフォルト：24時間（86400000ミリ秒）
-* `jwt.expiration-ms`で設定可能
+* デフォルト：24時間
+* 設定により変更可能
 
 ### 4.2 ワークフロールール
 
@@ -542,10 +540,10 @@ stateDiagram-v2
 
 ### 5.1 共通バリデーション
 
-* 必須項目チェック：Bean Validation `@NotNull`, `@NotBlank`
-* 文字列長チェック：`@Size`
-* 数値範囲チェック：`@Min`, `@Max`
-* 形式チェック：`@Pattern`, `@Email`
+* 必須項目チェック：NULL不可、空白不可
+* 文字列長チェック：最小長、最大長
+* 数値範囲チェック：最小値、最大値
+* 形式チェック：パターンマッチング、メール形式
 
 ### 5.2 個別バリデーション
 
@@ -573,9 +571,9 @@ stateDiagram-v2
 | 例外クラス | HTTPステータス | メッセージ |
 |-----------|---------------|-----------|
 | `IllegalArgumentException` | 400 Bad Request | 引数が不正です |
-| `NotFoundException` | 404 Not Found | リソースが見つかりません |
-| `OptimisticLockException` | 409 Conflict | 他のユーザーによって更新されました |
-| `WorkflowNotFoundException` | 404 Not Found | ワークフローが見つかりません |
+| リソース未検出例外 | 404 Not Found | リソースが見つかりません |
+| 楽観的ロック例外 | 409 Conflict | 他のユーザーによって更新されました |
+| ワークフロー未検出例外 | 404 Not Found | ワークフローが見つかりません |
 | `InvalidWorkflowStateException` | 400 Bad Request | 状態が不正です |
 | `UnauthorizedApprovalException` | 403 Forbidden | 承認権限がありません |
 | その他の例外 | 500 Internal Server Error | 内部エラーが発生しました |
@@ -584,8 +582,8 @@ stateDiagram-v2
 
 ### 7.1 トランザクション境界
 
-* Serviceレイヤーのメソッドを`@Transactional`でマーク
-* デフォルト：`TxType.REQUIRED`
+* サービスレイヤーでトランザクション境界を定義
+* デフォルト：既存トランザクションがあれば参加、なければ新規作成
 * 例外発生時は自動ロールバック
 
 ### 7.2 重要なトランザクション処理
@@ -609,8 +607,8 @@ stateDiagram-v2
 
 ### 8.1 N+1問題の回避
 
-* BookエンティティはSecondaryTableでBOOK + STOCK結合
-* @ManyToOneの関連エンティティは必要に応じてJOIN FETCH
+* 書籍エンティティは在庫と結合して取得
+* 関連エンティティは必要に応じて結合取得
 
 ### 8.2 インデックスの活用
 

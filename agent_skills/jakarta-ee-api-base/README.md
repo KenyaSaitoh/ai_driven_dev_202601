@@ -108,26 +108,41 @@ AIが：
 
 ---
 
-## 📜 共通ルール
+## 📜 開発原則
 
-このAgent Skillsには、Jakarta EE開発で遵守すべき共通ルールが含まれています：
+このAgent Skillsには、Jakarta EE開発で遵守すべき原則が含まれています：
 
-* 場所: `@agent_skills/jakarta-ee-api-base/principles/common_rules.md`
+* 場所: `@agent_skills/jakarta-ee-api-base/principles/`
+  * [architecture.md](principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
+  * [security.md](principles/security.md) - セキュリティ標準
+  * [common_rules.md](principles/common_rules.md) - 共通ルール
 
-* 主なルール:
+* アーキテクチャ標準の主な内容:
+  * 標準技術スタック（Jakarta EE 10、JPA 3.1、JAX-RS 3.1等）
+  * レイヤードアーキテクチャ（API、Security、Service、DAO、Entity）
+  * 開発標準（命名規則、コーディング規約、バリデーション、エラーハンドリング、ログ出力）
+  * セキュリティ実装（JWT認証、認証フィルター、認証コンテキスト）
+  * トランザクション管理と並行制御（楽観的ロック）
+  * データベース構成、REST API設計原則、テスト戦略
+  * パフォーマンス考慮事項
+
+* セキュリティ標準の主な内容:
+  * JWT認証（HttpOnly Cookie、トークンライフサイクル、CSRF対策）
+  * パスワード管理（BCryptハッシュ化）
+  * データ保護（個人情報、機密情報、暗号化）
+  * 通信セキュリティ（HTTPS/TLS、証明書管理）
+  * セキュアコーディング（SQLインジェクション、XSS、コマンドインジェクション対策）
+  * OWASP Top 10対応
+
+* 共通ルールの主な内容:
   1. 仕様ファースト開発: すべての機能開発は詳細な仕様書の作成から始める
   2. アーキテクチャの一貫性: Jakarta EE 10のベストプラクティスに従う
   3. テスト駆動品質: すべてのビジネスロジックに対して単体テストを作成
   4. ドキュメント品質の追求: コードとSPECドキュメントを常に最新に保つ
-
-* Markdownフォーマット規約:
-  * 箇条書きはアスタリスク（`*`）を使用
-  * 必要に応じてネスト（2スペースインデント）
-  * ボールド（太字）は使用しない
-  * 詳細はルールドキュメントを参照
+  5. Markdownフォーマット規約: 箇条書きはアスタリスク、ボールド不使用等
 
 * 注意:
-  * このルールは全Jakarta EEプロジェクトで共通
+  * これらの原則は全Jakarta EEプロジェクトで共通
   * プロジェクト固有のルールがある場合は、それも併せて遵守してください
 
 ---
@@ -510,8 +525,10 @@ Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービスの開発を支援し�
 agent_skills/jakarta-ee-api-base/
 ├── SKILL.md                          # Agent Skill説明書
 ├── README.md                         # このファイル
-├── principles/
-│   └── common_rules.md               # 原則（全プロジェクト共通）
+├── principles/                       # 開発原則（全プロジェクト共通）
+│   ├── architecture.md              # Jakarta EE APIアーキテクチャ標準
+│   ├── security.md                  # セキュリティ標準
+│   └── common_rules.md              # 共通ルール
 ├── templates/                        # 仕様書テンプレート
 │   ├── architecture_design.md
 │   ├── functional_design.md

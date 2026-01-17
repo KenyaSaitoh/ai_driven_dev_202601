@@ -74,7 +74,7 @@
 
 | シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
 |-----------|------|----------------|------------|---------------|
-| JWT-001 | 有効なJWT Cookieでリクエストできる | 有効なJWT Cookie | 認証必須APIにリクエスト | APIが正常に実行される<br/>SecuredResourceにemployeeIdが設定される |
+| JWT-001 | 有効なJWT Cookieでリクエストできる | 有効なJWT Cookie | 認証必須APIにリクエスト | APIが正常に実行される<br/>AuthenContextにemployeeIdが設定される |
 | JWT-002 | JWTの有効期限内はリクエストできる | JWT発行から23時間後 | 認証必須APIにリクエスト | APIが正常に実行される |
 
 #### 5.1.2 異常系

@@ -64,34 +64,36 @@ POST /api/auth/login
 |---------|-------------|
 | BR-AUTH-001 | メールアドレスが存在しない場合、401エラー |
 | BR-AUTH-002 | パスワードが一致しない場合、401エラー |
-| BR-AUTH-003 | パスワードはBCryptハッシュまたは平文（開発環境）で照合 |
+| BR-AUTH-003 | パスワードはハッシュ化または平文（開発環境）で照合 |
 | BR-AUTH-004 | JWTの有効期限は24時間（設定可能） |
 | BR-AUTH-005 | JWT Cookieは HttpOnly, Path=/, MaxAge=86400 |
 
 #### 3.1.6 シーケンス図
 
+注意: 基本設計レベルのため、論理コンポーネントで記述しています。実装クラス（AuthResource、CustomerRestClient等）の詳細は詳細設計書（detailed_design.md）を参照してください。
+
 ```mermaid
 sequenceDiagram
-    participant Client
-    participant AuthResource
-    participant CustomerRestClient
-    participant JwtUtil
-    participant RestAPI as berry-books-rest API
+    participant Client as クライアント
+    participant API as 認証API
+    participant ExtAPI as 外部API連携
+    participant JwtMgmt as JWT管理
+    participant RestAPI as 顧客管理API
     
-    Client->>AuthenResource: POST /api/auth/login<br/>{email, password}
-    AuthenResource->>CustomerRestClient: findByEmail(email)
-    CustomerRestClient->>RestAPI: GET /customers/query_email?email={email}
-    RestAPI-->>CustomerRestClient: Customer data
-    CustomerRestClient-->>AuthenResource: Customer object
+    Client->>API: POST /api/auth/login<br/>{email, password}
+    API->>ExtAPI: メールアドレスで顧客検索
+    ExtAPI->>RestAPI: GET /customers/query_email?email={email}
+    RestAPI-->>ExtAPI: 顧客データ
+    ExtAPI-->>API: 顧客情報
 
-    AuthenResource->>AuthenResource: BCrypt.checkpw(password, storedPassword)
+    API->>API: パスワード照合
     
-    alt Password match
-        AuthenResource->>JwtUtil: generateToken(customerId, email)
-        JwtUtil-->>AuthenResource: JWT token
-        AuthenResource-->>Client: 200 OK<br/>Set-Cookie: berry-books-jwt=<token><br/>LoginResponse
-    else Password mismatch
-        AuthenResource-->>Client: 401 Unauthorized<br/>ErrorResponse
+    alt パスワード一致
+        API->>JwtMgmt: JWTトークン生成
+        JwtMgmt-->>API: JWTトークン
+        API-->>Client: 200 OK<br/>Set-Cookie: JWT<br/>ログインレスポンス
+    else パスワード不一致
+        API-->>Client: 401 Unauthorized<br/>エラーレスポンス
     end
 ```
 
@@ -158,8 +160,8 @@ POST /api/auth/register
 | ルールID | 説明 |
 |---------|-------------|
 | BR-AUTH-010 | メールアドレスが既に存在する場合、409エラー |
-| BR-AUTH-011 | パスワードはBCryptでハッシュ化して保存 |
-| BR-AUTH-012 | 住所は都道府県名から始まること（AddressUtil.startsWithValidPrefecture()） |
+| BR-AUTH-011 | パスワードはハッシュ化して保存 |
+| BR-AUTH-012 | 住所は都道府県名から始まること |
 | BR-AUTH-013 | 登録成功時、自動的にJWT Cookieを発行してログイン状態にする |
 
 ---
@@ -179,7 +181,6 @@ JWT Cookieから顧客情報を取得する。認証必須。
 #### 3.4.3 リクエスト
 
 * Cookie: `berry-books-jwt=<JWT Token>`
-
 * リクエストボディ: なし
 
 #### 3.4.4 レスポンス
@@ -189,59 +190,7 @@ JWT Cookieから顧客情報を取得する。認証必須。
 
 ---
 
-## 4. データ転送オブジェクト (DTO)
-
-### 4.1 LoginRequest
-
-* 構造種別: レコード型（immutableなデータ転送オブジェクト）
-* フィールド構成:
-
-| フィールド名 | 型 | 制約 | 説明 |
-|------------|---|------|------|
-| email | String | NotBlank, Email形式 | メールアドレス |
-| password | String | NotBlank | パスワード |
-
-### 4.2 LoginResponse
-
-* 構造種別: レコード型（immutableなデータ転送オブジェクト）
-* フィールド構成:
-
-| フィールド名 | 型 | 説明 |
-|------------|---|------|
-| customerId | Integer | 顧客ID |
-| customerName | String | 顧客名 |
-| email | String | メールアドレス |
-| birthday | LocalDate | 生年月日 |
-| address | String | 住所 |
-
-### 4.3 RegisterRequest
-
-* 構造種別: レコード型（immutableなデータ転送オブジェクト）
-* フィールド構成:
-
-| フィールド名 | 型 | 制約 | 説明 |
-|------------|---|------|------|
-| customerName | String | NotBlank, Size(max=30) | 顧客名 |
-| password | String | NotBlank | パスワード |
-| email | String | NotBlank, Email形式, Size(max=30) | メールアドレス |
-| birthday | LocalDate | - | 生年月日 |
-| address | String | Size(max=120) | 住所 |
-
-### 4.4 ErrorResponse
-
-* 構造種別: レコード型（immutableなデータ転送オブジェクト）
-* フィールド構成:
-
-| フィールド名 | 型 | 説明 |
-|------------|---|------|
-| status | int | HTTPステータスコード |
-| error | String | エラー種別 |
-| message | String | エラーメッセージ |
-| path | String | リクエストパス |
-
----
-
-## 5. エラーハンドリング
+## 4. エラーハンドリング
 
 ### 5.1 エラーメッセージ一覧
 
@@ -251,11 +200,11 @@ JWT Cookieから顧客情報を取得する。認証必須。
 | AUTH-002 | 401 | 認証が必要です | JWT Cookie未設定、またはJWT無効 |
 | AUTH-003 | 409 | 指定されたメールアドレスは既に登録されています | メールアドレス重複 |
 | AUTH-004 | 400 | 住所は都道府県名から始めてください | 住所が都道府県名から始まらない |
-| AUTH-005 | 400 | Bean Validationエラー | 必須項目未入力、形式不正 |
+| AUTH-005 | 400 | バリデーションエラー | 必須項目未入力、形式不正 |
 
 ---
 
-## 6. セキュリティ考慮事項
+## 5. セキュリティ考慮事項
 
 ### 6.1 JWT設定
 
@@ -277,12 +226,12 @@ jwt.cookie-name=berry-books-jwt
 
 ### 6.2 パスワードハッシュ化
 
-* アルゴリズム: BCrypt
+* アルゴリズム: ハッシュアルゴリズム
 * Cost: 10（デフォルト）
 * ハッシュ長: 60文字
 * ハッシュ化処理:
-  * BCryptアルゴリズムを使用して平文パスワードをハッシュ化
-  * ソルト生成はBCryptが自動的に実行
+  * ハッシュアルゴリズムを使用して平文パスワードをハッシュ化
+  * ソルト生成は自動的に実行
   * 戻り値: ハッシュ化されたパスワード文字列（60文字）
 
 ### 6.3 Cookie設定
@@ -296,7 +245,7 @@ jwt.cookie-name=berry-books-jwt
 
 ---
 
-## 7. 関連ドキュメント
+## 6. 関連ドキュメント
 
 * [behaviors.md](behaviors.md) - 認証APIの受入基準
 * [../../system/functional_design.md](../../system/functional_design.md) - 全体機能設計書

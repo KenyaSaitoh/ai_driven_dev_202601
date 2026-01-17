@@ -44,9 +44,7 @@ POST /api/orders
 #### 3.1.3 リクエスト
 
 * Content-Type: `application/json`
-
 * Cookie: `berry-books-jwt=<JWT Token>`
-
 * リクエストボディ:
 
 | フィールド | 型 | 必須 | 説明 |
@@ -78,11 +76,11 @@ POST /api/orders
 | ルールID | 説明 |
 |---------|-------------|
 | BR-ORDER-001 | 注文作成は認証必須（JWT Cookie） |
-| BR-ORDER-002 | 在庫数が注文数より少ない場合、OutOfStockException（409） |
-| BR-ORDER-003 | 在庫のVERSIONが一致しない場合、OptimisticLockException（409） |
-| BR-ORDER-004 | 注文処理は単一トランザクション（@Transactional） |
-| BR-ORDER-005 | 注文作成時に在庫を減算（UPDATE STOCK SET QUANTITY = QUANTITY - count） |
-| BR-ORDER-006 | 配送料金は購入金額に応じて計算（DeliveryFeeService） |
+| BR-ORDER-002 | 在庫数が注文数より少ない場合、在庫不足エラー（409） |
+| BR-ORDER-003 | 在庫のバージョンが一致しない場合、楽観的ロックエラー（409） |
+| BR-ORDER-004 | 注文処理は単一トランザクション |
+| BR-ORDER-005 | 注文作成時に在庫を減算 |
+| BR-ORDER-006 | 配送料金は購入金額に応じて計算 |
 | BR-ORDER-007 | 沖縄県の場合、配送料金が異なる |
 
 #### 3.1.6 シーケンス図
@@ -97,51 +95,51 @@ sequenceDiagram
     participant OrderDetailDao
     participant DB
     
-    Client->>OrderResource: POST /api/orders<br/>Cookie: berry-books-jwt
-    OrderResource->>OrderResource: JWT認証チェック
-    OrderResource->>OrderService: orderBooks(orderTO)
+    Client->>API: POST /api/orders<br/>Cookie: JWT
+    API->>API: JWT認証チェック
+    API->>BizLogic: 注文実行
     
-    Note over OrderService,DB: BEGIN TRANSACTION
+    Note over BizLogic,DB: トランザクション開始
     
     loop 各カート項目
-        OrderService->>StockDao: findByBookId(bookId)
-        StockDao->>DB: SELECT * FROM STOCK
-        DB-->>StockDao: Stock
-        StockDao-->>OrderService: Stock
+        BizLogic->>StockMgmt: 在庫取得（書籍ID）
+        StockMgmt->>DB: 在庫検索
+        DB-->>StockMgmt: 在庫情報
+        StockMgmt-->>BizLogic: 在庫情報
         
-        OrderService->>OrderService: 在庫チェック<br/>(quantity >= count)
+        BizLogic->>BizLogic: 在庫数チェック<br/>(在庫 >= 注文数)
         
         alt 在庫不足
-            OrderService-->>OrderResource: OutOfStockException
-            OrderResource-->>Client: 409 Conflict
+            BizLogic-->>API: 在庫不足エラー
+            API-->>Client: 409 Conflict
         end
         
-        OrderService->>StockDao: updateStock(bookId, count, version)
-        StockDao->>DB: UPDATE STOCK<br/>SET QUANTITY = QUANTITY - count<br/>WHERE VERSION = version
+        BizLogic->>StockMgmt: 在庫更新（減算、バージョンチェック）
+        StockMgmt->>DB: 在庫更新<br/>WHERE VERSION = 指定値
         
-        alt VERSION不一致
-            DB-->>StockDao: 0 rows updated
-            StockDao-->>OrderService: OptimisticLockException
-            OrderService-->>OrderResource: OptimisticLockException
-            OrderResource-->>Client: 409 Conflict
+        alt バージョン不一致
+            DB-->>StockMgmt: 更新失敗
+            StockMgmt-->>BizLogic: 楽観的ロックエラー
+            BizLogic-->>API: 楽観的ロックエラー
+            API-->>Client: 409 Conflict
         end
     end
     
-    OrderService->>OrderTranDao: insert(orderTran)
-    OrderTranDao->>DB: INSERT INTO ORDER_TRAN
-    DB-->>OrderTranDao: orderTranId
-    OrderTranDao-->>OrderService: OrderTran
+    BizLogic->>OrderMgmt: 注文トランザクション登録
+    OrderMgmt->>DB: INSERT ORDER_TRAN
+    DB-->>OrderMgmt: 注文トランザクションID
+    OrderMgmt-->>BizLogic: 注文トランザクション情報
     
     loop 各注文明細
-        OrderService->>OrderDetailDao: insert(orderDetail)
-        OrderDetailDao->>DB: INSERT INTO ORDER_DETAIL
-        DB-->>OrderDetailDao: Success
+        BizLogic->>OrderMgmt: 注文明細登録
+        OrderMgmt->>DB: INSERT ORDER_DETAIL
+        DB-->>OrderMgmt: 成功
     end
     
-    Note over OrderService,DB: COMMIT
+    Note over BizLogic,DB: トランザクションコミット
     
-    OrderService-->>OrderResource: OrderTran
-    OrderResource-->>Client: 200 OK<br/>OrderResponse
+    BizLogic-->>API: 注文完了情報
+    API-->>Client: 200 OK<br/>注文レスポンス
 ```
 
 ---
@@ -161,7 +159,6 @@ GET /api/orders/history
 #### 3.2.3 リクエスト
 
 * Cookie: `berry-books-jwt=<JWT Token>`
-
 * リクエストパラメータ: なし
 
 #### 3.2.4 レスポンス
@@ -238,89 +235,9 @@ GET /api/orders/{tranId}/details/{detailId}
 
 ---
 
-## 4. データ転送オブジェクト (DTO)
+## 4. エラーハンドリング
 
-### 4.1 OrderRequest
-
-* 構造種別: レコード型（immutableなデータ転送オブジェクト）
-
-* フィールド構成:
-
-| フィールド名 | 型 | 制約 | 説明 |
-|------------|---|------|------|
-| cartItems | List<CartItemRequest> | Valid（ネストバリデーション） | カートアイテムリスト |
-| totalPrice | Integer | NotNull | 合計金額 |
-| deliveryPrice | Integer | NotNull | 配送料 |
-| deliveryAddress | String | NotBlank | 配送先住所 |
-| settlementType | Integer | NotNull | 決済方法 |
-
-### 4.2 CartItemRequest
-
-* 構造種別: レコード型（immutableなデータ転送オブジェクト）
-
-* フィールド構成:
-
-| フィールド名 | 型 | 制約 | 説明 |
-|------------|---|------|------|
-| bookId | Integer | NotNull | 書籍ID |
-| bookName | String | NotBlank | 書籍名 |
-| publisherName | String | NotBlank | 出版社名 |
-| price | Integer | NotNull | 価格 |
-| count | Integer | NotNull | 数量 |
-| version | Long | NotNull | 楽観的ロック用バージョン番号 |
-
-### 4.3 OrderResponse
-
-* 構造種別: レコード型（immutableなデータ転送オブジェクト）
-
-* フィールド構成:
-
-| フィールド名 | 型 | 説明 |
-|------------|---|------|
-| orderTranId | Integer | 注文トランザクションID |
-| orderDate | LocalDate | 注文日 |
-| totalPrice | Integer | 合計金額 |
-| deliveryPrice | Integer | 配送料 |
-| deliveryAddress | String | 配送先住所 |
-| settlementType | Integer | 決済方法 |
-| orderDetails | List<OrderDetailResponse> | 注文明細リスト |
-
-### 4.4 OrderHistoryResponse
-
-* 構造種別: レコード型（immutableなデータ転送オブジェクト）
-
-* フィールド構成:
-
-| フィールド名 | 型 | 説明 |
-|------------|---|------|
-| orderDate | LocalDate | 注文日 |
-| orderTranId | Integer | 注文トランザクションID |
-| orderDetailId | Integer | 注文明細ID |
-| bookName | String | 書籍名 |
-| publisherName | String | 出版社名 |
-| price | BigDecimal | 価格 |
-| count | Integer | 数量 |
-
-### 4.5 OrderDetailResponse
-
-* 構造種別: レコード型（immutableなデータ転送オブジェクト）
-
-* フィールド構成:
-
-| フィールド名 | 型 | 説明 |
-|------------|---|------|
-| orderDetailId | Integer | 注文明細ID |
-| bookId | Integer | 書籍ID |
-| bookName | String | 書籍名 |
-| publisherName | String | 出版社名 |
-| price | BigDecimal | 価格 |
-| count | Integer | 数量 |
-
----
-
-## 5. エラーハンドリング
-
-### 5.1 エラーメッセージ一覧
+### 4.1 エラーメッセージ一覧
 
 | エラーコード | HTTPステータス | メッセージ | 発生条件 |
 |------------|--------------|----------|---------|
@@ -332,7 +249,7 @@ GET /api/orders/{tranId}/details/{detailId}
 
 ---
 
-## 6. 楽観的ロック制御
+## 5. 楽観的ロック制御
 
 ### 6.1 楽観的ロック戦略
 
@@ -345,7 +262,7 @@ GET /api/orders/{tranId}/details/{detailId}
 1. カート追加時: VERSION値を取得しカートアイテムに保存
 2. 注文確定時: 保存したVERSION値で在庫を更新
 3. 成功時: 在庫数を減算、VERSION値を自動インクリメント
-4. 失敗時: OptimisticLockException、ユーザーにエラー表示
+4. 失敗時: 楽観的ロック例外、ユーザーにエラー表示
 
 * 更新処理の論理構造:
   * 対象テーブル: STOCK
@@ -362,9 +279,9 @@ GET /api/orders/{tranId}/details/{detailId}
 
 ### 7.1 トランザクション境界
 
-* トランザクション境界: サービスレイヤーの `@Transactional`
+* トランザクション境界: サービスレイヤー
 
-* OrderService.orderBooks()の処理:
+* 注文サービスの処理:
 
 1. 在庫可用性チェック
 2. 在庫更新（楽観的ロック付き）
@@ -375,7 +292,7 @@ GET /api/orders/{tranId}/details/{detailId}
 
 ---
 
-## 8. 関連ドキュメント
+## 7. 関連ドキュメント
 
 * [behaviors.md](behaviors.md) - 注文APIの受入基準
 * [../../system/functional_design.md](../../system/functional_design.md) - 全体機能設計書

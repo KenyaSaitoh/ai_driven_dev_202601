@@ -59,25 +59,27 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
   * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
   * タスク分解時に、フレームワーク固有の実装要件を考慮する
 
-### 必須ドキュメント（system/配下）
+### 必須ドキュメント（system/配下 - システム全体、共通処理、ドメインモデル）
 
 * architecture_design.md - 技術スタック、アーキテクチャパターン、ライブラリを確認する
   * アーキテクチャパターンを識別する
   * データ管理方針を確認する
   * 外部連携要件を確認する
-* functional_design.md - システム全体の機能設計概要と各APIへのリンクを確認する
+* functional_design.md - システム全体の機能設計、共通サービス、ドメインモデルの機能設計を確認する
+* data_model.md - テーブル定義とERDを確認する（該当する場合）
+* detailed_design.md - 共通処理、JPAエンティティ、Dao、共通Serviceの詳細設計を確認する（該当する場合）
 
 ### オプションドキュメント（system/配下、存在する場合）
 
-* data_model.md - エンティティとデータベーススキーマを確認する
-* behaviors.md - システム全体の振る舞い概要と各APIへのリンクを確認する
+* behaviors.md - システム全体の振る舞い、共通処理の振る舞いを確認する
 * external_interface.md - 外部連携とAPI仕様を確認する
 
-### API単位ドキュメント（api/配下）
+### API単位ドキュメント（api/配下 - API固有の設計）
 
 * api/API_XXX_yyyy/ - 各API単位のディレクトリ
-  * functional_design.md - 各APIの詳細な機能設計
-  * behaviors.md - 各APIの振る舞い仕様
+  * functional_design.md - API固有のエンドポイント、リクエスト/レスポンス、ビジネスルールの機能設計
+  * detailed_design.md - API固有のResource、DTO、API特有のServiceの詳細設計（該当する場合）
+  * behaviors.md - API固有の振る舞い仕様（該当する場合）
 
 注意: プロジェクトによって利用可能なドキュメントは異なる。利用可能なものに基づいてタスクを生成する
 
@@ -120,14 +122,16 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
 * 複数機能で共有される共通コンポーネント
 * エンティティ: architecture_design.mdとdata_model.mdから実装対象を判断する
 * Dao: 実装するエンティティに対応するDaoを作成する
-* 共通サービス: 複数APIで使用されるサービス
+* 共通サービス: 複数APIで使用されるサービス（API固有のServiceは含めない）
 * 認証基盤: 認証関連コンポーネント
-* 外部API連携: RestClient
+* 外部API連携: RestClient（複数APIで共有される場合）
 * 共通DTO: ErrorResponse、外部API用DTO等
 * 共通ユーティリティ
 * フィルター/例外ハンドラ
 
-* 重要: 共通コンポーネントの具体的な内容は、architecture_design.md、functional_design.md、external_interface.mdから判断する
+* 重要: 
+  * 共通コンポーネントの具体的な内容は、architecture_design.md、functional_design.md、external_interface.mdから判断する
+  * API固有のビジネスロジック（Service）は、並行作業を考慮して、API単位タスクに含める
 
 ### 2.4 機能別タスク（API単位）
 
@@ -148,11 +152,14 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 
 3. 各機能タスクファイルの内容
    * API固有のResourceクラス
-   * API固有のServiceクラス
-   * API固有のDaoクラス（該当する場合）
+   * API固有のServiceクラス（このAPIのみで使用されるビジネスロジック）
+   * API固有のDaoクラス（該当する場合、このAPIのみで使用されるデータアクセス）
    * API固有のDTO/レスポンスモデル
+   * 外部API連携クライアント（このAPIのみで使用される場合）
    * API固有のテストケース
    * 担当者: 1名（API単位で独立して実装可能）
+
+注意: 複数のAPIで共有されるビジネスロジック（共通Service）は、共通機能タスクに含めます。並行作業を考慮して、API固有のServiceはAPI単位タスクに含めます。
 
 4. 機能分割の判断基準
    * 小規模プロジェクト（1-3 API）: 1つの`all_apis.md`にまとめても可

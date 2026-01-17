@@ -763,6 +763,19 @@ subprojects {
                     }
                 }
                 
+                // Delete detailed_design.md file from system specs
+                def specsSystemDir = file("$projectDir/specs/baseline/system")
+                if (specsSystemDir.exists()) {
+                    def detailedDesignFile = new File(specsSystemDir, "detailed_design.md")
+                    if (detailedDesignFile.exists()) {
+                        println ""
+                        println "Cleaning system detailed_design.md file..."
+                        println "  Deleting: system/detailed_design.md"
+                        detailedDesignFile.delete()
+                        deletedFilesCount++
+                    }
+                }
+                
                 // Delete bin, build, logs directories
                 println ""
                 println "Cleaning build artifacts..."

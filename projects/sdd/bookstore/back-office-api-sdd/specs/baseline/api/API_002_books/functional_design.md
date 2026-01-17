@@ -42,15 +42,12 @@
 #### 3.1.2 リクエスト
 
 * ヘッダー: なし
-
 * クエリパラメータ: なし
-
 * ボディ: なし
 
 #### 3.1.3 レスポンス
 
 * 成功（200 OK）:
-
 * レスポンススキーマ:
 | フィールド | 型 | 説明 |
 |-----------|---|------|
@@ -70,8 +67,8 @@
 
 #### 3.1.4 処理フロー
 
-1. BookServiceを呼び出し（`getBooksAll()`）
-2. BookDaoで全書籍を取得（JPQL: `SELECT b FROM Book b`）
+1. 書籍サービスを呼び出し
+2. 書籍データアクセスで全書籍を取得
 3. Bookエンティティのリストを取得
 4. 各BookエンティティをBookTOに変換
    * カテゴリ情報をネスト構造で設定
@@ -90,9 +87,9 @@
 
 #### 3.1.6 関連コンポーネント
 
-* `BookResource#getAllBooks()`
-* `BookService#getBooksAll()`
-* `BookDao#findAll()`
+* 書籍リソース（書籍一覧取得）
+* 書籍サービス（ビジネスロジック）
+* 書籍データアクセス（全件取得）
 
 ---
 
@@ -124,8 +121,8 @@
 #### 3.2.4 処理フロー
 
 1. パスパラメータから書籍IDを取得
-2. BookServiceを呼び出し（`getBook(bookId)`）
-3. BookDaoで指定IDの書籍を取得（`EntityManager.find()`）
+2. 書籍サービスを呼び出し
+3. 書籍データアクセスで指定IDの書籍を取得
 4. 書籍が見つからない場合 → 404 Not Found
 5. BookエンティティをBookTOに変換
 6. JSON形式でレスポンス
@@ -139,9 +136,9 @@
 
 #### 3.2.6 関連コンポーネント
 
-* `BookResource#getBookById()`
-* `BookService#getBook()`
-* `BookDao#findById()`
+* 書籍リソース（書籍詳細取得）
+* 書籍サービス（ビジネスロジック）
+* 書籍データアクセス（ID検索）
 
 ---
 
@@ -210,10 +207,9 @@
 
 #### 3.3.7 関連コンポーネント
 
-* `BookResource#searchBooks()`
-* `BookResource#searchBooksJpql()` （内部で呼び出し）
-* `BookService#searchBook(...)` （複数のオーバーロード）
-* `BookDao#query()`, `BookDao#queryByCategory()`, `BookDao#queryByKeyword()`
+* 書籍リソース（書籍検索）
+* 書籍サービス（検索ロジック）
+* 書籍データアクセス（動的検索：全件/カテゴリ別/キーワード別）
 
 ---
 
@@ -244,9 +240,9 @@
 
 #### 3.4.6 関連コンポーネント
 
-* `BookResource#searchBooksJpql()`
-* `BookService#searchBook(...)`
-* `BookDao#query()`, `BookDao#queryByCategory()`, `BookDao#queryByKeyword()`
+* 書籍リソース（JPQL検索）
+* 書籍サービス（検索ロジック）
+* 書籍データアクセス（JPQL動的クエリ）
 
 ---
 
@@ -317,9 +313,9 @@
 
 #### 3.5.8 関連コンポーネント
 
-* `BookResource#searchBooksCriteria()`
-* `BookService#searchBookWithCriteria()`
-* `BookDao#searchWithCriteria()`
+* 書籍リソース（Criteria API検索）
+* 書籍サービス（動的クエリ検索）
+* 書籍データアクセス（Criteria API検索）
 
 ---
 
@@ -334,9 +330,7 @@
 #### 3.6.2 リクエスト
 
 * ヘッダー: なし
-
 * クエリパラメータ: なし
-
 * ボディ: なし
 
 #### 3.6.3 レスポンス
@@ -364,58 +358,20 @@
 
 #### 3.6.7 関連コンポーネント
 
-* `BookResource#getAllCategories()`
-* `CategoryService#getCategoryMap()`
-* `CategoryDao#findAll()`
+* 書籍リソース（カテゴリ一覧取得）
+* カテゴリサービス（Map形式変換）
+* カテゴリデータアクセス（全件取得）
 
 ---
 
-## 4. データ転送オブジェクト（DTO）
-
-### 4.1 BookTO
-
-* パッケージ: `pro.kensait.backoffice.api.dto`
-
-* 構造種別: データ転送オブジェクト（ネスト構造を含む）
-
-* フィールド構成:
-
-| フィールド名 | 型 | 説明 |
-|------------|---|------|
-| bookId | Integer | 書籍ID |
-| bookName | String | 書籍名 |
-| author | String | 著者名 |
-| price | BigDecimal | 価格 |
-| imageUrl | String | 画像URL |
-| quantity | Integer | 在庫数 |
-| version | Long | 楽観的ロックバージョン |
-| category | CategoryInfo | カテゴリ情報（ネスト） |
-| publisher | PublisherInfo | 出版社情報（ネスト） |
-
-* ネスト構造 - CategoryInfo:
-
-| フィールド名 | 型 | 説明 |
-|------------|---|------|
-| categoryId | Integer | カテゴリID |
-| categoryName | String | カテゴリ名 |
-
-* ネスト構造 - PublisherInfo:
-
-| フィールド名 | 型 | 説明 |
-|------------|---|------|
-| publisherId | Integer | 出版社ID |
-| publisherName | String | 出版社名 |
-
----
-
-## 5. ビジネスルールまとめ
+## 4. ビジネスルールまとめ
 
 ### 5.1 検索ルール
 
 | ルールID | ルール内容 |
 |---------|-----------|
 | BR-BOOK-001 | 論理削除された書籍（deleted=true）は検索結果から除外する |
-| BR-BOOK-002 | 在庫情報はSecondaryTableで自動結合 |
+| BR-BOOK-002 | 在庫情報は書籍と結合して取得 |
 | BR-BOOK-003 | 書籍の削除は論理削除（DELETEDフラグ）で実施し、物理削除は行わない |
 | BR-BOOK-004 | 存在しない書籍IDは404エラー |
 | BR-BOOK-005 | categoryId=0は全カテゴリとして扱う |
@@ -426,13 +382,13 @@
 
 ### 5.2 データ結合ルール
 
-* BOOK + STOCK: SecondaryTableで自動結合
-* BOOK → CATEGORY: ManyToOneで結合
-* BOOK → PUBLISHER: ManyToOneで結合
+* BOOK + STOCK: 書籍と在庫を結合
+* BOOK → CATEGORY: 書籍とカテゴリを結合
+* BOOK → PUBLISHER: 書籍と出版社を結合
 
 ---
 
-## 6. エラーハンドリング
+## 5. エラーハンドリング
 
 ### 6.1 エラーケース
 
@@ -445,13 +401,13 @@
 
 * INFOレベル:
 ```
-[ BookResource#getAllBooks ]
-[ BookResource#getBookById ] id: 1
-[ BookResource#searchBooks ] categoryId: 1, keyword: サンプル
-[ BookService#getBooksAll ]
-[ BookService#getBook ]
-[ BookService#searchBook(categoryId, keyword) ]
-[ BookService#searchBookWithCriteria ]
+[ BookResource ] getAllBooks
+[ BookResource ] getBookById: id=1
+[ BookResource ] searchBooks: categoryId=1, keyword=サンプル
+[ BookService ] getBooksAll
+[ BookService ] getBook
+[ BookService ] searchBook: categoryId, keyword
+[ BookService ] searchBookWithCriteria
 ```
 
 ---
@@ -460,8 +416,8 @@
 
 ### 7.1 N+1問題の回避
 
-* SecondaryTable: BOOKとSTOCKを1回のクエリで取得
-* ManyToOne: カテゴリと出版社を自動的にJOIN取得
+* 書籍と在庫を1回のクエリで取得
+* カテゴリと出版社を結合して取得
 
 ### 7.2 インデックスの活用
 
@@ -479,7 +435,7 @@
 
 ---
 
-## 8. テスト仕様
+## 7. テスト仕様
 
 ### 8.1 正常系テスト
 
@@ -540,7 +496,7 @@ GET /api/books?sort=bookName,asc&sort=price,desc
 
 ---
 
-## 10. セキュリティ考慮事項
+## 9. セキュリティ考慮事項
 
 ### 10.1 認証・認可
 
@@ -562,7 +518,7 @@ GET /api/books?sort=bookName,asc&sort=price,desc
 
 ---
 
-## 11. 動的振る舞い
+## 10. 動的振る舞い
 
 ### 11.1 書籍一覧取得シーケンス
 
@@ -575,11 +531,11 @@ sequenceDiagram
     participant Database
 
     Client->>BookResource: GET /api/books
-    Note over BookResource: LOG INFO<br/>[BookResource#getAllBooks]
-    BookResource->>BookService: getAllBooks()
-    Note over BookService: LOG INFO<br/>[BookService#getAllBooks]
-    BookService->>BookDao: findAll()
-    BookDao->>Database: findAll()<br/>Named Query: Book.findAll<br/>SELECT b FROM Book b<br/>LEFT JOIN FETCH b.category<br/>LEFT JOIN FETCH b.publisher<br/>WHERE b.deleted = false<br/>ORDER BY b.bookId
+    Note over BookResource: LOG INFO<br/>[BookResource] getAllBooks
+    BookResource->>BookService: 書籍一覧取得
+    Note over BookService: LOG INFO<br/>[BookService] getBooksAll
+    BookService->>BookDao: 全件取得
+    BookDao->>Database: 全件取得<br/>SELECT 書籍, カテゴリ, 出版社<br/>結合取得（N+1問題回避）<br/>WHERE deleted = false<br/>ORDER BY bookId
     Database-->>BookDao: List<Book>
     BookDao-->>BookService: List<Book>
     BookService-->>BookResource: List<Book>
@@ -601,8 +557,8 @@ sequenceDiagram
 
     Client->>BookResource: GET /api/books/1
     BookResource->>BookService: getBook(1)
-    BookService->>BookDao: findById(1)
-    BookDao->>Database: findById(1)<br/>SELECT b FROM Book b<br/>LEFT JOIN FETCH b.category<br/>LEFT JOIN FETCH b.publisher<br/>WHERE b.bookId = 1
+    BookService->>BookDao: ID検索(1)
+    BookDao->>Database: ID検索(1)<br/>SELECT 書籍, カテゴリ, 出版社<br/>結合取得<br/>WHERE bookId = 1
     Database-->>BookDao: Optional<Book>
     BookDao-->>BookService: Optional<Book>
     
@@ -674,11 +630,11 @@ sequenceDiagram
 
     Client->>BookResource: GET /api/books/search/criteria<br/>?categoryId=1&keyword=Java
     BookResource->>BookService: searchBooksCriteria(1, "Java")
-    BookService->>BookDao: searchCriteria(1, "Java")
+    BookService->>BookDao: 動的検索(categoryId=1, keyword="Java")
     
-    Note over BookDao: Build Criteria Query<br/>CriteriaBuilder<br/>Predicate動的構築
+    Note over BookDao: 動的クエリ構築<br/>条件の動的組み立て
     
-    BookDao->>Database: TypedQuery execution<br/>(Criteria API生成)
+    BookDao->>Database: 型安全クエリ実行
     Database-->>BookDao: List<Book>
     BookDao-->>BookService: List<Book>
     BookService-->>BookResource: List<Book>
@@ -696,13 +652,13 @@ sequenceDiagram
     participant Database
 
     Client->>BookResource: GET /api/books/categories
-    Note over BookResource: LOG INFO<br/>[BookResource#getCategories]
-    BookResource->>CategoryDao: getCategoriesAll()
-    CategoryDao->>Database: findAll()<br/>Named Query: Category.findAll
+    Note over BookResource: LOG INFO<br/>[BookResource] getCategories
+    BookResource->>CategoryDao: カテゴリ全件取得
+    CategoryDao->>Database: 全件取得
     Database-->>CategoryDao: List<Category>
     CategoryDao-->>BookResource: List<Category>
     
-    BookResource->>BookResource: Stream & Convert to Map<br/>categories.stream()<br/>.collect(Collectors.toMap(<br/>  Category::getCategoryName,<br/>  Category::getCategoryId))
+    BookResource->>BookResource: データ変換<br/>Category → Map<br/>(categoryName → categoryId)
     
     BookResource-->>Client: 200 OK<br/>{<br/>  "文学": 1,<br/>  "ビジネス": 2<br/>}<br/>Content-Type: application/json
 ```
@@ -721,7 +677,7 @@ sequenceDiagram
     BookService->>BookDao: findById(999)
     BookDao-->>BookService: Optional.empty()
     BookService-->>BookResource: empty
-    BookResource->>BookResource: LOG WARN<br/>[BookResource#getBook]<br/>Book not found: 999
+    BookResource->>BookResource: LOG WARN<br/>[BookResource] getBook<br/>Book not found: 999
     BookResource-->>Client: 404 Not Found<br/>{error: "書籍が見つかりません"}
 ```
 
@@ -737,9 +693,9 @@ graph TD
     DB[Database<br/>- BOOK table<br/>- CATEGORY table<br/>- PUBLISHER table<br/>- STOCK table]
     
     Client -->|HTTP GET<br/>/api/books| Resource
-    Resource -->|@Inject| Service
-    Service -->|@Inject| BookDao
-    Resource -->|@Inject| CategoryDao
-    BookDao -->|EntityManager / JPQL| DB
+    Resource -->|依存性注入| Service
+    Service -->|依存性注入| BookDao
+    Resource -->|依存性注入| CategoryDao
+    BookDao -->|データアクセス| DB
     CategoryDao -->|EntityManager / JPQL| DB
 ```

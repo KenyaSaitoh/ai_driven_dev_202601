@@ -96,7 +96,6 @@ screen_id: "SCREEN_005_PersonSearch"
   * 主キー、複合主キーから@Id、@EmbeddedId等を設計
 
 注意: data_model.mdはRDB論理設計のみ。JPAエンティティクラスは詳細設計フェーズでERDから設計します
-  * persistence.xml設定情報セクションでJNDI名とPersistence Unit名を確認
 
 注意: 拡張機能の場合、システムレベルの仕様が存在しない場合がある。その場合はベースラインの仕様を参照する
 
@@ -209,7 +208,7 @@ screen_id: "SCREEN_005_PersonSearch"
 
 9. データソース設定
    * 「persistence.xmlで使用するJNDI名は以下でよろしいでしょうか？」
-   * architecture_design.mdまたはdata_model.mdから抽出したJNDI名を確認
+   * architecture_design.mdのデータソース設定セクションまたはpersistence.xml設定情報セクションから抽出したJNDI名を確認
    * 移行元で実際に使用されているJNDI名であることを確認
 
 ### 2.3 不足情報の補完

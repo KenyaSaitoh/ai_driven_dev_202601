@@ -48,17 +48,13 @@ stateDiagram-v2
 ### 5.1 ワークフロー作成
 
 * エンドポイント: `POST /api/workflows`
-
 * リクエスト（新規書籍追加）:
-
 * レスポンス（201 Created）:
 
 ### 5.2 ワークフロー承認
 
 * エンドポイント: `POST /api/workflows/{workflowId}/approve`
-
 * リクエスト:
-
 * 処理フロー:
   1. 最新の状態を取得（APPLIEDか？）
   2. 承認権限チェック
@@ -72,7 +68,6 @@ stateDiagram-v2
 5. トランザクションコミット（ワークフロー + 書籍マスタ）
 
 * レスポンス（200 OK）: WorkflowTO
-
 * レスポンス（403 Forbidden）:
 
 ## 6. 承認権限ルール
@@ -131,7 +126,7 @@ OPERATION_ID  WORKFLOW_ID  STATE     OPERATION_TYPE  OPERATED_AT
   * 対象テーブル: STOCK
   * 挿入カラム: BOOK_ID, QUANTITY, VERSION
   * 初期値: QUANTITY=0, VERSION=0
-  * 備考: SecondaryTableマッピングにより自動的に実行される
+  * 備考: 書籍と在庫の結合により自動的に実行される
 
 ### 8.2 REMOVE_BOOK
 
@@ -158,55 +153,7 @@ OPERATION_ID  WORKFLOW_ID  STATE     OPERATION_TYPE  OPERATED_AT
 
 どちらか失敗した場合、両方ロールバック。
 
-## 10. DTO
-
-### 10.1 WorkflowCreateRequest
-
-* パッケージ: `pro.kensait.backoffice.api.dto`
-
-* 構造種別: リクエストデータ転送オブジェクト
-
-* フィールド構成:
-
-| フィールド名 | 型 | 説明 |
-|------------|---|------|
-| workflowType | String | ワークフロー種別 |
-| createdBy | Long | 作成者の社員ID |
-| bookId | Integer | 書籍ID |
-| bookName | String | 書籍名 |
-| author | String | 著者名 |
-| price | BigDecimal | 価格 |
-| imageUrl | String | 画像URL |
-| categoryId | Integer | カテゴリID |
-| publisherId | Integer | 出版社ID |
-| applyReason | String | 申請理由 |
-| startDate | LocalDate | 開始日 |
-| endDate | LocalDate | 終了日 |
-
-### 10.2 WorkflowTO
-
-* パッケージ: `pro.kensait.backoffice.api.dto`
-
-* 構造種別: データ転送オブジェクト
-
-* 主要フィールド構成:
-
-| フィールド名 | 型 | 説明 |
-|------------|---|------|
-| operationId | Long | 操作ID |
-| workflowId | Long | ワークフローID |
-| workflowType | String | ワークフロー種別 |
-| state | String | 状態 |
-| bookId | Integer | 書籍ID |
-| bookName | String | 書籍名 |
-| operationType | String | 操作種別 |
-| operatedBy | Long | 操作者の社員ID |
-| operatorName | String | 操作者名 |
-| operatedAt | LocalDateTime | 操作日時 |
-
-* 備考: その他のフィールドも含む（詳細は実装参照）
-
-## 11. ビジネスルール
+## 10. ビジネスルール
 
 | ルールID | ルール内容 |
 |---------|-----------|
@@ -226,7 +173,7 @@ OPERATION_ID  WORKFLOW_ID  STATE     OPERATION_TYPE  OPERATED_AT
 | 不正な状態遷移 | 400 Bad Request | 現在の状態では操作できません |
 | 承認権限不足 | 403 Forbidden | 承認権限がありません |
 
-## 13. 関連コンポーネント
+## 12. 関連コンポーネント
 
 * `WorkflowResource`
 * `WorkflowService`
@@ -234,14 +181,14 @@ OPERATION_ID  WORKFLOW_ID  STATE     OPERATION_TYPE  OPERATED_AT
 * `EmployeeDao`
 * `BookDao`
 
-## 14. パフォーマンス要件
+## 13. パフォーマンス要件
 
 * ワークフロー一覧取得: 500ms以内
 * 承認処理: 1秒以内
 
 ---
 
-## 15. 動的振る舞い
+## 14. 動的振る舞い
 
 ### 15.1 ワークフロー作成シーケンス（新規書籍追加）
 

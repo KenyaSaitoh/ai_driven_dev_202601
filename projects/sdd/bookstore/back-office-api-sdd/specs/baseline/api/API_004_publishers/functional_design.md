@@ -37,9 +37,7 @@
 #### 3.1.2 リクエスト
 
 * ヘッダー: なし
-
 * クエリパラメータ: なし
-
 * ボディ: なし
 
 #### 3.1.3 レスポンス
@@ -59,14 +57,13 @@ Content-Type: application/json; charset=UTF-8
 
 #### 3.1.4 処理フロー
 
-1. PublisherResourceを呼び出し（`getAllPublishers()`）
-2. PublisherServiceを呼び出し（`getPublishersAll()`）
-3. PublisherDaoで全出版社を取得
-   * JPQL: `SELECT p FROM Publisher p`
-   * Named Query: `Publisher.findAll`
+1. 出版社リソースを呼び出し
+2. 出版社サービスを呼び出し
+3. 出版社データアクセスで全出版社を取得
+   * 全出版社を取得
 4. Publisherエンティティのリストを取得
 5. 各PublisherエンティティをPublisherTOに変換
-   * ストリームAPIで変換: `.stream().map(p -> new PublisherTO(...)).toList()`
+   * データ変換: Publisher → PublisherTO
 6. 配列形式でJSON変換してレスポンス
 
 #### 3.1.5 ビジネスルール
@@ -77,49 +74,13 @@ Content-Type: application/json; charset=UTF-8
 
 #### 3.1.6 関連コンポーネント
 
-* `PublisherResource#getAllPublishers()`
-* `PublisherService#getPublishersAll()`
-* `PublisherDao#findAll()`
+* 出版社リソース（出版社一覧取得）
+* 出版社サービス（ビジネスロジック）
+* 出版社データアクセス（全件取得）
 
 ---
 
-## 4. データ転送オブジェクト（DTO）
-
-### 4.1 PublisherTO
-
-* パッケージ: `pro.kensait.backoffice.api.dto`
-
-* 構造種別: レコード型（immutableなデータ転送オブジェクト）
-
-* フィールド構成:
-
-| フィールド名 | 型 | 説明 |
-|------------|---|------|
-| publisherId | Integer | 出版社ID |
-| publisherName | String | 出版社名 |
-
----
-
-## 5. エンティティ
-
-### 5.1 Publisher
-
-* パッケージ: `pro.kensait.backoffice.entity`
-
-* マッピング対象テーブル: PUBLISHER
-
-* エンティティ構成:
-
-| フィールド名 | 型 | カラム名 | 制約 | 説明 |
-|------------|---|---------|-----|------|
-| publisherId | int | PUBLISHER_ID | PRIMARY KEY | 出版社ID |
-| publisherName | String | PUBLISHER_NAME | - | 出版社名 |
-
-* エンティティ種別: 永続化エンティティ（JPAエンティティ）
-
----
-
-## 6. ビジネスルール
+## 4. ビジネスルール
 
 | ルールID | ルール内容 |
 |---------|-----------|
@@ -130,7 +91,7 @@ Content-Type: application/json; charset=UTF-8
 
 ---
 
-## 7. エラーハンドリング
+## 5. エラーハンドリング
 
 ### 7.1 エラーケース
 
@@ -144,19 +105,19 @@ Content-Type: application/json; charset=UTF-8
 
 * INFOレベル:
 ```
-[ PublisherResource#getAllPublishers ]
-[ PublisherService#getPublishersAll ]
+[ PublisherResource ] getAllPublishers
+[ PublisherService ] getPublishersAll
 ```
 
 * DEBUGレベル:
 ```
-[ PublisherDao#findAll ] Executing JPQL: SELECT p FROM Publisher p
-[ PublisherDao#findAll ] Result count: 10
+[ PublisherDao ] 全出版社取得実行
+[ PublisherDao ] 取得件数: 10
 ```
 
 ---
 
-## 8. パフォーマンス考慮事項
+## 6. パフォーマンス考慮事項
 
 ### 8.1 レスポンスタイム
 
@@ -178,7 +139,7 @@ Content-Type: application/json; charset=UTF-8
 
 ---
 
-## 9. テスト仕様
+## 7. テスト仕様
 
 ### 9.1 正常系テスト
 
@@ -198,14 +159,14 @@ Content-Type: application/json; charset=UTF-8
 
 ## 10. データベースクエリ
 
-### 10.1 クエリ仕様（JPQL）
+### 10.1 クエリ仕様
 
 * クエリ内容:
   * 対象エンティティ: Publisher
   * 取得フィールド: 全フィールド
   * WHERE条件: なし（全件取得）
 
-### 10.2 実行されるSQLの論理構造
+### 10.2 実行されるクエリの論理構造
 
 * SELECT句:
   * PUBLISHER_ID
@@ -219,7 +180,7 @@ Content-Type: application/json; charset=UTF-8
 
 ---
 
-## 11. 将来の拡張
+## 9. 将来の拡張
 
 ### 11.1 出版社詳細取得
 
@@ -264,7 +225,7 @@ GET /api/publishers?search=出版社A
 
 ---
 
-## 13. 運用考慮事項
+## 11. 運用考慮事項
 
 ### 13.1 データメンテナンス
 
@@ -286,7 +247,7 @@ GET /api/publishers?search=出版社A
 
 ---
 
-## 14. 関連API
+## 12. 関連API
 
 * 書籍API: `/api/books` - 出版社で絞り込み可能
 * ワークフローAPI: `/api/workflows` - 新規書籍追加時に出版社ID指定
@@ -300,8 +261,8 @@ GET /api/publishers?search=出版社A
 | 項目 | カテゴリAPI | 出版社API |
 |------|-----------|----------|
 | エンドポイント | `/api/categories` | `/api/publishers` |
-| エンティティ | Category | Publisher |
-| DTO | CategoryTO | PublisherTO |
+| データモデル | Category | Publisher |
+| レスポンス形式 | 配列 | 配列 |
 | 処理フロー | 同じ | 同じ |
 | パフォーマンス | 同等 | 同等 |
 | キャッシング | 推奨 | 推奨 |
@@ -314,31 +275,31 @@ GET /api/publishers?search=出版社A
 
 ---
 
-## 16. 動的振る舞い
+## 14. 動的振る舞い
 
-### 16.1 出版社一覧取得シーケンス
+### 14.1 出版社一覧取得シーケンス
 
 ```mermaid
 sequenceDiagram
-    participant Client
-    participant PublisherResource
-    participant PublisherService
-    participant PublisherDao
-    participant Database
+    participant Client as クライアント
+    participant API as 出版社API
+    participant BizLogic as ビジネスロジック
+    participant DataAccess as データアクセス
+    participant Database as データベース
 
-    Client->>PublisherResource: GET /api/publishers
-    Note over PublisherResource: LOG INFO<br/>[PublisherResource#getAllPublishers]
-    PublisherResource->>PublisherService: getAllPublishers()
-    Note over PublisherService: LOG INFO<br/>[PublisherService#getPublishersAll]
-    PublisherService->>PublisherDao: getPublishersAll()
-    PublisherDao->>Database: findAll()<br/>Named Query: Publisher.findAll<br/>SELECT p FROM PUBLISHER p<br/>ORDER BY p.PUBLISHER_ID
-    Database-->>PublisherDao: List<Publisher> (10 records)
-    PublisherDao-->>PublisherService: List<Publisher>
-    PublisherService-->>PublisherResource: List<Publisher>
+    Client->>API: GET /api/publishers
+    Note over API: LOG INFO<br/>出版社一覧取得
+    API->>BizLogic: 出版社一覧取得
+    Note over BizLogic: LOG INFO<br/>全件取得処理
+    BizLogic->>DataAccess: 全件取得
+    DataAccess->>Database: 全件検索<br/>ORDER BY PUBLISHER_ID
+    Database-->>DataAccess: 出版社リスト (10 records)
+    DataAccess-->>BizLogic: 出版社リスト
+    BizLogic-->>API: 出版社リスト
     
-    PublisherResource->>PublisherResource: Stream & Map<br/>publishers.stream()<br/>.map(p -> new PublisherTO(<br/>  p.getPublisherId(),<br/>  p.getPublisherName()))<br/>.toList()
+    API->>API: データ変換<br/>内部表現 → レスポンス形式
     
-    PublisherResource-->>Client: 200 OK<br/>[{PublisherTO}]<br/>Content-Type: application/json
+    API-->>Client: 200 OK<br/>JSON配列<br/>Content-Type: application/json
 ```
 
 ### 16.2 処理フローチャート
@@ -357,36 +318,36 @@ flowchart TD
     J --> K[200 OK<br/>レスポンス返却]
 ```
 
-### 16.3 データフロー全体図
+### 14.3 データフロー全体図
 
 ```mermaid
 graph TD
-    Client[Client]
-    Resource[PublisherResource<br/>- getAllPublishers]
-    Service[PublisherService<br/>- getPublishersAll]
-    Dao[PublisherDao<br/>- findAll]
-    DB[Database<br/>- PUBLISHER table]
+    Client[クライアント]
+    API[出版社API]
+    BizLogic[ビジネスロジック]
+    DataAccess[データアクセス]
+    DB[データベース<br/>PUBLISHER]
     
-    Client -->|HTTP GET<br/>/api/publishers| Resource
-    Resource -->|@Inject| Service
-    Service -->|@Inject| Dao
-    Dao -->|EntityManager / JPQL| DB
+    Client -->|HTTP GET<br/>/api/publishers| API
+    API -->|呼び出し| BizLogic
+    BizLogic -->|呼び出し| DataAccess
+    DataAccess -->|クエリ実行| DB
 ```
 
-### 16.4 状態管理
+### 14.4 状態管理
 
 * 出版社APIは状態を持たない（ステートレス）:
 
 ```mermaid
 graph LR
-    R1[Request 1] --> PR1[Publisher<br/>Resource]
-    PR1 --> DB1[Database]
+    R1[Request 1] --> API1[出版社API]
+    API1 --> DB1[Database]
     
-    R2[Request 2] --> PR2[Publisher<br/>Resource]
-    PR2 --> DB2[Database]
+    R2[Request 2] --> API2[出版社API]
+    API2 --> DB2[Database]
     
-    R3[Request 3] --> PR3[Publisher<br/>Resource]
-    PR3 --> DB3[Database]
+    R3[Request 3] --> API3[出版社API]
+    API3 --> DB3[Database]
 ```
 
 各リクエストは独立して処理される

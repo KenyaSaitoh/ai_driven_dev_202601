@@ -134,7 +134,9 @@ agent_skills/struts-to-jsf-migration/
 ├── README.md                         # このファイル
 ├── SKILL.md                          # 詳細ガイド
 ├── principles/
-│   └── common_rules.md              # マイグレーション共通ルール
+│   ├── architecture.md              # Jakarta EE APIアーキテクチャ標準
+│   ├── security.md                  # セキュリティ標準
+│   └── common_rules.md              # マイグレーション共通ルール、マッピング規則
 └── instructions/
     ├── reverse_engineering.md        # ステップ1: 既存コード分析
     ├── task_breakdown.md             # ステップ2: タスク分解
@@ -244,7 +246,10 @@ Person一覧画面を実装してください。
 ## 📖 参考資料
 
 * [SKILL.md](SKILL.md) - 詳細ガイド
-* [principles/common_rules.md](principles/common_rules.md) - マイグレーション原則
+* [マイグレーション原則](principles/) - マイグレーションルール、アーキテクチャ標準、セキュリティ標準
+  * [architecture.md](principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
+  * [security.md](principles/security.md) - セキュリティ標準
+  * [common_rules.md](principles/common_rules.md) - 共通ルール、マッピング規則
 * [Jakarta EE 10仕様](https://jakarta.ee/specifications/platform/10/)
 * [Jakarta Faces 4.0仕様](https://jakarta.ee/specifications/faces/4.0/)
 

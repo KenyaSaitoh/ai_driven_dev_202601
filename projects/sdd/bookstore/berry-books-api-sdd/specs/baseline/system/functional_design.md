@@ -1,15 +1,19 @@
-# berry-books-api - 機能設計書（API仕様）
+# berry-books-api - システム機能設計書
 
+ファイル名: functional_design.md（system/配下）  
 プロジェクトID: berry-books-api  
 バージョン: 2.0.0  
-最終更新日: 2025-12-27  
-ステータス: REST API仕様確定
+最終更新日: 2026-01-17  
+ステータス: システム機能設計確定
 
 ---
 
 ## 1. 概要
 
-本文書は、berry-books-api REST APIの各エンドポイントの詳細仕様を記述する。各APIについて、リクエスト/レスポンス形式、ビジネスルール、エラーハンドリングを定義する。
+本文書は、berry-books-apiシステム全体の機能設計、共通サービス、ドメインモデルの機能設計を記述する。
+
+* API固有の機能設計は、各api/{api_id}/functional_design.mdを参照すること
+* 実装クラス設計（JPAエンティティ、Dao、共通Service等）、メソッドシグネチャ、アノテーションは詳細設計（system/detailed_design.md）で記述します
 
 * ベースURL: `http://localhost:8080/berry-books-api/api`
 
@@ -17,329 +21,175 @@
 
 * アーキテクチャ: 注文管理を担う独立したバックエンドサービス
 
-### 1.1 API実装方式
+---
 
-berry-books-apiは、注文管理という独自のドメインを持ち、必要に応じて外部システムを呼び出します。
+## 2. システムアーキテクチャ
 
-| API | 実装方式 | 説明 |
-|-----|---------|------|
-| 認証API | 独自実装 + 外部連携 | JWT生成・検証は本システム、顧客情報はcustomer-hub-api経由 |
-| 書籍API | 外部API呼び出し | back-office-apiから書籍情報を取得 |
-| カテゴリAPI | 外部API呼び出し | back-office-apiからカテゴリ情報を取得 |
-| 注文API | 独自実装 + 外部連携 | 注文処理は本システム、在庫更新はback-office-api経由 |
-| 画像API | 独自実装 | WAR内リソースを直接配信 |
+### 2.1 システム概要
 
-### 1.2 API別詳細仕様
+berry-books-apiは、オンライン書店の注文管理を担う独立したバックエンドサービスです。
 
-API単位の詳細仕様は、以下のドキュメントを参照してください：
+* プライマリドメイン: 注文管理
+* セカンダリドメイン: 顧客管理（外部API経由）、書籍管理（外部API経由）
 
-* [API_001_auth](../api/API_001_auth/functional_design.md) - 認証API（ログイン、ログアウト、新規登録、ユーザー情報取得）
-* [API_002_books](../api/API_002_books/functional_design.md) - 書籍API（書籍一覧、詳細、検索、カテゴリ一覧）※外部API連携
-* [API_003_orders](../api/API_003_orders/functional_design.md) - 注文API（注文作成、注文履歴、注文詳細）
-* [API_004_images](../api/API_004_images/functional_design.md) - 画像API（書籍表紙画像取得）
+### 2.2 アーキテクチャパターン
+
+* マイクロサービスアーキテクチャ: 注文管理ドメインに特化
+* 外部API統合: 書籍情報、顧客情報は外部サービスから取得
+* レイヤードアーキテクチャ: プレゼンテーション層、ビジネスロジック層、データアクセス層
 
 ---
 
-## 2. 認証API (`/api/auth`)
+## 3. API一覧
 
-### 2.1 ログイン
+### 3.1 API実装方式
 
+| API ID | API名 | ベースパス | 実装方式 | 説明 | 機能設計書 |
+|--------|------|----------|---------|------|----------|
+| API_001 | 認証API | /api/auth | 独自実装 + 外部連携 | JWT生成・検証は本システム、顧客情報はcustomer-hub-api経由 | [API_001_auth](../api/API_001_auth/functional_design.md) |
+| API_002 | 書籍API | /api/books | 外部API呼び出し | back-office-apiから書籍情報を取得 | [API_002_books](../api/API_002_books/functional_design.md) |
+| API_003 | 注文API | /api/orders | 独自実装 + 外部連携 | 注文処理は本システム、在庫更新はback-office-api経由 | [API_003_orders](../api/API_003_orders/functional_design.md) |
+| API_004 | 画像API | /api/images | 独自実装 | WAR内リソースを直接配信 | [API_004_images](../api/API_004_images/functional_design.md) |
+
+注意: API固有の詳細仕様は、各APIディレクトリ配下のfunctional_design.mdを参照してください。
+
+---
+
+## 4. 共通機能設計
+
+注意: API固有の機能設計は、各api/{api_id}/functional_design.mdを参照してください。
+
+### 4.1 認証・認可
+
+#### 4.1.1 認証方式
+
+* 認証方式: JWT（JSON Web Token）
+* トークン管理: HttpOnly Cookie
+* トークン有効期限: 24時間
+* アルゴリズム: HMAC-SHA256
+
+#### 4.1.2 認証フロー
+
+1. ログイン時にJWT生成
+2. HttpOnly CookieでJWTを管理
+3. 認証必須APIは、JWTフィルターで検証
+4. 認証除外エンドポイント: /api/auth/login, /api/auth/logout, /api/auth/register, /api/books/*, /api/images/*
+
+#### 4.1.3 外部連携による顧客認証
+
+* 顧客情報は、customer-hub-api経由で取得
+* パスワード照合は本システムで実施
+
+### 4.2 ログ処理
+
+* ログレベル: ERROR, WARN, INFO, DEBUG
+* ログ出力方針: SLF4J + Log4j2
+* 重要なイベント: ログイン成功/失敗、注文作成、外部API呼び出し
+
+### 4.3 エラーハンドリング
+
+* エラーレスポンス形式: ErrorResponse（status, error, message, path）
+* 例外マッピング: Exception Mapperで統一的なエラーレスポンスを返却
+
+---
+
+## 5. ドメインモデル機能設計
+
+### 5.1 注文ドメイン
+
+#### 5.1.1 ビジネスルール
+
+| ルールID | 説明 |
+|---------|------|
+| BR-ORDER-001 | 注文作成時、在庫数が注文数以上であること |
+| BR-ORDER-002 | 在庫更新は楽観的ロックで並行制御すること |
+| BR-ORDER-003 | 注文トランザクションと注文明細は同一トランザクション内で作成すること |
+| BR-ORDER-004 | 注文履歴は、1注文明細=1レコードの非正規化形式で返却すること |
+
+#### 5.1.2 状態遷移
+
+* 注文状態: 注文作成（固定、ステータス管理なし）
+
+### 5.2 顧客ドメイン（外部API経由）
+
+* 顧客情報はcustomer-hub-api経由で取得
+* 本システムでは顧客情報を永続化しない
+
+### 5.3 書籍ドメイン（外部API経由）
+
+* 書籍情報はback-office-api経由で取得
+* 本システムでは書籍情報を永続化しない
+
+---
+
+## 6. システム全体のユーザーフロー
+
+### 6.1 メインユーザーフロー
+
+```mermaid
+flowchart TD
+    Start([開始]) --> Login[ログイン]
+    Login --> Browse[書籍閲覧]
+    Browse --> Search{検索?}
+    Search -->|Yes| SearchBooks[書籍検索]
+    SearchBooks --> Browse
+    Search -->|No| AddCart[カート追加]
+    AddCart --> Checkout[注文作成]
+    Checkout --> History[注文履歴確認]
+    History --> End([終了])
 ```
-POST /api/auth/login
-```
 
-メールアドレスとパスワードで認証し、JWT Cookieを発行する。
+---
 
-* Content-Type: `application/json`
-* 認証: 不要
-* レスポンス: 200 OK（Set-Cookie: JWT）、401 Unauthorized
+## 7. システム全体のデータフロー
 
-詳細仕様: [API_001_auth/openapi.yaml](../api/API_001_auth/openapi.yaml)
+### 7.1 注文作成フロー（論理レベル）
 
-#### シーケンス図
+注意: 実装クラス名は使用していません。詳細設計書（detailed_design.md）で実装クラスを定義します。
 
 ```mermaid
 sequenceDiagram
-    participant Client
-    participant AuthResource
-    participant CustomerRestClient
-    participant JwtUtil
-    participant RestAPI as berry-books-rest API
+    participant Client as クライアント
+    participant API as APIレイヤー
+    participant BizLogic as ビジネスロジック
+    participant DataAccess as データアクセス
+    participant ExtAPI as 外部API連携
+    participant DB as Database
     
-    Client->>AuthenResource: POST /api/auth/login<br/>{email, password}
-    AuthenResource->>CustomerRestClient: findByEmail(email)
-    CustomerRestClient->>RestAPI: GET /customers/query_email?email={email}
-    RestAPI-->>CustomerRestClient: Customer data
-    CustomerRestClient-->>AuthenResource: Customer object
-
-    AuthenResource->>AuthenResource: BCrypt.checkpw(password, storedPassword)
+    Client->>API: 注文作成リクエスト
+    API->>API: JWT認証チェック
+    API->>BizLogic: 注文処理
     
-    alt Password match
-        AuthenResource->>JwtUtil: generateToken(customerId, email)
-        JwtUtil-->>AuthenResource: JWT token
-        AuthenResource-->>Client: 200 OK<br/>Set-Cookie: berry-books-jwt=<token><br/>LoginResponse
-    else Password mismatch
-        AuthenResource-->>Client: 401 Unauthorized<br/>ErrorResponse
-    end
-```
-
----
-
-### 2.2 ログアウト
-
-```
-POST /api/auth/logout
-```
-
-JWT Cookieを削除（MaxAge=0）してログアウトする。
-
-* Content-Type: `application/json`
-* 認証: 不要
-* レスポンス: 200 OK（Set-Cookie: 削除）
-
-詳細仕様: [API_001_auth/openapi.yaml](../api/API_001_auth/openapi.yaml)
-
----
-
-### 2.3 新規登録
-
-```
-POST /api/auth/register
-```
-
-新規顧客を登録し、JWT Cookieを発行する。
-
-* Content-Type: `application/json`
-* 認証: 不要
-* レスポンス: 200 OK（Set-Cookie: JWT）、409 Conflict、400 Bad Request
-
-詳細仕様: [API_001_auth/openapi.yaml](../api/API_001_auth/openapi.yaml)
-
----
-
-### 2.4 現在のログインユーザー情報取得
-
-```
-GET /api/auth/me
-```
-
-JWT Cookieから顧客情報を取得する。
-
-* 認証: 必須（JWT Cookie）
-* レスポンス: 200 OK、401 Unauthorized
-
-詳細仕様: [API_001_auth/openapi.yaml](../api/API_001_auth/openapi.yaml)
-
----
-
-## 3. 書籍API (`/api/books`)
-
-### 3.1 書籍一覧取得
-
-```
-GET /api/books
-```
-
-全書籍を取得する。back-office-apiに外部API連携転送。
-
-* 認証: 不要
-* レスポンス: 200 OK
-
-詳細仕様: [API_002_books/openapi.yaml](../api/API_002_books/openapi.yaml)
-
----
-
-### 3.2 書籍詳細取得
-
-```
-GET /api/books/{id}
-```
-
-指定されたIDの書籍を取得する。back-office-apiに外部API連携転送。
-
-* 認証: 不要
-* レスポンス: 200 OK、404 Not Found
-
-詳細仕様: [API_002_books/openapi.yaml](../api/API_002_books/openapi.yaml)
-
----
-
-### 3.3 書籍検索
-
-```
-GET /api/books/search?categoryId={id}&keyword={keyword}
-```
-
-カテゴリIDとキーワードで書籍を検索する。back-office-apiに外部API連携転送。
-
-* 認証: 不要
-* クエリパラメータ: categoryId（オプション）、keyword（オプション）
-* レスポンス: 200 OK
-
-詳細仕様: [API_002_books/openapi.yaml](../api/API_002_books/openapi.yaml)
-
----
-
-### 3.4 カテゴリ一覧取得
-
-```
-GET /api/books/categories
-```
-
-全カテゴリをMapで取得する。back-office-apiに外部API連携転送。
-
-* 認証: 不要
-* レスポンス: 200 OK
-
-詳細仕様: [API_002_books/openapi.yaml](../api/API_002_books/openapi.yaml)
-
----
-
-## 4. 注文API (`/api/orders`)
-
-### 4.1 注文作成
-
-```
-POST /api/orders
-```
-
-カート内の書籍を注文する。在庫引き当て、在庫減算、注文レコード作成を実行する。
-
-* Content-Type: `application/json`
-* 認証: 必須（JWT Cookie）
-* レスポンス: 200 OK、409 Conflict（在庫不足/楽観的ロック）、401 Unauthorized
-
-詳細仕様: [API_003_orders/openapi.yaml](../api/API_003_orders/openapi.yaml)
-
-#### シーケンス図
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant OrderResource
-    participant OrderService
-    participant StockDao
-    participant OrderTranDao
-    participant OrderDetailDao
-    participant DB
-    
-    Client->>OrderResource: POST /api/orders<br/>Cookie: berry-books-jwt
-    OrderResource->>OrderResource: JWT認証チェック
-    OrderResource->>OrderService: orderBooks(orderTO)
-    
-    Note over OrderService,DB: BEGIN TRANSACTION
+    Note over BizLogic,DB: トランザクション開始
     
     loop 各カート項目
-        OrderService->>StockDao: findByBookId(bookId)
-        StockDao->>DB: SELECT * FROM STOCK
-        DB-->>StockDao: Stock
-        StockDao-->>OrderService: Stock
-        
-        OrderService->>OrderService: 在庫チェック<br/>(quantity >= count)
-        
-        alt 在庫不足
-            OrderService-->>OrderResource: OutOfStockException
-            OrderResource-->>Client: 409 Conflict
-        end
-        
-        OrderService->>StockDao: updateStock(bookId, count, version)
-        StockDao->>DB: UPDATE STOCK<br/>SET QUANTITY = QUANTITY - count<br/>WHERE VERSION = version
-        
-        alt VERSION不一致
-            DB-->>StockDao: 0 rows updated
-            StockDao-->>OrderService: OptimisticLockException
-            OrderService-->>OrderResource: OptimisticLockException
-            OrderResource-->>Client: 409 Conflict
-        end
+        BizLogic->>ExtAPI: 在庫確認（back-office-api）
+        ExtAPI-->>BizLogic: 在庫情報
+        BizLogic->>BizLogic: 在庫数チェック
+        BizLogic->>ExtAPI: 在庫更新（back-office-api）
+        ExtAPI-->>BizLogic: 更新結果
     end
     
-    OrderService->>OrderTranDao: insert(orderTran)
-    OrderTranDao->>DB: INSERT INTO ORDER_TRAN
-    DB-->>OrderTranDao: orderTranId
-    OrderTranDao-->>OrderService: OrderTran
+    BizLogic->>DataAccess: 注文トランザクション登録
+    DataAccess->>DB: INSERT ORDER_TRAN
+    DB-->>DataAccess: 注文ID
     
     loop 各注文明細
-        OrderService->>OrderDetailDao: insert(orderDetail)
-        OrderDetailDao->>DB: INSERT INTO ORDER_DETAIL
-        DB-->>OrderDetailDao: Success
+        BizLogic->>DataAccess: 注文明細登録
+        DataAccess->>DB: INSERT ORDER_DETAIL
     end
     
-    Note over OrderService,DB: COMMIT
+    Note over BizLogic,DB: トランザクションコミット
     
-    OrderService-->>OrderResource: OrderTran
-    OrderResource-->>Client: 200 OK<br/>OrderResponse
+    BizLogic-->>API: 注文完了情報
+    API-->>Client: 注文レスポンス
 ```
 
 ---
 
-### 4.2 注文履歴取得
+## 8. エラーハンドリング
 
-```
-GET /api/orders/history
-```
-
-ログイン中の顧客の注文履歴を取得する。1注文明細=1レコードの非正規化形式。
-
-* 認証: 必須（JWT Cookie）
-* レスポンス: 200 OK、401 Unauthorized
-
-詳細仕様: [API_003_orders/openapi.yaml](../api/API_003_orders/openapi.yaml)
-
----
-
-### 4.3 注文詳細取得
-
-```
-GET /api/orders/{tranId}
-```
-
-指定された注文IDの注文詳細を取得する。
-
-* 認証: 不要
-* パスパラメータ: tranId（注文トランザクションID）
-* レスポンス: 200 OK、404 Not Found
-
-詳細仕様: [API_003_orders/openapi.yaml](../api/API_003_orders/openapi.yaml)
-
----
-
-### 4.4 注文明細取得
-
-```
-GET /api/orders/{tranId}/details/{detailId}
-```
-
-指定された注文明細を取得する。
-
-* 認証: 不要
-* パスパラメータ: tranId（注文トランザクションID）、detailId（注文明細ID）
-* レスポンス: 200 OK、404 Not Found
-
-詳細仕様: [API_003_orders/openapi.yaml](../api/API_003_orders/openapi.yaml)
-
----
-
-## 5. 画像API (`/api/images`)
-
-### 5.1 書籍表紙画像取得
-
-```
-GET /api/images/covers/{bookId}
-```
-
-指定された書籍IDの表紙画像を取得する。画像が存在しない場合はフォールバック画像を返す。
-
-* 認証: 不要
-* パスパラメータ: bookId（書籍ID）
-* レスポンス: 200 OK（Content-Type: image/jpeg）
-
-詳細仕様: [API_004_images/openapi.yaml](../api/API_004_images/openapi.yaml)
-
----
-
-## 6. エラーレスポンス仕様
-
-### 6.1 HTTPステータスコード
+### 8.1 エラーレスポンス仕様
 
 | ステータスコード | 説明 | 例 |
 |---------------|------|-----|
@@ -350,15 +200,69 @@ GET /api/images/covers/{bookId}
 | 409 Conflict | ビジネスエラー | 在庫不足、楽観的ロック競合、メールアドレス重複 |
 | 500 Internal Server Error | システムエラー | データベース接続エラー、予期しない例外 |
 
+### 8.2 エラーレスポンス形式
+
+```json
+{
+  "status": 409,
+  "error": "Conflict",
+  "message": "在庫が不足しています",
+  "path": "/api/orders"
+}
+```
+
 ---
 
-## 7. 参考資料
+## 9. トランザクション管理
 
-本機能設計書に関連する詳細ドキュメント：
+### 9.1 トランザクション境界
+
+| レイヤー | トランザクション境界 | 説明 |
+|---------|------------------|------|
+| プレゼンテーション層 | なし | トランザクションは持たない |
+| ビジネスロジック層 | トランザクション境界 | Serviceクラスでトランザクション管理 |
+| データアクセス層 | なし | トランザクションは持たない |
+
+### 9.2 重要なトランザクション処理
+
+| 処理名 | トランザクション範囲 | 並行制御 |
+|--------|------------------|---------|
+| 注文作成 | 在庫更新（外部API） + 注文トランザクション登録 + 注文明細登録 | 楽観的ロック（外部API側） |
+
+---
+
+## 10. 外部連携
+
+### 10.1 外部システム連携一覧
+
+| 外部システム | 連携目的 | API一覧 |
+|------------|---------|---------|
+| customer-hub-api | 顧客情報取得 | 顧客検索、顧客登録 |
+| back-office-api | 書籍情報取得、在庫更新 | 書籍一覧、書籍詳細、書籍検索、カテゴリ一覧、在庫更新 |
+
+詳細: [external_interface.md](external_interface.md)を参照
+
+---
+
+## 11. 参考資料
+
+### 11.1 システムレベルドキュメント
 
 * [requirements.md](requirements.md) - 要件定義書
-* [behaviors.md](behaviors.md) - 振る舞い仕様書（受入基準）
 * [architecture_design.md](architecture_design.md) - アーキテクチャ設計書
 * [data_model.md](data_model.md) - データモデル仕様書
+* [behaviors.md](behaviors.md) - システム振る舞い仕様書（システム統合受入基準）
 * [external_interface.md](external_interface.md) - 外部インターフェース仕様書
-* [README.md](../../README.md) - プロジェクトREADME
+
+### 11.2 API単位ドキュメント
+
+API固有の詳細仕様は、以下のドキュメントを参照してください：
+
+* [../api/API_001_auth/functional_design.md](../api/API_001_auth/functional_design.md) - 認証API機能設計書
+* [../api/API_002_books/functional_design.md](../api/API_002_books/functional_design.md) - 書籍API機能設計書
+* [../api/API_003_orders/functional_design.md](../api/API_003_orders/functional_design.md) - 注文API機能設計書
+* [../api/API_004_images/functional_design.md](../api/API_004_images/functional_design.md) - 画像API機能設計書
+
+### 11.3 プロジェクト情報
+
+* [../../README.md](../../README.md) - プロジェクトREADME

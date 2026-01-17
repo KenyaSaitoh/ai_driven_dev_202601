@@ -1,4 +1,4 @@
-﻿# jsf-person-sdd プロジェクト
+# jsf-person-sdd プロジェクト
 
 ## 📖 概要
 
@@ -113,7 +113,7 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 ##### 4-1. セットアップタスク（最初に1回）
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/struts-to-jsf-migration/instructions/code_generation.md
 
 セットアップタスクを実行してください。
 
@@ -126,7 +126,7 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 ##### 4-2. 共通機能タスク（セットアップ後に1回）
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/struts-to-jsf-migration/instructions/code_generation.md
 
 共通機能タスクを実行してください。
 
@@ -145,7 +145,7 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 * SCREEN_001_PersonList（Person一覧画面）:
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/struts-to-jsf-migration/instructions/code_generation.md
 
 Person一覧画面を実装してください。
 
@@ -157,7 +157,7 @@ Person一覧画面を実装してください。
 * SCREEN_002_PersonInput（Person入力画面）:
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/struts-to-jsf-migration/instructions/code_generation.md
 
 Person入力画面を実装してください。
 
@@ -169,7 +169,7 @@ Person入力画面を実装してください。
 * SCREEN_003_PersonConfirm（Person確認画面）:
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/struts-to-jsf-migration/instructions/code_generation.md
 
 Person確認画面を実装してください。
 
@@ -183,7 +183,24 @@ Person確認画面を実装してください。
 ### 📚 詳細情報
 
 * マイグレーション詳細: `@agent_skills/struts-to-jsf-migration/README.md` を参照
-* Jakarta EE開発詳細: `@agent_skills/jakarta-ee-standard/README.md` を参照
+* Jakarta EE開発詳細: `@agent_skills/jakarta-ee-api-base/README.md` を参照
+
+#### 開発原則
+
+このプロジェクトは、以下の原則に従って開発されます：
+
+* **場所**: `@agent_skills/struts-to-jsf-migration/principles/`
+  * [architecture.md](../../../agent_skills/struts-to-jsf-migration/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
+  * [security.md](../../../agent_skills/struts-to-jsf-migration/principles/security.md) - セキュリティ標準
+  * [common_rules.md](../../../agent_skills/struts-to-jsf-migration/principles/common_rules.md) - 共通ルール、マッピング規則
+
+* **主な内容**:
+  * 標準技術スタック（Jakarta EE 10、Jakarta Faces 4.0、JPA 3.1）
+  * レイヤードアーキテクチャ（Managed Bean、Service、Entity）
+  * 開発標準（命名規則、コーディング規約、バリデーション）
+  * セキュリティ実装（JWT認証、パスワード管理）
+  * トランザクション管理、セッション管理（ViewScoped、Flash Scope）
+  * テスト戦略、パフォーマンス考慮事項
 
 ## 🎯 マイグレーション対象（Struts → JSF）
 
@@ -489,12 +506,21 @@ Database (HSQLDB)
 
 ## 📖 参考リンク
 
+### Agent Skills
+
+* [Struts to JSF Migration README](../../../agent_skills/struts-to-jsf-migration/README.md) - マイグレーションガイド
+* [Jakarta EE API Base README](../../../agent_skills/jakarta-ee-api-base/README.md) - 開発ガイド
+* [開発原則](../../../agent_skills/struts-to-jsf-migration/principles/)
+  * [architecture.md](../../../agent_skills/struts-to-jsf-migration/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
+  * [security.md](../../../agent_skills/struts-to-jsf-migration/principles/security.md) - セキュリティ標準
+  * [common_rules.md](../../../agent_skills/struts-to-jsf-migration/principles/common_rules.md) - 共通ルール、マッピング規則
+
+### Jakarta EE仕様
+
 * [Jakarta EE 10 Platform](https://jakarta.ee/specifications/platform/10/)
 * [Jakarta Server Faces 4.0](https://jakarta.ee/specifications/faces/4.0/)
 * [Jakarta Persistence (JPA) 3.1](https://jakarta.ee/specifications/persistence/3.1/)
 * [Hibernate ORM Documentation](https://hibernate.org/orm/documentation/6.4/)
-* [Agent Skills - Struts to JSF Migration](../../agent_skills/struts-to-jsf-migration/README.md)
-* [Agent Skills - Jakarta EE Standard](../../agent_skills/jakarta-ee-standard/README.md)
 
 ## 📄 ライセンス
 

@@ -1,5 +1,6 @@
-# [PROJECT_NAME] - 機能設計書
+# [PROJECT_NAME] - システム機能設計書
 
+ファイル名: functional_design.md（system/配下）  
 プロジェクトID: [PROJECT_ID]  
 バージョン: 1.0.0  
 最終更新日: [DATE]  
@@ -9,32 +10,59 @@
 
 ## 1. 概要
 
-本文書は、[PROJECT_NAME]システムの各機能の詳細設計を記述する。各機能について、ユーザーストーリー、ビジネスルール、ユーザーフロー、データフロー、画面遷移、例外・エラー処理を定義する。
+本文書は、[PROJECT_NAME]システム全体の機能設計、共通サービス、ドメインモデルの機能設計を記述する。システム全体のユーザーストーリー、共通機能のビジネスルール、システム全体のユーザーフロー、データフローを論理レベルで定義する。
+
+* API固有の機能設計は、各api/{api_id}/functional_design.mdを参照すること
+* 実装クラス設計（JPAエンティティ、Dao、共通Service等）、メソッドシグネチャ、アノテーションは詳細設計（system/detailed_design.md）で記述します
 
 ---
 
-## 2. 機能一覧
+## 2. システム概要
 
-### 2.1 [機能カテゴリ1]
+### 2.1 システムアーキテクチャ
 
-| 機能ID | 機能名 | 説明 | 詳細設計書 |
-|--------|--------|------|----------|
-| F-[XXX]-001 | [機能名] | [説明] | [../api/API_XXX/functional_design.md](../api/API_XXX/functional_design.md) |
-| F-[XXX]-002 | [機能名] | [説明] | [../api/API_XXX/functional_design.md](../api/API_XXX/functional_design.md) |
+[システム全体のアーキテクチャ概要、レイヤー構成、主要コンポーネント]
 
-### 2.2 [機能カテゴリ2]
+### 2.2 API一覧
 
-| 機能ID | 機能名 | 説明 | 詳細設計書 |
-|--------|--------|------|----------|
-| F-[YYY]-001 | [機能名] | [説明] | [../api/API_YYY/functional_design.md](../api/API_YYY/functional_design.md) |
+| API ID | API名 | ベースパス | 説明 | 機能設計書 |
+|--------|------|----------|------|----------|
+| API_001 | [API名1] | /api/[path] | [説明] | [../api/API_001/functional_design.md](../api/API_001/functional_design.md) |
+| API_002 | [API名2] | /api/[path] | [説明] | [../api/API_002/functional_design.md](../api/API_002/functional_design.md) |
 
 ---
 
-## 3. 機能詳細設計
+## 3. 共通機能設計
 
-注意: 詳細な機能設計は、各APIディレクトリ配下のfunctional_design.mdを参照してください。ここではシステム全体の概要のみを記載します。
+注意: API固有の機能設計は、各api/{api_id}/functional_design.mdを参照してください。
 
-### 3.1 F-[XXX]-001: [機能名1]
+### 3.1 認証・認可
+
+#### 3.1.1 認証方式
+
+* 認証方式: [JWT / セッション / その他]
+* 認証フロー: [認証の流れを論理レベルで記述]
+
+#### 3.1.2 認可制御
+
+* ロール定義: [ロール一覧]
+* 権限チェック: [権限チェックのロジック]
+
+### 3.2 ログ処理
+
+* ログレベル: [ERROR, WARN, INFO, DEBUG]
+* ログ出力方針: [どのような情報をログに出力するか]
+
+### 3.3 エラーハンドリング
+
+* エラーレスポンス形式: [統一的なエラーレスポンス構造]
+* 例外マッピング: [例外とHTTPステータスコードのマッピング]
+
+---
+
+## 4. ドメインモデル機能設計
+
+### 4.1 [ドメインモデル1]
 
 #### 2.1.1 ユーザーストーリー
 
@@ -101,23 +129,22 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     participant User as ユーザー
-    participant View as View
-    participant Controller as Controller
-    participant Service as Service
-    participant DAO as DAO
+    participant UI as ユーザーインターフェース
+    participant BizLogic as ビジネスロジック
+    participant DataAccess as データアクセス
     participant DB as Database
     
-    User->>View: アクション
-    View->>Controller: リクエスト
-    Controller->>Service: ビジネスロジック呼び出し
-    Service->>DAO: データアクセス
-    DAO->>DB: クエリ実行
-    DB-->>DAO: 結果
-    DAO-->>Service: エンティティ
-    Service-->>Controller: 結果
-    Controller-->>View: 表示データ
-    View-->>User: レスポンス
+    User->>UI: アクション
+    UI->>BizLogic: リクエスト
+    BizLogic->>DataAccess: データ操作要求
+    DataAccess->>DB: クエリ実行
+    DB-->>DataAccess: 結果
+    DataAccess-->>BizLogic: データ
+    BizLogic-->>UI: 処理結果
+    UI-->>User: レスポンス
 ```
+
+注意: シーケンス図は論理レベルで記述します。実装クラス名（Resource, Service, Dao等）は使用しません。
 
 ---
 
@@ -259,9 +286,11 @@ stateDiagram-v2
 
 | レイヤー | トランザクション境界 | 説明 |
 |---------|------------------|------|
-| Resource | なし | トランザクションは持たない |
-| Service | @Transactional | ビジネスロジックレイヤーでトランザクション管理 |
-| DAO | なし | トランザクションは持たない（Serviceから委譲） |
+| プレゼンテーション層 | なし | トランザクションは持たない |
+| ビジネスロジック層 | トランザクション境界 | ビジネスロジックレイヤーでトランザクション管理 |
+| データアクセス層 | なし | トランザクションは持たない（ビジネスロジック層から委譲） |
+
+注意: 論理レベルの記述です。実装詳細（@Transactional等のアノテーション）は詳細設計で記述します。
 
 ### 11.2 重要なトランザクション処理
 
@@ -293,14 +322,16 @@ stateDiagram-v2
 
 ### 13.1 認証トークン
 
-* JWT（JSON Web Token）を使用
-* HttpOnly Cookie に格納
+* 認証トークンを使用（例: JWT）
+* セキュアな方法で保持（例: HttpOnly Cookie）
 * 有効期限: [EXPIRATION]
 
 ### 13.2 パスワード保護
 
-* BCryptでハッシュ化
+* ハッシュアルゴリズムでハッシュ化
 * ソルト付きハッシュ
+
+注意: 具体的なアルゴリズム名（BCrypt等）は詳細設計で記述します。
 
 ### 13.3 権限制御
 
@@ -327,24 +358,29 @@ stateDiagram-v2
 
 ## 15. 動的振る舞い
 
+注意: 
+* シーケンス図は論理レベルで記述します
+* 実装クラス名（BookResource, BookService, BookDao等）は使用しません
+* 論理コンポーネント名（「書籍リソース」「書籍サービス」「書籍データアクセス」等）または抽象レイヤー名（「APIレイヤー」「ビジネスロジック」「データアクセス」）を使用します
+
 ### 15.1 [処理フロー名]
 
 ```mermaid
 sequenceDiagram
-    participant Client
-    participant Resource
-    participant Service
-    participant DAO
-    participant DB
+    participant Client as クライアント
+    participant API as APIレイヤー
+    participant BizLogic as ビジネスロジック
+    participant DataAccess as データアクセス
+    participant DB as Database
     
-    Client->>Resource: リクエスト
-    Resource->>Service: ビジネスロジック呼び出し
-    Service->>DAO: データアクセス
-    DAO->>DB: クエリ実行
-    DB-->>DAO: 結果
-    DAO-->>Service: エンティティ
-    Service-->>Resource: 処理結果
-    Resource-->>Client: レスポンス
+    Client->>API: リクエスト
+    API->>BizLogic: ビジネスロジック呼び出し
+    BizLogic->>DataAccess: データアクセス
+    DataAccess->>DB: クエリ実行
+    DB-->>DataAccess: 結果
+    DataAccess-->>BizLogic: データ
+    BizLogic-->>API: 処理結果
+    API-->>Client: レスポンス
 ```
 
 ---
