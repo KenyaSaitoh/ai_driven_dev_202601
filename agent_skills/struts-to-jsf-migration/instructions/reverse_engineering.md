@@ -1,4 +1,4 @@
-# 既存コード分析インストラクション（仕様書生成）
+# 既存コード分析インストラクション（SPEC生成）
 
 ## パラメータ設定
 
@@ -6,7 +6,7 @@
 
 ```yaml
 struts_project_root: "ここに既存Strutsプロジェクトのルートパスを入力"
-spec_output_directory: "ここに仕様書の出力先パスを入力"
+spec_output_directory: "ここにSPECの出力先パスを入力"
 ```
 
 * 例
@@ -24,17 +24,17 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 
 ## 概要
 
-このインストラクションは、既存のApache Struts 1.xプロジェクトから抽象的・論理的な仕様書を生成するためのものである
+このインストラクションは、既存のApache Struts 1.xプロジェクトから抽象的・論理的なSPECを生成するためのものである
 
 重要な方針
-* Code-to-Codeの直接変換ではなく、まず仕様書を生成する
+* Code-to-Codeの直接変換ではなく、まずSPECを生成する
 * Strutsの実装詳細に囚われず、ビジネスロジックとビジネスルールを抽出する
-* 生成された仕様書は、JSFフレームワークに依存しない抽象的なものとする
+* 生成されたSPECは、JSFフレームワークに依存しない抽象的なものとする
 * 技術スタックの記載は移行先を前提とする
 
 出力先
-* `{spec_output_directory}/baseline/system/` - システムレベルの仕様書
-* `{spec_output_directory}/baseline/screen/` - 画面単位の仕様書
+* `{spec_output_directory}/baseline/basic_design/` - システムレベルのSPEC
+* `{spec_output_directory}/baseline/detailed_design/screen/` - 画面単位のSPEC
 
 ---
 
@@ -52,10 +52,10 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 
 ### 1.2 フレームワーク仕様（該当する場合）
 
-* @agent_skills/struts-to-jsf-migration/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
-* @agent_skills/jakarta-ee-api-base/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+* @agent_skills/struts-to-jsf-migration/frameworks/ - フレームワーク固有のSPECやサンプルコードを確認する
+* @agent_skills/jakarta-ee-api-base/frameworks/ - フレームワーク固有のSPECやサンプルコードを確認する
   * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
-  * 仕様書生成時に、フレームワーク仕様を考慮した設計を記載する
+  * SPEC生成時に、フレームワーク仕様を考慮した設計を記載する
 
 ### 1.3 Strutsプロジェクト構造の把握
 
@@ -132,11 +132,11 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 
 ---
 
-## 2. 仕様書の生成
+## 2. SPECの生成
 
-### 2.1 システムレベルの仕様書
+### 2.1 システムレベルのSPEC
 
-以下の仕様書を `{spec_output_directory}/baseline/system/` に生成する
+以下のSPECを `{spec_output_directory}/baseline/basic_design/` に生成する
 
 #### requirements.md
 
@@ -237,9 +237,9 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
   * 入力検証ルール
   * ActionFormのvalidate()メソッドまたはJSPから抽出
 
-### 2.2 画面単位の仕様書
+### 2.2 画面単位のSPEC
 
-各JSPファイルに対して、以下の仕様書を `{spec_output_directory}/baseline/screen/SCREEN_XXX_<画面名>/` に生成してください：
+各JSPファイルに対して、以下のSPECを `{spec_output_directory}/baseline/detailed_design/screen/SCREEN_XXX_<画面名>/` に生成してください：
 
 #### screen_design.md
 
@@ -412,7 +412,7 @@ JSFへのマッピング:
 
 ---
 
-## 4. 仕様書生成のガイドライン
+## 4. SPEC生成のガイドライン
 
 ### 4.1 抽象化のルール
 
@@ -430,7 +430,7 @@ JSFへのマッピング:
 
 ### 4.2 JSFアーキテクチャへの適応
 
-仕様書には、JSFの技術スタックを前提とした設計を記載する
+SPECには、JSFの技術スタックを前提とした設計を記載する
 
 * Managed Bean: `@Named`, `@ViewScoped`
 * CDI: `@Inject`
@@ -447,7 +447,7 @@ JSFへのマッピング:
 ### 4.4 ビジネスロジックの保全
 
 * StrutsのServiceクラスやEJBのビジネスロジックを正確に抽出する
-* バリデーションルール、計算ロジック、状態遷移を仕様書に記載する
+* バリデーションルール、計算ロジック、状態遷移をSPECに記載する
 * ビジネスルールを失わないように注意する
 
 ---
@@ -457,8 +457,8 @@ JSFへのマッピング:
 1. Strutsプロジェクト探索: `{struts_project_root}` 配下のファイルを探索し、構造を把握する
 2. コンポーネント分析: Action、ActionForm、EJB、DAO、JSPを分析する
 3. 関係抽出: 画面遷移、データフロー、ビジネスロジックの関係を抽出する
-4. 仕様書生成: システムレベルと画面単位の仕様書を生成する
-5. 検証: 生成された仕様書の完全性を確認する（次のステップで実施）
+4. SPEC生成: システムレベルと画面単位のSPECを生成する
+5. 検証: 生成されたSPECの完全性を確認する（次のステップで実施）
 
 ---
 
@@ -466,7 +466,7 @@ JSFへのマッピング:
 
 ### Markdownフォーマット規約
 
-生成する仕様書は、ルールドキュメントに記載されたフォーマット規約に従う
+生成するSPECは、ルールドキュメントに記載されたフォーマット規約に従う
 
 * 箇条書きはアスタリスク（`*`）を使用する（ハイフン `–` は使用しない）
 * ボールド（太字）は使用しない
@@ -487,17 +487,17 @@ JSFへのマッピング:
 
 ### 不明点の扱い
 
-* コードから抽出できない情報は、仕様書に「要確認」として記載する
-* 次のステップ（仕様書検証）でユーザーに質問して補完する
+* コードから抽出できない情報は、SPECに「要確認」として記載する
+* 次のステップ（SPEC検証）でユーザーに質問して補完する
 
 ---
 
 ## 7. 成果物チェックリスト
 
-生成された仕様書が満たすべき要件
+生成されたSPECが満たすべき要件
 
-* システムレベルの仕様書が生成されている
-* 各画面単位の仕様書が生成されている
+* システムレベルのSPECが生成されている
+* 各画面単位のSPECが生成されている
 * Strutsの実装詳細に囚われず、抽象的・論理的な記述になっている
 * JSFアーキテクチャを前提とした設計になっている
 * データベーススキーマは既存のまま継続される設計になっている

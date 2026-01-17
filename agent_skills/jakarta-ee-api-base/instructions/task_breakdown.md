@@ -6,7 +6,7 @@
 
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
-spec_directory: "ここに仕様書ディレクトリのパスを入力"
+spec_directory: "ここにSPECディレクトリのパスを入力"
 output_directory: "ここにタスク出力先のパスを入力（オプション）"
 ```
 
@@ -25,13 +25,15 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
 
 ## 概要
 
-このインストラクションは、完成したSPECから複数人が並行して作業できる実装タスクリストを分解・生成するためのものである
+このインストラクションは、基本設計SPEC（basic_design/）を分析して、複数人が並行して作業できる実装タスクリストを分解・生成するためのものである
 
 重要な方針
 * タスクリストは抽象度の高いレベルで作成する
 * ソースコードや詳細な実装手順は含めない
 * 各タスクは「何を作成・修正するか」を明確に示す
-* 詳細な実装は次の「実装フェーズ（コード生成）」で仕様書を参照して行う
+* 詳細な実装は次の「実装フェーズ（コード生成）」でSPECを参照して行う
+* タスク分解の結果として、common（共通機能）とAPI単位を識別する
+* この識別結果に基づいて、次の詳細設計フェーズで detailed_design/ フォルダ構造を作成する
 
 出力先
 * ベースプロジェクトの場合: `{project_root}/tasks/` ディレクトリ
@@ -55,33 +57,27 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
 
 ### フレームワーク仕様（該当する場合）
 
-* @agent_skills/jakarta-ee-api-base/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+* @agent_skills/jakarta-ee-api-base/frameworks/ - フレームワーク固有のSPECやサンプルコードを確認する
   * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
   * タスク分解時に、フレームワーク固有の実装要件を考慮する
 
-### 必須ドキュメント（system/配下 - システム全体、共通処理、ドメインモデル）
+### 必須ドキュメント（basic_design/配下 - 基本設計SPEC）
 
 * architecture_design.md - 技術スタック、アーキテクチャパターン、ライブラリを確認する
   * アーキテクチャパターンを識別する
   * データ管理方針を確認する
   * 外部連携要件を確認する
-* functional_design.md - システム全体の機能設計、共通サービス、ドメインモデルの機能設計を確認する
+* functional_design.md - システム全体の機能設計（全APIを含む）を確認する
+  * 全ての機能を分析する
+  * 何が共通機能で何がAPI固有機能かを識別する
 * data_model.md - テーブル定義とERDを確認する（該当する場合）
-* detailed_design.md - 共通処理、JPAエンティティ、Dao、共通Serviceの詳細設計を確認する（該当する場合）
+* behaviors.md - システム全体の振る舞い（全APIの振る舞いを含む）を確認する
+* external_interface.md - 外部連携とAPI仕様を確認する（該当する場合）
 
-### オプションドキュメント（system/配下、存在する場合）
-
-* behaviors.md - システム全体の振る舞い、共通処理の振る舞いを確認する
-* external_interface.md - 外部連携とAPI仕様を確認する
-
-### API単位ドキュメント（api/配下 - API固有の設計）
-
-* api/API_XXX_yyyy/ - 各API単位のディレクトリ
-  * functional_design.md - API固有のエンドポイント、リクエスト/レスポンス、ビジネスルールの機能設計
-  * detailed_design.md - API固有のResource、DTO、API特有のServiceの詳細設計（該当する場合）
-  * behaviors.md - API固有の振る舞い仕様（該当する場合）
-
-注意: プロジェクトによって利用可能なドキュメントは異なる。利用可能なものに基づいてタスクを生成する
+注意: 
+* 基本設計フェーズでは、api/フォルダやcommon/フォルダはまだ作成されていない
+* 全ての機能と振る舞いは basic_design/functional_design.md と basic_design/behaviors.md に記載されている
+* タスク分解フェーズで、これらを分析して common と API単位を識別する
 
 ---
 
@@ -140,15 +136,16 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 #### 機能の識別と抽出
 
 1. 機能（API）の識別
-   * requirements.md、api/ ディレクトリ、functional_design.mdから機能を抽出する
+   * basic_design/requirements.md、basic_design/functional_design.mdから機能を抽出する
    * 各APIの範囲と責務を分析する
    * API間の依存関係を把握する
+   * 何が共通機能で何がAPI固有機能かを識別する
 
 2. タスクファイルの命名規則
    * 基本形式：`tasks/[API_ID]_[API名].md`
    * 例：`API_001_auth.md`、`API_002_books.md`、`API_003_orders.md`
-   * api/配下のディレクトリ名と対応させる
    * 注意: ファイル名はアンダースコア区切りを使用する
+   * 注意: タスク分解の時点では、detailed_design/api/ フォルダはまだ作成されていない
 
 3. 各機能タスクファイルの内容
    * API固有のResourceクラス
@@ -268,7 +265,7 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 * [ ] [P] タスク X.X.X: [タスク名]
   * 目的: [このタスクで実現する機能・目的]
   * 対象: [作成/修正するコンポーネント名やファイル名]
-  * 参照SPEC: [参照する仕様書（Markdownリンク形式）] の「[セクション番号 セクション名]」
+  * 参照SPEC: [参照するSPEC（Markdownリンク形式）] の「[セクション番号 セクション名]」
   * 注意事項: [考慮すべき点があれば記載]
 ```
 
@@ -370,15 +367,19 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 
 ## 7. 生成手順
 
-1. ルールとSPEC分析: `@agent_skills/jakarta-ee-api-base/principles/` 配下の原則ドキュメントと全SPECファイル（system/とapi/）を読み込み、共通ルールと機能全体を把握する
-2. アーキテクチャ識別: architecture_design.mdからアーキテクチャパターンを識別する
-3. 機能（API）抽出: 実装が必要なAPIを抽出し、依存関係と共通コンポーネントを識別する
+1. ルールとSPEC分析: `@agent_skills/jakarta-ee-api-base/principles/` 配下の原則ドキュメントと basic_design/ 配下の全SPECを読み込み、共通ルールと機能全体を把握する
+2. アーキテクチャ識別: basic_design/architecture_design.md からアーキテクチャパターンを識別する
+3. 機能（API）抽出: basic_design/functional_design.md を分析して、実装が必要なAPIを抽出し、依存関係と共通コンポーネントを識別する
+   * 何が共通機能で何がAPI固有機能かを判断する
 4. タスク分割: API数に応じた適切なファイル分割方法を決定する
-5. タスク構成: 各SPECからタスクを抽出し、セットアップ/共通/API別/結合に分類・順序付けする
+5. タスク構成: basic_design/ のSPECからタスクを抽出し、セットアップ/共通/API別/結合に分類・順序付けする
 6. 並行化判定: [P]マークを付与し、タスクファイルを指定された出力先に生成する
 7. メインリスト生成: `tasks/tasks.md` に全体概要と実行計画を生成する
 
-* 注意: `{project_root}` と出力先はパラメータで指定される。ファイル名・タスクIDは全てアンダースコア区切りを使用する
+重要: 
+* タスク分解の結果として、common（共通機能）とAPI単位が識別される
+* この識別結果は、次の詳細設計フェーズで detailed_design/ フォルダ構造を作成する際に使用される
+* `{project_root}` と出力先はパラメータで指定される。ファイル名・タスクIDは全てアンダースコア区切りを使用する
 
 ---
 
@@ -393,15 +394,17 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 
 全てのタスクの「参照SPEC」は以下の形式で記述する
 * Markdownリンク形式でクリック可能にする（例: `[functional_design.md](相対パス)`）
-* 具体的なセクション番号とセクション名を明記する（例: `の「2.2 StockDao」`）
+* 具体的なセクション番号とセクション名を明記する（例: `の「2.2 在庫管理機能」`）
 * 複数SPEC参照の場合は箇条書きで列挙する
-* system/とapi/配下の両方のドキュメントを適切に参照する
+* タスク分解時点では basic_design/ 配下のSPECを参照する
+* 注意: detailed_design/ 配下のフォルダは、詳細設計フェーズで作成されるため、タスク分解時点では存在しない
 
 ### タスク分解のルール
 
 * ルール遵守: `@agent_skills/jakarta-ee-api-base/principles/` 配下の原則ドキュメント（共通ルール、品質基準、セキュリティ標準、組織標準）を必ず遵守する。プロジェクト固有の原則がある場合は `{project_root}/principles/` も併せて遵守する
 * 抽象度の維持: タスクは「何を作るか」のみを記述する。ソースコードや詳細な実装手順は記述しない
-* アーキテクチャ適応: architecture_design.mdからアーキテクチャパターンを識別し、適切なタスクを分解・生成する
+* アーキテクチャ適応: basic_design/architecture_design.md からアーキテクチャパターンを識別し、適切なタスクを分解・生成する
+* 機能分解: basic_design/functional_design.md を分析して、何が共通機能で何がAPI固有機能かを識別する
 * 既存コード考慮: 既存実装がある場合は、修正タスクと新規作成タスクを明確に区別する
 * APIテスト設定: E2E APIテストは通常ビルドから除外し、個別実行可能にする設定を明記する
 

@@ -17,7 +17,7 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 このプロジェクトは、汎用的な **Jakarta EE マイクロサービス開発 Agent Skills** を使用して開発します。
 
-開発は以下の**4段階プロセス**で進めます：
+開発は以下の**5段階プロセス**で進めます：
 
 ```
 ステップ1: 基本設計（仕様書作成）← AIと対話しながら
@@ -26,7 +26,7 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
     ↓
 ステップ3: 詳細設計（仕様書 → 詳細設計書）← AIと対話しながら
     ↓
-ステップ4: コード生成（詳細設計書 → 実装コード）
+ステップ4: コード生成（詳細設計→実装→単体テスト）（詳細設計書 → 実装コード）
 ```
 
 ---
@@ -51,9 +51,9 @@ requirements.mdから、システム全体とAPI単位の仕様書を**AIと対�
   1. 既存資料（EXCEL、Word等）の有無を確認します
   2. 既存資料がある場合は、Markdown形式に変換します
   3. テンプレートを展開し、各仕様書を対話的に作成します
-  4. `specs/baseline/system/*.md` と `specs/baseline/api/API_XXX_*/*.md` が生成されます
+  4. `specs/baseline/basic_design/*.md` と `specs/baseline/detailed_design/API_XXX_*/*.md` が生成されます
 
-* 生成されるファイル: `specs/baseline/system/*.md`, `specs/baseline/api/API_XXX_*/*.md`（仕様書）
+* 生成されるファイル: `specs/baseline/basic_design/*.md`, `specs/baseline/detailed_design/API_XXX_*/*.md`（仕様書）
 
 ---
 
@@ -75,7 +75,46 @@ requirements.mdから、システム全体とAPI単位の仕様書を**AIと対�
 
 ---
 
-#### ステップ3: 詳細設計（各APIごとに実施）
+#### ステップ3: 詳細設計
+
+詳細設計は**2段階**で実施します：
+
+1. **システム全体の詳細設計**（プロジェクト開始時に1回）
+2. **各APIの詳細設計**（各APIごとに実施）
+
+---
+
+##### 3-1. システム全体の詳細設計（プロジェクト開始時に1回）
+
+共通処理、エンティティ、Dao、セキュリティコンポーネント等の詳細設計を**AIと対話しながら**作成します。
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
+
+システム全体の詳細設計書を作成してください。
+
+パラメータ:
+* project_root: projects/sdd/bookstore/berry-books-api-sdd
+* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
+* api_id: system
+```
+
+* 対話の流れ:
+  1. AIが仕様書（data_model.md、functional_design.md等）を読み込み、理解した内容を説明します
+  2. AIが不明点を質問します
+  3. あなたが回答します
+  4. `specs/baseline/basic_design/detailed_design.md` が生成されます
+
+* 生成される内容:
+  * ドメインモデル（JPAエンティティ）の詳細設計（注文関連のみ）
+  * Daoクラスの詳細設計
+  * JWT認証基盤（JwtUtil、JwtAuthenFilter）
+  * 外部API連携クライアント（BackOfficeRestClient、CustomerHubRestClient）
+  * 共通DTO、ユーティリティクラス、例外ハンドラ
+
+---
+
+##### 3-2. 各APIの詳細設計（各APIごとに実施）
 
 各APIの詳細設計書を**AIと対話しながら**作成します。
 
@@ -85,7 +124,13 @@ requirements.mdから、システム全体とAPI単位の仕様書を**AIと対�
   1. AIが仕様書を読み込み、理解した内容を説明します
   2. AIが不明点を質問します
   3. あなたが回答します
-  4. `specs/baseline/api/API_XXX_*/detailed_design.md` が生成されます
+  4. `specs/baseline/detailed_design/API_XXX_*/detailed_design.md` が生成されます
+
+* 生成される内容:
+  * Resourceクラス（JAX-RS）の詳細設計
+  * API固有のDTOクラス（Request、Response）
+  * API固有のビジネスロジック（Serviceメソッド）
+  * 外部API連携の詳細（該当する場合）
 
 ---
 
@@ -148,7 +193,7 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 
 ---
 
-#### ステップ4: コード生成（詳細設計完了後）
+#### ステップ4: コード生成（詳細設計→実装→単体テスト）（詳細設計完了後）
 
 詳細設計書をもとに、実装コードを生成します。
 
@@ -198,7 +243,7 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/api/API_001_auth/detailed_design.md
+@projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/detailed_design/API_001_auth/detailed_design.md
 
 認証APIを実装してください（JWT + 外部API連携）。
 
@@ -211,7 +256,7 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/api/API_002_books/detailed_design.md
+@projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/detailed_design/API_002_books/detailed_design.md
 
 書籍APIを実装してください（外部API呼び出し）。
 
@@ -224,7 +269,7 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/api/API_003_orders/detailed_design.md
+@projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/detailed_design/API_003_orders/detailed_design.md
 
 注文APIを実装してください（分散トランザクション対応）。
 
@@ -237,13 +282,46 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/api/API_004_images/detailed_design.md
+@projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/detailed_design/API_004_images/detailed_design.md
 
 画像APIを実装してください（静的リソース配信）。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/berry-books-api-sdd
 * task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/API_004_images.md
+```
+
+---
+
+#### ステップ5: E2Eテスト生成（実装完了後）
+
+全API実装完了後に、E2Eテスト（End-to-End Test）を生成します。
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md
+
+E2Eテストを生成してください。
+
+パラメータ:
+* project_root: projects/sdd/bookstore/berry-books-api-sdd
+* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
+```
+
+AIが：
+1. 📄 basic_design/behaviors.md（E2Eテストシナリオ）を読み込む
+2. 🧪 REST Assured を使用したE2Eテストを生成
+   * 複数API間の連携テスト（認証 → 書籍検索 → 注文作成等）
+   * 外部API連携のテスト（back-office-api、customer-hub-api）
+   * 実際のHTTPリクエスト/レスポンス
+3. 🏷️ `@Tag("e2e")` でE2Eテストを分離
+
+実行方法:
+```bash
+# アプリケーションサーバーを起動
+./gradlew run
+
+# 別ターミナルでE2Eテストを実行
+./gradlew e2eTest
 ```
 
 ---

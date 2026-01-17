@@ -17,16 +17,18 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 このプロジェクトは、汎用的な **Jakarta EE マイクロサービス開発 Agent Skills** を使用して開発します。
 
-開発は以下の**4段階プロセス**で進めます：
+開発は以下の**5段階プロセス**で進めます：
 
 ```
-ステップ1: 基本設計（仕様書作成）← AIと対話しながら
+ステップ1: 基本設計（SPEC作成）← AIと対話しながら
     ↓
-ステップ2: タスク分解（仕様書 → タスクリスト）
+ステップ2: タスク分解（SPEC → タスクリスト）
     ↓
-ステップ3: 詳細設計（仕様書 → 詳細設計書）← AIと対話しながら
+ステップ3: 詳細設計（SPEC → 詳細設計書）← AIと対話しながら
     ↓
-ステップ4: コード生成（詳細設計書 → 実装コード）
+ステップ4: コード生成（詳細設計書 → 実装コード + 単体テスト）
+    ↓
+ステップ5: E2Eテスト生成（basic_design/behaviors.md → REST Assured）
 ```
 
 ---
@@ -51,9 +53,9 @@ requirements.mdから、システム全体とAPI単位の仕様書を**AIと対�
   1. 既存資料（EXCEL、Word等）の有無を確認します
   2. 既存資料がある場合は、Markdown形式に変換します
   3. テンプレートを展開し、各仕様書を対話的に作成します
-  4. `specs/baseline/system/*.md` と `specs/baseline/api/API_XXX_*/*.md` が生成されます
+  4. `specs/baseline/basic_design/*.md` と `specs/baseline/detailed_design/API_XXX_*/*.md` が生成されます
 
-* 生成されるファイル: `specs/baseline/system/*.md`, `specs/baseline/api/API_XXX_*/*.md`（仕様書）
+* 生成されるファイル: `specs/baseline/basic_design/*.md`, `specs/baseline/detailed_design/API_XXX_*/*.md`（仕様書）
 
 ---
 
@@ -75,7 +77,46 @@ requirements.mdから、システム全体とAPI単位の仕様書を**AIと対�
 
 ---
 
-#### ステップ3: 詳細設計（各APIごとに実施）
+#### ステップ3: 詳細設計
+
+詳細設計は**2段階**で実施します：
+
+1. **システム全体の詳細設計**（プロジェクト開始時に1回）
+2. **各APIの詳細設計**（各APIごとに実施）
+
+---
+
+##### 3-1. システム全体の詳細設計（プロジェクト開始時に1回）
+
+共通処理、エンティティ、Dao、セキュリティコンポーネント等の詳細設計を**AIと対話しながら**作成します。
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
+
+システム全体の詳細設計書を作成してください。
+
+パラメータ:
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* api_id: system
+```
+
+* 対話の流れ:
+  1. AIが仕様書（data_model.md、functional_design.md等）を読み込み、理解した内容を説明します
+  2. AIが不明点を質問します
+  3. あなたが回答します
+  4. `specs/baseline/basic_design/detailed_design.md` が生成されます
+
+* 生成される内容:
+  * ドメインモデル（JPAエンティティ）の詳細設計
+  * Daoクラスの詳細設計
+  * 共通Serviceクラスの詳細設計
+  * セキュリティコンポーネント（JwtUtil、認証フィルター等）
+  * ユーティリティクラス、共通例外クラス
+
+---
+
+##### 3-2. 各APIの詳細設計（各APIごとに実施）
 
 各APIの詳細設計書を**AIと対話しながら**作成します。
 
@@ -85,7 +126,13 @@ requirements.mdから、システム全体とAPI単位の仕様書を**AIと対�
   1. AIが仕様書を読み込み、理解した内容を説明します
   2. AIが不明点を質問します
   3. あなたが回答します
-  4. `specs/baseline/api/API_XXX_*/detailed_design.md` が生成されます
+  4. `specs/baseline/detailed_design/API_XXX_*/detailed_design.md` が生成されます
+
+* 生成される内容:
+  * Resourceクラス（JAX-RS）の詳細設計
+  * API固有のDTOクラス（Request、Response）
+  * API固有のビジネスロジック（Serviceメソッド）
+  * 外部API連携クライアント（該当する場合）
 
 ---
 
@@ -173,14 +220,16 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 
 ---
 
-#### ステップ4: コード生成（詳細設計完了後）
+#### ステップ4: コード生成（詳細設計→実装→単体テスト）
 
-詳細設計書をもとに、実装コードを生成します。
+詳細設計書をもとに、実装コードと単体テストを生成します。
 
 * 実行順序: 
 1. **セットアップタスク** → 2. **共通機能タスク** → 3. **各API実装**
 
 > **重要**: 共通機能タスク（エンティティ、DAO、DTO、ユーティリティ等）を先に実装してから、各API実装に進んでください。
+
+> **単体テストの方針**: タスク粒度内のコンポーネント間は実際の連携をテスト。タスク外の依存関係のみモック化。
 
 ##### 3-1. セットアップタスク（最初に1回）
 
@@ -222,7 +271,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_001_auth/detailed_design.md
+@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/detailed_design/API_001_auth/detailed_design.md
 
 認証APIを実装してください。
 
@@ -235,7 +284,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_002_books/detailed_design.md
+@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/detailed_design/API_002_books/detailed_design.md
 
 書籍APIを実装してください。
 
@@ -248,7 +297,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_003_categories/detailed_design.md
+@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/detailed_design/API_003_categories/detailed_design.md
 
 カテゴリAPIを実装してください。
 
@@ -261,7 +310,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_004_publishers/detailed_design.md
+@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/detailed_design/API_004_publishers/detailed_design.md
 
 出版社APIを実装してください。
 
@@ -274,7 +323,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_005_stocks/detailed_design.md
+@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/detailed_design/API_005_stocks/detailed_design.md
 
 在庫APIを実装してください（楽観的ロック対応）。
 
@@ -287,13 +336,46 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_006_workflows/detailed_design.md
+@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/detailed_design/API_006_workflows/detailed_design.md
 
 ワークフローAPIを実装してください。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/back-office-api-sdd
 * task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_006_workflows.md
+```
+
+---
+
+#### ステップ5: E2Eテスト生成（実装完了後）
+
+全API実装完了後に、E2Eテスト（End-to-End Test）を生成します。
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md
+
+E2Eテストを生成してください。
+
+パラメータ:
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+```
+
+AIが：
+1. 📄 basic_design/behaviors.md（E2Eテストシナリオ）を読み込む
+2. 🧪 REST Assured を使用したE2Eテストを生成
+   * 複数API間の連携テスト（認証 → 書籍検索 → 在庫更新等）
+   * 実際のHTTPリクエスト/レスポンス
+   * 実際のDBアクセスを含む
+3. 🏷️ `@Tag("e2e")` でE2Eテストを分離
+
+実行方法:
+```bash
+# アプリケーションサーバーを起動
+./gradlew run
+
+# 別ターミナルでE2Eテストを実行
+./gradlew e2eTest
 ```
 
 ---

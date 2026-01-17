@@ -197,14 +197,61 @@ npm run dev
 
 ## 🧹 仕様駆動開発（SDD）プロジェクトの成果物クリーンアップ
 
-SDDプロジェクト（**berry-books-api-sdd**、**back-office-api-sdd**、**jsf-person-sdd**）は、仕様駆動開発により何度でも再実装できます。
+SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-sdd）は、仕様駆動開発により何度でも再実装できます。
+
+成果物は3タイプに分けてクリーンアップできます。基本設計SPEC（specs/*/basic_design/）は絶対に削除されません。
+
+### タイプ1: タスクファイルのみクリーンアップ
+
+タスク分解の結果（tasks/）を削除します。
 
 ```bash
-# 各SDDプロジェクトの成果物をクリーンアップ
-./gradlew :berry-books-api-sdd:cleanSddArtifacts
-./gradlew :back-office-api-sdd:cleanSddArtifacts
-./gradlew :jsf-person-sdd:cleanSddArtifacts
+./gradlew :berry-books-api-sdd:cleanTasks
+./gradlew :back-office-api-sdd:cleanTasks
+./gradlew :jsf-person-sdd:cleanTasks
 ```
+
+削除されるもの: `tasks/`
+保持されるもの: `specs/*/basic_design/`, `specs/*/detailed_design/`, `src/`
+
+### タイプ2: 詳細設計SPECのクリーンアップ
+
+詳細設計SPEC（specs/*/detailed_design/）を削除します。
+
+```bash
+./gradlew :berry-books-api-sdd:cleanDetailedDesign
+./gradlew :back-office-api-sdd:cleanDetailedDesign
+./gradlew :jsf-person-sdd:cleanDetailedDesign
+```
+
+削除されるもの: `specs/*/detailed_design/`
+保持されるもの: `specs/*/basic_design/`, `tasks/`, `src/`
+
+### タイプ3: 実装コードのクリーンアップ
+
+生成された実装コード（src/、build/）を削除します。
+
+```bash
+./gradlew :berry-books-api-sdd:cleanCode
+./gradlew :back-office-api-sdd:cleanCode
+./gradlew :jsf-person-sdd:cleanCode
+```
+
+削除されるもの: `src/main/`, `src/test/`, `build/`
+保持されるもの: `specs/*/basic_design/`, `specs/*/detailed_design/`, `tasks/`
+
+### すべてをクリーンアップ（基本設計SPECは保護）
+
+タスク、詳細設計SPEC、実装コードをすべて削除します。
+
+```bash
+./gradlew :berry-books-api-sdd:cleanAllSdd
+./gradlew :back-office-api-sdd:cleanAllSdd
+./gradlew :jsf-person-sdd:cleanAllSdd
+```
+
+削除されるもの: `tasks/`, `specs/*/detailed_design/`, `src/`, `build/`
+保持されるもの: `specs/*/basic_design/` （基本設計SPECは絶対に削除されない）
 
 詳細は各プロジェクトのREADME.mdを参照してください：
 - [projects/sdd/bookstore/berry-books-api-sdd/README.md](projects/sdd/bookstore/berry-books-api-sdd/README.md)
@@ -307,7 +354,13 @@ tail -f -n 50 payara6/glassfish/domains/domain1/logs/server.log
 
 | タスク | 説明 |
 |--------|------|
-| `cleanSddArtifacts` | 成果物をクリーンアップ（berry-books-api-sdd専用、ディレクトリ構造は保持） |
+| `cleanTasks` | タスクファイル（tasks/）を削除 |
+| `cleanDetailedDesign` | 詳細設計SPEC（specs/*/detailed_design/）を削除 |
+| `cleanCode` | 実装コード（src/、build/）を削除 |
+| `cleanAllSdd` | すべてのSDD成果物を削除（基本設計SPECは保護） |
+| `e2eTest` | E2Eテストを実行（@Tag("e2e")のテスト） |
+
+注意: 基本設計SPEC（specs/*/basic_design/）は絶対に削除されません。
 
 ### ユーティリティタスク
 

@@ -283,7 +283,7 @@ sequenceDiagram
 
 ## 13. 参考資料
 
-### 13.1 関連仕様書
+### 13.1 関連SPEC
 
 * [requirements.md](requirements.md) - 要件定義書
 * [functional_design.md](functional_design.md) - 機能設計書（API仕様）

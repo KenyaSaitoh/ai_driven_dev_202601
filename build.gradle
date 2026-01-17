@@ -153,11 +153,24 @@ subprojects {
             implementation "org.mindrot:jbcrypt:0.4"
         }
         
-        // テスト依存関係
+        // テスト依存関係（全プロジェクト共通）
         testImplementation "org.junit.jupiter:junit-jupiter:5.10.0"
         testImplementation "org.mockito:mockito-core:5.5.0"
         testImplementation "org.mockito:mockito-junit-jupiter:5.5.0"
+        
+        // E2Eテスト: Playwright（Web/JSF系プロジェクト用）
         testImplementation "com.microsoft.playwright:playwright:1.40.0"
+        
+        // E2Eテスト: REST Assured（API系プロジェクト用）
+        if (project.name == "berry-books-api" || 
+            project.name == "berry-books-api-sdd" ||
+            project.name == "back-office-api" ||
+            project.name == "back-office-api-sdd" ||
+            project.name == "customer-hub-api") {
+            testImplementation "io.rest-assured:rest-assured:5.4.0"
+            testImplementation "io.rest-assured:json-path:5.4.0"
+            testImplementation "io.rest-assured:xml-path:5.4.0"
+        }
         
         // Jakarta EE API（テスト用）
         testImplementation "jakarta.platform:jakarta.jakartaee-api:10.0.0"
@@ -324,6 +337,89 @@ subprojects {
             println "  1. Payara Server is running (gradle startPayara)"
             println "  2. Application is deployed (gradle :${project.name}:deploy)"
             println ""
+        }
+    }
+    
+    // SDD成果物クリーンアップタスク（全プロジェクト共通）
+    // 注意: basic_design/ は絶対に削除しない（基本設計SPECは保護）
+    
+    task cleanTasks {
+        group = "sdd"
+        description = "Clean SDD tasks (tasks/) - keeps basic_design/"
+        doLast {
+            def tasksDir = file("${projectDir}/tasks")
+            if (tasksDir.exists()) {
+                println "Cleaning tasks: ${tasksDir.absolutePath}"
+                delete tasksDir
+                println "✓ Tasks cleaned"
+            } else {
+                println "No tasks directory found"
+            }
+        }
+    }
+    
+    task cleanDetailedDesign {
+        group = "sdd"
+        description = "Clean detailed design SPEC (detailed_design/) - keeps basic_design/"
+        doLast {
+            def specsDir = file("${projectDir}/specs")
+            if (specsDir.exists()) {
+                specsDir.eachDir { specDir ->
+                    def detailedDesignDir = new File(specDir, "detailed_design")
+                    if (detailedDesignDir.exists()) {
+                        println "Cleaning detailed design: ${detailedDesignDir.absolutePath}"
+                        delete detailedDesignDir
+                        println "✓ Detailed design cleaned"
+                    }
+                }
+            } else {
+                println "No specs directory found"
+            }
+        }
+    }
+    
+    task cleanCode {
+        group = "sdd"
+        description = "Clean generated code (src/, build/) - keeps SPEC (basic_design/, detailed_design/)"
+        doLast {
+            println "Cleaning generated code for ${project.name}..."
+            
+            // src/main を削除
+            def srcMainDir = file("${projectDir}/src/main")
+            if (srcMainDir.exists()) {
+                println "  Deleting: ${srcMainDir.absolutePath}"
+                delete srcMainDir
+            }
+            
+            // src/test を削除
+            def srcTestDir = file("${projectDir}/src/test")
+            if (srcTestDir.exists()) {
+                println "  Deleting: ${srcTestDir.absolutePath}"
+                delete srcTestDir
+            }
+            
+            // build を削除（標準のcleanと同じ）
+            def buildDir = file("${projectDir}/build")
+            if (buildDir.exists()) {
+                println "  Deleting: ${buildDir.absolutePath}"
+                delete buildDir
+            }
+            
+            println "✓ Generated code cleaned"
+            println "✓ SPEC files are preserved (basic_design/, detailed_design/)"
+        }
+    }
+    
+    task cleanAllSdd {
+        group = "sdd"
+        description = "Clean all SDD artifacts except basic_design/ (tasks, detailed_design, code)"
+        dependsOn cleanTasks, cleanDetailedDesign, cleanCode
+        doLast {
+            println ""
+            println "===================================="
+            println "All SDD artifacts cleaned for ${project.name}!"
+            println "Preserved: specs/*/basic_design/"
+            println "===================================="
         }
     }
 

@@ -6,7 +6,7 @@
 
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
-spec_directory: "ここに仕様書ディレクトリのパスを入力"
+spec_directory: "ここにSPECディレクトリのパスを入力"
 output_directory: "ここにタスク出力先のパスを入力（オプション）"
 ```
 
@@ -31,7 +31,7 @@ output_directory: "projects/sdd/person/jsf-person-sdd/tasks"
 * タスクリストは抽象度の高いレベルで作成する
 * ソースコードや詳細な実装手順は含めない
 * 各タスクは「何を作成・修正するか」を明確に示す
-* 詳細な実装は次の「実装フェーズ（コード生成）」で仕様書を参照して行う
+* 詳細な実装は次の「実装フェーズ（コード生成）」でSPECを参照して行う
 
 出力先
 * ベースプロジェクトの場合: `{project_root}/tasks/` ディレクトリ
@@ -58,8 +58,8 @@ output_directory: "projects/sdd/person/jsf-person-sdd/tasks"
 
 ### フレームワーク仕様（該当する場合）
 
-* @agent_skills/struts-to-jsf-migration/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
-* @agent_skills/jakarta-ee-api-base/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+* @agent_skills/struts-to-jsf-migration/frameworks/ - フレームワーク固有のSPECやサンプルコードを確認する
+* @agent_skills/jakarta-ee-api-base/frameworks/ - フレームワーク固有のSPECやサンプルコードを確認する
   * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
   * タスク分解時に、フレームワーク固有の実装要件を考慮する
 
@@ -262,7 +262,7 @@ SPECから画面を抽出してタスクファイルを生成：
 * [ ] [P] タスク X.X.X: [タスク名]
   * 目的: [このタスクで実現する機能・目的]
   * 対象: [作成/修正するコンポーネント名やファイル名]
-  * 参照SPEC: [参照する仕様書（Markdownリンク形式）] の「[セクション番号 セクション名]」
+  * 参照SPEC: [参照するSPEC（Markdownリンク形式）] の「[セクション番号 セクション名]」
   * 注意事項: [考慮すべき点があれば記載]
 ```
 
@@ -283,7 +283,7 @@ SPECから画面を抽出してタスクファイルを生成：
 * [ ] T_SCREEN001_003: PersonTableBean の作成
   * 目的: Person一覧画面のManaged Beanを実装する
   * 対象: PersonTableBean.java (JSF Managed Bean)
-  * 参照SPEC: [functional_design.md](../specs/baseline/screen/SCREEN_001_PersonList/functional_design.md) の「2.1 PersonTableBean」
+  * 参照SPEC: [functional_design.md](../specs/baseline/detailed_design/screen/SCREEN_001_PersonList/functional_design.md) の「2.1 PersonTableBean」
   * 注意事項: ViewScopedで実装し、画面遷移時にFlash Scopeでデータを受け渡すこと
 ```
 
@@ -294,8 +294,8 @@ SPECから画面を抽出してタスクファイルを生成：
   * 目的: Person一覧画面のXHTMLを実装する
   * 対象: PersonTablePage.xhtml (Facelets XHTML)
   * 参照SPEC: 
-    * [screen_design.md](../specs/baseline/screen/SCREEN_001_PersonList/screen_design.md) の「2. 画面レイアウト」
-    * [functional_design.md](../specs/baseline/screen/SCREEN_001_PersonList/functional_design.md) の「3. 画面遷移」
+    * [screen_design.md](../specs/baseline/detailed_design/screen/SCREEN_001_PersonList/screen_design.md) の「2. 画面レイアウト」
+    * [functional_design.md](../specs/baseline/detailed_design/screen/SCREEN_001_PersonList/functional_design.md) の「3. 画面遷移」
   * 注意事項: h:dataTableを使用してPersonリストを表示すること
 ```
 

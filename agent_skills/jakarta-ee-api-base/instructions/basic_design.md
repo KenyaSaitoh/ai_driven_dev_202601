@@ -6,7 +6,7 @@
 
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
-spec_directory: "ここに仕様書ディレクトリのパスを入力"
+spec_directory: "ここにSPECディレクトリのパスを入力"
 ```
 
 * 例1: ベースライン（初回リリース版）
@@ -30,30 +30,31 @@ spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/enhancements/2
 
 ## 概要
 
-このインストラクションは、Jakarta EE プロジェクトの仕様書をゼロから作成するためのものである
+このインストラクションは、Jakarta EE プロジェクトの基本設計SPECをゼロから作成するためのものである
 
 重要な方針
 * テンプレートを使用して、所定のフォルダに展開し、ひな形化された状態をまず作る
-* AIとユーザーが対話しながら、各仕様書の中身を埋めていく
+* AIとユーザーが対話しながら、各SPECの中身を埋めていく
 * 既存資料（EXCEL、Word、PDF等）がある場合は、それを読み込んでMarkdown形式に変換する
 * 既存資料がない場合は、テンプレートから対話的に作成する
 * requirements.md（要件定義書）は所与とする（既に存在している前提）
-* システム全体の仕様書（system/配下）とAPI単位の仕様書（api/配下）を作成する
+* 基本設計フェーズでは、システム全体を一枚岩として設計する（basic_design/配下のみ作成）
+* API単位への分解は、次のタスク分解フェーズで実施する
 
-作成する仕様書
+作成するSPEC
 
-system/配下（システム全体、共通処理、ドメインモデル）:
-* architecture_design.md - アーキテクチャ設計書（プロジェクト固有のアーキテクチャ）
-* functional_design.md - 機能設計書（システム全体の機能概要、共通サービス、ドメインモデルの機能設計）
-* detailed_design.md - 詳細設計書（共通処理、ドメインモデル（JPAエンティティ）、共通サービスの詳細設計）
+basic_design/配下（システム全体の基本設計）:
+* requirements.md - 要件定義書（所与、既存）
+* architecture_design.md - アーキテクチャ設計書（プロジェクト全体のアーキテクチャ）
+* functional_design.md - 機能設計書（システム全体の機能設計、全APIを含む）
 * data_model.md - データモデル仕様書（ERD、テーブル定義、リレーション）
-* behaviors.md - 振る舞い仕様書（システム全体の振る舞い、共通処理の振る舞い、受入基準）
+* behaviors.md - 振る舞い仕様書（システム全体の振る舞い、全APIの振る舞いを含む）
 * external_interface.md - 外部インターフェース仕様書（外部API連携、外部システムとの接続）
 
-api/配下（API単位、API固有の設計）:
-* api/{api_id}/functional_design.md - API機能設計書（API固有のエンドポイント、リクエスト/レスポンス、ビジネスルール）
-* api/{api_id}/detailed_design.md - API詳細設計書（Resource、DTO、API特有のビジネスロジックの詳細設計）
-* api/{api_id}/behaviors.md - API振る舞い仕様書（API固有の振る舞い、テストシナリオ、受入基準）
+注意: 
+* 基本設計フェーズでは、api/フォルダやcommon/フォルダは作成しない
+* 詳細設計（detailed_design.md）は、タスク分解後の詳細設計フェーズで作成する
+* 全ての機能をbasic_design/functional_design.mdに記載する
 
 ---
 
@@ -61,7 +62,7 @@ api/配下（API単位、API固有の設計）:
 
 ### 1.1 requirements.mdの確認
 
-{spec_directory}/system/requirements.md が存在することを確認する
+{spec_directory}/basic_design/requirements.md が存在することを確認する
 
 * 存在しない場合は、ユーザーに「requirements.mdが見つかりません。先に要件定義書を作成してください」と伝える
 
@@ -76,30 +77,22 @@ api/配下（API単位、API固有の設計）:
 
 ## 2. テンプレートの展開
 
-### 2.1 システムレベル仕様書の展開
+### 2.1 基本設計テンプレートの展開
 
-@agent_skills/jakarta-ee-api-base/templates/ 配下のテンプレートファイルを {spec_directory}/system/ にコピーする
+@agent_skills/jakarta-ee-api-base/templates/ 配下のテンプレートファイルを {spec_directory}/basic_design/ にコピーする
 
-コピー対象ファイル（system用テンプレート）:
+コピー対象ファイル:
 * architecture_design.md - アーキテクチャ設計書
-* functional_design.md - システム機能設計書（システム全体、共通サービス、ドメインモデル）
+* functional_design.md - 機能設計書（システム全体、全APIを含む）
 * data_model.md - データモデル仕様書（ERD、テーブル定義）
-* behaviors.md - システム振る舞い仕様書（システム全体、共通処理の振る舞い）
+* behaviors.md - 振る舞い仕様書（システム全体、全APIの振る舞いを含む）
 * external_interface.md - 外部インターフェース仕様書
 
 注意
 * requirements.mdは既に存在しているため、コピーしない
-* system_detailed_design.md → system/detailed_design.md としてコピー（詳細設計フェーズで使用）
 * 既にファイルが存在する場合は、ユーザーに「上書きしますか？」と確認する
 * テンプレートは「ひな形」として展開する
 * 既存資料（EXCEL、Word等）がある場合は、後の工程でそれらを読み込んで変換する
-
-### 2.2 API用テンプレートの準備
-
-API単位の仕様書は、APIを識別した後に作成します。使用するテンプレート：
-* api_functional_design.md - API機能設計書テンプレート（API固有のエンドポイント、ビジネスルール）
-* api_detailed_design.md - API詳細設計書テンプレート（Resource、DTO、API特有のService）
-* api_behaviors.md - API振る舞い仕様書テンプレート（API固有の振る舞い、テストシナリオ）
 
 ### 2.2 ディレクトリ構造の確認
 
@@ -107,28 +100,28 @@ API単位の仕様書は、APIを識別した後に作成します。使用す�
 
 ```
 {spec_directory}/
-├── system/                          # システム全体、共通処理、ドメインモデル
-│   ├── requirements.md              # 所与（既存）
-│   ├── architecture_design.md       # テンプレートから展開
-│   ├── functional_design.md         # テンプレートから展開（システム全体、共通サービス、ドメインモデル）
-│   ├── detailed_design.md           # 詳細設計フェーズで作成（共通処理、JPAエンティティ、共通サービス）
-│   ├── data_model.md                # テンプレートから展開
-│   ├── behaviors.md                 # テンプレートから展開（システム全体、共通処理の振る舞い）
-│   └── external_interface.md        # テンプレートから展開
-└── api/                             # API単位の仕様書（API固有の設計）
-    └── API_XXX_yyyy/
-        ├── functional_design.md     # API固有の機能設計
-        ├── detailed_design.md       # 詳細設計フェーズで作成（Resource、DTO、API特有のサービス）
-        └── behaviors.md             # API固有の振る舞い
+└── basic_design/                    # 基本設計の成果物
+    ├── requirements.md              # 所与（既存）
+    ├── architecture_design.md       # テンプレートから展開
+    ├── functional_design.md         # テンプレートから展開（全機能を含む）
+    ├── data_model.md                # テンプレートから展開
+    ├── behaviors.md                 # テンプレートから展開（全振る舞いを含む）
+    └── external_interface.md        # テンプレートから展開
 ```
+
+重要な方針:
+* 基本設計フェーズでは、api/フォルダやcommon/フォルダは作成しない
+* 全ての機能を functional_design.md に記載する
+* 全ての振る舞いを behaviors.md に記載する
+* API単位への分解は、次のタスク分解フェーズで実施する
 
 ---
 
-## 3. 対話による仕様書作成（システムレベル）
+## 3. 対話によるSPEC作成
 
 ### 3.1 requirements.mdの理解
 
-{spec_directory}/system/requirements.md を読み込み、以下を理解する
+{spec_directory}/basic_design/requirements.md を読み込み、以下を理解する
 
 * プロジェクト概要
 * 目的と対象ユーザー
@@ -152,7 +145,7 @@ API単位の仕様書は、APIを識別した後に作成します。使用す�
 4. 不足している情報をユーザーに確認する
 
 既存資料がない場合:
-* {spec_directory}/system/architecture_design.md のテンプレートを開き、ユーザーと対話しながら各セクションを埋めていく
+* {spec_directory}/basic_design/architecture_design.md のテンプレートを開き、ユーザーと対話しながら各セクションを埋めていく
 
 主要なセクション:
 * 技術スタック
@@ -192,7 +185,7 @@ API単位の仕様書は、APIを識別した後に作成します。使用す�
 5. 不足している情報（データ整合性ルール等）をユーザーに確認する
 
 既存資料がない場合:
-* {spec_directory}/system/data_model.md のテンプレートを開き、ユーザーと対話しながら各セクションを埋めていく
+* {spec_directory}/basic_design/data_model.md のテンプレートを開き、ユーザーと対話しながら各セクションを埋めていく
 
 主要なセクション:
 * ER図（Mermaid）
@@ -216,9 +209,9 @@ API単位の仕様書は、APIを識別した後に作成します。使用す�
 * 詳細設計（detailed_design.md）: JPAエンティティクラス設計（@Entity, @Table, @Column, @ManyToOne等のアノテーション、Javaの型、フィールド名）
 * ここでの「エンティティ」: RDBの論理エンティティ（テーブル）を指します。JPAエンティティクラスは詳細設計で扱います
 
-### 3.4 functional_design.md（system）の作成
+### 3.4 functional_design.mdの作成
 
-重要: system/functional_design.mdはシステム全体の機能設計、共通サービス、ドメインモデルの機能設計を記述します。API固有の機能設計はapi/{api_id}/functional_design.mdに記述します。
+重要: basic_design/functional_design.mdにはシステム全体の機能設計を記述します。全てのAPI機能を含めます。
 
 まず、既存資料の有無を確認する
 
@@ -231,69 +224,73 @@ API単位の仕様書は、APIを識別した後に作成します。使用す�
 2. 機能一覧、ユーザーストーリー、ビジネスルール等をMarkdown形式に変換する
 3. テンプレート構造に合わせて整形する
 4. フロー図がある場合は、Mermaid記法に変換する
-5. システム全体の機能と共通処理に関する情報をsystem/functional_design.mdに記載
-6. API固有の情報はapi/{api_id}/functional_design.mdに分離する準備をする
-7. 不足している情報をユーザーに確認する
+5. 全ての機能をbasic_design/functional_design.mdに記載
+6. 不足している情報をユーザーに確認する
 
 既存資料がない場合:
-* {spec_directory}/system/functional_design.md のテンプレートを開き、ユーザーと対話しながら各セクションを埋めていく
+* {spec_directory}/basic_design/functional_design.md のテンプレートを開き、ユーザーと対話しながら各セクションを埋めていく
 
-主要なセクション（system/functional_design.md）:
+主要なセクション:
 * システム概要
+* 全API機能の設計（認証API、書籍管理API、注文管理API等、全てを列挙）
 * 共通機能設計（認証、ログ、エラーハンドリング等）
 * ドメインモデルの機能設計（ビジネスルール、バリデーション、状態遷移等）
 * システム全体のユーザーフロー（Mermaid）
 * システム全体のデータフロー（シーケンス図 - 論理レベル）
-* API一覧とリンク（各API詳細はapi/{api_id}/functional_design.mdへ）
 
-重要な分界点:
-* system/functional_design.md: システム全体の機能概要、共通サービス、ドメインモデルの機能設計
-* api/{api_id}/functional_design.md: API固有のエンドポイント、リクエスト/レスポンス、ビジネスルール
-* 基本設計では、論理レベルのコンポーネント（「書籍サービス」「社員データアクセス」等）またはレイヤー名（「APIレイヤー」「ビジネスロジック」等）のみを記述し、実装クラス名（BookService、EmployeeDao等）やメソッド名（findById()等）は記述しません
-* シーケンス図も論理レベルで記述: `participant BookResource` → `participant 書籍リソース` または `participant APIレイヤー`
-* DTO、エンティティの詳細構造、パッケージ名は記述しません（詳細設計で記述）
+重要な方針:
+* 全ての機能を一枚岩として記述する（共通機能とAPI機能の区別はしない）
+* 基本設計では、論理レベルのコンポーネント（「書籍サービス」「社員データアクセス」等）またはレイヤー名（「APIレイヤー」「ビジネスロジック」等）のみを記述
+* 実装クラス名（BookService、EmployeeDao等）やメソッド名（findById()等）は記述しない
+* シーケンス図も論理レベルで記述: `participant 書籍リソース` または `participant APIレイヤー`
+* DTO、エンティティの詳細構造、パッケージ名は記述しない（詳細設計で記述）
 
 対話のポイント:
 * 「主要な機能を教えてください」
+* 「認証、書籍管理、注文管理など、どのような機能がありますか？」
 * 「共通的な機能（認証、ログ、エラーハンドリング等）は何がありますか？」
 * 「ドメインモデルのビジネスルールは何ですか？」
 * 「システム全体のユーザーフローを教えてください」
-* 「APIは何個ありますか？それぞれのAPIの概要を教えてください」
 
-### 3.5 behaviors.md（system）の作成
+### 3.5 behaviors.mdの作成
 
-重要: system/behaviors.mdはシステム全体の振る舞い、共通処理の振る舞い、受入基準を記述します。API固有の振る舞いはapi/{api_id}/behaviors.mdに記述します。
+重要: basic_design/behaviors.mdにはシステム全体の振る舞いを記述します。全てのAPI機能の振る舞いを含めます。
 
 まず、既存資料の有無を確認する
 
 質問:
 * 「振る舞い仕様（受入基準、テストシナリオ等）に関する既存の資料（EXCEL、Word、PDF等）はありますか？」
-* 「テスト仕様書やシナリオ一覧は既にありますか？」
+* 「テストSPECやシナリオ一覧は既にありますか？」
 
 既存資料がある場合:
 1. 資料を読み込む（ユーザーに@で添付してもらう）
 2. テストシナリオ、受入基準、エラーケース等をMarkdown形式に変換する
 3. テンプレート構造（Given-When-Then形式）に合わせて整形する
-4. システム全体の振る舞いと共通処理に関する情報をsystem/behaviors.mdに記載
-5. API固有の情報はapi/{api_id}/behaviors.mdに分離する準備をする
-6. 不足している情報をユーザーに確認する
+4. 全ての振る舞いをbasic_design/behaviors.mdに記載
+5. 不足している情報をユーザーに確認する
 
 既存資料がない場合:
-* {spec_directory}/system/behaviors.md のテンプレートを開き、ユーザーと対話しながら各セクションを埋めていく
+* {spec_directory}/basic_design/behaviors.md のテンプレートを開き、ユーザーと対話しながら各セクションを埋めていく
 
-主要なセクション（system/behaviors.md）:
+主要なセクション:
 * システム全体の振る舞い概要
+* 全API機能の振る舞い（認証API、書籍管理API、注文管理API等、全てを列挙）
 * 共通処理の振る舞い（認証、ログ、エラーハンドリング、トランザクション等）
 * ドメインモデルの振る舞い（ビジネスルール、バリデーション、状態遷移等）
 * システム全体のシナリオ（Given-When-Then形式）
-* 共通的なエラーケース
-* API一覧とリンク（各API詳細はapi/{api_id}/behaviors.mdへ）
+* エラーケース
+
+重要な方針:
+* 全ての振る舞いを一枚岩として記述する（共通とAPI固有の区別はしない）
+* Given-When-Then形式で記述する
+* 具体的なテストケースを含める
 
 対話のポイント:
 * 「システム全体の振る舞いを教えてください」
+* 「各API機能（認証、書籍管理、注文管理等）の振る舞いをGiven-When-Then形式で教えてください」
 * 「共通処理（認証、エラーハンドリング等）の振る舞いをGiven-When-Then形式で教えてください」
 * 「ドメインモデルのビジネスルールの振る舞いは何ですか？」
-* 「共通的なエラーケースは何がありますか？」
+* 「エラーケースは何がありますか？」
 * 「エラーメッセージはどう表示しますか？」
 
 ### 3.6 external_interface.mdの作成
@@ -312,11 +309,11 @@ API単位の仕様書は、APIを識別した後に作成します。使用す�
 5. 不足している情報（認証方式、ベースURL、エラーレスポンス等）をユーザーに確認する
 
 注意:
-* 外部インターフェース仕様書は**本システムが呼び出す外部システムのAPI仕様**のみを記載する
+* 外部インターフェースSPECは**本システムが呼び出す外部システムのAPI仕様**のみを記載する
 * データベース接続情報、本システムの実装クラス、本システムが公開するAPI仕様は記載しない
 
 既存資料がない場合:
-* {spec_directory}/system/external_interface.md のテンプレートを開き、ユーザーと対話しながら各セクションを埋めていく
+* {spec_directory}/basic_design/external_interface.md のテンプレートを開き、ユーザーと対話しながら各セクションを埋めていく
 
 主要なセクション:
 * 外部システム連携一覧（本システムが呼び出す外部システムのリスト）
@@ -335,123 +332,11 @@ API単位の仕様書は、APIを識別した後に作成します。使用す�
 
 ---
 
-## 4. API単位の仕様書作成
+## 4. SPECの検証
 
-### 4.1 APIの抽出
+### 4.1 整合性チェック
 
-functional_design.mdとrequirements.mdから、実装が必要なAPIを抽出する
-
-例:
-* API_001_auth - 認証API
-* API_002_books - 書籍管理API
-* API_003_stocks - 在庫管理API
-
-### 4.2 API単位ディレクトリの作成とテンプレート展開
-
-各APIごとに {spec_directory}/api/{api_id}/ ディレクトリを作成し、API用テンプレートをコピーする
-
-コピー対象ファイル（API用テンプレート）:
-* api_functional_design.md → api/{api_id}/functional_design.md
-* api_behaviors.md → api/{api_id}/behaviors.md
-
-注意: api_detailed_design.mdは詳細設計フェーズで使用
-
-例:
-```
-{spec_directory}/api/
-├── API_001_auth/
-│   ├── functional_design.md     # api_functional_design.mdからコピー
-│   └── behaviors.md             # api_behaviors.mdからコピー
-├── API_002_books/
-│   ├── functional_design.md
-│   └── behaviors.md
-└── API_003_stocks/
-    ├── functional_design.md
-    └── behaviors.md
-```
-
-### 4.3 API functional_design.md（api/{api_id}）の作成
-
-重要: api/{api_id}/functional_design.mdはAPI固有のエンドポイント、リクエスト/レスポンス、ビジネスルールを記述します。システム全体の機能設計はsystem/functional_design.mdに記述します。
-
-各APIごとに、既存資料の有無を確認する
-
-質問:
-* 「{api_id}のAPI仕様に関する既存の資料（EXCEL、Word、PDF、OpenAPI YAML等）はありますか？」
-* 「エンドポイント一覧、リクエスト/レスポンス定義等の資料はありますか？」
-
-既存資料がある場合:
-1. 資料を読み込む（ユーザーに@で添付してもらう）
-2. API固有のエンドポイント仕様、リクエスト/レスポンス定義、ビジネスルール等をMarkdown形式に変換する
-3. OpenAPI (YAML)形式の場合は、Markdownテーブルとコードブロックに変換する
-4. システム全体や共通処理に関する情報は除外し、API固有の情報のみに絞る
-5. 不足している情報（ビジネスロジック、エラーハンドリング等）をユーザーに確認する
-
-重要な分界点:
-* system/functional_design.md: システム全体、共通サービス、ドメインモデルの機能設計
-* api/{api_id}/functional_design.md: API固有のエンドポイント、リクエスト/レスポンス構造、ビジネスロジック（論理レベル）
-* api/{api_id}/detailed_design.md: Resourceクラス、API固有のServiceクラス、DTOクラス、メソッド定義、アノテーション
-* 注意: 既存資料にクラス設計（Javaクラス、DTO等）が含まれている場合でも、基本設計書には含めず、詳細設計フェーズで記述します
-
-既存資料がない場合:
-* ユーザーと対話しながら各APIの functional_design.md を作成する
-
-主要なセクション（api/{api_id}/functional_design.md）:
-* API概要（このAPI固有の概要）
-* エンドポイント仕様（このAPIが提供するエンドポイント）
-  * パス
-  * HTTPメソッド
-  * リクエストパラメータ
-  * リクエストボディ
-  * レスポンスボディ
-  * ステータスコード
-* ビジネスロジック（このAPI固有のビジネスルール）
-* 外部API連携（このAPIが呼び出す外部API）
-
-注意: クラス設計（Resource, DTO）は詳細設計フェーズで実施します。基本設計では記述しません。
-
-対話のポイント:
-* 「このAPIのエンドポイントを教えてください」
-* 「リクエスト/レスポンスの形式を教えてください」
-* 「このAPI固有のビジネスロジックは何ですか？」
-* 「このAPIは外部APIを呼び出しますか？」
-
-### 4.4 API behaviors.md（api/{api_id}）の作成
-
-重要: api/{api_id}/behaviors.mdはAPI固有の振る舞い、テストシナリオ、受入基準を記述します。システム全体や共通処理の振る舞いはsystem/behaviors.mdに記述します。
-
-各APIごとに、既存資料の有無を確認する
-
-質問:
-* 「{api_id}のテストシナリオや受入基準に関する既存の資料（EXCEL、Word、PDF等）はありますか？」
-
-既存資料がある場合:
-1. 資料を読み込む（ユーザーに@で添付してもらう）
-2. API固有のテストシナリオ、エラーケース、受入基準等をMarkdown形式に変換する
-3. テンプレート構造（Given-When-Then形式）に合わせて整形する
-4. システム全体や共通処理に関する情報は除外し、API固有の情報のみに絞る
-5. 不足している情報をユーザーに確認する
-
-既存資料がない場合:
-* ユーザーと対話しながら各APIの behaviors.md を作成する
-
-主要なセクション（api/{api_id}/behaviors.md）:
-* API固有のシナリオ（Given-When-Then形式）
-* API固有のエラーケース
-* API固有の受入基準
-
-対話のポイント:
-* 「このAPIの振る舞いをGiven-When-Then形式で教えてください」
-* 「このAPI固有のエラーケースは何がありますか？」
-* 「このAPIの受入基準は何ですか？」
-
----
-
-## 5. 仕様書の検証
-
-### 5.1 整合性チェック
-
-作成した仕様書の整合性を確認する
+作成したSPECの整合性を確認する
 
 * architecture_design.mdで定義した技術スタックと設計方針が一貫しているか
 * data_model.mdで定義したテーブル/ERDが、functional_design.mdの機能要件と整合しているか
@@ -461,14 +346,14 @@ functional_design.mdとrequirements.mdから、実装が必要なAPIを抽出す
 * 基本設計の整合性チェック: 機能要件、ビジネスルール、テーブル定義の整合性
 * 詳細設計の整合性チェック: クラス設計（JPAエンティティ、Dao、Service等）とテーブル定義のマッピング、メソッドシグネチャの整合性
 
-### 5.2 不足項目の確認
+### 4.2 不足項目の確認
 
-各仕様書のテンプレートに記載されている全てのセクションが埋められているか確認する
+各SPECのテンプレートに記載されている全てのセクションが埋められているか確認する
 
 * [PROJECT_NAME]、[DATE]、[STATUS]等のプレースホルダーが全て置き換えられているか
 * 「該当なし」としてスキップしたセクションが明示されているか
 
-### 5.3 Markdownフォーマット規約の確認
+### 4.3 Markdownフォーマット規約の確認
 
 @agent_skills/jakarta-ee-api-base/principles/common_rules.md に記載されたMarkdownフォーマット規約に従っているか確認する
 
@@ -478,101 +363,85 @@ functional_design.mdとrequirements.mdから、実装が必要なAPIを抽出す
 
 ---
 
-## 6. 完了報告
+## 5. 完了報告
 
-### 6.1 作成した仕様書の一覧
+### 5.1 作成したSPECの一覧
 
-ユーザーに作成した仕様書の一覧を報告する
+ユーザーに作成したSPECの一覧を報告する
 
 例:
 ```
-以下の仕様書を作成しました：
+以下の基本設計SPECを作成しました：
 
-システムレベル仕様書（システム全体、共通処理、ドメインモデル）:
-* {spec_directory}/system/architecture_design.md - アーキテクチャ設計書
-* {spec_directory}/system/functional_design.md - システム機能設計書
-* {spec_directory}/system/data_model.md - データモデル仕様書
-* {spec_directory}/system/behaviors.md - システム振る舞い仕様書
-* {spec_directory}/system/external_interface.md - 外部インターフェース仕様書
+{spec_directory}/basic_design/
+├── requirements.md              # 所与（既存）
+├── architecture_design.md       # アーキテクチャ設計書
+├── functional_design.md         # 機能設計書（全機能を含む）
+├── data_model.md                # データモデル仕様書
+├── behaviors.md                 # 振る舞い仕様書（全振る舞いを含む）
+└── external_interface.md        # 外部インターフェース仕様書
 
-注意: system/detailed_design.mdは詳細設計フェーズで作成します
-
-API単位仕様書（API固有の設計）:
-* {spec_directory}/api/API_001_auth/functional_design.md - API機能設計書
-* {spec_directory}/api/API_001_auth/behaviors.md - API振る舞い仕様書
-* {spec_directory}/api/API_002_books/functional_design.md
-* {spec_directory}/api/API_002_books/behaviors.md
-* {spec_directory}/api/API_003_stocks/functional_design.md
-* {spec_directory}/api/API_003_stocks/behaviors.md
-
-注意: api/{api_id}/detailed_design.mdは詳細設計フェーズで作成します
+注意: 
+* 詳細設計（detailed_design/）は、タスク分解後の詳細設計フェーズで作成します
+* API単位への分解は、次のタスク分解フェーズで実施します
 ```
 
-### 6.2 次のステップの案内
+### 5.2 次のステップの案内
 
 ユーザーに次のステップを案内する
 
 ```
 次のステップ:
 1. タスク分解: @agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
+   - basic_design/ を分析してタスクに分解
+   - common（共通機能）とAPI単位を識別
 2. 詳細設計: @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
+   - タスク分解の結果に基づいて detailed_design/ フォルダを作成
+   - common/ と API単位のフォルダを作成
 3. コード生成: @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
+   - 各タスクに従って実装
 ```
 
 ---
 
-## 7. systemとapiの使い分け（まとめ）
+## 6. 基本設計の方針（まとめ）
 
-### 7.1 system配下の仕様書
+### 6.1 基本設計の成果物
 
-システム全体、共通処理、ドメインモデルに関する仕様書を配置します。
+基本設計フェーズでは、システム全体を一枚岩として設計します。
 
-| ファイル | 記載内容 | 作成フェーズ |
-|---------|---------|-----------|
-| architecture_design.md | プロジェクト固有のアーキテクチャ設計 | 基本設計 |
-| functional_design.md | システム全体の機能設計、共通サービス、ドメインモデルの機能設計 | 基本設計 |
-| detailed_design.md | 共通処理、JPAエンティティ、Dao、共通Serviceの詳細設計 | 詳細設計 |
-| data_model.md | ERD、テーブル定義、リレーション | 基本設計 |
-| behaviors.md | システム全体の振る舞い、共通処理の振る舞い、受入基準 | 基本設計 |
-| external_interface.md | 外部API連携仕様 | 基本設計 |
+| ファイル | 記載内容 |
+|---------|---------|
+| requirements.md | 要件定義書（所与） |
+| architecture_design.md | プロジェクト全体のアーキテクチャ設計 |
+| functional_design.md | システム全体の機能設計（全APIを含む） |
+| data_model.md | ERD、テーブル定義、リレーション |
+| behaviors.md | システム全体の振る舞い（全APIの振る舞いを含む） |
+| external_interface.md | 外部API連携仕様 |
 
-### 7.2 api配下の仕様書
+### 6.2 基本設計の重要な方針
 
-API固有の設計情報を配置します。
-
-| ファイル | 記載内容 | 作成フェーズ |
-|---------|---------|-----------|
-| api/{api_id}/functional_design.md | API固有のエンドポイント、リクエスト/レスポンス、ビジネスルール | 基本設計 |
-| api/{api_id}/detailed_design.md | Resource、DTO、API特有のServiceの詳細設計 | 詳細設計 |
-| api/{api_id}/behaviors.md | API固有の振る舞い、テストシナリオ、受入基準 | 基本設計 |
-
-### 7.3 使い分けの判断基準
-
-| 設計対象 | 配置場所 | 理由 |
-|---------|---------|------|
-| 共通処理（認証、ログ、エラーハンドリング） | system/ | 複数のAPIで共有される |
-| ドメインモデル（JPAエンティティ、Dao） | system/ | ビジネスロジックの核心 |
-| 共通Service | system/ | 複数のAPIで共有されるビジネスロジック |
-| システム全体の振る舞い | system/ | システム統合テストの基準 |
-| API固有のエンドポイント | api/{api_id}/ | 特定のAPIにのみ関連する |
-| API固有のResource、DTO | api/{api_id}/ | 特定のAPIにのみ関連する |
-| API固有のビジネスロジック（Service） | api/{api_id}/ | 特定のAPIにのみ関連する（並行作業を考慮） |
+* 全ての機能を functional_design.md に記載する（共通機能とAPI機能の区別はしない）
+* 全ての振る舞いを behaviors.md に記載する（共通とAPI固有の区別はしない）
+* api/フォルダやcommon/フォルダは作成しない
+* 論理レベルで記述する（実装クラス名、メソッド名、パッケージ名は記述しない）
+* API単位への分解は、次のタスク分解フェーズで実施する
 
 ---
 
-## 8. 重要な注意事項
+## 7. 重要な注意事項
 
 ### 対話的アプローチ
 
-このインストラクションは、AIとユーザーが対話しながら仕様書を作成するためのものである
+このインストラクションは、AIとユーザーが対話しながらSPECを作成するためのものである
 
-* AIが一方的に仕様書を作成するのではなく、ユーザーに質問しながら進める
-* ユーザーの回答を元に、仕様書の内容を埋めていく
+* AIが一方的にSPECを作成するのではなく、ユーザーに質問しながら進める
+* ユーザーの回答を元に、SPECの内容を埋めていく
 * 不明点や矛盾があれば、必ずユーザーに確認する
 
 ### 既存資料の活用
 
-各仕様書作成時には、必ず既存資料の有無を確認する
+各SPEC作成時には、必ず既存資料の有無を確認する
 
 * 既存資料の形式: EXCEL、Word、PDF、OpenAPI YAML、画像（ER図等）、その他
 * 既存資料がある場合:
@@ -611,12 +480,12 @@ API固有の設計情報を配置します。
 
 ベースライン（初回リリース版）
 * {spec_directory} = `{project_root}/specs/baseline`
-* system配下に完全な仕様セットを作成する
+* basic_design配下に完全な仕様セットを作成する
 
 拡張機能（エンハンスメント）
 * {spec_directory} = `{project_root}/specs/enhancements/[拡張名]`
-* system配下は必要に応じて作成する（ベースラインを参照する場合は不要）
-* api配下には拡張機能固有のAPI仕様のみを作成する
+* basic_design配下は必要に応じて作成する（ベースラインを参照する場合は不要）
+* 拡張機能固有の仕様のみを作成する
 
 ---
 

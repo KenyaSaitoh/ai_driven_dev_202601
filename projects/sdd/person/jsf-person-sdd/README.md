@@ -20,7 +20,7 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 
 このプロジェクトは、汎用的な **Struts to JSF マイグレーション Agent Skills** を使用してマイグレーションします。
 
-マイグレーションは以下の**4段階プロセス**で進めます：
+マイグレーションは以下の**5段階プロセス**で進めます：
 
 ```
 ステップ1: 既存コード分析（Strutsコード → 仕様書）
@@ -29,7 +29,7 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
     ↓
 ステップ3: 詳細設計（画面単位で詳細設計）← AIと対話しながら
     ↓
-ステップ4: コード生成（タスクリスト → JSFコード）
+ステップ4: コード生成（詳細設計→実装→単体テスト）（タスクリスト → JSFコード）
 ```
 
 ---
@@ -103,7 +103,7 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 
 ---
 
-#### ステップ4: コード生成（詳細設計完了後）
+#### ステップ4: コード生成（詳細設計→実装→単体テスト）（詳細設計完了後）
 
 詳細設計書に基づいてJSFコードを生成します。
 
@@ -176,6 +176,39 @@ Person確認画面を実装してください。
 パラメータ:
 * project_root: projects/sdd/person/jsf-person-sdd
 * task_file: projects/sdd/person/jsf-person-sdd/tasks/SCREEN_003_PersonConfirm.md
+```
+
+---
+
+#### ステップ5: E2Eテスト生成（実装完了後）
+
+全画面実装完了後に、E2Eテスト（End-to-End Test）を生成します。
+
+```
+@agent_skills/struts-to-jsf-migration/instructions/e2e_test_generation.md
+
+E2Eテストを生成してください。
+
+パラメータ:
+* project_root: projects/sdd/person/jsf-person-sdd
+* spec_directory: projects/sdd/person/jsf-person-sdd/specs/baseline
+```
+
+AIが：
+1. 📄 basic_design/behaviors.md（E2Eテストシナリオ）を読み込む
+2. 🧪 Playwright を使用したE2Eテストを生成
+   * 複数画面にまたがるフローをテスト（一覧 → 入力 → 確認 → 登録）
+   * 実際のブラウザ操作
+   * 実際のDBアクセスを含む
+3. 🏷️ `@Tag("e2e")` でE2Eテストを分離
+
+実行方法:
+```bash
+# アプリケーションサーバーを起動
+./gradlew run
+
+# 別ターミナルでE2Eテストを実行
+./gradlew e2eTest
 ```
 
 ---

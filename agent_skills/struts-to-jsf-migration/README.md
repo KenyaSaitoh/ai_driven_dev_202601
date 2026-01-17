@@ -1,41 +1,41 @@
 # Struts to JSF マイグレーション - クイックスタートガイド
 
-Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを4ステップで実現します。
+Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを5ステップで実現します。
 
 ---
 
 ## 🎯 マイグレーションアプローチ
 
 ```
-Struts コード → 仕様書生成 → タスク分解 → 詳細設計 → JSF コード生成
- (既存コード分析)  (画面単位)  (AIと対話)  (コード生成)
+Struts コード → SPEC生成 → タスク分解 → 詳細設計 → JSF コード生成 → E2Eテスト
+ (既存コード分析)  (画面単位)  (AIと対話)  (実装+単体テスト)  (Playwright)
 ```
 
-Code-to-Codeの直接変換ではなく、一度仕様書として抽象化することで：
+Code-to-Codeの直接変換ではなく、一度SPECとして抽象化することで：
 * レガシーな設計パターンを持ち込まない
 * 最新のJakarta EE 10ベストプラクティスを採用
 * ビジネスロジックを正確に保全
 
 ---
 
-## 🚀 4ステップでマイグレーション
+## 🚀 5ステップでマイグレーション
 
 ### ステップ1: 🔍 既存コード分析
 
-既存のStrutsコードから仕様書を生成します。
+既存のStrutsコードからSPECを生成します。
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/reverse_engineering.md
 @projects/legacy/struts-app
 
-既存のStrutsプロジェクトから仕様書を生成してください。
+既存のStrutsプロジェクトからSPECを生成してください。
 
 パラメータ:
 * struts_project_root: projects/legacy/struts-app
 * spec_output_directory: projects/jsf-migration/struts-app-jsf/specs
 ```
 
-生成される仕様書:
+生成されるSPEC:
 * `requirements.md` - システムの目的、機能要件
 * `architecture_design.md` - 技術スタック、レイヤー構成
 * `functional_design.md` - 画面一覧、画面遷移
@@ -45,7 +45,7 @@ Code-to-Codeの直接変換ではなく、一度仕様書として抽象化す�
 
 ### ステップ2: 📋 タスク分解
 
-生成された仕様書から実装タスクを分解します。
+生成されたSPECから実装タスクを分解します。
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/task_breakdown.md
@@ -83,9 +83,9 @@ AIと対話しながら：
 * 画面遷移とデータ受け渡しを確認
 * 詳細設計書を生成
 
-### ステップ4: ⚙️ JSFコード生成
+### ステップ4: ⚙️ JSFコード生成（詳細設計→実装→単体テスト）
 
-詳細設計書に基づいてJSFコードを生成します。
+詳細設計書に基づいてJSFコードと単体テストを生成します。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
@@ -97,6 +97,40 @@ AIと対話しながら：
 * task_file: projects/jsf-migration/struts-app-jsf/tasks/setup_tasks.md
 * skip_infrastructure: true
 ```
+
+AIが：
+1. 💻 Managed Bean、Service、Dao、Entity等を生成
+2. 🎨 Facelets XHTML（画面）を生成
+3. ✅ タスク粒度内の単体テストを生成
+   * 同じタスク内のコンポーネント間は実際の連携をテスト
+   * 例: PersonListBean → PersonService → PersonDao は実際の連携、EntityManagerはモック
+
+### ステップ5: 🧪 E2Eテスト生成
+
+```
+@agent_skills/struts-to-jsf-migration/instructions/e2e_test_generation.md
+
+E2Eテストを生成してください。
+
+パラメータ:
+* project_root: projects/jsf-migration/struts-app-jsf
+* spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
+```
+
+AIが：
+1. 📄 basic_design/behaviors.md（E2Eテストシナリオ）を読み込む
+2. 🧪 Playwright を使用したE2Eテストを生成する
+   * 複数画面にまたがるフローをテスト
+   * 実際のブラウザ操作
+   * 実際のDBアクセスを含む
+   * エンドツーエンドのフロー検証
+3. 📋 テストデータのセットアップ/クリーンアップコードを生成
+4. 🏷️ `@Tag("e2e")` でE2Eテストを分離
+
+重要：
+* E2Eテストは実装完了後に実行
+* アプリケーションサーバーが起動している状態で実行
+* `./gradlew e2eTest` で実行（通常の `test` タスクからは除外）
 
 その後、画面別にコードを生成：
 
@@ -152,13 +186,13 @@ agent_skills/struts-to-jsf-migration/
 
 既存のStruts人材管理システム（`struts-person`）をJSFにマイグレーションします。
 
-#### ステップ1: 仕様書生成
+#### ステップ1: SPEC生成
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/reverse_engineering.md
 @projects/master/person/struts-person
 
-既存のstruts-personプロジェクトから仕様書を生成してください。
+既存のstruts-personプロジェクトからSPECを生成してください。
 
 パラメータ:
 * struts_project_root: projects/master/person/struts-person

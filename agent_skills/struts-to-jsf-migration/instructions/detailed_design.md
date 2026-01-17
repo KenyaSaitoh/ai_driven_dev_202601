@@ -6,7 +6,7 @@
 
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
-spec_directory: "ここに仕様書ディレクトリのパスを入力"
+spec_directory: "ここにSPECディレクトリのパスを入力"
 screen_id: "ここに対象画面のIDを入力（例: SCREEN_001_PersonList）"
 ```
 
@@ -34,25 +34,39 @@ screen_id: "SCREEN_005_PersonSearch"
 
 ## 概要
 
-このインストラクションは、仕様書（screen_design.md、functional_design.md、behaviors.md）から画面の詳細設計書（detailed_design.md）を生成するためのものである
+このインストラクションは、基本設計SPEC（basic_design/）から画面の詳細設計書を生成するためのものである
 
 重要な方針
+* basic_design/functional_design.md、screen_design.mdを参照して、実装レベルのdetailed_design.mdを作成する
+* 純粋な単体テスト用のbehaviors.mdを新規作成する（結合テスト用のbasic_design/behaviors.mdとは別物）
 * AIが仕様を理解し、人と対話しながら妥当性・充足性を確認する
 * 不足情報を補いながら詳細設計を作成する
-* 仕様書は抽象的、detailed_design.mdは具体的
 * 推測せず、不明点は必ずユーザーに質問する
 
-出力先
-* `{spec_directory}/screen/{screen_id}/detailed_design.md`
+生成するファイル
+* `{spec_directory}/detailed_design/screen/{screen_id}/detailed_design.md` - 実装クラス設計（Managed Bean、画面遷移等）
+* `{spec_directory}/detailed_design/screen/{screen_id}/behaviors.md` - 純粋な単体テスト用の振る舞い
+
+behaviors.mdの違い:
+* basic_design/behaviors.md: システム全体の振る舞い（E2Eテスト用）
+  * 画面間遷移、複数画面にまたがるエンドツーエンドのフロー
+  * 実際のDBアクセス、画面レンダリングを含む
+  * Playwrightを使用したブラウザ操作テスト
+  
+* detailed_design/screen/{screen_id}/behaviors.md: タスク粒度内の単体テスト用の振る舞い
+  * タスク内のコンポーネント間の連携をテスト
+  * タスク内のコンポーネントはモック不要（実際の連携をテスト）
+  * タスク外の依存関係のみモックを使用
+  * 例: PersonListBeanとPersonServiceが同じタスクなら、両方とも実インスタンスでテスト（EntityManagerのみモック）
 
 注意
-* ベースライン（初回リリース版）の場合: `{project_root}/specs/baseline/screen/{screen_id}/detailed_design.md`
-* 拡張機能の場合: `{project_root}/specs/enhancements/[拡張名]/screen/{screen_id}/detailed_design.md`
+* ベースライン（初回リリース版）の場合: `{project_root}/specs/baseline/detailed_design/screen/{screen_id}/`
+* 拡張機能の場合: `{project_root}/specs/enhancements/[拡張名]/detailed_design/screen/{screen_id}/`
 * `{spec_directory}` パラメータで柔軟に指定可能
 
 ---
 
-## 1. 仕様書の読み込みと理解
+## 1. SPECの読み込みと理解
 
 パラメータで指定されたプロジェクト情報に基づいて、以下の設計ドキュメントを読み込んで分析してください。
 
@@ -70,8 +84,8 @@ screen_id: "SCREEN_005_PersonSearch"
 
 ### 1.2 フレームワーク仕様（該当する場合）
 
-* @agent_skills/struts-to-jsf-migration/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
-* @agent_skills/jakarta-ee-api-base/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+* @agent_skills/struts-to-jsf-migration/frameworks/ - フレームワーク固有のSPECやサンプルコードを確認する
+* @agent_skills/jakarta-ee-api-base/frameworks/ - フレームワーク固有のSPECやサンプルコードを確認する
   * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
   * 詳細設計時に、フレームワーク仕様に従った設計を行う
 
@@ -79,18 +93,18 @@ screen_id: "SCREEN_005_PersonSearch"
 
 以下のファイルを読み込み、システム全体の設計を理解してください：
 
-* {spec_directory}/system/architecture_design.md - 技術スタック、パッケージ構造を確認
+* {spec_directory}/basic_design/architecture_design.md - 技術スタック、パッケージ構造を確認
   * ベースパッケージ（例: `pro.kensait.jsf.person`）
   * パッケージ階層の規約
   * 使用技術スタック（Jakarta EE 10、JPA、JSF等）
   * セッション管理方針（ViewScoped、Flash Scope等）
   * データソース設定セクションでJNDI名を確認（Service実装時に参照）
 
-* {spec_directory}/system/functional_design.md - システム全体の機能設計概要を確認
+* {spec_directory}/basic_design/functional_design.md - システム全体の機能設計概要を確認
   * 画面遷移図
   * 画面間のデータ受け渡し方式
 
-* {spec_directory}/system/data_model.md - テーブル定義（ERD）からJPAエンティティクラスを設計
+* {spec_directory}/basic_design/data_model.md - テーブル定義（ERD）からJPAエンティティクラスを設計
   * テーブル定義（カラム、型、制約）からフィールドをマッピング
   * テーブル間のリレーションシップから@ManyToOne、@OneToMany等を設計
   * 主キー、複合主キーから@Id、@EmbeddedId等を設計
@@ -103,17 +117,17 @@ screen_id: "SCREEN_005_PersonSearch"
 
 以下のファイルを読み込み、対象画面の詳細を理解してください：
 
-* {spec_directory}/screen/{screen_id}/screen_design.md - 画面設計書
+* {spec_directory}/detailed_design/screen/{screen_id}/screen_design.md - 画面設計書
   * 画面レイアウト（テーブル、フォーム、ボタン等）
   * 入力項目（項目名、型、必須/任意、バリデーション）
   * 表示データ（一覧表示、詳細表示等）
 
-* {spec_directory}/screen/{screen_id}/functional_design.md - 画面機能設計書
+* {spec_directory}/detailed_design/screen/{screen_id}/functional_design.md - 画面機能設計書
   * Managed Bean設計（Bean名、スコープ、プロパティ、アクションメソッド）
   * Service設計（メソッドシグネチャ、ビジネスロジック）
   * データアクセス設計（Entity、JPQL）
 
-* {spec_directory}/screen/{screen_id}/behaviors.md - 画面振る舞い仕様書
+* {spec_directory}/detailed_design/screen/{screen_id}/behaviors.md - 画面振る舞い仕様書
   * 画面の振る舞い（初期表示、ボタンクリック、バリデーションエラー等）
   * エラーケース
   * Given-When-Thenシナリオ
@@ -215,7 +229,7 @@ screen_id: "SCREEN_005_PersonSearch"
 
 ユーザーからのフィードバックを受けて、以下を補完してください：
 
-* 仕様書に記載されていない実装詳細
+* SPECに記載されていない実装詳細
 * クラス間の依存関係
 * メソッドシグネチャの詳細
 * エラーメッセージの文言
@@ -230,11 +244,11 @@ screen_id: "SCREEN_005_PersonSearch"
 以下の場所に`detailed_design.md`を作成してください：
 
 ```
-{spec_directory}/screen/{screen_id}/detailed_design.md
+{spec_directory}/detailed_design/screen/{screen_id}/detailed_design.md
 ```
 
-* ベースラインの例: `{project_root}/specs/baseline/screen/SCREEN_001_PersonList/detailed_design.md`
-* 拡張機能の例: `{project_root}/specs/enhancements/202512_person_search/screen/SCREEN_005_PersonSearch/detailed_design.md`
+* ベースラインの例: `{project_root}/specs/baseline/detailed_design/screen/SCREEN_001_PersonList/detailed_design.md`
+* 拡張機能の例: `{project_root}/specs/enhancements/202512_person_search/detailed_design/screen/SCREEN_005_PersonSearch/detailed_design.md`
 
 ### 3.2 詳細設計書のテンプレート
 
@@ -517,15 +531,15 @@ FacesContext.getCurrentInstance().addMessage(null,
 
 ## 5. 注意事項
 
-### 仕様書の優先順位
+### SPECの優先順位
 
 詳細が矛盾する場合、以下の優先順位で判断してください：
 
-1. {spec_directory}/screen/{screen_id}/screen_design.md（最優先）
-2. {spec_directory}/screen/{screen_id}/functional_design.md
-3. {spec_directory}/screen/{screen_id}/behaviors.md
-4. {spec_directory}/system/architecture_design.md
-5. {spec_directory}/system/functional_design.md
+1. {spec_directory}/detailed_design/screen/{screen_id}/screen_design.md（最優先）
+2. {spec_directory}/detailed_design/screen/{screen_id}/functional_design.md
+3. {spec_directory}/detailed_design/screen/{screen_id}/behaviors.md
+4. {spec_directory}/basic_design/architecture_design.md
+5. {spec_directory}/basic_design/functional_design.md
 6. ベースライン仕様（拡張機能の場合、system配下が存在しない場合）
 
 ### 不明点の扱い

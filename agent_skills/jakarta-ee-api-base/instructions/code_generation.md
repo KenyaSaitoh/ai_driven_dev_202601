@@ -35,7 +35,7 @@ skip_infrastructure: true  # インフラセットアップをスキップ
 
 1. 最優先: `@agent_skills/jakarta-ee-api-base/principles/` 配下のすべてのルールドキュメントでJakarta EE開発のルール、アーキテクチャ標準、品質基準、セキュリティ標準を確認する。プロジェクト固有のルールがある場合は `{project_root}/principles/` も併せて確認する
 
-2. フレームワーク仕様（該当する場合）: `@agent_skills/jakarta-ee-api-base/frameworks/` 配下に格納されたフレームワーク固有の仕様書やサンプルコードを確認する
+2. フレームワーク仕様（該当する場合）: `@agent_skills/jakarta-ee-api-base/frameworks/` 配下に格納されたフレームワーク固有のSPECやサンプルコードを確認する
    * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
    * 詳細設計やコード生成時に、フレームワーク仕様に従った実装を行う
 
@@ -43,7 +43,7 @@ skip_infrastructure: true  # インフラセットアップをスキップ
    * タスクの「参照SPEC」はMarkdownリンク形式で記述されている（クリック可能）
    * リンク先のSPECファイルと指定されたセクションを必ず参照する
 
-4. 必須: `{project_root}/specs/baseline/system/architecture_design.md` で以下を確認する
+4. 必須: `{project_root}/specs/baseline/basic_design/architecture_design.md` で以下を確認する
    * 技術スタック（言語、バージョン、フレームワーク、ライブラリ）
    * アーキテクチャパターンとレイヤー構成
    * パッケージ構造と命名規則
@@ -52,23 +52,27 @@ skip_infrastructure: true  # インフラセットアップをスキップ
    * テスト戦略（テストフレームワーク、カバレッジ目標、テスト方針）
    * コード生成時は、ここで定義された技術スタックを厳密に遵守すること
 
-5. 必須: `{project_root}/specs/baseline/system/requirements.md` で機能要件と成功基準を確認する
+5. 必須: `{project_root}/specs/baseline/basic_design/requirements.md` で機能要件と成功基準を確認する
 
-6. 必須: `{project_root}/specs/baseline/system/functional_design.md` でシステム全体の機能設計、共通サービス、ドメインモデルの機能設計を確認する
+6. 必須: `{project_root}/specs/baseline/basic_design/functional_design.md` でシステム全体の機能設計（全APIを含む）を確認する
+   * これが唯一の真実の情報源（Single Source of Truth）
+   * 全ての機能要件、エンドポイント仕様、ビジネスルールはここに記載されている
 
-7. 必須: `{project_root}/specs/baseline/system/detailed_design.md` で共通処理、JPAエンティティ、Dao、共通Serviceの詳細設計を確認する（存在する場合）
+7. 必須: `{project_root}/specs/baseline/detailed_design/common/detailed_design.md` で共通処理、JPAエンティティ、Dao、共通Serviceの詳細設計を確認する（存在する場合）
 
-8. 必須: `{project_root}/specs/baseline/api/*/functional_design.md` でAPI固有のエンドポイント仕様、リクエスト/レスポンス、ビジネスルールを確認する
+8. 必須: `{project_root}/specs/baseline/detailed_design/*/detailed_design.md` でAPI固有のResource、DTO、API特有のServiceの詳細設計を確認する（存在する場合）
+   * 実装クラス設計、メソッドシグネチャ、アノテーション等
 
-9. 必須: `{project_root}/specs/baseline/api/*/detailed_design.md` でAPI固有のResource、DTO、API特有のServiceの詳細設計を確認する（存在する場合）
+9. 必須: `{project_root}/specs/baseline/detailed_design/*/behaviors.md` で単体テスト用の振る舞い仕様を確認する（存在する場合）
+   * メソッドレベルのテストシナリオ
 
-10. 存在する場合: `{project_root}/specs/baseline/system/data_model.md` でテーブル定義とERDを確認する
+10. 存在する場合: `{project_root}/specs/baseline/basic_design/data_model.md` でテーブル定義とERDを確認する
 
-11. 存在する場合: `{project_root}/specs/baseline/system/behaviors.md` でシステム全体の振る舞い、共通処理の振る舞い、受入基準を確認する
+11. 存在する場合: `{project_root}/specs/baseline/basic_design/behaviors.md` でシステム全体の振る舞い（全APIの振る舞いを含む）を確認する
 
-12. 存在する場合: `{project_root}/specs/baseline/api/*/behaviors.md` でAPI固有の受入基準とテストシナリオを確認する
+12. 存在する場合: `{project_root}/specs/baseline/detailed_design/*/behaviors.md` でAPI固有の受入基準とテストシナリオを確認する
 
-13. 存在する場合: `{project_root}/specs/baseline/system/external_interface.md` で外部連携仕様とAPI仕様を確認する
+13. 存在する場合: `{project_root}/specs/baseline/basic_design/external_interface.md` で外部連携仕様とAPI仕様を確認する
 
 11. 静的リソース: `{project_root}/resources/` フォルダの静的ファイル（画像等）を確認し、セットアップ時に適切な場所にコピーする
 
@@ -117,28 +121,28 @@ architecture_design.mdに記載された技術スタックを厳密に遵守す�
 * 品質基準、セキュリティ要件、パフォーマンス基準を満たす
 * プロジェクト固有のルール（`{project_root}/principles/`）がある場合は、それも併せて遵守する
 
-#### 仕様書修正の制約
+#### SPEC修正の制約
 
-コード生成時における仕様書の修正には厳格な制約がある
+コード生成時におけるSPECの修正には厳格な制約がある
 
-* ✅ 修正可能な仕様書
+* ✅ 修正可能なSPEC
   * `detailed_design.md`（詳細設計書）のみ修正可能
   * 実装時に発見した設計の不整合の修正
   * クラス設計の改善やメソッドシグネチャの調整
   * 実装詳細レベルの変更
 
-* ❌ 修正禁止の仕様書
-以下の上位仕様書は絶対に修正しないこと
+* ❌ 修正禁止のSPEC
+以下の上位SPECは絶対に修正しないこと
 * `requirements.md` - 要件定義
 * `architecture_design.md` - アーキテクチャ設計
 * `functional_design.md` - 機能設計
 * `data_model.md` - データモデル
 * `behaviors.md` - 振る舞い仕様
 * `external_interface.md` - 外部インターフェース仕様
-* その他すべての上位仕様書
+* その他すべての上位SPEC
 
 * 対応方針
-  * 上位仕様書は参照のみに使用し、変更しない
+  * 上位SPECは参照のみに使用し、変更しない
   * 実装詳細の調整が必要な場合は`detailed_design.md`で対応する
   * 上位仕様との矛盾を発見した場合は、実装を停止しユーザーに報告する
 
@@ -172,31 +176,99 @@ Entity、Dao、Service、Resource（JAX-RSエンドポイント）を実装す�
 
 ユニットテスト、パフォーマンス最適化、ドキュメント
 
-### 5. 単体テスト生成ガイドライン
+### 5. 単体テスト生成ガイドライン（タスク粒度内のテスト）
 
-* テストフレームワーク: architecture_design.mdで指定されたフレームワークを使用する
+重要: このフェーズで生成するのはタスク粒度内の単体テストである
+
+#### 5.1 基本方針
+
+* テストスコープ: タスクの粒度内
+  * タスク分解で定義された1つのタスク（例: API_002_books）に含まれるコンポーネントをテスト
+  * タスク内のコンポーネント間は実際の連携でテスト可能
+  * タスク外の依存関係はモックを使用
+  
+* モック使用の判断基準:
+  * 同じタスク内のコンポーネント → モック不要（実際の連携をテスト）
+    * 例: BookResource → BookService → BookDao （同じタスク内）
+  * タスク外の依存関係 → モックを使用
+    * 例: BookService が AuthService に依存する場合、AuthService はモック
+    * 例: EntityManager、外部APIクライアント等はモック
+
+* テストフレームワーク: architecture_design.mdで指定されたフレームワークを使用する（JUnit 5 + Mockito等）
 * テストカバレッジ: architecture_design.mdの目標値を遵守する
-* api/配下の各APIのbehaviors.mdの各Given-When-Thenシナリオから対応するテストケースを抽出して実装する
-* api/配下の各APIのfunctional_design.mdの各メソッドシグネチャに対して、正常系・異常系・境界値のテストを作成する
-* data_model.mdのエンティティ検証ルールをテストで検証する
-* テストデータはbehaviors.mdやfunctional_design.mdの具体例を参考に作成する
-* モックやスタブが必要な場合は、architecture_design.mdに従う
 
-### 6. API統合テスト生成ガイドライン
+#### 5.2 テストケース設計
 
-* テストフレームワーク: REST AssuredまたはJAX-RS Clientを使用してREST APIをテストする
-* テストフレームワークの選定: architecture_design.mdを確認する
-* api/配下の各APIのfunctional_design.mdのエンドポイント仕様に基づいてテストを作成する
-* api/配下の各APIのbehaviors.mdのシナリオを実際のHTTPリクエストとしてテストする
-* JWT認証が必要なエンドポイントについては、事前にログインしてトークンを取得する
-* HTTPステータスコード、レスポンスボディ、ヘッダーの検証
-* エラーケースの検証
-* テストは`src/test/java/<パッケージ>/api/`配下に配置する（パッケージはarchitecture_design.mdを参照）
-* ビルド時の除外設定: API統合テストは通常のビルドでは実行されず、個別に実行する設定にする
-  * JUnit 5の`@Tag("integration")`アノテーションをAPI統合テストクラスに付与する
-  * Gradleの`build.gradle`で、testタスクから"integration"タグを除外する設定を追加する
-  * 統合テスト専用のGradleタスクを定義し、個別実行可能にする
-  * テストクラス名の命名規則で識別可能にする
+* detailed_design/配下の各タスクのbehaviors.md（単体テスト用）の各Given-When-Thenシナリオから対応するテストケースを実装する
+* detailed_design/配下の各タスクのdetailed_design.mdの各メソッドシグネチャに対して、以下のテストを作成する：
+  * 正常系テスト（期待する戻り値が返されるか）
+  * 異常系テスト（例外が適切にスローされるか）
+  * 境界値テスト（null、空文字列、最大値、最小値等）
+  * エッジケーステスト
+
+#### 5.3 テストの例
+
+ケース1: タスク内の実際の連携をテスト
+```java
+@ExtendWith(MockitoExtension.class)
+class BookServiceTest {
+    @Mock
+    private EntityManager em; // タスク外の依存関係はモック
+    
+    private BookDao bookDao;
+    private BookService bookService;
+    
+    @BeforeEach
+    void setUp() {
+        bookDao = new BookDao(em); // タスク内のコンポーネントは実インスタンス
+        bookService = new BookService(bookDao); // 実際の連携をテスト
+    }
+    
+    @Test
+    void testFindById_正常系() {
+        // Given
+        Book book = new Book();
+        book.setBookId(1L);
+        when(em.find(Book.class, 1L)).thenReturn(book);
+        
+        // When
+        Book result = bookService.findById(1L); // Service→Daoの実際の連携
+        
+        // Then
+        assertNotNull(result);
+        assertEquals(1L, result.getBookId());
+    }
+}
+```
+
+ケース2: タスク外の依存関係をモック
+```java
+@ExtendWith(MockitoExtension.class)
+class BookServiceTest {
+    @Mock
+    private CategoryService categoryService; // 別タスクのServiceはモック
+    
+    private BookService bookService;
+    
+    @Test
+    void testEnrichBookWithCategory() {
+        // Given
+        Category category = new Category();
+        when(categoryService.findById(1L)).thenReturn(category);
+        
+        // When
+        Book result = bookService.enrichBookWithCategory(bookId, categoryId);
+        
+        // Then
+        assertNotNull(result.getCategory());
+    }
+}
+```
+
+#### 5.4 テストデータ
+
+* テストデータはdetailed_design/配下のbehaviors.md（単体テスト用）やbasic_design/functional_design.mdの具体例を参考に作成する
+* テストデータは各テストケース内でセットアップする（テストの独立性を保つ）
 
 ---
 
@@ -318,7 +390,7 @@ architecture_design.mdを参照して以下を確認すること
 * テストがパスし、カバレッジが要件を満たすことを検証する
 * 実装がアーキテクチャ設計に従っていることを確認する
 * クラス設計が機能設計仕様と一致することを検証する
-* 仕様書とのトレーサビリティ検証
+* SPECとのトレーサビリティ検証
   * api/配下の各APIのbehaviors.mdの受入基準（Given-When-Then）が全てテストケースでカバーされていることを確認する
   * api/配下の各APIのfunctional_design.mdで定義された全てのエンドポイント、DTO、クラス、メソッドが実装されていることを確認する
   * data_model.mdで定義された全ての制約条件（NOT NULL, UNIQUE, FK等）が実装されていることを確認する
@@ -331,7 +403,7 @@ architecture_design.mdを参照して以下を確認すること
 
 ## 実装要件に応じたガイド
 
-このスキルは、仕様書（`{project_root}/specs/baseline/system/architecture_design.md`）に記載された実装要件に自動的に適応する
+このスキルは、SPEC（`{project_root}/specs/baseline/system/architecture_design.md`）に記載された実装要件に自動的に適応する
 
 ### エンティティ実装が必要な場合
 

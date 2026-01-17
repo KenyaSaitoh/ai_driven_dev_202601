@@ -6,64 +6,83 @@
 
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
-spec_directory: "ここに仕様書ディレクトリのパスを入力"
-api_id: "ここに対象APIのIDを入力（例: API_001_auth）"
+spec_directory: "ここにSPECディレクトリのパスを入力"
+target_type: "common または API_XXX_xxx"
 ```
 
-* 例1: ベースライン（初回リリース版）
+* 例1: 共通機能の詳細設計
 ```yaml
 project_root: "projects/sdd/bookstore/back-office-api-sdd"
 spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline"
-api_id: "API_002_books"
+target_type: "common"
 ```
 
-* 例2: 拡張機能（エンハンスメント）
+* 例2: API単位の詳細設計
 ```yaml
 project_root: "projects/sdd/bookstore/back-office-api-sdd"
-spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/enhancements/202512_inventory_alert"
-api_id: "API_005_alerts"
+spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline"
+target_type: "API_002_books"
 ```
 
 注意
 * パス区切りはOS環境に応じて調整する（Windows: `\`, Unix/Linux/Mac: `/`）
 * 以降、`{project_root}` と表記されている箇所は、上記で設定した値に置き換える
 * 以降、`{spec_directory}` と表記されている箇所は、上記で設定した値に置き換える
-* `{api_id}` は対象APIのIDに置き換える
-* アーキテクチャパターンは仕様書から自動判定する
+* `{target_type}` は "common" または "API_XXX_xxx" に置き換える
+* アーキテクチャパターンはSPECから自動判定する
 
 ---
 
 ## 概要
 
-このインストラクションは、仕様書（functional_design.md、behaviors.md、architecture_design.md）からAPI機能の詳細設計書（detailed_design.md）を生成するためのものである
+このインストラクションは、基本設計SPEC（basic_design/）とタスク分解の結果から詳細設計書（detailed_design/）を生成するためのものである
 
 重要な方針
+* タスク分解で識別された common または API単位 に対して詳細設計を作成する
+* basic_design/functional_design.md を参照して、実装レベルの detailed_design.md を作成する
+* 単体テスト用の behaviors.md を新規作成する（結合テスト用の basic_design/behaviors.md とは別物）
 * AIが仕様を理解し、人と対話しながら妥当性・充足性を確認する
-* 不足情報を補いながら詳細設計を作成する
-* 基本設計（functional_design.md等）は論理レベル、detailed_design.mdは実装レベル
 * 推測せず、不明点は必ずユーザーに質問する
-* アーキテクチャパターンは仕様書から判断する（パラメータ指定不要）
+* アーキテクチャパターンはSPECから判断する（パラメータ指定不要）
 
 基本設計と詳細設計の分界点:
-* 基本設計: 機能要件、ビジネスルール、テーブル定義（RDB論理設計）、API仕様（エンドポイント、リクエスト/レスポンス構造）
-* 詳細設計: 実装クラス設計（Resource, Service, Dao, JPAエンティティ、DTO）、メソッドシグネチャ、アノテーション（@Entity, @Path, @Transactional等）、JPQL、依存性注入
+* 基本設計（basic_design/）: 機能要件（functional_design.md）、システム全体の振る舞い（結合テスト用 behaviors.md）
+* 詳細設計（detailed_design/）: 実装クラス設計（detailed_design.md）、実装単位の振る舞い（単体テスト用 behaviors.md）
 
-出力先の分離
-* `{spec_directory}/system/detailed_design.md` - ドメインモデル、エンティティ、Dao、共通Service、ユーティリティクラスの詳細設計
-* `{spec_directory}/api/{api_id}/detailed_design.md` - API固有の詳細設計（Resource、DTO、API特有のビジネスロジック）
+behaviors.mdの違い:
+* basic_design/behaviors.md: システム全体の振る舞い（E2Eテスト用）
+  * API間連携、システム統合シナリオ
+  * 複数コンポーネントにまたがるエンドツーエンドのフロー
+  * 実際のDBアクセス、外部API呼び出しを含む
+  * REST Assuredを使用したHTTPリクエスト/レスポンステスト
+  
+* detailed_design/{target}/behaviors.md: タスク粒度内の単体テスト用の振る舞い
+  * タスク内のコンポーネント間の連携をテスト
+  * タスク内のコンポーネントはモック不要（実際の連携をテスト）
+  * タスク外の依存関係のみモックを使用
+  * 例: BookServiceとBookDaoが同じタスクなら、両方とも実インスタンスでテスト（EntityManagerのみモック）
+
+フォルダ構造
+* `{spec_directory}/basic_design/` - 基本設計（フェーズ1で作成済み）
+  * functional_design.md - 全機能の要件（唯一の真実の情報源）
+  * behaviors.md - システム全体の振る舞い（結合テスト用）
+* `{spec_directory}/detailed_design/common/` - 共通機能の詳細設計（タスク分解で識別）
+  * detailed_design.md - 実装クラス設計
+  * behaviors.md - 単体テスト用の振る舞い
+* `{spec_directory}/detailed_design/API_XXX_xxx/` - API単位の詳細設計（タスク分解で識別）
+  * detailed_design.md - 実装クラス設計
+  * behaviors.md - 単体テスト用の振る舞い
 
 注意
-* ベースライン（初回リリース版）の場合: 
-  * `{project_root}/specs/baseline/system/detailed_design.md`（ドメインモデル・共通処理）
-  * `{project_root}/specs/baseline/api/{api_id}/detailed_design.md`（API固有）
-* 拡張機能の場合: 
-  * `{project_root}/specs/enhancements/[拡張名]/system/detailed_design.md`（ドメインモデル・共通処理）
-  * `{project_root}/specs/enhancements/[拡張名]/api/{api_id}/detailed_design.md`（API固有）
-* `{spec_directory}` パラメータで柔軟に指定可能
+* 詳細設計フェーズで初めて detailed_design/ フォルダを作成する
+* タスク分解の結果に基づいて、common/ と API単位のフォルダを作成する
+* functional_design.md は basic_design/ にのみ存在する（detailed_design/ には作成しない）
+* basic_design/functional_design.md を参照して detailed_design.md を作成する
+* behaviors.md は単体テスト用に新規作成する（basic_design/behaviors.md とは別物）
 
 ---
 
-## 1. 仕様書の読み込みと理解
+## 1. SPECの読み込みと理解
 
 パラメータで指定されたプロジェクト情報に基づいて、以下の設計ドキュメントを読み込んで分析する
 
@@ -78,45 +97,44 @@ api_id: "API_005_alerts"
 
 ### 1.2 フレームワーク仕様（該当する場合）
 
-* @agent_skills/jakarta-ee-api-base/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+* @agent_skills/jakarta-ee-api-base/frameworks/ - フレームワーク固有のSPECやサンプルコードを確認する
   * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
   * 詳細設計時に、フレームワーク仕様に従った設計を行う
 
-### 1.3 システムレベルの仕様
+### 1.3 基本設計の仕様
 
 以下のファイルを読み込み、システム全体の設計を理解する
 
-* {spec_directory}/system/architecture_design.md - 技術スタック、パッケージ構造、セキュリティ方式を確認する
+* {spec_directory}/basic_design/architecture_design.md - 技術スタック、パッケージ構造、セキュリティ方式を確認する
 
-* {spec_directory}/system/functional_design.md - システム全体の機能設計、共通サービス、ドメインモデルの機能設計を確認する
+* {spec_directory}/basic_design/functional_design.md - システム全体の機能設計（全APIを含む）を確認する
   * システム全体の機能概要
-  * 共通サービスの機能設計（認証、ログ、エラーハンドリング等）
+  * 全てのAPI機能の設計
+  * 共通機能の設計（認証、ログ、エラーハンドリング等）
   * ドメインモデルの機能設計（ビジネスルール、バリデーション、状態遷移等）
 
-* {spec_directory}/system/data_model.md - テーブル定義とERDを確認し、JPAエンティティクラスを設計する
+* {spec_directory}/basic_design/data_model.md - テーブル定義とERDを確認し、JPAエンティティクラスを設計する
   * 注意: data_model.mdはRDB論理設計（テーブル、カラム、制約）のみ記述
-  * JPAエンティティクラスの設計（@Entity, @Column, @ManyToOne等のアノテーション、Java型、リレーションマッピング）はsystem/detailed_design.mdで実施
+  * JPAエンティティクラスの設計（@Entity, @Column, @ManyToOne等のアノテーション、Java型、リレーションマッピング）はdetailed_design/common/detailed_design.mdで実施
 
-* {spec_directory}/system/behaviors.md - システム全体の振る舞い、共通処理の振る舞いを確認する（該当する場合）
+* {spec_directory}/basic_design/behaviors.md - システム全体の振る舞い（全APIの振る舞いを含む）を確認する
 
 注意: 
-* 拡張機能の場合、システムレベルの仕様が存在しない場合がある。その場合はベースラインの仕様を参照する
-* data_model.mdはRDB論理設計（ERD、テーブル、制約）のみを記述。JPAエンティティクラスはsystem/detailed_design.mdでERDから設計する
+* 基本設計フェーズでは、全ての機能が basic_design/ に一枚岩として記述されている
+* タスク分解フェーズで、何が共通機能で何がAPI固有機能かが識別されている
+* 詳細設計フェーズで、basic_design/ から該当部分を抽出して detailed_design/ フォルダを作成する
 
-### 1.4 対象APIの仕様
+### 1.4 タスク分解の結果
 
-以下のファイルを読み込み、対象APIの詳細を理解する
+以下のタスクファイルを読み込み、対象の範囲を理解する
 
-* {spec_directory}/api/{api_id}/functional_design.md - API機能設計書
-  * API固有のベースパス
-  * API固有のエンドポイント一覧
-  * API固有のリクエスト/レスポンス形式
-  * API固有のビジネスルール
+* {project_root}/tasks/common_tasks.md - 共通機能のタスク（target_type が "common" の場合）
+* {project_root}/tasks/{target_type}.md - API単位のタスク（target_type が "API_XXX_xxx" の場合）
 
-* {spec_directory}/api/{api_id}/behaviors.md - API振る舞い仕様書（該当する場合）
-  * API固有のエラーケース
-  * API固有の外部API連携
-  * API固有の受入基準
+タスクファイルから、以下を確認する：
+* 実装対象のコンポーネント（Resource、Service、Dao、DTO等）
+* 参照すべき SPEC（basic_design/ の該当セクション）
+* 依存関係
 
 注意: システム全体の機能設計、共通処理の振る舞いはsystem/functional_design.md、system/behaviors.mdを参照する
 
@@ -191,7 +209,7 @@ api_id: "API_005_alerts"
 
 ユーザーからのフィードバックを受けて、以下を補完する
 
-* 仕様書に記載されていない実装詳細
+* SPECに記載されていない実装詳細
 * クラス間の依存関係
 * メソッドシグネチャの詳細
 * エラーメッセージの文言
@@ -199,42 +217,69 @@ api_id: "API_005_alerts"
 
 ---
 
-## 3. detailed_design.mdの生成
+## 3. 詳細設計書の生成
 
-### 3.1 出力先の分離
+### 3.1 生成するファイル
 
-詳細設計書は以下の2つに分けて作成する
+詳細設計フェーズでは、以下の2つのファイルを生成する：
 
-#### 3.1.1 システム全体の詳細設計
+#### 3.1.1 detailed_design.md（実装クラス設計）
 
 ```
-{spec_directory}/system/detailed_design.md
+{spec_directory}/detailed_design/{target_type}/detailed_design.md
 ```
 
-* ベースラインの例: `{project_root}/specs/baseline/system/detailed_design.md`
-* 拡張機能の例: `{project_root}/specs/enhancements/202512_inventory_alert/system/detailed_design.md`
+* common の例: `{project_root}/specs/baseline/detailed_design/common/detailed_design.md`
+* API単位の例: `{project_root}/specs/baseline/detailed_design/API_002_books/detailed_design.md`
 
 * 記載内容:
+  * 実装クラス設計（クラス名、パッケージ、アノテーション）
+  * メソッドシグネチャ（引数、戻り値、例外）
+  * 依存性注入の設計（@Inject、@Named等）
+  * JPQL/Criteria APIのクエリ設計
+  * DTOとエンティティのマッピング設計
+
+* commonの場合の記載内容:
   * ドメインモデル（JPAエンティティ）の詳細設計
   * Daoクラスの詳細設計
   * 共通的なServiceクラスの詳細設計
   * ユーティリティクラス、共通例外クラスの詳細設計
   * セキュリティコンポーネント（JWT、認証フィルター等）の詳細設計
 
-#### 3.1.2 API固有の詳細設計
-
-```
-{spec_directory}/api/{api_id}/detailed_design.md
-```
-
-* ベースラインの例: `{project_root}/specs/baseline/api/API_002_books/detailed_design.md`
-* 拡張機能の例: `{project_root}/specs/enhancements/202512_inventory_alert/api/API_005_alerts/detailed_design.md`
-
-* 記載内容:
+* API単位の場合の記載内容:
   * Resourceクラス（JAX-RS）の詳細設計
   * API固有のDTOクラス（Request、Response）の詳細設計
   * API固有のビジネスロジック（Serviceメソッド）の詳細設計
   * 外部API連携クライアント（該当する場合）の詳細設計
+
+#### 3.1.2 behaviors.md（純粋な単体テスト用の振る舞い）
+
+```
+{spec_directory}/detailed_design/{target_type}/behaviors.md
+```
+
+* 記載内容:
+  * メソッドレベルの単体テストシナリオ（Given-When-Then形式）
+  * 依存関係はモックを使用（@Mock, Mockito等）
+  * 1メソッド＝1テストケースの粒度
+  * 境界値テスト、異常系テスト（nullチェック、例外処理等）
+  * 単体テストの受入基準
+
+* テスト対象の例:
+  * Service層: `BookService.findById(Long id)` → BookDaoをモック化
+  * Resource層: `BookResource.getBook(Long id)` → BookServiceをモック化
+  * Dao層: `BookDao.findById(Long id)` → EntityManagerをモック化
+
+* テストに含まれないもの:
+  * DBアクセス（実際のデータベース接続）
+  * 外部API呼び出し（実際のHTTP通信）
+  * トランザクション処理
+  * 複数クラスにまたがる統合シナリオ
+
+重要: 
+* basic_design/behaviors.md（結合テスト/E2Eテスト用）とは完全に別物
+* basic_design/behaviors.md: システム全体の振る舞い、複数コンポーネント連携、実際のDB/外部API
+* detailed_design/{target}/behaviors.md: 純粋な単体テスト、1メソッド単位、依存関係はモック
 
 ### 3.2 システム全体の詳細設計書テンプレート
 
@@ -637,7 +682,7 @@ API固有の設計情報を記述します。
 
 ---
 
-## 5. 仕様書からの実装範囲判定
+## 5. SPECからの実装範囲判定
 
 AIは以下の情報から、実装すべきクラスを判断する
 
@@ -738,7 +783,7 @@ AIは以下の情報から、実装すべきクラスを判断する
 
 ## 7. 注意事項
 
-### 仕様書の優先順位
+### SPECの優先順位
 
 詳細が矛盾する場合、以下の優先順位で判断する
 
@@ -756,7 +801,7 @@ AIは以下の情報から、実装すべきクラスを判断する
 
 ### 実装範囲の判定
 
-仕様書から以下を確認する
+SPECから以下を確認する
 
 * {spec_directory}/system/data_model.md: テーブル定義（ERD）の有無 → JPAエンティティ/Dao/Service実装の必要性
 * {spec_directory}/system/external_interface.md: 外部API定義の有無 → RestClient実装の必要性
@@ -767,7 +812,7 @@ AIは以下の情報から、実装すべきクラスを判断する
 * 詳細設計（detailed_design.md）: JPAエンティティクラス設計（@Entity, @Table, @Column, @ManyToOne等のアノテーション、Java型、フィールド名、リレーションマッピング）
 * JPAエンティティクラスの設計は、data_model.mdのERD（テーブル定義）から詳細設計フェーズでマッピングして作成します
 
-「マイクロサービス」「BFF」といったラベルに依存せず、仕様書の内容から判断する
+「マイクロサービス」「BFF」といったラベルに依存せず、SPECの内容から判断する
 
 注意: 拡張機能の場合、system配下の仕様が存在しない場合はベースラインの仕様を参照する
 

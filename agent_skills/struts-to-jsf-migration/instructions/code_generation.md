@@ -38,7 +38,7 @@ skip_infrastructure: true  # インフラセットアップをスキップ
    * [security.md](../principles/security.md) - セキュリティ標準
    * [common_rules.md](../principles/common_rules.md) - マイグレーション共通ルール、マッピング規則
 
-2. フレームワーク仕様（該当する場合）: `@agent_skills/struts-to-jsf-migration/frameworks/` 配下に格納されたフレームワーク固有の仕様書やサンプルコードを確認する
+2. フレームワーク仕様（該当する場合）: `@agent_skills/struts-to-jsf-migration/frameworks/` 配下に格納されたフレームワーク固有のSPECやサンプルコードを確認する
    * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
    * 詳細設計やコード生成時に、フレームワーク仕様に従った実装を行う
 
@@ -46,7 +46,7 @@ skip_infrastructure: true  # インフラセットアップをスキップ
    * タスクの「参照SPEC」はMarkdownリンク形式で記述されている（クリック可能）
    * リンク先のSPECファイルと指定されたセクションを必ず参照する
 
-4. 必須: `{project_root}/specs/baseline/system/architecture_design.md` で以下を確認する
+4. 必須: `{project_root}/specs/baseline/basic_design/architecture_design.md` で以下を確認する
    * 技術スタック（言語、バージョン、フレームワーク、ライブラリ）
    * アーキテクチャパターンとレイヤー構成
    * パッケージ構造と命名規則
@@ -56,25 +56,25 @@ skip_infrastructure: true  # インフラセットアップをスキップ
    * セッション管理方針（ViewScoped、Flash Scope、Session Scope）
    * コード生成時は、ここで定義された技術スタックを厳密に遵守すること
 
-5. 必須: `{project_root}/specs/baseline/system/requirements.md` で機能要件と成功基準を確認する
+5. 必須: `{project_root}/specs/baseline/basic_design/requirements.md` で機能要件と成功基準を確認する
 
-6. 必須: `{project_root}/specs/baseline/system/functional_design.md` でシステム全体の機能設計、画面一覧、画面遷移図を確認する
+6. 必須: `{project_root}/specs/baseline/basic_design/functional_design.md` でシステム全体の機能設計、画面一覧、画面遷移図を確認する
 
-7. 必須: `{project_root}/specs/baseline/system/detailed_design.md` で共通処理、JPAエンティティ、Serviceの詳細設計を確認する（存在する場合）
+7. 必須: `{project_root}/specs/baseline/basic_design/detailed_design.md` で共通処理、JPAエンティティ、Serviceの詳細設計を確認する（存在する場合）
 
-8. 必須: `{project_root}/specs/baseline/screen/*/functional_design.md` で画面固有のManaged Bean設計、Service設計、データアクセス設計を確認する
+8. 必須: `{project_root}/specs/baseline/detailed_design/screen/*/functional_design.md` で画面固有のManaged Bean設計、Service設計、データアクセス設計を確認する
 
-9. 必須: `{project_root}/specs/baseline/screen/*/detailed_design.md` で画面固有の詳細設計を確認する（存在する場合）
+9. 必須: `{project_root}/specs/baseline/detailed_design/screen/*/detailed_design.md` で画面固有の詳細設計を確認する（存在する場合）
 
-10. 存在する場合: `{project_root}/specs/baseline/system/data_model.md` でテーブル定義とERDを確認する
+10. 存在する場合: `{project_root}/specs/baseline/basic_design/data_model.md` でテーブル定義とERDを確認する
 
-11. 存在する場合: `{project_root}/specs/baseline/system/behaviors.md` でシステム全体の振る舞い、共通処理の振る舞い、受入基準を確認する
+11. 存在する場合: `{project_root}/specs/baseline/basic_design/behaviors.md` でシステム全体の振る舞い、共通処理の振る舞い、受入基準を確認する
 
-12. 存在する場合: `{project_root}/specs/baseline/screen/*/behaviors.md` で画面固有の受入基準とテストシナリオを確認する
+12. 存在する場合: `{project_root}/specs/baseline/detailed_design/screen/*/behaviors.md` で画面固有の受入基準とテストシナリオを確認する
 
-13. 存在する場合: `{project_root}/specs/baseline/screen/*/screen_design.md` で画面レイアウト、入力項目、バリデーションを確認する
+13. 存在する場合: `{project_root}/specs/baseline/detailed_design/screen/*/screen_design.md` で画面レイアウト、入力項目、バリデーションを確認する
 
-14. 存在する場合: `{project_root}/specs/baseline/system/external_interface.md` で外部連携仕様とAPI仕様を確認する
+14. 存在する場合: `{project_root}/specs/baseline/basic_design/external_interface.md` で外部連携仕様とAPI仕様を確認する
 
 15. 静的リソース: `{project_root}/resources/` フォルダの静的ファイル（画像等）を確認し、セットアップ時に適切な場所にコピーする
 
@@ -124,18 +124,18 @@ architecture_design.mdに記載された技術スタックを厳密に遵守す�
 * マイグレーション特有のマッピング規則（Struts → JSF）に従う
 * プロジェクト固有のルール（`{project_root}/principles/`）がある場合は、それも併せて遵守する
 
-#### 仕様書修正の制約
+#### SPEC修正の制約
 
-コード生成時における仕様書の修正には厳格な制約がある
+コード生成時におけるSPECの修正には厳格な制約がある
 
-* ✅ 修正可能な仕様書
+* ✅ 修正可能なSPEC
   * `detailed_design.md`（詳細設計書）のみ修正可能
   * 実装時に発見した設計の不整合の修正
   * クラス設計の改善やメソッドシグネチャの調整
   * 実装詳細レベルの変更
 
-* ❌ 修正禁止の仕様書
-以下の上位仕様書は絶対に修正しないこと
+* ❌ 修正禁止のSPEC
+以下の上位SPECは絶対に修正しないこと
 * `requirements.md` - 要件定義
 * `architecture_design.md` - アーキテクチャ設計
 * `functional_design.md` - 機能設計
@@ -143,10 +143,10 @@ architecture_design.mdに記載された技術スタックを厳密に遵守す�
 * `behaviors.md` - 振る舞い仕様
 * `screen_design.md` - 画面設計
 * `external_interface.md` - 外部インターフェース仕様
-* その他すべての上位仕様書
+* その他すべての上位SPEC
 
 * 対応方針
-  * 上位仕様書は参照のみに使用し、変更しない
+  * 上位SPECは参照のみに使用し、変更しない
   * 実装詳細の調整が必要な場合は`detailed_design.md`で対応する
   * 上位仕様との矛盾を発見した場合は、実装を停止しユーザーに報告する
 
@@ -180,25 +180,101 @@ Entity、Service、Managed Bean、Facelets XHTMLを実装する
 
 ユニットテスト、パフォーマンス最適化、ドキュメント
 
-### 5. 単体テスト生成ガイドライン
+### 5. 単体テスト生成ガイドライン（タスク粒度内のテスト）
 
-* テストフレームワーク: architecture_design.mdで指定されたフレームワークを使用する
+重要: このフェーズで生成するのはタスク粒度内の単体テストである
+
+#### 5.1 基本方針
+
+* テストスコープ: タスクの粒度内
+  * タスク分解で定義された1つのタスク（例: SCREEN_001_PersonList）に含まれるコンポーネントをテスト
+  * タスク内のコンポーネント間は実際の連携でテスト可能
+  * タスク外の依存関係はモックを使用
+  
+* モック使用の判断基準:
+  * 同じタスク内のコンポーネント → モック不要（実際の連携をテスト）
+    * 例: PersonListBean → PersonService → PersonDao （同じタスク内）
+  * タスク外の依存関係 → モックを使用
+    * 例: PersonService が ExternalService に依存する場合、ExternalService はモック
+    * 例: EntityManager、外部APIクライアント等はモック
+
+* テストフレームワーク: architecture_design.mdで指定されたフレームワークを使用する（JUnit 5 + Mockito等）
 * テストカバレッジ: architecture_design.mdの目標値を遵守する
-* screen/配下の各画面のbehaviors.mdの各Given-When-Thenシナリオから対応するテストケースを抽出して実装する
-* screen/配下の各画面のfunctional_design.mdの各メソッドシグネチャに対して、正常系・異常系・境界値のテストを作成する
-* data_model.mdのエンティティ検証ルールをテストで検証する
-* テストデータはbehaviors.mdやfunctional_design.mdの具体例を参考に作成する
-* モックやスタブが必要な場合は、architecture_design.mdに従う
 
-### 6. 画面テスト生成ガイドライン
+#### 5.2 テストケース設計
 
-* テストフレームワーク: Arquillianまたはその他のJSFテストフレームワークを使用する
-* テストフレームワークの選定: architecture_design.mdを確認する
-* screen/配下の各画面のfunctional_design.mdの画面仕様に基づいてテストを作成する
-* screen/配下の各画面のbehaviors.mdのシナリオを実際の画面操作としてテストする
-* 画面遷移、データ受け渡し（Flash Scope）、バリデーションの検証
-* エラーケースの検証
-* テストは`src/test/java/<パッケージ>/bean/`配下に配置する（パッケージはarchitecture_design.mdを参照）
+* detailed_design/screen/配下の各画面のbehaviors.md（単体テスト用）の各Given-When-Thenシナリオから対応するテストケースを実装する
+* detailed_design/screen/配下の各画面のdetailed_design.mdの各メソッドシグネチャに対して、以下のテストを作成する：
+  * 正常系テスト（期待する戻り値が返されるか）
+  * 異常系テスト（例外が適切にスローされるか）
+  * 境界値テスト（null、空文字列、最大値、最小値等）
+  * バリデーションテスト
+
+#### 5.3 テストの例
+
+ケース1: タスク内の実際の連携をテスト
+```java
+@ExtendWith(MockitoExtension.class)
+class PersonListBeanTest {
+    @Mock
+    private EntityManager em; // タスク外の依存関係はモック
+    
+    private PersonDao personDao;
+    private PersonService personService;
+    private PersonListBean personListBean;
+    
+    @BeforeEach
+    void setUp() {
+        personDao = new PersonDao(em); // タスク内のコンポーネントは実インスタンス
+        personService = new PersonService(personDao); // 実際の連携をテスト
+        personListBean = new PersonListBean(personService);
+    }
+    
+    @Test
+    void testDeletePerson_正常系() {
+        // Given
+        Long personId = 1L;
+        Person person = new Person();
+        person.setPersonId(personId);
+        when(em.find(Person.class, personId)).thenReturn(person);
+        
+        // When
+        String result = personListBean.deletePerson(personId); // Bean→Service→Daoの実際の連携
+        
+        // Then
+        assertNotNull(result);
+        verify(em, times(1)).remove(person);
+    }
+}
+```
+
+ケース2: タスク外の依存関係をモック
+```java
+@ExtendWith(MockitoExtension.class)
+class PersonServiceTest {
+    @Mock
+    private ExternalApiClient externalApiClient; // 別タスクのクライアントはモック
+    
+    private PersonService personService;
+    
+    @Test
+    void testNotifyExternalSystem() {
+        // Given
+        doNothing().when(externalApiClient).notify(any());
+        
+        // When
+        personService.notifyExternalSystem(personId);
+        
+        // Then
+        verify(externalApiClient, times(1)).notify(any());
+    }
+}
+```
+
+#### 5.4 テストデータ
+
+* テストデータはdetailed_design/screen/配下のbehaviors.md（単体テスト用）やbasic_design/screen_design.mdの具体例を参考に作成する
+* テストデータは各テストケース内でセットアップする（テストの独立性を保つ）
 
 ---
 
@@ -316,7 +392,7 @@ architecture_design.mdを参照して以下を確認すること
 * テストがパスし、カバレッジが要件を満たすことを検証する
 * 実装がアーキテクチャ設計に従っていることを確認する
 * クラス設計が機能設計仕様と一致することを検証する
-* 仕様書とのトレーサビリティ検証
+* SPECとのトレーサビリティ検証
   * screen/配下の各画面のbehaviors.mdの受入基準（Given-When-Then）が全てテストケースでカバーされていることを確認する
   * screen/配下の各画面のfunctional_design.mdで定義された全てのManaged Bean、Service、クラス、メソッドが実装されていることを確認する
   * data_model.mdで定義された全ての制約条件（NOT NULL, UNIQUE, FK等）が実装されていることを確認する

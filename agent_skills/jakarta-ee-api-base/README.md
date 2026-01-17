@@ -18,29 +18,30 @@ Jakarta EE 10とJAX-RS 3.1を使ったREST API サービスプロジェクト全
 
 ---
 
-## 🚀 超簡単な使い方（4段階プロセス）
+## 🚀 超簡単な使い方（5段階プロセス）
 
-### ステップ1: 📄 基本設計（仕様書作成）
+### ステップ1: 📄 基本設計（SPEC作成）
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/basic_design.md
 
-仕様書を作成してください
+SPECを作成してください
 
 パラメータ:
 * project_root: <プロジェクトルートパス>
-* spec_directory: <仕様書ディレクトリパス>
+* spec_directory: <SPECディレクトリパス>
 ```
 
 AIと対話しながら:
-1. 📋 テンプレートを所定のフォルダに展開
+1. 📋 テンプレートを basic_design/ フォルダに展開
 2. 📖 requirements.mdを読み込み、理解内容を説明
-3. 💬 ユーザーと対話しながら各仕様書の中身を埋める
-4. 📝 システムレベル仕様書（architecture_design.md、functional_design.md等）を作成
-5. 📝 API単位仕様書（api/配下）を作成
+3. 💬 ユーザーと対話しながら各SPECの中身を埋める
+4. 📝 システム全体のSPEC（architecture_design.md、functional_design.md等）を basic_design/ に作成
 
 注意:
 * requirements.md（要件定義書）は所与とする（既に存在している前提）
+* 基本設計フェーズでは、システム全体を一枚岩として設計する
+* API単位への分解は、次のタスク分解フェーズで実施する
 
 ### ステップ2: 📋 タスク分解
 
@@ -51,44 +52,55 @@ AIと対話しながら:
 
 パラメータ:
 * project_root: <プロジェクトルートパス>
-* spec_directory: <仕様書ディレクトリパス>
+* spec_directory: <SPECディレクトリパス>
 * output_directory: <タスク出力先パス（オプション）>
 ```
 
 これだけ！ AIが自動で：
-1. 📖 仕様書を読み込む
-2. 🔧 タスクファイルを分解・生成する
-3. 💾 `tasks/`フォルダに保存する
+1. 📖 basic_design/ を分析
+2. 🎯 何が共通機能で何がAPI固有機能かを識別
+3. 🔧 タスクファイルを分解・生成する
+4. 💾 `tasks/`フォルダに保存する
+
+重要: このタスク分解の結果が、次の詳細設計フェーズで detailed_design/ フォルダ構造を決定します
 
 ### ステップ3: 🎨 詳細設計
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
-@<プロジェクトパス>/specs
 
-対象: <API_ID>（例: API_001_auth）
+詳細設計書を作成してください。
 
-このAPIの詳細設計書を作成してください。
+パラメータ:
+* project_root: <プロジェクトルートパス>
+* spec_directory: <SPECディレクトリパス>
+* target_type: common または API_XXX_xxx
 ```
 
 AIと対話しながら：
-1. 📖 仕様書を読み込み、理解内容を説明
-2. ❓ 不明点をユーザーに質問
-3. 💬 対話で妥当性・充足性を確認
-4. 📝 `detailed_design.md`を生成
+1. 📂 タスク分解の結果に基づいて detailed_design/{target_type}/ フォルダを作成
+2. 📖 basic_design/functional_design.md を参照して実装設計を作成
+3. 🎨 実装レベルの detailed_design.md を生成（クラス設計、メソッドシグネチャ、アノテーション）
+4. ✅ 単体テスト用の behaviors.md を新規作成（タスク粒度内のテストシナリオ）
+5. ❓ 不明点をユーザーに質問
+6. 💬 対話で妥当性・充足性を確認
+
+重要：
+* functional_design.md は basic_design/ にのみ存在（唯一の真実の情報源）
+* basic_design/behaviors.md: システム全体の振る舞い（E2Eテスト用）
+* detailed_design/{target}/behaviors.md: タスク粒度内の振る舞い（単体テスト用）
 
 なぜ必要？
-* 仕様書の理解を人が確認できる
+* SPECの理解を人が確認できる
 * 不足情報を補完できる
 * コード生成の精度が向上する
 
-### ステップ4: ⚙️ コード生成
+### ステップ4: ⚙️ コード生成（詳細設計→実装→単体テスト）
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@<プロジェクトパス>/specs/baseline/api/<API_ID>/detailed_design.md
 
-セットアップタスクを実行してください。
+タスクを実行してください。
 
 パラメータ:
 * project_root: <プロジェクトルートパス>
@@ -97,14 +109,44 @@ AIと対話しながら：
 ```
 
 AIが：
-1. 📄 タスクと詳細設計を読み込む
-2. 💻 コードを生成する
-3. ✅ テストを作成する
+1. 📄 タスクと詳細設計（detailed_design/配下）を読み込む
+2. 💻 コードを生成する（Resource、Service、Dao、Entity、DTO等）
+3. ✅ タスク粒度内の単体テストを作成する
+   * 同じタスク内のコンポーネント間は実際の連携をテスト
+   * タスク外の依存関係のみモック化
+   * 例: BookService → BookDao は実際の連携、EntityManagerはモック
 4. ☑️ タスクを完了としてマークする
 
 💡 skip_infrastructureパラメータ:
 * `true`: DB/APサーバーのセットアップをスキップ（既存環境を使用）
 * `false`またはパラメータなし: 完全セットアップを実行
+
+### ステップ5: 🧪 E2Eテスト生成
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md
+
+E2Eテストを生成してください。
+
+パラメータ:
+* project_root: <プロジェクトルートパス>
+* spec_directory: <SPECディレクトリパス>
+```
+
+AIが：
+1. 📄 basic_design/behaviors.md（E2Eテストシナリオ）を読み込む
+2. 🧪 REST Assured を使用したE2Eテストを生成する
+   * 複数API間の連携をテスト
+   * 実際のHTTPリクエスト/レスポンス
+   * 実際のDBアクセスを含む
+   * エンドツーエンドのフロー検証
+3. 📋 テストデータのセットアップ/クリーンアップコードを生成
+4. 🏷️ `@Tag("e2e")` でE2Eテストを分離
+
+重要：
+* E2Eテストは実装完了後に実行
+* アプリケーションサーバーが起動している状態で実行
+* `./gradlew e2eTest` で実行（通常の `test` タスクからは除外）
 
 ---
 
@@ -135,7 +177,7 @@ AIが：
   * OWASP Top 10対応
 
 * 共通ルールの主な内容:
-  1. 仕様ファースト開発: すべての機能開発は詳細な仕様書の作成から始める
+  1. 仕様ファースト開発: すべての機能開発は詳細なSPECの作成から始める
   2. アーキテクチャの一貫性: Jakarta EE 10のベストプラクティスに従う
   3. テスト駆動品質: すべてのビジネスロジックに対して単体テストを作成
   4. ドキュメント品質の追求: コードとSPECドキュメントを常に最新に保つ
@@ -151,18 +193,18 @@ AIが：
 
 ### 例1: プロジェクト立ち上げ（REST APIサービス - 4段階）
 
-ステップ1: 基本設計（仕様書作成）
+ステップ1: 基本設計（SPEC作成）
 ```
 @agent_skills/jakarta-ee-api-base/instructions/basic_design.md
 
-仕様書を作成してください
+SPECを作成してください
 
 パラメータ:
 * project_root: projects/sdd/bookstore/back-office-api-sdd
 * spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
 ```
 
-AIと対話しながら仕様書を作成
+AIと対話しながらSPECを作成
 
 ステップ2: タスク分解
 ```
@@ -189,18 +231,24 @@ tasks/
 ステップ3: 詳細設計（書籍API）
 ```
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
-@projects/sdd/bookstore/back-office-api-sdd/specs
-
-対象: API_002_books
 
 書籍APIの詳細設計書を作成してください。
+
+パラメータ:
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* target_type: API_002_books
+
 JPQL検索とCriteria API検索の両方を実装する予定です。
 ```
 
 AIとの対話:
 ```
-AI: 理解した内容を説明します...
-    【API概要】
+AI: タスク分解の結果を確認しました。
+    detailed_design/API_002_books/ フォルダを作成します。
+    basic_design/functional_design.md を参照して書籍APIの実装設計を作成します。
+    
+    【API概要】（basic_design/functional_design.mdから）
     * 書籍API（/api/books）
     * エンドポイント:
       1. GET /api/books - 全書籍取得
@@ -220,22 +268,25 @@ AI: 理解した内容を説明します...
 
 ユーザー: はい、その通りです。keywordは両方を対象にしてください。
 
-AI: 承知しました。detailed_design.mdを作成しました。
-    → specs/baseline/api/API_002_books/detailed_design.md
+AI: 承知しました。以下を作成しました：
+    → specs/baseline/detailed_design/API_002_books/detailed_design.md（実装クラス設計）
+    → specs/baseline/detailed_design/API_002_books/behaviors.md（単体テスト用）
 ```
 
 ステップ4: コード生成
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/back-office-api-sdd/tasks/API_002_books.md
-@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_002_books/detailed_design.md
 
 書籍APIを実装してください。
+
+パラメータ:
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_002_books.md
 ```
 
 ### 例2: 外部API連携（4段階）
 
-ステップ1: 基本設計（スキップ - 既に仕様書が存在する場合）
+ステップ1: 基本設計（スキップ - 既にSPECが存在する場合）
 
 ステップ2: タスク分解
 ```
@@ -276,7 +327,7 @@ AI: 理解した内容を説明します...
     
     【不明点・確認事項】
     1. 在庫更新失敗時のロールバック戦略は？
-    2. 配送料金の計算ロジックは仕様書にありますか？
+    2. 配送料金の計算ロジックはSPECにありますか？
 
 ユーザー: 在庫更新失敗時はOptimisticLockExceptionをスローしてください。
          配送料金は東京都内500円、関東圏700円、その他1000円です。
@@ -392,7 +443,7 @@ API_001を実装してください。
 @<プロジェクトパス>/tasks/API_001_xxx.md
 
 全タスク完了しています。
-仕様書との整合性をチェックしてください。
+SPECとの整合性をチェックしてください。
 ```
 
 ---
@@ -483,9 +534,7 @@ Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービスの開発を支援し�
 * `OptimisticLockException`を適切に処理
 * 競合時はHTTP 409 Conflictを返す
 
-### 2種類の検索実装
-
-#### JPQL検索
+### 2種類の検索実装#### JPQL検索
 
 * JPQLクエリで動的検索を実装
 * シンプルで読みやすいコード
@@ -529,14 +578,14 @@ agent_skills/jakarta-ee-api-base/
 │   ├── architecture.md              # Jakarta EE APIアーキテクチャ標準
 │   ├── security.md                  # セキュリティ標準
 │   └── common_rules.md              # 共通ルール
-├── templates/                        # 仕様書テンプレート
+├── templates/                        # SPECテンプレート
 │   ├── architecture_design.md
 │   ├── functional_design.md
 │   ├── data_model.md
 │   ├── behaviors.md
 │   └── external_interface.md
 └── instructions/
-    ├── basic_design.md               # ステップ1: 基本設計（仕様書作成）
+    ├── basic_design.md               # ステップ1: 基本設計（SPEC作成）
     ├── task_breakdown.md             # ステップ2: タスク分解
     ├── detailed_design.md            # ステップ3: 詳細設計
     └── code_generation.md            # ステップ4: コード生成

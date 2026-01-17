@@ -11,7 +11,7 @@
 
 本ドキュメントは、**本システムが外部システムを呼び出す際**のインターフェース仕様を記述する。
 
-注意: 本システムが外部に公開するAPI仕様は、各APIディレクトリ配下のOpenAPI仕様書を参照すること。
+注意: 本システムが外部に公開するAPI仕様は、各APIディレクトリ配下のOpenAPISPECを参照すること。
 
 ### 1.1 システム構成図
 
@@ -64,21 +64,21 @@ graph TB
 
 ---
 
-## 3. 外部システム連携詳細（OpenAPI仕様書がある場合）
+## 3. 外部システム連携詳細（OpenAPISPECがある場合）
 
-外部システムがOpenAPI仕様書を提供している場合、それを取り寄せて参照する：
+外部システムがOpenAPISPECを提供している場合、それを取り寄せて参照する：
 
-* OpenAPI仕様書の格納場所: `system/external_interfaces/[SYSTEM_NAME]/`
+* OpenAPISPECの格納場所: `system/external_interfaces/[SYSTEM_NAME]/`
 * 例: `system/external_interfaces/back-office-api/books-api.yaml`
 
-OpenAPI仕様書があれば、以下のセクション5は不要。
-OpenAPI仕様書がない場合のみ、セクション5で詳細を記述する。
+OpenAPISPECがあれば、以下のセクション5は不要。
+OpenAPISPECがない場合のみ、セクション5で詳細を記述する。
 
 ---
 
-## 4. 外部システム連携詳細（OpenAPI仕様書がない場合）
+## 4. 外部システム連携詳細（OpenAPISPECがない場合）
 
-以下は外部システムのAPI仕様を記述するテンプレートです。OpenAPI仕様書がある場合は、このセクションを削除してください。
+以下は外部システムのAPI仕様を記述するテンプレートです。OpenAPISPECがある場合は、このセクションを削除してください。
 
 ### 4.X [外部システム名]
 

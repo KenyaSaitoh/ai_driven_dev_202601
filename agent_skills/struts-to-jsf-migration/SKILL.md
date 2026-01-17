@@ -1,11 +1,11 @@
 ---
 name: struts-to-jsf-migration
-description: Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを支援。仕様駆動アプローチ（Spec-Driven Migration）により、リバースエンジニアリング、タスク分解、詳細設計、コード生成の4段階で確実なマイグレーションを実現。
+description: Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを支援。仕様駆動アプローチ（Spec-Driven Migration）により、リバースエンジニアリング、タスク分解、詳細設計、コード生成、E2Eテストの5段階で確実なマイグレーションを実現。
 ---
 
 # Struts to JSF マイグレーション Agent Skill
 
-## 使い方（4段階プロセス）
+## 使い方（5段階プロセス）
 
 ### ステップ1: リバースエンジニアリング
 
@@ -13,7 +13,7 @@ description: Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレー
 @agent_skills/struts-to-jsf-migration/instructions/reverse_engineering.md
 @projects/legacy/struts-app
 
-既存のStrutsプロジェクトから仕様書を生成してください
+既存のStrutsプロジェクトからSPECを生成してください
 
 パラメータ
 * struts_project_root: projects/legacy/struts-app
@@ -22,7 +22,7 @@ description: Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレー
 
 AIが自動で以下を実行
 1. Strutsコード（Action、ActionForm、JSP、EJB、DAO）を分析
-2. 抽象的・論理的な仕様書を生成
+2. 抽象的・論理的なSPECを生成
 3. `specs/`フォルダに保存
 
 ### ステップ2: タスク分解
@@ -38,7 +38,7 @@ AIが自動で以下を実行
 ```
 
 AIが自動で以下を実行
-1. 仕様書を読み込み
+1. SPECを読み込み
 2. タスクファイルを分解・生成
 3. `tasks/`フォルダに保存
 
@@ -56,12 +56,12 @@ AIが自動で以下を実行
 ```
 
 AIと対話しながら以下を実施（対話的プロセス）
-1. 仕様書を読み込み、理解内容を説明
+1. SPECを読み込み、理解内容を説明
 2. 不明点をユーザーに質問
 3. 対話で妥当性・充足性を確認
 4. `detailed_design.md`を生成
 
-### ステップ4: コード生成
+### ステップ4: コード生成（詳細設計→実装→単体テスト）
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/code_generation.md
@@ -75,9 +75,30 @@ AIと対話しながら以下を実施（対話的プロセス）
 
 AIが自動で以下を実行
 1. タスクと詳細設計を読み込み
-2. JSFコードを生成（Managed Bean、Entity、Service等）
-3. テストを作成
+2. JSFコードを生成（Managed Bean、Entity、Service、Facelets XHTML等）
+3. タスク粒度内の単体テストを作成
+   * タスク内のコンポーネント間は実際の連携をテスト
+   * タスク外の依存関係のみモック化
 4. タスクを完了としてマーク
+
+### ステップ5: E2Eテスト生成
+
+```
+@agent_skills/struts-to-jsf-migration/instructions/e2e_test_generation.md
+
+E2Eテストを生成してください
+
+パラメータ
+* project_root: projects/jsf-migration/struts-app-jsf
+* spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
+```
+
+AIが自動で以下を実行
+1. basic_design/behaviors.md（E2Eテストシナリオ）を読み込み
+2. Playwright を使用したE2Eテストを生成
+   * 複数画面にまたがるフローをテスト
+   * 実際のブラウザ操作
+3. テストデータのセットアップ/クリーンアップコードを生成
 
 ---
 
@@ -87,14 +108,14 @@ AIが自動で以下を実行
 @agent_skills/struts-to-jsf-migration/instructions/reverse_engineering.md
 @projects/master/person/struts-person
 
-既存のstruts-personプロジェクトから仕様書を生成してください
+既存のstruts-personプロジェクトからSPECを生成してください
 
 パラメータ
 * struts_project_root: projects/master/person/struts-person
 * spec_output_directory: projects/master/person/jsf-person-migrated/specs
 ```
 
-その後、仕様書検証とコード生成を実施する
+その後、SPEC検証とコード生成を実施する
 
 ---
 
@@ -137,7 +158,8 @@ agent_skills/struts-to-jsf-migration/
     ├── reverse_engineering.md        # ステップ1: リバースエンジニアリング
     ├── task_breakdown.md             # ステップ2: タスク分解
     ├── detailed_design.md            # ステップ3: 詳細設計
-    └── code_generation.md            # ステップ4: コード生成
+    ├── code_generation.md            # ステップ4: コード生成（実装+単体テスト）
+    └── e2e_test_generation.md        # ステップ5: E2Eテスト生成（Playwright）
 ```
 
 ---
