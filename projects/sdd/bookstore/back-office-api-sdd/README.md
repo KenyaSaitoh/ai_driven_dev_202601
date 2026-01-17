@@ -2,22 +2,22 @@
 
 ## 📖 概要
 
-Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオンライン書店「**Berry Books**」のバックオフィスAPIアプリケーションです。
+Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオンライン書店「Berry Books」のバックオフィスAPIアプリケーションです。
 書籍・在庫・カテゴリ・出版社の完全なデータ管理をREST APIとして提供するマイクロサービスです。
 
-> **Note:** このプロジェクトは**仕様駆動開発（SDD: Specification-Driven Development）**の研修用プロジェクトです。
+> Note: このプロジェクトは仕様駆動開発（SDD: Specification-Driven Development）の研修用プロジェクトです。
 
-> **SDDとは:**
+> SDDとは:
 > - 詳細な仕様書（specs/）に基づいて、段階的にコードを生成する手法
 > - AIを活用して、仕様書からタスクリスト（tasks/）を生成し、タスクに従って実装を進める
 > - 憲章（principles/）に定められた設計原則とベストプラクティスに従う
-> - **汎用Agent Skills** (`agent_skills/jakarta-ee-api-base/`) を使用した開発
+> - 汎用Agent Skills (`agent_skills/jakarta-ee-api-base/`) を使用した開発
 
 ## 🤖 Agent Skillsを使った開発
 
-このプロジェクトは、汎用的な **Jakarta EE マイクロサービス開発 Agent Skills** を使用して開発します。
+このプロジェクトは、汎用的な Jakarta EE マイクロサービス開発 Agent Skills を使用して開発します。
 
-開発は以下の**5段階プロセス**で進めます：
+開発は以下の5段階プロセスで進めます：
 
 ```
 ステップ1: 基本設計（SPEC作成）← AIと対話しながら
@@ -37,7 +37,7 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 #### ステップ1: 基本設計（プロジェクト開始時に1回）
 
-requirements.mdから、システム全体とAPI単位の仕様書を**AIと対話しながら**作成します。
+requirements.mdから、システム全体とAPI単位の仕様書をAIと対話しながら作成します。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/basic_design.md
@@ -79,16 +79,16 @@ requirements.mdから、システム全体とAPI単位の仕様書を**AIと対�
 
 #### ステップ3: 詳細設計
 
-詳細設計は**2段階**で実施します：
+詳細設計は2段階で実施します：
 
-1. **システム全体の詳細設計**（プロジェクト開始時に1回）
-2. **各APIの詳細設計**（各APIごとに実施）
+1. システム全体の詳細設計（プロジェクト開始時に1回）
+2. 各APIの詳細設計（各APIごとに実施）
 
 ---
 
 ##### 3-1. システム全体の詳細設計（プロジェクト開始時に1回）
 
-共通処理、エンティティ、Dao、セキュリティコンポーネント等の詳細設計を**AIと対話しながら**作成します。
+共通処理、エンティティ、Dao、セキュリティコンポーネント等の詳細設計をAIと対話しながら作成します。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
@@ -118,7 +118,7 @@ requirements.mdから、システム全体とAPI単位の仕様書を**AIと対�
 
 ##### 3-2. 各APIの詳細設計（各APIごとに実施）
 
-各APIの詳細設計書を**AIと対話しながら**作成します。
+各APIの詳細設計書をAIと対話しながら作成します。
 
 * 実行順序: `tasks/tasks.md`の「実行順序」セクションを参照してください。
 
@@ -216,7 +216,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 * api_id: API_006_workflows
 ```
 
-* 重要: 詳細設計は**対話的なプロセス**です。AIが質問してきたら、必ず回答してください。
+* 重要: 詳細設計は対話的なプロセスです。AIが質問してきたら、必ず回答してください。
 
 ---
 
@@ -225,11 +225,11 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 詳細設計書をもとに、実装コードと単体テストを生成します。
 
 * 実行順序: 
-1. **セットアップタスク** → 2. **共通機能タスク** → 3. **各API実装**
+1. セットアップタスク → 2. 共通機能タスク → 3. 各API実装
 
-> **重要**: 共通機能タスク（エンティティ、DAO、DTO、ユーティリティ等）を先に実装してから、各API実装に進んでください。
+> 重要: 共通機能タスク（エンティティ、DAO、DTO、ユーティリティ等）を先に実装してから、各API実装に進んでください。
 
-> **単体テストの方針**: タスク粒度内のコンポーネント間は実際の連携をテスト。タスク外の依存関係のみモック化。
+> 単体テストの方針: タスク粒度内のコンポーネント間は実際の連携をテスト。タスク外の依存関係のみモック化。
 
 ##### 3-1. セットアップタスク（最初に1回）
 
@@ -388,12 +388,12 @@ AIが：
 
 このプロジェクトは、以下の原則に従って開発されます：
 
-* **場所**: `@agent_skills/jakarta-ee-api-base/principles/`
+* 場所: `@agent_skills/jakarta-ee-api-base/principles/`
   * [architecture.md](../../../agent_skills/jakarta-ee-api-base/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
   * [security.md](../../../agent_skills/jakarta-ee-api-base/principles/security.md) - セキュリティ標準
   * [common_rules.md](../../../agent_skills/jakarta-ee-api-base/principles/common_rules.md) - 共通ルール
 
-* **主な内容**:
+* 主な内容:
   * 標準技術スタック（Jakarta EE 10、JPA 3.1、JAX-RS 3.1）
   * レイヤードアーキテクチャ（API、Service、DAO、Entity）
   * 開発標準（命名規則、コーディング規約、バリデーション、エラーハンドリング）
@@ -404,16 +404,16 @@ AIが：
 ## 🎯 プロジェクトの特徴（マイクロサービスパターン）
 
 ### アーキテクチャ
-* **独立したデータ管理サービス**: 書籍・在庫・カテゴリ・出版社の完全管理
-* **マイクロサービス**: berry-books-apiから呼ばれるバックエンドサービス
-* **REST API**: データ管理機能をREST APIとして提供
-* **CORS対応**: クロスオリジンリクエストに対応
+* 独立したデータ管理サービス: 書籍・在庫・カテゴリ・出版社の完全管理
+* マイクロサービス: berry-books-apiから呼ばれるバックエンドサービス
+* REST API: データ管理機能をREST APIとして提供
+* CORS対応: クロスオリジンリクエストに対応
 
 ### 実装する全エンティティ
-* ✅ **Book**（書籍）
-* ✅ **Stock**（在庫）- **楽観的ロック必須（@Version）**
-* ✅ **Category**（カテゴリ）
-* ✅ **Publisher**（出版社）
+* ✅ Book（書籍）
+* ✅ Stock（在庫）- 楽観的ロック必須（@Version）
+* ✅ Category（カテゴリ）
+* ✅ Publisher（出版社）
 
 ### 重要な実装要件
 
@@ -423,9 +423,9 @@ AIが：
 * `OptimisticLockException` → HTTP 409 Conflict
 
 #### 2種類の書籍検索実装
-* **JPQL検索**（`BookDao`）: 動的クエリ、シンプル
-* **Criteria API検索**（`BookDaoCriteria`）: 型安全、コンパイル時チェック
-* **両方実装**: 比較学習が可能
+* JPQL検索（`BookDao`）: 動的クエリ、シンプル
+* Criteria API検索（`BookDaoCriteria`）: 型安全、コンパイル時チェック
+* 両方実装: 比較学習が可能
 
 #### CORS設定
 * berry-books-apiからのクロスオリジンリクエスト対応
@@ -435,20 +435,20 @@ AIが：
 
 ### 本番環境
 
-* **Jakarta EE 10**
-* **Payara Server 6**
-* **JAX-RS (Jakarta RESTful Web Services) 3.1** - REST API
-* **Jakarta Persistence (JPA) 3.1** - Hibernate実装
-* **Jakarta Transactions (JTA)**
-* **Jakarta CDI 4.0**
-* **Jakarta Bean Validation 3.0**
-* **HSQLDB 2.7.x**
+* Jakarta EE 10
+* Payara Server 6
+* JAX-RS (Jakarta RESTful Web Services) 3.1 - REST API
+* Jakarta Persistence (JPA) 3.1 - Hibernate実装
+* Jakarta Transactions (JTA)
+* Jakarta CDI 4.0
+* Jakarta Bean Validation 3.0
+* HSQLDB 2.7.x
 
 ### テスト環境
 
-* **JUnit 5** - テストフレームワーク
-* **Mockito** - モックライブラリ
-* **JaCoCo** - カバレッジツール（オプション）
+* JUnit 5 - テストフレームワーク
+* Mockito - モックライブラリ
+* JaCoCo - カバレッジツール（オプション）
 
 ## プロジェクト構成
 
@@ -525,7 +525,7 @@ back-office-api-sdd/
 |---------|--------------|------|-----|
 | GET | `/api/stocks` | 全在庫取得 | |
 | GET | `/api/stocks/{bookId}` | 在庫取得 | |
-| PUT | `/api/stocks/{bookId}` | 在庫更新 | **楽観的ロック対応** |
+| PUT | `/api/stocks/{bookId}` | 在庫更新 | 楽観的ロック対応 |
 
 * 重要: 在庫更新時は`version`パラメータが必須。競合時はHTTP 409 Conflictを返す。
 
@@ -552,14 +552,14 @@ back-office-api-sdd/
 * Payara Server 6（プロジェクトルートの`payara6/`に配置）
 * HSQLDB（プロジェクトルートの`hsqldb/`に配置）
 
-> **Note:** ① と ② の手順は、ルートの`README.md`を参照してください。
+> Note: ① と ② の手順は、ルートの`README.md`を参照してください。
 
 ### ③ 依存関係の確認
 
 このプロジェクトを開始する前に、以下が起動していることを確認してください：
 
-* **① HSQLDBサーバー** （`./gradlew startHsqldb`）
-* **② Payara Server** （`./gradlew startPayara`）
+* ① HSQLDBサーバー （`./gradlew startHsqldb`）
+* ② Payara Server （`./gradlew startPayara`）
 
 ### ④ プロジェクトを開始するときに1回だけ実行
 
@@ -574,7 +574,7 @@ back-office-api-sdd/
 ./gradlew :back-office-api-sdd:deploy
 ```
 
-> **重要:** `setupHsqldb`を実行すると、`src/main/resources/db/schema.sql`と`sample_data.sql`が実行されます。
+> 重要: `setupHsqldb`を実行すると、`src/main/resources/db/schema.sql`と`sample_data.sql`が実行されます。
 
 ### ⑤ プロジェクトを終了するときに1回だけ実行（CleanUp）
 
@@ -595,8 +595,8 @@ back-office-api-sdd/
 
 デプロイ後、以下のベースURLでAPIにアクセスできます：
 
-* **ベースURL**: http://localhost:8080/back-office-api-sdd/api
-* **ウェルカムページ**: http://localhost:8080/back-office-api-sdd/
+* ベースURL: http://localhost:8080/back-office-api-sdd/api
+* ウェルカムページ: http://localhost:8080/back-office-api-sdd/
 
 ## 📝 APIの使用例（curl）
 
@@ -635,7 +635,7 @@ curl -X PUT http://localhost:8080/back-office-api-sdd/api/stocks/1 \
   }'
 ```
 
-> **重要**: `version`パラメータが異なる場合、HTTP 409 Conflictが返されます。
+> 重要: `version`パラメータが異なる場合、HTTP 409 Conflictが返されます。
 
 ### 6. カテゴリ一覧取得
 
@@ -707,18 +707,18 @@ DAO (@ApplicationScoped)
 Database (HSQLDB)
 ```
 
-**注:** このAPIはberry-books-apiから呼ばれるマイクロサービスです。
+注: このAPIはberry-books-apiから呼ばれるマイクロサービスです。
 
 ### 主要な設計パターン
 
-* **REST Resource Pattern**: JAX-RS
-* **Service Layer Pattern**: CDI + Transactional
-* **Repository Pattern**: DAO
-* **DTO Pattern**: Java Records
-* **Dependency Injection**: CDI
-* **Optimistic Locking**: `@Version`（在庫管理）
-* **Exception Mapper**: JAX-RS
-* **CORS Filter**: クロスオリジン対応
+* REST Resource Pattern: JAX-RS
+* Service Layer Pattern: CDI + Transactional
+* Repository Pattern: DAO
+* DTO Pattern: Java Records
+* Dependency Injection: CDI
+* Optimistic Locking: `@Version`（在庫管理）
+* Exception Mapper: JAX-RS
+* CORS Filter: クロスオリジン対応
 
 ### 楽観的ロック制御
 
@@ -734,11 +734,11 @@ Database (HSQLDB)
 
 ### 設定内容
 
-* **JNDI名**: `jdbc/HsqldbDS`
-* **データベース**: `testdb`
-* **ユーザー**: `SA`
-* **パスワード**: （空文字）
-* **TCPサーバー**: `localhost:9001`
+* JNDI名: `jdbc/HsqldbDS`
+* データベース: `testdb`
+* ユーザー: `SA`
+* パスワード: （空文字）
+* TCPサーバー: `localhost:9001`
 
 データソースはPayara Serverのドメイン設定に登録されます。
 
@@ -776,7 +776,7 @@ Database (HSQLDB)
 tail -f -n 50 payara6/glassfish/domains/domain1/logs/server.log
 ```
 
-> **Note**: Windowsでは**Git Bash**を使用してください。
+> Note: WindowsではGit Bashを使用してください。
 
 ## 🧪 データベースのリセット
 

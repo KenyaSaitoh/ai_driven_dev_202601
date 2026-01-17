@@ -345,13 +345,18 @@ subprojects {
     
     task cleanTasks {
         group = "sdd"
-        description = "Clean SDD tasks (tasks/) - keeps basic_design/"
+        description = "Clean SDD tasks (tasks/) - keeps empty folder"
         doLast {
             def tasksDir = file("${projectDir}/tasks")
             if (tasksDir.exists()) {
                 println "Cleaning tasks: ${tasksDir.absolutePath}"
-                delete tasksDir
-                println "✓ Tasks cleaned"
+                // フォルダ内のファイルとサブディレクトリを削除（フォルダ自体は残す）
+                tasksDir.listFiles().each { file ->
+                    if (file.name != ".gitkeep") {
+                        delete file
+                    }
+                }
+                println "✓ Tasks cleaned (folder kept empty)"
             } else {
                 println "No tasks directory found"
             }
@@ -360,7 +365,7 @@ subprojects {
     
     task cleanDetailedDesign {
         group = "sdd"
-        description = "Clean detailed design SPEC (detailed_design/) - keeps basic_design/"
+        description = "Clean detailed design SPEC (detailed_design/) - keeps empty folder"
         doLast {
             def specsDir = file("${projectDir}/specs")
             if (specsDir.exists()) {
@@ -368,8 +373,13 @@ subprojects {
                     def detailedDesignDir = new File(specDir, "detailed_design")
                     if (detailedDesignDir.exists()) {
                         println "Cleaning detailed design: ${detailedDesignDir.absolutePath}"
-                        delete detailedDesignDir
-                        println "✓ Detailed design cleaned"
+                        // フォルダ内のファイルとサブディレクトリを削除（フォルダ自体は残す）
+                        detailedDesignDir.listFiles().each { file ->
+                            if (file.name != ".gitkeep") {
+                                delete file
+                            }
+                        }
+                        println "✓ Detailed design cleaned (folder kept empty)"
                     }
                 }
             } else {
@@ -419,6 +429,7 @@ subprojects {
             println "===================================="
             println "All SDD artifacts cleaned for ${project.name}!"
             println "Preserved: specs/*/basic_design/"
+            println "Empty folders kept: tasks/, specs/*/detailed_design/"
             println "===================================="
         }
     }

@@ -203,7 +203,7 @@ SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-s
 
 ### タイプ1: タスクファイルのみクリーンアップ
 
-タスク分解の結果（tasks/）を削除します。
+タスク分解の結果（tasks/）の中身を削除します。フォルダ自体は空のまま残ります。
 
 ```bash
 ./gradlew :berry-books-api-sdd:cleanTasks
@@ -211,12 +211,12 @@ SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-s
 ./gradlew :jsf-person-sdd:cleanTasks
 ```
 
-削除されるもの: `tasks/`
+削除されるもの: `tasks/`の中身（フォルダは空のまま残る）
 保持されるもの: `specs/*/basic_design/`, `specs/*/detailed_design/`, `src/`
 
 ### タイプ2: 詳細設計SPECのクリーンアップ
 
-詳細設計SPEC（specs/*/detailed_design/）を削除します。
+詳細設計SPEC（specs/*/detailed_design/）の中身を削除します。フォルダ自体は空のまま残ります。
 
 ```bash
 ./gradlew :berry-books-api-sdd:cleanDetailedDesign
@@ -224,7 +224,7 @@ SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-s
 ./gradlew :jsf-person-sdd:cleanDetailedDesign
 ```
 
-削除されるもの: `specs/*/detailed_design/`
+削除されるもの: `specs/*/detailed_design/`の中身（フォルダは空のまま残る）
 保持されるもの: `specs/*/basic_design/`, `tasks/`, `src/`
 
 ### タイプ3: 実装コードのクリーンアップ
@@ -250,8 +250,9 @@ SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-s
 ./gradlew :jsf-person-sdd:cleanAllSdd
 ```
 
-削除されるもの: `tasks/`, `specs/*/detailed_design/`, `src/`, `build/`
+削除されるもの: `tasks/`の中身、`specs/*/detailed_design/`の中身、`src/`、`build/`
 保持されるもの: `specs/*/basic_design/` （基本設計SPECは絶対に削除されない）
+空のまま残るフォルダ: `tasks/`, `specs/*/detailed_design/`
 
 詳細は各プロジェクトのREADME.mdを参照してください：
 - [projects/sdd/bookstore/berry-books-api-sdd/README.md](projects/sdd/bookstore/berry-books-api-sdd/README.md)

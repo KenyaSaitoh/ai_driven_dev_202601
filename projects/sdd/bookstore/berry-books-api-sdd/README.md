@@ -2,22 +2,22 @@
 
 ## 📖 概要
 
-Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオンライン書店「**Berry Books**」のREST APIアプリケーションです。
+Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオンライン書店「Berry Books」のREST APIアプリケーションです。
 書籍検索、JWT認証、注文処理などのEC機能をREST APIとして提供します。
 
-> **Note:** このプロジェクトは**仕様駆動開発（SDD: Specification-Driven Development）**の研修用プロジェクトです。
+> Note: このプロジェクトは仕様駆動開発（SDD: Specification-Driven Development）の研修用プロジェクトです。
 
-> **SDDとは:**
+> SDDとは:
 > - 詳細な仕様書（specs/）に基づいて、段階的にコードを生成する手法
 > - AIを活用して、仕様書からタスクリスト（tasks/）を生成し、タスクに従って実装を進める
 > - 憲章（principles/）に定められた設計原則とベストプラクティスに従う
-> - **汎用Agent Skills** (`agent_skills/jakarta-ee-api-base/`) を使用した開発
+> - 汎用Agent Skills (`agent_skills/jakarta-ee-api-base/`) を使用した開発
 
 ## 🤖 Agent Skillsを使った開発
 
-このプロジェクトは、汎用的な **Jakarta EE マイクロサービス開発 Agent Skills** を使用して開発します。
+このプロジェクトは、汎用的な Jakarta EE マイクロサービス開発 Agent Skills を使用して開発します。
 
-開発は以下の**5段階プロセス**で進めます：
+開発は以下の5段階プロセスで進めます：
 
 ```
 ステップ1: 基本設計（仕様書作成）← AIと対話しながら
@@ -35,7 +35,7 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 #### ステップ1: 基本設計（プロジェクト開始時に1回）
 
-requirements.mdから、システム全体とAPI単位の仕様書を**AIと対話しながら**作成します。
+requirements.mdから、システム全体とAPI単位の仕様書をAIと対話しながら作成します。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/basic_design.md
@@ -77,16 +77,16 @@ requirements.mdから、システム全体とAPI単位の仕様書を**AIと対�
 
 #### ステップ3: 詳細設計
 
-詳細設計は**2段階**で実施します：
+詳細設計は2段階で実施します：
 
-1. **システム全体の詳細設計**（プロジェクト開始時に1回）
-2. **各APIの詳細設計**（各APIごとに実施）
+1. システム全体の詳細設計（プロジェクト開始時に1回）
+2. 各APIの詳細設計（各APIごとに実施）
 
 ---
 
 ##### 3-1. システム全体の詳細設計（プロジェクト開始時に1回）
 
-共通処理、エンティティ、Dao、セキュリティコンポーネント等の詳細設計を**AIと対話しながら**作成します。
+共通処理、エンティティ、Dao、セキュリティコンポーネント等の詳細設計をAIと対話しながら作成します。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
@@ -116,7 +116,7 @@ requirements.mdから、システム全体とAPI単位の仕様書を**AIと対�
 
 ##### 3-2. 各APIの詳細設計（各APIごとに実施）
 
-各APIの詳細設計書を**AIと対話しながら**作成します。
+各APIの詳細設計書をAIと対話しながら作成します。
 
 * 実行順序: `tasks/tasks.md`の「実行順序」セクションを参照してください。
 
@@ -189,7 +189,7 @@ requirements.mdから、システム全体とAPI単位の仕様書を**AIと対�
 ServletContextを使用してWAR内リソースを配信する予定です。
 ```
 
-* 重要: 詳細設計は**対話的なプロセス**です。AIが質問してきたら、必ず回答してください。
+* 重要: 詳細設計は対話的なプロセスです。AIが質問してきたら、必ず回答してください。
 
 ---
 
@@ -198,9 +198,9 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 詳細設計書をもとに、実装コードを生成します。
 
 * 実行順序: 
-1. **セットアップタスク** → 2. **共通機能タスク** → 3. **各API実装**
+1. セットアップタスク → 2. 共通機能タスク → 3. 各API実装
 
-> **重要**: 共通機能タスク（注文エンティティ、JWT認証基盤、外部API連携クライアント等）を先に実装してから、各API実装に進んでください。
+> 重要: 共通機能タスク（注文エンティティ、JWT認証基盤、外部API連携クライアント等）を先に実装してから、各API実装に進んでください。
 
 ##### 3-1. セットアップタスク（最初に1回）
 
@@ -334,12 +334,12 @@ AIが：
 
 このプロジェクトは、以下の原則に従って開発されます：
 
-* **場所**: `@agent_skills/jakarta-ee-api-base/principles/`
+* 場所: `@agent_skills/jakarta-ee-api-base/principles/`
   * [architecture.md](../../../agent_skills/jakarta-ee-api-base/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
   * [security.md](../../../agent_skills/jakarta-ee-api-base/principles/security.md) - セキュリティ標準
   * [common_rules.md](../../../agent_skills/jakarta-ee-api-base/principles/common_rules.md) - 共通ルール
 
-* **主な内容**:
+* 主な内容:
   * 標準技術スタック（Jakarta EE 10、JPA 3.1、JAX-RS 3.1）
   * レイヤードアーキテクチャ（API、Security、Service、DAO、Entity）
   * 開発標準（命名規則、コーディング規約、バリデーション、エラーハンドリング）
@@ -350,28 +350,28 @@ AIが：
 ## 🎯 プロジェクトの特徴
 
 ### アーキテクチャ
-* **バックエンドサービス**: フロントエンド（berry-books-spa）の唯一のエントリーポイント
-* **マイクロサービス統合**: 複数のバックエンドマイクロサービスを統合
-* **フロントエンド最適化**: フロントエンド向けに最適化されたAPIを提供
+* バックエンドサービス: フロントエンド（berry-books-spa）の唯一のエントリーポイント
+* マイクロサービス統合: 複数のバックエンドマイクロサービスを統合
+* フロントエンド最適化: フロントエンド向けに最適化されたAPIを提供
 
 ### 実装パターン
 
 #### 外部API呼び出し
-* **BookResource**: 書籍情報を`back-office-api`から取得
-* **CategoryResource**: カテゴリ情報を`back-office-api`から取得
+* BookResource: 書籍情報を`back-office-api`から取得
+* CategoryResource: カテゴリ情報を`back-office-api`から取得
 
 #### 独自のビジネスロジック実装
-* **AuthenResource**: JWT認証 + `customer-hub-api`連携
-* **OrderResource**: 注文処理 + 在庫管理連携
-* **ImageResource**: WAR内リソース配信
+* AuthenResource: JWT認証 + `customer-hub-api`連携
+* OrderResource: 注文処理 + 在庫管理連携
+* ImageResource: WAR内リソース配信
 
 ### データ管理の制約
-* **実装する**: OrderTran、OrderDetail（注文関連のみ）
-* **実装しない**: Book、Stock、Category、Customer（外部API管理）
+* 実装する: OrderTran、OrderDetail（注文関連のみ）
+* 実装しない: Book、Stock、Category、Customer（外部API管理）
 
 ### 外部API連携
-* **BackOfficeRestClient**: `back-office-api`との連携（書籍・在庫・カテゴリ管理）
-* **CustomerHubRestClient**: `customer-hub-api`との連携（顧客管理）
+* BackOfficeRestClient: `back-office-api`との連携（書籍・在庫・カテゴリ管理）
+* CustomerHubRestClient: `customer-hub-api`との連携（顧客管理）
 
 ### JWT認証
 * JWT生成・検証は本システムで実装
@@ -382,22 +382,22 @@ AIが：
 
 ### 本番環境
 
-* **Jakarta EE 10**
-* **Payara Server 6**
-* **JAX-RS (Jakarta RESTful Web Services) 3.1** - REST API
-* **Jakarta Persistence (JPA) 3.1** - Hibernate実装
-* **Jakarta Transactions (JTA)**
-* **Jakarta CDI 4.0**
-* **Jakarta Bean Validation 3.0**
-* **HSQLDB 2.7.x**
-* **JWT (JSON Web Token)** - jjwt 0.12.6
-* **BCrypt** - パスワードハッシュ化
+* Jakarta EE 10
+* Payara Server 6
+* JAX-RS (Jakarta RESTful Web Services) 3.1 - REST API
+* Jakarta Persistence (JPA) 3.1 - Hibernate実装
+* Jakarta Transactions (JTA)
+* Jakarta CDI 4.0
+* Jakarta Bean Validation 3.0
+* HSQLDB 2.7.x
+* JWT (JSON Web Token) - jjwt 0.12.6
+* BCrypt - パスワードハッシュ化
 
 ### テスト環境
 
-* **JUnit 5** - テストフレームワーク
-* **Mockito** - モックライブラリ
-* **JaCoCo** - カバレッジツール（オプション）
+* JUnit 5 - テストフレームワーク
+* Mockito - モックライブラリ
+* JaCoCo - カバレッジツール（オプション）
 
 ## プロジェクト構成
 
@@ -478,18 +478,18 @@ berry-books-api-sdd/
 
 | レイヤー | クラス | 状態 | 備考 |
 |---------|-------|------|------|
-| **API** | AuthenResource | ✅ 完了 | JWT認証、外部API連携 |
-| **API** | BookResource | ✅ 完了 | 外部API呼び出し（2026-01-10実装） |
-| **API** | CategoryResource | ✅ 完了 | 外部API呼び出し（2026-01-10実装） |
-| **API** | OrderResource | ✅ 完了 | 注文処理、在庫管理連携 |
-| **API** | ImageResource | ✅ 完了 | WAR内リソース配信 |
-| **External** | BackOfficeRestClient | ✅ 完了 | ConfigProvider方式（2026-01-10修正） |
-| **External** | CustomerHubRestClient | ✅ 完了 | ConfigProvider方式（2026-01-10修正） |
-| **Security** | JwtUtil | ✅ 完了 | JWT生成・検証 |
-| **Security** | JwtAuthenFilter | ✅ 完了 | MediaType設定、PUBLIC_ENDPOINTS拡張 |
-| **Exception** | 全ExceptionMapper | ✅ 完了 | MediaType設定追加（2026-01-10修正） |
-| **Config** | beans.xml | ✅ 完了 | CDI有効化（2026-01-10追加） |
-| **Config** | microprofile-config.properties | ✅ 完了 | 外部API URL設定 |
+| API | AuthenResource | ✅ 完了 | JWT認証、外部API連携 |
+| API | BookResource | ✅ 完了 | 外部API呼び出し（2026-01-10実装） |
+| API | CategoryResource | ✅ 完了 | 外部API呼び出し（2026-01-10実装） |
+| API | OrderResource | ✅ 完了 | 注文処理、在庫管理連携 |
+| API | ImageResource | ✅ 完了 | WAR内リソース配信 |
+| External | BackOfficeRestClient | ✅ 完了 | ConfigProvider方式（2026-01-10修正） |
+| External | CustomerHubRestClient | ✅ 完了 | ConfigProvider方式（2026-01-10修正） |
+| Security | JwtUtil | ✅ 完了 | JWT生成・検証 |
+| Security | JwtAuthenFilter | ✅ 完了 | MediaType設定、PUBLIC_ENDPOINTS拡張 |
+| Exception | 全ExceptionMapper | ✅ 完了 | MediaType設定追加（2026-01-10修正） |
+| Config | beans.xml | ✅ 完了 | CDI有効化（2026-01-10追加） |
+| Config | microprofile-config.properties | ✅ 完了 | 外部API URL設定 |
 
 ### 🔧 技術的対応（2026-01-10実施）
 
@@ -591,14 +591,14 @@ berry-books-api-sdd/
 * Payara Server 6（プロジェクトルートの`payara6/`に配置）
 * HSQLDB（プロジェクトルートの`hsqldb/`に配置）
 
-> **Note:** ① と ② の手順は、ルートの`README.md`を参照してください。
+> Note: ① と ② の手順は、ルートの`README.md`を参照してください。
 
 ### ③ 依存関係の確認
 
 このプロジェクトを開始する前に、以下が起動していることを確認してください：
 
-* **① HSQLDBサーバー** （`./gradlew startHsqldb`）
-* **② Payara Server** （`./gradlew startPayara`）
+* ① HSQLDBサーバー （`./gradlew startHsqldb`）
+* ② Payara Server （`./gradlew startPayara`）
 
 ### ④ プロジェクトを開始するときに1回だけ実行
 
@@ -613,7 +613,7 @@ berry-books-api-sdd/
 ./gradlew :berry-books-api-sdd:deploy
 ```
 
-> **重要:** `setupHsqldb`を実行すると、`src/main/resources/db/schema.sql`と`sample_data.sql`が実行されます。
+> 重要: `setupHsqldb`を実行すると、`src/main/resources/db/schema.sql`と`sample_data.sql`が実行されます。
 
 ### ⑤ プロジェクトを終了するときに1回だけ実行（CleanUp）
 
@@ -634,8 +634,8 @@ berry-books-api-sdd/
 
 デプロイ後、以下のベースURLでAPIにアクセスできます：
 
-* **ベースURL**: http://localhost:8080/berry-books-api-sdd/api
-* **ウェルカムページ**: http://localhost:8080/berry-books-api-sdd/
+* ベースURL: http://localhost:8080/berry-books-api-sdd/api
+* ウェルカムページ: http://localhost:8080/berry-books-api-sdd/
 
 ## 🔐 JWT認証
 
@@ -664,7 +664,7 @@ jwt.expiration-ms=86400000
 jwt.cookie-name=berry-books-jwt
 ```
 
-> **重要:** 本番環境では、システムプロパティまたは環境変数で`jwt.secret-key`を上書きしてください。
+> 重要: 本番環境では、システムプロパティまたは環境変数で`jwt.secret-key`を上書きしてください。
 
 ### 外部API設定
 
@@ -674,9 +674,9 @@ back-office-api.base-url=http://localhost:8080/back-office-api-sdd/api
 customer-hub-api.base-url=http://localhost:8080/customer-hub-api/api/customers
 ```
 
-> **重要:** 本システムは以下の外部APIに依存します：
-> - **back-office-api-sdd**: 書籍・在庫・カテゴリ管理
-> - **customer-hub-api**: 顧客管理
+> 重要: 本システムは以下の外部APIに依存します：
+> - back-office-api-sdd: 書籍・在庫・カテゴリ管理
+> - customer-hub-api: 顧客管理
 
 ## 📝 APIの使用例（curl）
 
@@ -831,7 +831,7 @@ DAO (@ApplicationScoped)
 Database (HSQLDB) ← 注文データのみ管理
 ```
 
-**本システムの役割:**
+本システムの役割:
 * フロントエンドの唯一のエントリーポイント
 * 注文管理という独自のドメインを持つ
 * 必要に応じて外部システム（書籍管理、顧客管理）を呼び出す
@@ -839,22 +839,22 @@ Database (HSQLDB) ← 注文データのみ管理
 
 ### 主要な設計パターン
 
-* **REST Resource Pattern**: JAX-RS（HTTPエンドポイント）
-* **Service Layer Pattern**: CDI + Transactional（注文ビジネスロジック）
-* **Repository Pattern**: DAO（注文データアクセス）
-* **DTO Pattern**: Java Records（データ転送）
-* **JWT Authentication**: HttpOnly Cookie（認証管理）
-* **Dependency Injection**: CDI（依存性注入）
-* **REST Client Pattern**: 外部API連携（back-office-api、customer-hub-api）
-* **Exception Mapper**: JAX-RS（エラーハンドリング）
+* REST Resource Pattern: JAX-RS（HTTPエンドポイント）
+* Service Layer Pattern: CDI + Transactional（注文ビジネスロジック）
+* Repository Pattern: DAO（注文データアクセス）
+* DTO Pattern: Java Records（データ転送）
+* JWT Authentication: HttpOnly Cookie（認証管理）
+* Dependency Injection: CDI（依存性注入）
+* REST Client Pattern: 外部API連携（back-office-api、customer-hub-api）
+* Exception Mapper: JAX-RS（エラーハンドリング）
 
 ### データ管理の分離
 
-**本システムで管理するデータ:**
+本システムで管理するデータ:
 * 注文トランザクション（ORDER_TRAN）
 * 注文明細（ORDER_DETAIL）
 
-**外部APIで管理するデータ（本システムでは管理しない）:**
+外部APIで管理するデータ（本システムでは管理しない）:
 * 書籍・在庫・カテゴリ（back-office-api）
 * 顧客情報（customer-hub-api）
 
@@ -869,11 +869,11 @@ Database (HSQLDB) ← 注文データのみ管理
 
 ### 設定内容
 
-* **JNDI名**: `jdbc/HsqldbDS`
-* **データベース**: `testdb`
-* **ユーザー**: `SA`
-* **パスワード**: （空文字）
-* **TCPサーバー**: `localhost:9001`
+* JNDI名: `jdbc/HsqldbDS`
+* データベース: `testdb`
+* ユーザー: `SA`
+* パスワード: （空文字）
+* TCPサーバー: `localhost:9001`
 
 データソースはPayara Serverのドメイン設定に登録されます。
 
@@ -911,7 +911,7 @@ Database (HSQLDB) ← 注文データのみ管理
 tail -f -n 50 payara6/glassfish/domains/domain1/logs/server.log
 ```
 
-> **Note**: Windowsでは**Git Bash**を使用してください。
+> Note: WindowsではGit Bashを使用してください。
 
 ## 🧪 データベースのリセット
 
