@@ -128,7 +128,7 @@ behaviors.mdの違い:
 
 以下のタスクファイルを読み込み、対象の範囲を理解する
 
-* {project_root}/tasks/common_tasks.md - 共通機能のタスク（target_type が "common" の場合）
+* {project_root}/tasks/common.md - 共通機能のタスク（target_type が "common" の場合）
 * {project_root}/tasks/{target_type}.md - API単位のタスク（target_type が "API_XXX_xxx" の場合）
 
 タスクファイルから、以下を確認する：

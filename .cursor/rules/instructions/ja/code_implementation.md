@@ -31,7 +31,7 @@ skip_infrastructure: false  # trueの場合、インフラセットアップを�
 **例（berry-books-apiの場合）:**
 ```yaml
 project_root: "projects/sdd/bookstore/berry-books-api-sdd"
-task_file: "projects/sdd/bookstore/berry-books-api-sdd/tasks/setup_tasks.md"
+task_file: "projects/sdd/bookstore/berry-books-api-sdd/tasks/setup.md"
 skip_infrastructure: true  # インフラセットアップをスキップ
 ```
 

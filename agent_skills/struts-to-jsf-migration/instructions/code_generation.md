@@ -13,7 +13,7 @@ skip_infrastructure: false  # trueの場合、インフラセットアップを�
 * 例
 ```yaml
 project_root: "projects/sdd/person/jsf-person-sdd"
-task_file: "projects/sdd/person/jsf-person-sdd/tasks/setup_tasks.md"
+task_file: "projects/sdd/person/jsf-person-sdd/tasks/setup.md"
 skip_infrastructure: true  # インフラセットアップをスキップ
 ```
 

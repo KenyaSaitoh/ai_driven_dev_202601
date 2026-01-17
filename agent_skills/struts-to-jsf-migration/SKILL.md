@@ -70,7 +70,7 @@ AIと対話しながら以下を実施（対話的プロセス）
 
 パラメータ
 * project_root: projects/jsf-migration/struts-app-jsf
-* task_file: projects/jsf-migration/struts-app-jsf/tasks/setup_tasks.md
+* task_file: projects/jsf-migration/struts-app-jsf/tasks/setup.md
 ```
 
 AIが自動で以下を実行

@@ -5,22 +5,22 @@
 Apache Struts 1.xからJakarta Faces (JSF) 4.0にマイグレーションされた人材管理システムです。
 JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操作を実装しています。
 
-* **移行元**: `@projects/master/person/struts-person`（Apache Struts 1.3.10）
-* **移行先**: このプロジェクト（Jakarta Faces 4.0 + Jakarta EE 10）
+* 移行元: `@projects/master/person/struts-person`（Apache Struts 1.3.10）
+* 移行先: このプロジェクト（Jakarta Faces 4.0 + Jakarta EE 10）
 
-> **Note:** このプロジェクトは**Strutsマイグレーション研修用プロジェクト**です。
+> Note: このプロジェクトはStrutsマイグレーション研修用プロジェクトです。
 
-> **マイグレーションアプローチ:**
+> マイグレーションアプローチ:
 > * 既存のStrutsコードから仕様書を生成（既存コード分析）
 > * 仕様書を検証・調整してJSFアーキテクチャに適応
 > * 仕様書からJSFコードを生成（仕様駆動開発）
-> * **汎用Agent Skills** (`agent_skills/struts-to-jsf-migration/`) を使用したマイグレーション
+> * 汎用Agent Skills (`agent_skills/struts-to-jsf-migration/`) を使用したマイグレーション
 
 ## 🤖 Agent Skillsを使ったマイグレーション
 
-このプロジェクトは、汎用的な **Struts to JSF マイグレーション Agent Skills** を使用してマイグレーションします。
+このプロジェクトは、汎用的な Struts to JSF マイグレーション Agent Skills を使用してマイグレーションします。
 
-マイグレーションは以下の**5段階プロセス**で進めます：
+マイグレーションは以下の5段階プロセスで進めます：
 
 ```
 ステップ1: 既存コード分析（Strutsコード → 仕様書）
@@ -81,16 +81,26 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 
 #### ステップ3: 詳細設計（タスク分解後、画面単位）
 
-画面単位で詳細設計書を**AIと対話しながら**作成します。
+画面単位で詳細設計書をAIと対話しながら作成します。
+
+* screen_idの決定方法:
+  * ステップ2のタスク分解で生成されたタスクファイル名を確認してください
+  * `tasks/SCREEN_XXX_Yyy.md` が生成されていれば、`screen_id: SCREEN_XXX_Yyy` と指定します
+  * 例: `tasks/SCREEN_001_PersonList.md` → `screen_id: SCREEN_001_PersonList`
+
+* コマンドテンプレート（タスク分解後に使用）:
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/detailed_design.md
 
-画面の詳細設計書を作成してください。
+{画面名}の詳細設計書を作成してください。
 
 パラメータ:
 * project_root: projects/sdd/person/jsf-person-sdd
-* screen_id: SCREEN_001_PersonList
+* spec_directory: projects/sdd/person/jsf-person-sdd/specs/baseline
+* screen_id: {tasks/配下に生成されたタスクファイル名（拡張子なし）}
+
+{補足情報があれば記載}
 ```
 
 * 対話の流れ:
@@ -99,7 +109,9 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
   3. あなたが回答します
   4. 詳細設計書が生成されます
 
-* 重要: 詳細設計は**対話的なプロセス**です。AIが質問してきたら、必ず回答してください。
+* 重要: 
+  * タスク分解で生成されたタスクファイル名（`tasks/*.md`）と`screen_id`を一致させてください
+  * 詳細設計は対話的なプロセスです。AIが質問してきたら、必ず回答してください
 
 ---
 
@@ -108,7 +120,7 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 詳細設計書に基づいてJSFコードを生成します。
 
 * 実行順序: 
-  1. **セットアップタスク** → 2. **共通機能タスク** → 3. **各画面実装**
+  1. セットアップタスク → 2. 共通機能タスク → 3. 各画面実装
 
 ##### 4-1. セットアップタスク（最初に1回）
 
@@ -119,7 +131,7 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 
 パラメータ:
 * project_root: projects/sdd/person/jsf-person-sdd
-* task_file: projects/sdd/person/jsf-person-sdd/tasks/setup_tasks.md
+* task_file: projects/sdd/person/jsf-person-sdd/tasks/setup.md
 * skip_infrastructure: true
 ```
 
@@ -132,7 +144,7 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 
 パラメータ:
 * project_root: projects/sdd/person/jsf-person-sdd
-* task_file: projects/sdd/person/jsf-person-sdd/tasks/common_tasks.md
+* task_file: projects/sdd/person/jsf-person-sdd/tasks/common.md
 ```
 
 * 実装される共通機能:
@@ -142,41 +154,26 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 
 ##### 4-3. 各画面の実装（共通機能完了後）
 
-* SCREEN_001_PersonList（Person一覧画面）:
+詳細設計書を参照しながら、各画面を実装します。
+
+* コマンドテンプレート（タスク分解後に使用）:
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/code_generation.md
+@projects/sdd/person/jsf-person-sdd/specs/baseline/detailed_design/screen/{screen_id}/detailed_design.md
 
-Person一覧画面を実装してください。
-
-パラメータ:
-* project_root: projects/sdd/person/jsf-person-sdd
-* task_file: projects/sdd/person/jsf-person-sdd/tasks/SCREEN_001_PersonList.md
-```
-
-* SCREEN_002_PersonInput（Person入力画面）:
-
-```
-@agent_skills/struts-to-jsf-migration/instructions/code_generation.md
-
-Person入力画面を実装してください。
+{画面名}を実装してください。
 
 パラメータ:
 * project_root: projects/sdd/person/jsf-person-sdd
-* task_file: projects/sdd/person/jsf-person-sdd/tasks/SCREEN_002_PersonInput.md
+* task_file: projects/sdd/person/jsf-person-sdd/tasks/{タスクファイル名}
+
+{補足情報があれば記載}
 ```
 
-* SCREEN_003_PersonConfirm（Person確認画面）:
-
-```
-@agent_skills/struts-to-jsf-migration/instructions/code_generation.md
-
-Person確認画面を実装してください。
-
-パラメータ:
-* project_root: projects/sdd/person/jsf-person-sdd
-* task_file: projects/sdd/person/jsf-person-sdd/tasks/SCREEN_003_PersonConfirm.md
-```
+* 重要: 
+  * `{screen_id}` と `{タスクファイル名}` は、ステップ2で生成されたタスクファイル名に合わせてください
+  * 例: `tasks/SCREEN_001_PersonList.md` → `screen_id: SCREEN_001_PersonList`, `task_file: tasks/SCREEN_001_PersonList.md`
 
 ---
 
@@ -222,12 +219,12 @@ AIが：
 
 このプロジェクトは、以下の原則に従って開発されます：
 
-* **場所**: `@agent_skills/struts-to-jsf-migration/principles/`
+* 場所: `@agent_skills/struts-to-jsf-migration/principles/`
   * [architecture.md](../../../agent_skills/struts-to-jsf-migration/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
   * [security.md](../../../agent_skills/struts-to-jsf-migration/principles/security.md) - セキュリティ標準
   * [common_rules.md](../../../agent_skills/struts-to-jsf-migration/principles/common_rules.md) - 共通ルール、マッピング規則
 
-* **主な内容**:
+* 主な内容:
   * 標準技術スタック（Jakarta EE 10、Jakarta Faces 4.0、JPA 3.1）
   * レイヤードアーキテクチャ（Managed Bean、Service、Entity）
   * 開発標準（命名規則、コーディング規約、バリデーション）
@@ -239,19 +236,19 @@ AIが：
 
 ### Strutsの構成要素
 
-* **ActionForm**: PersonForm（フォームデータの保持）
-* **Action**: PersonListAction、PersonInputAction、PersonUpdateAction等
-* **EJB**: PersonServiceBean（`@Stateless`、JNDIルックアップ）
-* **DAO**: PersonDao（JDBC + DataSource）
-* **JSP**: personList.jsp、personInput.jsp等（Strutsタグライブラリ）
+* ActionForm: PersonForm（フォームデータの保持）
+* Action: PersonListAction、PersonInputAction、PersonUpdateAction等
+* EJB: PersonServiceBean（`@Stateless`、JNDIルックアップ）
+* DAO: PersonDao（JDBC + DataSource）
+* JSP: personList.jsp、personInput.jsp等（Strutsタグライブラリ）
 
 ### JSFの構成要素
 
-* **Managed Bean**: PersonListBean、PersonInputBean、PersonConfirmBean（`@Named`, `@ViewScoped`）
-* **CDI**: `@Inject`で依存性注入
-* **Service**: PersonService（`@RequestScoped`, `@Transactional`）
-* **JPA**: Person Entity（`@Entity`）、EntityManager
-* **Facelets XHTML**: personList.xhtml、personInput.xhtml、personConfirm.xhtml
+* Managed Bean: PersonListBean、PersonInputBean、PersonConfirmBean（`@Named`, `@ViewScoped`）
+* CDI: `@Inject`で依存性注入
+* Service: PersonService（`@RequestScoped`, `@Transactional`）
+* JPA: Person Entity（`@Entity`）、EntityManager
+* Facelets XHTML: personList.xhtml、personInput.xhtml、personConfirm.xhtml
 
 ### データベースの継続性
 
@@ -268,14 +265,14 @@ AIが：
 * Payara Server 6（プロジェクトルートの`payara6/`に配置）
 * HSQLDB（プロジェクトルートの`hsqldb/`に配置）
 
-> **Note:** ① と ② の手順は、ルートの`README.md`を参照してください。
+> Note: ① と ② の手順は、ルートの`README.md`を参照してください。
 
 ### ③ 依存関係の確認
 
 このプロジェクトを開始する前に、以下が起動していることを確認してください：
 
-* **① HSQLDBサーバー** （`./gradlew startHsqldb`）
-* **② Payara Server** （`./gradlew startPayara`）
+* ① HSQLDBサーバー （`./gradlew startHsqldb`）
+* ② Payara Server （`./gradlew startPayara`）
 
 ### ④ プロジェクトを開始するときに1回だけ実行
 
@@ -290,7 +287,7 @@ AIが：
 ./gradlew :jsf-person-sdd:deploy
 ```
 
-> **Note**: デプロイ時にデータソース（`jdbc/HsqldbDS`）が自動的に作成されます。
+> Note: デプロイ時にデータソース（`jdbc/HsqldbDS`）が自動的に作成されます。
 
 ### ⑤ プロジェクトを終了するときに1回だけ実行（CleanUp）
 
@@ -317,29 +314,29 @@ AIが：
 
 デプロイ後、以下のURLにアクセス：
 
-* **Person一覧**: http://localhost:8080/jsf-person-sdd/person/personList.xhtml
-* **Person入力（新規）**: http://localhost:8080/jsf-person-sdd/person/personInput.xhtml
-* **Person入力（編集）**: http://localhost:8080/jsf-person-sdd/person/personInput.xhtml?personId=1
-* **Person確認**: http://localhost:8080/jsf-person-sdd/person/personConfirm.xhtml
+* Person一覧: http://localhost:8080/jsf-person-sdd/person/personList.xhtml
+* Person入力（新規）: http://localhost:8080/jsf-person-sdd/person/personInput.xhtml
+* Person入力（編集）: http://localhost:8080/jsf-person-sdd/person/personInput.xhtml?personId=1
+* Person確認: http://localhost:8080/jsf-person-sdd/person/personConfirm.xhtml
 
 ## ✅ 実装状況
 
 ### 完了した機能
 
-- ✅ **セットアップ**: プロジェクト構成、依存関係、設定ファイル
-- ✅ **共通機能**: Person Entity、PersonService（JPA + CDI）
-- ✅ **SCREEN_001_PersonList**: 一覧表示、削除機能
-- ✅ **SCREEN_002_PersonInput**: 新規登録・編集画面、Bean Validation
-- ✅ **SCREEN_003_PersonConfirm**: 確認画面、登録・更新処理
+- ✅ セットアップ: プロジェクト構成、依存関係、設定ファイル
+- ✅ 共通機能: Person Entity、PersonService（JPA + CDI）
+- ✅ SCREEN_001_PersonList: 一覧表示、削除機能
+- ✅ SCREEN_002_PersonInput: 新規登録・編集画面、Bean Validation
+- ✅ SCREEN_003_PersonConfirm: 確認画面、登録・更新処理
 
 ### 技術的な特徴
 
-- **JSF 4.0 Managed Bean**: `@Named` + `@ViewScoped` でステート管理
-- **CDI依存性注入**: `@Inject` でサービス層を注入
-- **JPA + JTA**: EntityManagerによる型安全なデータアクセス、トランザクション管理
-- **Bean Validation**: `@NotNull`, `@Size`, `@Min`, `@Max` による宣言的バリデーション
-- **Facelets XHTML**: JSF標準のビューテクノロジー
-- **データソース**: `jdbc/HsqldbDS` (HSQLDB) をJNDI経由で利用
+- JSF 4.0 Managed Bean: `@Named` + `@ViewScoped` でステート管理
+- CDI依存性注入: `@Inject` でサービス層を注入
+- JPA + JTA: EntityManagerによる型安全なデータアクセス、トランザクション管理
+- Bean Validation: `@NotNull`, `@Size`, `@Min`, `@Max` による宣言的バリデーション
+- Facelets XHTML: JSF標準のビューテクノロジー
+- データソース: `jdbc/HsqldbDS` (HSQLDB) をJNDI経由で利用
 
 ## 🎯 プロジェクト構成
 
@@ -360,8 +357,8 @@ projects/sdd/person/jsf-person-sdd/
 │           └── SCREEN_003_PersonConfirm/
 ├── tasks/                          # タスクリスト（AI生成）
 │   ├── tasks.md
-│   ├── setup_tasks.md
-│   ├── common_tasks.md
+│   ├── setup.md
+│   ├── common.md
 │   ├── SCREEN_001_PersonList.md
 │   ├── SCREEN_002_PersonInput.md
 │   ├── SCREEN_003_PersonConfirm.md
@@ -414,13 +411,13 @@ projects/sdd/person/jsf-person-sdd/
 
 ## 🔧 使用している技術
 
-* **Jakarta EE 10**
-* **Payara Server 6**
-* **Jakarta Faces (JSF) 4.0**
-* **Jakarta Persistence (JPA) 3.1**
-* **Jakarta Transactions (JTA)**
-* **Jakarta CDI 4.0**
-* **HSQLDB 2.7.x**
+* Jakarta EE 10
+* Payara Server 6
+* Jakarta Faces (JSF) 4.0
+* Jakarta Persistence (JPA) 3.1
+* Jakarta Transactions (JTA)
+* Jakarta CDI 4.0
+* HSQLDB 2.7.x
 
 ## 📝 データソース設定について
 
@@ -428,19 +425,19 @@ projects/sdd/person/jsf-person-sdd/
 
 ### 設定内容
 
-* **JNDI名**: `jdbc/HsqldbDS`
-* **データベース**: `testdb`
-* **ユーザー**: `SA`
-* **パスワード**: （空文字）
-* **TCPサーバー**: `localhost:9001`
-* **接続URL**: `jdbc:hsqldb:hsql://localhost:9001/testdb`
+* JNDI名: `jdbc/HsqldbDS`
+* データベース: `testdb`
+* ユーザー: `SA`
+* パスワード: （空文字）
+* TCPサーバー: `localhost:9001`
+* 接続URL: `jdbc:hsqldb:hsql://localhost:9001/testdb`
 
 データソースはPayara Serverのドメイン設定に登録されます。
 
 ### 設定ファイル
 
-* **env-conf.gradle**: データソースのJNDI名と接続情報を定義
-* **persistence.xml**: JPA設定でデータソースを参照（`<jta-data-source>jdbc/HsqldbDS</jta-data-source>`）
+* env-conf.gradle: データソースのJNDI名と接続情報を定義
+* persistence.xml: JPA設定でデータソースを参照（`<jta-data-source>jdbc/HsqldbDS</jta-data-source>`）
 
 ### ⚠️ 注意事項
 
@@ -476,7 +473,7 @@ projects/sdd/person/jsf-person-sdd/
 tail -f -n 50 payara6/glassfish/domains/domain1/logs/server.log
 ```
 
-> **Note**: Windowsでは**Git Bash**を使用してください。
+> Note: WindowsではGit Bashを使用してください。
 
 ## 📚 アーキテクチャ（Struts → JSF）
 
@@ -510,12 +507,12 @@ Database (HSQLDB)
 
 ### マイグレーションのポイント
 
-* **ActionForm → Managed Bean**: フォームデータはManaged Beanのプロパティで管理
-* **Action → アクションメソッド**: `execute()`メソッドがアクションメソッドに変換
-* **EJB（JNDI） → CDI（@Inject）**: 依存性注入で簡潔に
-* **DAO（JDBC） → JPA**: JPQL/EntityManagerで型安全に
-* **JSPタグ → Faceletsタグ**: `<logic:iterate>` → `<h:dataTable>`、`<html:form>` → `<h:form>`等
-* **データソースJNDI**: 実装環境では `jdbc/HsqldbDS` を使用（persistence.xmlで設定）
+* ActionForm → Managed Bean: フォームデータはManaged Beanのプロパティで管理
+* Action → アクションメソッド: `execute()`メソッドがアクションメソッドに変換
+* EJB（JNDI） → CDI（@Inject）: 依存性注入で簡潔に
+* DAO（JDBC） → JPA: JPQL/EntityManagerで型安全に
+* JSPタグ → Faceletsタグ: `<logic:iterate>` → `<h:dataTable>`、`<html:form>` → `<h:form>`等
+* データソースJNDI: 実装環境では `jdbc/HsqldbDS` を使用（persistence.xmlで設定）
 
 ### 主要クラス
 

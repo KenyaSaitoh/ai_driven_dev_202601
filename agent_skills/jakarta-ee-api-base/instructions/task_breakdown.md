@@ -104,7 +104,7 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
 
 ### 2.2 セットアップタスク
 
-`tasks/setup_tasks.md`
+`tasks/setup.md`
 * プロジェクト初期化（全員が実行前に1回だけ）
 * 開発環境セットアップ
 * データベース初期化
@@ -114,7 +114,7 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
 
 ### 2.3 共通機能タスク
 
-`tasks/common_tasks.md`
+`tasks/common.md`
 * 複数機能で共有される共通コンポーネント
 * エンティティ: architecture_design.mdとdata_model.mdから実装対象を判断する
 * Dao: 実装するエンティティに対応するDaoを作成する
@@ -319,8 +319,8 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 
 | タスク | タスクファイル | 担当者 | 並行実行 | 想定工数 |
 |---------|--------------|--------|---------|---------|
-| 0. セットアップ | setup_tasks.md | 全員 | 不可 | [分析から算出] |
-| 1. 共通機能 | common_tasks.md | 共通機能チーム | 一部可能 | [分析から算出] |
+| 0. セットアップ | setup.md | 全員 | 不可 | [分析から算出] |
+| 1. 共通機能 | common.md | 共通機能チーム | 一部可能 | [分析から算出] |
 | 2. API_001 | API_001_xxx.md | 担当者A | 可能 | [分析から算出] |
 | 3. API_002 | API_002_yyy.md | 担当者B | 可能 | [分析から算出] |
 | ... | ... | ... | ... | ... |
@@ -335,8 +335,8 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 
 ### タスクファイル一覧
 
-* [セットアップタスク](setup_tasks.md)
-* [共通機能タスク](common_tasks.md)
+* [セットアップタスク](setup.md)
+* [共通機能タスク](common.md)
 * [API_001のタスク](API_001_xxx.md)
 * [API_002のタスク](API_002_yyy.md)
 * ...
@@ -387,7 +387,7 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 
 ### 命名規則
 
-* ファイル名・タスクIDは全てアンダースコア区切り（例: `setup_tasks.md`, `T_SETUP_001`）
+* ファイル名・タスクIDは全てアンダースコア区切り（例: `setup.md`, `T_SETUP_001`）
 * ハイフン（`-`）は使用しない
 
 ### SPEC参照の記述

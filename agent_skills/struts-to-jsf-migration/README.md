@@ -58,8 +58,8 @@ Code-to-Codeの直接変換ではなく、一度SPECとして抽象化するこ�
 ```
 
 画面単位でタスクファイルを生成：
-* `setup_tasks.md` - セットアップ
-* `common_tasks.md` - 共通機能（Entity、Service等）
+* `setup.md` - セットアップ
+* `common.md` - 共通機能（Entity、Service等）
 * `SCREEN_XXX_*.md` - 各画面の実装タスク
 * `integration_tasks.md` - 結合テスト
 
@@ -94,7 +94,7 @@ AIと対話しながら：
 
 パラメータ:
 * project_root: projects/jsf-migration/struts-app-jsf
-* task_file: projects/jsf-migration/struts-app-jsf/tasks/setup_tasks.md
+* task_file: projects/jsf-migration/struts-app-jsf/tasks/setup.md
 * skip_infrastructure: true
 ```
 
@@ -232,7 +232,7 @@ Person一覧画面の詳細設計書を作成してください。
 
 パラメータ:
 * project_root: projects/master/person/person-jsf-migrated
-* task_file: projects/master/person/person-jsf-migrated/tasks/setup_tasks.md
+* task_file: projects/master/person/person-jsf-migrated/tasks/setup.md
 * skip_infrastructure: true
 ```
 

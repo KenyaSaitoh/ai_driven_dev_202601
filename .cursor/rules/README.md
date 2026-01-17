@@ -40,7 +40,7 @@ Jakarta EE 10ベースのBFF（Backend for Frontend）プロジェクトを実�
 
 パラメータ:
 - project_root: projects/sdd/bookstore/berry-books-api-sdd
-- task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/setup_tasks.md
+- task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/setup.md
 - skip_infrastructure: true  # インフラセットアップをスキップ（オプション）
 ```
 
@@ -74,8 +74,8 @@ berry-books-apiの全タスクを生成してください。
 ```
 tasks/
 ├── tasks.md              ← メインタスクリスト
-├── setup_tasks.md        ← セットアップ
-├── common_tasks.md       ← 共通機能
+├── setup.md              ← セットアップ
+├── common.md             ← 共通機能
 ├── API_001_auth.md       ← 認証API
 ├── API_002_books.md      ← 書籍API
 ├── API_003_orders.md     ← 注文API
@@ -195,26 +195,26 @@ AIが自動実装：
 **パターンA: フルセットアップ（初回のみ）**
 ```
 @agent_skills/instructions/ja/code_implementation.md
-@tasks/setup_tasks.md
+@tasks/setup.md
 
 セットアップを実行してください。
 
 パラメータ:
 - project_root: projects/sdd/bookstore/berry-books-api-sdd
-- task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/setup_tasks.md
+- task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/setup.md
 - skip_infrastructure: false
 ```
 
 **パターンB: アプリケーションセットアップのみ（開発環境構築済みの場合）**
 ```
 @agent_skills/instructions/ja/code_implementation.md
-@tasks/setup_tasks.md
+@tasks/setup.md
 
 セットアップを実行してください（インフラセットアップはスキップ）。
 
 パラメータ:
 - project_root: projects/sdd/bookstore/berry-books-api-sdd
-- task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/setup_tasks.md
+- task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/setup.md
 - skip_infrastructure: true
 ```
 

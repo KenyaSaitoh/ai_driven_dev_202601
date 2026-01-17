@@ -221,8 +221,8 @@ AIと対話しながらSPECを作成
 ```
 tasks/
 ├── tasks.md              ← メインタスクリスト
-├── setup_tasks.md        ← セットアップ
-├── common_tasks.md       ← 共通機能
+├── setup.md              ← セットアップ
+├── common.md             ← 共通機能
 ├── API_001_auth.md       ← API別タスク
 ├── API_002_books.md        
 └── integration_tasks.md  ← 結合テスト
@@ -465,26 +465,26 @@ SPECとの整合性をチェックしてください。
 パターンA: フルセットアップ（初回のみ）
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@<プロジェクトパス>/tasks/setup_tasks.md
+@<プロジェクトパス>/tasks/setup.md
 
 セットアップを実行してください。
 
 パラメータ:
 * project_root: <プロジェクトルートパス>
-* task_file: <プロジェクトルートパス>/tasks/setup_tasks.md
+* task_file: <プロジェクトルートパス>/tasks/setup.md
 * skip_infrastructure: false
 ```
 
 パターンB: アプリケーションセットアップのみ（開発環境構築済みの場合）
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@<プロジェクトパス>/tasks/setup_tasks.md
+@<プロジェクトパス>/tasks/setup.md
 
 セットアップを実行してください（インフラセットアップはスキップ）。
 
 パラメータ:
 * project_root: <プロジェクトルートパス>
-* task_file: <プロジェクトルートパス>/tasks/setup_tasks.md
+* task_file: <プロジェクトルートパス>/tasks/setup.md
 * skip_infrastructure: true
 ```
 

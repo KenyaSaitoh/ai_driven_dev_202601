@@ -86,19 +86,19 @@ requirements.mdから、システム全体とAPI単位の仕様書をAIと対話
 
 ---
 
-##### 3-1. システム全体の詳細設計（プロジェクト開始時に1回）
+##### 3-1. 共通機能の詳細設計（プロジェクト開始時に1回）
 
 共通処理、エンティティ、Dao、セキュリティコンポーネント等の詳細設計をAIと対話しながら作成します。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
-システム全体の詳細設計書を作成してください。
+共通機能の詳細設計書を作成してください。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/back-office-api-sdd
 * spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
-* api_id: system
+* target_type: common
 ```
 
 * 対話の流れ:
@@ -122,6 +122,11 @@ requirements.mdから、システム全体とAPI単位の仕様書をAIと対話
 
 * 実行順序: `tasks/tasks.md`の「実行順序」セクションを参照してください。
 
+* target_typeの決定方法:
+  * ステップ2のタスク分解で生成されたタスクファイル名を確認してください
+  * `tasks/API_XXX_xxx.md` が生成されていれば、`target_type: API_XXX_xxx` と指定します
+  * 例: `tasks/API_002_books.md` → `target_type: API_002_books`
+
 * 対話の流れ:
   1. AIが仕様書を読み込み、理解した内容を説明します
   2. AIが不明点を質問します
@@ -136,87 +141,24 @@ requirements.mdから、システム全体とAPI単位の仕様書をAIと対話
 
 ---
 
-* 全APIの詳細設計コマンド（コピペ用）:
-
-##### API_001_auth（認証API）
+* コマンドテンプレート（タスク分解後に使用）:
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
-認証APIの詳細設計書を作成してください。
+{API名}の詳細設計書を作成してください。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/back-office-api-sdd
 * spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
-* api_id: API_001_auth
+* target_type: {tasks/配下に生成されたタスクファイル名（拡張子なし）}
+
+{補足情報があれば記載}
 ```
 
-##### API_002_books（書籍API - JPQL + Criteria API）
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
-
-書籍APIの詳細設計書を作成してください。
-JPQL検索とCriteria API検索の両方を実装する予定です。
-
-パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
-* api_id: API_002_books
-```
-
-##### API_003_categories（カテゴリAPI）
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
-
-カテゴリAPIの詳細設計書を作成してください。
-
-パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
-* api_id: API_003_categories
-```
-
-##### API_004_publishers（出版社API）
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
-
-出版社APIの詳細設計書を作成してください。
-
-パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
-* api_id: API_004_publishers
-```
-
-##### API_005_stocks（在庫API - 楽観的ロック）
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
-@projects/sdd/bookstore/back-office-api-sdd/specs
-
-対象: API_005_stocks
-
-在庫APIの詳細設計書を作成してください。
-楽観的ロック（@Version）を使用した在庫更新を実装する予定です。
-```
-
-##### API_006_workflows（ワークフローAPI）
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
-
-ワークフローAPIの詳細設計書を作成してください。
-
-パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
-* api_id: API_006_workflows
-```
-
-* 重要: 詳細設計は対話的なプロセスです。AIが質問してきたら、必ず回答してください。
+* 重要: 
+  * タスク分解で生成されたタスクファイル名（`tasks/*.md`）と`target_type`を一致させてください
+  * 詳細設計は対話的なプロセスです。AIが質問してきたら、必ず回答してください
 
 ---
 
@@ -240,7 +182,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/back-office-api-sdd
-* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/setup_tasks.md
+* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/setup.md
 * skip_infrastructure: true
 ```
 
@@ -253,7 +195,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/back-office-api-sdd
-* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/common_tasks.md
+* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/common.md
 ```
 
 * 実装される共通機能:
@@ -263,87 +205,28 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
   * セキュリティ基盤（JWT、BCrypt）
   * ユーティリティクラス
 
-##### 3-3. 各APIの実装（共通機能完了後にコピペ用）
+##### 3-3. 各APIの実装（共通機能完了後）
 
 詳細設計書を参照しながら、各APIを実装します。
 
-* API_001_auth:
+* コマンドテンプレート（タスク分解後に使用）:
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/detailed_design/API_001_auth/detailed_design.md
+@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/detailed_design/{target_type}/detailed_design.md
 
-認証APIを実装してください。
-
-パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_001_auth.md
-```
-
-* API_002_books:
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/detailed_design/API_002_books/detailed_design.md
-
-書籍APIを実装してください。
+{API名}を実装してください。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/back-office-api-sdd
-* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_002_books.md
+* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/{タスクファイル名}
+
+{補足情報があれば記載}
 ```
 
-* API_003_categories:
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/detailed_design/API_003_categories/detailed_design.md
-
-カテゴリAPIを実装してください。
-
-パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_003_categories.md
-```
-
-* API_004_publishers:
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/detailed_design/API_004_publishers/detailed_design.md
-
-出版社APIを実装してください。
-
-パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_004_publishers.md
-```
-
-* API_005_stocks:
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/detailed_design/API_005_stocks/detailed_design.md
-
-在庫APIを実装してください（楽観的ロック対応）。
-
-パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_005_stocks.md
-```
-
-* API_006_workflows:
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/back-office-api-sdd/specs/baseline/detailed_design/API_006_workflows/detailed_design.md
-
-ワークフローAPIを実装してください。
-
-パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/API_006_workflows.md
-```
+* 重要: 
+  * `{target_type}` と `{タスクファイル名}` は、ステップ2で生成されたタスクファイル名に合わせてください
+  * 例: `tasks/API_002_books.md` → `target_type: API_002_books`, `task_file: tasks/API_002_books.md`
 
 ---
 
@@ -471,8 +354,8 @@ back-office-api-sdd/
 │   └── constitution.md
 ├── tasks/                          # タスクリスト（AI生成）
 │   ├── tasks.md
-│   ├── setup_tasks.md
-│   ├── common_tasks.md
+│   ├── setup.md
+│   ├── common.md
 │   ├── API_001_books.md
 │   ├── API_002_stocks.md
 │   └── integration_tasks.md

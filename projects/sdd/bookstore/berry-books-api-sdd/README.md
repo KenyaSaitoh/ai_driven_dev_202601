@@ -84,19 +84,19 @@ requirements.mdから、システム全体とAPI単位の仕様書をAIと対話
 
 ---
 
-##### 3-1. システム全体の詳細設計（プロジェクト開始時に1回）
+##### 3-1. 共通機能の詳細設計（プロジェクト開始時に1回）
 
 共通処理、エンティティ、Dao、セキュリティコンポーネント等の詳細設計をAIと対話しながら作成します。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
-システム全体の詳細設計書を作成してください。
+共通機能の詳細設計書を作成してください。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/berry-books-api-sdd
 * spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
-* api_id: system
+* target_type: common
 ```
 
 * 対話の流れ:
@@ -120,6 +120,11 @@ requirements.mdから、システム全体とAPI単位の仕様書をAIと対話
 
 * 実行順序: `tasks/tasks.md`の「実行順序」セクションを参照してください。
 
+* target_typeの決定方法:
+  * ステップ2のタスク分解で生成されたタスクファイル名を確認してください
+  * `tasks/API_XXX_xxx.md` が生成されていれば、`target_type: API_XXX_xxx` と指定します
+  * 例: `tasks/API_001_auth.md` → `target_type: API_001_auth`
+
 * 対話の流れ:
   1. AIが仕様書を読み込み、理解した内容を説明します
   2. AIが不明点を質問します
@@ -134,62 +139,24 @@ requirements.mdから、システム全体とAPI単位の仕様書をAIと対話
 
 ---
 
-* 全APIの詳細設計コマンド（コピペ用）:
-
-##### API_001_auth（認証API）
+* コマンドテンプレート（タスク分解後に使用）:
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
-認証APIの詳細設計書を作成してください。
+{API名}の詳細設計書を作成してください。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/berry-books-api-sdd
 * spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
-* api_id: API_001_auth
+* target_type: {tasks/配下に生成されたタスクファイル名（拡張子なし）}
+
+{補足情報があれば記載}
 ```
 
-##### API_002_books（書籍API - 外部API連携）
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
-
-書籍APIの詳細設計書を作成してください。
-
-パラメータ:
-* project_root: projects/sdd/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
-* api_id: API_002_books
-```
-
-##### API_003_orders（注文API）
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
-
-注文APIの詳細設計書を作成してください。
-
-パラメータ:
-* project_root: projects/sdd/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
-* api_id: API_003_orders
-```
-
-##### API_004_images（画像API）
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
-
-画像APIの詳細設計書を作成してください。
-
-パラメータ:
-* project_root: projects/sdd/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
-* api_id: API_004_images
-ServletContextを使用してWAR内リソースを配信する予定です。
-```
-
-* 重要: 詳細設計は対話的なプロセスです。AIが質問してきたら、必ず回答してください。
+* 重要: 
+  * タスク分解で生成されたタスクファイル名（`tasks/*.md`）と`target_type`を一致させてください
+  * 詳細設計は対話的なプロセスです。AIが質問してきたら、必ず回答してください
 
 ---
 
@@ -211,7 +178,7 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/berry-books-api-sdd
-* task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/setup_tasks.md
+* task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/setup.md
 * skip_infrastructure: true
 ```
 
@@ -224,7 +191,7 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/berry-books-api-sdd
-* task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/common_tasks.md
+* task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/common.md
 ```
 
 * 実装される共通機能:
@@ -235,61 +202,28 @@ ServletContextを使用してWAR内リソースを配信する予定です。
   * 共通DTO・ユーティリティ
   * 例外ハンドラ・フィルター
 
-##### 3-3. 各APIの実装（共通機能完了後にコピペ用）
+##### 3-3. 各APIの実装（共通機能完了後）
 
 詳細設計書を参照しながら、各APIを実装します。
 
-* API_001_auth:
+* コマンドテンプレート（タスク分解後に使用）:
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/detailed_design/API_001_auth/detailed_design.md
+@projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/detailed_design/{target_type}/detailed_design.md
 
-認証APIを実装してください（JWT + 外部API連携）。
-
-パラメータ:
-* project_root: projects/sdd/bookstore/berry-books-api-sdd
-* task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/API_001_auth.md
-```
-
-* API_002_books:
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/detailed_design/API_002_books/detailed_design.md
-
-書籍APIを実装してください（外部API呼び出し）。
+{API名}を実装してください。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/berry-books-api-sdd
-* task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/API_002_books.md
+* task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/{タスクファイル名}
+
+{補足情報があれば記載}
 ```
 
-* API_003_orders:
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/detailed_design/API_003_orders/detailed_design.md
-
-注文APIを実装してください（分散トランザクション対応）。
-
-パラメータ:
-* project_root: projects/sdd/bookstore/berry-books-api-sdd
-* task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/API_003_orders.md
-```
-
-* API_004_images:
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/detailed_design/API_004_images/detailed_design.md
-
-画像APIを実装してください（静的リソース配信）。
-
-パラメータ:
-* project_root: projects/sdd/bookstore/berry-books-api-sdd
-* task_file: projects/sdd/bookstore/berry-books-api-sdd/tasks/API_004_images.md
-```
+* 重要: 
+  * `{target_type}` と `{タスクファイル名}` は、ステップ2で生成されたタスクファイル名に合わせてください
+  * 例: `tasks/API_001_auth.md` → `target_type: API_001_auth`, `task_file: tasks/API_001_auth.md`
 
 ---
 
@@ -422,8 +356,8 @@ berry-books-api-sdd/
 │   └── constitution.md
 ├── tasks/                          # タスクリスト（AI生成）
 │   ├── tasks.md
-│   ├── setup_tasks.md
-│   ├── common_tasks.md
+│   ├── setup.md
+│   ├── common.md
 │   ├── API_001_auth.md
 │   ├── API_002_books.md
 │   └── integration_tasks.md
