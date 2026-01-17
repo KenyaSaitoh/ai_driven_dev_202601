@@ -13,9 +13,28 @@
 
 ---
 
-## 2. 機能詳細設計
+## 2. 機能一覧
 
-### 2.1 機能 [FEATURE_ID_1]: [FEATURE_NAME_1]
+### 2.1 [機能カテゴリ1]
+
+| 機能ID | 機能名 | 説明 | 詳細設計書 |
+|--------|--------|------|----------|
+| F-[XXX]-001 | [機能名] | [説明] | [../api/API_XXX/functional_design.md](../api/API_XXX/functional_design.md) |
+| F-[XXX]-002 | [機能名] | [説明] | [../api/API_XXX/functional_design.md](../api/API_XXX/functional_design.md) |
+
+### 2.2 [機能カテゴリ2]
+
+| 機能ID | 機能名 | 説明 | 詳細設計書 |
+|--------|--------|------|----------|
+| F-[YYY]-001 | [機能名] | [説明] | [../api/API_YYY/functional_design.md](../api/API_YYY/functional_design.md) |
+
+---
+
+## 3. 機能詳細設計
+
+注意: 詳細な機能設計は、各APIディレクトリ配下のfunctional_design.mdを参照してください。ここではシステム全体の概要のみを記載します。
+
+### 3.1 F-[XXX]-001: [機能名1]
 
 #### 2.1.1 ユーザーストーリー
 
@@ -188,85 +207,151 @@ stateDiagram-v2
 
 ---
 
-## 8. クラス設計
+## 8. ビジネスルール
 
-### 8.1 主要クラスの責務
+### 8.1 [カテゴリ1]ルール
 
-#### 8.1.1 共通レイヤー
+| ルールID | 説明 | 適用箇所 |
+|---------|------|---------|
+| BR-[XXX]-001 | [ルール説明] | [機能名] |
+| BR-[XXX]-002 | [ルール説明] | [機能名] |
 
-クラス: [CLASS_NAME]:
-* 責務: [RESPONSIBILITY]
-* タイプ: [TYPE] (例: Enum, Utility, etc.)
-* 主要フィールド:
-  * `[field1]`: [DESCRIPTION]
-  * `[field2]`: [DESCRIPTION]
-  * 主要メソッド:
-    * `[method1]([params])`: [DESCRIPTION]
-    * `[method2]([params])`: [DESCRIPTION]
+### 8.2 [カテゴリ2]ルール
 
-#### 8.1.2 プレゼンテーションレイヤー
-
-クラス: [CLASS_NAME]:
-* 責務: [RESPONSIBILITY]
-* タイプ: @[SCOPE] Managed Bean
-* 主要フィールド:
-  * `[field1]`: [DESCRIPTION]
-  * `[field2]`: [DESCRIPTION]
-  * 主要メソッド:
-    * `[method1]()`: [DESCRIPTION]
-    * `[method2]()`: [DESCRIPTION]
-
-#### 8.1.3 サービスレイヤー
-
-クラス: [CLASS_NAME]:
-* 責務: [RESPONSIBILITY]
-* タイプ: @ApplicationScoped Service
-* 主要フィールド:
-  * `[field1]`: [DESCRIPTION]
-  * 主要メソッド:
-    * `[method1]([params])`: [DESCRIPTION]
-    * `[method2]([params])`: [DESCRIPTION]
-
-#### 8.1.4 DAOレイヤー
-
-クラス: [CLASS_NAME]:
-* 責務: [RESPONSIBILITY]
-* タイプ: @ApplicationScoped DAO
-* 主要フィールド:
-  * `EntityManager em`
-  * 主要メソッド:
-    * `[method1]([params])`: [DESCRIPTION]
-    * `[method2]([params])`: [DESCRIPTION]
-
-### 8.2 セッション状態設計
-
-```mermaid
-classDiagram
-    class SessionBean {
-        -field1: Type
-        -field2: Type
-        +method1(): ReturnType
-        +method2(): ReturnType
-    }
-    
-    class RelatedClass {
-        -field1: Type
-        +method1(): ReturnType
-    }
-    
-    SessionBean --> RelatedClass: uses
-```
-
-* セッションスコープBeanの説明:
-  * [BEAN_NAME]: [DESCRIPTION]
-  * フィールド: [FIELDS]
-  * ライフサイクル: [LIFECYCLE]
+| ルールID | 説明 | 適用箇所 |
+|---------|------|---------|
+| BR-[YYY]-001 | [ルール説明] | [機能名] |
 
 ---
 
-## 9. バッチ処理
+## 9. バリデーションルール
 
-### 9.1 バッチ処理一覧
+### 9.1 共通バリデーション
+
+| バリデーションID | 説明 | エラーコード |
+|----------------|------|-------------|
+| VAL-001 | 必須入力チェック | VAL-001 |
+| VAL-002 | 文字数制限 | VAL-002 |
+| VAL-003 | メールアドレス形式 | VAL-003 |
+
+### 9.2 個別バリデーション
+
+| バリデーションID | 対象フィールド | 説明 | エラーコード |
+|----------------|--------------|------|-------------|
+| VAL-[XXX]-001 | [FIELD_NAME] | [説明] | VAL-[XXX]-001 |
+
+---
+
+## 10. エラーハンドリング
+
+### 10.1 例外マッピング
+
+| 例外クラス | HTTPステータス | エラーメッセージ | 対処方法 |
+|-----------|--------------|----------------|---------|
+| [ExceptionClass1] | [STATUS_CODE] | [MESSAGE] | [ACTION] |
+| [ExceptionClass2] | [STATUS_CODE] | [MESSAGE] | [ACTION] |
+
+---
+
+## 11. トランザクション管理
+
+### 11.1 トランザクション境界
+
+| レイヤー | トランザクション境界 | 説明 |
+|---------|------------------|------|
+| Resource | なし | トランザクションは持たない |
+| Service | @Transactional | ビジネスロジックレイヤーでトランザクション管理 |
+| DAO | なし | トランザクションは持たない（Serviceから委譲） |
+
+### 11.2 重要なトランザクション処理
+
+| 処理名 | トランザクション範囲 | 並行制御 |
+|--------|------------------|---------|
+| [PROCESS_1] | [SCOPE] | [楽観的ロック / 悲観的ロック / なし] |
+| [PROCESS_2] | [SCOPE] | [楽観的ロック / 悲観的ロック / なし] |
+
+---
+
+## 12. パフォーマンス考慮事項
+
+### 12.1 N+1問題の回避
+
+| 対象処理 | 対策 |
+|---------|------|
+| [PROCESS_1] | JOIN FETCH を使用 |
+| [PROCESS_2] | BatchFetch を使用 |
+
+### 12.2 インデックスの活用
+
+| テーブル | インデックスカラム | 目的 |
+|---------|----------------|------|
+| [TABLE_1] | [COLUMN] | [PURPOSE] |
+
+---
+
+## 13. セキュリティ考慮事項
+
+### 13.1 認証トークン
+
+* JWT（JSON Web Token）を使用
+* HttpOnly Cookie に格納
+* 有効期限: [EXPIRATION]
+
+### 13.2 パスワード保護
+
+* BCryptでハッシュ化
+* ソルト付きハッシュ
+
+### 13.3 権限制御
+
+| 権限レベル | アクセス可能な機能 |
+|----------|----------------|
+| [ROLE_1] | [FUNCTIONS] |
+| [ROLE_2] | [FUNCTIONS] |
+
+---
+
+## 14. 拡張性
+
+### 14.1 将来の機能拡張
+
+* [FUTURE_FEATURE_1]: [DESCRIPTION]
+* [FUTURE_FEATURE_2]: [DESCRIPTION]
+
+### 14.2 外部連携
+
+* [EXTERNAL_SYSTEM_1]: [DESCRIPTION]
+* [EXTERNAL_SYSTEM_2]: [DESCRIPTION]
+
+---
+
+## 15. 動的振る舞い
+
+### 15.1 [処理フロー名]
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Resource
+    participant Service
+    participant DAO
+    participant DB
+    
+    Client->>Resource: リクエスト
+    Resource->>Service: ビジネスロジック呼び出し
+    Service->>DAO: データアクセス
+    DAO->>DB: クエリ実行
+    DB-->>DAO: 結果
+    DAO-->>Service: エンティティ
+    Service-->>Resource: 処理結果
+    Resource-->>Client: レスポンス
+```
+
+---
+
+## 16. バッチ処理
+
+### 16.1 バッチ処理一覧
 
 | バッチID | バッチ名 | 実行タイミング | 目的 | 優先度 |
 |---------|---------|-------------|------|-------|
@@ -275,9 +360,9 @@ classDiagram
 
 注意: バッチ処理の要件がない場合は、このセクションを「該当なし」として残す。
 
-### 9.2 バッチ詳細設計
+### 16.2 バッチ詳細設計
 
-#### 9.2.1 バッチ [BATCH_ID_1]: [BATCH_NAME]
+#### 16.2.1 バッチ [BATCH_ID_1]: [BATCH_NAME]
 
 * 概要:
 [バッチの目的と概要を記述]

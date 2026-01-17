@@ -6,7 +6,7 @@
 
 ## 概要
 
-このドキュメントは、Jakarta EE標準Agent Skillsを使用するすべてのプロジェクトで共通的に適用される開発ルールとドキュメント規約を定義する
+このドキュメントは、Jakarta EE標準Agent Skillsを使用するすべてのプロジェクトで共通的に適用される共通ルールとドキュメント規約を定義する
 
 * 対象技術スタック: Jakarta EE 10, JPA 3.1, JAX-RS 3.1, CDI 4.0, Bean Validation 3.0
 * 対応アプリケーションサーバー: Payara Server 6, WildFly等
@@ -41,7 +41,6 @@ Jakarta EE 10のベストプラクティスに従い、レイヤーアーキテ�
 * アーキテクチャ設計書（architecture_design.md）
 * 機能設計書（functional_design.md）
 * データモデル設計書（data_model.md）
-* 画面設計書（screen_design.md）
 * 振る舞い仕様書（behaviors.md）
 * 外部インターフェース仕様書（external_interface.md）
 

@@ -34,7 +34,7 @@ AIが自動で以下を実行
 
 パラメータ
 * project_root: projects/jsf-migration/struts-app-jsf
-* spec_directory: projects/jsf-migration/struts-app-jsf/specs
+* spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
 ```
 
 AIが自動で以下を実行
@@ -51,6 +51,7 @@ AIが自動で以下を実行
 
 パラメータ
 * project_root: projects/jsf-migration/struts-app-jsf
+* spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
 * screen_id: SCREEN_001_PersonList
 ```
 
@@ -128,7 +129,7 @@ AIが自動で以下を実行
 agent_skills/struts-to-jsf-migration/
 ├── SKILL.md                          # このファイル
 ├── README.md                         # クイックスタートガイド
-├── principles/                       # マイグレーション共通ルール
+├── principles/                       # マイグレーション原則
 │   └── common_rules.md              # マイグレーションルール、マッピング規則
 └── instructions/
     ├── reverse_engineering.md        # ステップ1: リバースエンジニアリング

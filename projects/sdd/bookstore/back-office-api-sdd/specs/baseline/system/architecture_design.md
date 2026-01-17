@@ -3,9 +3,11 @@
 ## 1. システム概要
 
 ### 1.1 システム名
+
 Books Stock API - バックオフィス書籍在庫管理システム
 
 ### 1.2 アーキテクチャスタイル
+
 * アーキテクチャパターン: レイヤードアーキテクチャ（階層型アーキテクチャ）
 * API設計: RESTful API
 * データアクセス: JPA（Jakarta Persistence API）
@@ -312,22 +314,9 @@ flowchart TD
 
 ### 7.2 JWT構造
 
-```json
-{
-  "header": {
-    "alg": "HS256",
-    "typ": "JWT"
-  },
-  "payload": {
-    "sub": "123",  // employeeId
-    "employeeCode": "E0001",
-    "departmentId": 1,
-    "iat": 1234567890,  // 発行日時
-    "exp": 1234654290   // 有効期限
-  },
-  "signature": "..."
-}
-```
+* ヘッダー: alg=HS256, typ=JWT
+* ペイロード: sub(employeeId), employeeCode, departmentId, iat, exp
+* シグネチャ: HMACSHA256
 
 ### 7.3 権限制御
 
@@ -340,16 +329,19 @@ flowchart TD
 ## 8. トランザクション設計
 
 ### 8.1 トランザクション境界
+
 * Serviceレイヤーのメソッドを`@Transactional`でマーク
 * デフォルト: `@Transactional(TxType.REQUIRED)`
 * JTAトランザクションマネージャーによる管理
 
 ### 8.2 楽観的ロック
+
 * `Stock`エンティティに`@Version`フィールド
 * 更新時にバージョンチェック
 * 競合発生時は`OptimisticLockException`をスロー
 
 ### 8.3 ワークフロートランザクション
+
 * ワークフロー承認時は以下を1トランザクションで実行:
   1. 操作履歴の追加（WORKFLOW INSERT）
   2. 書籍マスタへの反映（BOOK UPDATE/INSERT/DELETE）
@@ -371,16 +363,13 @@ flowchart TD
 
 ### 9.2 エラーレスポンス形式
 
-```json
-{
-  "error": "エラータイプ",
-  "message": "エラーメッセージ（日本語）"
-}
-```
+* error: エラータイプ
+* message: エラーメッセージ（日本語）
 
 ## 10. ログ設計
 
 ### 10.1 ログレベル
+
 * INFO: API呼び出しログ、重要な処理の開始/終了
 * WARN: 楽観的ロック失敗、認証失敗など
 * ERROR: 予期しないエラー、システムエラー
@@ -400,26 +389,31 @@ flowchart TD
 ## 11. パフォーマンス考慮事項
 
 ### 11.1 データベースアクセス
+
 * N+1問題の回避: JOINによる一括取得、JPQL `JOIN FETCH`の活用
 * Bookエンティティ: `@SecondaryTable`でBOOK + STOCK結合
 * インデックス: 主キー、外部キー、検索条件フィールド
 
 ### 11.2 キャッシング
+
 * 現状はキャッシング未実装。将来的な実装候補:
   * JPAセカンドレベルキャッシュ（Category, Publisherなどの参照マスタ）
   * アプリケーションレベルキャッシュ（メモリキャッシュ）
 
 ### 11.3 接続プール
+
 * アプリケーションサーバーの接続プール機能を使用
 * JNDI名: `jdbc/HsqldbDS`
 
 ## 12. デプロイメント構成
 
 ### 12.1 デプロイメント形式
+
 * WARファイル形式
 * Payara Serverにデプロイ
 
 ### 12.2 設定の外部化
+
 * `microprofile-config.properties`: デフォルト設定
 * 環境変数: 本番環境での設定上書き（JWT秘密鍵など）
 * システムプロパティ: 起動時のオプション設定
@@ -427,15 +421,18 @@ flowchart TD
 ## 13. 拡張性・保守性
 
 ### 13.1 レイヤーの分離
+
 * 各レイヤーは疎結合
 * インターフェース（暗黙的にServiceとDAOで分離）
 * DTOによるAPI仕様とエンティティの分離
 
 ### 13.2 依存性注入
+
 * CDIによる依存性注入
 * テスト時のモック化が容易
 
 ### 13.3 設定の一元管理
+
 * MicroProfile Configによる設定管理
 * プロパティファイルで設定を外部化
 

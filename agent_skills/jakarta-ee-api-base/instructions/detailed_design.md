@@ -6,18 +6,28 @@
 
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
+spec_directory: "ここに仕様書ディレクトリのパスを入力"
 api_id: "ここに対象APIのIDを入力（例: API_001_auth）"
 ```
 
-* 例
+* 例1: ベースライン（初回リリース版）
 ```yaml
 project_root: "projects/sdd/bookstore/back-office-api-sdd"
+spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline"
 api_id: "API_002_books"
+```
+
+* 例2: 拡張機能（エンハンスメント）
+```yaml
+project_root: "projects/sdd/bookstore/back-office-api-sdd"
+spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/enhancements/202512_inventory_alert"
+api_id: "API_005_alerts"
 ```
 
 注意
 * パス区切りはOS環境に応じて調整する（Windows: `\`, Unix/Linux/Mac: `/`）
 * 以降、`{project_root}` と表記されている箇所は、上記で設定した値に置き換える
+* 以降、`{spec_directory}` と表記されている箇所は、上記で設定した値に置き換える
 * `{api_id}` は対象APIのIDに置き換える
 * アーキテクチャパターンは仕様書から自動判定する
 
@@ -35,7 +45,12 @@ api_id: "API_002_books"
 * アーキテクチャパターンは仕様書から判断する（パラメータ指定不要）
 
 出力先
-* `{project_root}/specs/baseline/api/{api_id}/detailed_design.md`
+* `{spec_directory}/api/{api_id}/detailed_design.md`
+
+注意
+* ベースライン（初回リリース版）の場合: `{project_root}/specs/baseline/api/{api_id}/detailed_design.md`
+* 拡張機能の場合: `{project_root}/specs/enhancements/[拡張名]/api/{api_id}/detailed_design.md`
+* `{spec_directory}` パラメータで柔軟に指定可能
 
 ---
 
@@ -43,18 +58,18 @@ api_id: "API_002_books"
 
 パラメータで指定されたプロジェクト情報に基づいて、以下の設計ドキュメントを読み込んで分析する
 
-注意: `{project_root}` および `{api_id}` は、パラメータで指定された値に置き換える
+注意: `{project_root}`, `{spec_directory}`, `{api_id}` は、パラメータで指定された値に置き換える
 
 ### 1.1 Agent Skillsルール（最優先で確認）
 
-* @agent_skills/jakarta-ee-api-basic/principles/ - Jakarta EE開発の共通ルール、アーキテクチャ標準、品質基準、セキュリティ標準を確認する
-  * このフォルダ配下のすべてのMarkdownファイルを読み込み、開発ルールを遵守すること
+* @agent_skills/jakarta-ee-api-base/principles/ - Jakarta EE開発の原則、アーキテクチャ標準、品質基準、セキュリティ標準を確認する
+  * このフォルダ配下の原則ドキュメントを読み込み、共通ルールを遵守すること
   * 重要: 詳細設計においても、ルールドキュメントに記載されたすべてのルールを遵守すること
   * 注意: Agent Skills配下のルールは全プロジェクト共通。プロジェクト固有のルールがある場合は `{project_root}/principles/` も確認すること
 
 ### 1.2 フレームワーク仕様（該当する場合）
 
-* @agent_skills/jakarta-ee-api-basic/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+* @agent_skills/jakarta-ee-api-base/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
   * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
   * 詳細設計時に、フレームワーク仕様に従った設計を行う
 
@@ -62,23 +77,27 @@ api_id: "API_002_books"
 
 以下のファイルを読み込み、システム全体の設計を理解する
 
-* architecture_design.md - 技術スタック、パッケージ構造、セキュリティ方式を確認する
+* {spec_directory}/system/architecture_design.md - 技術スタック、パッケージ構造、セキュリティ方式を確認する
 
-* functional_design.md - システム全体の機能設計概要を確認する
+* {spec_directory}/system/functional_design.md - システム全体の機能設計概要を確認する
 
-* data_model.md - エンティティとデータベーススキーマを確認する
+* {spec_directory}/system/data_model.md - テーブル定義とERDを確認し、JPAエンティティクラスを設計する
+
+注意: 
+* 拡張機能の場合、システムレベルの仕様が存在しない場合がある。その場合はベースラインの仕様を参照する
+* data_model.mdはRDB論理設計（ERD、テーブル、制約）のみを記述。JPAエンティティクラスは詳細設計フェーズでERDから設計する
 
 ### 1.4 対象APIの仕様
 
 以下のファイルを読み込み、対象APIの詳細を理解する
 
-* api/{api_id}/functional_design.md - API機能設計書
+* {spec_directory}/api/{api_id}/functional_design.md - API機能設計書
   * APIのベースパス
   * エンドポイント一覧
   * リクエスト/レスポンス形式
   * ビジネスルール
 
-* api/{api_id}/behaviors.md - API振る舞い仕様書
+* {spec_directory}/api/{api_id}/behaviors.md - API振る舞い仕様書
   * エラーケース
   * 外部API連携の有無
   * 受入基準
@@ -169,8 +188,11 @@ api_id: "API_002_books"
 以下の場所に`detailed_design.md`を作成する
 
 ```
-{project_root}/specs/baseline/api/{api_id}/detailed_design.md
+{spec_directory}/api/{api_id}/detailed_design.md
 ```
+
+* ベースラインの例: `{project_root}/specs/baseline/api/API_002_books/detailed_design.md`
+* 拡張機能の例: `{project_root}/specs/enhancements/202512_inventory_alert/api/API_005_alerts/detailed_design.md`
 
 ### 3.2 詳細設計書のテンプレート
 
@@ -377,8 +399,8 @@ AIは以下の情報から、実装すべきクラスを判断する
 
 ### 4.1 data_model.mdの確認
 
-* エンティティ定義がある場合
-  * ✅ Entity実装が必要
+* テーブル定義（ERD）がある場合
+  * ✅ JPAエンティティクラスの設計が必要（ERDからマッピング）
   * ✅ Dao実装が必要
   * ✅ Service実装が必要
   * ✅ トランザクション管理
@@ -476,10 +498,11 @@ AIは以下の情報から、実装すべきクラスを判断する
 
 詳細が矛盾する場合、以下の優先順位で判断する
 
-1. API固有のfunctional_design.md（最優先）
-2. API固有のbehaviors.md
-3. systemレベルのarchitecture_design.md
-4. systemレベルのfunctional_design.md
+1. {spec_directory}/api/{api_id}/functional_design.md（最優先）
+2. {spec_directory}/api/{api_id}/behaviors.md
+3. {spec_directory}/system/architecture_design.md
+4. {spec_directory}/system/functional_design.md
+5. ベースライン仕様（拡張機能の場合、system配下が存在しない場合）
 
 ### 不明点の扱い
 
@@ -491,11 +514,15 @@ AIは以下の情報から、実装すべきクラスを判断する
 
 仕様書から以下を確認する
 
-* data_model.md: エンティティ定義の有無 → Entity/Dao/Service実装の必要性
-* external_interface.md: 外部API定義の有無 → RestClient実装の必要性
-* functional_design.md: エンドポイント定義 → Resource実装の必要性
+* {spec_directory}/system/data_model.md: テーブル定義（ERD）の有無 → JPAエンティティ/Dao/Service実装の必要性
+* {spec_directory}/system/external_interface.md: 外部API定義の有無 → RestClient実装の必要性
+* {spec_directory}/api/{api_id}/functional_design.md: エンドポイント定義 → Resource実装の必要性
+
+注意: data_model.mdのERD（テーブル定義）からJPAエンティティクラスを設計します。基本設計書にはJPAエンティティの詳細は含まれていません。
 
 「マイクロサービス」「BFF」といったラベルに依存せず、仕様書の内容から判断する
+
+注意: 拡張機能の場合、system配下の仕様が存在しない場合はベースラインの仕様を参照する
 
 ### 既存のdetailed_design.mdの扱い
 
@@ -503,6 +530,19 @@ AIは以下の情報から、実装すべきクラスを判断する
 * ユーザーに「既存のファイルを上書きしますか」と確認する
 * 上書きの場合は、既存の内容を読んで良い部分を継承する
 * 追記の場合は、不足セクションのみを追加する
+
+### ベースラインと拡張機能の違い
+
+ベースライン（初回リリース版）
+* {spec_directory} = `{project_root}/specs/baseline`
+* system配下にシステム全体の仕様が存在する
+* 完全な仕様セットが揃っている
+
+拡張機能（エンハンスメント）
+* {spec_directory} = `{project_root}/specs/enhancements/[拡張名]`
+* system配下が存在しない場合がある
+* その場合はベースラインのsystem仕様を参照する
+* api配下には拡張機能固有のAPI仕様のみが存在する
 
 ---
 

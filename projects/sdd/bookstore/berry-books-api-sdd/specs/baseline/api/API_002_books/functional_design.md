@@ -20,13 +20,13 @@
 
 | メソッド | エンドポイント | 説明 | 認証 |
 |---------|--------------|------|-----|
-| GET | `/api/books` | 全書籍取得（プロキシ） | 不要 |
-| GET | `/api/books/{id}` | 書籍詳細取得（プロキシ） | 不要 |
-| GET | `/api/books/search/jpql?categoryId={id}&keyword={keyword}` | 書籍検索（JPQL版・プロキシ） | 不要 |
-| GET | `/api/books/search/criteria?categoryId={id}&keyword={keyword}` | 書籍検索（Criteria API版・プロキシ） | 不要 |
-| GET | `/api/categories` | カテゴリ一覧取得（プロキシ） | 不要 |
+| GET | `/api/books` | 全書籍取得 | 不要 |
+| GET | `/api/books/{id}` | 書籍詳細取得 | 不要 |
+| GET | `/api/books/search/jpql?categoryId={id}&keyword={keyword}` | 書籍検索（JPQL版） | 不要 |
+| GET | `/api/books/search/criteria?categoryId={id}&keyword={keyword}` | 書籍検索（Criteria API版） | 不要 |
+| GET | `/api/categories` | カテゴリ一覧取得 | 不要 |
 
-* 注意: 書籍APIは全てback-office-apiへのプロキシとして機能します。
+* 注意: 書籍APIは全てback-office-apiから情報を取得します。
 
 ---
 
@@ -52,31 +52,6 @@ GET /api/books
 
 * 成功時 (200 OK):
 
-```json
-[
-  {
-    "bookId": 1,
-    "bookName": "Java入門",
-    "author": "山田太郎",
-    "categoryId": 1,
-    "publisherId": 1,
-    "price": 3000,
-    "category": {
-      "categoryId": 1,
-      "categoryName": "Java"
-    },
-    "publisher": {
-      "publisherId": 1,
-      "publisherName": "技術評論社"
-    },
-    "stock": {
-      "bookId": 1,
-      "quantity": 10,
-      "version": 1
-    }
-  }
-]
-```
 
 ---
 
@@ -104,37 +79,9 @@ GET /api/books/{id}
 
 * 成功時 (200 OK):
 
-```json
-{
-  "bookId": 1,
-  "bookName": "Java入門",
-  "author": "山田太郎",
-  "categoryId": 1,
-  "publisherId": 1,
-  "price": 3000,
-  "category": {
-    "categoryId": 1,
-    "categoryName": "Java"
-  },
-  "publisher": {
-    "publisherId": 1,
-    "publisherName": "技術評論社"
-  },
-  "stock": {
-    "bookId": 1,
-    "quantity": 10,
-    "version": 1
-  }
-}
-```
 
 * エラー時 (404 Not Found):
 
-```json
-{
-  "error": "書籍が見つかりません"
-}
-```
 
 ---
 
@@ -148,7 +95,7 @@ GET /api/books/search/jpql?categoryId={id}&keyword={keyword}
 
 #### 3.3.2 概要
 
-カテゴリIDとキーワードで書籍を検索する（JPQL使用）。認証不要。back-office-apiへのプロキシとして機能。
+カテゴリIDとキーワードで書籍を検索する（JPQL使用）。認証不要。back-office-apiから情報を取得。
 
 #### 3.3.3 リクエスト
 
@@ -172,31 +119,6 @@ GET /api/books/search/jpql?categoryId={id}&keyword={keyword}
 
 * 成功時 (200 OK):
 
-```json
-[
-  {
-    "bookId": 1,
-    "bookName": "Java入門",
-    "author": "山田太郎",
-    "categoryId": 1,
-    "publisherId": 1,
-    "price": 3000,
-    "category": {
-      "categoryId": 1,
-      "categoryName": "Java"
-    },
-    "publisher": {
-      "publisherId": 1,
-      "publisherName": "技術評論社"
-    },
-    "stock": {
-      "bookId": 1,
-      "quantity": 10,
-      "version": 1
-    }
-  }
-]
-```
 
 #### 3.3.5 ビジネスルール
 
@@ -218,7 +140,7 @@ GET /api/books/search/criteria?categoryId={id}&keyword={keyword}
 
 #### 3.4.2 概要
 
-カテゴリIDとキーワードで書籍を検索する（Criteria API使用）。認証不要。back-office-apiへのプロキシとして機能。
+カテゴリIDとキーワードで書籍を検索する（Criteria API使用）。認証不要。back-office-apiへの外部APIを呼び出し。
 
 #### 3.4.3 リクエスト
 
@@ -242,31 +164,6 @@ GET /api/books/search/criteria?categoryId={id}&keyword={keyword}
 
 * 成功時 (200 OK):
 
-```json
-[
-  {
-    "bookId": 1,
-    "bookName": "Java入門",
-    "author": "山田太郎",
-    "categoryId": 1,
-    "publisherId": 1,
-    "price": 3000,
-    "category": {
-      "categoryId": 1,
-      "categoryName": "Java"
-    },
-    "publisher": {
-      "publisherId": 1,
-      "publisherName": "技術評論社"
-    },
-    "stock": {
-      "bookId": 1,
-      "quantity": 10,
-      "version": 1
-    }
-  }
-]
-```
 
 #### 3.4.5 JPQL版との違い
 
@@ -299,22 +196,12 @@ GET /api/categories
 
 #### 3.5.2 概要
 
-全カテゴリをMapで取得する。認証不要。back-office-apiへのプロキシとして機能。
+全カテゴリをMapで取得する。認証不要。back-office-apiから情報を取得。
 
 #### 3.5.3 レスポンス
 
 * 成功時 (200 OK):
 
-```json
-{
-  "Java": 1,
-  "JavaScript": 2,
-  "Python": 3,
-  "データベース": 4,
-  "AWS": 5,
-  "生成AI": 6
-}
-```
 
 ---
 

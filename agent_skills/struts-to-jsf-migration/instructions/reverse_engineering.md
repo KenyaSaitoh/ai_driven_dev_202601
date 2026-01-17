@@ -53,7 +53,7 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 ### 1.2 フレームワーク仕様（該当する場合）
 
 * @agent_skills/struts-to-jsf-migration/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
-* @agent_skills/jakarta-ee-api-basic/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+* @agent_skills/jakarta-ee-api-base/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
   * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
   * 仕様書生成時に、フレームワーク仕様を考慮した設計を記載する
 

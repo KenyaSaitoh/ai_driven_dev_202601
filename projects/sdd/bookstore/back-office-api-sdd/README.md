@@ -11,45 +11,71 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 > - 詳細な仕様書（specs/）に基づいて、段階的にコードを生成する手法
 > - AIを活用して、仕様書からタスクリスト（tasks/）を生成し、タスクに従って実装を進める
 > - 憲章（principles/）に定められた設計原則とベストプラクティスに従う
-> - **汎用Agent Skills** (`agent_skills/jakarta-ee-standard/`) を使用した開発
+> - **汎用Agent Skills** (`agent_skills/jakarta-ee-api-base/`) を使用した開発
 
 ## 🤖 Agent Skillsを使った開発
 
 このプロジェクトは、汎用的な **Jakarta EE マイクロサービス開発 Agent Skills** を使用して開発します。
 
-開発は以下の**3段階プロセス**で進めます：
+開発は以下の**4段階プロセス**で進めます：
 
 ```
-ステップ1: タスク分解（仕様書 → タスクリスト）
+ステップ1: 基本設計（仕様書作成）← AIと対話しながら
     ↓
-ステップ2: 詳細設計（仕様書 → 詳細設計書）← AIと対話しながら
+ステップ2: タスク分解（仕様書 → タスクリスト）
     ↓
-ステップ3: コード生成（詳細設計書 → 実装コード）
+ステップ3: 詳細設計（仕様書 → 詳細設計書）← AIと対話しながら
+    ↓
+ステップ4: コード生成（詳細設計書 → 実装コード）
 ```
 
 ---
 
 ### 📋 開発フロー
 
-#### ステップ1: タスク分解（プロジェクト開始時に1回）
+#### ステップ1: 基本設計（プロジェクト開始時に1回）
+
+requirements.mdから、システム全体とAPI単位の仕様書を**AIと対話しながら**作成します。
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/basic_design.md
+
+仕様書を作成してください
+
+パラメータ:
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+```
+
+* 対話の流れ:
+  1. 既存資料（EXCEL、Word等）の有無を確認します
+  2. 既存資料がある場合は、Markdown形式に変換します
+  3. テンプレートを展開し、各仕様書を対話的に作成します
+  4. `specs/baseline/system/*.md` と `specs/baseline/api/API_XXX_*/*.md` が生成されます
+
+* 生成されるファイル: `specs/baseline/system/*.md`, `specs/baseline/api/API_XXX_*/*.md`（仕様書）
+
+---
+
+#### ステップ2: タスク分解（プロジェクト開始時に1回）
 
 仕様書から実装タスクリストを分解・生成します。
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/task_breakdown.md
+@agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
 
 全タスクを分解してください。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs
+* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
 ```
 
 * 生成されるファイル: `tasks/*.md`（タスクリスト）
 
 ---
 
-#### ステップ2: 詳細設計（各APIごとに実施）
+#### ステップ3: 詳細設計（各APIごとに実施）
 
 各APIの詳細設計書を**AIと対話しながら**作成します。
 
@@ -68,52 +94,60 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 ##### API_001_auth（認証API）
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
-@projects/sdd/bookstore/back-office-api-sdd/specs
-
-対象: API_001_auth
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
 認証APIの詳細設計書を作成してください。
+
+パラメータ:
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* api_id: API_001_auth
 ```
 
 ##### API_002_books（書籍API - JPQL + Criteria API）
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
-@projects/sdd/bookstore/back-office-api-sdd/specs
-
-対象: API_002_books
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
 書籍APIの詳細設計書を作成してください。
 JPQL検索とCriteria API検索の両方を実装する予定です。
+
+パラメータ:
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* api_id: API_002_books
 ```
 
 ##### API_003_categories（カテゴリAPI）
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
-@projects/sdd/bookstore/back-office-api-sdd/specs
-
-対象: API_003_categories
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
 カテゴリAPIの詳細設計書を作成してください。
+
+パラメータ:
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* api_id: API_003_categories
 ```
 
 ##### API_004_publishers（出版社API）
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
-@projects/sdd/bookstore/back-office-api-sdd/specs
-
-対象: API_004_publishers
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
 出版社APIの詳細設計書を作成してください。
+
+パラメータ:
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* api_id: API_004_publishers
 ```
 
 ##### API_005_stocks（在庫API - 楽観的ロック）
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 @projects/sdd/bookstore/back-office-api-sdd/specs
 
 対象: API_005_stocks
@@ -125,19 +159,21 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 ##### API_006_workflows（ワークフローAPI）
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
-@projects/sdd/bookstore/back-office-api-sdd/specs
-
-対象: API_006_workflows
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
 ワークフローAPIの詳細設計書を作成してください。
+
+パラメータ:
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* api_id: API_006_workflows
 ```
 
 * 重要: 詳細設計は**対話的なプロセス**です。AIが質問してきたら、必ず回答してください。
 
 ---
 
-#### ステップ3: コード生成（詳細設計完了後）
+#### ステップ4: コード生成（詳細設計完了後）
 
 詳細設計書をもとに、実装コードを生成します。
 
@@ -149,7 +185,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 ##### 3-1. セットアップタスク（最初に1回）
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 
 セットアップタスクを実行してください。
 
@@ -162,7 +198,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 ##### 3-2. 共通機能タスク（セットアップ後に1回）
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 
 共通機能タスクを実行してください。
 
@@ -185,7 +221,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 * API_001_auth:
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_001_auth/detailed_design.md
 
 認証APIを実装してください。
@@ -198,7 +234,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 * API_002_books:
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_002_books/detailed_design.md
 
 書籍APIを実装してください。
@@ -211,7 +247,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 * API_003_categories:
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_003_categories/detailed_design.md
 
 カテゴリAPIを実装してください。
@@ -224,7 +260,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 * API_004_publishers:
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_004_publishers/detailed_design.md
 
 出版社APIを実装してください。
@@ -237,7 +273,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 * API_005_stocks:
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_005_stocks/detailed_design.md
 
 在庫APIを実装してください（楽観的ロック対応）。
@@ -250,7 +286,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 * API_006_workflows:
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_006_workflows/detailed_design.md
 
 ワークフローAPIを実装してください。
@@ -264,13 +300,13 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 
 ### 📚 詳細情報
 
-詳細は `@agent_skills/jakarta-ee-standard/README.md` を参照してください。
+詳細は `@agent_skills/jakarta-ee-api-base/README.md` を参照してください。
 
 ## 🎯 プロジェクトの特徴（マイクロサービスパターン）
 
 ### アーキテクチャ
 * **独立したデータ管理サービス**: 書籍・在庫・カテゴリ・出版社の完全管理
-* **マイクロサービス**: BFF（berry-books-api）から呼ばれるバックエンドサービス
+* **マイクロサービス**: berry-books-apiから呼ばれるバックエンドサービス
 * **REST API**: データ管理機能をREST APIとして提供
 * **CORS対応**: クロスオリジンリクエストに対応
 
@@ -293,7 +329,7 @@ JPQL検索とCriteria API検索の両方を実装する予定です。
 * **両方実装**: 比較学習が可能
 
 #### CORS設定
-* BFF（berry-books-api）からのクロスオリジンリクエスト対応
+* berry-books-apiからのクロスオリジンリクエスト対応
 * `CorsFilter`実装
 
 ## 🔧 使用している技術
@@ -561,7 +597,7 @@ projects/sdd/bookstore/back-office-api-sdd/build/reports/tests/test/index.html
 ### レイヤー構成
 
 ```
-BFF (berry-books-api)
+berry-books-api
     ↓ HTTP/JSON
 JAX-RS Resource (@Path, @ApplicationScoped)
     ↓ CORS Filter
@@ -572,7 +608,7 @@ DAO (@ApplicationScoped)
 Database (HSQLDB)
 ```
 
-**注:** このAPIはBFF（berry-books-api）から呼ばれるマイクロサービスです。
+**注:** このAPIはberry-books-apiから呼ばれるマイクロサービスです。
 
 ### 主要な設計パターン
 

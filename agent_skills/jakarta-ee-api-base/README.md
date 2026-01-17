@@ -5,8 +5,8 @@
 Jakarta EE 10とJAX-RS 3.1を使ったREST API サービスプロジェクト全般を実装するための汎用Agent Skillです。
 
 このAgent Skillsに含まれるもの:
-* instructions/: 3段階の開発インストラクション（タスク分解、詳細設計、コード生成）
-* principles/: Jakarta EE開発の共通ルール（全プロジェクトで遵守すべき開発ルール、品質基準、アーキテクチャ標準）
+* instructions/: 4段階の開発インストラクション（基本設計、タスク分解、詳細設計、コード生成）
+* principles/: Jakarta EE開発の原則（全プロジェクトで遵守すべき共通ルール、品質基準、アーキテクチャ標準）
 
 対応する実装要件:
 
@@ -18,12 +18,34 @@ Jakarta EE 10とJAX-RS 3.1を使ったREST API サービスプロジェクト全
 
 ---
 
-## 🚀 超簡単な使い方（3段階プロセス）
+## 🚀 超簡単な使い方（4段階プロセス）
 
-### ステップ1: 📋 タスク分解
+### ステップ1: 📄 基本設計（仕様書作成）
 
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/task_breakdown.md
+@agent_skills/jakarta-ee-api-base/instructions/basic_design.md
+
+仕様書を作成してください
+
+パラメータ:
+* project_root: <プロジェクトルートパス>
+* spec_directory: <仕様書ディレクトリパス>
+```
+
+AIと対話しながら:
+1. 📋 テンプレートを所定のフォルダに展開
+2. 📖 requirements.mdを読み込み、理解内容を説明
+3. 💬 ユーザーと対話しながら各仕様書の中身を埋める
+4. 📝 システムレベル仕様書（architecture_design.md、functional_design.md等）を作成
+5. 📝 API単位仕様書（api/配下）を作成
+
+注意:
+* requirements.md（要件定義書）は所与とする（既に存在している前提）
+
+### ステップ2: 📋 タスク分解
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
 
 タスクを分解してください。
 
@@ -38,10 +60,10 @@ Jakarta EE 10とJAX-RS 3.1を使ったREST API サービスプロジェクト全
 2. 🔧 タスクファイルを分解・生成する
 3. 💾 `tasks/`フォルダに保存する
 
-### ステップ2: 🎨 詳細設計（NEW!）
+### ステップ3: 🎨 詳細設計
 
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/detailed_design.md
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 @<プロジェクトパス>/specs
 
 対象: <API_ID>（例: API_001_auth）
@@ -60,10 +82,10 @@ AIと対話しながら：
 * 不足情報を補完できる
 * コード生成の精度が向上する
 
-### ステップ3: ⚙️ コード生成
+### ステップ4: ⚙️ コード生成
 
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @<プロジェクトパス>/specs/baseline/api/<API_ID>/detailed_design.md
 
 セットアップタスクを実行してください。
@@ -86,11 +108,11 @@ AIが：
 
 ---
 
-## 📜 開発ルール
+## 📜 共通ルール
 
 このAgent Skillsには、Jakarta EE開発で遵守すべき共通ルールが含まれています：
 
-* 場所: `@agent_skills/jakarta-ee-api-basic/principles/common_rules.md`
+* 場所: `@agent_skills/jakarta-ee-api-base/principles/common_rules.md`
 
 * 主なルール:
   1. 仕様ファースト開発: すべての機能開発は詳細な仕様書の作成から始める
@@ -112,17 +134,30 @@ AIが：
 
 ## 💡 実践例
 
-### 例1: プロジェクト立ち上げ（REST APIサービス - 3段階）
+### 例1: プロジェクト立ち上げ（REST APIサービス - 4段階）
 
-ステップ1: タスク分解
+ステップ1: 基本設計（仕様書作成）
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/task_breakdown.md
+@agent_skills/jakarta-ee-api-base/instructions/basic_design.md
+
+仕様書を作成してください
+
+パラメータ:
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+```
+
+AIと対話しながら仕様書を作成
+
+ステップ2: タスク分解
+```
+@agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
 
 全タスクを分解してください。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs
+* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
 ```
 
 結果:
@@ -136,9 +171,9 @@ tasks/
 └── integration_tasks.md  ← 結合テスト
 ```
 
-ステップ2: 詳細設計（書籍API）
+ステップ3: 詳細設計（書籍API）
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/detailed_design.md
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 @projects/sdd/bookstore/back-office-api-sdd/specs
 
 対象: API_002_books
@@ -174,31 +209,33 @@ AI: 承知しました。detailed_design.mdを作成しました。
     → specs/baseline/api/API_002_books/detailed_design.md
 ```
 
-ステップ3: コード生成
+ステップ4: コード生成
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @projects/sdd/bookstore/back-office-api-sdd/tasks/API_002_books.md
 @projects/sdd/bookstore/back-office-api-sdd/specs/baseline/api/API_002_books/detailed_design.md
 
 書籍APIを実装してください。
 ```
 
-### 例2: 外部API連携（3段階）
+### 例2: 外部API連携（4段階）
 
-ステップ1: タスク分解
+ステップ1: 基本設計（スキップ - 既に仕様書が存在する場合）
+
+ステップ2: タスク分解
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/task_breakdown.md
+@agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
 
 全タスクを分解してください。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs
+* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
 ```
 
-ステップ2: 詳細設計（注文API - 独自実装 + 外部API連携）
+ステップ3: 詳細設計（注文API - 独自実装 + 外部API連携）
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/detailed_design.md
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 @projects/sdd/bookstore/berry-books-api-sdd/specs
 
 対象: API_003_orders
@@ -233,9 +270,9 @@ AI: 承知しました。DeliveryFeeServiceを追加します。
     detailed_design.mdを作成しました。
 ```
 
-ステップ3: コード生成
+ステップ4: コード生成
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/api/API_003_orders/detailed_design.md
 
 注文APIを実装してください。
@@ -251,7 +288,7 @@ AIが自動実装：
 ### 例4: 楽観的ロック実装
 
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @projects/sdd/bookstore/back-office-api-sdd/tasks/API_002_stocks.md
 
 在庫APIを実装してください。
@@ -269,7 +306,7 @@ AIが自動実装：
 ### 例5: 外部API統合 + JWT認証
 
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @projects/sdd/bookstore/berry-books-api-sdd/tasks/API_001_auth.md
 
 認証APIを実装してください。
@@ -285,7 +322,7 @@ AIが自動実装：
 
 開発者A:
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @<プロジェクトパス>/tasks/API_001_xxx.md
 
 API_001を実装
@@ -293,7 +330,7 @@ API_001を実装
 
 開発者B（同時に実行）:
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @<プロジェクトパス>/tasks/API_002_yyy.md
 
 API_002を実装
@@ -301,7 +338,7 @@ API_002を実装
 
 開発者C（同時に実行）:
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @<プロジェクトパス>/tasks/API_003_zzz.md
 
 API_003を実装
@@ -316,7 +353,7 @@ API_003を実装
 ### 複数ファイルを同時参照
 
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @<プロジェクトパス>/tasks/API_001_xxx.md
 @<プロジェクトパス>/specs/baseline/api/API_001_xxx/functional_design.md
 
@@ -326,7 +363,7 @@ API_001を実装してください。
 ### 段階的実装
 
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @<プロジェクトパス>/tasks/API_001_xxx.md
 
 タスクT_API001_001からT_API001_003まで実装してください。
@@ -336,7 +373,7 @@ API_001を実装してください。
 ### レビュー依頼
 
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @<プロジェクトパス>/tasks/API_001_xxx.md
 
 全タスク完了しています。
@@ -350,7 +387,7 @@ API_001を実装してください。
 ### Day 1: プロジェクト立ち上げ
 
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/task_breakdown.md
+@agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
 
 プロジェクト全体のタスクを分解してください。
 ```
@@ -361,7 +398,7 @@ API_001を実装してください。
 
 パターンA: フルセットアップ（初回のみ）
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @<プロジェクトパス>/tasks/setup_tasks.md
 
 セットアップを実行してください。
@@ -374,7 +411,7 @@ API_001を実装してください。
 
 パターンB: アプリケーションセットアップのみ（開発環境構築済みの場合）
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @<プロジェクトパス>/tasks/setup_tasks.md
 
 セットアップを実行してください（インフラセットアップはスキップ）。
@@ -396,7 +433,7 @@ API_001を実装してください。
 ### Day 6: 結合テスト
 
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @<プロジェクトパス>/tasks/integration_tasks.md
 
 結合テストを実行してください。
@@ -470,15 +507,22 @@ Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービスの開発を支援し�
 ## 📁 ディレクトリ構造
 
 ```
-agent_skills/jakarta-ee-api-basic/
+agent_skills/jakarta-ee-api-base/
 ├── SKILL.md                          # Agent Skill説明書
 ├── README.md                         # このファイル
 ├── principles/
-│   └── common_rules.md               # 開発ルール（全プロジェクト共通）
+│   └── common_rules.md               # 原則（全プロジェクト共通）
+├── templates/                        # 仕様書テンプレート
+│   ├── architecture_design.md
+│   ├── functional_design.md
+│   ├── data_model.md
+│   ├── behaviors.md
+│   └── external_interface.md
 └── instructions/
-    ├── task_breakdown.md             # タスク分解インストラクション
-    ├── detailed_design.md            # 詳細設計インストラクション
-    └── code_generation.md            # コード生成インストラクション
+    ├── basic_design.md               # ステップ1: 基本設計（仕様書作成）
+    ├── task_breakdown.md             # ステップ2: タスク分解
+    ├── detailed_design.md            # ステップ3: 詳細設計
+    └── code_generation.md            # ステップ4: コード生成
 ```
 
 ---

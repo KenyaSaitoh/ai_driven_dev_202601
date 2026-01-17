@@ -4,7 +4,7 @@
 
 このインストラクションは、仕様書からJSFコードを生成する方法を説明する
 
-重要: 実際のコード生成には、`@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md` を使用する
+重要: 実際のコード生成には、`@agent_skills/jakarta-ee-api-base/instructions/code_generation.md` を使用する
 
 ---
 
@@ -131,7 +131,7 @@ Person一覧画面の詳細設計書を作成してください
 タスクファイルに従ってJSFコードを生成する
 
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 
 タスクを実行してください
 
@@ -143,7 +143,7 @@ Person一覧画面の詳細設計書を作成してください
 
 例（セットアップ）
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 
 セットアップタスクを実行してください
 
@@ -155,7 +155,7 @@ Person一覧画面の詳細設計書を作成してください
 
 例（共通機能）
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 
 共通機能を実装してください
 
@@ -166,7 +166,7 @@ Person一覧画面の詳細設計書を作成してください
 
 例（画面別実装）
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 
 Person一覧画面を実装してください
 
@@ -467,4 +467,4 @@ public class PersonTableBean implements Serializable {
 * [リバースエンジニアリングインストラクション](reverse_engineering.md) - ステップ1: 既存コード分析
 * [タスク分解インストラクション](task_breakdown.md) - ステップ2: タスク分解
 * [詳細設計インストラクション](detailed_design.md) - ステップ3: 詳細設計
-* [jakarta-ee-api-basic/instructions/code_generation.md](../../jakarta-ee-api-basic/instructions/code_generation.md) - コード生成（実行用）
+* [jakarta-ee-api-base/instructions/code_generation.md](../../jakarta-ee-api-base/instructions/code_generation.md) - コード生成（実行用）

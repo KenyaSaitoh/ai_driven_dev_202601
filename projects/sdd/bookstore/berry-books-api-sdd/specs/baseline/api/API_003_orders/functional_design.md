@@ -49,24 +49,6 @@ POST /api/orders
 
 * リクエストボディ:
 
-```json
-{
-  "cartItems": [
-    {
-      "bookId": 1,
-      "bookName": "Java入門",
-      "publisherName": "技術評論社",
-      "price": 3000,
-      "count": 2,
-      "version": 1
-    }
-  ],
-  "totalPrice": 6000,
-  "deliveryPrice": 800,
-  "deliveryAddress": "東京都渋谷区1-2-3",
-  "settlementType": 1
-}
-```
 
 | フィールド | 型 | 必須 | 説明 |
 |----------|---|------|------|
@@ -86,59 +68,15 @@ POST /api/orders
 
 * 成功時 (200 OK):
 
-```json
-{
-  "orderTranId": 1,
-  "orderDate": "2025-12-27",
-  "totalPrice": 6000,
-  "deliveryPrice": 800,
-  "deliveryAddress": "東京都渋谷区1-2-3",
-  "settlementType": 1,
-  "orderDetails": [
-    {
-      "orderDetailId": 1,
-      "bookId": 1,
-      "bookName": "Java入門",
-      "publisherName": "技術評論社",
-      "price": 3000,
-      "count": 2
-    }
-  ]
-}
-```
 
 * エラー時 (409 Conflict - 在庫不足):
 
-```json
-{
-  "status": 409,
-  "error": "Conflict",
-  "message": "在庫が不足しています: Java入門",
-  "path": "/api/orders"
-}
-```
 
 * エラー時 (409 Conflict - 楽観的ロック競合):
 
-```json
-{
-  "status": 409,
-  "error": "Conflict",
-  "message": "他のユーザーが購入済みです。最新の在庫情報を確認してください。",
-  "path": "/api/orders"
-}
-```
 
 * エラー時 (401 Unauthorized):
 
-```json
-{
-  "status": 401,
-  "error": "Unauthorized",
-  "message": "認証が必要です",
-  "path": "/api/orders"
-}
-```
 
 #### 3.1.5 ビジネスルール
 
@@ -235,39 +173,9 @@ GET /api/orders/history
 
 * 成功時 (200 OK):
 
-```json
-[
-  {
-    "orderDate": "2025-12-27",
-    "orderTranId": 1,
-    "orderDetailId": 1,
-    "bookName": "Java入門",
-    "publisherName": "技術評論社",
-    "price": 3000,
-    "count": 2
-  },
-  {
-    "orderDate": "2025-12-27",
-    "orderTranId": 1,
-    "orderDetailId": 2,
-    "bookName": "Spring Boot実践",
-    "publisherName": "技術評論社",
-    "price": 3500,
-    "count": 1
-  }
-]
-```
 
 * エラー時 (401 Unauthorized):
 
-```json
-{
-  "status": 401,
-  "error": "Unauthorized",
-  "message": "認証が必要です",
-  "path": "/api/orders/history"
-}
-```
 
 #### 3.2.5 ビジネスルール
 
@@ -304,45 +212,9 @@ GET /api/orders/{tranId}
 
 * 成功時 (200 OK):
 
-```json
-{
-  "orderTranId": 1,
-  "orderDate": "2025-12-27",
-  "totalPrice": 6500,
-  "deliveryPrice": 800,
-  "deliveryAddress": "東京都渋谷区1-2-3",
-  "settlementType": 1,
-  "orderDetails": [
-    {
-      "orderDetailId": 1,
-      "bookId": 1,
-      "bookName": "Java入門",
-      "publisherName": "技術評論社",
-      "price": 3000,
-      "count": 2
-    },
-    {
-      "orderDetailId": 2,
-      "bookId": 2,
-      "bookName": "Spring Boot実践",
-      "publisherName": "技術評論社",
-      "price": 3500,
-      "count": 1
-    }
-  ]
-}
-```
 
 * エラー時 (404 Not Found):
 
-```json
-{
-  "status": 404,
-  "error": "Not Found",
-  "message": "注文が見つかりません",
-  "path": "/api/orders/1"
-}
-```
 
 ---
 
@@ -371,27 +243,9 @@ GET /api/orders/{tranId}/details/{detailId}
 
 * 成功時 (200 OK):
 
-```json
-{
-  "orderDetailId": 1,
-  "bookId": 1,
-  "bookName": "Java入門",
-  "publisherName": "技術評論社",
-  "price": 3000,
-  "count": 2
-}
-```
 
 * エラー時 (404 Not Found):
 
-```json
-{
-  "status": 404,
-  "error": "Not Found",
-  "message": "注文明細が見つかりません",
-  "path": "/api/orders/1/details/1"
-}
-```
 
 ---
 

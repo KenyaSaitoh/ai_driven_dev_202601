@@ -3,15 +3,19 @@
 ## 1. API概要
 
 ### 1.1 API名
+
 出版社API（Publishers API）
 
 ### 1.2 ベースパス
+
 `/api/publishers`
 
 ### 1.3 目的
+
 出版社マスタ情報の参照機能を提供する。
 
 ### 1.4 認証要否
+
 現状は認証不要（将来的にJWT認証フィルタ実装時に認証必須となる予定）
 
 ## 2. エンドポイント一覧
@@ -25,6 +29,7 @@
 ### 3.1 出版社一覧取得
 
 #### 3.1.1 基本情報
+
 * エンドポイント: `GET /api/publishers`
 * 機能: すべての出版社情報を配列形式で取得
 * 認証: 不要（将来:必要）
@@ -44,24 +49,6 @@
 * ヘッダー:
 ```
 Content-Type: application/json; charset=UTF-8
-```
-
-* ボディ:
-```json
-[
-  {
-    "publisherId": 1,
-    "publisherName": "出版社A"
-  },
-  {
-    "publisherId": 2,
-    "publisherName": "出版社B"
-  },
-  {
-    "publisherId": 3,
-    "publisherName": "出版社C"
-  }
-]
 ```
 
 * レスポンススキーマ:
@@ -110,14 +97,6 @@ Content-Type: application/json; charset=UTF-8
 |------------|---|------|
 | publisherId | Integer | 出版社ID |
 | publisherName | String | 出版社名 |
-
-* 例:
-```json
-{
-  "publisherId": 1,
-  "publisherName": "出版社A"
-}
-```
 
 ---
 
@@ -180,16 +159,19 @@ Content-Type: application/json; charset=UTF-8
 ## 8. パフォーマンス考慮事項
 
 ### 8.1 レスポンスタイム
+
 * 目標: 50ms以内
 * 実測: 30-50ms（通常時）
 
 ### 8.2 キャッシング
+
 * 現状: キャッシュなし
 * 将来: アプリケーションレベルキャッシュ推奨
   * マスタデータのため変更頻度が低い
   * メモリキャッシュで高速化可能
 
 ### 8.3 データ量
+
 * 想定レコード数: 10-100件
 * データサイズ: 数KB程度
 * スケーラビリティ: 問題なし
@@ -246,16 +228,7 @@ Content-Type: application/json; charset=UTF-8
 GET /api/publishers/{publisherId}
 ```
 
-* レスポンス:
-```json
-{
-  "publisherId": 1,
-  "publisherName": "出版社A",
-  "address": "東京都...",
-  "phone": "03-xxxx-xxxx",
-  "bookCount": 150
-}
-```
+* レスポンス: 詳細情報（address, phone, bookCount等を含む）
 
 ### 11.2 出版社検索
 
@@ -266,15 +239,7 @@ GET /api/publishers?search=出版社A
 
 ### 11.3 出版社統計情報
 
-* 出版社別の書籍数を含む:
-```json
-{
-  "publisherId": 1,
-  "publisherName": "出版社A",
-  "bookCount": 150,
-  "activeBookCount": 120
-}
-```
+* 出版社別の書籍数を含む統計情報（bookCount, activeBookCount）
 
 ### 11.4 出版社CRUD操作
 

@@ -61,17 +61,17 @@ graph TD
 
 ## 2. アーキテクチャ設計
 
-### 2.1 BFF（Backend for Frontend）パターン
+### 2.1 バックエンドサービスアーキテクチャ
 
-berry-books-apiは、フロントエンド（berry-books-spa）の唯一のエントリーポイントとして機能するBFF（Backend for Frontend）です。マイクロサービスアーキテクチャにおいて、複数のバックエンドサービスを統合し、フロントエンドに最適化されたAPIを提供します。
+berry-books-apiは、フロントエンド（berry-books-spa）の唯一のエントリーポイントとして機能するバックエンドサービスです。マイクロサービスアーキテクチャにおいて、複数のバックエンドサービスを統合し、フロントエンドに最適化されたAPIを提供します。
 
-#### 2.1.1 BFFパターンの利点
+#### 2.1.1 このパターンの利点
 
 | 利点 | 説明 |
 |-----|------|
 | フロントエンド最適化 | フロントエンドに必要なデータ形式で直接レスポンス |
 | バックエンドの抽象化 | 複数のマイクロサービスの存在を隠蔽 |
-| 認証の一元化 | BFF層でJWT認証を管理 |
+| 認証の一元化 | 本システムでJWT認証を管理 |
 | API集約 | 複数のバックエンドAPIの呼び出しを1つに集約 |
 | 柔軟な拡張 | バックエンドの変更がフロントエンドに影響しない |
 
@@ -83,8 +83,8 @@ graph TB
         SPA[berry-books-spa<br/>React SPA]
     end
     
-    subgraph "BFF Layer"
-        BFF[berry-books-api<br/>Backend for Frontend<br/>JWT認証・API統合]
+    subgraph "Backend Service Layer"
+        BerryBooksAPI[berry-books-api<br/>バックエンドサービス<br/>JWT認証・API統合]
     end
     
     subgraph "Backend Microservices"
@@ -96,10 +96,10 @@ graph TB
         DB[(HSQLDB testdb<br/>共有データベース)]
     end
     
-    SPA -->|HTTP/JSON<br/>JWT Cookie| BFF
-    BFF -->|REST API<br/>書籍・在庫情報| BackOffice
-    BFF -->|REST API<br/>顧客情報| CustomerHub
-    BFF -->|JDBC<br/>注文データ| DB
+    SPA -->|HTTP/JSON<br/>JWT Cookie| BerryBooksAPI
+    BerryBooksAPI -->|REST API<br/>書籍・在庫情報| BackOffice
+    BerryBooksAPI -->|REST API<br/>顧客情報| CustomerHub
+    BerryBooksAPI -->|JDBC<br/>注文データ| DB
     BackOffice -->|JDBC<br/>書籍・在庫データ| DB
     CustomerHub -->|JDBC<br/>顧客データ| DB
 ```
@@ -108,11 +108,11 @@ graph TB
 
 | システム | 責務 | 管理するデータ |
 |---------|------|--------------|
-| berry-books-api<br/>(BFF) | • JWT認証<br/>• API統合・プロキシ<br/>• 注文処理<br/>• 配送料金計算<br/>• 画像配信 | ORDER_TRAN<br/>ORDER_DETAIL |
+| berry-books-api | • JWT認証<br/>• 注文管理<br/>• 配送料金計算<br/>• 外部API連携<br/>• 画像配信 | ORDER_TRAN<br/>ORDER_DETAIL |
 | back-office-api | • 書籍管理<br/>• 在庫管理<br/>• カテゴリ管理<br/>• 楽観的ロック制御 | BOOK<br/>STOCK<br/>CATEGORY<br/>PUBLISHER |
 | customer-hub-api | • 顧客CRUD<br/>• 認証情報管理<br/>• メール重複チェック | CUSTOMER |
 
-### 2.2 BFF レイヤードアーキテクチャ
+### 2.2 レイヤードアーキテクチャ
 
 ```mermaid
 graph TB
@@ -120,11 +120,11 @@ graph TB
         Client[berry-books-spa<br/>React SPA]
     end
     
-    subgraph "berry-books-api (BFF)"
+    subgraph "berry-books-api"
         subgraph "API Layer (JAX-RS Resources)"
             AuthAPI[AuthenResource<br/>認証API]
-            BookAPI[BookResource<br/>書籍API プロキシ]
-            CategoryAPI[CategoryResource<br/>カテゴリAPI プロキシ]
+            BookAPI[BookResource<br/>書籍API]
+            CategoryAPI[CategoryResource<br/>カテゴリAPI]
             OrderAPI[OrderResource<br/>注文API]
             ImageAPI[ImageResource<br/>画像API]
         end
@@ -189,23 +189,23 @@ graph TB
     CustomerAPI -->|JDBC| DB
 ```
 
-### 2.3 コンポーネントの責務（BFFパターン）
+### 2.3 コンポーネントの責務
 
 | レイヤー | 責務 | 実装方式 |
 |-------|-----------------|-------------------|
-| API Layer (JAX-RS Resource) | • HTTPリクエスト・レスポンス処理<br/>• JWT認証情報の取得<br/>• 外部APIへのプロキシ（BookResource、CategoryResource）<br/>• ビジネスロジック実行（OrderResource）<br/>• 静的リソース配信（ImageResource） | プロキシ型: 外部APIに転送<br/>独自実装型: サービス層を呼び出し |
-| Security Layer | • JWT生成・検証<br/>• Cookie管理<br/>• 認証フィルター処理<br/>• 認証情報のスレッドローカル管理 | JWT認証はBFF層で一元管理 |
+| API Layer (JAX-RS Resource) | • HTTPリクエスト・レスポンス処理<br/>• JWT認証情報の取得<br/>• 外部API呼び出し（BookResource、CategoryResource）<br/>• ビジネスロジック実行（OrderResource）<br/>• 静的リソース配信（ImageResource） | 外部API連携型: REST Clientで外部呼び出し<br/>独自実装型: サービス層を呼び出し |
+| Security Layer | • JWT生成・検証<br/>• Cookie管理<br/>• 認証フィルター処理<br/>• 認証情報のスレッドローカル管理 | JWT認証は本システムで一元管理 |
 | Service Layer | • 注文ビジネスロジック<br/>• 配送料金計算<br/>• トランザクション境界<br/>• 外部API呼び出し | OrderService、DeliveryFeeServiceのみ実装<br/>（BookService、CategoryServiceは不要） |
 | DAO Layer | • 注文データのCRUD操作<br/>• JPQL実行<br/>• エンティティライフサイクル管理 | OrderTranDao、OrderDetailDaoのみ実装<br/>（BookDao、StockDaoは不要） |
 | Entity Layer | • 注文データ構造<br/>• リレーションシップ定義<br/>• データベースマッピング | OrderTran、OrderDetail、OrderDetailPKのみ実装<br/>（Book、Stock、Customerは不要） |
 | External Integration Layer | • 外部API呼び出し<br/>• DTOマッピング<br/>• エラーハンドリング<br/>• リトライ処理 | BackOfficeRestClient、CustomerHubRestClient |
 
-#### 2.3.1 プロキシパターン vs 独自実装
+#### 2.3.1 外部API呼び出し vs 独自実装
 
 | API Resource | 実装パターン | 説明 |
 |-------------|------------|------|
-| BookResource | プロキシ | back-office-apiにそのまま転送、独自ロジックなし |
-| CategoryResource | プロキシ | back-office-apiにそのまま転送、独自ロジックなし |
+| BookResource | 外部API呼び出し | back-office-apiから書籍情報を取得 |
+| CategoryResource | 外部API呼び出し | back-office-apiからカテゴリ情報を取得 |
 | AuthenResource | 独自実装 + 外部連携 | JWT生成、customer-hub-apiで認証情報取得 |
 | OrderResource | 独自実装 + 外部連携 | 注文処理、back-office-apiで在庫更新 |
 | ImageResource | 独自実装 | WAR内リソースを直接配信 |
@@ -250,11 +250,11 @@ sequenceDiagram
 
 ## 3. デザインパターン
 
-### 3.1 適用パターン（BFF）
+### 3.1 適用パターン
 
 ```mermaid
 classDiagram
-    class BFFPattern {
+    class berry-books-apiPattern {
         <<pattern>>
         +API Aggregation
         +Backend Abstraction
@@ -296,8 +296,8 @@ classDiagram
         +Filter-based validation
     }
     
-    BFFPattern --> RESTResourcePattern
-    BFFPattern --> ProxyPattern
+    APIIntegrationPattern --> RESTResourcePattern
+    APIIntegrationPattern --> ProxyPattern
     RESTResourcePattern --> ServiceLayerPattern
     RESTResourcePattern --> JWTAuthenticationPattern
     ServiceLayerPattern --> DTOPattern
@@ -305,7 +305,7 @@ classDiagram
 
 | パターン | 目的 | 適用箇所 |
 |---------|------|---------|
-| BFF Pattern | API統合・バックエンド抽象化 | berry-books-api全体 |
+| berry-books-api Pattern | API統合・バックエンド抽象化 | berry-books-api全体 |
 | Proxy Pattern | 外部APIへの透過的転送 | BookResource, CategoryResource |
 | REST Resource Pattern | HTTPエンドポイント提供 | AuthenResource, BookResource, OrderResource |
 | サービスレイヤー | 注文ビジネスロジック集約 | OrderService, DeliveryFeeService |
@@ -337,7 +337,7 @@ classDiagram
 pro.kensait.berrybooks
 ```
 
-* 重要: このプロジェクトはBFF（Backend for Frontend）パターンを採用しているため、パッケージ構造は以下の特徴があります：
+* 重要: このプロジェクトはバックエンドサービスアーキテクチャを採用しているため、パッケージ構造は以下の特徴があります：
 * `external/` パッケージが存在（外部API連携）
 * `service/` は注文処理とデリバリーのみ（書籍・カテゴリサービスは不要）
 * `dao/` と `entity/` は注文関連のみ（書籍・在庫・顧客エンティティは不要）
@@ -353,7 +353,7 @@ pro.kensait.berrybooks
 ├── service               # Business Logic Layer（注文処理のみ）
 ├── dao                   # Data Access Layer（注文データのみ）
 ├── entity                # Persistence Layer（注文エンティティのみ）
-├── external              # External Integration Layer（BFFの核心）
+├── external              # External Integration Layer（外部連携）
 │   └── dto               # 外部API用DTO
 ├── common                # Common Classes
 └── util                  # Utilities
@@ -364,21 +364,21 @@ pro.kensait.berrybooks
 | API | 詳細設計書 |
 |-----|----------|
 | 認証API | [API_001_auth/detailed_design.md](../api/API_001_auth/detailed_design.md) |
-| 書籍API（プロキシ） | [API_002_books/detailed_design.md](../api/API_002_books/detailed_design.md) |
+| 書籍API（外部API連携） | [API_002_books/detailed_design.md](../api/API_002_books/detailed_design.md) |
 | 注文API | [API_003_orders/detailed_design.md](../api/API_003_orders/detailed_design.md) |
 | 画像API | [API_004_images/detailed_design.md](../api/API_004_images/detailed_design.md) |
 
-### 3.3 BFF特有のパッケージ
+### 3.3 berry-books-api特有のパッケージ
 
 | パッケージ | 目的 | 備考 |
 |-----------|------|------|
-| `external` | 外部API連携 | BFF特有：back-office-api、customer-hub-apiとの連携 |
+| `external` | 外部API連携 | back-office-api、customer-hub-apiとの連携 |
 | `external.dto` | 外部APIのDTO | 外部APIのレスポンス/リクエストをマッピング |
-| `service.order` | 注文ビジネスロジック | BFFで実装する唯一のサービス層 |
+| `service.order` | 注文ビジネスロジック | 本システムで実装する唯一のサービス層 |
 | `dao` | 注文データアクセス | 注文関連データのみ管理 |
 | `entity` | 注文エンティティ | OrderTran、OrderDetailのみ |
 
-### 3.4 BFFパターンによる実装制約
+### 3.4 マイクロサービスアーキテクチャによる実装制約
 
 * 実装されているもの:
   * 注文関連のエンティティ（OrderTran, OrderDetail）
@@ -484,12 +484,15 @@ sequenceDiagram
 
 ```properties
 # JWT秘密鍵（本番環境では環境変数で上書きすること）
+
 jwt.secret-key=BerryBooksSecretKeyForJWT2024MustBe32CharactersOrMore
 
 # JWT有効期限（ミリ秒）デフォルト: 24時間
+
 jwt.expiration-ms=86400000
 
 # JWT Cookie名
+
 jwt.cookie-name=berry-books-jwt
 ```
 
@@ -556,15 +559,15 @@ JwtAuthenFilterは、リクエストURIからコンテキストパスを除外�
 | Bean Validation | `@Valid`, `@NotBlank` | サーバーサイド入力検証 |
 | JPA/JPQL | Prepared Statement | SQLインジェクション対策 |
 | Exception Mapper | `@Provider` | 統一的なエラーレスポンス、情報漏洩防止 |
-| Context Path 正規化 | `getContextPath()` | マルチテナント・リバースプロキシ対応 |
+| Context Path 正規化 | `getContextPath()` | マルチテナント・リバース外部API連携環境対応 |
 
 ---
 
-## 7. トランザクション管理（BFFパターン）
+## 7. トランザクション管理
 
 ### 7.1 トランザクション境界とマイクロサービス連携
 
-BFFパターンでは、トランザクションは各マイクロサービスで独立して管理されます。
+マイクロサービスアーキテクチャでは、トランザクションは各マイクロサービスで独立して管理されます。
 
 ```mermaid
 sequenceDiagram
@@ -612,11 +615,11 @@ sequenceDiagram
     OrderResource-->>Client: 200 OK + OrderResponse
 ```
 
-### 7.2 トランザクション戦略（BFFパターン）
+### 7.2 トランザクション戦略
 
 #### 7.2.1 分散トランザクションの扱い
 
-BFFパターンでは、複数のマイクロサービスにまたがるトランザクションは結果整合性（Eventual Consistency）で管理します。
+複数のマイクロサービスにまたがるトランザクションは結果整合性（Eventual Consistency）で管理します。
 
 | トランザクション範囲 | 管理方式 | 実装 |
 |------------------|---------|------|
@@ -648,9 +651,9 @@ BFFパターンでは、複数のマイクロサービスにまたがるトラ�
 
 ## 8. 並行制御（楽観的ロック） - 外部API管理
 
-### 8.1 楽観的ロック戦略（BFFパターン）
+### 8.1 楽観的ロック戦略（マイクロサービスアーキテクチャ）
 
-BFFパターンでは、在庫の楽観的ロックはback-office-apiが管理します。berry-books-apiはクライアントから受け取ったバージョン番号を外部APIに転送します。
+マイクロサービスアーキテクチャでは、在庫の楽観的ロックはback-office-apiが管理します。berry-books-apiはクライアントから受け取ったバージョン番号を外部APIに転送します。
 
 ```mermaid
 stateDiagram-v2
@@ -676,14 +679,14 @@ stateDiagram-v2
     ErrorResponse --> [*]
 ```
 
-### 8.2 実装詳細（BFFとしての役割）
+### 8.2 実装詳細
 
 #### 8.2.1 責務分担
 
 | システム | 責務 |
 |---------|------|
 | back-office-api | • STOCKテーブル管理<br/>• @Versionによる楽観的ロック<br/>• OptimisticLockException送出 |
-| berry-books-api (BFF) | • バージョン番号の転送<br/>• 外部API呼び出し<br/>• 例外のプロキシ（409 Conflict） |
+| berry-books-api | • バージョン番号の転送<br/>• 外部API呼び出し<br/>• 例外の転送（409 Conflict） |
 
 #### 8.2.2 処理フロー
 
@@ -695,20 +698,16 @@ stateDiagram-v2
    * WHERE句: `bookId = ? AND version = ?`
    * 成功時: VERSION自動インクリメント、更新後のStockTOを返却
    * 失敗時: 409 Conflict（OptimisticLockException）を返却
-4. BFF側の処理: 
+4. berry-books-api側の処理: 
    * 成功時: 注文処理を続行
    * 失敗時: `OptimisticLockException`を再スローし、ExceptionMapperで409 Conflictレスポンス
 
 #### 8.2.3 エラーレスポンス
 
-```json
-{
-  "status": 409,
-  "error": "Conflict",
-  "message": "在庫が他のユーザーによって更新されました。最新の在庫情報を確認してください。",
-  "path": "/api/orders"
-}
-```
+* status: 409
+* error: Conflict
+* message: 在庫が他のユーザーによって更新されました
+* path: /api/orders
 
 ---
 
@@ -752,15 +751,6 @@ classDiagram
 | `Exception` (その他) | 500 Internal Server Error | `GenericExceptionMapper` | "サーバーエラーが発生しました" |
 
 ### 9.3 統一的なエラーレスポンス形式
-
-```json
-{
-  "status": 409,
-  "error": "Conflict",
-  "message": "在庫が不足しています: Java入門",
-  "path": "/api/orders"
-}
-```
 
 * ErrorResponse構造:
 
@@ -899,15 +889,19 @@ graph TB
 
 ```bash
 # 依存関係の確認
+
 ./gradlew :berry-books-api:dependencies
 
 # プロジェクトをビルド
+
 ./gradlew :berry-books-api:war
 
 # テスト実行
+
 ./gradlew :berry-books-api:test
 
 # カバレッジレポート生成
+
 ./gradlew :berry-books-api:jacocoTestReport
 ```
 
@@ -1034,8 +1028,8 @@ Payara Server 6.x
 | コンポーネント | 状態 | 実装方針 |
 |-------------|------|---------|
 | 認証リソース | ✅ 完了 | JWT認証、外部サービス連携 |
-| 書籍リソース | ✅ 完了 | プロキシパターン（BFF層） |
-| カテゴリリソース | ✅ 完了 | プロキシパターン（BFF層） |
+| 書籍リソース | ✅ 完了 | 外部API呼び出し |
+| カテゴリリソース | ✅ 完了 | 外部API呼び出し |
 | 注文リソース | ✅ 完了 | 注文処理、在庫管理連携、スナップショット保存 |
 | 画像リソース | ✅ 完了 | WAR内静的リソース配信 |
 | 外部API連携（書籍・在庫） | ✅ 完了 | REST Client実装 |
@@ -1133,7 +1127,7 @@ Payara Server 6.x
 | ログアウトAPI | POST /api/auth/logout | ✅ 正常 | Cookie削除 |
 
 * 確認事項:
-  * BFF層のプロキシパターンが正常に機能
+  * 外部API連携が正常に機能
   * 外部サービス（書籍・在庫管理、顧客管理）との連携が正常
   * スナップショットパターンによる注文履歴表示が正常
   * エラーハンドリングが適切に機能

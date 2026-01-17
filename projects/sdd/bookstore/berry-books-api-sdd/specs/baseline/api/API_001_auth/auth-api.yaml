@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Berry Books API - 認証API
   description: |
-    Berry Books書店 BFF（Backend for Frontend）の認証API仕様
+    Berry Books書店 バックエンドサービスの認証API仕様
     
     ユーザーのログイン、ログアウト、新規登録、現在のログインユーザー情報取得を提供する。
     JWT（JSON Web Token）ベースの認証を使用し、HttpOnly Cookieでトークンを管理する。

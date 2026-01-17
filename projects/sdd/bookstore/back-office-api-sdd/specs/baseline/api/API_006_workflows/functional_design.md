@@ -50,46 +50,14 @@ stateDiagram-v2
 * エンドポイント: `POST /api/workflows`
 
 * リクエスト（新規書籍追加）:
-```json
-{
-  "workflowType": "ADD_NEW_BOOK",
-  "createdBy": 1,
-  "bookName": "新しい書籍",
-  "author": "著者名",
-  "price": 3000,
-  "imageUrl": "http://example.com/new.jpg",
-  "categoryId": 1,
-  "publisherId": 2,
-  "applyReason": "新商品として追加"
-}
-```
 
 * レスポンス（201 Created）:
-```json
-{
-  "operationId": 1,
-  "workflowId": 1,
-  "workflowType": "ADD_NEW_BOOK",
-  "state": "CREATED",
-  "bookName": "新しい書籍",
-  "operationType": "CREATE",
-  "operatedBy": 1,
-  "operatorName": "山田太郎",
-  "operatedAt": "2025-01-01T10:00:00"
-}
-```
 
 ### 5.2 ワークフロー承認
 
 * エンドポイント: `POST /api/workflows/{workflowId}/approve`
 
 * リクエスト:
-```json
-{
-  "operatedBy": 2,
-  "operationReason": "承認します"
-}
-```
 
 * 処理フロー:
   1. 最新の状態を取得（APPLIEDか？）
@@ -106,12 +74,6 @@ stateDiagram-v2
 * レスポンス（200 OK）: WorkflowTO
 
 * レスポンス（403 Forbidden）:
-```json
-{
-  "error": "UnauthorizedApprovalException",
-  "message": "承認権限がありません"
-}
-```
 
 ## 6. 承認権限ルール
 

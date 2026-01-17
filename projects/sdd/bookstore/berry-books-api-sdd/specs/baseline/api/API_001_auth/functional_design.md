@@ -48,12 +48,6 @@ POST /api/auth/login
 
 * リクエストボディ:
 
-```json
-{
-  "email": "alice@gmail.com",
-  "password": "password"
-}
-```
 
 | フィールド | 型 | 必須 | 検証ルール |
 |----------|---|------|----------|
@@ -66,26 +60,9 @@ POST /api/auth/login
 
 * Set-Cookie: `berry-books-jwt=<JWT Token>; Path=/; Max-Age=86400; HttpOnly`
 
-```json
-{
-  "customerId": 1,
-  "customerName": "Alice",
-  "email": "alice@gmail.com",
-  "birthday": "1990-01-01",
-  "address": "東京都渋谷区1-2-3"
-}
-```
 
 * エラー時 (401 Unauthorized):
 
-```json
-{
-  "status": 401,
-  "error": "Unauthorized",
-  "message": "メールアドレスまたはパスワードが正しくありません",
-  "path": "/api/auth/login"
-}
-```
 
 #### 3.1.5 ビジネスルール
 
@@ -150,9 +127,6 @@ JWT Cookieを削除（MaxAge=0）してログアウトする。
 
 * Set-Cookie: `berry-books-jwt=; Path=/; Max-Age=0; HttpOnly`
 
-```json
-{}
-```
 
 ---
 
@@ -174,15 +148,6 @@ POST /api/auth/register
 
 * リクエストボディ:
 
-```json
-{
-  "customerName": "山田太郎",
-  "password": "password123",
-  "email": "yamada@example.com",
-  "birthday": "1990-01-01",
-  "address": "東京都渋谷区1-2-3"
-}
-```
 
 | フィールド | 型 | 必須 | 検証ルール |
 |----------|---|------|----------|
@@ -198,37 +163,12 @@ POST /api/auth/register
 
 * Set-Cookie: `berry-books-jwt=<JWT Token>; Path=/; Max-Age=86400; HttpOnly`
 
-```json
-{
-  "customerId": 10,
-  "customerName": "山田太郎",
-  "email": "yamada@example.com",
-  "birthday": "1990-01-01",
-  "address": "東京都渋谷区1-2-3"
-}
-```
 
 * エラー時 (409 Conflict):
 
-```json
-{
-  "status": 409,
-  "error": "Conflict",
-  "message": "指定されたメールアドレスは既に登録されています",
-  "path": "/api/auth/register"
-}
-```
 
 * エラー時 (400 Bad Request):
 
-```json
-{
-  "status": 400,
-  "error": "Bad Request",
-  "message": "住所は都道府県名から始めてください",
-  "path": "/api/auth/register"
-}
-```
 
 #### 3.3.5 ビジネスルール
 
@@ -263,26 +203,9 @@ JWT Cookieから顧客情報を取得する。認証必須。
 
 * 成功時 (200 OK):
 
-```json
-{
-  "customerId": 1,
-  "customerName": "Alice",
-  "email": "alice@gmail.com",
-  "birthday": "1990-01-01",
-  "address": "東京都渋谷区1-2-3"
-}
-```
 
 * エラー時 (401 Unauthorized):
 
-```json
-{
-  "status": 401,
-  "error": "Unauthorized",
-  "message": "認証が必要です",
-  "path": "/api/auth/me"
-}
-```
 
 ---
 
@@ -364,12 +287,15 @@ JWT Cookieから顧客情報を取得する。認証必須。
 
 ```properties
 # JWT秘密鍵（本番環境では環境変数で上書きすること）
+
 jwt.secret-key=BerryBooksSecretKeyForJWT2024MustBe32CharactersOrMore
 
 # JWT有効期限（ミリ秒）デフォルト: 24時間
+
 jwt.expiration-ms=86400000
 
 # JWT Cookie名
+
 jwt.cookie-name=berry-books-jwt
 ```
 

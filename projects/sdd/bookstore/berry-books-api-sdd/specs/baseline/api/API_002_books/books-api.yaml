@@ -2,10 +2,10 @@ openapi: 3.0.3
 info:
   title: Berry Books API - 書籍API
   description: |
-    Berry Books書店 BFF（Backend for Frontend）の書籍API仕様
+    Berry Books書店 バックエンドサービスの書籍API仕様
     
     書籍の一覧取得、詳細取得、検索、カテゴリ一覧取得を提供する。
-    すべてのエンドポイントは認証不要で、back-office-apiへのプロキシとして機能する。
+    すべてのエンドポイントは認証不要で、back-office-apiへの外部APIを呼び出しする。
   version: 2.0.0
   contact:
     name: API Support
@@ -29,7 +29,7 @@ paths:
       tags:
         - books
       summary: 全書籍取得
-      description: 全書籍を取得する（back-office-apiへのプロキシ）
+      description: 全書籍を取得する（back-office-apiへの外部API連携）
       operationId: getAllBooks
       responses:
         '200':
@@ -46,7 +46,7 @@ paths:
       tags:
         - books
       summary: 書籍詳細取得
-      description: 指定されたIDの書籍を取得する（back-office-apiへのプロキシ）
+      description: 指定されたIDの書籍を取得する（back-office-apiへの外部API連携）
       operationId: getBookById
       parameters:
         - name: id
@@ -76,7 +76,7 @@ paths:
       tags:
         - books
       summary: 書籍検索（JPQL版）
-      description: JPQLを使用してカテゴリIDまたはキーワードで書籍を検索する（back-office-apiへのプロキシ）
+      description: JPQLを使用してカテゴリIDまたはキーワードで書籍を検索する（back-office-apiへの外部API連携）
       operationId: searchBooksJpql
       parameters:
         - name: categoryId
@@ -109,7 +109,7 @@ paths:
       tags:
         - books
       summary: 書籍検索（Criteria API版）
-      description: Criteria APIを使用してカテゴリIDまたはキーワードで書籍を検索する（back-office-apiへのプロキシ）
+      description: Criteria APIを使用してカテゴリIDまたはキーワードで書籍を検索する（back-office-apiへの外部API連携）
       operationId: searchBooksCriteria
       parameters:
         - name: categoryId
@@ -142,7 +142,7 @@ paths:
       tags:
         - categories
       summary: カテゴリ一覧取得
-      description: カテゴリ一覧をマップ形式で取得する（back-office-apiへのプロキシ）
+      description: カテゴリ一覧をマップ形式で取得する（back-office-apiへの外部API連携）
       operationId: getAllCategories
       responses:
         '200':

@@ -6,18 +6,28 @@
 
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
+spec_directory: "ここに仕様書ディレクトリのパスを入力"
 screen_id: "ここに対象画面のIDを入力（例: SCREEN_001_PersonList）"
 ```
 
-* 例
+* 例1: ベースライン（初回リリース版）
 ```yaml
 project_root: "projects/sdd/person/jsf-person-sdd"
+spec_directory: "projects/sdd/person/jsf-person-sdd/specs/baseline"
 screen_id: "SCREEN_001_PersonList"
+```
+
+* 例2: 拡張機能（エンハンスメント）
+```yaml
+project_root: "projects/sdd/person/jsf-person-sdd"
+spec_directory: "projects/sdd/person/jsf-person-sdd/specs/enhancements/202512_person_search"
+screen_id: "SCREEN_005_PersonSearch"
 ```
 
 注意
 * パス区切りはOS環境に応じて調整する（Windows: `\`, Unix/Linux/Mac: `/`）
 * 以降、`{project_root}` と表記されている箇所は、上記で設定した値に置き換える
+* 以降、`{spec_directory}` と表記されている箇所は、上記で設定した値に置き換える
 * `{screen_id}` は対象画面のIDに置き換える
 
 ---
@@ -33,7 +43,12 @@ screen_id: "SCREEN_001_PersonList"
 * 推測せず、不明点は必ずユーザーに質問する
 
 出力先
-* `{project_root}/specs/baseline/screen/{screen_id}/detailed_design.md`
+* `{spec_directory}/screen/{screen_id}/detailed_design.md`
+
+注意
+* ベースライン（初回リリース版）の場合: `{project_root}/specs/baseline/screen/{screen_id}/detailed_design.md`
+* 拡張機能の場合: `{project_root}/specs/enhancements/[拡張名]/screen/{screen_id}/detailed_design.md`
+* `{spec_directory}` パラメータで柔軟に指定可能
 
 ---
 
@@ -41,22 +56,22 @@ screen_id: "SCREEN_001_PersonList"
 
 パラメータで指定されたプロジェクト情報に基づいて、以下の設計ドキュメントを読み込んで分析してください。
 
-注意: `{project_root}` および `{screen_id}` は、パラメータで指定された値に置き換えてください。
+注意: `{project_root}`, `{spec_directory}`, `{screen_id}` は、パラメータで指定された値に置き換えてください。
 
 ### 1.1 Agent Skillsルール（最優先で確認）
 
 * @agent_skills/struts-to-jsf-migration/principles/ - マイグレーションルール、アーキテクチャ標準、マッピング規則、セキュリティ標準を確認
   * このフォルダ配下のすべてのMarkdownファイルを読み込み、マイグレーションルールを遵守すること
   * Code-to-Spec-to-Codeアプローチ、マッピング規則を確認
-* @agent_skills/jakarta-ee-api-basic/principles/ - Jakarta EE開発の共通ルール
-  * このフォルダ配下のすべてのMarkdownファイルを読み込み、開発ルールを遵守すること
+* @agent_skills/jakarta-ee-api-base/principles/ - Jakarta EE開発の原則
+  * このフォルダ配下の原則ドキュメントを読み込み、共通ルールを遵守すること
   * 重要: 詳細設計においても、ルールドキュメントに記載されたすべてのルール（命名規則、設計パターン、コーディング規約など）を遵守すること
   * 注意: Agent Skills配下のルールは全プロジェクト共通。プロジェクト固有のルールがある場合は `{project_root}/principles/` も確認すること
 
 ### 1.2 フレームワーク仕様（該当する場合）
 
 * @agent_skills/struts-to-jsf-migration/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
-* @agent_skills/jakarta-ee-api-basic/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+* @agent_skills/jakarta-ee-api-base/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
   * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
   * 詳細設計時に、フレームワーク仕様に従った設計を行う
 
@@ -64,38 +79,42 @@ screen_id: "SCREEN_001_PersonList"
 
 以下のファイルを読み込み、システム全体の設計を理解してください：
 
-* architecture_design.md - 技術スタック、パッケージ構造を確認
+* {spec_directory}/system/architecture_design.md - 技術スタック、パッケージ構造を確認
   * ベースパッケージ（例: `pro.kensait.jsf.person`）
   * パッケージ階層の規約
   * 使用技術スタック（Jakarta EE 10、JPA、JSF等）
   * セッション管理方針（ViewScoped、Flash Scope等）
   * データソース設定セクションでJNDI名を確認（Service実装時に参照）
 
-* functional_design.md - システム全体の機能設計概要を確認
+* {spec_directory}/system/functional_design.md - システム全体の機能設計概要を確認
   * 画面遷移図
   * 画面間のデータ受け渡し方式
 
-* data_model.md - エンティティとデータベーススキーマを確認
-  * 対象エンティティのテーブル定義
-  * フィールド、型、制約
-  * リレーション（@ManyToOne、@OneToMany等）
+* {spec_directory}/system/data_model.md - テーブル定義（ERD）からJPAエンティティクラスを設計
+  * テーブル定義（カラム、型、制約）からフィールドをマッピング
+  * テーブル間のリレーションシップから@ManyToOne、@OneToMany等を設計
+  * 主キー、複合主キーから@Id、@EmbeddedId等を設計
+
+注意: data_model.mdはRDB論理設計のみ。JPAエンティティクラスは詳細設計フェーズでERDから設計します
   * persistence.xml設定情報セクションでJNDI名とPersistence Unit名を確認
+
+注意: 拡張機能の場合、システムレベルの仕様が存在しない場合がある。その場合はベースラインの仕様を参照する
 
 ### 1.4 対象画面の仕様
 
 以下のファイルを読み込み、対象画面の詳細を理解してください：
 
-* screen/{screen_id}/screen_design.md - 画面設計書
+* {spec_directory}/screen/{screen_id}/screen_design.md - 画面設計書
   * 画面レイアウト（テーブル、フォーム、ボタン等）
   * 入力項目（項目名、型、必須/任意、バリデーション）
   * 表示データ（一覧表示、詳細表示等）
 
-* screen/{screen_id}/functional_design.md - 画面機能設計書
+* {spec_directory}/screen/{screen_id}/functional_design.md - 画面機能設計書
   * Managed Bean設計（Bean名、スコープ、プロパティ、アクションメソッド）
   * Service設計（メソッドシグネチャ、ビジネスロジック）
   * データアクセス設計（Entity、JPQL）
 
-* screen/{screen_id}/behaviors.md - 画面振る舞い仕様書
+* {spec_directory}/screen/{screen_id}/behaviors.md - 画面振る舞い仕様書
   * 画面の振る舞い（初期表示、ボタンクリック、バリデーションエラー等）
   * エラーケース
   * Given-When-Thenシナリオ
@@ -212,8 +231,11 @@ screen_id: "SCREEN_001_PersonList"
 以下の場所に`detailed_design.md`を作成してください：
 
 ```
-{project_root}/specs/baseline/screen/{screen_id}/detailed_design.md
+{spec_directory}/screen/{screen_id}/detailed_design.md
 ```
+
+* ベースラインの例: `{project_root}/specs/baseline/screen/SCREEN_001_PersonList/detailed_design.md`
+* 拡張機能の例: `{project_root}/specs/enhancements/202512_person_search/screen/SCREEN_005_PersonSearch/detailed_design.md`
 
 ### 3.2 詳細設計書のテンプレート
 
@@ -481,9 +503,9 @@ FacesContext.getCurrentInstance().addMessage(null,
 
 ### データモデルの確認
 
-* [ ] エンティティのテーブル定義を確認した
-* [ ] フィールド、型、制約を確認した
-* [ ] リレーションを確認した
+* [ ] data_model.mdのテーブル定義（ERD）を確認した
+* [ ] テーブルのカラム、型、制約からJPAエンティティフィールドを設計した
+* [ ] テーブル間のリレーションシップからJPAアノテーション（@OneToMany等）を設計した
 
 ### 対話による確認
 
@@ -500,11 +522,12 @@ FacesContext.getCurrentInstance().addMessage(null,
 
 詳細が矛盾する場合、以下の優先順位で判断してください：
 
-1. 画面固有のscreen_design.md（最優先）
-2. 画面固有のfunctional_design.md
-3. 画面固有のbehaviors.md
-4. systemレベルのarchitecture_design.md
-5. systemレベルのfunctional_design.md
+1. {spec_directory}/screen/{screen_id}/screen_design.md（最優先）
+2. {spec_directory}/screen/{screen_id}/functional_design.md
+3. {spec_directory}/screen/{screen_id}/behaviors.md
+4. {spec_directory}/system/architecture_design.md
+5. {spec_directory}/system/functional_design.md
+6. ベースライン仕様（拡張機能の場合、system配下が存在しない場合）
 
 ### 不明点の扱い
 
@@ -519,12 +542,25 @@ FacesContext.getCurrentInstance().addMessage(null,
 * 上書きの場合は、既存の内容を読んで良い部分を継承
 * 追記の場合は、不足セクションのみを追加
 
+### ベースラインと拡張機能の違い
+
+ベースライン（初回リリース版）
+* {spec_directory} = `{project_root}/specs/baseline`
+* system配下にシステム全体の仕様が存在する
+* 完全な仕様セットが揃っている
+
+拡張機能（エンハンスメント）
+* {spec_directory} = `{project_root}/specs/enhancements/[拡張名]`
+* system配下が存在しない場合がある
+* その場合はベースラインのsystem仕様を参照する
+* screen配下には拡張機能固有の画面仕様のみが存在する
+
 ---
 
 ## 参考資料
 
 * [マイグレーションルール](../principles/) - マッピング規則、マイグレーションルール
-* [Jakarta EE開発ルール](../../jakarta-ee-api-basic/principles/) - 開発ルール
+* [共通ルール](../../jakarta-ee-api-base/principles/) - 共通ルール
 * [task_breakdown.md](task_breakdown.md) - タスク分解（前工程）
 * [code_generation.md](code_generation.md) - コード生成（次工程）
 * [Jakarta EE 10仕様](https://jakarta.ee/specifications/)

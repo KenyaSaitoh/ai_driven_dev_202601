@@ -11,45 +11,71 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 > - 詳細な仕様書（specs/）に基づいて、段階的にコードを生成する手法
 > - AIを活用して、仕様書からタスクリスト（tasks/）を生成し、タスクに従って実装を進める
 > - 憲章（principles/）に定められた設計原則とベストプラクティスに従う
-> - **汎用Agent Skills** (`agent_skills/jakarta-ee-standard/`) を使用した開発
+> - **汎用Agent Skills** (`agent_skills/jakarta-ee-api-base/`) を使用した開発
 
 ## 🤖 Agent Skillsを使った開発
 
 このプロジェクトは、汎用的な **Jakarta EE マイクロサービス開発 Agent Skills** を使用して開発します。
 
-開発は以下の**3段階プロセス**で進めます：
+開発は以下の**4段階プロセス**で進めます：
 
 ```
-ステップ1: タスク分解（仕様書 → タスクリスト）
+ステップ1: 基本設計（仕様書作成）← AIと対話しながら
     ↓
-ステップ2: 詳細設計（仕様書 → 詳細設計書）← AIと対話しながら
+ステップ2: タスク分解（仕様書 → タスクリスト）
     ↓
-ステップ3: コード生成（詳細設計書 → 実装コード）
+ステップ3: 詳細設計（仕様書 → 詳細設計書）← AIと対話しながら
+    ↓
+ステップ4: コード生成（詳細設計書 → 実装コード）
 ```
 
 ---
 
 ### 📋 開発フロー
 
-#### ステップ1: タスク分解（プロジェクト開始時に1回）
+#### ステップ1: 基本設計（プロジェクト開始時に1回）
+
+requirements.mdから、システム全体とAPI単位の仕様書を**AIと対話しながら**作成します。
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/basic_design.md
+
+仕様書を作成してください
+
+パラメータ:
+* project_root: projects/sdd/bookstore/berry-books-api-sdd
+* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
+```
+
+* 対話の流れ:
+  1. 既存資料（EXCEL、Word等）の有無を確認します
+  2. 既存資料がある場合は、Markdown形式に変換します
+  3. テンプレートを展開し、各仕様書を対話的に作成します
+  4. `specs/baseline/system/*.md` と `specs/baseline/api/API_XXX_*/*.md` が生成されます
+
+* 生成されるファイル: `specs/baseline/system/*.md`, `specs/baseline/api/API_XXX_*/*.md`（仕様書）
+
+---
+
+#### ステップ2: タスク分解（プロジェクト開始時に1回）
 
 仕様書から実装タスクリストを分解・生成します。
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/task_breakdown.md
+@agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
 
 全タスクを分解してください。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs
+* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
 ```
 
 * 生成されるファイル: `tasks/*.md`（タスクリスト）
 
 ---
 
-#### ステップ2: 詳細設計（各APIごとに実施）
+#### ステップ3: 詳細設計（各APIごとに実施）
 
 各APIの詳細設計書を**AIと対話しながら**作成します。
 
@@ -68,48 +94,56 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 ##### API_001_auth（認証API）
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
-@projects/sdd/bookstore/berry-books-api-sdd/specs
-
-対象: API_001_auth
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
 認証APIの詳細設計書を作成してください。
 JWT認証とCustomerHubRestClientの連携を実装する予定です。
+
+パラメータ:
+* project_root: projects/sdd/bookstore/berry-books-api-sdd
+* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
+* api_id: API_001_auth
 ```
 
-##### API_002_books（書籍API - プロキシ）
+##### API_002_books（書籍API - 外部API連携）
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
-@projects/sdd/bookstore/berry-books-api-sdd/specs
-
-対象: API_002_books
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
 書籍APIの詳細設計書を作成してください。
-BackOfficeRestClientを使用したプロキシパターンで実装する予定です。
+BackOfficeRestClientを使用して外部APIを呼び出します。
+
+パラメータ:
+* project_root: projects/sdd/bookstore/berry-books-api-sdd
+* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
+* api_id: API_002_books
 ```
 
 ##### API_003_orders（注文API）
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
-@projects/sdd/bookstore/berry-books-api-sdd/specs
-
-対象: API_003_orders
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
 注文APIの詳細設計書を作成してください。
 在庫管理との連携と分散トランザクションを実装する予定です。
+
+パラメータ:
+* project_root: projects/sdd/bookstore/berry-books-api-sdd
+* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
+* api_id: API_003_orders
 ```
 
 ##### API_004_images（画像API）
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/detailed_design.md
-@projects/sdd/bookstore/berry-books-api-sdd/specs
-
-対象: API_004_images
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
 画像APIの詳細設計書を作成してください。
+
+パラメータ:
+* project_root: projects/sdd/bookstore/berry-books-api-sdd
+* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
+* api_id: API_004_images
 ServletContextを使用してWAR内リソースを配信する予定です。
 ```
 
@@ -117,7 +151,7 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 
 ---
 
-#### ステップ3: コード生成（詳細設計完了後）
+#### ステップ4: コード生成（詳細設計完了後）
 
 詳細設計書をもとに、実装コードを生成します。
 
@@ -129,7 +163,7 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 ##### 3-1. セットアップタスク（最初に1回）
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 
 セットアップタスクを実行してください。
 
@@ -142,7 +176,7 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 ##### 3-2. 共通機能タスク（セットアップ後に1回）
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 
 共通機能タスクを実行してください。
 
@@ -166,7 +200,7 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 * API_001_auth:
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/api/API_001_auth/detailed_design.md
 
 認証APIを実装してください（JWT + 外部API連携）。
@@ -179,10 +213,10 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 * API_002_books:
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/api/API_002_books/detailed_design.md
 
-書籍APIを実装してください（プロキシパターン）。
+書籍APIを実装してください（外部API呼び出し）。
 
 パラメータ:
 * project_root: projects/sdd/bookstore/berry-books-api-sdd
@@ -192,7 +226,7 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 * API_003_orders:
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/api/API_003_orders/detailed_design.md
 
 注文APIを実装してください（分散トランザクション対応）。
@@ -205,7 +239,7 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 * API_004_images:
 
 ```
-@agent_skills/jakarta-ee-standard/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 @projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/api/API_004_images/detailed_design.md
 
 画像APIを実装してください（静的リソース配信）。
@@ -219,22 +253,22 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 
 ### 📚 詳細情報
 
-詳細は `@agent_skills/jakarta-ee-standard/README.md` を参照してください。
+詳細は `@agent_skills/jakarta-ee-api-base/README.md` を参照してください。
 
-## 🎯 プロジェクトの特徴（BFFパターン）
+## 🎯 プロジェクトの特徴
 
 ### アーキテクチャ
-* **BFF（Backend for Frontend）**: フロントエンド（berry-books-spa）の唯一のエントリーポイント
+* **バックエンドサービス**: フロントエンド（berry-books-spa）の唯一のエントリーポイント
 * **マイクロサービス統合**: 複数のバックエンドマイクロサービスを統合
 * **フロントエンド最適化**: フロントエンド向けに最適化されたAPIを提供
 
 ### 実装パターン
 
-#### プロキシパターン（外部APIへ透過的転送）
-* **BookResource**: 書籍情報 → `back-office-api`へ転送
-* **CategoryResource**: カテゴリ情報 → `back-office-api`へ転送
+#### 外部API呼び出し
+* **BookResource**: 書籍情報を`back-office-api`から取得
+* **CategoryResource**: カテゴリ情報を`back-office-api`から取得
 
-#### 独自実装パターン（ビジネスロジックを持つ）
+#### 独自のビジネスロジック実装
 * **AuthenResource**: JWT認証 + `customer-hub-api`連携
 * **OrderResource**: 注文処理 + 在庫管理連携
 * **ImageResource**: WAR内リソース配信
@@ -248,7 +282,7 @@ ServletContextを使用してWAR内リソースを配信する予定です。
 * **CustomerHubRestClient**: `customer-hub-api`との連携（顧客管理）
 
 ### JWT認証
-* JWT生成・検証はBFF層で実装
+* JWT生成・検証は本システムで実装
 * HttpOnly Cookieで安全に管理
 * 認証必須エンドポイントの保護
 
@@ -353,8 +387,8 @@ berry-books-api-sdd/
 | レイヤー | クラス | 状態 | 備考 |
 |---------|-------|------|------|
 | **API** | AuthenResource | ✅ 完了 | JWT認証、外部API連携 |
-| **API** | BookResource | ✅ 完了 | プロキシパターン（2026-01-10実装） |
-| **API** | CategoryResource | ✅ 完了 | プロキシパターン（2026-01-10実装） |
+| **API** | BookResource | ✅ 完了 | 外部API呼び出し（2026-01-10実装） |
+| **API** | CategoryResource | ✅ 完了 | 外部API呼び出し（2026-01-10実装） |
 | **API** | OrderResource | ✅ 完了 | 注文処理、在庫管理連携 |
 | **API** | ImageResource | ✅ 完了 | WAR内リソース配信 |
 | **External** | BackOfficeRestClient | ✅ 完了 | ConfigProvider方式（2026-01-10修正） |
@@ -548,7 +582,7 @@ back-office-api.base-url=http://localhost:8080/back-office-api-sdd/api
 customer-hub-api.base-url=http://localhost:8080/customer-hub-api/api/customers
 ```
 
-> **重要:** このBFFは以下の外部APIに依存します：
+> **重要:** 本システムは以下の外部APIに依存します：
 > - **back-office-api-sdd**: 書籍・在庫・カテゴリ管理
 > - **customer-hub-api**: 顧客管理
 
@@ -687,7 +721,7 @@ projects/sdd/bookstore/berry-books-api-sdd/build/reports/tests/test/index.html
 # projects/sdd/bookstore/berry-books-api-sdd/build/reports/jacoco/test/html/index.html
 ```
 
-## 📚 アーキテクチャ（BFFパターン）
+## 📚 アーキテクチャ
 
 ### レイヤー構成
 
@@ -698,39 +732,37 @@ JAX-RS Resource (@Path, @ApplicationScoped)
     ↓ JWT Authentication Filter
 CDI Service (@ApplicationScoped)
     ↓
-[プロキシ] REST Client → back-office-api (書籍・在庫・カテゴリ)
-[プロキシ] REST Client → customer-hub-api (顧客)
-[独自実装] DAO (@ApplicationScoped)
+REST Client → back-office-api (書籍・在庫・カテゴリ)
+REST Client → customer-hub-api (顧客)
+DAO (@ApplicationScoped)
     ↓ JPA
 Database (HSQLDB) ← 注文データのみ管理
 ```
 
-**BFFの役割:**
+**本システムの役割:**
 * フロントエンドの唯一のエントリーポイント
-* 複数のバックエンドマイクロサービスを統合
-* 一部の機能は外部APIへプロキシ転送
-* 一部の機能は独自のビジネスロジックを実装
+* 注文管理という独自のドメインを持つ
+* 必要に応じて外部システム（書籍管理、顧客管理）を呼び出す
+* 注文処理、配送料金計算などのビジネスロジックを実装
 
 ### 主要な設計パターン
 
-* **BFF Pattern**: Backend for Frontend
-* **Proxy Pattern**: 外部APIへの透過的転送（BookResource、CategoryResource）
-* **REST Resource Pattern**: JAX-RS
-* **Service Layer Pattern**: CDI + Transactional（注文処理のみ）
-* **Repository Pattern**: DAO（注文関連のみ）
-* **DTO Pattern**: Java Records
-* **JWT Authentication**: HttpOnly Cookie（BFF層で実装）
-* **Dependency Injection**: CDI
-* **REST Client Pattern**: 外部API連携
-* **Exception Mapper**: JAX-RS
+* **REST Resource Pattern**: JAX-RS（HTTPエンドポイント）
+* **Service Layer Pattern**: CDI + Transactional（注文ビジネスロジック）
+* **Repository Pattern**: DAO（注文データアクセス）
+* **DTO Pattern**: Java Records（データ転送）
+* **JWT Authentication**: HttpOnly Cookie（認証管理）
+* **Dependency Injection**: CDI（依存性注入）
+* **REST Client Pattern**: 外部API連携（back-office-api、customer-hub-api）
+* **Exception Mapper**: JAX-RS（エラーハンドリング）
 
 ### データ管理の分離
 
-**BFFで管理するデータ:**
+**本システムで管理するデータ:**
 * 注文トランザクション（ORDER_TRAN）
 * 注文明細（ORDER_DETAIL）
 
-**外部APIで管理するデータ（BFFでは管理しない）:**
+**外部APIで管理するデータ（本システムでは管理しない）:**
 * 書籍・在庫・カテゴリ（back-office-api）
 * 顧客情報（customer-hub-api）
 
@@ -814,7 +846,6 @@ rm -f hsqldb/data/testdb.*
 * [JWT (JSON Web Token)](https://jwt.io/)
 * [jjwt - Java JWT Library](https://github.com/jwtk/jjwt)
 * [Agent Skills Documentation](https://agentskills.io/what-are-skills)
-* [BFF Pattern](https://samnewman.io/patterns/architectural/bff/)
 
 ## 📄 ライセンス
 

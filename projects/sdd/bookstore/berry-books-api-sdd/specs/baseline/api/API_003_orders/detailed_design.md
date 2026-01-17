@@ -1,8 +1,8 @@
-# API_003 注文API - 詳細設計書（BFFパターン - 独自実装）
+# API_003 注文API - 詳細設計書（マイクロサービスアーキテクチャ - 独自実装）
 
 * API ID: API_003  
 * API名: 注文API  
-* パターン: BFF（Backend for Frontend） - 独自実装 + 外部API連携  
+* パターン: バックエンドサービス - 独自実装 + 外部API連携  
 * バージョン: 1.0.0  
 * 最終更新: 2025-01-10
 
@@ -188,7 +188,7 @@ public record OrderResponse(
 
 ### 2.5 OrderService（ビジネスロジック層）
 
-* 責務: 注文処理ビジネスロジック（BFF独自実装）
+* 責務: 注文処理ビジネスロジック（berry-books-api独自実装）
 
 * アノテーション:
   * `@ApplicationScoped`
@@ -365,7 +365,7 @@ public OrderResponse findOrderById(Integer tranId)
 
 ### 2.6 DeliveryFeeService（配送料金計算）
 
-* 責務: 配送料金の計算（BFF独自実装）
+* 責務: 配送料金の計算（berry-books-api独自実装）
 
 * アノテーション:
   * `@ApplicationScoped`
@@ -430,16 +430,16 @@ if (AddressUtil.isTokyoMetropolitanArea(address)) {
 
 ---
 
-## 3. BFFパターンの特徴（分散トランザクション）
+## 3. マイクロサービスアーキテクチャの特徴（分散トランザクション）
 
 ### 3.1 トランザクション分離
 
 * 外部API（在庫更新）:
   * `back-office-api`が独立してトランザクション管理
-  * BFF層からは制御不可
+  * 本システムからは制御不可
 
 * ローカルDB（注文作成）:
-  * `@Transactional`でBFF層がトランザクション管理
+  * `@Transactional`で本システムがトランザクション管理
 
 ### 3.2 結果整合性（Eventual Consistency）
 
@@ -496,5 +496,5 @@ if (AddressUtil.isTokyoMetropolitanArea(address)) {
 
 * [functional_design.md](functional_design.md) - 機能設計書
 * [behaviors.md](behaviors.md) - 振る舞い仕様書
-* [BFFパターン](https://samnewman.io/patterns/architectural/bff/)
+* [マイクロサービスアーキテクチャ](https://samnewman.io/patterns/architectural/berry-books-api/)
 * [Sagaパターン](https://microservices.io/patterns/data/saga.html)

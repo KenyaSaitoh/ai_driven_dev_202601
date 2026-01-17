@@ -5,12 +5,33 @@ description: Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービス開発を
 
 # Jakarta EE API サービス開発 Agent Skill
 
-## 使い方（3段階プロセス）
+## 使い方（4段階プロセス）
 
-### ステップ1: タスク分解
+### ステップ1: 基本設計（仕様書作成）
 
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/task_breakdown.md
+@agent_skills/jakarta-ee-api-base/instructions/basic_design.md
+
+仕様書を作成してください
+
+パラメータ
+* project_root: <プロジェクトルートパス>
+* spec_directory: <仕様書ディレクトリパス>
+```
+
+AIと対話しながら以下を実施（対話的プロセス）
+1. テンプレートを所定のフォルダに展開
+2. requirements.mdを読み込み、理解内容を説明
+3. ユーザーと対話しながら各仕様書の中身を埋める
+4. システムレベル仕様書（architecture_design.md、functional_design.md等）を作成
+5. API単位仕様書（api/配下）を作成
+
+注意: requirements.md（要件定義書）は所与とする（既に存在している前提）
+
+### ステップ2: タスク分解
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
 
 タスクを分解してください
 
@@ -28,12 +49,13 @@ AIが自動で以下を実行
 ### ステップ2: 詳細設計
 
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/detailed_design.md
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
 API詳細設計書を作成してください
 
 パラメータ
 * project_root: <プロジェクトルートパス>
+* spec_directory: <仕様書ディレクトリパス>
 * api_id: <API_ID>（例: API_001_auth）
 ```
 
@@ -43,10 +65,10 @@ AIと対話しながら以下を実施（対話的プロセス）
 3. 対話で妥当性・充足性を確認
 4. `detailed_design.md`を生成
 
-### ステップ3: コード生成
+### ステップ4: コード生成
 
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 
 セットアップタスクを実行してください
 
@@ -66,13 +88,13 @@ AIが自動で以下を実行
 ## 実践例
 
 ```
-@agent_skills/jakarta-ee-api-basic/instructions/task_breakdown.md
+@agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
 
 全タスクを分解してください
 
 パラメータ
 * project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs
+* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
 ```
 
 その後、詳細設計とコード生成を実施する
@@ -96,15 +118,22 @@ AIが自動で以下を実行
 ## ディレクトリ構造
 
 ```
-agent_skills/jakarta-ee-api-basic/
+agent_skills/jakarta-ee-api-base/
 ├── SKILL.md                          # このファイル
 ├── README.md                         # クイックスタートガイド
-├── principles/                       # 開発ルール（全プロジェクト共通）
-│   └── common_rules.md              # Jakarta EE開発ルール
+├── principles/                       # 原則（全プロジェクト共通）
+│   └── common_rules.md              # 共通ルール
+├── templates/                        # 仕様書テンプレート
+│   ├── architecture_design.md
+│   ├── functional_design.md
+│   ├── data_model.md
+│   ├── behaviors.md
+│   └── external_interface.md
 └── instructions/
-    ├── task_breakdown.md             # ステップ1: タスク分解
-    ├── detailed_design.md            # ステップ2: 詳細設計
-    └── code_generation.md            # ステップ3: コード生成
+    ├── basic_design.md               # ステップ1: 基本設計（仕様書作成）
+    ├── task_breakdown.md             # ステップ2: タスク分解
+    ├── detailed_design.md            # ステップ3: 詳細設計
+    └── code_generation.md            # ステップ4: コード生成
 ```
 
 ---

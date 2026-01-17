@@ -1,8 +1,8 @@
-# API_001 認証API - 詳細設計書（BFFパターン）
+# API_001 認証API - 詳細設計書（マイクロサービスアーキテクチャ）
 
 * API ID: API_001  
 * API名: 認証API  
-* パターン: BFF（Backend for Frontend） - 独自実装 + 外部API連携  
+* パターン: バックエンドサービス - 独自実装 + 外部API連携  
 * バージョン: 1.0.0  
 * 最終更新: 2025-01-10
 
@@ -42,7 +42,7 @@ pro.kensait.berrybooks
 
 ### 2.1 AuthenResource（JAX-RS Resource）
 
-* 責務: 認証APIのエンドポイント提供（BFF層）
+* 責務: 認証APIのエンドポイント提供（本システム）
 
 * アノテーション:
   * `@Path("/auth")` - ベースパス
@@ -203,7 +203,7 @@ public record RegisterRequest(
 
 ### 2.5 JwtUtil（セキュリティユーティリティ）
 
-* 責務: JWT生成・検証（BFF層）
+* 責務: JWT生成・検証（本システム）
 
 * アノテーション:
   * `@ApplicationScoped`
@@ -248,7 +248,7 @@ public Integer getCustomerIdFromToken(String token)
 
 ### 2.6 JwtAuthenFilter（認証フィルター）
 
-* 責務: JWT認証フィルター（BFF層）
+* 責務: JWT認証フィルター（本システム）
 
 * アノテーション:
   * `@Provider`
@@ -273,7 +273,7 @@ public Integer getCustomerIdFromToken(String token)
 
 ### 2.7 CustomerHubRestClient（外部API連携）
 
-* 責務: 顧客管理APIとの連携（BFF特有）
+* 責務: 顧客管理APIとの連携（berry-books-api特有）
 
 * アノテーション:
   * `@ApplicationScoped`
@@ -353,33 +353,37 @@ public record CustomerTO(
 
 ```properties
 # JWT秘密鍵（本番環境では環境変数で上書き）
+
 jwt.secret-key=BerryBooksSecretKeyForJWT2024MustBe32CharactersOrMore
 
 # JWT有効期限（ミリ秒）- 24時間
+
 jwt.expiration-ms=86400000
 
 # JWT Cookie名
+
 jwt.cookie-name=berry-books-jwt
 
 # 外部API: 顧客管理API
+
 customer-hub-api.base-url=http://localhost:8080/customer-hub-api/api/customers
 ```
 
 ---
 
-## 4. BFFパターンの特徴
+## 4. マイクロサービスアーキテクチャの特徴
 
 ### 4.1 外部API連携
 
 * 顧客情報は`customer-hub-api`が管理
-* BFF層は顧客エンティティを持たない
+* 本システムは顧客エンティティを持たない
 * CustomerHubRestClientを通じて外部APIを呼び出し
 
 ### 4.2 JWT認証の責務
 
-* JWT生成・検証はBFF層で実装
+* JWT生成・検証は本システムで実装
 * 外部APIには認証情報を転送しない
-* BFF層で認証を完結
+* 本システムで認証を完結
 
 ---
 
@@ -425,4 +429,4 @@ customer-hub-api.base-url=http://localhost:8080/customer-hub-api/api/customers
 * [behaviors.md](behaviors.md) - 振る舞い仕様書
 * [JWT仕様](https://jwt.io/)
 * [BCrypt仕様](https://en.wikipedia.org/wiki/Bcrypt)
-* [BFFパターン](https://samnewman.io/patterns/architectural/bff/)
+* [マイクロサービスアーキテクチャ](https://samnewman.io/patterns/architectural/berry-books-api/)

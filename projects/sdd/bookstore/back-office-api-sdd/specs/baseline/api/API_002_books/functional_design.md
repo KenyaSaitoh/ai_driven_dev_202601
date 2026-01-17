@@ -3,15 +3,19 @@
 ## 1. API概要
 
 ### 1.1 API名
+
 書籍API（Books API）
 
 ### 1.2 ベースパス
+
 `/api/books`
 
 ### 1.3 目的
+
 書籍マスタ情報の参照機能を提供する。書籍一覧取得、詳細取得、検索機能（カテゴリ・キーワード）を含む。
 
 ### 1.4 認証要否
+
 現状は認証不要（将来的にJWT認証フィルタ実装時に認証必須となる予定）
 
 ## 2. エンドポイント一覧
@@ -30,6 +34,7 @@
 ### 3.1 書籍一覧取得
 
 #### 3.1.1 基本情報
+
 * エンドポイント: `GET /api/books`
 * 機能: すべての書籍情報（在庫情報含む）を取得
 * 認証: 不要（将来:必要）
@@ -45,44 +50,6 @@
 #### 3.1.3 レスポンス
 
 * 成功（200 OK）:
-```json
-[
-  {
-    "bookId": 1,
-    "bookName": "サンプル書籍",
-    "author": "著者名",
-    "price": 2500,
-    "imageUrl": "http://example.com/image.jpg",
-    "quantity": 10,
-    "version": 1,
-    "category": {
-      "categoryId": 1,
-      "categoryName": "文学"
-    },
-    "publisher": {
-      "publisherId": 1,
-      "publisherName": "出版社A"
-    }
-  },
-  {
-    "bookId": 2,
-    "bookName": "別の書籍",
-    "author": "別の著者",
-    "price": 3000,
-    "imageUrl": "http://example.com/image2.jpg",
-    "quantity": 5,
-    "version": 2,
-    "category": {
-      "categoryId": 2,
-      "categoryName": "ビジネス"
-    },
-    "publisher": {
-      "publisherId": 2,
-      "publisherName": "出版社B"
-    }
-  }
-]
-```
 
 * レスポンススキーマ:
 | フィールド | 型 | 説明 |
@@ -132,6 +99,7 @@
 ### 3.2 書籍詳細取得
 
 #### 3.2.1 基本情報
+
 * エンドポイント: `GET /api/books/{id}`
 * 機能: 指定した書籍IDの詳細情報を取得
 * 認証: 不要（将来:必要）
@@ -150,32 +118,8 @@
 #### 3.2.3 レスポンス
 
 * 成功（200 OK）:
-```json
-{
-  "bookId": 1,
-  "bookName": "サンプル書籍",
-  "author": "著者名",
-  "price": 2500,
-  "imageUrl": "http://example.com/image.jpg",
-  "quantity": 10,
-  "version": 1,
-  "category": {
-    "categoryId": 1,
-    "categoryName": "文学"
-  },
-  "publisher": {
-    "publisherId": 1,
-    "publisherName": "出版社A"
-  }
-}
-```
 
 * 失敗（404 Not Found）:
-```json
-{
-  "error": "書籍が見つかりません"
-}
-```
 
 #### 3.2.4 処理フロー
 
@@ -204,6 +148,7 @@
 ### 3.3 書籍検索（デフォルト）
 
 #### 3.3.1 基本情報
+
 * エンドポイント: `GET /api/books/search`
 * 機能: カテゴリとキーワードで書籍を検索（内部的にJPQLを使用）
 * 認証: 不要（将来:必要）
@@ -225,27 +170,6 @@
 #### 3.3.3 レスポンス
 
 * 成功（200 OK）:
-```json
-[
-  {
-    "bookId": 1,
-    "bookName": "サンプル書籍",
-    "author": "著者名",
-    "price": 2500,
-    "imageUrl": "http://example.com/image.jpg",
-    "quantity": 10,
-    "version": 1,
-    "category": {
-      "categoryId": 1,
-      "categoryName": "文学"
-    },
-    "publisher": {
-      "publisherId": 1,
-      "publisherName": "出版社A"
-    }
-  }
-]
-```
 
 #### 3.3.4 処理フロー
 
@@ -296,6 +220,7 @@
 ### 3.4 書籍検索（JPQL）
 
 #### 3.4.1 基本情報
+
 * エンドポイント: `GET /api/books/search/jpql`
 * 機能: カテゴリとキーワードで書籍を検索（静的クエリ: JPQL）
 * 認証: 不要（将来:必要）
@@ -328,6 +253,7 @@
 ### 3.5 書籍検索（Criteria API）
 
 #### 3.5.1 基本情報
+
 * エンドポイント: `GET /api/books/search/criteria`
 * 機能: カテゴリとキーワードで書籍を検索（動的クエリ: Criteria API）
 * 認証: 不要（将来:必要）
@@ -400,6 +326,7 @@
 ### 3.6 カテゴリ一覧取得（書籍API経由）
 
 #### 3.6.1 基本情報
+
 * エンドポイント: `GET /api/books/categories`
 * 機能: カテゴリの一覧をMap形式で取得
 * 認証: 不要（将来:必要）
@@ -415,14 +342,6 @@
 #### 3.6.3 レスポンス
 
 * 成功（200 OK）:
-```json
-{
-  "文学": 1,
-  "ビジネス": 2,
-  "技術": 3,
-  "歴史": 4
-}
-```
 
 * 備考: カテゴリ名をキー、カテゴリIDを値とするMap形式
 
@@ -599,15 +518,6 @@ GET /api/books?page=1&size=20
 ```
 
 * レスポンス:
-```json
-{
-  "content": [...],
-  "page": 1,
-  "size": 20,
-  "totalElements": 100,
-  "totalPages": 5
-}
-```
 
 ### 9.2 ソート機能
 

@@ -1,0 +1,179 @@
+openapi: 3.0.3
+info:
+  title: Books Stock API - 在庫API
+  description: |
+    バックオフィス書籍在庫管理システムの在庫API仕様
+    
+    書籍在庫情報の参照・更新機能を提供する（楽観的ロック対応）。
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:8080/api
+    description: 開発環境
+  - url: https://api.example.com/api
+    description: 本番環境
+
+tags:
+  - name: stocks
+    description: 在庫操作
+
+paths:
+  /stocks:
+    get:
+      tags:
+        - stocks
+      summary: 在庫一覧取得
+      description: すべての書籍の在庫情報を取得する
+      operationId: getAllStocks
+      responses:
+        '200':
+          description: 在庫一覧取得成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stock'
+        '500':
+          description: サーバー内部エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /stocks/{bookId}:
+    get:
+      tags:
+        - stocks
+      summary: 在庫情報取得
+      description: 指定された書籍IDの在庫情報を取得する
+      operationId: getStockByBookId
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          description: 書籍ID
+          schema:
+            type: integer
+            format: int32
+            example: 1
+      responses:
+        '200':
+          description: 在庫情報取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stock'
+        '404':
+          description: 在庫情報が見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: サーバー内部エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - stocks
+      summary: 在庫更新
+      description: 指定された書籍IDの在庫数を更新する（楽観的ロック対応）
+      operationId: updateStock
+      parameters:
+        - name: bookId
+          in: path
+          required: true
+          description: 書籍ID
+          schema:
+            type: integer
+            format: int32
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockUpdateRequest'
+      responses:
+        '200':
+          description: 在庫更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stock'
+        '404':
+          description: 在庫情報が見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: 楽観的ロック失敗（他のユーザーによって更新済み）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: サーバー内部エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Stock:
+      type: object
+      properties:
+        bookId:
+          type: integer
+          format: int32
+          description: 書籍ID
+          example: 1
+        quantity:
+          type: integer
+          format: int32
+          description: 在庫数
+          example: 10
+        version:
+          type: integer
+          format: int64
+          description: バージョン（楽観的ロック用）
+          example: 1
+
+    StockUpdateRequest:
+      type: object
+      required:
+        - version
+        - quantity
+      properties:
+        version:
+          type: integer
+          format: int64
+          description: 現在のバージョン（楽観的ロック用）
+          example: 1
+        quantity:
+          type: integer
+          format: int32
+          description: 更新後の在庫数
+          minimum: 0
+          example: 15
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: エラータイプ
+          example: Conflict
+        message:
+          type: string
+          description: エラーメッセージ（日本語）
+          example: 在庫が他のユーザーによって更新されました。再度お試しください。

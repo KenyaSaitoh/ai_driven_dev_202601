@@ -51,15 +51,15 @@ output_directory: "projects/sdd/person/jsf-person-sdd/tasks"
 * @agent_skills/struts-to-jsf-migration/principles/ - マイグレーションルール、アーキテクチャ標準、マッピング規則、セキュリティ標準を確認
   * このフォルダ配下のすべてのMarkdownファイルを読み込み、マイグレーションルールを遵守すること
   * Code-to-Spec-to-Codeアプローチ、マッピング規則を確認
-* @agent_skills/jakarta-ee-api-basic/principles/ - Jakarta EE開発の共通ルール
-  * このフォルダ配下のすべてのMarkdownファイルを読み込み、開発ルールを遵守すること
+* @agent_skills/jakarta-ee-api-base/principles/ - Jakarta EE開発の原則
+  * このフォルダ配下の原則ドキュメントを読み込み、共通ルールを遵守すること
   * 重要: タスク分解においても、ルールドキュメントに記載されたすべてのルール（テストカバレッジ基準、アーキテクチャパターン、コーディング規約など）を遵守すること
   * 注意: Agent Skills配下のルールは全プロジェクト共通。プロジェクト固有のルールがある場合は `{project_root}/principles/` も確認すること
 
 ### フレームワーク仕様（該当する場合）
 
 * @agent_skills/struts-to-jsf-migration/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
-* @agent_skills/jakarta-ee-api-basic/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+* @agent_skills/jakarta-ee-api-base/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
   * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
   * タスク分解時に、フレームワーク固有の実装要件を考慮する
 
@@ -369,7 +369,7 @@ SPECから画面を抽出してタスクファイルを生成：
 
 ## 7. 生成手順
 
-1. ルールとSPEC分析: `@agent_skills/struts-to-jsf-migration/principles/` と `@agent_skills/jakarta-ee-api-basic/principles/` 配下の共通ルールドキュメントと全SPECファイル（system/とscreen/）を読み込み、開発ルールと機能全体を把握
+1. ルールとSPEC分析: `@agent_skills/struts-to-jsf-migration/principles/` と `@agent_skills/jakarta-ee-api-base/principles/` 配下の共通ルールドキュメントと全SPECファイル（system/とscreen/）を読み込み、共通ルールと機能全体を把握
 2. アーキテクチャ識別: architecture_design.mdからアーキテクチャパターン（サーバーサイドMVC: JSF）を識別
 3. 画面抽出: 実装が必要な画面を抽出し、依存関係と共通コンポーネントを識別
 4. タスク分割: 画面数に応じた適切なファイル分割方法を決定（小規模: 少数ファイル、中規模: 画面別、大規模: グループ別）
@@ -398,7 +398,7 @@ SPECから画面を抽出してタスクファイルを生成：
 
 ### タスク分解のルール
 
-* ルール遵守: `@agent_skills/struts-to-jsf-migration/principles/` と `@agent_skills/jakarta-ee-api-basic/principles/` 配下の共通ルールドキュメント（開発ルール、マイグレーションルール、品質基準、セキュリティ標準、組織標準）を必ず遵守。プロジェクト固有のルールがある場合は `{project_root}/principles/` も併せて遵守
+* ルール遵守: `@agent_skills/struts-to-jsf-migration/principles/` と `@agent_skills/jakarta-ee-api-base/principles/` 配下の原則ドキュメント（共通ルール、マイグレーションルール、品質基準、セキュリティ標準、組織標準）を必ず遵守。プロジェクト固有の原則がある場合は `{project_root}/principles/` も併せて遵守
 * 抽象度の維持: タスクは「何を作るか」のみを記述。ソースコードや詳細な実装手順は記述しない
 * アーキテクチャ適応: architecture_design.mdからアーキテクチャパターンを識別し、適切なタスクを分解・生成
   * サーバーサイドMVC（JSF）: Managed Bean、Facelets XHTML、CDI + JPA、セッション管理
@@ -422,5 +422,5 @@ SPECから画面を抽出してタスクファイルを生成：
 ## 参考資料
 
 * [マイグレーションルール](../principles/) - マッピング規則、マイグレーションルール
-* [Jakarta EE開発ルール](../../jakarta-ee-api-basic/principles/) - 開発ルール
+* [共通ルール](../../jakarta-ee-api-base/principles/) - 共通ルール
 * [code_generation.md](code_generation.md) - 次のステップ（コード生成）

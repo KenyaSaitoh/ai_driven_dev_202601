@@ -5,9 +5,115 @@
 最終更新日: [DATE]  
 ステータス: [STATUS]
 
+* 変更履歴:
+  * v1.0.0 ([DATE]): 初版
+
 ---
 
-## 1. 技術スタック
+## 1. システム概要
+
+### 1.1 システム名
+
+[SYSTEM_NAME]
+
+### 1.2 アーキテクチャスタイル
+
+* アーキテクチャパターン: [レイヤードアーキテクチャ / マイクロサービス / BFF / その他]
+* API設計: [RESTful API / GraphQL / その他]
+* データアクセス: [JPA / JDBC / その他]
+* 認証方式: [JWT / セッション / OAuth / その他]
+
+---
+
+## 2. 全体アーキテクチャ
+
+### 2.1 システム構成図
+
+[Mermaid図でシステム全体の構成を表示]
+
+```mermaid
+flowchart TD
+    Client["Client Application"]
+    
+    subgraph AppServer["Application Server"]
+        subgraph Presentation["Presentation Layer"]
+            Resource1["Resource1"]
+        end
+        
+        subgraph Business["Business Logic Layer"]
+            Service1["Service1"]
+        end
+        
+        subgraph DataAccess["Data Access Layer"]
+            Dao1["Dao1"]
+        end
+        
+        subgraph Persistence["Persistence Layer"]
+            Entities["Entities"]
+        end
+    end
+    
+    DB[("Database")]
+    
+    Client -->|HTTP/HTTPS| Presentation
+    Presentation --> Business
+    Business --> DataAccess
+    DataAccess --> Persistence
+    Persistence --> DB
+```
+
+注意: 実際のプロジェクトに応じて、より詳細な構成図を記述してください
+
+### 2.2 アーキテクチャパターンの説明
+
+[採用したアーキテクチャパターンの詳細説明]
+
+* BFFパターンの場合:
+  * BFF層の役割
+  * バックエンドサービスとの関係
+  * 責務分担
+
+* マイクロサービスの場合:
+  * サービス間通信
+  * データ管理の責務分担
+  * サービス境界
+
+---
+
+## 3. パッケージ構造
+
+### 3.1 ベースパッケージ
+
+```
+[BASE_PACKAGE]
+```
+
+### 3.2 パッケージ階層（概要）
+
+```
+[BASE_PACKAGE]/
+├── api                    # Presentation Layer (JAX-RS Resources)
+│   ├── dto               # Data Transfer Objects
+│   └── exception         # Exception Mappers
+├── service               # Business Logic Layer
+├── dao                   # Data Access Layer
+├── entity                # Persistence Layer (JPA Entities)
+├── security              # Security (JWT, Authentication)
+├── exception             # General Exception Mappers
+├── common                # Common Classes
+└── util                  # Utilities
+```
+
+* 詳細なクラス構成: 各API機能の`detailed_design.md`を参照してください。
+
+| API | 詳細設計書 |
+|-----|----------|
+| [API_NAME_1] | [../api/API_XXX/detailed_design.md](../api/API_XXX/detailed_design.md) |
+| [API_NAME_2] | [../api/API_YYY/detailed_design.md](../api/API_YYY/detailed_design.md) |
+
+---
+
+## 4. 技術スタック
 
 ### 1.1 コアプラットフォーム
 
@@ -236,9 +342,26 @@ sequenceDiagram
 
 | 項目 | 設定値 | 説明 |
 |------|--------|------|
-| データベース | [DATABASE] | [DESCRIPTION] |
-| 接続プール | [POOL_SIZE] | [DESCRIPTION] |
-| トランザクション分離レベル | [ISOLATION_LEVEL] | [DESCRIPTION] |
+| データベース種別 | [DATABASE] | [DESCRIPTION] |
+| 接続方式 | JDBC（JPA経由） | - |
+| データソース名（JNDI） | [JNDI_NAME] | 例: java:app/jdbc/testdb |
+| 接続プール管理 | アプリケーションサーバー | - |
+| トランザクション分離レベル | [ISOLATION_LEVEL] | - |
+
+### 10.2 persistence.xml設定
+
+* ファイル: `src/main/resources/META-INF/persistence.xml`
+* Persistence Unit名: [PERSISTENCE_UNIT_NAME]
+* JNDI名: [JNDI_NAME]
+
+### 10.3 アクセステーブル
+
+本システムがアクセスするテーブル：
+
+| テーブル名 | 用途 | アクセス権限 |
+|----------|------|------------|
+| [TABLE_1] | [PURPOSE] | READ, WRITE |
+| [TABLE_2] | [PURPOSE] | READ |
 
 ---
 
@@ -389,19 +512,38 @@ graph TB
 
 ---
 
-## 18. 参考資料
+## 18. API仕様書（OpenAPI）
 
-### 18.1 公式ドキュメント
+### 18.1 本システムが公開するAPI仕様
 
-* [TECH_STACK_1]: [URL]
-* [TECH_STACK_2]: [URL]
+本システムが外部に公開するAPI仕様については、各APIディレクトリ配下のOpenAPI (YAML) 仕様書を参照してください：
 
-### 18.2 関連仕様書
+| API | OpenAPI仕様書 | 説明 |
+|-----|-------------|------|
+| [API_NAME_1] | [../api/API_XXX/openapi.yaml](../api/API_XXX/openapi.yaml) | [DESCRIPTION] |
+| [API_NAME_2] | [../api/API_YYY/openapi.yaml](../api/API_YYY/openapi.yaml) | [DESCRIPTION] |
 
-* [SPEC_1]: [LINK]
-* [SPEC_2]: [LINK]
+注意: OpenAPI仕様書が不要な場合は、このセクションを「該当なし」とする
 
-### 18.3 サンプルコード・リポジトリ
+---
+
+## 19. 参考資料
+
+### 19.1 公式ドキュメント
+
+* Jakarta EE 10: https://jakarta.ee/specifications/platform/10/
+* JAX-RS 3.1: https://jakarta.ee/specifications/restful-ws/3.1/
+* JPA 3.1: https://jakarta.ee/specifications/persistence/3.1/
+* CDI 4.0: https://jakarta.ee/specifications/cdi/4.0/
+
+### 19.2 関連仕様書
+
+* [requirements.md](requirements.md) - 要件定義書
+* [functional_design.md](functional_design.md) - 機能設計書
+* [data_model.md](data_model.md) - データモデル仕様書
+* [external_interface.md](external_interface.md) - 外部インターフェース仕様書
+
+### 19.3 サンプルコード・リポジトリ
 
 * [SAMPLE_1]: [URL]
 * [SAMPLE_2]: [URL]

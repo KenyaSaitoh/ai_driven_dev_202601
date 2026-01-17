@@ -797,6 +797,7 @@ public String deletePerson(Integer personId) {
 ## 14. 実装チェックリスト
 
 ### 仕様理解の確認
+
 * [x] 画面の目的と機能を理解している
 * [x] 表示項目と入力項目を把握している
 * [x] ボタンと画面遷移を把握している
@@ -804,17 +805,20 @@ public String deletePerson(Integer personId) {
 * [x] エラーケースを把握している
 
 ### パッケージ構造の確認
+
 * [x] ベースパッケージを確認した: pro.kensait.jsf.person
 * [x] 命名規則を確認した: PersonListBean
 * [x] 実装が必要なクラスをリストアップした: PersonListBean
 
 ### Managed Bean設計の確認
+
 * [x] Bean名とスコープを確認した: personListBean、@ViewScoped
 * [x] プロパティ一覧を確認した: personService、personList
 * [x] アクションメソッド一覧を確認した: init()、getPersonList()、deletePerson()
 * [x] URLパラメータでのデータ受け渡しを確認した
 
 ### データモデルの確認
+
 * [x] エンティティのテーブル定義を確認した: PERSON
 * [x] フィールド、型、制約を確認した
 * [x] リレーションを確認した: なし

@@ -1,8 +1,8 @@
-# API_002 書籍API - 詳細設計書（BFFパターン - プロキシ）
+# API_002 書籍API - 詳細設計書（マイクロサービスアーキテクチャ - 外部API連携）
 
 * API ID: API_002  
 * API名: 書籍API  
-* パターン: BFF（Backend for Frontend） - プロキシパターン  
+* パターン: バックエンドサービス - 外部API呼び出し  
 * バージョン: 1.0.0  
 * 最終更新: 2025-01-10
 
@@ -15,8 +15,8 @@
 ```
 pro.kensait.berrybooks
 ├── api
-│   ├── BookResource.java             # 書籍リソース（プロキシ）
-│   └── CategoryResource.java         # カテゴリリソース（プロキシ）
+│   ├── BookResource.java             # 書籍リソース（外部API連携）
+│   └── CategoryResource.java         # カテゴリリソース（外部API連携）
 └── external
     ├── BackOfficeRestClient.java    # バックオフィスAPI連携
     └── dto
@@ -24,7 +24,7 @@ pro.kensait.berrybooks
         └── ErrorResponse.java        # エラーレスポンス
 ```
 
-* 注: このAPIはプロキシパターンのため、以下のクラスは実装されていません：
+* 注: このAPIは外部API呼び出しのため、以下のクラスは実装されていません：
 * `BookService` - サービス層なし
 * `BookDao` - DAO層なし
 * `Book` エンティティ - エンティティなし
@@ -35,9 +35,9 @@ pro.kensait.berrybooks
 
 ## 2. クラス設計
 
-### 2.1 BookResource（JAX-RS Resource - プロキシ）
+### 2.1 BookResource（JAX-RS Resource - 外部API連携）
 
-* 責務: 書籍APIのプロキシエンドポイント提供
+* 責務: 書籍APIの外部API連携エンドポイント提供
 
 * アノテーション:
   * `@Path("/books")` - ベースパス
@@ -59,7 +59,7 @@ pro.kensait.berrybooks
 
 * レスポンス: `List<BookTO>`
 
-* プロキシ先: `back-office-api` の `GET /api/books`
+* 外部API連携先: `back-office-api` の `GET /api/books`
 
 #### getBookById() - 書籍詳細取得
 
@@ -79,7 +79,7 @@ pro.kensait.berrybooks
 
 * レスポンス: `BookTO`
 
-* プロキシ先: `back-office-api` の `GET /api/books/{id}`
+* 外部API連携先: `back-office-api` の `GET /api/books/{id}`
 
 #### searchBooks() - 書籍検索
 
@@ -100,13 +100,13 @@ pro.kensait.berrybooks
 
 * レスポンス: `List<BookTO>`
 
-* プロキシ先: `back-office-api` の `GET /api/books/search/jpql`
+* 外部API連携先: `back-office-api` の `GET /api/books/search/jpql`
 
 ---
 
-### 2.2 CategoryResource（JAX-RS Resource - プロキシ）
+### 2.2 CategoryResource（JAX-RS Resource - 外部API連携）
 
-* 責務: カテゴリAPIのプロキシエンドポイント提供
+* 責務: カテゴリAPIの外部API連携エンドポイント提供
 
 * アノテーション:
   * `@Path("/categories")` - ベースパス
@@ -121,13 +121,13 @@ pro.kensait.berrybooks
 @Produces(MediaType.APPLICATION_JSON)
 ```
 
-* プロキシ先: `back-office-api` の `GET /api/categories`
+* 外部API連携先: `back-office-api` の `GET /api/categories`
 
 ---
 
 ### 2.3 BackOfficeRestClient（外部API連携）
 
-* 責務: バックオフィスAPIとの連携（BFF特有）
+* 責務: バックオフィスAPIとの連携（berry-books-api特有）
 
 * アノテーション:
   * `@ApplicationScoped`
@@ -300,12 +300,13 @@ public class BookTO {
 
 ```properties
 # 外部API: バックオフィスAPI
+
 back-office-api.base-url=http://localhost:8080/back-office-api-sdd/api
 ```
 
 ---
 
-## 4. プロキシパターンの特徴
+## 4. 外部API呼び出しの特徴
 
 ### 4.1 実装の簡潔性
 
@@ -316,7 +317,7 @@ back-office-api.base-url=http://localhost:8080/back-office-api-sdd/api
 ### 4.2 処理フロー
 
 ```
-Client → BFF (BookResource) → BackOfficeRestClient → back-office-api
+Client → berry-books-api (BookResource) → BackOfficeRestClient → back-office-api
                                                            ↓
                                                      BookService
                                                            ↓
@@ -328,8 +329,8 @@ Client → BFF (BookResource) → BackOfficeRestClient → back-office-api
 ### 4.3 利点
 
 * 保守性: ビジネスロジックは`back-office-api`で一元管理
-* 簡潔性: BFF層は単純な転送のみ
-* 柔軟性: バックエンドの変更がBFF層に影響しない
+* 簡潔性: 本システムは単純な転送のみ
+* 柔軟性: バックエンドの変更が本システムに影響しない
 
 ---
 
@@ -341,7 +342,7 @@ Client → BFF (BookResource) → BackOfficeRestClient → back-office-api
 |------------|--------------|------|
 | 書籍IDが存在しない | 404 Not Found | `back-office-api`からのエラーをそのまま転送 |
 | 検索結果が0件 | 200 OK | 空配列をそのまま転送 |
-| 外部API接続エラー | 503 Service Unavailable | BFF層でエラーレスポンスを生成 |
+| 外部API接続エラー | 503 Service Unavailable | 本システムでエラーレスポンスを生成 |
 
 ### 5.2 外部API接続エラー
 
@@ -362,7 +363,7 @@ try {
 
 ### 6.1 ユニットテスト
 
-* 対象: なし（プロキシパターンのため、ロジックが存在しない）
+* 対象: なし（外部API呼び出しのため、ロジックが存在しない）
 
 ### 6.2 統合テスト
 
@@ -383,8 +384,8 @@ try {
 
 | クラス | 状態 | 備考 |
 |--------|------|------|
-| BookResource | ✅ 完了 | プロキシパターンで実装 |
-| CategoryResource | ✅ 完了 | プロキシパターンで実装 |
+| BookResource | ✅ 完了 | 外部API呼び出しで実装 |
+| CategoryResource | ✅ 完了 | 外部API呼び出しで実装 |
 | BackOfficeRestClient | ✅ 完了 | ConfigProvider方式で実装 |
 
 ### 7.2 実装時の技術的対応
@@ -492,5 +493,5 @@ return Response.status(Response.Status.NOT_FOUND)
 
 * [functional_design.md](functional_design.md) - 機能設計書
 * [behaviors.md](behaviors.md) - 振る舞い仕様書
-* [BFFパターン](https://samnewman.io/patterns/architectural/bff/)
-* [プロキシパターン](https://en.wikipedia.org/wiki/Proxy_pattern)
+* [マイクロサービスアーキテクチャ](https://samnewman.io/patterns/architectural/berry-books-api/)
+* [外部API呼び出し](https://en.wikipedia.org/wiki/Proxy_pattern)

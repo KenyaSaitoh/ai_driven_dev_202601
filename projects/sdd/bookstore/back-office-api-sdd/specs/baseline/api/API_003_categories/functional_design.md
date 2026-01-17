@@ -3,15 +3,19 @@
 ## 1. API概要
 
 ### 1.1 API名
+
 カテゴリAPI（Categories API）
 
 ### 1.2 ベースパス
+
 `/api/categories`
 
 ### 1.3 目的
+
 書籍カテゴリマスタ情報の参照機能を提供する。
 
 ### 1.4 認証要否
+
 現状は認証不要（将来的にJWT認証フィルタ実装時に認証必須となる予定）
 
 ## 2. エンドポイント一覧
@@ -25,6 +29,7 @@
 ### 3.1 カテゴリ一覧取得
 
 #### 3.1.1 基本情報
+
 * エンドポイント: `GET /api/categories`
 * 機能: すべてのカテゴリ情報を配列形式で取得
 * 認証: 不要（将来:必要）
@@ -47,26 +52,6 @@ Content-Type: application/json; charset=UTF-8
 ```
 
 * ボディ:
-```json
-[
-  {
-    "categoryId": 1,
-    "categoryName": "文学"
-  },
-  {
-    "categoryId": 2,
-    "categoryName": "ビジネス"
-  },
-  {
-    "categoryId": 3,
-    "categoryName": "技術"
-  },
-  {
-    "categoryId": 4,
-    "categoryName": "歴史"
-  }
-]
-```
 
 * レスポンススキーマ:
 | フィールド | 型 | 必須 | 説明 |
@@ -116,12 +101,6 @@ Content-Type: application/json; charset=UTF-8
 | categoryName | String | カテゴリ名 |
 
 * 例:
-```json
-{
-  "categoryId": 1,
-  "categoryName": "文学"
-}
-```
 
 ---
 
@@ -185,16 +164,19 @@ Content-Type: application/json; charset=UTF-8
 ## 8. パフォーマンス考慮事項
 
 ### 8.1 レスポンスタイム
+
 * 目標: 50ms以内
 * 実測: 30-50ms（通常時）
 
 ### 8.2 キャッシング
+
 * 現状: キャッシュなし
 * 将来: アプリケーションレベルキャッシュ推奨
   * マスタデータのため変更頻度が低い
   * メモリキャッシュで高速化可能
 
 ### 8.3 データ量
+
 * 想定レコード数: 10-50件
 * データサイズ: 数KB程度
 * スケーラビリティ: 問題なし
@@ -230,20 +212,8 @@ Content-Type: application/json; charset=UTF-8
 | 用途 | 標準REST形式 | 既存UI用 |
 
 `/api/categories` のレスポンス:
-```json
-[
-  {"categoryId": 1, "categoryName": "文学"},
-  {"categoryId": 2, "categoryName": "ビジネス"}
-]
-```
 
 `/api/books/categories` のレスポンス:
-```json
-{
-  "文学": 1,
-  "ビジネス": 2
-}
-```
 
 * 推奨事項: 新規開発では`/api/categories`を使用
 
@@ -277,36 +247,10 @@ Content-Type: application/json; charset=UTF-8
 ### 12.1 カテゴリ階層構造
 
 * 親子関係を持つカテゴリ構造の実装:
-```json
-{
-  "categoryId": 1,
-  "categoryName": "文学",
-  "parentCategoryId": null,
-  "children": [
-    {
-      "categoryId": 11,
-      "categoryName": "日本文学",
-      "parentCategoryId": 1
-    },
-    {
-      "categoryId": 12,
-      "categoryName": "海外文学",
-      "parentCategoryId": 1
-    }
-  ]
-}
-```
 
 ### 12.2 カテゴリ統計情報
 
 * カテゴリ別の書籍数を含む:
-```json
-{
-  "categoryId": 1,
-  "categoryName": "文学",
-  "bookCount": 150
-}
-```
 
 ### 12.3 カテゴリ詳細取得
 

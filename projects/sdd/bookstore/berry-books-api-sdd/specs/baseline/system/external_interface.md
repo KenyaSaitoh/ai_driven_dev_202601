@@ -9,9 +9,9 @@
 
 ## 1. 概要
 
-本ドキュメントは、berry-books-api（BFF）が外部システムを呼び出す際のインターフェース仕様を記述する。
+本ドキュメントは、berry-books-apiが外部システムを呼び出す際のインターフェース仕様を記述する。
 
-berry-books-apiは、Backend for Frontend（BFF）パターンに基づき、フロントエンド（berry-books-spa）と複数のバックエンドサービス（customer-hub-api、back-office-api）を仲介する。
+berry-books-apiは、フロントエンド（berry-books-spa）と複数のバックエンドサービス（customer-hub-api、back-office-api）を仲介するバックエンドサービスである。
 
 ---
 
@@ -154,9 +154,25 @@ berry-books-apiは、Backend for Frontend（BFF）パターンに基づき、フ
 * スコープ: アプリケーションスコープ（シングルトン）
 * 使用ライブラリ: Jakarta RESTful Web Services Client API
 
+### 6.3 OpenAPI仕様書
+
+back-office-apiのOpenAPI仕様書は、以下のフォルダに格納されている：
+
+* 格納場所: [external_intercace/](external_intercace/)
+* 主要なAPI仕様書:
+  - [auth-api.yaml](external_intercace/auth-api.yaml) - 認証API
+  - [books-api.yaml](external_intercace/books-api.yaml) - 書籍API
+  - [categories-api.yaml](external_intercace/categories-api.yaml) - カテゴリAPI
+  - [publishers-api.yaml](external_intercace/publishers-api.yaml) - 出版社API
+  - [stocks-api.yaml](external_intercace/stocks-api.yaml) - 在庫API
+  - [workflows-api.yaml](external_intercace/workflows-api.yaml) - ワークフローAPI
+
+詳細なAPI仕様は、上記のOpenAPI仕様書を参照のこと。
+以下のセクション7では、主要なエンドポイントの概要のみを記載する。
+
 ---
 
-## 7. back-office-api エンドポイント
+## 7. back-office-api エンドポイント概要
 
 ### 7.1 書籍一覧取得
 
@@ -338,20 +354,7 @@ MicroProfile Config標準に従う：
 
 ---
 
-## 12. 本システムが公開するAPI仕様について
-
-本システムが外部に公開するAPI仕様については、各APIディレクトリ配下のOpenAPI (YAML) 仕様書を参照してください：
-
-| API | OpenAPI仕様書 | 説明 |
-|-----|-------------|------|
-| 認証API | [API_001_auth/openapi.yaml](../api/API_001_auth/openapi.yaml) | ログイン・ログアウト・新規登録 |
-| 書籍API | [API_002_books/openapi.yaml](../api/API_002_books/openapi.yaml) | 書籍情報の参照・検索（プロキシ） |
-| 注文API | [API_003_orders/openapi.yaml](../api/API_003_orders/openapi.yaml) | 注文作成・履歴取得 |
-| 画像API | [API_004_images/openapi.yaml](../api/API_004_images/openapi.yaml) | 書籍表紙画像配信 |
-
----
-
-## 13. 参考資料
+## 12. 参考資料
 
 本外部インターフェース仕様書に関連する詳細ドキュメント：
 

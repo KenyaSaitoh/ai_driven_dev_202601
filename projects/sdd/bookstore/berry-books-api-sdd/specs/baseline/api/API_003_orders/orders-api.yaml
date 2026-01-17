@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Berry Books API - 注文API
   description: |
-    Berry Books書店 BFF（Backend for Frontend）の注文API仕様
+    Berry Books書店 バックエンドサービスの注文API仕様
     
     注文作成、注文履歴取得、注文詳細取得、注文明細取得を提供する。
     注文作成と注文履歴取得は認証必須。

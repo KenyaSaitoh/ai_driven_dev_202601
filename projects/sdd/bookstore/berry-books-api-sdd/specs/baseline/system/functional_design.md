@@ -9,24 +9,24 @@
 
 ## 1. 概要
 
-本文書は、berry-books-api REST API（BFF）の各エンドポイントの詳細仕様を記述する。各APIについて、リクエスト/レスポンス形式、ビジネスルール、エラーハンドリングを定義する。
+本文書は、berry-books-api REST APIの各エンドポイントの詳細仕様を記述する。各APIについて、リクエスト/レスポンス形式、ビジネスルール、エラーハンドリングを定義する。
 
 * ベースURL: `http://localhost:8080/berry-books-api/api`
 
 * 認証方式: JWT（HttpOnly Cookie）
 
-* アーキテクチャパターン: BFF（Backend for Frontend）
+* アーキテクチャ: 注文管理を担う独立したバックエンドサービス
 
-### 1.1 BFFパターンにおけるAPI実装方式
+### 1.1 API実装方式
 
-berry-books-apiは、フロントエンド（berry-books-spa）の唯一のエントリーポイントとして、複数のバックエンドマイクロサービスを統合します。
+berry-books-apiは、注文管理という独自のドメインを持ち、必要に応じて外部システムを呼び出します。
 
 | API | 実装方式 | 説明 |
 |-----|---------|------|
-| 認証API | 独自実装 + 外部連携 | JWT生成・検証はBFF層、顧客情報はcustomer-hub-api経由 |
-| 書籍API | プロキシ | back-office-apiに透過的に転送 |
-| カテゴリAPI | プロキシ | back-office-apiに透過的に転送 |
-| 注文API | 独自実装 + 外部連携 | 注文処理はBFF層、在庫更新はback-office-api経由 |
+| 認証API | 独自実装 + 外部連携 | JWT生成・検証は本システム、顧客情報はcustomer-hub-api経由 |
+| 書籍API | 外部API呼び出し | back-office-apiから書籍情報を取得 |
+| カテゴリAPI | 外部API呼び出し | back-office-apiからカテゴリ情報を取得 |
+| 注文API | 独自実装 + 外部連携 | 注文処理は本システム、在庫更新はback-office-api経由 |
 | 画像API | 独自実装 | WAR内リソースを直接配信 |
 
 ### 1.2 API別詳細仕様
@@ -34,7 +34,7 @@ berry-books-apiは、フロントエンド（berry-books-spa）の唯一のエ�
 API単位の詳細仕様は、以下のドキュメントを参照してください：
 
 * [API_001_auth](../api/API_001_auth/functional_design.md) - 認証API（ログイン、ログアウト、新規登録、ユーザー情報取得）
-* [API_002_books](../api/API_002_books/functional_design.md) - 書籍API（書籍一覧、詳細、検索、カテゴリ一覧）※プロキシ
+* [API_002_books](../api/API_002_books/functional_design.md) - 書籍API（書籍一覧、詳細、検索、カテゴリ一覧）※外部API連携
 * [API_003_orders](../api/API_003_orders/functional_design.md) - 注文API（注文作成、注文履歴、注文詳細）
 * [API_004_images](../api/API_004_images/functional_design.md) - 画像API（書籍表紙画像取得）
 
@@ -140,7 +140,7 @@ JWT Cookieから顧客情報を取得する。
 GET /api/books
 ```
 
-全書籍を取得する。back-office-apiにプロキシ転送。
+全書籍を取得する。back-office-apiに外部API連携転送。
 
 * 認証: 不要
 * レスポンス: 200 OK
@@ -155,7 +155,7 @@ GET /api/books
 GET /api/books/{id}
 ```
 
-指定されたIDの書籍を取得する。back-office-apiにプロキシ転送。
+指定されたIDの書籍を取得する。back-office-apiに外部API連携転送。
 
 * 認証: 不要
 * レスポンス: 200 OK、404 Not Found
@@ -170,7 +170,7 @@ GET /api/books/{id}
 GET /api/books/search?categoryId={id}&keyword={keyword}
 ```
 
-カテゴリIDとキーワードで書籍を検索する。back-office-apiにプロキシ転送。
+カテゴリIDとキーワードで書籍を検索する。back-office-apiに外部API連携転送。
 
 * 認証: 不要
 * クエリパラメータ: categoryId（オプション）、keyword（オプション）
@@ -186,7 +186,7 @@ GET /api/books/search?categoryId={id}&keyword={keyword}
 GET /api/books/categories
 ```
 
-全カテゴリをMapで取得する。back-office-apiにプロキシ転送。
+全カテゴリをMapで取得する。back-office-apiに外部API連携転送。
 
 * 認証: 不要
 * レスポンス: 200 OK

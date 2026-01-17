@@ -3,15 +3,19 @@
 ## 1. API概要
 
 ### 1.1 API名
+
 認証API（Authentication API）
 
 ### 1.2 ベースパス
+
 `/api/auth`
 
 ### 1.3 目的
+
 社員の認証（ログイン/ログアウト）およびユーザー情報取得機能を提供する。
 
 ### 1.4 認証方式
+
 * ログイン: 社員コード + パスワード
 * セッション管理: JWT (JSON Web Token) + HttpOnly Cookie
 
@@ -28,6 +32,7 @@
 ### 3.1 ログイン
 
 #### 3.1.1 基本情報
+
 * エンドポイント: `POST /api/auth/login`
 * 機能: 社員コードとパスワードで認証し、JWTトークンを発行
 * 認証: 不要
@@ -37,14 +42,6 @@
 * ヘッダー:
 ```
 Content-Type: application/json
-```
-
-* ボディ:
-```json
-{
-  "employeeCode": "E0001",
-  "password": "password123"
-}
 ```
 
 * リクエストスキーマ:
@@ -63,19 +60,6 @@ Set-Cookie: back-office-jwt=<JWT_TOKEN>; Path=/; Max-Age=86400; HttpOnly
 Content-Type: application/json; charset=UTF-8
 ```
 
-* ボディ:
-```json
-{
-  "employeeId": 1,
-  "employeeCode": "E0001",
-  "employeeName": "山田太郎",
-  "email": "yamada@example.com",
-  "jobRank": 2,
-  "departmentId": 1,
-  "departmentName": "営業部"
-}
-```
-
 * レスポンススキーマ:
 | フィールド | 型 | 説明 |
 |-----------|---|------|
@@ -87,21 +71,9 @@ Content-Type: application/json; charset=UTF-8
 | departmentId | Long | 部署ID |
 | departmentName | String | 部署名 |
 
-* 失敗（401 Unauthorized）:
-```json
-{
-  "error": "Unauthorized",
-  "message": "社員コードまたはパスワードが正しくありません"
-}
-```
+* 失敗（401 Unauthorized）: 社員コードまたはパスワードが正しくありません
 
-* 失敗（500 Internal Server Error）:
-```json
-{
-  "error": "Internal Server Error",
-  "message": "ログイン処理中にエラーが発生しました"
-}
-```
+* 失敗（500 Internal Server Error）: ログイン処理中にエラーが発生しました
 
 #### 3.1.4 処理フロー
 
@@ -137,24 +109,9 @@ Content-Type: application/json; charset=UTF-8
 
 #### 3.1.6 JWT構造
 
-* ヘッダー:
-```json
-{
-  "alg": "HS256",
-  "typ": "JWT"
-}
-```
+* ヘッダー: alg=HS256, typ=JWT
 
 * ペイロード:
-```json
-{
-  "sub": "1",
-  "employeeCode": "E0001",
-  "departmentId": 1,
-  "iat": 1704067200,
-  "exp": 1704153600
-}
-```
 
 | クレーム | 説明 |
 |---------|------|
@@ -164,13 +121,7 @@ Content-Type: application/json; charset=UTF-8
 | iat | Issued At（発行日時） |
 | exp | Expiration（有効期限） |
 
-* シグネチャ:
-```
-HMACSHA256(
-  base64UrlEncode(header) + "." + base64UrlEncode(payload),
-  secret-key
-)
-```
+* シグネチャ: HMACSHA256で署名
 
 #### 3.1.7 関連コンポーネント
 
@@ -186,6 +137,7 @@ HMACSHA256(
 ### 3.2 ログアウト
 
 #### 3.2.1 基本情報
+
 * エンドポイント: `POST /api/auth/logout`
 * 機能: JWTトークンを無効化（Cookieを削除）
 * 認証: 不要（Cookie削除のみ）
@@ -232,6 +184,7 @@ Set-Cookie: back-office-jwt=; Path=/; Max-Age=0; HttpOnly
 ### 3.3 現在のユーザー情報取得
 
 #### 3.3.1 基本情報
+
 * エンドポイント: `GET /api/auth/me`
 * 機能: 現在ログイン中のユーザー情報を取得
 * 認証: 必要（JWT）
@@ -248,26 +201,9 @@ Cookie: back-office-jwt=<JWT_TOKEN>
 
 #### 3.3.3 レスポンス
 
-* 現在（501 Not Implemented）:
-```json
-{
-  "error": "Not Implemented",
-  "message": "この機能は未実装です"
-}
-```
+* 現在（501 Not Implemented）: この機能は未実装です
 
-* 将来の実装予定（200 OK）:
-```json
-{
-  "employeeId": 1,
-  "employeeCode": "E0001",
-  "employeeName": "山田太郎",
-  "email": "yamada@example.com",
-  "jobRank": 2,
-  "departmentId": 1,
-  "departmentName": "営業部"
-}
-```
+* 将来の実装予定（200 OK）: 社員情報を返却
 
 #### 3.3.4 処理フロー（実装予定）
 
@@ -421,13 +357,16 @@ java.lang.Exception: ...
 
 ```properties
 # JWT秘密鍵（本番環境では環境変数で上書き）
+
 jwt.secret-key=BackOfficeSecretKeyForJWT2024MustBe32CharactersOrMore
 
 # JWT有効期限（ミリ秒）
 # デフォルト: 24時間 = 86400000
+
 jwt.expiration-ms=86400000
 
 # JWT Cookie名
+
 jwt.cookie-name=back-office-jwt
 ```
 

@@ -48,14 +48,14 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
 
 ### Agent Skillsルール（最優先で確認）
 
-* @agent_skills/jakarta-ee-api-basic/principles/ - Jakarta EE開発の共通ルール、アーキテクチャ標準、品質基準、セキュリティ標準を確認する
-  * このフォルダ配下のすべてのMarkdownファイルを読み込み、開発ルールを遵守すること
+* @agent_skills/jakarta-ee-api-base/principles/ - Jakarta EE開発の原則、アーキテクチャ標準、品質基準、セキュリティ標準を確認する
+  * このフォルダ配下の原則ドキュメントを読み込み、共通ルールを遵守すること
   * 重要: タスク分解においても、ルールドキュメントに記載されたすべてのルールを遵守すること
   * 注意: Agent Skills配下のルールは全プロジェクト共通。プロジェクト固有のルールがある場合は `{project_root}/principles/` も確認すること
 
 ### フレームワーク仕様（該当する場合）
 
-* @agent_skills/jakarta-ee-api-basic/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
+* @agent_skills/jakarta-ee-api-base/frameworks/ - フレームワーク固有の仕様書やサンプルコードを確認する
   * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
   * タスク分解時に、フレームワーク固有の実装要件を考慮する
 
@@ -363,7 +363,7 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 
 ## 7. 生成手順
 
-1. ルールとSPEC分析: `@agent_skills/jakarta-ee-api-basic/principles/` 配下の共通ルールドキュメントと全SPECファイル（system/とapi/）を読み込み、開発ルールと機能全体を把握する
+1. ルールとSPEC分析: `@agent_skills/jakarta-ee-api-base/principles/` 配下の原則ドキュメントと全SPECファイル（system/とapi/）を読み込み、共通ルールと機能全体を把握する
 2. アーキテクチャ識別: architecture_design.mdからアーキテクチャパターンを識別する
 3. 機能（API）抽出: 実装が必要なAPIを抽出し、依存関係と共通コンポーネントを識別する
 4. タスク分割: API数に応じた適切なファイル分割方法を決定する
@@ -392,7 +392,7 @@ SPECから機能（API）を抽出してタスクファイルを生成：
 
 ### タスク分解のルール
 
-* ルール遵守: `@agent_skills/jakarta-ee-api-basic/principles/` 配下の共通ルールドキュメント（開発ルール、品質基準、セキュリティ標準、組織標準）を必ず遵守する。プロジェクト固有のルールがある場合は `{project_root}/principles/` も併せて遵守する
+* ルール遵守: `@agent_skills/jakarta-ee-api-base/principles/` 配下の原則ドキュメント（共通ルール、品質基準、セキュリティ標準、組織標準）を必ず遵守する。プロジェクト固有の原則がある場合は `{project_root}/principles/` も併せて遵守する
 * 抽象度の維持: タスクは「何を作るか」のみを記述する。ソースコードや詳細な実装手順は記述しない
 * アーキテクチャ適応: architecture_design.mdからアーキテクチャパターンを識別し、適切なタスクを分解・生成する
 * 既存コード考慮: 既存実装がある場合は、修正タスクと新規作成タスクを明確に区別する

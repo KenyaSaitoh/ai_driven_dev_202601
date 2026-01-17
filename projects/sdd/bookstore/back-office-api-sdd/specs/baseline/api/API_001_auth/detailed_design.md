@@ -218,12 +218,15 @@ WHERE e.employeeCode = :employeeCode
 
 ```properties
 # JWT秘密鍵（本番環境では環境変数で上書き）
+
 jwt.secret-key=BackOfficeSecretKeyForJWT2024MustBe32CharactersOrMore
 
 # JWT有効期限（ミリ秒）- 24時間
+
 jwt.expiration-ms=86400000
 
 # JWT Cookie名
+
 jwt.cookie-name=back-office-jwt
 ```
 

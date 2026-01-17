@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Berry Books API - 画像API
   description: |
-    Berry Books書店 BFF（Backend for Frontend）の画像API仕様
+    Berry Books書店 バックエンドサービスの画像API仕様
     
     書籍表紙画像の取得を提供する。認証不要で、公開APIとして利用できる。
   version: 2.0.0

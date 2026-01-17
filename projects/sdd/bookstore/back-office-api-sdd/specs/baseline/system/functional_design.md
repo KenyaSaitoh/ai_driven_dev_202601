@@ -62,13 +62,16 @@
 ### 3.1 F-AUTH-001: ログイン
 
 #### 3.1.1 機能概要
+
 社員コードとパスワードによる認証を行い、成功時はJWTトークンを発行してHttpOnly Cookieに設定する。
 
 #### 3.1.2 入力
+
 * 社員コード（employeeCode）: String
 * パスワード（password）: String
 
 #### 3.1.3 処理フロー
+
 1. リクエストから社員コードとパスワードを取得
 2. 社員コードで社員情報をデータベースから検索
 3. 社員が存在しない場合 → 401 Unauthorized
@@ -89,11 +92,13 @@
 8. レスポンス生成（社員情報 + Set-Cookie）
 
 #### 3.1.4 出力
+
 * 成功（200 OK）: LoginResponse + Set-Cookie
 * 失敗（401 Unauthorized）: ErrorResponse
 * エラー（500 Internal Server Error）: ErrorResponse
 
 #### 3.1.5 関連コンポーネント
+
 * `AuthenResource#login()`
 * `EmployeeDao#findByCode()`
 * `JwtUtil#generateToken()`
@@ -102,30 +107,38 @@
 ### 3.2 F-AUTH-002: ログアウト
 
 #### 3.2.1 機能概要
+
 現在のJWTトークンを無効化する（Cookieを削除）。
 
 #### 3.2.2 入力
+
 なし
 
 #### 3.2.3 処理フロー
+
 1. HttpOnly Cookieを削除（MaxAge=0）
 2. レスポンス生成（Set-Cookie）
 
 #### 3.2.4 出力
+
 * 成功（200 OK）: 空のレスポンス + Set-Cookie（削除用）
 
 #### 3.2.5 関連コンポーネント
+
 * `AuthenResource#logout()`
 
 ### 3.3 F-BOOK-001: 書籍一覧取得
 
 #### 3.3.1 機能概要
+
 すべての書籍情報（在庫情報含む）を取得する。
 
 #### 3.3.2 入力
+
 なし
 
 #### 3.3.3 処理フロー
+
 1. BookServiceを呼び出し
 2. BookDaoで全書籍を取得（JPQL）
 3. BookエンティティをBookTOに変換
@@ -135,9 +148,11 @@
 4. リスト形式でレスポンス生成
 
 #### 3.3.4 出力
+
 * 成功（200 OK）: BookTOのリスト
 
 #### 3.3.5 関連コンポーネント
+
 * `BookResource#getAllBooks()`
 * `BookService#getBooksAll()`
 * `BookDao#findAll()`
@@ -145,12 +160,15 @@
 ### 3.4 F-BOOK-002: 書籍詳細取得
 
 #### 3.4.1 機能概要
+
 指定した書籍IDの詳細情報を取得する。
 
 #### 3.4.2 入力
+
 * 書籍ID（bookId）: Integer
 
 #### 3.4.3 処理フロー
+
 1. パスパラメータから書籍IDを取得
 2. BookServiceを呼び出し
 3. BookDaoで指定IDの書籍を取得
@@ -159,10 +177,12 @@
 6. レスポンス生成
 
 #### 3.4.4 出力
+
 * 成功（200 OK）: BookTO
 * 失敗（404 Not Found）: ErrorResponse
 
 #### 3.4.5 関連コンポーネント
+
 * `BookResource#getBookById()`
 * `BookService#getBook()`
 * `BookDao#findById()`
@@ -170,13 +190,16 @@
 ### 3.5 F-BOOK-003: 書籍検索（JPQL）
 
 #### 3.5.1 機能概要
+
 カテゴリIDとキーワードで書籍を検索する（静的クエリ使用）。
 
 #### 3.5.2 入力
+
 * カテゴリID（categoryId）: Integer（オプション）
 * キーワード（keyword）: String（オプション）
 
 #### 3.5.3 処理フロー
+
 1. クエリパラメータから検索条件を取得
 2. 検索条件に応じてBookServiceのメソッドを呼び分け
    * カテゴリID + キーワード → `searchBook(categoryId, keyword)`
@@ -188,9 +211,11 @@
 5. リスト形式でレスポンス生成
 
 #### 3.5.4 出力
+
 * 成功（200 OK）: BookTOのリスト
 
 #### 3.5.5 関連コンポーネント
+
 * `BookResource#searchBooksJpql()`
 * `BookService#searchBook()`
 * `BookDao#findByCategoryAndKeyword()` etc.
@@ -198,14 +223,17 @@
 ### 3.6 F-STOCK-003: 在庫更新
 
 #### 3.6.1 機能概要
+
 指定した書籍IDの在庫数を更新する。楽観的ロックで排他制御。
 
 #### 3.6.2 入力
+
 * 書籍ID（bookId）: Integer
 * バージョン（version）: Long
 * 在庫数（quantity）: Integer
 
 #### 3.6.3 処理フロー
+
 1. パスパラメータから書籍IDを取得
 2. リクエストボディからバージョンと在庫数を取得
 3. StockDaoで指定IDの在庫情報を取得
@@ -218,11 +246,13 @@
 9. 更新後の在庫情報をレスポンス
 
 #### 3.6.4 出力
+
 * 成功（200 OK）: StockTO（更新後、versionがインクリメント）
 * 失敗（404 Not Found）: ErrorResponse
 * 失敗（409 Conflict）: ErrorResponse
 
 #### 3.6.5 関連コンポーネント
+
 * `StockResource#updateStock()`
 * `StockDao#findById()`
 * JPA `@Version`
@@ -230,9 +260,11 @@
 ### 3.7 F-WORKFLOW-001: ワークフロー作成
 
 #### 3.7.1 機能概要
+
 新規ワークフローを作成する。3種類のワークフロータイプに対応。
 
 #### 3.7.2 入力
+
 * 共通:
   * ワークフロータイプ（workflowType）: String
   * 作成者ID（createdBy）: Long
@@ -256,6 +288,7 @@
   * 適用終了日（endDate）: LocalDate
 
 #### 3.7.3 処理フロー
+
 1. リクエストボディから入力データを取得
 2. 作成者の存在チェック（EmployeeDao）
 3. ワークフロータイプのバリデーション
@@ -272,11 +305,13 @@
 9. レスポンス生成（201 Created）
 
 #### 3.7.4 出力
+
 * 成功（201 Created）: WorkflowTO
 * 失敗（400 Bad Request）: ErrorResponse
 * エラー（500 Internal Server Error）: ErrorResponse
 
 #### 3.7.5 関連コンポーネント
+
 * `WorkflowResource#createWorkflow()`
 * `WorkflowService#createWorkflow()`
 * `WorkflowDao#getNextWorkflowId()`
@@ -286,14 +321,17 @@
 ### 3.8 F-WORKFLOW-002: ワークフロー更新
 
 #### 3.8.1 機能概要
+
 作成済み（CREATED状態）のワークフローを一時保存する。
 
 #### 3.8.2 入力
+
 * ワークフローID（workflowId）: Long
 * 更新者ID（updatedBy）: Long
 * 更新内容（ワークフロータイプによって異なる）
 
 #### 3.8.3 処理フロー
+
 1. パスパラメータからワークフローIDを取得
 2. 最新の状態を取得（WorkflowDao）
 3. ワークフローが存在しない場合 → 404 Not Found
@@ -307,11 +345,13 @@
 9. レスポンス生成
 
 #### 3.8.4 出力
+
 * 成功（200 OK）: WorkflowTO
 * 失敗（400 Bad Request）: ErrorResponse
 * 失敗（404 Not Found）: ErrorResponse
 
 #### 3.8.5 関連コンポーネント
+
 * `WorkflowResource#updateWorkflow()`
 * `WorkflowService#updateWorkflow()`
 * `WorkflowDao#findLatestByWorkflowId()`
@@ -320,14 +360,17 @@
 ### 3.9 F-WORKFLOW-004: ワークフロー承認
 
 #### 3.9.1 機能概要
+
 申請済み（APPLIED状態）のワークフローを承認し、書籍マスタに反映する。
 
 #### 3.9.2 入力
+
 * ワークフローID（workflowId）: Long
 * 操作者ID（operatedBy）: Long
 * 操作理由（operationReason）: String（オプション）
 
 #### 3.9.3 処理フロー
+
 1. パスパラメータからワークフローIDを取得
 2. 最新の状態を取得（WorkflowDao）
 3. ワークフローが存在しない場合 → 404 Not Found
@@ -355,12 +398,14 @@
 11. レスポンス生成
 
 #### 3.9.4 出力
+
 * 成功（200 OK）: WorkflowTO
 * 失敗（400 Bad Request）: ErrorResponse
 * 失敗（403 Forbidden）: ErrorResponse
 * 失敗（404 Not Found）: ErrorResponse
 
 #### 3.9.5 関連コンポーネント
+
 * `WorkflowResource#approveWorkflow()`
 * `WorkflowService#approveWorkflow()`
 * `WorkflowService#checkApprovalAuthority()`
@@ -373,9 +418,11 @@
 ### 3.10 F-WORKFLOW-008: 書籍マスタ反映
 
 #### 3.10.1 機能概要
+
 承認されたワークフローの内容を書籍マスタ（BOOK, STOCK）に反映する。
 
 #### 3.10.2 入力
+
 * Workflowエンティティ（APPROVED状態）
 
 #### 3.10.3 処理フロー
@@ -406,9 +453,11 @@
   4. トランザクションコミット時にUPDATE
 
 #### 3.10.4 出力
+
 なし（副作用としてデータベースを更新）
 
 #### 3.10.5 関連コンポーネント
+
 * `WorkflowService#applyToBookMaster()`
 * `BookDao#findById()`
 * `EntityManager#persist()`, `EntityManager#find()`
@@ -418,10 +467,12 @@
 ### 4.1 認証・認可ルール
 
 #### BR-AUTH-001: パスワード照合
+
 * BCryptハッシュ（`$2a$`, `$2b$`, `$2y$`で始まる）の場合：`BCrypt.checkpw()`で検証
 * 平文パスワードの場合：文字列比較（開発環境のみ、本番環境では非推奨）
 
 #### BR-AUTH-002: JWT有効期限
+
 * デフォルト：24時間（86400000ミリ秒）
 * `jwt.expiration-ms`で設定可能
 
@@ -444,15 +495,18 @@ stateDiagram-v2
 * REJECTED: CREATEDに戻る
 
 #### BR-WORKFLOW-002: 承認権限
+
 * ASSOCIATE（JOB_RANK=1）: 承認不可
 * MANAGER（JOB_RANK=2）: 同一部署のワークフローのみ承認可
 * DIRECTOR（JOB_RANK=3）: 全部署のワークフロー承認可
 
 #### BR-WORKFLOW-003: 更新権限
+
 * CREATEDのワークフローのみ更新可能
 * 作成者本人のみ更新可能（実装上は制限なし、UI側で制御想定）
 
 #### BR-WORKFLOW-004: 閲覧権限
+
 * CREATED: 作成者本人のみ閲覧可
 * APPLIED: 作成者本人 + 承認権限がある人
 * APPROVED: すべての社員
@@ -460,29 +514,34 @@ stateDiagram-v2
 ### 4.3 在庫管理ルール
 
 #### BR-STOCK-001: 楽観的ロック
+
 * 在庫更新時はバージョン番号を必ず指定
 * バージョンが一致しない場合は409 Conflictを返す
 * クライアント側で再取得して再試行
 
 #### BR-STOCK-002: 在庫数の範囲
+
 * 0以上の整数
 * 負の値は許可しない
 
 ### 4.4 書籍管理ルール
 
 #### BR-BOOK-001: 論理削除
+
 * 書籍の削除は論理削除（DELETEDフラグ）で実施
 * 論理削除された書籍はAPIレスポンス（一覧・検索）から除外される
 * 書籍詳細取得APIでは論理削除された書籍も参照可能
 * 物理削除は実施しない（データ保持・履歴保持のため）
 
 #### BR-BOOK-002: 新規書籍の初期在庫
+
 * ワークフロー承認時の新規書籍追加では在庫数を0で作成
 * 在庫数は別途在庫更新APIで変更
 
 ## 5. バリデーションルール
 
 ### 5.1 共通バリデーション
+
 * 必須項目チェック：Bean Validation `@NotNull`, `@NotBlank`
 * 文字列長チェック：`@Size`
 * 数値範囲チェック：`@Min`, `@Max`
@@ -491,14 +550,17 @@ stateDiagram-v2
 ### 5.2 個別バリデーション
 
 #### LoginRequest
+
 * `employeeCode`: 必須、20文字以内
 * `password`: 必須、100文字以内
 
 #### StockUpdateRequest
+
 * `version`: 必須
 * `quantity`: 必須、0以上
 
 #### WorkflowCreateRequest
+
 * `workflowType`: 必須、列挙型
 * `createdBy`: 必須
 * `applyReason`: オプション、500文字以内
@@ -518,18 +580,10 @@ stateDiagram-v2
 | `UnauthorizedApprovalException` | 403 Forbidden | 承認権限がありません |
 | その他の例外 | 500 Internal Server Error | 内部エラーが発生しました |
 
-### 6.2 エラーレスポンス
-* すべてのエラーは統一的なJSON形式で返却:
-```json
-{
-  "error": "エラータイプ",
-  "message": "エラーメッセージ（日本語）"
-}
-```
-
 ## 7. トランザクション管理
 
 ### 7.1 トランザクション境界
+
 * Serviceレイヤーのメソッドを`@Transactional`でマーク
 * デフォルト：`TxType.REQUIRED`
 * 例外発生時は自動ロールバック
@@ -537,6 +591,7 @@ stateDiagram-v2
 ### 7.2 重要なトランザクション処理
 
 #### ワークフロー承認
+
 * 以下を1トランザクションで実行:
   1. ワークフロー操作履歴の追加
   2. 書籍マスタへの反映
@@ -544,6 +599,7 @@ stateDiagram-v2
 どちらか一方が失敗した場合、両方ともロールバックされる。
 
 #### 在庫更新
+
 1. 在庫情報の取得
 2. バージョンチェック
 3. 在庫数の更新
@@ -552,30 +608,36 @@ stateDiagram-v2
 ## 8. パフォーマンス考慮事項
 
 ### 8.1 N+1問題の回避
+
 * BookエンティティはSecondaryTableでBOOK + STOCK結合
 * @ManyToOneの関連エンティティは必要に応じてJOIN FETCH
 
 ### 8.2 インデックスの活用
+
 * 検索条件に使用されるカラムにインデックスを作成
 * 外部キーカラムにもインデックスを作成
 
 ## 9. セキュリティ考慮事項
 
 ### 9.1 認証トークン
+
 * JWTはHttpOnly Cookieで保持
 * JavaScriptからアクセス不可（XSS対策）
 
 ### 9.2 パスワード保護
+
 * BCryptでハッシュ化（不可逆変換）
 * ソルト自動生成
 
 ### 9.3 権限制御
+
 * 職務ランクによる操作制限
 * 部署による閲覧・承認制限
 
 ## 10. 拡張性
 
 ### 10.1 将来の機能拡張
+
 * JWT認証フィルタの実装
 * メール通知機能
 * バッチ処理（価格改定の自動適用）
@@ -583,6 +645,7 @@ stateDiagram-v2
 * ファイルアップロード（書籍画像）
 
 ### 10.2 外部連携
+
 * 在庫管理システムとの連携
 * 会計システムとの連携
 * 通知サービスとの連携

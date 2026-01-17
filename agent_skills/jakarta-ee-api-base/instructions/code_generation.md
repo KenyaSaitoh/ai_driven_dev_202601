@@ -33,9 +33,9 @@ skip_infrastructure: true  # インフラセットアップをスキップ
 
 #### 読み込むべきドキュメント（優先順）
 
-1. 最優先: `@agent_skills/jakarta-ee-api-basic/principles/` 配下のすべてのルールドキュメントでJakarta EE開発のルール、アーキテクチャ標準、品質基準、セキュリティ標準を確認する。プロジェクト固有のルールがある場合は `{project_root}/principles/` も併せて確認する
+1. 最優先: `@agent_skills/jakarta-ee-api-base/principles/` 配下のすべてのルールドキュメントでJakarta EE開発のルール、アーキテクチャ標準、品質基準、セキュリティ標準を確認する。プロジェクト固有のルールがある場合は `{project_root}/principles/` も併せて確認する
 
-2. フレームワーク仕様（該当する場合）: `@agent_skills/jakarta-ee-api-basic/frameworks/` 配下に格納されたフレームワーク固有の仕様書やサンプルコードを確認する
+2. フレームワーク仕様（該当する場合）: `@agent_skills/jakarta-ee-api-base/frameworks/` 配下に格納されたフレームワーク固有の仕様書やサンプルコードを確認する
    * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
    * 詳細設計やコード生成時に、フレームワーク仕様に従った実装を行う
 
@@ -106,7 +106,7 @@ architecture_design.mdに記載された技術スタックを厳密に遵守す�
 
 #### ルールの遵守
 
-`@agent_skills/jakarta-ee-api-basic/principles/` 配下の共通ルールドキュメントに記載された開発ルールを全ての実装で遵守する
+`@agent_skills/jakarta-ee-api-base/principles/` 配下の原則ドキュメントに記載された共通ルールを全ての実装で遵守する
 * テストカバレッジ基準、アーキテクチャパターン、コーディング規約に従う
 * 品質基準、セキュリティ要件、パフォーマンス基準を満たす
 * プロジェクト固有のルール（`{project_root}/principles/`）がある場合は、それも併せて遵守する

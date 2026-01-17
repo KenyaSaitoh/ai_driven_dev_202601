@@ -139,12 +139,6 @@ erDiagram
 * 制約:
   * PRIMARY KEY: CATEGORY_ID
 
-* データ例:
-  * 1: 文学
-  * 2: ビジネス
-  * 3: 技術
-  * 4: 歴史
-
 ### 3.4 PUBLISHER（出版社マスタ）
 
 出版社情報を管理するマスタテーブル。
@@ -195,11 +189,6 @@ erDiagram
 
 * 制約:
   * PRIMARY KEY: DEPARTMENT_ID
-
-* データ例:
-  * 1: 営業部
-  * 2: 管理部
-  * 3: 物流部
 
 ### 3.7 WORKFLOW（ワークフロー履歴）
 
@@ -261,21 +250,25 @@ erDiagram
 ### 4.2 リレーションシップ
 
 #### Book ↔ Category
+
 * 関係: Many-to-One
 * Book側: `@ManyToOne`
 * 外部キー: BOOK.CATEGORY_ID → CATEGORY.CATEGORY_ID
 
 #### Book ↔ Publisher
+
 * 関係: Many-to-One
 * Book側: `@ManyToOne`
 * 外部キー: BOOK.PUBLISHER_ID → PUBLISHER.PUBLISHER_ID
 
 #### Book ↔ Stock
+
 * 関係: One-to-One（同一エンティティ内で`@SecondaryTable`）
 * Book側: `@SecondaryTable(name = "STOCK")`
 * BOOKとSTOCKはBOOK_IDで結合
 
 #### Employee ↔ Department
+
 * 関係: Many-to-One
 * Employee側: `@ManyToOne(fetch = FetchType.EAGER)`
 * 外部キー: EMPLOYEE.DEPARTMENT_ID → DEPARTMENT.DEPARTMENT_ID
@@ -284,26 +277,31 @@ erDiagram
   * LAZY（遅延ロード）を使用すると、JSON-B シリアライゼーション時に「Generating incomplete JSON」エラーが発生します
 
 #### Department ↔ Employee
+
 * 関係: One-to-Many
 * Department側: `@OneToMany(mappedBy = "department")`
 * 双方向関係
 
 #### Workflow ↔ Book
+
 * 関係: Many-to-One
 * Workflow側: `@ManyToOne`（`insertable=false, updatable=false`）
 * 外部キー: WORKFLOW.BOOK_ID → BOOK.BOOK_ID
 
 #### Workflow ↔ Category
+
 * 関係: Many-to-One
 * Workflow側: `@ManyToOne`（`insertable=false, updatable=false`）
 * 外部キー: WORKFLOW.CATEGORY_ID → CATEGORY.CATEGORY_ID
 
 #### Workflow ↔ Publisher
+
 * 関係: Many-to-One
 * Workflow側: `@ManyToOne`（`insertable=false, updatable=false`）
 * 外部キー: WORKFLOW.PUBLISHER_ID → PUBLISHER.PUBLISHER_ID
 
 #### Workflow ↔ Employee
+
 * 関係: Many-to-One
 * Workflow側: `@ManyToOne`（`insertable=false, updatable=false`）
 * 外部キー: WORKFLOW.OPERATED_BY → EMPLOYEE.EMPLOYEE_ID
@@ -365,12 +363,15 @@ erDiagram
 ## 7. インデックス設計
 
 ### 7.1 主キーインデックス
+
 * すべてのテーブルのPRIMARY KEYに自動作成
 
 ### 7.2 外部キーインデックス
+
 * すべての外部キーカラムにインデックス作成（JOIN性能向上）
 
 ### 7.3 検索用インデックス
+
 * BOOK.CATEGORY_ID: カテゴリ別検索
 * BOOK.PUBLISHER_ID: 出版社別検索
 * BOOK.DELETED: 論理削除フィルタ
@@ -382,21 +383,25 @@ erDiagram
 ## 8. データライフサイクル
 
 ### 8.1 論理削除
+
 * BOOK: DELETEDフラグで論理削除を実施
 * 論理削除された書籍はAPIレスポンス（一覧・検索）から除外される
 * 書籍詳細取得APIでは論理削除された書籍も参照可能
 * 物理削除は実施しない（データ保持・履歴保持のため）
 
 ### 8.2 履歴保持
+
 * WORKFLOW: 全操作履歴を永続的に保持（監査目的）
 
 ## 9. データセキュリティ
 
 ### 9.1 機密データ
+
 * EMPLOYEE.PASSWORD: BCryptハッシュで保存（不可逆変換）
 * EMPLOYEE.EMAIL: 個人情報として扱う
 
 ### 9.2 監査ログ
+
 * WORKFLOW: 全操作履歴を保持
   * 操作者（OPERATED_BY）
   * 操作日時（OPERATED_AT）
