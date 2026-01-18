@@ -287,20 +287,20 @@ AIが：
 
 #### 使用方法
 
-1. **基本設計SPECのマスターファイルを更新**
+1. 基本設計SPECのマスターファイルを更新
    ```bash
    vim specs/baseline/basic_design/functional_design.md
    vim specs/baseline/basic_design/data_model.md
    ```
 
-2. **CHANGES.mdを作成して変更内容を記載**
+2. CHANGES.mdを作成して変更内容を記載
    ```bash
    cp agent_skills/jakarta-ee-api-base/templates/basic_design/CHANGES_template.md \
       specs/baseline/basic_design/CHANGES.md
    vim specs/baseline/basic_design/CHANGES.md
    ```
 
-3. **変更対応を実行**
+3. 変更対応を実行
    ```
    @agent_skills/jakarta-ee-api-base/instructions/basic_design_change.md
    

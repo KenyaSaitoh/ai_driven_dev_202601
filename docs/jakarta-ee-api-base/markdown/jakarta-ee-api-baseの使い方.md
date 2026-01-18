@@ -1,6 +1,6 @@
 # SKILL: jakarta-ee-api-base の使い方
 
-バージョン: 4.0.0  
+バージョン: 5.0.0  
 最終更新日: 2026-01-18
 
 ---
@@ -9,7 +9,7 @@
 
 Jakarta EE 10とJAX-RS 3.1を使ったREST API サービス開発を支援するAgent Skillです。
 
-このAgent Skillは、SPECからタスク分解、詳細設計、コード生成、単体テスト実行評価、E2Eテストまで6段階で一貫サポートします。
+このAgent Skillは、SPECからタスク分解、詳細設計、コード生成、単体テスト実行評価、結合テスト、E2Eテストまで7段階で一貫サポートします。さらに、基本設計変更対応により、手戻りや拡張案件にも対応します。
 
 ---
 
@@ -19,19 +19,22 @@ Jakarta EE 10とJAX-RS 3.1を使ったREST API サービス開発を支援する
 agent_skills/jakarta-ee-api-base/
 │
 ├── SKILL.md                                    # Agent Skill説明書（エントリポイント）
-│                                               # 6段階プロセス、使い方、実践例を記載
+│                                               # 7段階プロセス、使い方、実践例を記載
 │
-├── instructions/                               # 開発インストラクション（6段階プロセス）
+├── instructions/                               # 開発インストラクション（7段階プロセス + 変更対応）
 │   │
 │   ├── basic_design.md                        # ステップ1: 基本設計（SPEC作成）
 │   │   └─→ 遵守: principles/common_rules.md
 │   │   └─→ 参照: frameworks/（該当する場合）
-│   │   └─→ 読込: {project_root}/specs/baseline/basic_design/requirements.md
-│   │   └─→ 出力: {spec_directory}/basic_design/
+│   │   └─→ 読込: {project_root}/specs/baseline/requirements/requirements.md
+│   │   └─→ 出力: {spec_directory}/requirements/
+│   │              ├── requirements.md（所与）
+│   │              └── behaviors.md（E2Eテスト用、要件を外形的に捉えた振る舞い）
+│   │              {spec_directory}/basic_design/
 │   │              ├── architecture_design.md（テンプレートから展開）
 │   │              ├── functional_design.md（全機能を含む）
 │   │              ├── data_model.md
-│   │              ├── behaviors.md（全振る舞いを含む）
+│   │              ├── behaviors.md（結合テスト用、基本設計を外形的に捉えた振る舞い）
 │   │              └── external_interface.md
 │   │
 │   ├── task_breakdown.md                      # ステップ2: タスク分解
@@ -42,8 +45,7 @@ agent_skills/jakarta-ee-api-base/
 │   │              ├── tasks.md                 # メインタスクリスト（依存関係、実行順序）
 │   │              ├── setup.md                 # setupタスク（特別なタスク、常に最初）
 │   │              ├── FUNC_001_xxx.md          # 機能タスク（内容はプロジェクト固有）
-│   │              ├── FUNC_002_yyy.md          # 機能タスク（内容はプロジェクト固有）
-│   │              └── e2e_test.md              # E2Eテストタスク
+│   │              └── FUNC_002_yyy.md          # 機能タスク（内容はプロジェクト固有）
 │   │
 │   ├── detailed_design.md                     # ステップ3: 詳細設計
 │   │   └─→ 遵守: principles/common_rules.md
@@ -71,10 +73,23 @@ agent_skills/jakarta-ee-api-base/
 │   │   └─→ 分析: テスト結果、カバレッジ、未カバーコード
 │   │   └─→ 出力: フィードバックレポート
 │   │
-│   └── e2e_test_generation.md                 # ステップ6: E2Eテスト生成（REST Assured）
+│   ├── it_generation.md                       # ステップ6: 結合テスト生成（JUnit + Weld SE）
+│   │   └─→ 遵守: principles/common_rules.md
+│   │   └─→ 読込: {project_root}/specs/baseline/basic_design/behaviors.md
+│   │   └─→ 出力: {project_root}/src/test/java/（結合テスト）
+│   │   └─→ 特徴: Service/DAO層のテスト、実DB接続、外部APIモック（WireMock）
+│   │
+│   ├── e2e_test_generation.md                 # ステップ7: E2Eテスト生成（REST Assured）
+│   │   └─→ 遵守: principles/common_rules.md
+│   │   └─→ 読込: {project_root}/specs/baseline/requirements/behaviors.md
+│   │   └─→ 出力: {project_root}/src/test/java/（E2Eテスト）
+│   │   └─→ 特徴: 複数機能間連携、実HTTPリクエスト、実DBアクセス
+│   │
+│   └── basic_design_change.md                 # 基本設計変更対応（手戻り・拡張案件）
 │       └─→ 遵守: principles/common_rules.md
-│       └─→ 読込: {project_root}/specs/baseline/basic_design/behaviors.md
-│       └─→ 出力: {project_root}/src/test/java/（E2Eテスト）
+│       └─→ 読込: {spec_directory}/basic_design/CHANGES.md
+│       └─→ 処理: 変更影響分析、タスク生成、既存指示書呼び出し
+│       └─→ 出力: {project_root}/tasks/change_tasks.md、更新された設計/コード
 │
 ├── principles/                                 # 開発原則（全プロジェクト共通）
 │   │
@@ -92,7 +107,7 @@ agent_skills/jakarta-ee-api-base/
 │   │                                          # - デザインパターン標準
 │   │                                          # - 開発標準（命名規則、コーディング規約、バリデーション）
 │   │                                          # - セキュリティ実装（JWT認証、認証フィルター、認証コンテキスト）
-│   │                                          # - トランザクション管理と並行制御（楽観的ロック）
+│   │                                          # - トランザクション管理と並行制御（悲観的ロック、楽観的ロック）
 │   │                                          # - エラーハンドリング、ログ出力標準
 │   │                                          # - データベース構成、REST API設計原則
 │   │                                          # - テスト戦略、パフォーマンス考慮事項
@@ -107,12 +122,16 @@ agent_skills/jakarta-ee-api-base/
 │
 └── templates/                                  # SPECテンプレート
     │
+    ├── requirements/                          # 要件定義テンプレート（ステップ1で使用）
+    │   └── behaviors.md                       # 振る舞い仕様書テンプレート（E2Eテスト用）
+    │
     ├── basic_design/                          # 基本設計テンプレート（ステップ1で使用）
     │   ├── architecture_design.md             # アーキテクチャ設計書テンプレート
     │   ├── functional_design.md               # 機能設計書テンプレート（システム全体）
     │   ├── data_model.md                      # データモデル仕様書テンプレート
-    │   ├── behaviors.md                       # 振る舞い仕様書テンプレート（E2Eテスト用）
-    │   └── external_interface.md              # 外部インターフェース仕様書テンプレート
+    │   ├── behaviors.md                       # 振る舞い仕様書テンプレート（結合テスト用）
+    │   ├── external_interface.md              # 外部インターフェース仕様書テンプレート
+    │   └── CHANGES_template.md                # 変更差分ファイルテンプレート（変更対応で使用）
     │
     └── detailed_design/                       # 詳細設計テンプレート（ステップ3で使用）
         ├── detailed_design.md                 # 詳細設計書テンプレート（実装クラス設計）
@@ -133,13 +152,20 @@ agent_skills/jakarta-ee-api-base/
 ├── specs/                                     # 仕様書ディレクトリ
 │   └── baseline/                             # ベースライン仕様（バージョン管理される唯一の真実の情報源）
 │       │
-│       ├── basic_design/                     # ステップ1: 基本設計（システム全体）
+│       ├── requirements/                    # 要件定義（所与）
 │       │   ├── requirements.md              # 要件定義書（所与、既存）
+│       │   └── behaviors.md                 # 振る舞い仕様書（E2Eテスト用、要件を外形的に捉えた振る舞い）
+│       │
+│       ├── basic_design/                    # ステップ1: 基本設計（システム全体）
 │       │   ├── architecture_design.md       # アーキテクチャ設計書
 │       │   ├── functional_design.md         # 機能設計書（全機能を含む）
 │       │   ├── data_model.md                # データモデル仕様書
-│       │   ├── behaviors.md                 # 振る舞い仕様書（全振る舞い、E2Eテスト用）
+│       │   ├── behaviors.md                 # 振る舞い仕様書（結合テスト用、基本設計を外形的に捉えた振る舞い）
 │       │   ├── external_interface.md        # 外部インターフェース仕様書
+│       │   ├── CHANGES.md                   # アクティブな変更（未適用、変更対応時に作成）
+│       │   ├── changes_archive/             # 適用済み変更のアーカイブ
+│       │   │   ├── 20260118_order_cancel.md # 例: 過去の変更履歴
+│       │   │   └── 20260125_order_history.md
 │       │   └── external_interface/          # 外部APIインターフェース定義（OpenAPI YAML等）
 │       │       ├── auth-api.yaml           # 例: 認証API定義
 │       │       ├── books-api.yaml          # 例: 書籍API定義
@@ -161,8 +187,7 @@ agent_skills/jakarta-ee-api-base/
 │   ├── setup.md                             # setupタスク（特別なタスク、常に最初）
 │   ├── FUNC_001_xxx.md                      # 機能タスク1（例: 認証・認可）
 │   ├── FUNC_002_yyy.md                      # 機能タスク2（例: 書籍管理）
-│   ├── FUNC_003_zzz.md                      # 機能タスク3（例: 注文管理）
-│   └── e2e_test.md                          # E2Eテストタスク
+│   └── FUNC_003_zzz.md                      # 機能タスク3（例: 注文管理）
 │
 ├── sql/                                      # データベーススクリプト
 │   └── {database_type}/                     # データベース種別（hsqldb, postgresql等）
@@ -216,19 +241,24 @@ agent_skills/jakarta-ee-api-base/
 │   └── test/
 │       ├── java/                            # テストコード
 │       │   └── {package_structure}/
-│       │       ├── api/                     # Resourceの単体テスト
+│       │       ├── api/                     # Resourceの単体テスト（@Tag("unit")）
 │       │       │   ├── AuthResourceTest.java
 │       │       │   ├── BookResourceTest.java
 │       │       │   └── （その他Resourceテスト）
-│       │       ├── service/                 # Serviceの単体テスト
+│       │       ├── service/                 # Serviceの単体テスト（@Tag("unit")）
 │       │       │   ├── AuthServiceTest.java
 │       │       │   ├── BookServiceTest.java
 │       │       │   └── （その他Serviceテスト）
-│       │       ├── dao/                     # Daoの単体テスト
+│       │       ├── dao/                     # Daoの単体テスト（@Tag("unit")）
 │       │       │   ├── BookDaoTest.java
 │       │       │   ├── UserDaoTest.java
 │       │       │   └── （その他Daoテスト）
-│       │       └── e2e/                     # ステップ6: E2Eテスト
+│       │       ├── integration/             # ステップ6: 結合テスト（@Tag("integration")）
+│       │       │   ├── BaseIntegrationTest.java # 結合テスト基底クラス（Weld SE）
+│       │       │   ├── BookServiceIT.java   # 書籍サービス結合テスト
+│       │       │   ├── AuthServiceIT.java   # 認証サービス結合テスト
+│       │       │   └── （その他結合テスト）
+│       │       └── e2e/                     # ステップ7: E2Eテスト（@Tag("e2e")）
 │       │           ├── BaseE2ETest.java    # E2Eテスト基底クラス
 │       │           ├── AuthE2ETest.java    # 認証E2Eテスト
 │       │           ├── BookE2ETest.java    # 書籍E2Eテスト
@@ -274,28 +304,39 @@ agent_skills/jakarta-ee-api-base/
 ### フォルダ構造の注意事項
 
 1. **specs/baseline/** - バージョン管理される唯一の真実の情報源
-   * basic_design/: システム全体の基本設計
-   * detailed_design/: タスク単位の詳細設計
+   * requirements/: 要件定義（所与）とE2Eテスト用振る舞い仕様
+   * basic_design/: システム全体の基本設計と結合テスト用振る舞い仕様
+   * detailed_design/: タスク単位の詳細設計と単体テスト用振る舞い仕様
 
-2. **tasks/** - タスク分解の結果
+2. **振る舞い仕様書（behaviors.md）の3種類**
+   * requirements/behaviors.md: E2Eテスト用（要件を外形的に捉えた振る舞い）
+   * basic_design/behaviors.md: 結合テスト用（基本設計を外形的に捉えた振る舞い）
+   * detailed_design/{target}/behaviors.md: 単体テスト用（タスク粒度内の振る舞い）
+
+3. **tasks/** - タスク分解の結果
    * tasks.md がメインタスクリスト（依存関係、実行順序を記載）
    * 各タスクファイル（FUNC_XXX_xxx.md）が実装タスクを定義
 
-3. **src/main/java/** - 実装コード
+4. **src/main/java/** - 実装コード
    * Jakarta EE標準のレイヤードアーキテクチャ
    * api → service → dao → entity の依存関係
 
-4. **src/test/java/** - テストコード
-   * 単体テスト: タスク粒度内のコンポーネントをテスト
-   * E2Eテスト: システム全体の振る舞いをテスト
+5. **src/test/java/** - テストコード（3層構造）
+   * 単体テスト（@Tag("unit")）: モックを使用、コンポーネント単体をテスト
+   * 結合テスト（@Tag("integration")）: 実DB、Service/DAO層のテスト、外部API はモック
+   * E2Eテスト（@Tag("e2e")）: 実サーバー、実DB、システム全体の振る舞いをテスト
 
-5. **build/reports/** - テスト・カバレッジレポート
+6. **build/reports/** - テスト・カバレッジレポート
    * ステップ5で生成される分析レポート
    * Git除外対象
 
+7. **CHANGES.md** - 基本設計変更管理
+   * basic_design/CHANGES.md: アクティブな変更（未適用）
+   * basic_design/changes_archive/: 適用済み変更の履歴
+
 ---
 
-## 6段階プロセス
+## 7段階プロセス
 
 ### ステップ1: 基本設計（SPEC作成）
 
@@ -315,24 +356,32 @@ SPECを作成してください
 ```
 
 AIと対話しながら実施:
-1. テンプレートを basic_design/ フォルダに展開
-2. requirements.mdを読み込み、理解内容を説明
-3. ユーザーと対話しながら各SPECの中身を埋める
-4. システム全体のSPEC（architecture_design.md、functional_design.md等）を basic_design/ に作成
+1. requirements/requirements.mdを読み込み、理解内容を説明
+2. requirements/behaviors.md（E2Eテスト用）を作成
+3. テンプレートを basic_design/ フォルダに展開
+4. ユーザーと対話しながら各SPECの中身を埋める
+5. システム全体のSPEC（architecture_design.md、functional_design.md等）を basic_design/ に作成
+6. basic_design/behaviors.md（結合テスト用）を作成
 
 注意:
 * requirements.md（要件定義書）は所与とする（既に存在している前提）
 * 基本設計フェーズでは、システム全体を一枚岩として設計する
 * 機能単位への分解は、次のタスク分解フェーズで実施する
+* 振る舞い仕様書は2種類作成:
+  - requirements/behaviors.md: E2Eテスト用（要件を外形的に捉えた振る舞い）
+  - basic_design/behaviors.md: 結合テスト用（基本設計を外形的に捉えた振る舞い）
 
 生成されるファイル:
 ```
-{spec_directory}/basic_design/
+{spec_directory}/requirements/
 ├── requirements.md              # 所与（既存）
+└── behaviors.md                 # E2Eテスト用（要件を外形的に捉えた振る舞い）
+
+{spec_directory}/basic_design/
 ├── architecture_design.md       # アーキテクチャ設計書
 ├── functional_design.md         # 機能設計書（全機能を含む）
 ├── data_model.md                # データモデル仕様書
-├── behaviors.md                 # 振る舞い仕様書（全振る舞いを含む、E2Eテスト用）
+├── behaviors.md                 # 結合テスト用（基本設計を外形的に捉えた振る舞い）
 └── external_interface.md        # 外部インターフェース仕様書
 ```
 
@@ -371,8 +420,7 @@ AIが自動で実行:
 ├── setup.md                 # setupタスク（特別なタスク、常に最初）
 ├── FUNC_001_auth.md         # 機能別タスク（例: 認証・認可）
 ├── FUNC_002_books.md        # 機能別タスク（例: 書籍管理）
-├── FUNC_003_orders.md       # 機能別タスク（例: 注文管理）
-└── e2e_test.md     # 結合テスト
+└── FUNC_003_orders.md       # 機能別タスク（例: 注文管理）
 ```
 
 ---
@@ -405,8 +453,10 @@ AIと対話しながら実施:
 
 重要:
 * functional_design.md は basic_design/ にのみ存在（唯一の真実の情報源）
-* basic_design/behaviors.md: システム全体の振る舞い（E2Eテスト用）
-* detailed_design/{target}/behaviors.md: タスク粒度内の振る舞い（単体テスト用）
+* 振る舞い仕様書の3種類の使い分け:
+  - requirements/behaviors.md: E2Eテスト用（要件を外形的に捉えた振る舞い）
+  - basic_design/behaviors.md: 結合テスト用（基本設計を外形的に捉えた振る舞い）
+  - detailed_design/{target}/behaviors.md: 単体テスト用（タスク粒度内の振る舞い）
 
 生成されるファイル:
 ```
@@ -508,7 +558,49 @@ build/reports/
 
 ---
 
-### ステップ6: E2Eテスト生成
+### ステップ6: 結合テスト生成
+
+目的: Service層とDAO層の結合テストを生成する
+
+インストラクション: `it_generation.md`
+
+使い方:
+```
+@agent_skills/jakarta-ee-api-base/instructions/it_generation.md
+
+結合テストを生成してください
+
+パラメータ:
+* project_root: <プロジェクトルートパス>
+* spec_directory: <SPECディレクトリパス>
+```
+
+AIが自動で実行:
+1. basic_design/behaviors.md（結合テストシナリオ）を読み込む
+2. JUnit + Weld SE を使用した結合テストを生成する
+   * Service層とDAO層の結合をテスト
+   * 実際のDB接続（HSQLDB in-memory）
+   * 外部API呼び出しはWireMockでモック
+   * CDI環境（Weld SE）でのコンポーネント連携
+3. テストデータのセットアップ/クリーンアップコードを生成
+4. `@Tag("integration")` で結合テストを分離
+
+重要:
+* 結合テストは単体テスト完了後に実行
+* API層は含まない（Service層以下をテスト）
+* `./gradlew integrationTest` で実行（通常の `test` タスクからは除外）
+
+生成されるファイル:
+```
+{project_root}/src/test/java/
+└── integration/
+    ├── BaseIntegrationTest.java  # 結合テスト基底クラス（Weld SE設定）
+    └── *IT.java                  # 結合テストケース
+```
+
+---
+
+### ステップ7: E2Eテスト生成
 
 目的: システム全体のエンドツーエンドテストを生成する
 
@@ -526,7 +618,7 @@ E2Eテストを生成してください
 ```
 
 AIが自動で実行:
-1. basic_design/behaviors.md（E2Eテストシナリオ）を読み込む
+1. requirements/behaviors.md（E2Eテストシナリオ）を読み込む
 2. REST Assured を使用したE2Eテストを生成する
    * 複数機能間の連携をテスト
    * 実際のHTTPリクエスト/レスポンス
@@ -550,9 +642,66 @@ AIが自動で実行:
 
 ---
 
+## 基本設計変更対応（手戻り・拡張案件）
+
+目的: 結合テストやE2Eテストで不具合が見つかり、基本設計に戻る必要がある場合や、拡張案件で新機能を追加する場合に対応する
+
+インストラクション: `basic_design_change.md`
+
+使い方:
+```
+@agent_skills/jakarta-ee-api-base/instructions/basic_design_change.md
+
+基本設計の変更を適用してください
+
+パラメータ:
+* project_root: <プロジェクトルートパス>
+* spec_directory: <SPECディレクトリパス>
+* change_spec: <変更差分ファイルパス>（省略可、デフォルト: {spec_directory}/basic_design/CHANGES.md）
+```
+
+実行手順:
+1. 基本設計SPECのマスターファイル（functional_design.md、data_model.md等）を自由に編集
+2. CHANGES.mdを作成して変更内容を明示的に記載
+   ```bash
+   cp agent_skills/jakarta-ee-api-base/templates/basic_design/CHANGES_template.md \
+      specs/baseline/basic_design/CHANGES.md
+   vim specs/baseline/basic_design/CHANGES.md
+   ```
+3. 上記コマンドを実行
+
+AIが自動で実行:
+1. CHANGES.md（変更差分ファイル）を読み込み
+2. 変更の影響を受けるファイル（詳細設計、コード、テスト）を特定
+3. 変更タスクファイル（`tasks/change_tasks.md`）を生成
+4. 既存の指示書を呼び出して、影響を受けるファイルを更新
+   * detailed_design.md → 詳細設計更新
+   * code_generation.md → コード更新
+   * it_generation.md → 結合テスト更新
+   * e2e_test_generation.md → E2Eテスト更新
+5. すべての変更適用後、CHANGES.mdをアーカイブ
+
+重要:
+* マスターファイルはMarkdown、EXCEL、PDF、Word等、任意の形式で管理可能
+* 変更内容はCHANGES.mdに明示的に記載（形式非依存）
+* 適用後、CHANGES.mdは自動的に`changes_archive/`に移動され、履歴として保管
+
+ディレクトリ構造:
+```
+{spec_directory}/basic_design/
+├── functional_design.md      # マスター（自由に編集）
+├── data_model.md             # マスター（自由に編集）
+├── CHANGES.md                # アクティブな変更（未適用）
+└── changes_archive/          # 履歴
+    ├── 20260118_order_cancel.md
+    └── 20260125_order_history.md
+```
+
+---
+
 ## 実践例
 
-### 例1: プロジェクト立ち上げ（6段階）
+### 例1: プロジェクト立ち上げ（7段階）
 
 ステップ1: 基本設計（SPEC作成）
 ```
@@ -585,8 +734,7 @@ tasks/
 ├── setup.md              ← setupタスク（特別なタスク、常に最初）
 ├── FUNC_001_auth.md      ← 機能タスク（例: 認証・認可）
 ├── FUNC_002_books.md     ← 機能タスク（例: 書籍管理）
-├── FUNC_003_orders.md    ← 機能タスク（例: 注文管理）        
-└── e2e_test.md  ← E2Eテスト
+└── FUNC_003_orders.md    ← 機能タスク（例: 注文管理）
 ```
 
 ステップ3: 詳細設計（書籍機能）
@@ -658,7 +806,23 @@ AI: 承知しました。以下を作成しました：
 
 （フィードバックに基づいて、必要に応じてステップ3に戻る）
 
-ステップ6: E2Eテスト生成
+ステップ6: 結合テスト生成
+```
+@agent_skills/jakarta-ee-api-base/instructions/it_generation.md
+
+結合テストを生成してください
+
+パラメータ:
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+```
+
+実行方法:
+```bash
+./gradlew integrationTest
+```
+
+ステップ7: E2Eテスト生成
 ```
 @agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md
 
@@ -667,5 +831,147 @@ E2Eテストを生成してください
 パラメータ:
 * project_root: projects/sdd/bookstore/back-office-api-sdd
 * spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+```
+
+実行方法:
+```bash
+# アプリケーションサーバーを起動
+./gradlew run
+
+# 別ターミナルでE2Eテストを実行
+./gradlew e2eTest
+```
+
+---
+
+### 例2: 基本設計変更対応（手戻り・拡張案件）
+
+E2Eテストで不具合が見つかり、注文キャンセル機能を追加する必要が発生した場合の例。
+
+**ステップ1: 基本設計SPECを更新**
+
+```bash
+# 機能設計書を編集してキャンセル機能を追加
+vim specs/baseline/basic_design/functional_design.md
+
+# データモデルを編集してcancel_reasonカラムを追加
+vim specs/baseline/basic_design/data_model.md
+```
+
+**ステップ2: CHANGES.mdを作成**
+
+```bash
+# テンプレートをコピー
+cp agent_skills/jakarta-ee-api-base/templates/basic_design/CHANGES_template.md \
+   specs/baseline/basic_design/CHANGES.md
+
+# 変更内容を明示的に記載
+vim specs/baseline/basic_design/CHANGES.md
+```
+
+CHANGES.mdの記載例:
+```markdown
+# 基本設計変更記録
+
+## [2026-01-18] 注文キャンセル機能追加
+
+### 変更対象
+- functional_design.md
+- data_model.md
+- behaviors.md（結合テスト用）
+
+### 変更内容
+
+#### functional_design.md の変更
+##### セクション「API一覧」
+**追加**:
+- API_002_Order に DELETE /orders/{id} エンドポイント追加
+  - リクエスト: cancel_reason（必須、VARCHAR(255)）
+  - レスポンス: 200 OK または 404 Not Found
+
+#### data_model.md の変更
+##### テーブル「ORDER_TRAN」
+**追加**:
+| カラム名 | 型 | NULL | デフォルト | 説明 |
+|---------|-----|------|-----------|------|
+| cancel_reason | VARCHAR(255) | YES | NULL | キャンセル理由 |
+
+#### behaviors.md の変更（結合テスト用）
+**追加**:
+- シナリオ: 注文キャンセル
+  - 前提: 注文が作成済み
+  - 実行: DELETE /orders/{id} with cancel_reason
+  - 期待: 注文ステータスがCANCELLEDに更新される
+
+### 変更理由
+E2Eテストで誤注文のキャンセル機能がないことが判明。
+顧客からの要望もあり、追加が必要と判断。
+
+### 影響範囲（推定）
+- 詳細設計: FUNC_003_orders/detailed_design.md
+- コード: OrderResource.java, OrderService.java, OrderDao.java
+- テスト: 結合テスト、E2Eテスト
+```
+
+**ステップ3: 変更対応を実行**
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/basic_design_change.md
+
+基本設計の変更を適用してください
+
+パラメータ:
+* project_root: projects/sdd/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+```
+
+AIが自動で実行:
+1. CHANGES.mdを読み込み
+2. 影響分析（FUNC_003_orders が影響を受ける）
+3. change_tasks.mdを生成
+4. 以下の指示書を順次呼び出し:
+   - detailed_design.md → 詳細設計更新
+   - code_generation.md → コード更新
+   - it_generation.md → 結合テスト更新
+   - e2e_test_generation.md → E2Eテスト更新
+5. CHANGES.mdを `changes_archive/20260118_order_cancel.md` に移動
+
+結果:
+```
+specs/baseline/basic_design/
+├── functional_design.md      ← 更新済み（マスター）
+├── data_model.md             ← 更新済み（マスター）
+├── behaviors.md              ← 更新済み（マスター）
+└── changes_archive/
+    └── 20260118_order_cancel.md  ← アーカイブ済み
+
+specs/baseline/detailed_design/FUNC_003_orders/
+├── detailed_design.md        ← 自動更新（キャンセルメソッド追加）
+└── behaviors.md              ← 自動更新（単体テスト追加）
+
+src/main/java/.../
+├── OrderResource.java        ← 自動更新（DELETE エンドポイント追加）
+├── OrderService.java         ← 自動更新（cancelOrderメソッド追加）
+└── OrderDao.java             ← 自動更新（updateStatusメソッド拡張）
+
+src/test/java/.../
+├── integration/
+│   └── OrderServiceIT.java   ← 自動更新（結合テスト追加）
+└── e2e/
+    └── OrderE2ETest.java     ← 自動更新（E2Eテスト追加）
+```
+
+**ステップ4: テスト実行**
+
+```bash
+# 単体テスト
+./gradlew test
+
+# 結合テスト
+./gradlew integrationTest
+
+# E2Eテスト
+./gradlew run  # 別ターミナル
+./gradlew e2eTest
 ```
 
