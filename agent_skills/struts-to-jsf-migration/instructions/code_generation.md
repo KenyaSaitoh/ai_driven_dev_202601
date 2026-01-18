@@ -40,10 +40,12 @@ skip_infrastructure: false  # 機能タスクではこのパラメータは無�
 
 #### 読み込むべきドキュメント（優先順）
 
-1. 最優先: `@agent_skills/struts-to-jsf-migration/principles/` 配下のすべての原則ドキュメントでマイグレーションルール、アーキテクチャ標準、セキュリティ標準、マッピング規則を確認する
-   * [architecture.md](../principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
-   * [security.md](../principles/security.md) - セキュリティ標準
-   * [common_rules.md](../principles/common_rules.md) - マイグレーション共通ルール、マッピング規則
+1. Agent Skillsルール（最優先で確認）
+
+* @agent_skills/struts-to-jsf-migration/principles/ - マイグレーションルール、アーキテクチャ標準、品質基準、セキュリティ標準を確認する
+  * このフォルダ配下の原則ドキュメントを読み込み、共通ルールを遵守すること
+  * 重要: コード生成においても、ルールドキュメントに記載されたすべてのルールを遵守すること
+  * 注意: Agent Skills配下のルールは全プロジェクト共通。プロジェクト固有のルールがある場合は `{project_root}/principles/` も確認すること
 
 2. フレームワーク仕様（該当する場合）: `@agent_skills/struts-to-jsf-migration/frameworks/` 配下に格納されたフレームワーク固有のSPECやサンプルコードを確認する
    * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する

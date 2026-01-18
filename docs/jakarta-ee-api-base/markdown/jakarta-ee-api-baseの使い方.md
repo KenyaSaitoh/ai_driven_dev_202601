@@ -124,6 +124,180 @@ agent_skills/jakarta-ee-api-base/
 
 ---
 
+## プロジェクトフォルダ構造
+
+このAgent Skillを使用して開発するプロジェクトの標準フォルダ構造です。
+
+```
+{project_root}/                                # プロジェクトルートディレクトリ
+│
+├── README.md                                  # プロジェクト概要、セットアップ手順
+│
+├── specs/                                     # 仕様書ディレクトリ
+│   └── baseline/                             # ベースライン仕様（バージョン管理される唯一の真実の情報源）
+│       │
+│       ├── basic_design/                     # ステップ1: 基本設計（システム全体）
+│       │   ├── requirements.md              # 要件定義書（所与、既存）
+│       │   ├── architecture_design.md       # アーキテクチャ設計書
+│       │   ├── functional_design.md         # 機能設計書（全機能を含む）
+│       │   ├── data_model.md                # データモデル仕様書
+│       │   ├── behaviors.md                 # 振る舞い仕様書（全振る舞い、E2Eテスト用）
+│       │   ├── external_interface.md        # 外部インターフェース仕様書
+│       │   └── external_interface/          # 外部APIインターフェース定義（OpenAPI YAML等）
+│       │       ├── auth-api.yaml           # 例: 認証API定義
+│       │       ├── books-api.yaml          # 例: 書籍API定義
+│       │       └── （その他API定義）
+│       │
+│       └── detailed_design/                 # ステップ3: 詳細設計（タスク単位）
+│           ├── FUNC_001_xxx/               # 機能タスク1の詳細設計
+│           │   ├── detailed_design.md     # 実装クラス設計
+│           │   └── behaviors.md           # 単体テスト用振る舞い仕様
+│           ├── FUNC_002_yyy/               # 機能タスク2の詳細設計
+│           │   ├── detailed_design.md
+│           │   └── behaviors.md
+│           └── FUNC_003_zzz/               # 機能タスク3の詳細設計
+│               ├── detailed_design.md
+│               └── behaviors.md
+│
+├── tasks/                                    # ステップ2: タスク分解の結果
+│   ├── tasks.md                             # メインタスクリスト（依存関係、実行順序）
+│   ├── setup.md                             # setupタスク（特別なタスク、常に最初）
+│   ├── FUNC_001_xxx.md                      # 機能タスク1（例: 認証・認可）
+│   ├── FUNC_002_yyy.md                      # 機能タスク2（例: 書籍管理）
+│   ├── FUNC_003_zzz.md                      # 機能タスク3（例: 注文管理）
+│   └── e2e_test.md                          # E2Eテストタスク
+│
+├── sql/                                      # データベーススクリプト
+│   └── {database_type}/                     # データベース種別（hsqldb, postgresql等）
+│       ├── 01_schema.sql                    # スキーマ定義
+│       ├── 02_sample_data.sql               # サンプルデータ
+│       └── （その他SQLスクリプト）
+│
+├── src/                                      # ステップ4: コード生成の結果
+│   ├── main/
+│   │   ├── java/                            # 実装コード
+│   │   │   └── {package_structure}/
+│   │   │       ├── api/                     # JAX-RS Resources（REST API）
+│   │   │       │   ├── AuthResource.java
+│   │   │       │   ├── BookResource.java
+│   │   │       │   └── （その他Resource）
+│   │   │       ├── service/                 # Business Logic
+│   │   │       │   ├── AuthService.java
+│   │   │       │   ├── BookService.java
+│   │   │       │   └── （その他Service）
+│   │   │       ├── dao/                     # Data Access
+│   │   │       │   ├── BookDao.java
+│   │   │       │   ├── UserDao.java
+│   │   │       │   └── （その他Dao）
+│   │   │       ├── entity/                  # JPA Entities
+│   │   │       │   ├── Book.java
+│   │   │       │   ├── User.java
+│   │   │       │   └── （その他Entity）
+│   │   │       ├── dto/                     # Data Transfer Objects
+│   │   │       │   ├── BookDto.java
+│   │   │       │   ├── UserDto.java
+│   │   │       │   └── （その他DTO）
+│   │   │       ├── security/                # セキュリティ関連
+│   │   │       │   ├── JwtUtil.java
+│   │   │       │   ├── AuthFilter.java
+│   │   │       │   └── （その他セキュリティコンポーネント）
+│   │   │       ├── exception/               # 例外ハンドラー
+│   │   │       │   ├── GlobalExceptionMapper.java
+│   │   │       │   └── （その他例外）
+│   │   │       └── （その他パッケージ）
+│   │   │
+│   │   ├── resources/                       # アプリケーションリソース
+│   │   │   ├── META-INF/
+│   │   │   │   └── microprofile-config.properties # 設定ファイル
+│   │   │   └── （その他リソース）
+│   │   │
+│   │   └── webapp/                          # Webアプリケーションリソース
+│   │       ├── WEB-INF/
+│   │       │   └── beans.xml               # CDI設定
+│   │       └── （その他Webリソース）
+│   │
+│   └── test/
+│       ├── java/                            # テストコード
+│       │   └── {package_structure}/
+│       │       ├── api/                     # Resourceの単体テスト
+│       │       │   ├── AuthResourceTest.java
+│       │       │   ├── BookResourceTest.java
+│       │       │   └── （その他Resourceテスト）
+│       │       ├── service/                 # Serviceの単体テスト
+│       │       │   ├── AuthServiceTest.java
+│       │       │   ├── BookServiceTest.java
+│       │       │   └── （その他Serviceテスト）
+│       │       ├── dao/                     # Daoの単体テスト
+│       │       │   ├── BookDaoTest.java
+│       │       │   ├── UserDaoTest.java
+│       │       │   └── （その他Daoテスト）
+│       │       └── e2e/                     # ステップ6: E2Eテスト
+│       │           ├── BaseE2ETest.java    # E2Eテスト基底クラス
+│       │           ├── AuthE2ETest.java    # 認証E2Eテスト
+│       │           ├── BookE2ETest.java    # 書籍E2Eテスト
+│       │           └── （その他E2Eテスト）
+│       │
+│       └── resources/                       # テストリソース
+│           ├── META-INF/
+│           │   └── microprofile-config.properties # テスト用設定
+│           └── （その他テストリソース）
+│
+├── build/                                    # ビルド成果物（Git除外）
+│   ├── classes/                             # コンパイル済みクラス
+│   ├── libs/                                # ビルド済みアーティファクト
+│   └── reports/                             # ステップ5: テスト・カバレッジレポート
+│       ├── tests/test/
+│       │   └── index.html                   # テスト結果（HTML）
+│       ├── jacoco/test/
+│       │   ├── html/index.html              # カバレッジ（HTML）
+│       │   └── jacocoTestReport.json        # カバレッジ（JSON、AI向け）
+│       └── test-analysis/
+│           ├── test_analysis_report.json    # 分析レポート（JSON）
+│           └── test_analysis_report.md      # 分析レポート（Markdown）
+│
+├── images/                                   # 画像リソース（プロジェクト固有）
+│   └── covers/                              # 例: 書籍カバー画像
+│       └── （画像ファイル）
+│
+├── test_script/                              # 手動テストスクリプト（プロジェクト固有）
+│   ├── README.md                            # テストスクリプト使い方
+│   ├── _common.sh                           # 共通設定・関数
+│   ├── test_all.sh                          # 全機能テスト
+│   └── （その他テストスクリプト）
+│
+├── bin/                                      # バイナリ・スクリプト
+│   ├── main/
+│   └── test/
+│
+├── build.gradle                              # Gradleビルドスクリプト
+├── settings.gradle                           # Gradleプロジェクト設定
+└── .gitignore                                # Git除外設定
+```
+
+### フォルダ構造の注意事項
+
+1. **specs/baseline/** - バージョン管理される唯一の真実の情報源
+   * basic_design/: システム全体の基本設計
+   * detailed_design/: タスク単位の詳細設計
+
+2. **tasks/** - タスク分解の結果
+   * tasks.md がメインタスクリスト（依存関係、実行順序を記載）
+   * 各タスクファイル（FUNC_XXX_xxx.md）が実装タスクを定義
+
+3. **src/main/java/** - 実装コード
+   * Jakarta EE標準のレイヤードアーキテクチャ
+   * api → service → dao → entity の依存関係
+
+4. **src/test/java/** - テストコード
+   * 単体テスト: タスク粒度内のコンポーネントをテスト
+   * E2Eテスト: システム全体の振る舞いをテスト
+
+5. **build/reports/** - テスト・カバレッジレポート
+   * ステップ5で生成される分析レポート
+   * Git除外対象
+
+---
+
 ## 6段階プロセス
 
 ### ステップ1: 基本設計（SPEC作成）
@@ -498,82 +672,3 @@ E2Eテストを生成してください
 * spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
 ```
 
----
-
-## 対応する主要機能
-
-### Jakarta EE-based REST API
-
-Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービスの開発を支援します。
-
-### エンティティ実装
-
-* JPA/EntityManagerによるデータ永続化
-* CRUD操作の実装
-* トランザクション管理
-* 独立したデータベース管理
-
-### 外部API連携
-
-* RestClientによる外部API呼び出し
-* プロキシ転送
-* 独自ビジネスロジックの実装
-* 複数の外部APIを統合
-
-### 楽観的ロック（Optimistic Locking）
-
-* `@Version`アノテーションを使用
-* 更新時の競合を検出
-* `OptimisticLockException`を適切に処理
-* 競合時はHTTP 409 Conflictを返す
-
-### 2種類の検索実装
-
-#### JPQL検索
-* JPQLクエリで動的検索を実装
-* シンプルで読みやすいコード
-
-#### Criteria API検索
-* JPA Criteria APIで型安全な検索を実装
-* コンパイル時の型チェックが効く
-
-両方の実装を比較学習できる設計！
-
-### REST API統合
-
-* 外部APIクライアント（JAX-RS Client）
-* API間連携
-* タイムアウト、リトライ処理
-* エラーハンドリング
-
-### JWT認証
-
-* JWT生成・検証
-* 認証フィルター
-* 認証コンテキスト
-* 権限チェック
-
-### CORS対応
-
-* クロスオリジンリクエスト許可
-* レスポンスヘッダー設定
-* プリフライトリクエスト対応
-
----
-
-## 参考資料
-
-### 公式ドキュメント
-
-* Jakarta EE 10: https://jakarta.ee/specifications/platform/10/
-* JAX-RS 3.1: https://jakarta.ee/specifications/restful-ws/3.1/
-* JPA 3.1: https://jakarta.ee/specifications/persistence/3.1/
-* JWT (JSON Web Token): https://jwt.io/
-* jjwt: https://github.com/jwtk/jjwt
-* MicroProfile Config: https://microprofile.io/specifications/microprofile-config/
-
-### 関連原則ドキュメント
-
-* [common_rules.md](../../../agent_skills/jakarta-ee-api-base/principles/common_rules.md) - Jakarta EE 仕様駆動開発 共通ルール
-* [architecture.md](../../../agent_skills/jakarta-ee-api-base/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
-* [security.md](../../../agent_skills/jakarta-ee-api-base/principles/security.md) - セキュリティ標準ガイドライン

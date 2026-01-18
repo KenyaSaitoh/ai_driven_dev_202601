@@ -86,7 +86,18 @@ coverage_targets:
 
 ---
 
-## 実行フロー
+## 1. SPECの読み込みと理解
+
+### 1.1 Agent Skillsルール（最優先で確認）
+
+* @agent_skills/struts-to-jsf-migration/principles/ - マイグレーションルール、アーキテクチャ標準、品質基準、セキュリティ標準を確認する
+  * このフォルダ配下の原則ドキュメントを読み込み、共通ルールを遵守すること
+  * 重要: 単体テスト実行・評価においても、ルールドキュメントに記載されたすべてのルールを遵守すること
+  * 注意: Agent Skills配下のルールは全プロジェクト共通。プロジェクト固有のルールがある場合は `{project_root}/principles/` も確認すること
+
+---
+
+## 2. 実行フロー
 
 Jakarta EE API版の [unit_test_execution.md](../../jakarta-ee-api-base/instructions/unit_test_execution.md) と基本的に同じフローに従う。
 

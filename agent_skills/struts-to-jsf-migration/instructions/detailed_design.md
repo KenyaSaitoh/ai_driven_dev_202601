@@ -74,12 +74,9 @@ behaviors.mdの違い:
 
 ### 1.1 Agent Skillsルール（最優先で確認）
 
-* @agent_skills/struts-to-jsf-migration/principles/ - マイグレーションルール、アーキテクチャ標準、マッピング規則、セキュリティ標準を確認
-  * このフォルダ配下のすべてのMarkdownファイルを読み込み、マイグレーションルールを遵守すること
-  * Code-to-Spec-to-Codeアプローチ、マッピング規則を確認
-* @agent_skills/jakarta-ee-api-base/principles/ - Jakarta EE開発の原則
+* @agent_skills/struts-to-jsf-migration/principles/ - マイグレーションルール、アーキテクチャ標準、品質基準、セキュリティ標準を確認する
   * このフォルダ配下の原則ドキュメントを読み込み、共通ルールを遵守すること
-  * 重要: 詳細設計においても、ルールドキュメントに記載されたすべてのルール（命名規則、設計パターン、コーディング規約など）を遵守すること
+  * 重要: 詳細設計においても、ルールドキュメントに記載されたすべてのルールを遵守すること
   * 注意: Agent Skills配下のルールは全プロジェクト共通。プロジェクト固有のルールがある場合は `{project_root}/principles/` も確認すること
 
 ### 1.2 フレームワーク仕様（該当する場合）
