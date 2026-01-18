@@ -21,9 +21,6 @@ agent_skills/jakarta-ee-api-base/
 ├── SKILL.md                                    # Agent Skill説明書（エントリポイント）
 │                                               # 6段階プロセス、使い方、実践例を記載
 │
-├── README.md                                   # クイックスタートガイド
-│                                               # 超簡単な使い方、便利な使い方、実践的ワークフロー
-│
 ├── instructions/                               # 開発インストラクション（6段階プロセス）
 │   │
 │   ├── basic_design.md                        # ステップ1: 基本設計（SPEC作成）
@@ -61,7 +58,7 @@ agent_skills/jakarta-ee-api-base/
 │   │                  ├── detailed_design.md  # 機能固有の実装クラス設計
 │   │                  └── behaviors.md        # 機能固有の単体テスト用
 │   │
-│   ├── code_generation.md                     # ステップ4: コード生成（実装+単体テスト）
+│   ├── code_generation.md                     # ステップ4: コード生成（本番＋単体テスト）
 │   │   └─→ 遵守: principles/common_rules.md
 │   │   └─→ 参照: frameworks/（該当する場合）
 │   │   └─→ 読込: {project_root}/specs/baseline/basic_design/

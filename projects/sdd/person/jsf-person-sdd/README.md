@@ -20,7 +20,7 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 
 このプロジェクトは、汎用的な Struts to JSF マイグレーション Agent Skills を使用してマイグレーションします。
 
-マイグレーションは以下の5段階プロセスで進めます：
+マイグレーションは以下の7段階プロセスで進めます：
 
 ```
 ステップ1: 既存コード分析（Strutsコード → 仕様書）
@@ -33,7 +33,9 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
     ↓
 ステップ5: 単体テスト実行評価（テスト実行 → カバレッジ分析 → フィードバック）
     ↓
-ステップ6: E2Eテスト生成（basic_design/behaviors.md → Playwright）
+ステップ6: 結合テスト生成（basic_design/behaviors.md → JUnit + Weld SE）
+    ↓
+ステップ7: E2Eテスト生成（requirements/behaviors.md → Playwright）
 ```
 
 ---
@@ -221,7 +223,38 @@ AIが：
 
 ---
 
-#### ステップ6: E2Eテスト生成（実装完了後）
+#### ステップ6: 結合テスト生成（単体テスト完了後）
+
+単体テスト完了後に、結合テスト（Integration Test）を生成します。
+
+```
+@agent_skills/struts-to-jsf-migration/instructions/it_generation.md
+
+結合テストを生成してください。
+
+パラメータ:
+* project_root: projects/sdd/person/jsf-person-sdd
+* spec_directory: projects/sdd/person/jsf-person-sdd/specs/baseline
+```
+
+AIが：
+1. 📄 basic_design/behaviors.md（結合テストシナリオ）を読み込む
+2. 🧪 JUnit 5 + Weld SE を使用した結合テストを生成
+   * Service層以下（Service + Entity + DB）の連携テスト
+   * 実際のDBアクセス（メモリDB）
+   * モックは使用しない
+   * アプリケーションサーバー不要
+3. 🏷️ `@Tag("integration")` で結合テストを分離
+
+実行方法:
+```bash
+# 結合テストを実行
+./gradlew integrationTest
+```
+
+---
+
+#### ステップ7: E2Eテスト生成（実装完了後）
 
 全画面実装完了後に、E2Eテスト（End-to-End Test）を生成します。
 
@@ -236,7 +269,7 @@ E2Eテストを生成してください。
 ```
 
 AIが：
-1. 📄 basic_design/behaviors.md（E2Eテストシナリオ）を読み込む
+1. 📄 requirements/behaviors.md（E2Eテストシナリオ）を読み込む
 2. 🧪 Playwright を使用したE2Eテストを生成
    * 複数画面にまたがるフローをテスト（一覧 → 入力 → 確認 → 登録）
    * 実際のブラウザ操作
@@ -250,6 +283,58 @@ AIが：
 
 # 別ターミナルでE2Eテストを実行
 ./gradlew e2eTest
+```
+
+---
+
+### 🔄 基本設計変更対応（手戻り・拡張案件）
+
+結合テストやE2Eテストで不具合が見つかり、基本設計に戻る必要がある場合や、拡張案件で新機能を追加する場合に使用します。
+
+#### 使用方法
+
+1. **基本設計SPECのマスターファイルを更新**
+   ```bash
+   vim specs/baseline/basic_design/functional_design.md
+   vim specs/baseline/basic_design/screen_design.md
+   ```
+
+2. **CHANGES.mdを作成して変更内容を記載**
+   ```bash
+   cp agent_skills/struts-to-jsf-migration/templates/basic_design/CHANGES_template.md \
+      specs/baseline/basic_design/CHANGES.md
+   vim specs/baseline/basic_design/CHANGES.md
+   ```
+
+3. **変更対応を実行**
+   ```
+   @agent_skills/struts-to-jsf-migration/instructions/basic_design_change.md
+   
+   基本設計の変更を適用してください。
+   
+   パラメータ:
+   * project_root: projects/sdd/person/jsf-person-sdd
+   * spec_directory: projects/sdd/person/jsf-person-sdd/specs/baseline
+   ```
+
+AIが：
+1. 📄 CHANGES.md（変更差分ファイル）を読み込み
+2. 🔍 変更の影響を受けるファイル（詳細設計、コード、XHTML、テスト）を特定
+3. 📋 変更タスクファイル（`tasks/change_tasks.md`）を生成
+4. 🎯 既存の指示書を呼び出して、影響を受けるファイルを更新
+5. ✅ すべての変更適用後、CHANGES.mdをアーカイブ
+
+#### ディレクトリ構造
+
+```
+specs/baseline/basic_design/
+  ├── functional_design.md      # マスター（自由に編集）
+  ├── screen_design.md          # マスター（自由に編集）
+  ├── data_model.md             # マスター（自由に編集）
+  ├── CHANGES.md                # アクティブな変更（未適用）
+  └── changes_archive/          # 履歴
+      ├── 20260118_person_edit.md
+      └── 20260125_validation_update.md
 ```
 
 ---
@@ -388,25 +473,33 @@ AIが：
 projects/sdd/person/jsf-person-sdd/
 ├── specs/                          # 仕様書（マイグレーション時に生成）
 │   └── baseline/
-│       ├── system/
-│       │   ├── requirements.md
+│       ├── requirements/           # システム要件
+│       │   ├── requirements.md    # 要件定義書
+│       │   └── behaviors.md       # E2Eテスト用（要件を外形的に捉えた振る舞い）
+│       ├── basic_design/           # 基本設計
 │       │   ├── architecture_design.md
 │       │   ├── functional_design.md
 │       │   ├── data_model.md
-│       │   ├── behaviors.md
-│       │   └── external_interface.md
-│       └── screen/
-│           ├── SCREEN_001_PersonList/
-│           ├── SCREEN_002_PersonInput/
-│           └── SCREEN_003_PersonConfirm/
+│       │   ├── screen_design.md
+│       │   ├── external_interface.md
+│       │   └── behaviors.md       # 結合テスト用（基本設計を外形的に捉えた振る舞い）
+│       └── detailed_design/        # 詳細設計
+│           ├── FUNC_001_PersonList/
+│           │   ├── detailed_design.md
+│           │   └── behaviors.md   # 単体テスト用
+│           ├── FUNC_002_PersonInput/
+│           │   ├── detailed_design.md
+│           │   └── behaviors.md
+│           └── FUNC_003_PersonConfirm/
+│               ├── detailed_design.md
+│               └── behaviors.md
 ├── tasks/                          # タスクリスト（AI生成）
 │   ├── tasks.md
 │   ├── setup.md
 │   ├── FUNC_001_common.md
 │   ├── FUNC_002_PersonList.md
 │   ├── FUNC_003_PersonInput.md
-│   ├── FUNC_003_PersonConfirm.md
-│   └── e2e_test.md
+│   └── FUNC_003_PersonConfirm.md
 ├── src/
 │   ├── main/
 │   │   ├── java/

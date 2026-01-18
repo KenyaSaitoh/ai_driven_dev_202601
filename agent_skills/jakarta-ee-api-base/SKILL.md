@@ -1,11 +1,11 @@
 ---
 name: jakarta-ee-api-base
-description: Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービス開発を支援。エンティティ実装、外部API連携など多様な実装要件に対応。SPECからタスク分解、詳細設計、コード生成、単体テスト実行評価、E2Eテストまで6段階で一貫サポート。
+description: Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービス開発を支援。エンティティ実装、外部API連携など多様な実装要件に対応。SPECからタスク分解、詳細設計、コード生成、単体テスト実行評価、結合テスト、E2Eテストまで7段階で一貫サポート。基本設計変更対応も含む。
 ---
 
 # Jakarta EE API サービス開発 Agent Skill
 
-## 使い方（6段階プロセス）
+## 使い方（7段階プロセス）
 
 ### ステップ1: 基本設計（SPEC作成）
 
@@ -123,7 +123,26 @@ AIが自動で以下を実行
     └──── フィードバック ←────┘
 ```
 
-### ステップ6: E2Eテスト生成
+### ステップ6: 結合テスト生成
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/it_generation.md
+
+結合テストを生成してください
+
+パラメータ
+* project_root: <プロジェクトルートパス>
+* spec_directory: <SPECディレクトリパス>
+```
+
+AIが自動で以下を実行
+1. basic_design/behaviors.md（結合テストシナリオ）を読み込み
+2. JUnit 5 + Weld SE を使用した結合テストを生成
+   * Service層以下（Service + DAO + Entity + DB）の連携テスト
+   * 実際のDBアクセス（メモリDB）
+   * 外部APIはWireMockでスタブ化
+
+### ステップ7: E2Eテスト生成
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md
@@ -136,11 +155,43 @@ E2Eテストを生成してください
 ```
 
 AIが自動で以下を実行
-1. basic_design/behaviors.md（E2Eテストシナリオ）を読み込み
+1. requirements/behaviors.md（E2Eテストシナリオ）を読み込み
 2. REST Assured を使用したE2Eテストを生成
-   * 複数機能間の連携をテスト
+   * API層を含む全体フロー
    * 実際のHTTPリクエスト/レスポンス
 3. テストデータのセットアップ/クリーンアップコードを生成
+
+---
+
+## 🔄 基本設計変更対応（手戻り・拡張案件）
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/basic_design_change.md
+
+基本設計の変更を適用してください
+
+パラメータ
+* project_root: <プロジェクトルートパス>
+* spec_directory: <SPECディレクトリパス>
+* change_spec: <変更差分ファイルパス>（省略可、デフォルト: {spec_directory}/basic_design/CHANGES.md）
+```
+
+AIが自動で以下を実行
+1. CHANGES.md（変更差分ファイル）を読み込み
+2. 変更の影響を受けるファイルを特定
+3. 変更タスクファイル（`tasks/change_tasks.md`）を生成
+4. 既存の指示書を呼び出して更新
+5. CHANGES.mdをアーカイブ
+
+使用方法:
+1. 基本設計SPECのマスターファイル（functional_design.md等）を自由に編集
+2. CHANGES.mdを作成して変更内容を明示的に記載
+3. 上記コマンドを実行
+4. 適用後、CHANGES.mdは自動的にchanges_archive/に移動
+
+重要:
+* マスターファイルはMarkdown、EXCEL、PDF、Word等、任意の形式で管理可能
+* 変更内容はCHANGES.mdに明示的に記載（形式非依存）
 
 ---
 
@@ -199,7 +250,10 @@ agent_skills/jakarta-ee-api-base/
     ├── task_breakdown.md             # ステップ2: タスク分解
     ├── detailed_design.md            # ステップ3: 詳細設計
     ├── code_generation.md            # ステップ4: コード生成（実装+単体テスト）
-    └── e2e_test_generation.md        # ステップ5: E2Eテスト生成（REST Assured）
+    ├── unit_test_execution.md        # ステップ5: 単体テスト実行評価
+    ├── it_generation.md              # ステップ6: 結合テスト生成（JUnit + Weld SE）
+    ├── e2e_test_generation.md        # ステップ7: E2Eテスト生成（REST Assured）
+    └── basic_design_change.md        # 基本設計変更対応（手戻り・拡張案件）
 ```
 
 ---

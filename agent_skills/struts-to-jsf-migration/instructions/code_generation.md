@@ -65,7 +65,7 @@ skip_infrastructure: false  # 機能タスクではこのパラメータは無�
    * セッション管理方針（ViewScoped、Flash Scope、Session Scope）
    * コード生成時は、ここで定義された技術スタックを厳密に遵守すること
 
-5. 必須: `{project_root}/specs/baseline/basic_design/requirements.md` で機能要件と成功基準を確認する
+5. 必須: `{project_root}/specs/baseline/requirements/requirements.md` で機能要件と成功基準を確認する
 
 6. 必須: `{project_root}/specs/baseline/basic_design/functional_design.md` でシステム全体の機能設計、画面一覧、画面遷移図を確認する
 

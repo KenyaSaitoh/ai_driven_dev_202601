@@ -209,17 +209,6 @@ FUNC_004_books_api:
 * 同じレベルのタスクは並行実行可能
 * タスク番号（FUNC_001、FUNC_002...）は実装順序を示すだけで、永続的なIDではない
 
-### 2.4 E2Eテストタスク
-
-`tasks/e2e_test.md`
-* 機能間結合テスト
-* E2E APIテスト - 主要な業務フローをAPIシーケンスでテストする
-* パフォーマンステスト
-* セキュリティテスト
-* CORS動作確認（該当する場合）
-* 並行処理テスト（該当する場合）
-* 最終検証
-
 ---
 
 ## 3. タスク分解ルール
@@ -298,11 +287,6 @@ FUNC_004_books_api:
 * `FUNC_004_books_api.md` [並行: FUNC_005, FUNC_006]
 * `FUNC_005_orders_api.md` [並行: FUNC_004, FUNC_006]
 * `FUNC_006_images_api.md` [並行: FUNC_004, FUNC_005]
-
-#### 最終レベル: E2Eテスト
-* `tasks/e2e_test.md`
-* 全機能実装後に実行
-* 機能間結合、E2E APIテスト、パフォーマンステスト
 
 重要な原則：
 * レベルは依存関係から自動的に決まる
@@ -406,8 +390,6 @@ FUNC_004_books_api:
 | 4. FUNC_004 | FUNC_004_orders_api.md | FUNC_001, FUNC_002 | FUNC_003, FUNC_005 | L3 | 担当者B | [分析から算出] |
 | 5. FUNC_005 | FUNC_005_images_api.md | FUNC_001 | FUNC_003, FUNC_004 | L3 | 担当者C | [分析から算出] |
 | ... | ... | ... | ... | ... | ... | ... |
-| N. e2e | e2e_test.md | 全FUNC | 不可 | LN | 全員 | [分析から算出] |
-
 重要: 
 * 「依存タスク」列: このタスクを開始する前に完了している必要があるタスク
 * 「並行実行可能」列: このタスクと同時に実行可能な他のタスク
@@ -433,9 +415,6 @@ FUNC_004_books_api:
 * FUNC_004_orders_api.md（依存: FUNC_001, FUNC_002 / 並行: FUNC_003, FUNC_005）
 * FUNC_005_images_api.md（依存: FUNC_001 / 並行: FUNC_003, FUNC_004）
 
-レベルN（全FUNC完了後）:
-* e2e_test.md
-
 ### タスクファイル一覧（実行順序）
 
 レベル0:
@@ -452,9 +431,6 @@ FUNC_004_books_api:
 * [FUNC_004_orders_api.md](FUNC_004_orders_api.md) - [内容は依存関係分析で決定]
 * [FUNC_005_images_api.md](FUNC_005_images_api.md) - [内容は依存関係分析で決定]
 
-レベルN:
-* [e2e_test.md](e2e_test.md) - E2Eテスト
-
 ## 依存関係図
 
 ```mermaid
@@ -464,7 +440,6 @@ graph TD
     F002[FUNC_002_common]
     F003[FUNC_003_books]
     F004[FUNC_004_orders]
-    E2E[e2e_test]
     
     Setup --> F001
     F001 --> F002
@@ -472,8 +447,6 @@ graph TD
     F001 --> F004
     F002 --> F003
     F002 --> F004
-    F003 --> E2E
-    F004 --> E2E
 \```
 ```
 

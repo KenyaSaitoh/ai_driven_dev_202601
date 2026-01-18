@@ -158,6 +158,15 @@ subprojects {
         testImplementation "org.mockito:mockito-core:5.5.0"
         testImplementation "org.mockito:mockito-junit-jupiter:5.5.0"
         
+        // 結合テスト: Weld SE（CDIコンテナ）
+        testImplementation "org.jboss.weld.se:weld-se-core:5.1.0.Final"
+        
+        // 結合テスト: WireMock（外部APIモック）
+        testImplementation "com.github.tomakehurst:wiremock-jre8:2.35.0"
+        
+        // 結合テスト: Hibernate（JPA実装）
+        testImplementation "org.hibernate.orm:hibernate-core:6.4.0.Final"
+        
         // E2Eテスト: Playwright（Web/JSF系プロジェクト用）
         testImplementation "com.microsoft.playwright:playwright:1.40.0"
         
@@ -280,14 +289,14 @@ subprojects {
     // テスト設定（全プロジェクト共通）
     test {
         useJUnitPlatform {
-            // E2Eテスト(@Tag("e2e"))を除外（全プロジェクト共通）
-            excludeTags 'e2e'
+            // 結合テスト(@Tag("integration"))とE2Eテスト(@Tag("e2e"))を除外
+            excludeTags 'integration', 'e2e'
         }
         
         // berry-books-mvc-sdd用: 詳細なテストログ
         if (project.name == "berry-books-mvc-sdd") {
             useJUnitPlatform {
-                excludeTags 'e2e'
+                excludeTags 'integration', 'e2e'
             }
             testLogging {
                 events "passed", "skipped", "failed"
@@ -300,6 +309,48 @@ subprojects {
             systemProperty 'stdout.encoding', 'UTF-8'
             systemProperty 'stderr.encoding', 'UTF-8'
             jvmArgs '-Dfile.encoding=UTF-8', '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
+        }
+    }
+    
+    // 結合テスト専用タスク（全プロジェクト共通）
+    task integrationTest(type: Test) {
+        group = "verification"
+        description = "Run integration tests with @Tag(\"integration\") (requires no deployed application)"
+        
+        useJUnitPlatform {
+            includeTags 'integration'
+        }
+        
+        testLogging {
+            events "passed", "skipped", "failed"
+            exceptionFormat "full"
+            showStandardStreams = false
+        }
+        
+        // 日本語の文字化け対策（Windows対応）
+        systemProperty 'file.encoding', 'UTF-8'
+        systemProperty 'sun.jnu.encoding', 'UTF-8'
+        systemProperty 'stdout.encoding', 'UTF-8'
+        systemProperty 'stderr.encoding', 'UTF-8'
+        jvmArgs '-Dfile.encoding=UTF-8', '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
+        
+        // Weld SE用の設定
+        systemProperty 'weld.se.debug', 'false'
+        
+        // 結合テストの前に、単体テストが完了していることを推奨
+        shouldRunAfter test
+        
+        doFirst {
+            println ""
+            println "===================================="
+            println "Running Integration Tests for ${project.name}"
+            println "===================================="
+            println "Integration tests use:"
+            println "  - Weld SE (CDI Container)"
+            println "  - In-memory HSQLDB"
+            println "  - WireMock for external APIs"
+            println "  - No application server required"
+            println ""
         }
     }
     
@@ -325,8 +376,8 @@ subprojects {
         systemProperty 'stderr.encoding', 'UTF-8'
         jvmArgs '-Dfile.encoding=UTF-8', '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8'
         
-        // E2Eテストの前に、通常のテストが完了していることを推奨
-        shouldRunAfter test
+        // E2Eテストの前に、結合テストが完了していることを推奨
+        shouldRunAfter integrationTest
         
         doFirst {
             println ""
@@ -341,7 +392,7 @@ subprojects {
     }
     
     // SDD成果物クリーンアップタスク（全プロジェクト共通）
-    // 注意: basic_design/ は絶対に削除しない（基本設計SPECは保護）
+    // 注意: requirements/ と basic_design/ は絶対に削除しない（要件定義・基本設計SPECは保護）
     
     task cleanTasks {
         group = "sdd"
@@ -470,19 +521,19 @@ subprojects {
             println "    - src/main/webapp/ (with .gitkeep)"
             println "    - src/test/java/ (with .gitkeep)"
             println "    - src/test/resources/ (with .gitkeep)"
-            println "✓ SPEC files are preserved (basic_design/, detailed_design/)"
+            println "✓ SPEC files are preserved (requirements/, basic_design/, detailed_design/)"
         }
     }
     
     task cleanAllSdd {
         group = "sdd"
-        description = "Clean all SDD artifacts except basic_design/ (tasks, detailed_design, code)"
+        description = "Clean all SDD artifacts except requirements/ and basic_design/ (tasks, detailed_design, code)"
         dependsOn cleanTasks, cleanDetailedDesign, cleanCode
         doLast {
             println ""
             println "===================================="
             println "All SDD artifacts cleaned for ${project.name}!"
-            println "Preserved: specs/*/basic_design/"
+            println "Preserved: specs/*/requirements/, specs/*/basic_design/"
             println "Empty folders kept: tasks/, specs/*/detailed_design/"
             println "===================================="
         }
@@ -988,6 +1039,11 @@ subprojects {
                 println "[INFO] Empty directories contain .gitkeep files."
                 println ""
                 println "Ready for re-implementation from SPEC!"
+                println ""
+                println "[INFO] Preserved SPEC files:"
+                println "    - specs/*/requirements/ (requirements.md, behaviors.md for E2E tests)"
+                println "    - specs/*/basic_design/ (architecture, functional design, behaviors.md for integration tests)"
+                println ""
                 println "Next steps:"
                 println "  1. Review specs/baseline/ for specifications"
                 println "  2. Review sql/ for database scripts"
@@ -1209,6 +1265,10 @@ task cleanupAllSddProjects {
         println "  ✓ back-office-api-sdd"
         println "  ✓ berry-books-api-sdd"
         println "  ✓ jsf-person-sdd"
+        println ""
+        println "[INFO] Preserved SPEC files:"
+        println "    - specs/*/requirements/ (requirements.md, behaviors.md for E2E tests)"
+        println "    - specs/*/basic_design/ (architecture, functional design, behaviors.md for integration tests)"
         println ""
     }
 }

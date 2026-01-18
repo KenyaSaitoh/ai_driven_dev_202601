@@ -1,11 +1,11 @@
 ---
 name: struts-to-jsf-migration
-description: Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを支援。仕様駆動アプローチ（Spec-Driven Migration）により、リバースエンジニアリング、タスク分解、詳細設計、コード生成、E2Eテストの6段階で確実なマイグレーションを実現。
+description: Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを支援。仕様駆動アプローチ（Spec-Driven Migration）により、リバースエンジニアリング、タスク分解、詳細設計、コード生成、結合テスト、E2Eテストの7段階で確実なマイグレーションを実現。基本設計変更対応も含む。
 ---
 
 # Struts to JSF マイグレーション Agent Skill
 
-## 使い方（6段階プロセス）
+## 使い方（7段階プロセス）
 
 ### ステップ1: リバースエンジニアリング
 
@@ -112,7 +112,25 @@ AIが自動で以下を実行
     └──── フィードバック ←────┘
 ```
 
-### ステップ6: E2Eテスト生成
+### ステップ6: 結合テスト生成
+
+```
+@agent_skills/struts-to-jsf-migration/instructions/it_generation.md
+
+結合テストを生成してください
+
+パラメータ
+* project_root: projects/jsf-migration/struts-app-jsf
+* spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
+```
+
+AIが自動で以下を実行
+1. basic_design/behaviors.md（結合テストシナリオ）を読み込み
+2. JUnit 5 + Weld SE を使用した結合テストを生成
+   * Service層以下（Service + DAO + Entity + DB）の連携テスト
+   * 実際のDBアクセス（メモリDB）
+
+### ステップ7: E2Eテスト生成
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/e2e_test_generation.md
@@ -125,11 +143,43 @@ E2Eテストを生成してください
 ```
 
 AIが自動で以下を実行
-1. basic_design/behaviors.md（E2Eテストシナリオ）を読み込み
+1. requirements/behaviors.md（E2Eテストシナリオ）を読み込み
 2. Playwright を使用したE2Eテストを生成
    * 複数画面にまたがるフローをテスト
    * 実際のブラウザ操作
 3. テストデータのセットアップ/クリーンアップコードを生成
+
+---
+
+## 🔄 基本設計変更対応（手戻り・拡張案件）
+
+```
+@agent_skills/struts-to-jsf-migration/instructions/basic_design_change.md
+
+基本設計の変更を適用してください
+
+パラメータ
+* project_root: projects/jsf-migration/struts-app-jsf
+* spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
+* change_spec: <変更差分ファイルパス>（省略可、デフォルト: {spec_directory}/basic_design/CHANGES.md）
+```
+
+AIが自動で以下を実行
+1. CHANGES.md（変更差分ファイル）を読み込み
+2. 変更の影響を受けるファイル（詳細設計、コード、XHTML、テスト）を特定
+3. 変更タスクファイル（`tasks/change_tasks.md`）を生成
+4. 既存の指示書を呼び出して更新
+5. CHANGES.mdをアーカイブ
+
+使用方法:
+1. 基本設計SPECのマスターファイル（functional_design.md、screen_design.md等）を自由に編集
+2. CHANGES.mdを作成して変更内容を明示的に記載
+3. 上記コマンドを実行
+4. 適用後、CHANGES.mdは自動的にchanges_archive/に移動
+
+重要:
+* マスターファイルはMarkdown、EXCEL、PDF、Word等、任意の形式で管理可能
+* 変更内容はCHANGES.mdに明示的に記載（形式非依存）
 
 ---
 
@@ -190,7 +240,10 @@ agent_skills/struts-to-jsf-migration/
     ├── task_breakdown.md             # ステップ2: タスク分解
     ├── detailed_design.md            # ステップ3: 詳細設計
     ├── code_generation.md            # ステップ4: コード生成（実装+単体テスト）
-    └── e2e_test_generation.md        # ステップ5: E2Eテスト生成（Playwright）
+    ├── unit_test_execution.md        # ステップ5: 単体テスト実行評価
+    ├── it_generation.md              # ステップ6: 結合テスト生成（JUnit + Weld SE）
+    ├── e2e_test_generation.md        # ステップ7: E2Eテスト生成（Playwright）
+    └── basic_design_change.md        # 基本設計変更対応（手戻り・拡張案件）
 ```
 
 ---

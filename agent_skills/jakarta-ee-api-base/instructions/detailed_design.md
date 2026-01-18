@@ -120,7 +120,8 @@ behaviors.mdの違い:
   * 注意: data_model.mdはRDB論理設計（テーブル、カラム、制約）のみ記述
   * JPAエンティティクラスの設計（@Entity, @Column, @ManyToOne等のアノテーション、Java型、リレーションマッピング）は該当する機能タスクのdetailed_design.mdで実施（通常はEntity/Daoを担当する機能タスク）
 
-* {spec_directory}/basic_design/behaviors.md - システム全体の振る舞い（全APIの振る舞いを含む）を確認する
+* {spec_directory}/basic_design/behaviors.md - 結合テスト用の振る舞い（Service層以下）を確認する
+* {spec_directory}/requirements/behaviors.md - E2Eテスト用の振る舞い（システム全体）を確認する（参考）
 
 注意: 
 * 基本設計フェーズでは、全ての機能が basic_design/ に一枚岩として記述されている
@@ -290,8 +291,9 @@ FUNC_003の例（REST API機能）:
   * 複数クラスにまたがる統合シナリオ
 
 重要: 
-* basic_design/behaviors.md（結合テスト/E2Eテスト用）とは完全に別物
-* basic_design/behaviors.md: システム全体の振る舞い、複数コンポーネント連携、実際のDB/外部API
+* requirements/behaviors.md（E2Eテスト用）、basic_design/behaviors.md（結合テスト用）とは完全に別物
+* requirements/behaviors.md: システム全体のE2Eシナリオ、API層含む全体フロー
+* basic_design/behaviors.md: Service層以下の連携シナリオ、実際のDB操作
 * detailed_design/{target}/behaviors.md: 純粋な単体テスト、1メソッド単位、依存関係はモック
 
 ### 3.2 システム全体の詳細設計書テンプレート

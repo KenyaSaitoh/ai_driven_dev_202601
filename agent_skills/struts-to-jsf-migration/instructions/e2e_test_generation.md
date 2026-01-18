@@ -540,11 +540,11 @@ void closeContextWithVideo(TestInfo testInfo) {
 
 ---
 
-## 7. basic_design/behaviors.md からのテストケース生成
+## 7. requirements/behaviors.md からのテストケース生成
 
 ### 7.1 シナリオの読み取り
 
-basic_design/behaviors.md の各シナリオを読み取り、以下の情報を抽出:
+requirements/behaviors.md の各シナリオを読み取り、以下の情報を抽出:
 
 * Given: 初期状態、表示する画面、テストデータの準備
 * When: 実行するユーザー操作（ボタンクリック、入力、選択等）
@@ -693,7 +693,7 @@ browser = playwright.webkit().launch();
 
 * Playwright for Java公式ドキュメント: https://playwright.dev/java/
 * JUnit 5公式ドキュメント: https://junit.org/junit5/
-* basic_design/behaviors.md - E2Eテストシナリオ
+* requirements/behaviors.md - E2Eテストシナリオ
 * basic_design/screen_design.md - 画面設計
 * basic_design/functional_design.md - 機能仕様
 * basic_design/architecture_design.md - システム構成

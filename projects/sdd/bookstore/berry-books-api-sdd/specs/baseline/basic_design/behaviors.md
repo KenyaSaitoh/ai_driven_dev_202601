@@ -1,351 +1,309 @@
-# berry-books-api - 振る舞い仕様書（受入基準）
+# Service層以下 - 結合テスト仕様書
 
 プロジェクトID: berry-books-api  
 バージョン: 2.0.0  
-最終更新日: 2025-12-27  
-ステータス: REST API受入基準確定
+最終更新日: 2025-01-18  
+ステータス: Service層結合テスト仕様確定
 
 ---
 
 ## 1. 概要
 
-本文書は、berry-books-api REST APIの各機能の受入基準を記述する。各APIエンドポイントについて、正常系・異常系の振る舞いを定義し、テストシナリオの基礎とする。
+本文書は、berry-books-api REST APIのService層以下（Service + DAO + Entity + DB）の結合テスト仕様を記述する。API層（Resource）は含まず、ビジネスロジック層とデータアクセス層の連携をテストする。
 
-### 1.1 API別受入基準
+**テスト対象:**
+- Service層のビジネスロジック
+- DAO層のデータアクセス（存在する場合）
+- Entity（JPA）のマッピング
+- 実際のDB操作（メモリDB）
+- 外部API呼び出し（WireMockでスタブ化）
 
-API単位の受入基準は、以下のドキュメントを参照してください：
-
-* [API_001_auth](../detailed_design/API_001_auth/behaviors.md) - 認証APIの受入基準
-* [API_002_books](../detailed_design/API_002_books/behaviors.md) - 書籍APIの受入基準
-* [API_003_orders](../detailed_design/API_003_orders/behaviors.md) - 注文APIの受入基準
-* [API_004_images](../detailed_design/API_004_images/behaviors.md) - 画像APIの受入基準
-
----
-
-## 2. 認証API /api/auth`)
-
-### 2.1 ログイン (`POS/api/auth/login`)
-
-#### 2.1.1 正常系
-
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| AUTH-LOGIN-001 | 正しいメールアドレスとパスワードでログインできる | 顧客が登録されている（alice@gmail.com, password） | メールアドレス・パスワードでログインリクエスト | 200 OK<br/>JWT Cookieが発行される<br/>顧客情報が返される |
-| AUTH-LOGIN-002 | BCryptハッシュ化されたパスワードでログインできる | パスワードがBCryptハッシュで保存されている | 平文パスワードでログインリクエスト | 200 OK<br/>BCrypt.checkpw()で照合成功<br/>JWT Cookieが発行される |
-| AUTH-LOGIN-003 | 平文パスワード（開発環境）でログインできる | パスワードが平文で保存されている | 平文パスワードでログインリクエスト | 200 OK<br/>平文比較で照合成功<br/>JWT Cookieが発行される |
-
-#### 2.1.2 異常系
-
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| AUTH-LOGIN-E001 | メールアドレスが存在しない場合、エラー | メールアドレスが未登録 | 未登録のメールアドレスでログインリクエスト | 401 Unauthorized<br/>"メールアドレスまたはパスワードが正しくありません" |
-| AUTH-LOGIN-E002 | パスワードが一致しない場合、エラー | メールアドレスは存在するがパスワードが不一致 | 誤ったパスワードでログインリクエスト | 401 Unauthorized<br/>"メールアドレスまたはパスワードが正しくありません" |
-| AUTH-LOGIN-E003 | メールアドレスが空の場合、エラー | - | メールアドレスが空でログインリクエスト | 400 Bad Request<br/>Bean Validationエラー |
-| AUTH-LOGIN-E004 | パスワードが空の場合、エラー | - | パスワードが空でログインリクエスト | 400 Bad Request<br/>Bean Validationエラー |
+**テスト対象外:**
+- API層（Resource、JAX-RS）
+- HTTPリクエスト/レスポンス
+- 認証・認可（JWT、Cookie）
 
 ---
 
-### 2.2 ログアウト (`POS/api/auth/logout`)
+## 2. Service層のビジネスロジックシナリオ
 
-#### 2.2.1 正常系
+### 2.1 AuthService - 認証サービス
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| AUTH-LOGOUT-001 | ログアウトできる | ログイン済み | ログアウトリクエスト | 200 OK<br/>JWT Cookie削除（MaxAge=0） |
-| AUTH-LOGOUT-002 | 未ログイン状態でもログアウトできる | 未ログイン | ログアウトリクエスト | 200 OK<br/>JWT Cookie削除（MaxAge=0） |
+#### シナリオ: 顧客認証（BCryptパスワード検証）
 
----
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| DBに顧客が存在:<br/>- email="alice@gmail.com"<br/>- password="$2a$10$..." (BCrypt) | AuthService.authenticate(email="alice@gmail.com", password="password123") | 認証成功<br/>Customerエンティティが返される |
 
-### 2.3 新規登録 (`POS/api/auth/register`)
+#### シナリオ: 認証失敗（パスワード不一致）
 
-#### 2.3.1 正常系
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| DBに顧客が存在:<br/>- email="alice@gmail.com"<br/>- password="$2a$10$..." | AuthService.authenticate(email="alice@gmail.com", password="wrongpassword") | AuthenticationExceptionがスローされる |
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| AUTH-REG-001 | 新規顧客を登録できる | メールアドレスが未登録 | 顧客情報で登録リクエスト | 200 OK<br/>顧客が登録される<br/>パスワードがBCryptハッシュ化される<br/>JWT Cookieが発行される |
-| AUTH-REG-002 | 住所が都道府県名から始まる場合、登録できる | - | address="東京都渋谷区1-2-3"で登録リクエスト | 200 OK<br/>登録成功 |
-| AUTH-REG-003 | 生年月日が任意項目で登録できる | - | birthday=nullで登録リクエスト | 200 OK<br/>登録成功 |
+#### シナリオ: 認証失敗（顧客が存在しない）
 
-#### 2.3.2 異常系
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| DBに顧客が存在しない | AuthService.authenticate(email="notfound@example.com", password="password123") | AuthenticationExceptionがスローされる |
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| AUTH-REG-E001 | メールアドレスが既に存在する場合、エラー | メールアドレスが既に登録済み | 既存のメールアドレスで登録リクエスト | 409 Conflict<br/>"指定されたメールアドレスは既に登録されています" |
-| AUTH-REG-E002 | 住所が都道府県名から始まらない場合、エラー | - | address="渋谷区1-2-3"で登録リクエスト | 400 Bad Request<br/>"住所は都道府県名から始めてください" |
-| AUTH-REG-E003 | メールアドレスが空の場合、エラー | - | email=nullで登録リクエスト | 400 Bad Request<br/>Bean Validationエラー |
-| AUTH-REG-E004 | 顧客名が空の場合、エラー | - | customerName=nullで登録リクエスト | 400 Bad Request<br/>Bean Validationエラー |
-| AUTH-REG-E005 | パスワードが空の場合、エラー | - | password=nullで登録リクエスト | 400 Bad Request<br/>Bean Validationエラー |
+#### シナリオ: 平文パスワード認証（開発環境用）
 
----
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| DBに顧客が存在:<br/>- email="bob@gmail.com"<br/>- password="password" (平文) | AuthService.authenticate(email="bob@gmail.com", password="password") | 認証成功<br/>平文比較で照合される |
 
-### 2.4 現在のログインユーザー情報取得 (`GE/api/auth/me`)
+### 2.2 BookService - 書籍サービス
 
-#### 2.4.1 正常系
+#### シナリオ: 外部書籍APIから書籍情報を取得（WireMock）
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| AUTH-ME-001 | ログイン中の顧客情報を取得できる | JWT Cookieが設定されている /api/auth/meにリクエスト | 200 OK<br/>顧客情報が返される |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが以下をスタブ:<br/>- GET /api/books/1<br/>- Response: {bookId: 1, bookName: "Java完全理解", price: 3200} | BookService.getBookFromBackOffice(bookId=1) | 外部APIが呼ばれる<br/>書籍情報が取得される |
 
-#### 2.4.2 異常系
+#### シナリオ: 複数書籍検索（外部API）
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| AUTH-ME-E001 | JWT Cookieが設定されていない場合、エラー | JWT Cookieが未設定 /api/auth/meにリクエスト | 401 Unauthorized<br/>"認証が必要です" |
-| AUTH-ME-E002 | JWTが無効な場合、エラー | JWT Cookieが無効（改ざん、期限切れ） /api/auth/meにリクエスト | 401 Unauthorized<br/>"認証が必要です" |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが以下をスタブ:<br/>- GET /api/books/search?categoryId=1<br/>- Response: [{bookId: 1, ...}, {bookId: 2, ...}] | BookService.searchBooks(categoryId=1, keyword=null) | 外部APIが呼ばれる<br/>書籍リストが取得される |
 
----
+#### シナリオ: 外部API呼び出しエラー（404 Not Found）
 
-## 3. 書籍API /api/books`)
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが以下をスタブ:<br/>- GET /api/books/999<br/>- Response: 404 Not Found | BookService.getBookFromBackOffice(bookId=999) | ExternalApiExceptionがスローされる<br/>"書籍が見つかりません" |
 
-### 3.1 書籍一覧取得 (`GE/api/books`)
+### 2.3 OrderService - 注文サービス
 
-#### 3.1.1 正常系
+#### シナリオ: 注文作成（外部在庫API連携）
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| BOOK-LIST-001 | 全書籍を取得できる | 書籍が登録されている /api/booksにリクエスト | 200 OK<br/>全書籍が返される<br/>カテゴリ、出版社、在庫情報を含む |
-| BOOK-LIST-002 | 書籍が0件の場合、空配列を返す | 書籍が1件も登録されていない /api/booksにリクエスト | 200 OK<br/>空配列 [] が返される |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| 顧客ID=1が存在<br/>WireMockが以下をスタブ:<br/>- PUT /api/stocks/1<br/>- Response: {quantity: 8, version: 1} | OrderService.createOrder(customerId=1, items=[{bookId:1, quantity:2}]) | 1. OrderTranエンティティが作成される<br/>2. OrderDetailエンティティが作成される<br/>3. 外部在庫APIが呼ばれる<br/>4. OrderTranのstateが"CONFIRMED"になる |
 
----
+#### シナリオ: 注文作成（在庫不足エラー）
 
-### 3.2 書籍詳細取得 (`GE/api/books/{id}`)
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが以下をスタブ:<br/>- PUT /api/stocks/1<br/>- Response: 400 Bad Request, {message: "在庫不足"} | OrderService.createOrder(customerId=1, items=[{bookId:1, quantity:100}]) | OutOfStockExceptionがスローされる<br/>OrderTranは作成されない（ロールバック） |
 
-#### 3.2.1 正常系
+#### シナリオ: 注文一覧取得（顧客別）
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| BOOK-DETAIL-001 | 指定IDの書籍を取得できる | 書籍ID=1が存在する /api/books/1にリクエスト | 200 OK<br/>書籍ID=1の情報が返される<br/>カテゴリ、出版社、在庫情報を含む |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| DBに以下の注文が存在:<br/>- OrderTran(id=1, customerId=1)<br/>- OrderTran(id=2, customerId=1)<br/>- OrderTran(id=3, customerId=2) | OrderService.findOrdersByCustomer(customerId=1) | 顧客ID=1の注文2件が取得される |
 
-#### 3.2.2 異常系
+#### シナリオ: 注文詳細取得（OrderDetail含む）
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| BOOK-DETAIL-E001 | 指定IDの書籍が存在しない場合、エラー | 書籍ID=999が存在しない /api/books/999にリクエスト | 404 Not Found<br/>"書籍が見つかりません" |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| OrderTran(id=1, customerId=1)<br/>OrderDetail(id=1, tranId=1, bookId=1, quantity=2)<br/>OrderDetail(id=2, tranId=1, bookId=2, quantity=1) | OrderService.getOrderDetail(tranId=1) | OrderTranエンティティが取得され、<br/>orderTran.details.size() == 2<br/>（Lazy Loadingで詳細も取得） |
 
----
+### 2.4 ImageService - 画像サービス
 
-### 3.3 書籍検索 (`GE/api/books/search`)
+#### シナリオ: 外部画像APIから画像情報を取得
 
-#### 3.3.1 正常系
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが以下をスタブ:<br/>- GET /api/images/book/1<br/>- Response: {imageId: 1, url: "https://...", contentType: "image/jpeg"} | ImageService.getBookImage(bookId=1) | 外部APIが呼ばれる<br/>画像情報が取得される |
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| BOOK-SEARCH-001 | カテゴリIDで検索できる | カテゴリID=1の書籍が存在する | categoryId=1で検索リクエスト | 200 OK<br/>カテゴリID=1の書籍が返される |
-| BOOK-SEARCH-002 | キーワードで検索できる | 書籍名に"Java"を含む書籍が存在する | keyword="Java"で検索リクエスト | 200 OK<br/>書籍名または著者名に"Java"を含む書籍が返される（部分一致） |
-| BOOK-SEARCH-003 | カテゴリID+キーワードで検索できる | カテゴリID=1で書籍名に"Java"を含む書籍が存在する | categoryId=1&keyword="Java"で検索 | 200 OK<br/>カテゴリID=1かつ"Java"を含む書籍が返される |
-| BOOK-SEARCH-004 | categoryId=0は全カテゴリを検索する | - | categoryId=0&keyword="Java"で検索 | 200 OK<br/>全カテゴリから"Java"を含む書籍が返される |
-| BOOK-SEARCH-005 | パラメータ未指定で全書籍を返す | - | パラメータなしで検索リクエスト | 200 OK<br/>全書籍が返される |
-| BOOK-SEARCH-006 | 検索結果が0件の場合、空配列を返す | 該当書籍なし | keyword="存在しないキーワード"で検索 | 200 OK<br/>空配列 [] が返される |
+#### シナリオ: 外部画像API（画像が存在しない）
+
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが以下をスタブ:<br/>- GET /api/images/book/999<br/>- Response: 404 Not Found | ImageService.getBookImage(bookId=999) | nullが返される<br/>（画像がない場合はnullを許容） |
 
 ---
 
-### 3.4 カテゴリ一覧取得 (`GE/api/books/categories`)
+## 3. トランザクション管理シナリオ
 
-#### 3.4.1 正常系
+### 3.1 トランザクションロールバック（注文作成失敗）
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| BOOK-CAT-001 | 全カテゴリをMapで取得できる | カテゴリが登録されている /api/books/categoriesにリクエスト | 200 OK<br/>カテゴリMapが返される<br/>{"Java": 1, "JavaScript": 2, ...} |
+#### シナリオ: 外部API呼び出し失敗時のロールバック
 
----
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが在庫API失敗を返す:<br/>- PUT /api/stocks/1<br/>- Response: 500 Internal Server Error | OrderService.createOrder(customerId=1, items=[{bookId:1, quantity:2}]) 内で:<br/>1. OrderTran作成<br/>2. OrderDetail作成<br/>3. 外部API呼び出し → 失敗 | トランザクション全体がロールバックされる:<br/>- OrderTranは作成されない<br/>- OrderDetailも作成されない |
 
-## 4. 注文API /api/orders`)
+### 3.2 複数エンティティの整合性
 
-### 4.1 注文作成 (`POS/api/orders`)
+#### シナリオ: 注文作成時の関連エンティティ更新
 
-#### 4.1.1 正常系
-
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| ORDER-CREATE-001 | 注文を作成できる | ログイン済み<br/>在庫あり（数量10, version=1） | カート情報で注文リクエスト | 200 OK<br/>注文レコードが作成される<br/>在庫が減算される<br/>OrderResponseが返される |
-| ORDER-CREATE-002 | 複数書籍を同時に注文できる | ログイン済み<br/>全書籍の在庫あり | 複数カート項目で注文リクエスト | 200 OK<br/>複数の注文明細が作成される<br/>各書籍の在庫が減算される |
-| ORDER-CREATE-003 | トランザクションがコミットされる | ログイン済み<br/>在庫あり | 注文リクエスト | 200 OK<br/>ORDER_TRAN, ORDER_DETAIL, STOCKが同時にコミットされる |
-
-#### 4.1.2 異常系
-
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| ORDER-CREATE-E001 | 未ログインの場合、エラー | JWT Cookie未設定 | 注文リクエスト | 401 Unauthorized<br/>"認証が必要です" |
-| ORDER-CREATE-E002 | 在庫不足の場合、エラー | 在庫数=5<br/>注文数=10 | 在庫を超える数量で注文リクエスト | 409 Conflict<br/>"在庫が不足しています: {bookName}" |
-| ORDER-CREATE-E003 | 楽観的ロック競合の場合、エラー | カート追加時version=1<br/>注文時version=2（他ユーザーが購入済み） | version=1で注文リクエスト | 409 Conflict<br/>"他のユーザーが購入済みです。最新の在庫情報を確認してください。" |
-| ORDER-CREATE-E004 | 在庫不足でトランザクションがロールバックされる | 1冊目は在庫あり<br/>2冊目は在庫不足 | 2冊注文リクエスト | 409 Conflict<br/>1冊目の在庫減算もロールバックされる |
-| ORDER-CREATE-E005 | カート項目が空の場合、エラー | - | cartItems=[]で注文リクエスト | 400 Bad Request<br/>Bean Validationエラー |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| 顧客ID=1が存在<br/>外部在庫APIが成功 | OrderService.createOrder(customerId=1, items=[{bookId:1, quantity:2}, {bookId:2, quantity:1}]) | 1トランザクションで以下が作成される:<br/>- OrderTran 1件<br/>- OrderDetail 2件<br/>すべてコミットされる |
 
 ---
 
-### 4.2 注文履歴取得 (`GE/api/orders/history`)
+## 4. 外部API連携シナリオ（WireMock）
 
-#### 4.2.1 正常系
+### 4.1 back-office-api 連携
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| ORDER-HIST-001 | ログイン中の顧客の注文履歴を取得できる | ログイン済み<br/>注文履歴あり /api/orders/historyにリクエスト | 200 OK<br/>注文履歴が返される<br/>注文日降順でソート |
-| ORDER-HIST-002 | 注文履歴が0件の場合、空配列を返す | ログイン済み<br/>注文履歴なし /api/orders/historyにリクエスト | 200 OK<br/>空配列 [] が返される |
-| ORDER-HIST-003 | 注文明細ごとに1レコードで返される | 1注文に2明細が存在する /api/orders/historyにリクエスト | 200 OK<br/>2レコードが返される（非正規化） |
+#### シナリオ: 書籍API（GET /api/books/:id）
 
-#### 4.2.2 異常系
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが以下をスタブ:<br/>- GET /api/books/1<br/>- Response: 200 OK, {bookId: 1, bookName: "Java完全理解", price: 3200, categoryId: 1} | BookService.getBookFromBackOffice(bookId=1) | 外部APIが呼ばれる:<br/>- URL: http://localhost:8089/api/books/1<br/>- Method: GET<br/>レスポンスが正しくパースされる |
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| ORDER-HIST-E001 | 未ログインの場合、エラー | JWT Cookie未設定 /api/orders/historyにリクエスト | 401 Unauthorized<br/>"認証が必要です" |
+#### シナリオ: カテゴリAPI（GET /api/categories）
 
----
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが以下をスタブ:<br/>- GET /api/categories<br/>- Response: [{categoryId: 1, categoryName: "プログラミング"}, ...] | BookService.getAllCategories() | 外部APIが呼ばれる<br/>カテゴリリストが取得される |
 
-### 4.3 注文詳細取得 (`GE/api/orders/{tranId}`)
+#### シナリオ: 在庫API（PUT /api/stocks/:id）
 
-#### 4.3.1 正常系
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが以下をスタブ:<br/>- PUT /api/stocks/1<br/>- Request Body: {quantity: 8, version: 1}<br/>- Response: 200 OK, {quantity: 8, version: 2} | OrderService.updateStock(bookId=1, quantity=8, version=1) | 外部APIが呼ばれる:<br/>- URL: http://localhost:8089/api/stocks/1<br/>- Method: PUT<br/>- Body: {quantity: 8, version: 1} |
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| ORDER-DETAIL-001 | 指定IDの注文詳細を取得できる | 注文ID=1が存在する /api/orders/1にリクエスト | 200 OK<br/>注文詳細が返される<br/>注文明細リスト（orderDetails）を含む |
+#### シナリオ: 出版社API（GET /api/publishers）
 
-#### 4.3.2 異常系
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが以下をスタブ:<br/>- GET /api/publishers<br/>- Response: [{publisherId: 1, publisherName: "技術評論社"}, ...] | BookService.getAllPublishers() | 外部APIが呼ばれる<br/>出版社リストが取得される |
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| ORDER-DETAIL-E001 | 指定IDの注文が存在しない場合、エラー | 注文ID=999が存在しない /api/orders/999にリクエスト | 404 Not Found<br/>"注文が見つかりません" |
+### 4.2 外部APIエラーハンドリング
 
----
+#### シナリオ: 外部APIタイムアウト
 
-### 4.4 注文明細取得 (`GE/api/orders/{tranId}/details/{detailId}`)
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが5秒遅延を設定:<br/>- GET /api/books/1<br/>- Fixed Delay: 5000ms | BookService.getBookFromBackOffice(bookId=1) | TimeoutExceptionがスローされる<br/>（タイムアウト設定: 3秒） |
 
-#### 4.4.1 正常系
+#### シナリオ: 外部API 401 Unauthorized
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| ORDER-DETAIL-ITEM-001 | 指定IDの注文明細を取得できる | 注文ID=1, 明細ID=1が存在する /api/orders/1/details/1にリクエスト | 200 OK<br/>注文明細が返される |
-
-#### 4.4.2 異常系
-
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| ORDER-DETAIL-ITEM-E001 | 指定IDの注文明細が存在しない場合、エラー | 注文ID=1, 明細ID=999が存在しない /api/orders/1/details/999にリクエスト | 404 Not Found<br/>"注文明細が見つかりません" |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが以下をスタブ:<br/>- GET /api/books/1<br/>- Response: 401 Unauthorized | BookService.getBookFromBackOffice(bookId=1) | UnauthorizedExceptionがスローされる |
 
 ---
 
-## 5. 画像API /api/images`)
+## 5. エンティティリレーションシナリオ
 
-### 5.1 書籍表紙画像取得 (`GE/api/images/covers/{bookId}`)
+### 5.1 OrderTran → OrderDetail (OneToMany)
 
-#### 5.1.1 正常系
+#### シナリオ: 注文詳細の遅延ロード
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| IMAGE-001 | 書籍表紙画像を取得できる | 書籍ID=1<br/>画像ファイルが存在する /api/images/covers/1にリクエスト | 200 OK<br/>Content-Type: image/jpeg<br/>画像バイナリが返される |
-| IMAGE-002 | 画像が存在しない場合、フォールバック画像を返す | 書籍ID=999<br/>画像ファイルが存在しない /api/images/covers/999にリクエスト | 200 OK<br/>no-image.jpgが返される |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| OrderTran(id=1)<br/>OrderDetail(id=1, tranId=1)<br/>OrderDetail(id=2, tranId=1) | OrderService.getOrderDetail(tranId=1) で:<br/>orderTran.getDetails() にアクセス | Lazy Loadingで詳細が取得される:<br/>orderTran.details.size() == 2 |
 
----
+#### シナリオ: Cascade.ALL による自動削除
 
-## 6. JWT認証フィルター
-
-### 6.1 JWT検証
-
-#### 6.1.1 正常系
-
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| JWT-001 | 有効なJWT Cookieでリクエストできる | 有効なJWT Cookie | 認証必須APIにリクエスト | APIが正常に実行される<br/>AuthenContextにcustomerIdが設定される |
-| JWT-002 | JWT不要なAPIは認証なしでアクセスできる | JWT Cookie未設定 /api/books（認証不要）にリクエスト | APIが正常に実行される |
-
-#### 6.1.2 異常系
-
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| JWT-E001 | JWT Cookieが設定されていない場合、認証エラー | JWT Cookie未設定 | 認証必須APIにリクエスト | 401 Unauthorized |
-| JWT-E002 | JWTが無効な場合、認証エラー | JWT Cookieが改ざんされている | 認証必須APIにリクエスト | 401 Unauthorized |
-| JWT-E003 | JWTが期限切れの場合、認証エラー | JWT Cookieが期限切れ | 認証必須APIにリクエスト | 401 Unauthorized |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| OrderTran(id=1)<br/>OrderDetail(id=1, tranId=1)<br/>OrderDetail(id=2, tranId=1) | OrderService.deleteOrder(tranId=1) | OrderTranが削除されると、<br/>関連するOrderDetailも自動削除される |
 
 ---
 
-## 7. 配送料金計算
+## 6. バリデーションシナリオ
 
-### 7.1 配送料金計算ロジック
+### 6.1 Bean Validation
 
-#### 7.1.1 正常系
+#### シナリオ: OrderTran のバリデーション
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| DELIVERY-001 | 購入金額10,000円未満の場合、配送料800円 | 購入金額=9,999円<br/>配送先=東京都 | 配送料金計算 | 配送料金=800円 |
-| DELIVERY-002 | 購入金額10,000円以上の場合、配送料無料 | 購入金額=10,000円<br/>配送先=東京都 | 配送料金計算 | 配送料金=0円 |
-| DELIVERY-003 | 沖縄県の場合、配送料が異なる | 購入金額=9,999円<br/>配送先=沖縄県 | 配送料金計算 | 配送料金=1,500円（仮定） |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| OrderTran(customerId=null, totalPrice=-100) | OrderService.createOrder(orderTran) | ConstraintViolationExceptionがスローされる:<br/>- customerId: "must not be null"<br/>- totalPrice: "must be greater than or equal to 0" |
 
----
+#### シナリオ: OrderDetail のバリデーション
 
-## 8. トランザクション管理
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| OrderDetail(bookId=null, quantity=0) | 注文詳細を作成 | ConstraintViolationExceptionがスローされる:<br/>- bookId: "must not be null"<br/>- quantity: "must be greater than 0" |
 
-### 8.1 トランザクション境界
+### 6.2 ビジネスルールバリデーション
 
-#### 8.1.1 正常系
+#### シナリオ: 注文金額の妥当性チェック
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| TXN-001 | 注文処理が単一トランザクションで実行される | - | 注文リクエスト | ORDER_TRAN, ORDER_DETAIL, STOCKが同時にコミットまたはロールバックされる |
-
-#### 8.1.2 異常系
-
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| TXN-E001 | エラー発生時にトランザクションがロールバックされる | 2冊注文<br/>2冊目で在庫不足 | 注文リクエスト | 1冊目の在庫減算もロールバックされる<br/>データベースが変更前の状態に戻る |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| 書籍A(price=3200) × 2 = 6400円<br/>配送料800円 | OrderService.createOrder() で:<br/>totalPrice=5000を指定 | BusinessRuleViolationExceptionがスローされる:<br/>"注文金額が正しくありません" |
 
 ---
 
-## 9. 並行制御（楽観的ロック）
+## 7. 性能関連シナリオ
 
-### 9.1 楽観的ロック制御
+### 7.1 N+1問題の回避
 
-#### 9.1.1 正常系
+#### シナリオ: JOIN FETCHによる一括取得
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| LOCK-001 | 楽観的ロックが成功する | カート追加時version=1<br/>注文時もversion=1 | version=1で注文リクエスト | 200 OK<br/>在庫が減算される<br/>versionが2にインクリメントされる |
-
-#### 9.1.2 異常系
-
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| LOCK-E001 | 楽観的ロック競合が発生する | カート追加時version=1<br/>他ユーザーが購入済み（version=2） | version=1で注文リクエスト | 409 Conflict<br/>"他のユーザーが購入済みです。最新の在庫情報を確認してください。"<br/>トランザクションがロールバックされる |
-| LOCK-E002 | 複数の書籍で楽観的ロック競合が発生する | 2冊注文<br/>2冊目でversion不一致 | 注文リクエスト | 409 Conflict<br/>1冊目の在庫減算もロールバックされる |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| OrderTran 100件、各OrderTranに複数のOrderDetail | OrderService.findAllOrders() で:<br/>JOIN FETCH使用 | SQLクエリが最小限で実行される:<br/>"SELECT ot, od FROM OrderTran ot LEFT JOIN FETCH ot.details od"<br/>N+1問題が発生しない |
 
 ---
 
-## 10. パフォーマンス受入基準
+## 8. テストデータ準備
 
-### 10.1 レスポンスタイム
+各テストケースでは、以下の方針でテストデータを準備する：
 
-| シナリオID | API | 受入基準 |
-|-----------|-----|---------|
-| PERF-001 | GE/api/books | 500ms以内（95パーセンタイル） |
-| PERF-002 | GE/api/books/search | 500ms以内（95パーセンタイル） |
-| PERF-003 | POS/api/orders | 500ms以内（95パーセンタイル） |
-| PERF-004 | GE/api/orders/history | 500ms以内（95パーセンタイル） |
+1. **@BeforeEach で初期データ投入**
+   - EntityManagerを使用してエンティティを永続化
+   - em.flush()で強制的にDBに反映
 
-### 10.2 スループット
+2. **@AfterEach でロールバック**
+   - トランザクションロールバックで自動クリーンアップ
+   - 次のテストへの影響を防ぐ
 
-| シナリオID | 受入基準 |
-|-----------|---------|
-| PERF-010 | 100 req/sec以上を処理できる |
-
----
-
-## 11. セキュリティ受入基準
-
-### 11.1 認証・認可
-
-| シナリオID | 説明 | 受入基準 |
-|-----------|------|---------|
-| SEC-001 | JWT Cookie は HttpOnly | JavaScriptからアクセス不可 |
-| SEC-002 | パスワードはBCryptハッシュ化 | パスワードが平文で保存されていない |
-| SEC-003 | 認証必須APIは未認証でアクセス不可 | 401 Unauthorized |
+3. **テストデータの一意性**
+   - UUIDやタイムスタンプを使用して一意なデータを生成
+   - テスト間の干渉を防ぐ
 
 ---
 
-## 12. 参考資料
+## 9. WireMockスタブ設定例
 
-本振る舞い仕様書に関連する詳細ドキュメント：
+### 9.1 書籍API（成功）
 
-* [requirements.md](requirements.md) - 要件定義書
-* [functional_design.md](functional_design.md) - 機能設計書（API仕様）
-* [architecture_design.md](architecture_design.md) - アーキテクチャ設計書
-* [data_model.md](data_model.md) - データモデル仕様書
-* [external_interface.md](external_interface.md) - 外部インターフェース仕様書
-* [README.md](../../README.md) - プロジェクトREADME
+```java
+@BeforeEach
+void setupWireMock() {
+    // 書籍API
+    stubFor(get(urlEqualTo("/api/books/1"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody("{\"bookId\": 1, \"bookName\": \"Java完全理解\", \"price\": 3200}")));
+    
+    // 在庫API
+    stubFor(put(urlEqualTo("/api/stocks/1"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody("{\"bookId\": 1, \"quantity\": 8, \"version\": 2}")));
+}
+```
+
+### 9.2 在庫API（エラー）
+
+```java
+stubFor(put(urlEqualTo("/api/stocks/1"))
+    .willReturn(aResponse()
+        .withStatus(400)
+        .withHeader("Content-Type", "application/json")
+        .withBody("{\"message\": \"在庫不足\"}")));
+```
+
+---
+
+## 10. テスト実行コマンド
+
+```bash
+# 結合テストのみ実行
+./gradlew :berry-books-api-sdd:integrationTest
+
+# 単体テスト→結合テスト→E2Eテストの順に実行
+./gradlew :berry-books-api-sdd:test integrationTest e2eTest
+```
+
+---
+
+## 11. 参考情報
+
+- **requirements/behaviors.md**: E2Eテスト用の受入基準（API層を含む全体フロー）
+- **basic_design/functional_design.md**: 機能設計書
+- **basic_design/data_model.md**: データモデル仕様書
+- **basic_design/external_interface.md**: 外部API仕様書
+- **agent_skills/jakarta-ee-api-base/instructions/it_generation.md**: 結合テスト生成指示書

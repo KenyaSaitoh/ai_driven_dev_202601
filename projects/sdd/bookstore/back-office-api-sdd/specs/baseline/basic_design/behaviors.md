@@ -1,217 +1,303 @@
-# システム全体 - 受入基準
+# Service層以下 - 結合テスト仕様書
 
 システム名: 書店バックオフィスAPI  
 バージョン: 2.0.0  
-最終更新日: 2025-01-02
+最終更新日: 2025-01-18
 
 ---
 
 ## 1. 概要
 
-本文書は、書店バックオフィスAPIシステム全体の受入基準を記述する。各機能の統合テストシナリオ、システム全体のパフォーマンス、セキュリティ、運用に関する受入基準を定義する。
+本文書は、書店バックオフィスAPIシステムのService層以下（Service + DAO + Entity + DB）の結合テスト仕様を記述する。API層（Resource）は含まず、ビジネスロジック層とデータアクセス層の連携をテストする。
+
+**テスト対象:**
+- Service層のビジネスロジック
+- DAO層のデータアクセス
+- Entity（JPA）のマッピング
+- 実際のDB操作（メモリDB）
+- 外部API呼び出し（WireMockでスタブ化）
+
+**テスト対象外:**
+- API層（Resource、JAX-RS）
+- HTTPリクエスト/レスポンス
+- 認証・認可（JWT、Cookie）
 
 ---
 
-## 2. ユーザーストーリー
+## 2. Service層のビジネスロジックシナリオ
 
-### 2.1 社員ログイン
+### 2.1 BookService - 書籍検索
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| US-LOGIN-001 | 社員がログインできる | 社員コード・パスワードが正しい | ログイン | JWT Cookie発行<br/>書籍一覧を閲覧可能 |
-| US-LOGIN-002 | ログイン後、各種APIを利用できる | ログイン済み | 書籍API, カテゴリAPI等にアクセス | 正常にレスポンス取得 |
-| US-LOGIN-003 | ログアウト後、再ログインが必要 | ログアウト済み | APIアクセス（将来実装時） | 401 Unauthorized |
+#### シナリオ: カテゴリで書籍を検索
 
-### 2.2 書籍検索
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| DBに以下の書籍が存在:<br/>- bookId=1, bookName="Java完全理解", categoryId=1<br/>- bookId=2, bookName="Spring入門", categoryId=1<br/>- bookId=3, bookName="文学作品", categoryId=2 | BookService.searchBooks(categoryId=1, keyword=null) | カテゴリID=1の書籍2件が取得される<br/>- "Java完全理解"<br/>- "Spring入門" |
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| US-SEARCH-001 | カテゴリで書籍を絞り込める | カテゴリ"文学"に書籍が存在 /api/books/search?categoryId=1 | 文学カテゴリの書籍一覧取得 |
-| US-SEARCH-002 | キーワードで書籍を検索できる | 書籍名に"Java"を含む書籍が存在 /api/books/search?keyword=Java | "Java"を含む書籍一覧取得 |
-| US-SEARCH-003 | 詳細情報を確認できる | bookId=1が存在 /api/books/1 | 書籍詳細情報取得（カテゴリ・出版社・在庫含む） |
+#### シナリオ: キーワードで書籍を検索
 
-### 2.3 在庫管理
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| DBに書籍が存在:<br/>- bookId=1, bookName="Java完全理解"<br/>- bookId=2, bookName="JavaScript入門" | BookService.searchBooks(categoryId=null, keyword="Java") | "Java"を含む書籍2件が取得される |
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| US-STOCK-001 | 在庫数を更新できる | bookId=1, quantity=10, version=1 | PU/api/stocks/1<br/>{version: 1, quantity: 15} | 在庫数が15に更新<br/>version=2 |
-| US-STOCK-002 | 並行更新時、楽観的ロックが機能する | 2ユーザーが同時に更新 | 先に更新したユーザーが成功<br/>後から更新したユーザーは409 | 楽観的ロック制御により整合性確保 |
+#### シナリオ: 書籍詳細を取得（カテゴリ・出版社・在庫を含む）
 
-### 2.4 新規書籍追加ワークフロー
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| DBに書籍とリレーションデータが存在:<br/>- bookId=1, categoryId=1, publisherId=1<br/>- Category(id=1, name="プログラミング")<br/>- Publisher(id=1, name="技術評論社")<br/>- Stock(bookId=1, quantity=10) | BookService.getBookDetail(bookId=1) | 書籍詳細が取得され、以下が含まれる:<br/>- book.bookName="Java完全理解"<br/>- book.category.categoryName="プログラミング"<br/>- book.publisher.publisherName="技術評論社"<br/>- book.stock.quantity=10 |
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| US-WF-001 | 一般社員が新規書籍追加を申請できる | operatedBy=1 (ASSOCIATE) | POS/api/workflows<br/>{workflowType: "ADD_NEW_BOOK"}<br/>POS/api/workflows/1/apply | ワークフロー作成・申請成功<br/>state: "APPLIED" |
-| US-WF-002 | 管理職が承認できる | operatedBy=2 (MANAGER)<br/>state=APPLIED | POS/api/workflows/1/approve | 承認成功<br/>書籍マスタに反映<br/>state: "APPROVED" |
-| US-WF-003 | 承認後、書籍が検索可能になる | 新規書籍が承認済み /api/books/search?keyword=新規書籍 | 新規書籍が検索結果に表示 |
+### 2.2 StockService - 在庫管理
 
----
+#### シナリオ: 在庫数を更新（正常系）
 
-## 3. システム統合受入基準
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| DBに在庫が存在:<br/>- Stock(bookId=1, quantity=10, version=1) | StockService.updateStock(bookId=1, quantity=15, version=1) | DBの在庫が更新される:<br/>- quantity=15<br/>- version=2（楽観的ロックバージョンアップ） |
 
-### 3.1 エンドツーエンドシナリオ
+#### シナリオ: 楽観的ロック競合検知
 
-| シナリオID | 説明 | ステップ | 受入基準 |
-|-----------|------|---------|---------|
-| E2E-001 | ログインから書籍検索まで | 1. POS/api/auth/login<br/>2. GE/api/books<br/>3. GE/api/books/1 | 全ステップが成功<br/>JWT Cookieが維持される |
-| E2E-002 | ワークフロー作成から承認まで | 1. POS/api/workflows<br/>2. POS/api/workflows/1/apply<br/>3. POS/api/workflows/1/approve<br/>4. GE/api/books (新規書籍確認) | 全ステップが成功<br/>新規書籍が反映される |
-| E2E-003 | 在庫更新フロー | 1. GE/api/stocks/1<br/>2. PU/api/stocks/1<br/>3. GE/api/books/1 (在庫確認) | 全ステップが成功<br/>在庫数が正しく更新される |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| DBに在庫が存在:<br/>- Stock(bookId=1, quantity=10, version=2) | StockService.updateStock(bookId=1, quantity=15, version=1)<br/>（古いバージョンで更新試行） | OptimisticLockExceptionがスローされる<br/>DBの在庫は更新されない |
 
----
+#### シナリオ: 外部在庫API連携（WireMockスタブ）
 
-## 4. データ整合性受入基準
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが以下をスタブ:<br/>- PUT /api/stocks/1<br/>- Response: {quantity: 15, version: 2} | StockService.syncWithExternalStock(bookId=1) | 外部APIが呼ばれる<br/>レスポンスに基づきDBが更新される |
 
-### 4.1 外部キー整合性
+### 2.3 EmployeeService - 社員管理
 
-| シナリオID | 説明 | 受入基準 |
-|-----------|------|---------|
-| DATA-001 | BOOKとCATEGORYの整合性 | 全書籍にcategoryIdが存在し、CATEGORYテーブルに対応レコードが存在 |
-| DATA-002 | BOOKとPUBLISHERの整合性 | 全書籍にpublisherIdが存在し、PUBLISHERテーブルに対応レコードが存在 |
-| DATA-003 | BOOKとSTOCKの整合性 | 全書籍にSTOCKレコードが存在（1:1関係） |
-| DATA-004 | WORKFLOWとEMPLOYEEの整合性 | 全ワークフローにcreatedBy, operatedByが存在し、EMPLOYEEテーブルに対応レコードが存在 |
+#### シナリオ: 社員認証（パスワード検証）
 
----
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| DBに社員が存在:<br/>- employeeCode="EMP001"<br/>- password="$2a$10$..." (BCrypt) | EmployeeService.authenticate(code="EMP001", password="password123") | 認証成功<br/>Employeeエンティティが返される |
 
-## 5. パフォーマンス受入基準
+#### シナリオ: 認証失敗（パスワード不一致）
 
-### 5.1 レスポンスタイム
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| DBに社員が存在:<br/>- employeeCode="EMP001"<br/>- password="$2a$10$..." | EmployeeService.authenticate(code="EMP001", password="wrongpassword") | AuthenticationExceptionがスローされる |
 
-| シナリオID | カテゴリ | 受入基準 |
-|-----------|---------|---------|
-| PERF-001 | 認証API | 500ms以内（95パーセンタイル） |
-| PERF-002 | 書籍API | 500ms以内（95パーセンタイル） |
-| PERF-003 | カテゴリAPI | 50ms以内（95パーセンタイル） |
-| PERF-004 | 出版社API | 50ms以内（95パーセンタイル） |
-| PERF-005 | 在庫API | 200ms以内（95パーセンタイル） |
-| PERF-006 | ワークフローAPI | 1秒以内（95パーセンタイル） |
+### 2.4 WorkflowService - ワークフロー管理
 
-### 5.2 スループット
+#### シナリオ: ワークフロー作成
 
-| シナリオID | 説明 | 受入基準 |
-|-----------|------|---------|
-| PERF-TH-001 | 同時リクエスト処理能力 | 100リクエスト/秒を処理可能 |
-| PERF-TH-002 | 大量データ取得 | 書籍1000件を3秒以内に取得 |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| 社員ID=1（一般社員）が存在 | WorkflowService.createWorkflow(workflowType="ADD_NEW_BOOK", operatedBy=1) | Workflowエンティティが作成される:<br/>- state="DRAFT"<br/>- operatedBy=1 |
 
-### 5.3 N+1問題の防止
+#### シナリオ: ワークフロー申請
 
-| シナリオID | 説明 | 受入基準 |
-|-----------|------|---------|
-| PERF-N1-001 | 書籍一覧取得時のSQL実行回数 | 1回のクエリで全データ取得（JOIN FETCH） |
-| PERF-N1-002 | ワークフロー一覧取得時のSQL実行回数 | 1回のクエリで全データ取得 |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| Workflow(id=1, state="DRAFT") | WorkflowService.applyWorkflow(workflowId=1, operatedBy=1) | 状態が更新される:<br/>- state="APPLIED"<br/>- appliedAt=現在時刻 |
+
+#### シナリオ: ワークフロー承認（管理職のみ）
+
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| Workflow(id=1, state="APPLIED")<br/>社員ID=2（管理職、role="MANAGER"） | WorkflowService.approveWorkflow(workflowId=1, operatedBy=2) | 状態が更新される:<br/>- state="APPROVED"<br/>- approvedAt=現在時刻<br/>書籍マスタに反映される |
+
+#### シナリオ: 承認権限チェック（一般社員は承認不可）
+
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| Workflow(id=1, state="APPLIED")<br/>社員ID=1（一般社員、role="ASSOCIATE"） | WorkflowService.approveWorkflow(workflowId=1, operatedBy=1) | ForbiddenExceptionがスローされる<br/>状態は変更されない |
 
 ---
 
-## 6. セキュリティ受入基準
+## 3. DAO層のデータアクセスシナリオ
 
-### 6.1 認証・認可
+### 3.1 BookDao - JPQL動的クエリ
 
-| シナリオID | 説明 | 受入基準 |
-|-----------|------|---------|
-| SEC-001 | JWT Cookie は HttpOnly | JavaScriptからアクセス不可 |
-| SEC-002 | パスワードはBCryptハッシュ化 | パスワードが平文で保存されていない（本番環境） |
-| SEC-003 | JWT有効期限は24時間 | 24時間後にJWTが無効になる |
-| SEC-004 | 承認権限チェック | ASSOCIATEは承認不可<br/>MANAGERは同一部署のみ<br/>DIRECTORは全部署承認可 |
+#### シナリオ: 条件付き検索（JPQL）
 
-### 6.2 SQLインジェクション対策
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| DBに書籍が複数存在 | BookDao.searchByJpql(categoryId=1, keyword="Java") | JPQLクエリが正しく生成・実行される:<br/>"SELECT b FROM Book b WHERE b.categoryId = :categoryId AND b.bookName LIKE :keyword" |
 
-| シナリオID | 説明 | 受入基準 |
-|-----------|------|---------|
-| SEC-SQL-001 | JPAの名前付きパラメータ使用 | 全クエリで:parameterName形式を使用 |
-| SEC-SQL-002 | Criteria APIのタイプセーフクエリ | Criteria APIでコンパイル時型チェック |
-| SEC-SQL-003 | ユーザー入力の直接SQL組み立て禁止 | ユーザー入力を直接SQL文字列に連結しない |
+### 3.2 StockDao - 楽観的ロック
 
----
+#### シナリオ: @Versionフィールドによる楽観的ロック
 
-## 7. トランザクション受入基準
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| Stock(id=1, quantity=10, version=1) | StockDao.update(stock) でquantity=15に変更<br/>ただし、別トランザクションで既にversion=2に更新済み | OptimisticLockExceptionがスローされる |
 
-### 7.1 トランザクション整合性
+### 3.3 WorkflowDao - Criteria API
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| TRAN-001 | ワークフロー承認はアトミック | - | 承認操作 | WORKFLOW_OPERATION INSERTと<br/>BOOK INSERT/UPDATEが同時にコミット |
-| TRAN-002 | エラー時は全てロールバック | BOOK INSERT失敗 | 承認操作 | WORKFLOW_OPERATIONもロールバック |
-| TRAN-003 | 在庫更新はアトミック | - | 在庫更新 | quantity更新とversion更新が同時にコミット |
+#### シナリオ: 複雑な条件検索（Criteria API）
+
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| Workflow複数件が存在:<br/>- state="APPLIED", "APPROVED", "REJECTED" | WorkflowDao.searchByCriteria(state="APPLIED", operatedBy=1) | Criteria APIで動的クエリが生成され、条件に合致するWorkflowが取得される |
 
 ---
 
-## 8. 並行処理受入基準
+## 4. トランザクション管理シナリオ
 
-### 8.1 楽観的ロック
+### 4.1 トランザクションロールバック
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| CONC-001 | 在庫更新時の楽観的ロック | 2ユーザーが同時に在庫更新 | 先に更新したユーザーが成功<br/>後から更新したユーザーは409 | データ整合性が確保される |
-| CONC-002 | 409受信後、再取得して再試行 | 409 Conflict受信 | 最新version取得して再更新 | 再更新成功 |
+#### シナリオ: 例外発生時のロールバック
 
----
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| Book(id=1, quantity=10) | WorkflowService.approveWorkflow() 内で:<br/>1. Workflowのstate更新<br/>2. Bookの作成<br/>3. 例外発生（ValidationException） | トランザクション全体がロールバックされる:<br/>- Workflowのstateは変更されない<br/>- Bookは作成されない |
 
-## 9. ログ出力受入基準
+### 4.2 複数エンティティの整合性
 
-### 9.1 ログレベル
+#### シナリオ: 関連エンティティの同時更新
 
-| シナリオID | 説明 | ログレベル | ログ内容 |
-|-----------|------|----------|---------|
-| LOG-001 | API呼び出し成功 | INFO | [Resource#method] Success: ... |
-| LOG-002 | ビジネスロジックエラー | WARN | [Service#method] Business logic error: ... |
-| LOG-003 | システムエラー | ERROR | [Component#method] Unexpected error<br/>スタックトレース |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| Workflow(id=1, state="APPLIED")<br/>Book(id=1) 存在 | WorkflowService.approveWorkflow(workflowId=1) で:<br/>1. Workflow.state="APPROVED"<br/>2. Book作成<br/>3. WorkflowDetail更新 | すべての更新が1トランザクションでコミットされる |
 
 ---
 
-## 10. エラーハンドリング受入基準
+## 5. 外部API連携シナリオ（WireMock）
 
-### 10.1 エラーレスポンス
+### 5.1 在庫API呼び出し
 
-| シナリオID | 説明 | HTTPステータス | レスポンス形式 |
-|-----------|------|---------------|--------------|
-| ERR-001 | リソースが見つからない | 404 Not Found | {error: "...", message: "..."} |
-| ERR-002 | バリデーションエラー | 400 Bad Request | {error: "...", message: "..."} |
-| ERR-003 | 権限不足 | 403 Forbidden | {error: "...", message: "..."} |
-| ERR-004 | 楽観的ロック失敗 | 409 Conflict | {error: "...", message: "再度お試しください"} |
-| ERR-005 | システムエラー | 500 Internal Server Error | {error: "...", message: "..."} |
+#### シナリオ: 外部在庫APIへのPUTリクエスト
 
----
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが以下をスタブ:<br/>- PUT /api/stocks/1<br/>- Request Body: {quantity: 15, version: 1}<br/>- Response: 200 OK, {quantity: 15, version: 2} | StockService.updateStock(bookId=1, quantity=15, version=1) | 外部APIが呼ばれる:<br/>- URL: http://localhost:8089/api/stocks/1<br/>- Method: PUT<br/>- Body: {quantity: 15, version: 1}<br/>レスポンスが正しく処理される |
 
-## 11. 運用受入基準
+#### シナリオ: 外部API呼び出しエラー（400 Bad Request）
 
-### 11.1 可用性
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが以下をスタブ:<br/>- PUT /api/stocks/1<br/>- Response: 400 Bad Request, {message: "在庫不足"} | StockService.updateStock(bookId=1, quantity=100, version=1) | ExternalApiExceptionがスローされる<br/>エラーメッセージ: "在庫不足" |
 
-| シナリオID | 説明 | 受入基準 |
-|-----------|------|---------|
-| OPS-001 | サービス稼働率 | 99.9%以上（計画停止除く） |
-| OPS-002 | 障害時の復旧時間 | 1時間以内 |
+#### シナリオ: 外部APIタイムアウト
 
-### 11.2 監視
-
-| シナリオID | 説明 | 受入基準 |
-|-----------|------|---------|
-| OPS-MON-001 | レスポンスタイム監視 | 各APIのレスポンスタイムを記録 |
-| OPS-MON-002 | エラー率監視 | 5xx系エラー率を記録 |
-| OPS-MON-003 | ログ出力 | 全API呼び出しをログ出力 |
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| WireMockが5秒遅延を設定:<br/>- PUT /api/stocks/1<br/>- Fixed Delay: 5000ms | StockService.updateStock(bookId=1, quantity=15, version=1) | TimeoutExceptionがスローされる<br/>（タイムアウト設定: 3秒） |
 
 ---
 
-## 12. 将来の拡張受入基準
+## 6. バリデーションシナリオ
 
-### 12.1 JWT認証フィルタ（実装予定）
+### 6.1 Bean Validation
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| EXT-001 | 全APIで認証必須 | JWT Cookie未設定 | 任意のAPIにアクセス | 401 Unauthorized |
-| EXT-002 | 有効なJWTで認証成功 | 有効なJWT Cookie | 任意のAPIにアクセス | 200 OK |
+#### シナリオ: エンティティのバリデーション
 
-### 12.2 ページネーション（実装予定）
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| Book(bookName="", price=-100) | BookService.createBook(book) | ConstraintViolationExceptionがスローされる:<br/>- bookName: "must not be blank"<br/>- price: "must be greater than or equal to 0" |
 
-| シナリオID | 説明 | Given（前提条件） | When（操作） | Then（期待結果） |
-|-----------|------|----------------|------------|---------------|
-| EXT-PAGE-001 | ページサイズ指定 | - /api/books?page=0&size=20 | 20件ずつ取得 |
-| EXT-PAGE-002 | 総ページ数取得 | - /api/books?page=0&size=20 | totalPages, totalElementsが含まれる |
+### 6.2 ビジネスルールバリデーション
+
+#### シナリオ: 在庫数の妥当性チェック
+
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| Stock(bookId=1, quantity=10) | StockService.updateStock(bookId=1, quantity=-5, version=1) | BusinessRuleViolationExceptionがスローされる:<br/>"在庫数は0以上である必要があります" |
 
 ---
 
-## 13. 関連ドキュメント
+## 7. エンティティリレーションシナリオ
 
-* [architecture_design.md](architecture_design.md) - アーキテクチャ設計書
-* [functional_design.md](functional_design.md) - 機能設計書
-* [data_model.md](data_model.md) - データモデル
-* [external_interface.md](external_interface.md) - 外部インターフェース
+### 7.1 OneToMany / ManyToOne
 
+#### シナリオ: Book → Category (ManyToOne)
+
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| Book(id=1, categoryId=1)<br/>Category(id=1, name="プログラミング") | BookDao.findById(1) | Bookエンティティが取得され、<br/>book.category.categoryName="プログラミング"<br/>（Lazy Loadingでカテゴリも取得） |
+
+#### シナリオ: Category → Books (OneToMany)
+
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| Category(id=1)<br/>Book(id=1, categoryId=1)<br/>Book(id=2, categoryId=1) | CategoryDao.findById(1) | Categoryエンティティが取得され、<br/>category.books.size() == 2<br/>（Lazy Loadingで書籍リストも取得） |
+
+---
+
+## 8. 性能関連シナリオ
+
+### 8.1 N+1問題の回避
+
+#### シナリオ: JOIN FETCHによる一括取得
+
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| Book 100件、各Bookに1つのCategory | BookDao.findAllWithCategory()<br/>（JOIN FETCH b.category） | SQLクエリが1回のみ実行される:<br/>"SELECT b, c FROM Book b JOIN FETCH b.category c"<br/>N+1問題が発生しない |
+
+### 8.2 ページネーション
+
+#### シナリオ: 大量データの分割取得
+
+| Given（前提条件） | When（操作） | Then（期待結果） |
+|----------------|------------|---------------|
+| Book 1000件が存在 | BookDao.findAll(page=0, size=20) | 20件のみ取得される<br/>OFFSET 0 LIMIT 20 |
+
+---
+
+## 9. テストデータ準備
+
+各テストケースでは、以下の方針でテストデータを準備する：
+
+1. **@BeforeEach で初期データ投入**
+   - EntityManagerを使用してエンティティを永続化
+   - em.flush()で強制的にDBに反映
+
+2. **@AfterEach でロールバック**
+   - トランザクションロールバックで自動クリーンアップ
+   - 次のテストへの影響を防ぐ
+
+3. **テストデータの一意性**
+   - UUIDやタイムスタンプを使用して一意なデータを生成
+   - テスト間の干渉を防ぐ
+
+---
+
+## 10. WireMockスタブ設定例
+
+### 10.1 在庫API（成功）
+
+```java
+@BeforeEach
+void setupWireMock() {
+    stubFor(put(urlEqualTo("/api/stocks/1"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody("{\"bookId\": 1, \"quantity\": 15, \"version\": 2}")));
+}
+```
+
+### 10.2 在庫API（エラー）
+
+```java
+stubFor(put(urlEqualTo("/api/stocks/1"))
+    .willReturn(aResponse()
+        .withStatus(400)
+        .withHeader("Content-Type", "application/json")
+        .withBody("{\"message\": \"在庫不足\"}")));
+```
+
+---
+
+## 11. テスト実行コマンド
+
+```bash
+# 結合テストのみ実行
+./gradlew :back-office-api-sdd:integrationTest
+
+# 単体テスト→結合テスト→E2Eテストの順に実行
+./gradlew :back-office-api-sdd:test integrationTest e2eTest
+```
+
+---
+
+## 12. 参考情報
+
+- **requirements/behaviors.md**: E2Eテスト用の受入基準（API層を含む全体フロー）
+- **basic_design/functional_design.md**: 機能設計書
+- **basic_design/data_model.md**: データモデル仕様書
+- **agent_skills/jakarta-ee-api-base/instructions/it_generation.md**: 結合テスト生成指示書

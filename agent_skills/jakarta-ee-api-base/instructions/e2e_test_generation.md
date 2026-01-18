@@ -60,7 +60,7 @@ spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline"
   * エンドポイント一覧
   * リクエスト/レスポンス形式
 
-* {spec_directory}/basic_design/behaviors.md - E2Eテストシナリオを確認する
+* {spec_directory}/requirements/behaviors.md - E2Eテストシナリオを確認する
   * システム全体の振る舞い
   * API間連携シナリオ
   * E2Eのフロー
@@ -428,11 +428,11 @@ given(requestSpec)
 
 ---
 
-## 7. basic_design/behaviors.md からのテストケース生成
+## 7. requirements/behaviors.md からのテストケース生成
 
 ### 7.1 シナリオの読み取り
 
-basic_design/behaviors.md の各シナリオを読み取り、以下の情報を抽出:
+requirements/behaviors.md の各シナリオを読み取り、以下の情報を抽出:
 
 * Given: 初期状態、テストデータの準備
 * When: 実行するAPIリクエスト（エンドポイント、メソッド、パラメータ）
@@ -583,6 +583,6 @@ jobs:
 
 * REST Assured公式ドキュメント: https://rest-assured.io/
 * JUnit 5公式ドキュメント: https://junit.org/junit5/
-* basic_design/behaviors.md - E2Eテストシナリオ
+* requirements/behaviors.md - E2Eテストシナリオ
 * basic_design/functional_design.md - API仕様
 * basic_design/architecture_design.md - システム構成

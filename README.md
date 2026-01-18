@@ -199,7 +199,7 @@ npm run dev
 
 SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-sdd）は、仕様駆動開発により何度でも再実装できます。
 
-成果物は3タイプに分けてクリーンアップできます。基本設計SPEC（specs/*/basic_design/）は絶対に削除されません。
+成果物は3タイプに分けてクリーンアップできます。要件定義・基本設計SPEC（specs/*/requirements/、specs/*/basic_design/）は絶対に削除されません。
 
 ### タイプ1: タスクファイルのみクリーンアップ
 
@@ -212,7 +212,7 @@ SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-s
 ```
 
 削除されるもの: `tasks/`の中身（フォルダは空のまま残る）
-保持されるもの: `specs/*/basic_design/`, `specs/*/detailed_design/`, `src/`
+保持されるもの: `specs/*/requirements/`, `specs/*/basic_design/`, `specs/*/detailed_design/`, `src/`
 
 ### タイプ2: 詳細設計SPECのクリーンアップ
 
@@ -238,9 +238,9 @@ SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-s
 ```
 
 削除されるもの: `src/main/`配下の内容、`src/test/`配下の内容、`build/`
-保持されるもの: `specs/*/basic_design/`, `specs/*/detailed_design/`, `tasks/`, `src/`のディレクトリ構造（.gitkeep付き）
+保持されるもの: `specs/*/requirements/`, `specs/*/basic_design/`, `specs/*/detailed_design/`, `tasks/`, `src/`のディレクトリ構造（.gitkeep付き）
 
-### すべてをクリーンアップ（基本設計SPECは保護）
+### すべてをクリーンアップ（要件定義・基本設計SPECは保護）
 
 タスク、詳細設計SPEC、実装コードをすべて削除します。
 
@@ -251,7 +251,7 @@ SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-s
 ```
 
 削除されるもの: `tasks/`の中身、`specs/*/detailed_design/`の中身、`src/`配下の内容、`build/`
-保持されるもの: `specs/*/basic_design/` （基本設計SPECは絶対に削除されない）
+保持されるもの: `specs/*/requirements/`, `specs/*/basic_design/` （要件定義・基本設計SPECは絶対に削除されない）
 空のまま残るフォルダ: `tasks/`, `specs/*/detailed_design/`, `src/`のディレクトリ構造（.gitkeep付き）
 
 詳細は各プロジェクトのREADME.mdを参照してください：

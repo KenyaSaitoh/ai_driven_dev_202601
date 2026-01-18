@@ -17,7 +17,7 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 このプロジェクトは、汎用的な Jakarta EE マイクロサービス開発 Agent Skills を使用して開発します。
 
-開発は以下の5段階プロセスで進めます：
+開発は以下の7段階プロセスで進めます：
 
 ```
 ステップ1: 基本設計（仕様書作成）← AIと対話しながら
@@ -30,7 +30,9 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
     ↓
 ステップ5: 単体テスト実行評価（テスト実行 → カバレッジ分析 → フィードバック）
     ↓
-ステップ6: E2Eテスト生成（basic_design/behaviors.md → REST Assured）
+ステップ6: 結合テスト生成（basic_design/behaviors.md → JUnit + Weld SE）
+    ↓
+ステップ7: E2Eテスト生成（requirements/behaviors.md → REST Assured）
 ```
 
 ---
@@ -240,7 +242,38 @@ AIが：
 
 ---
 
-#### ステップ6: E2Eテスト生成（実装完了後）
+#### ステップ6: 結合テスト生成（単体テスト完了後）
+
+単体テスト完了後に、結合テスト（Integration Test）を生成します。
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/it_generation.md
+
+結合テストを生成してください。
+
+パラメータ:
+* project_root: projects/sdd/bookstore/berry-books-api-sdd
+* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
+```
+
+AIが：
+1. 📄 basic_design/behaviors.md（結合テストシナリオ）を読み込む
+2. 🧪 JUnit 5 + Weld SE を使用した結合テストを生成
+   * Service層以下（Service + DAO + Entity + DB）の連携テスト
+   * 実際のDBアクセス（メモリDB）
+   * 外部APIはWireMockでスタブ化
+   * アプリケーションサーバー不要
+3. 🏷️ `@Tag("integration")` で結合テストを分離
+
+実行方法:
+```bash
+# 結合テストを実行
+./gradlew integrationTest
+```
+
+---
+
+#### ステップ7: E2Eテスト生成（実装完了後）
 
 全機能実装完了後に、E2Eテスト（End-to-End Test）を生成します。
 
@@ -255,7 +288,7 @@ E2Eテストを生成してください。
 ```
 
 AIが：
-1. 📄 basic_design/behaviors.md（E2Eテストシナリオ）を読み込む
+1. 📄 requirements/behaviors.md（E2Eテストシナリオ）を読み込む
 2. 🧪 REST Assured を使用したE2Eテストを生成
    * 複数API間の連携テスト（認証 → 書籍検索 → 注文作成等）
    * 外部API連携のテスト（back-office-api、customer-hub-api）
@@ -269,6 +302,58 @@ AIが：
 
 # 別ターミナルでE2Eテストを実行
 ./gradlew e2eTest
+```
+
+---
+
+### 🔄 基本設計変更対応（手戻り・拡張案件）
+
+結合テストやE2Eテストで不具合が見つかり、基本設計に戻る必要がある場合や、拡張案件で新機能を追加する場合に使用します。
+
+#### 使用方法
+
+1. **基本設計SPECのマスターファイルを更新**
+   ```bash
+   vim specs/baseline/basic_design/functional_design.md
+   vim specs/baseline/basic_design/data_model.md
+   ```
+
+2. **CHANGES.mdを作成して変更内容を記載**
+   ```bash
+   cp agent_skills/jakarta-ee-api-base/templates/basic_design/CHANGES_template.md \
+      specs/baseline/basic_design/CHANGES.md
+   vim specs/baseline/basic_design/CHANGES.md
+   ```
+
+3. **変更対応を実行**
+   ```
+   @agent_skills/jakarta-ee-api-base/instructions/basic_design_change.md
+   
+   基本設計の変更を適用してください。
+   
+   パラメータ:
+   * project_root: projects/sdd/bookstore/berry-books-api-sdd
+   * spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
+   ```
+
+AIが：
+1. 📄 CHANGES.md（変更差分ファイル）を読み込み
+2. 🔍 変更の影響を受けるファイル（詳細設計、コード、テスト）を特定
+3. 📋 変更タスクファイル（`tasks/change_tasks.md`）を生成
+4. 🎯 既存の指示書を呼び出して、影響を受けるファイルを更新
+5. ✅ すべての変更適用後、CHANGES.mdをアーカイブ
+
+#### ディレクトリ構造
+
+```
+specs/baseline/basic_design/
+  ├── functional_design.md      # マスター（自由に編集）
+  ├── data_model.md             # マスター（自由に編集）
+  ├── external_interface.md     # マスター（自由に編集）
+  ├── CHANGES.md                # アクティブな変更（未適用）
+  └── changes_archive/          # 履歴
+      ├── 20260118_order_cancel.md
+      └── 20260125_order_history.md
 ```
 
 ---
@@ -352,13 +437,15 @@ AIが：
 berry-books-api-sdd/
 ├── specs/                          # 仕様書（SDD）
 │   ├── baseline/
+│   │   ├── requirements/           # システム要件
+│   │   │   ├── requirements.md    # 要件定義書
+│   │   │   └── behaviors.md       # E2Eテスト用（要件を外形的に捉えた振る舞い）
 │   │   ├── basic_design/           # 基本設計SPEC
-│   │   │   ├── requirements.md
 │   │   │   ├── architecture_design.md
 │   │   │   ├── functional_design.md
 │   │   │   ├── data_model.md
 │   │   │   ├── external_interface.md
-│   │   │   └── behaviors.md       # E2Eテスト用
+│   │   │   └── behaviors.md       # 結合テスト用（基本設計を外形的に捉えた振る舞い）
 │   │   └── detailed_design/        # 詳細設計SPEC
 │   │       ├── common/
 │   │       │   ├── detailed_design.md
@@ -383,8 +470,7 @@ berry-books-api-sdd/
 │   ├── setup.md
 │   ├── FUNC_001_infrastructure.md
 │   ├── FUNC_001_auth.md
-│   ├── FUNC_002_books.md
-│   └── e2e_test.md
+│   └── FUNC_002_books.md
 ├── src/
 │   ├── main/
 │   │   ├── java/

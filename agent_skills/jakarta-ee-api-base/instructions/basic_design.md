@@ -43,18 +43,24 @@ spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/enhancements/2
 
 作成するSPEC
 
-basic_design/配下（システム全体の基本設計）:
+requirements/配下（システム要件）:
 * requirements.md - 要件定義書（所与、既存）
+* behaviors.md - E2Eテスト用の振る舞い仕様書（システム全体のエンドツーエンドシナリオ）
+
+basic_design/配下（システム全体の基本設計）:
 * architecture_design.md - アーキテクチャ設計書（プロジェクト全体のアーキテクチャ）
 * functional_design.md - 機能設計書（システム全体の機能設計、全APIを含む）
 * data_model.md - データモデル仕様書（ERD、テーブル定義、リレーション）
-* behaviors.md - 振る舞い仕様書（システム全体の振る舞い、全APIの振る舞いを含む）
+* behaviors.md - 結合テスト用の振る舞い仕様書（Service層以下の連携シナリオ）
 * external_interface.md - 外部インターフェース仕様書（外部API連携、外部システムとの接続）
 
 注意: 
 * 基本設計フェーズでは、detailed_design/フォルダは作成しない
 * 詳細設計（detailed_design.md）は、タスク分解後の詳細設計フェーズで作成する
 * 全ての機能をbasic_design/functional_design.mdに記載する
+* behaviors.mdは2種類存在:
+  * requirements/behaviors.md: E2Eテスト用（API層含む全体フロー）
+  * basic_design/behaviors.md: 結合テスト用（Service層以下の連携）
 
 ---
 
@@ -62,7 +68,7 @@ basic_design/配下（システム全体の基本設計）:
 
 ### 1.1 requirements.mdの確認
 
-{spec_directory}/basic_design/requirements.md が存在することを確認する
+{spec_directory}/requirements/requirements.md が存在することを確認する
 
 * 存在しない場合は、ユーザーに「requirements.mdが見つかりません。先に要件定義書を作成してください」と伝える
 
@@ -88,8 +94,11 @@ basic_design/配下（システム全体の基本設計）:
 * behaviors.md - 振る舞い仕様書（システム全体、全APIの振る舞いを含む）
 * external_interface.md - 外部インターフェース仕様書
 
+requirements/配下のテンプレート（E2Eテスト用）:
+* behaviors.md - E2Eテスト用の振る舞い仕様書
+
 注意
-* requirements.mdは既に存在しているため、コピーしない
+* requirements.mdは既に存在しているため（{spec_directory}/requirements/）、コピーしない
 * 既にファイルが存在する場合は、ユーザーに「上書きしますか？」と確認する
 * テンプレートは「ひな形」として展開する
 * 既存資料（EXCEL、Word等）がある場合は、後の工程でそれらを読み込んで変換する
@@ -121,7 +130,7 @@ basic_design/配下（システム全体の基本設計）:
 
 ### 3.1 requirements.mdの理解
 
-{spec_directory}/basic_design/requirements.md を読み込み、以下を理解する
+{spec_directory}/requirements/requirements.md を読み込み、以下を理解する
 
 * プロジェクト概要
 * 目的と対象ユーザー
@@ -412,10 +421,12 @@ basic_design/配下（システム全体の基本設計）:
 
 | ファイル | 記載内容 |
 |---------|---------|
-| requirements.md | 要件定義書（所与） |
-| architecture_design.md | プロジェクト全体のアーキテクチャ設計 |
-| functional_design.md | システム全体の機能設計（全APIを含む） |
-| data_model.md | ERD、テーブル定義、リレーション |
+| requirements/requirements.md | 要件定義書（所与） |
+| requirements/behaviors.md | E2Eテスト用の振る舞い仕様書 |
+| basic_design/architecture_design.md | プロジェクト全体のアーキテクチャ設計 |
+| basic_design/functional_design.md | システム全体の機能設計（全APIを含む） |
+| basic_design/data_model.md | ERD、テーブル定義、リレーション |
+| basic_design/behaviors.md | 結合テスト用の振る舞い仕様書 |
 | behaviors.md | システム全体の振る舞い（全APIの振る舞いを含む） |
 | external_interface.md | 外部API連携仕様 |
 
