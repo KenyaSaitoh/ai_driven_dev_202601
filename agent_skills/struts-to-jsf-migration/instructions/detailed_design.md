@@ -7,28 +7,28 @@
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
 spec_directory: "ここにSPECディレクトリのパスを入力"
-screen_id: "ここに対象画面のIDを入力（例: SCREEN_001_PersonList）"
+target_type: "ここに対象画面のIDを入力（例: FUNC_001_PersonList）"
 ```
 
 * 例1: ベースライン（初回リリース版）
 ```yaml
 project_root: "projects/sdd/person/jsf-person-sdd"
 spec_directory: "projects/sdd/person/jsf-person-sdd/specs/baseline"
-screen_id: "SCREEN_001_PersonList"
+target_type: "FUNC_001_PersonList"
 ```
 
 * 例2: 拡張機能（エンハンスメント）
 ```yaml
 project_root: "projects/sdd/person/jsf-person-sdd"
 spec_directory: "projects/sdd/person/jsf-person-sdd/specs/enhancements/202512_person_search"
-screen_id: "SCREEN_005_PersonSearch"
+target_type: "FUNC_005_PersonSearch"
 ```
 
 注意
 * パス区切りはOS環境に応じて調整する（Windows: `\`, Unix/Linux/Mac: `/`）
 * 以降、`{project_root}` と表記されている箇所は、上記で設定した値に置き換える
 * 以降、`{spec_directory}` と表記されている箇所は、上記で設定した値に置き換える
-* `{screen_id}` は対象画面のIDに置き換える
+* `{target_type}` は対象画面のIDに置き換える
 
 ---
 
@@ -44,8 +44,8 @@ screen_id: "SCREEN_005_PersonSearch"
 * 推測せず、不明点は必ずユーザーに質問する
 
 生成するファイル
-* `{spec_directory}/detailed_design/screen/{screen_id}/detailed_design.md` - 実装クラス設計（Managed Bean、画面遷移等）
-* `{spec_directory}/detailed_design/screen/{screen_id}/behaviors.md` - 純粋な単体テスト用の振る舞い
+* `{spec_directory}/detailed_design/detailed_design/FUNC_XXX/detailed_design.md` - 実装クラス設計（Managed Bean、画面遷移等）
+* `{spec_directory}/detailed_design/detailed_design/FUNC_XXX/behaviors.md` - 純粋な単体テスト用の振る舞い
 
 behaviors.mdの違い:
 * basic_design/behaviors.md: システム全体の振る舞い（E2Eテスト用）
@@ -53,15 +53,15 @@ behaviors.mdの違い:
   * 実際のDBアクセス、画面レンダリングを含む
   * Playwrightを使用したブラウザ操作テスト
   
-* detailed_design/screen/{screen_id}/behaviors.md: タスク粒度内の単体テスト用の振る舞い
+* detailed_design/detailed_design/FUNC_XXX/behaviors.md: タスク粒度内の単体テスト用の振る舞い
   * タスク内のコンポーネント間の連携をテスト
   * タスク内のコンポーネントはモック不要（実際の連携をテスト）
   * タスク外の依存関係のみモックを使用
   * 例: PersonListBeanとPersonServiceが同じタスクなら、両方とも実インスタンスでテスト（EntityManagerのみモック）
 
 注意
-* ベースライン（初回リリース版）の場合: `{project_root}/specs/baseline/detailed_design/screen/{screen_id}/`
-* 拡張機能の場合: `{project_root}/specs/enhancements/[拡張名]/detailed_design/screen/{screen_id}/`
+* ベースライン（初回リリース版）の場合: `{project_root}/specs/baseline/detailed_design/detailed_design/FUNC_XXX/`
+* 拡張機能の場合: `{project_root}/specs/enhancements/[拡張名]/detailed_design/detailed_design/FUNC_XXX/`
 * `{spec_directory}` パラメータで柔軟に指定可能
 
 ---
@@ -70,7 +70,7 @@ behaviors.mdの違い:
 
 パラメータで指定されたプロジェクト情報に基づいて、以下の設計ドキュメントを読み込んで分析してください。
 
-注意: `{project_root}`, `{spec_directory}`, `{screen_id}` は、パラメータで指定された値に置き換えてください。
+注意: `{project_root}`, `{spec_directory}`, `{target_type}` は、パラメータで指定された値に置き換えてください。
 
 ### 1.1 Agent Skillsルール（最優先で確認）
 
@@ -117,17 +117,17 @@ behaviors.mdの違い:
 
 以下のファイルを読み込み、対象画面の詳細を理解してください：
 
-* {spec_directory}/detailed_design/screen/{screen_id}/screen_design.md - 画面設計書
+* {spec_directory}/detailed_design/detailed_design/FUNC_XXX/screen_design.md - 画面設計書
   * 画面レイアウト（テーブル、フォーム、ボタン等）
   * 入力項目（項目名、型、必須/任意、バリデーション）
   * 表示データ（一覧表示、詳細表示等）
 
-* {spec_directory}/detailed_design/screen/{screen_id}/functional_design.md - 画面機能設計書
+* {spec_directory}/detailed_design/detailed_design/FUNC_XXX/functional_design.md - 画面機能設計書
   * Managed Bean設計（Bean名、スコープ、プロパティ、アクションメソッド）
   * Service設計（メソッドシグネチャ、ビジネスロジック）
   * データアクセス設計（Entity、JPQL）
 
-* {spec_directory}/detailed_design/screen/{screen_id}/behaviors.md - 画面振る舞い仕様書
+* {spec_directory}/detailed_design/detailed_design/FUNC_XXX/behaviors.md - 画面振る舞い仕様書
   * 画面の振る舞い（初期表示、ボタンクリック、バリデーションエラー等）
   * エラーケース
   * Given-When-Thenシナリオ
@@ -244,18 +244,18 @@ behaviors.mdの違い:
 以下の場所に`detailed_design.md`を作成してください：
 
 ```
-{spec_directory}/detailed_design/screen/{screen_id}/detailed_design.md
+{spec_directory}/detailed_design/detailed_design/FUNC_XXX/detailed_design.md
 ```
 
-* ベースラインの例: `{project_root}/specs/baseline/detailed_design/screen/SCREEN_001_PersonList/detailed_design.md`
-* 拡張機能の例: `{project_root}/specs/enhancements/202512_person_search/detailed_design/screen/SCREEN_005_PersonSearch/detailed_design.md`
+* ベースラインの例: `{project_root}/specs/baseline/detailed_design/detailed_design/FUNC_001_PersonList/detailed_design.md`
+* 拡張機能の例: `{project_root}/specs/enhancements/202512_person_search/detailed_design/FUNC_005_PersonSearch/detailed_design.md`
 
 ### 3.2 詳細設計書のテンプレート
 
 ```markdown
-# {screen_id} <画面名> - 詳細設計書
+# {target_type} <画面名> - 詳細設計書
 
-* 画面ID: {screen_id}  
+* 画面ID: {target_type}  
 * 画面名: <画面名>  
 * バージョン: 1.0.0  
 * 最終更新: <日付>
@@ -535,9 +535,9 @@ FacesContext.getCurrentInstance().addMessage(null,
 
 詳細が矛盾する場合、以下の優先順位で判断してください：
 
-1. {spec_directory}/detailed_design/screen/{screen_id}/screen_design.md（最優先）
-2. {spec_directory}/detailed_design/screen/{screen_id}/functional_design.md
-3. {spec_directory}/detailed_design/screen/{screen_id}/behaviors.md
+1. {spec_directory}/detailed_design/detailed_design/FUNC_XXX/screen_design.md（最優先）
+2. {spec_directory}/detailed_design/detailed_design/FUNC_XXX/functional_design.md
+3. {spec_directory}/detailed_design/detailed_design/FUNC_XXX/behaviors.md
 4. {spec_directory}/basic_design/architecture_design.md
 5. {spec_directory}/basic_design/functional_design.md
 6. ベースライン仕様（拡張機能の場合、system配下が存在しない場合）
@@ -548,12 +548,60 @@ FacesContext.getCurrentInstance().addMessage(null,
 
 推測で詳細設計を作成しないでください。
 
-### 既存のdetailed_design.mdの扱い
+### 既存のdetailed_design.mdの扱いと反復的なブラッシュアップ
 
-すでにdetailed_design.mdが存在する場合：
-* ユーザーに「既存のファイルを上書きしますか？」と確認
-* 上書きの場合は、既存の内容を読んで良い部分を継承
-* 追記の場合は、不足セクションのみを追加
+詳細設計は一度で完璧になることはない。以下のタイミングで更新が必要:
+
+#### 更新が必要なケース
+
+1. コード生成時に設計の不整合を発見
+2. 単体テスト実装時に設計の不足を発見
+3. テスト実行時に設計の誤りを発見
+4. カバレッジ分析で不足やデッドコードを発見
+5. レビュー時に改善点を発見
+
+#### すでにdetailed_design.mdが存在する場合
+
+1. 必須: 既存のdetailed_design.mdを読み込む
+2. 分析: 現在の設計内容を理解する
+3. ユーザー確認: 以下を確認する
+   ```
+   既存の詳細設計書が見つかりました
+   
+   どのように進めますか？
+   A. 全面的に書き直す（上書き）
+   B. 特定のセクションのみ更新する
+   C. 不足セクションを追加する
+   D. 既存の内容を確認してから判断する
+   ```
+4. 更新: 選択に応じて実行
+5. 履歴: 「最終更新」日付を更新
+
+#### 設計の改善パターン
+
+以下のような改善が典型的:
+* メソッドシグネチャの調整
+* エラーハンドリングの追加・明確化
+* バリデーションロジックの明確化
+* テストケースの追加
+* パフォーマンス考慮事項の追加
+* デッドコードの明記と削除理由の記載
+
+#### フィードバックループ
+
+品質を高めるため、以下のループを繰り返す:
+```
+詳細設計 → コード生成 → テスト実行 → 評価
+    ↑                              ↓
+    └──────── フィードバック ←─────┘
+```
+
+各イテレーションで:
+* 単体テスト実行結果を確認
+* カバレッジギャップを分析
+* 不足している振る舞いをbehaviors.mdに追加
+* デッドコードをdetailed_design.mdに明記
+* 設計の誤りを修正
 
 ### ベースラインと拡張機能の違い
 

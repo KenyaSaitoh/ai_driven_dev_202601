@@ -18,7 +18,7 @@ API名: [API_NAME]
 
 ## 2. パッケージ構造
 
-### 2.1 API固有パッケージ
+### 2.1 機能固有パッケージ
 
 ```
 [BASE_PACKAGE]
@@ -29,7 +29,7 @@ API名: [API_NAME]
 │   │   └── [Response名].java
 │   └── exception
 │       └── [ExceptionMapper名].java（該当する場合）
-├── service（API固有のビジネスロジックがある場合）
+├── service（機能固有のビジネスロジックがある場合）
 │   └── [パッケージ]
 │       └── [Service名].java
 └── external（外部API連携がある場合）
@@ -38,7 +38,7 @@ API名: [API_NAME]
         └── [外部API用DTO名].java
 ```
 
-注意: エンティティ、Dao、共通Serviceは[../../system/detailed_design.md](../../system/detailed_design.md)を参照
+注意: エンティティ、Dao、共通Serviceは依存タスクの詳細設計を参照してください（タスクファイルのメタデータ「依存タスク」欄を確認）
 
 ---
 
@@ -103,11 +103,11 @@ public record [名前](
 
 ---
 
-## 5. API固有のビジネスロジック
+## 5. 機能固有のビジネスロジック
 
-注意: このセクションには、このAPI固有のビジネスロジックを記述します。複数のAPIで共有されるビジネスロジックは、system/detailed_design.mdに記述してください。
+注意: このセクションには、この機能固有のビジネスロジックを記述します。複数の機能で共有されるビジネスロジックは、依存タスクの詳細設計に記述してください。
 
-### 5.1 [API固有のService名]
+### 5.1 [機能固有のService名]
 
 * 責務: [責務の説明]（このAPIのみで使用される）
 
@@ -137,11 +137,11 @@ public [戻り値型] [メソッド名]([引数])
 
 ---
 
-### 5.2 [API固有のService名2]
+### 5.2 [機能固有のService名2]
 
-[必要に応じて追加のAPI固有のServiceを記述]
+[必要に応じて追加の機能固有のServiceを記述]
 
-注意: 共通Serviceメソッドは、このセクションには含めません。system/detailed_design.mdを参照してください。
+注意: 共通Serviceメソッドは、このセクションには含めません。依存タスクの詳細設計を参照してください。
 
 ---
 
@@ -187,7 +187,7 @@ public [戻り値型] [メソッド名]([引数])
 * [テストケース1]
 * [テストケース2]
 
-### 8.2 統合テスト
+### 8.2 結合テスト
 
 * 対象: [対象の説明]
 
@@ -198,7 +198,6 @@ public [戻り値型] [メソッド名]([引数])
 
 ## 9. 参考資料
 
-* [functional_design.md](functional_design.md) - API機能設計書
-* [behaviors.md](behaviors.md) - API振る舞い仕様書
-* [../../system/detailed_design.md](../../system/detailed_design.md) - システム詳細設計書（エンティティ、Dao、共通Service）
-* [../../system/functional_design.md](../../system/functional_design.md) - システム機能設計書
+* [behaviors.md](behaviors.md) - 単体テスト用振る舞い仕様書
+* 依存タスクの詳細設計書 - 共通詳細設計書（エンティティ、Dao、共通Service）
+* [../../basic_design/functional_design.md](../../basic_design/functional_design.md) - システム機能設計書

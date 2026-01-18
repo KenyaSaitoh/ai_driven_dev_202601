@@ -26,7 +26,7 @@
 
 ### 1.2 アーキテクチャスタイル
 
-* アーキテクチャパターン: [レイヤードアーキテクチャ / マイクロサービス / BFF / その他]
+* アーキテクチャパターン: [レイヤードアーキテクチャ / マイクロサービス / その他]
 * API設計: [RESTful API / GraphQL / その他]
 * データアクセス: [JPA / JDBC / その他]
 * 認証方式: [JWT / セッション / OAuth / その他]
@@ -74,11 +74,6 @@ flowchart TD
 
 [採用したアーキテクチャパターンの詳細説明]
 
-* BFFパターンの場合:
-  * BFF層の役割
-  * バックエンドサービスとの関係
-  * 責務分担
-
 * マイクロサービスの場合:
   * サービス間通信
   * データ管理の責務分担
@@ -110,11 +105,11 @@ flowchart TD
 └── util                  # Utilities
 ```
 
-* 詳細なクラス構成: 各API機能の`detailed_design.md`を参照してください。
+* 詳細なクラス構成: 各機能機能の`detailed_design.md`を参照してください。
 
 | API | 詳細設計書 |
 |-----|----------|
-| [API_NAME_1] | [../api/API_XXX/detailed_design.md](../api/API_XXX/detailed_design.md) |
+| [API_NAME_1] | [../detailed_design/FUNC_XXX/detailed_design.md](../detailed_design/FUNC_XXX/detailed_design.md) |
 | [API_NAME_2] | [../api/API_YYY/detailed_design.md](../api/API_YYY/detailed_design.md) |
 
 ### 3.3 プロジェクト固有のパッケージ
@@ -230,9 +225,12 @@ sequenceDiagram
 
 [プロジェクト固有の並行制御設計]
 
-### 8.1 楽観的ロック戦略
+### 8.1 並行制御戦略
 
-[プロジェクト固有の楽観的ロック設計]
+[採用する並行制御方式を記述]
+
+* 楽観的ロック: バージョン番号による競合検出（該当する場合）
+* 悲観的ロック: データベースレベルのロック機構（該当する場合）
 
 ---
 
@@ -249,45 +247,25 @@ sequenceDiagram
 
 ---
 
-## 10. パフォーマンス考慮事項
+## 10. その他の考慮事項
 
-[プロジェクト固有のパフォーマンス最適化]
+### 10.1 パフォーマンス
 
-### 10.1 データベースアクセス
+[必要に応じて記述]
 
-[プロジェクト固有の最適化戦略]
+### 10.2 拡張性・保守性
 
-### 10.2 キャッシング
-
-[プロジェクト固有のキャッシング戦略]
+[必要に応じて記述]
 
 ---
 
-## 11. 拡張性・保守性
-
-[プロジェクト固有の拡張性・保守性の考慮事項]
-
----
-
-## 12. 実装状況
-
-* 最終更新: [DATE]
-* 実装バージョン: [VERSION]
-
-| コンポーネント | 状態 | 実装方針 |
-|-------------|------|---------|
-| [COMPONENT_1] | [STATUS] | [APPROACH] |
-| [COMPONENT_2] | [STATUS] | [APPROACH] |
-
----
-
-## 13. 参考資料
+## 11. 参考資料
 
 ### 13.1 関連SPEC
 
 * [requirements.md](requirements.md) - 要件定義書
 * [functional_design.md](functional_design.md) - 機能設計書（API仕様）
-* [behaviors.md](behaviors.md) - 振る舞い仕様書（受入基準）
+* [behaviors.md](behaviors.md) - E2E振る舞い仕様書（templates/basic_design/behaviors.mdから生成）
 * [data_model.md](data_model.md) - データモデル仕様書
 * [external_interface.md](external_interface.md) - 外部インターフェース仕様書（該当する場合）
 

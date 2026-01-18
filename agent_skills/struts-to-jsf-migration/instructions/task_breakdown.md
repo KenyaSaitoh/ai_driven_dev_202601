@@ -32,6 +32,20 @@ output_directory: "projects/sdd/person/jsf-person-sdd/tasks"
 * ソースコードや詳細な実装手順は含めない
 * 各タスクは「何を作成・修正するか」を明確に示す
 * 詳細な実装は次の「実装フェーズ（コード生成）」でSPECを参照して行う
+* タスク分解の結果として、機能を依存関係に基づいて識別し、実装順序を決定する
+
+タスク分解の成果物と依存関係の明示方法:
+
+1. `tasks/tasks.md`（メインタスクリスト）に以下を記載:
+   * タスク概要表: 各タスクの「依存タスク」「並行実行可能」「レベル」を明記
+   * 実行順序セクション: レベル別に実行順序を記載
+   * 依存関係図: Mermaid形式でタスク間の依存関係を可視化
+
+2. 各タスクファイル（`FUNC_XXX.md`）のヘッダーに以下のメタデータを記載:
+   * 依存タスク: このタスクを開始する前に完了が必要なタスク
+   * 並行実行可能: このタスクと同時に実行可能なタスク
+
+これにより、詳細設計フェーズとコード生成フェーズでは、`tasks/tasks.md`を参照するだけで、どの順序で実行すべきかが明確になります。
 
 出力先
 * ベースプロジェクトの場合: `{project_root}/tasks/` ディレクトリ
@@ -70,21 +84,21 @@ output_directory: "projects/sdd/person/jsf-person-sdd/tasks"
   * データ管理方針を確認: エンティティ実装、JPA/EntityManager
   * セッション管理方針を確認: ViewScoped、Flash Scope等
   * データソース設定セクションでJNDI名を確認（persistence.xml設定に必要）
-* functional_design.md - システム全体の機能設計概要と各画面へのリンクを確認
+* functional_design.md - システム全体の機能設計概要と各機能へのリンクを確認
 
 ### オプションドキュメント（system/配下、存在する場合）
 
 * requirements.md - システムの目的、機能要件
 * data_model.md - エンティティとデータベーススキーマを確認
   * persistence.xml設定情報セクションでJNDI名を確認（persistence.xml設定に必要）
-* behaviors.md - システム全体の振る舞い概要と各画面へのリンクを確認
+* behaviors.md - システム全体の振る舞い概要と各機能へのリンクを確認
 
-### 画面単位ドキュメント（screen/配下）
+### 機能単位ドキュメント（detailed_design/配下）
 
-* screen/SCREEN_XXX_*/ - 各画面単位のディレクトリ（例: SCREEN_001_PersonList, SCREEN_002_PersonInput）
-  * screen_design.md - 画面レイアウト、入力項目、バリデーション
-  * functional_design.md - Managed Bean、Service、データアクセス設計
-  * behaviors.md - 画面の振る舞い仕様（受入基準、Given-When-Then）
+* detailed_design/FUNC_XXX_*/ - 各機能単位のディレクトリ（例: FUNC_001_PersonList, FUNC_002_PersonInput）
+  * screen_design.md - 画面レイアウト、入力項目、バリデーション（JSFプロジェクトの場合）
+  * detailed_design.md - Managed Bean、Service、データアクセス設計
+  * behaviors.md - 機能の振る舞い仕様（受入基準、Given-When-Then）
 
 注意: プロジェクトによって利用可能なドキュメントは異なります。利用可能なものに基づいてタスクを生成してください。
 
@@ -121,12 +135,12 @@ output_directory: "projects/sdd/person/jsf-person-sdd/tasks"
 * ログ設定
 * 静的リソース配置（CSS、画像等）
 
-### 2.3 共通機能タスク
+### 2.3 機能タスク（FUNC_XXX）
 
-`tasks/common.md`
-* 複数画面で共有される共通コンポーネント
-* エンティティ: architecture_design.mdとdata_model.mdから実装対象を判断
-* Service: ビジネスロジック層（CDI + JPA）
+`tasks/FUNC_XXX_yyy.md`（内容はプロジェクト固有）
+* 例: 複数画面で共有される共通コンポーネント
+* 例: エンティティ（architecture_design.mdとdata_model.mdから実装対象を判断）
+* 例: Service（ビジネスロジック層: CDI + JPA）
 * 共通DTO/モデル: 画面間のデータ受け渡し用
 * 共通ユーティリティ: MessageUtil、ValidationUtil等
 * 設定ファイル: persistence.xml、beans.xml、web.xml等
@@ -146,22 +160,22 @@ SPECから画面を抽出してタスクファイルを生成：
 #### 画面の識別と抽出
 
 1. 画面の識別
-   * requirements.md、screen/ ディレクトリ、functional_design.mdから画面を抽出
-   * 各画面の範囲と責務を分析
+   * requirements.md、detailed_design/ ディレクトリ、functional_design.mdから画面を抽出
+   * 各機能の範囲と責務を分析
    * 画面間の依存関係を把握
 
 2. タスクファイルの命名規則
-   * 基本形式：`tasks/[SCREEN_ID]_[画面名].md`
-   * 例：`SCREEN_001_PersonList.md`、`SCREEN_002_PersonInput.md`
+   * 基本形式：`tasks/[SCREEN_ID]_[機能名].md`
+   * 例：`FUNC_001_PersonList.md`、`FUNC_002_PersonInput.md`
    * screen/配下のディレクトリ名と対応させる
    * 注意: ファイル名はアンダースコア区切りを使用
 
-3. 各画面タスクファイルの内容
-   * 画面固有のManaged Bean（JSF Managed Bean）
-   * 画面固有のService（該当する場合）
-   * 画面固有のDTO/モデル（該当する場合）
+3. 各機能タスクファイルの内容
+   * 機能固有のManaged Bean（JSF Managed Bean）
+   * 機能固有のService（該当する場合）
+   * 機能固有のDTO/モデル（該当する場合）
    * Facelets XHTML（画面レイアウト）
-   * 画面固有のテストケース（単体テスト、画面テスト）
+   * 機能固有のテストケース（単体テスト、画面テスト）
    * 担当者: 1名（画面単位で独立して実装可能）
 
 4. 画面分割の判断基準
@@ -171,7 +185,7 @@ SPECから画面を抽出してタスクファイルを生成：
 
 ### 2.5 結合テストタスク
 
-`tasks/integration_tasks.md`
+`tasks/e2e_test.md`
 * 画面間結合テスト（画面遷移、データ受け渡し）
 * E2Eテスト（Selenium/Arquillian等） - 主要な業務フローをテスト
 * セッション管理テスト（ViewScoped、Flash Scope、Session Scope）
@@ -230,7 +244,7 @@ SPECから画面を抽出してタスクファイルを生成：
 
 3. 画面別実装（画面単位） (並行実行可能)
    * 一般的な実装順序: DTO/Model → Entity → Service → Managed Bean → XHTML
-   * 各画面は独立して実装可能
+   * 各機能は独立して実装可能
    * 注意: 実装順序はプロジェクトのアーキテクチャに従う
 
 4. 結合テスト (全画面実装後)
@@ -283,7 +297,7 @@ SPECから画面を抽出してタスクファイルを生成：
 * [ ] T_SCREEN001_003: PersonTableBean の作成
   * 目的: Person一覧画面のManaged Beanを実装する
   * 対象: PersonTableBean.java (JSF Managed Bean)
-  * 参照SPEC: [functional_design.md](../specs/baseline/detailed_design/screen/SCREEN_001_PersonList/functional_design.md) の「2.1 PersonTableBean」
+  * 参照SPEC: [functional_design.md](../specs/baseline/detailed_design/detailed_design/FUNC_001_PersonList/functional_design.md) の「2.1 PersonTableBean」
   * 注意事項: ViewScopedで実装し、画面遷移時にFlash Scopeでデータを受け渡すこと
 ```
 
@@ -294,8 +308,8 @@ SPECから画面を抽出してタスクファイルを生成：
   * 目的: Person一覧画面のXHTMLを実装する
   * 対象: PersonTablePage.xhtml (Facelets XHTML)
   * 参照SPEC: 
-    * [screen_design.md](../specs/baseline/detailed_design/screen/SCREEN_001_PersonList/screen_design.md) の「2. 画面レイアウト」
-    * [functional_design.md](../specs/baseline/detailed_design/screen/SCREEN_001_PersonList/functional_design.md) の「3. 画面遷移」
+    * [screen_design.md](../specs/baseline/detailed_design/detailed_design/FUNC_001_PersonList/screen_design.md) の「2. 画面レイアウト」
+    * [functional_design.md](../specs/baseline/detailed_design/detailed_design/FUNC_001_PersonList/functional_design.md) の「3. 画面遷移」
   * 注意事項: h:dataTableを使用してPersonリストを表示すること
 ```
 
@@ -317,27 +331,27 @@ SPECから画面を抽出してタスクファイルを生成：
 | タスク | タスクファイル | 担当者 | 並行実行 | 想定工数 |
 |---------|--------------|--------|---------|---------|
 | 0. セットアップ | setup.md | 全員 | 不可 | [分析から算出] |
-| 1. 共通機能 | common.md | 共通機能チーム | 一部可能 | [分析から算出] |
-| 2. SCREEN_001 | SCREEN_001_xxx.md | 担当者A | 可能 | [分析から算出] |
-| 3. SCREEN_002 | SCREEN_002_yyy.md | 担当者B | 可能 | [分析から算出] |
+| 1. FUNC_001 | FUNC_001_common.md | チームA | 一部可能 | [分析から算出] |
+| 2. FUNC_001 | FUNC_001_xxx.md | 担当者A | 可能 | [分析から算出] |
+| 3. FUNC_002 | FUNC_002_yyy.md | 担当者B | 可能 | [分析から算出] |
 | ... | ... | ... | ... | ... |
-| N. 結合テスト | integration_tasks.md | 全員 | 一部可能 | [分析から算出] |
+| N. 結合テスト | e2e_test.md | 全員 | 一部可能 | [分析から算出] |
 
 ### 実行順序
 
 1. タスク0: セットアップ（全員で実行）
-2. タスク1: 共通機能（共通機能チームが実装）
+2. タスク1: 共通機能（チームAが実装）
 3. タスク2～N-1: 画面別実装（各担当者が並行実行） ← ここが並行化のポイント
 4. タスクN: 結合テスト（全員で実施）
 
 ### タスクファイル一覧
 
-* [セットアップタスク](setup.md)
-* [共通機能タスク](common.md)
-* [SCREEN_001のタスク](SCREEN_001_xxx.md)
-* [SCREEN_002のタスク](SCREEN_002_yyy.md)
+* [セットアップタスク](setup.md)（特別なタスク、常に最初）
+* [FUNC_001のタスク](FUNC_001_xxx.md)（内容はプロジェクト固有）
+* [FUNC_002のタスク](FUNC_002_yyy.md)（内容はプロジェクト固有）
+* [FUNC_003のタスク](FUNC_003_zzz.md)（内容はプロジェクト固有）
 * ...
-* [結合テストタスク](integration_tasks.md)
+* [結合テストタスク](e2e_test.md)
 
 ## 依存関係図
 

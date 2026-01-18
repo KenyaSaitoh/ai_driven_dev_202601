@@ -1,11 +1,11 @@
 ---
-name: jakarta-ee-api-service-development
-description: Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービス開発を支援。エンティティ実装、外部API連携など多様な実装要件に対応。SPECからタスク分解、詳細設計、コード生成、E2Eテストまで5段階で一貫サポート。
+name: jakarta-ee-api-base
+description: Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービス開発を支援。エンティティ実装、外部API連携など多様な実装要件に対応。SPECからタスク分解、詳細設計、コード生成、単体テスト実行評価、E2Eテストまで6段階で一貫サポート。
 ---
 
 # Jakarta EE API サービス開発 Agent Skill
 
-## 使い方（5段階プロセス）
+## 使い方（6段階プロセス）
 
 ### ステップ1: 基本設計（SPEC作成）
 
@@ -28,7 +28,7 @@ AIと対話しながら以下を実施（対話的プロセス）
 注意: 
 * requirements.md（要件定義書）は所与とする（既に存在している前提）
 * 基本設計フェーズでは、システム全体を一枚岩として設計する
-* API単位への分解は、次のタスク分解フェーズで実施する
+* 機能単位への分解は、次のタスク分解フェーズで実施する
 
 ### ステップ2: タスク分解
 
@@ -45,7 +45,7 @@ AIと対話しながら以下を実施（対話的プロセス）
 
 AIが自動で以下を実行
 1. basic_design/ を分析
-2. 何が共通機能で何がAPI固有機能かを識別
+2. 機能を依存関係に基づいて識別し、実装順序を決定
 3. タスクファイルを分解・生成して `tasks/`フォルダに保存
 
 重要: このタスク分解の結果が、次の詳細設計フェーズで detailed_design/ フォルダ構造を決定する
@@ -60,7 +60,7 @@ AIが自動で以下を実行
 パラメータ
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
-* target_type: common または API_XXX_xxx
+* target_type: FUNC_XXX_xxx
 ```
 
 AIと対話しながら以下を実施（対話的プロセス）
@@ -70,7 +70,7 @@ AIと対話しながら以下を実施（対話的プロセス）
 
 重要: 
 * functional_design.md は basic_design/ にのみ存在（唯一の真実の情報源）
-* behaviors.md は結合テスト用（basic_design/）と単体テスト用（detailed_design/）で別物
+* behaviors.md はE2Eテスト用（basic_design/）と単体テスト用（detailed_design/）で別物
 
 ### ステップ4: コード生成（詳細設計→実装→単体テスト）
 
@@ -92,7 +92,38 @@ AIが自動で以下を実行
    * タスク外の依存関係のみモック化
 4. タスクを完了としてマーク
 
-### ステップ5: E2Eテスト生成
+### ステップ5: 単体テスト実行評価
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/unit_test_execution.md
+
+単体テストを実行してください
+
+パラメータ
+* project_root: <プロジェクトルートパス>
+* target_type: FUNC_XXX_xxx
+```
+
+AIが自動で以下を実行
+1. テスト実行（gradle test jacocoTestReport）
+2. テスト結果とカバレッジ分析
+3. 問題の分類（テスト失敗、必要な振る舞い、デッドコード、設計の誤り）
+4. フィードバックレポート生成
+5. ユーザーに推奨アクションを提示
+
+重要: 
+* 問題を発見してもユーザー確認なしに修正しない
+* カバレッジ不足やデッドコードを具体的に提案
+* 必要に応じてステップ3（詳細設計）に戻ってループ
+
+フィードバックループ:
+```
+詳細設計 → コード生成 → テスト実行評価
+    ↑                         ↓
+    └──── フィードバック ←────┘
+```
+
+### ステップ6: E2Eテスト生成
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md
@@ -107,7 +138,7 @@ E2Eテストを生成してください
 AIが自動で以下を実行
 1. basic_design/behaviors.md（E2Eテストシナリオ）を読み込み
 2. REST Assured を使用したE2Eテストを生成
-   * 複数API間の連携をテスト
+   * 複数機能間の連携をテスト
    * 実際のHTTPリクエスト/レスポンス
 3. テストデータのセットアップ/クリーンアップコードを生成
 
@@ -154,11 +185,15 @@ agent_skills/jakarta-ee-api-base/
 │   ├── security.md                  # セキュリティ標準
 │   └── common_rules.md              # 共通ルール
 ├── templates/                        # SPECテンプレート
-│   ├── architecture_design.md
-│   ├── functional_design.md
-│   ├── data_model.md
-│   ├── behaviors.md
-│   └── external_interface.md
+│   ├── basic_design/                # 基本設計用テンプレート
+│   │   ├── architecture_design.md
+│   │   ├── functional_design.md
+│   │   ├── data_model.md
+│   │   ├── behaviors.md            # E2Eテスト用
+│   │   └── external_interface.md
+│   └── detailed_design/             # 詳細設計用テンプレート
+│       ├── detailed_design.md
+│       └── behaviors.md            # 単体テスト用
 └── instructions/
     ├── basic_design.md               # ステップ1: 基本設計（SPEC作成）
     ├── task_breakdown.md             # ステップ2: タスク分解

@@ -7,28 +7,28 @@
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
 spec_directory: "ここにSPECディレクトリのパスを入力"
-target_type: "common または API_XXX_xxx"
+target_type: "FUNC_XXX_xxx"
 ```
 
-* 例1: 共通機能の詳細設計
+* 例1: FUNC_001の詳細設計
 ```yaml
 project_root: "projects/sdd/bookstore/back-office-api-sdd"
 spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline"
-target_type: "common"
+target_type: "FUNC_001_auth"
 ```
 
-* 例2: API単位の詳細設計
+* 例2: 別の機能の詳細設計
 ```yaml
 project_root: "projects/sdd/bookstore/back-office-api-sdd"
 spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline"
-target_type: "API_002_books"
+target_type: "FUNC_002_books"
 ```
 
 注意
 * パス区切りはOS環境に応じて調整する（Windows: `\`, Unix/Linux/Mac: `/`）
 * 以降、`{project_root}` と表記されている箇所は、上記で設定した値に置き換える
 * 以降、`{spec_directory}` と表記されている箇所は、上記で設定した値に置き換える
-* `{target_type}` は "common" または "API_XXX_xxx" に置き換える
+* `{target_type}` はタスク分解で決定されたFUNC_XXX_xxx形式のタスクIDに置き換える
 * アーキテクチャパターンはSPECから自動判定する
 
 ---
@@ -38,9 +38,9 @@ target_type: "API_002_books"
 このインストラクションは、基本設計SPEC（basic_design/）とタスク分解の結果から詳細設計書（detailed_design/）を生成するためのものである
 
 重要な方針
-* タスク分解で識別された common または API単位 に対して詳細設計を作成する
+* タスク分解で識別された機能（FUNC_XXX）に対して詳細設計を作成する
 * basic_design/functional_design.md を参照して、実装レベルの detailed_design.md を作成する
-* 単体テスト用の behaviors.md を新規作成する（結合テスト用の basic_design/behaviors.md とは別物）
+* 単体テスト用の behaviors.md を新規作成する（templates/detailed_design/behaviors.mdから、E2Eテスト用の basic_design/behaviors.md とは別物）
 * AIが仕様を理解し、人と対話しながら妥当性・充足性を確認する
 * 推測せず、不明点は必ずユーザーに質問する
 * アーキテクチャパターンはSPECから判断する（パラメータ指定不要）
@@ -52,7 +52,7 @@ target_type: "API_002_books"
 behaviors.mdの違い:
 * basic_design/behaviors.md: システム全体の振る舞い（E2Eテスト用）
   * API間連携、システム統合シナリオ
-  * 複数コンポーネントにまたがるエンドツーエンドのフロー
+  * 複数コンポーネントにまたがるE2Eのフロー
   * 実際のDBアクセス、外部API呼び出しを含む
   * REST Assuredを使用したHTTPリクエスト/レスポンステスト
   
@@ -65,20 +65,23 @@ behaviors.mdの違い:
 フォルダ構造
 * `{spec_directory}/basic_design/` - 基本設計（フェーズ1で作成済み）
   * functional_design.md - 全機能の要件（唯一の真実の情報源）
-  * behaviors.md - システム全体の振る舞い（結合テスト用）
-* `{spec_directory}/detailed_design/common/` - 共通機能の詳細設計（タスク分解で識別）
-  * detailed_design.md - 実装クラス設計
-  * behaviors.md - 単体テスト用の振る舞い
-* `{spec_directory}/detailed_design/API_XXX_xxx/` - API単位の詳細設計（タスク分解で識別）
+  * behaviors.md - システム全体の振る舞い（E2Eテスト用）
+* `{spec_directory}/detailed_design/FUNC_XXX_xxx/` - 機能単位の詳細設計（タスク分解で識別）
   * detailed_design.md - 実装クラス設計
   * behaviors.md - 単体テスト用の振る舞い
 
+機能の例（内容はプロジェクト固有で、タスク分解の結果により決定）:
+* `FUNC_001_auth/` - 例: 認証・認可機能
+* `FUNC_002_books/` - 例: 書籍管理機能
+* `FUNC_003_orders/` - 例: 注文管理機能
+* `FUNC_004_inventory/` - 例: 在庫管理機能
+
 注意
 * 詳細設計フェーズで初めて detailed_design/ フォルダを作成する
-* タスク分解の結果に基づいて、common/ と API単位のフォルダを作成する
+* タスク分解の結果（FUNC_XXX）に基づいてフォルダを作成する
 * functional_design.md は basic_design/ にのみ存在する（detailed_design/ には作成しない）
 * basic_design/functional_design.md を参照して detailed_design.md を作成する
-* behaviors.md は単体テスト用に新規作成する（basic_design/behaviors.md とは別物）
+* behaviors.md は単体テスト用に新規作成する（templates/detailed_design/behaviors.mdから、E2Eテスト用の basic_design/behaviors.md とは別物）
 
 ---
 
@@ -115,28 +118,30 @@ behaviors.mdの違い:
 
 * {spec_directory}/basic_design/data_model.md - テーブル定義とERDを確認し、JPAエンティティクラスを設計する
   * 注意: data_model.mdはRDB論理設計（テーブル、カラム、制約）のみ記述
-  * JPAエンティティクラスの設計（@Entity, @Column, @ManyToOne等のアノテーション、Java型、リレーションマッピング）はdetailed_design/common/detailed_design.mdで実施
+  * JPAエンティティクラスの設計（@Entity, @Column, @ManyToOne等のアノテーション、Java型、リレーションマッピング）は該当する機能タスクのdetailed_design.mdで実施（通常はEntity/Daoを担当する機能タスク）
 
 * {spec_directory}/basic_design/behaviors.md - システム全体の振る舞い（全APIの振る舞いを含む）を確認する
 
 注意: 
 * 基本設計フェーズでは、全ての機能が basic_design/ に一枚岩として記述されている
-* タスク分解フェーズで、何が共通機能で何がAPI固有機能かが識別されている
+* タスク分解フェーズで、機能が依存関係に基づいて識別され、実装順序が決定されている
 * 詳細設計フェーズで、basic_design/ から該当部分を抽出して detailed_design/ フォルダを作成する
 
 ### 1.4 タスク分解の結果
 
 以下のタスクファイルを読み込み、対象の範囲を理解する
 
-* {project_root}/tasks/common.md - 共通機能のタスク（target_type が "common" の場合）
-* {project_root}/tasks/{target_type}.md - API単位のタスク（target_type が "API_XXX_xxx" の場合）
+* {project_root}/tasks/{target_type}.md - 対象機能のタスク
+  * 例: FUNC_001_auth.md
+  * 例: FUNC_002_books.md
+  * 例: FUNC_003_orders.md
 
 タスクファイルから、以下を確認する：
 * 実装対象のコンポーネント（Resource、Service、Dao、DTO等）
 * 参照すべき SPEC（basic_design/ の該当セクション）
 * 依存関係
 
-注意: システム全体の機能設計、共通処理の振る舞いはsystem/functional_design.md、system/behaviors.mdを参照する
+注意: システム全体の機能設計、共通処理の振る舞いはbasic_design/functional_design.md、basic_design/behaviors.mdを参照する
 
 ---
 
@@ -229,31 +234,39 @@ behaviors.mdの違い:
 {spec_directory}/detailed_design/{target_type}/detailed_design.md
 ```
 
-* common の例: `{project_root}/specs/baseline/detailed_design/common/detailed_design.md`
-* API単位の例: `{project_root}/specs/baseline/detailed_design/API_002_books/detailed_design.md`
+* 例1: `{project_root}/specs/baseline/detailed_design/FUNC_001_auth/detailed_design.md`
+* 例2: `{project_root}/specs/baseline/detailed_design/FUNC_002_order_service/detailed_design.md`
+* 例3: `{project_root}/specs/baseline/detailed_design/FUNC_003_books/detailed_design.md`
 
-* 記載内容:
+* 共通記載内容（全機能タイプ）:
   * 実装クラス設計（クラス名、パッケージ、アノテーション）
   * メソッドシグネチャ（引数、戻り値、例外）
   * 依存性注入の設計（@Inject、@Named等）
-  * JPQL/Criteria APIのクエリ設計
-  * DTOとエンティティのマッピング設計
+  * JPQL/Criteria APIのクエリ設計（該当する場合）
+  * DTOとエンティティのマッピング設計（該当する場合）
 
-* commonの場合の記載内容:
+機能別の記載内容（タスク内容による）:
+
+FUNC_001の例（Entity、Dao等を含む）:
   * ドメインモデル（JPAエンティティ）の詳細設計
   * Daoクラスの詳細設計
-  * 共通的なServiceクラスの詳細設計
   * ユーティリティクラス、共通例外クラスの詳細設計
   * セキュリティコンポーネント（JWT、認証フィルター等）の詳細設計
 
-* API単位の場合の記載内容:
+FUNC_002の例（複数機能から使用されるService）:
+  * Serviceクラスの詳細設計
+  * ビジネスロジック、トランザクション境界の設計
+
+FUNC_003の例（REST API機能）:
   * Resourceクラス（JAX-RS）の詳細設計
-  * API固有のDTOクラス（Request、Response）の詳細設計
-  * API固有のビジネスロジック（Serviceメソッド）の詳細設計
+  * 機能固有のDTOクラス（Request、Response）の詳細設計
+  * 機能固有のビジネスロジック（Serviceメソッド）の詳細設計
   * 外部API連携クライアント（該当する場合）の詳細設計
 
 #### 3.1.2 behaviors.md（純粋な単体テスト用の振る舞い）
 
+テンプレート: templates/detailed_design/behaviors.md  
+コピー先:
 ```
 {spec_directory}/detailed_design/{target_type}/behaviors.md
 ```
@@ -418,7 +431,7 @@ public String generateToken(Long userId, String email)
 * [architecture_design.md](architecture_design.md) - アーキテクチャ設計書
 ```
 
-### 3.3 API固有の詳細設計書テンプレート
+### 3.3 機能固有の詳細設計書テンプレート
 
 ```markdown
 # {api_id} <API名> - API詳細設計書
@@ -440,7 +453,7 @@ public String generateToken(Long userId, String email)
 
 ## 2. パッケージ構造
 
-### 2.1 API固有パッケージ
+### 2.1 機能固有パッケージ
 
 \`\`\`
 <ベースパッケージ>
@@ -451,7 +464,7 @@ public String generateToken(Long userId, String email)
 │   │   └── <Response名>.java
 │   └── exception
 │       └── <ExceptionMapper名>.java（該当する場合）
-├── service（API固有のビジネスロジックがある場合）
+├── service（機能固有のビジネスロジックがある場合）
 │   └── <パッケージ>
 │       └── <Service名>.java
 └── external（外部API連携がある場合）
@@ -460,7 +473,7 @@ public String generateToken(Long userId, String email)
         └── <外部API用DTO名>.java
 \`\`\`
 
-注意: エンティティ、Dao、共通Serviceは[system/detailed_design.md](../../system/detailed_design.md)を参照
+注意: エンティティ、Dao、共通Serviceは依存タスクの詳細設計を参照してください（タスクファイルのメタデータ「依存タスク」欄を確認）
 
 ---
 
@@ -612,7 +625,7 @@ public <戻り値型> <メソッド名>(<引数>)
 * <テストケース1>
 * <テストケース2>
 
-### 6.2 統合テスト
+### 6.2 結合テスト
 
 * 対象: <対象の説明>
 
@@ -629,56 +642,57 @@ public <戻り値型> <メソッド名>(<引数>)
 
 ---
 
-## 4. systemとapiの使い分け（まとめ）
+## 4. 機能別の設計内容（タスク分解の結果による）
 
-### 4.1 system配下の詳細設計
+タスク分解で決定された各FUNC_XXXに対して、以下のような内容を記載します。
 
-システム全体、共通処理、ドメインモデルに関する詳細設計を記述します。
+### 4.1 記載内容の例
 
-* 出力先: `{spec_directory}/system/detailed_design.md`
-
+例: Entity、Daoを含む機能タスクの場合:
+* 出力先: `{spec_directory}/detailed_design/FUNC_XXX_yyy/detailed_design.md`
 * 記載内容:
   * ドメインモデル（JPAエンティティ）の詳細設計
   * Daoクラスの詳細設計
-  * 共通Serviceクラスの詳細設計（複数のAPIで共有されるビジネスロジックのみ）
   * セキュリティコンポーネント（JwtUtil、JwtAuthenFilter等）の詳細設計
   * ユーティリティクラスの詳細設計
   * 共通例外クラス、Exception Mapperの詳細設計
   * 設定情報（MicroProfile Config、persistence.xml等）
 
-注意: API固有のビジネスロジック（Serviceメソッド）は、並行作業を考慮して、api/{api_id}/detailed_design.mdに記述してください。
+FUNC_002の例（複数機能から使用されるService）:
+* 出力先: `{spec_directory}/detailed_design/FUNC_002_order_service/detailed_design.md`
+* 記載内容:
+  * 複数の機能で共有されるServiceクラスの詳細設計
+  * ビジネスロジック、トランザクション境界の設計
+  * ドメインルールの実装設計
 
-### 4.2 api配下の詳細設計
-
-API固有の設計情報を記述します。
-
-* 出力先: `{spec_directory}/api/{api_id}/detailed_design.md`
-
+FUNC_003の例（REST API機能）:
+* 出力先: `{spec_directory}/detailed_design/FUNC_003_books_api/detailed_design.md`
 * 記載内容:
   * Resourceクラス（JAX-RS）の詳細設計
-  * API固有のDTOクラス（Request、Response）の詳細設計
-  * API固有のビジネスロジック（Serviceメソッド）の詳細設計（このAPIのみで使用されるビジネスロジック）
+  * 機能固有のDTOクラス（Request、Response）の詳細設計
+  * 機能固有のビジネスロジック（Serviceメソッド）の詳細設計
   * 外部API連携クライアント（該当する場合）の詳細設計
-  * API固有のエラーハンドリング
-  * API固有のテスト要件
+  * 機能固有のエラーハンドリング
+  * 機能固有のテスト要件
 
-注意: 複数のAPIで共有されるビジネスロジックは、system/detailed_design.mdに記述してください。並行作業を考慮して、API固有のServiceメソッドはこのファイルに記述します。
+### 4.2 配置の判断基準（依存関係ベース）
 
-### 4.3 使い分けの判断基準
+| 設計対象 | 配置 | 判断基準 |
+|---------|---------|---------|
+| JPAエンティティ | 依存されるFUNC（例: FUNC_001） | 複数の機能から依存される |
+| Dao | 依存されるFUNC（例: FUNC_001） | 複数の機能から依存される |
+| セキュリティ | 依存されるFUNC（例: FUNC_001） | 複数の機能から依存される |
+| ユーティリティ | 依存されるFUNC（例: FUNC_001） | 複数の機能から依存される |
+| 複数機能で使用されるService | 依存されるFUNC（例: FUNC_002） | 複数の機能から依存される |
+| Resource（JAX-RS） | 特定のFUNC（例: FUNC_003） | 特定のAPIのみで使用 |
+| 機能固有のDTO | 特定のFUNC（例: FUNC_003） | 特定のAPIのみで使用 |
+| 機能固有のService | 特定のFUNC（例: FUNC_003） | 特定のAPIのみで使用（並行作業を考慮） |
+| 外部API連携クライアント | 使用範囲に応じて | 単一機能→そのFUNC、複数機能→依存されるFUNC |
 
-| 設計対象 | 配置場所 | 理由 |
-|---------|---------|------|
-| JPAエンティティ | system/detailed_design.md | ドメインモデルはシステムの核心 |
-| Dao | system/detailed_design.md | データアクセスは複数のAPIで共有される |
-| 共通Service | system/detailed_design.md | 複数のAPIで共有されるビジネスロジック |
-| セキュリティコンポーネント | system/detailed_design.md | システム全体で共有される |
-| ユーティリティクラス | system/detailed_design.md | システム全体で共有される |
-| Resource（JAX-RS） | api/{api_id}/detailed_design.md | 特定のAPIにのみ関連する |
-| API固有のDTO | api/{api_id}/detailed_design.md | 特定のAPIにのみ関連する |
-| API固有のService | api/{api_id}/detailed_design.md | 特定のAPIにのみ関連するビジネスロジック（並行作業を考慮） |
-| 外部API連携クライアント | api/{api_id}/detailed_design.md または system/detailed_design.md | 特定のAPIで使用される場合はapi/、複数のAPIで共有される場合はsystem/ |
-
-重要: 並行作業を考慮して、API固有のビジネスロジック（Serviceメソッド）は、そのAPIを担当する開発者が独立して作業できるように、api/{api_id}/detailed_design.mdに記述します。
+重要: 
+* タスク分解で依存関係が決定されている
+* 依存される側のFUNCを先に実装する必要がある
+* 特定の機能のみで使用されるコンポーネントは、その機能のフォルダに配置することで、担当者が独立して作業できる
 
 ---
 
@@ -787,10 +801,10 @@ AIは以下の情報から、実装すべきクラスを判断する
 
 詳細が矛盾する場合、以下の優先順位で判断する
 
-1. {spec_directory}/api/{api_id}/functional_design.md（最優先）
-2. {spec_directory}/api/{api_id}/behaviors.md
-3. {spec_directory}/system/architecture_design.md
-4. {spec_directory}/system/functional_design.md
+1. {spec_directory}/detailed_design/FUNC_XXX/functional_design.md（最優先）
+2. {spec_directory}/detailed_design/FUNC_XXX/behaviors.md
+3. {spec_directory}/basic_design/architecture_design.md
+4. {spec_directory}/basic_design/functional_design.md
 5. ベースライン仕様（拡張機能の場合、system配下が存在しない場合）
 
 ### 不明点の扱い
@@ -805,23 +819,71 @@ SPECから以下を確認する
 
 * {spec_directory}/system/data_model.md: テーブル定義（ERD）の有無 → JPAエンティティ/Dao/Service実装の必要性
 * {spec_directory}/system/external_interface.md: 外部API定義の有無 → RestClient実装の必要性
-* {spec_directory}/api/{api_id}/functional_design.md: エンドポイント定義 → Resource実装の必要性
+* {spec_directory}/detailed_design/FUNC_XXX/functional_design.md: エンドポイント定義 → Resource実装の必要性
 
 重要な分界点:
 * 基本設計（data_model.md）: RDB論理設計のみ（テーブル、カラム、型、制約、リレーション）
 * 詳細設計（detailed_design.md）: JPAエンティティクラス設計（@Entity, @Table, @Column, @ManyToOne等のアノテーション、Java型、フィールド名、リレーションマッピング）
 * JPAエンティティクラスの設計は、data_model.mdのERD（テーブル定義）から詳細設計フェーズでマッピングして作成します
 
-「マイクロサービス」「BFF」といったラベルに依存せず、SPECの内容から判断する
+Jakarta EEによるAPIシステムとして、SPECの内容から判断する
 
 注意: 拡張機能の場合、system配下の仕様が存在しない場合はベースラインの仕様を参照する
 
-### 既存のdetailed_design.mdの扱い
+### 既存のdetailed_design.mdの扱いと反復的なブラッシュアップ
 
-すでにdetailed_design.mdが存在する場合
-* ユーザーに「既存のファイルを上書きしますか」と確認する
-* 上書きの場合は、既存の内容を読んで良い部分を継承する
-* 追記の場合は、不足セクションのみを追加する
+詳細設計は一度で完璧になることはない。以下のタイミングで更新が必要:
+
+#### 更新が必要なケース
+
+1. コード生成時に設計の不整合を発見
+2. 単体テスト実装時に設計の不足を発見
+3. テスト実行時に設計の誤りを発見
+4. カバレッジ分析で不足やデッドコードを発見
+5. レビュー時に改善点を発見
+
+#### すでにdetailed_design.mdが存在する場合
+
+1. 必須: 既存のdetailed_design.mdを読み込む
+2. 分析: 現在の設計内容を理解する
+3. ユーザー確認: 以下を確認する
+   ```
+   既存の詳細設計書が見つかりました
+   
+   どのように進めますか？
+   A. 全面的に書き直す（上書き）
+   B. 特定のセクションのみ更新する
+   C. 不足セクションを追加する
+   D. 既存の内容を確認してから判断する
+   ```
+4. 更新: 選択に応じて実行
+5. 履歴: 「最終更新」日付を更新
+
+#### 設計の改善パターン
+
+以下のような改善が典型的:
+* メソッドシグネチャの調整
+* エラーハンドリングの追加・明確化
+* バリデーションロジックの明確化
+* テストケースの追加
+* パフォーマンス考慮事項の追加
+* デッドコードの明記と削除理由の記載
+
+#### フィードバックループ
+
+品質を高めるため、以下のループを繰り返す:
+```
+詳細設計 → コード生成 → テスト実行 → 評価
+    ↑                              ↓
+    └──────── フィードバック ←─────┘
+```
+
+各イテレーションで:
+* 単体テスト実行結果を確認
+* カバレッジギャップを分析
+* 不足している振る舞いをbehaviors.mdに追加
+* デッドコードをdetailed_design.mdに明記
+* 設計の誤りを修正
 
 ### ベースラインと拡張機能の違い
 

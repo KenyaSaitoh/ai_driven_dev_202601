@@ -198,8 +198,8 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
   * struts-config.xmlとActionForwardから抽出
 
 * コンポーネント設計:
-  * 各画面に対応するManaged Bean
-  * 各画面で使用するServiceクラス
+  * 各機能に対応するManaged Bean
+  * 各機能で使用するServiceクラス
   * 画面間のデータ受け渡し（Flash Scope、Session Scope等）
 
 #### data_model.md
@@ -239,11 +239,11 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 
 ### 2.2 画面単位のSPEC
 
-各JSPファイルに対して、以下のSPECを `{spec_output_directory}/baseline/detailed_design/screen/SCREEN_XXX_<画面名>/` に生成してください：
+各JSPファイルに対して、以下のSPECを `{spec_output_directory}/baseline/detailed_design/detailed_design/FUNC_XXX_<画面名>/` に生成してください：
 
 #### screen_design.md
 
-* 画面ID: SCREEN_XXX_<画面名>（例: SCREEN_001_PersonList）
+* 画面ID: FUNC_XXX_<画面名>（例: FUNC_001_PersonList）
 * 画面名: <画面の日本語名>
 * URL: <アクセスURL>
 * 目的: <画面の目的>
@@ -497,7 +497,7 @@ SPECには、JSFの技術スタックを前提とした設計を記載する
 生成されたSPECが満たすべき要件
 
 * システムレベルのSPECが生成されている
-* 各画面単位のSPECが生成されている
+* 各機能単位のSPECが生成されている
 * Strutsの実装詳細に囚われず、抽象的・論理的な記述になっている
 * JSFアーキテクチャを前提とした設計になっている
 * データベーススキーマは既存のまま継続される設計になっている

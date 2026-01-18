@@ -7,14 +7,21 @@
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
 task_file: "ここに実行するタスクファイルのパスを入力"
-skip_infrastructure: false  # trueの場合、インフラセットアップをスキップ
+skip_infrastructure: false  # setupタスク専用: trueの場合、インフラセットアップをスキップ
 ```
 
-* 例
+* 例1: setupタスクの実行
 ```yaml
 project_root: "projects/sdd/bookstore/back-office-api-sdd"
 task_file: "projects/sdd/bookstore/back-office-api-sdd/tasks/setup.md"
-skip_infrastructure: true  # インフラセットアップをスキップ
+skip_infrastructure: true  # setupタスク実行時のみ有効: DB/APサーバーのインストールをスキップ
+```
+
+* 例2: 機能タスクの実行
+```yaml
+project_root: "projects/sdd/bookstore/back-office-api-sdd"
+task_file: "projects/sdd/bookstore/back-office-api-sdd/tasks/FUNC_002_books.md"
+skip_infrastructure: false  # 機能タスクではこのパラメータは無視される
 ```
 
 注意
@@ -58,19 +65,25 @@ skip_infrastructure: true  # インフラセットアップをスキップ
    * これが唯一の真実の情報源（Single Source of Truth）
    * 全ての機能要件、エンドポイント仕様、ビジネスルールはここに記載されている
 
-7. 必須: `{project_root}/specs/baseline/detailed_design/common/detailed_design.md` で共通処理、JPAエンティティ、Dao、共通Serviceの詳細設計を確認する（存在する場合）
+7. 必須: 依存タスクの詳細設計を確認する（存在する場合）
+   * タスクファイルのメタデータ「依存タスク」欄を参照
+   * 各依存タスクの `{project_root}/specs/baseline/detailed_design/{依存タスクID}/detailed_design.md` を確認
+   * 例: JPAエンティティ、Dao、セキュリティコンポーネント等
 
-8. 必須: `{project_root}/specs/baseline/detailed_design/*/detailed_design.md` でAPI固有のResource、DTO、API特有のServiceの詳細設計を確認する（存在する場合）
+8. 必須: 現在のタスクの詳細設計を確認する（存在する場合）
+   * `{project_root}/specs/baseline/detailed_design/{task_id}/detailed_design.md`
+   * 実装クラス設計、メソッドシグネチャ、アノテーション等
    * 実装クラス設計、メソッドシグネチャ、アノテーション等
 
-9. 必須: `{project_root}/specs/baseline/detailed_design/*/behaviors.md` で単体テスト用の振る舞い仕様を確認する（存在する場合）
+9. 必須: 現在のタスクの振る舞い仕様を確認する（存在する場合）
+   * `{project_root}/specs/baseline/detailed_design/{task_id}/behaviors.md`
    * メソッドレベルのテストシナリオ
 
 10. 存在する場合: `{project_root}/specs/baseline/basic_design/data_model.md` でテーブル定義とERDを確認する
 
 11. 存在する場合: `{project_root}/specs/baseline/basic_design/behaviors.md` でシステム全体の振る舞い（全APIの振る舞いを含む）を確認する
 
-12. 存在する場合: `{project_root}/specs/baseline/detailed_design/*/behaviors.md` でAPI固有の受入基準とテストシナリオを確認する
+12. 存在する場合: `{project_root}/specs/baseline/detailed_design/*/behaviors.md` で機能固有の受入基準とテストシナリオを確認する
 
 13. 存在する場合: `{project_root}/specs/baseline/basic_design/external_interface.md` で外部連携仕様とAPI仕様を確認する
 
@@ -88,10 +101,14 @@ skip_infrastructure: true  # インフラセットアップをスキップ
 ### 3. タスク計画に従って実装を実行する
 
 * タスクごとの実行: 次のタスクに進む前に各タスクを完了する
-* セットアップタスク
+* setupタスク（特別なタスク）の実行時のみ:
   * `skip_infrastructure: true`の場合、インフラ関連タスク（DB/APサーバーのインストール等）はスキップする
-  * アプリケーション固有のセットアップ（スキーマ作成、初期データ、静的リソース配置等）は実行する
+  * `skip_infrastructure: false`の場合、すべてのセットアップを実行する
+  * アプリケーション固有のセットアップ（スキーマ作成、初期データ、静的リソース配置等）は常に実行する
   * リソース配置（画像ファイルのコピー等）を最優先で実行する
+* 機能タスク（FUNC_XXX）の実行時:
+  * `skip_infrastructure` パラメータは無視される
+  * タスクファイルに記載された実装内容に従う
 * 依存関係の尊重: 順次タスクは順番に実行、並列タスク[P]は一緒に実行可能
 * TDDアプローチに従う: 対応する実装の前にテストを実行する（プロジェクトがTDDを採用している場合）
 * ファイルベースの調整: 同じファイルに影響するタスクは順次実行必須
@@ -183,7 +200,7 @@ Entity、Dao、Service、Resource（JAX-RSエンドポイント）を実装す�
 #### 5.1 基本方針
 
 * テストスコープ: タスクの粒度内
-  * タスク分解で定義された1つのタスク（例: API_002_books）に含まれるコンポーネントをテスト
+  * タスク分解で定義された1つのタスク（例: FUNC_002_books）に含まれるコンポーネントをテスト
   * タスク内のコンポーネント間は実際の連携でテスト可能
   * タスク外の依存関係はモックを使用
   
@@ -299,7 +316,7 @@ architecture_design.mdを参照して以下を確認すること
 
 * 技術スタック: architecture_design.mdでJakarta Persistence（JPA）とCDIバージョンを確認する
 * スコープ: architecture_design.mdで適切なスコープを確認する
-* 第一参照: api/配下の該当APIのfunctional_design.md
+* 第一参照: detailed_design/FUNC_XXX/detailed_design.md
   * Daoインターフェース、メソッドシグネチャ、戻り値の型を確認する
   * クエリメソッドの動作仕様を確認する
 * 第二参照: data_model.md
@@ -311,7 +328,7 @@ architecture_design.mdを参照して以下を確認すること
 * 技術スタック: architecture_design.mdでJakarta CDI, Transactionsバージョンを確認する
 * スコープ: architecture_design.mdで適切なスコープを確認する
 * トランザクション: architecture_design.mdで@Transactionalの使用方法を確認する
-* 第一参照: api/配下の該当APIのfunctional_design.md
+* 第一参照: detailed_design/FUNC_XXX/detailed_design.md
   * Serviceクラスのメソッドシグネチャ、ビジネスロジック、処理フローを確認する
   * トランザクション境界、例外ハンドリング、バリデーションロジックを確認する
 * 第二参照: api/配下の該当APIのbehaviors.md
@@ -323,7 +340,7 @@ architecture_design.mdを参照して以下を確認すること
 
 * 技術スタック: architecture_design.mdでJAX-RS（Jakarta RESTful Web Services）バージョンを確認する
 * スコープ: architecture_design.mdで適切なスコープを確認する
-* 第一参照: api/配下の該当APIのfunctional_design.md
+* 第一参照: detailed_design/FUNC_XXX/detailed_design.md
   * Resourceクラスの設計、エンドポイント仕様を確認する
   * リクエスト/レスポンス形式、ステータスコード、エラーハンドリングを確認する
   * JWT認証の要否、権限チェックを確認する
@@ -333,7 +350,7 @@ architecture_design.mdを参照して以下を確認すること
 
 ### DTO/Response生成時
 
-* 第一参照: api/配下の該当APIのfunctional_design.md
+* 第一参照: detailed_design/FUNC_XXX/detailed_design.md
   * リクエストDTO、レスポンスDTOの構造、フィールド名、データ型を確認する
   * バリデーションアノテーションを確認する
 * 第二参照: data_model.md
@@ -358,16 +375,13 @@ architecture_design.mdを参照して以下を確認すること
 * 第二参照: functional_design.md
   * 連携クラスの設計、メソッド名、エラーハンドリングを確認する
 
-### API統合テスト生成時（REST Assured/JAX-RS Client）
+### 外部API連携テスト生成時（REST Client）
 
-* 第一参照: api/配下の該当APIのfunctional_design.md
-  * エンドポイント仕様を確認する
+* 第一参照: external_interface.md または OpenAPI YAML
+  * 外部APIのエンドポイント仕様を確認する
   * 認証要否、ステータスコード、エラーレスポンスを確認する
-* 第二参照: api/配下の該当APIのbehaviors.md
-  * Given-When-ThenシナリオをHTTPリクエスト/レスポンスのテストに変換する
-  * エラーケースのレスポンスを確認する
-* 第三参照: system/のfunctional_design.md
-  * API間の連携、データの流れ、セッション管理を確認する
+* 第二参照: functional_design.md
+  * 連携処理の流れ、エラーハンドリングを確認する
 
 ---
 
@@ -391,8 +405,8 @@ architecture_design.mdを参照して以下を確認すること
 * 実装がアーキテクチャ設計に従っていることを確認する
 * クラス設計が機能設計仕様と一致することを検証する
 * SPECとのトレーサビリティ検証
-  * api/配下の各APIのbehaviors.mdの受入基準（Given-When-Then）が全てテストケースでカバーされていることを確認する
-  * api/配下の各APIのfunctional_design.mdで定義された全てのエンドポイント、DTO、クラス、メソッドが実装されていることを確認する
+  * detailed_design/配下の各機能のbehaviors.mdの受入基準（Given-When-Then）が全てテストケースでカバーされていることを確認する
+  * detailed_design/配下の各機能のfunctional_design.mdで定義された全てのエンドポイント、DTO、クラス、メソッドが実装されていることを確認する
   * data_model.mdで定義された全ての制約条件（NOT NULL, UNIQUE, FK等）が実装されていることを確認する
   * external_interface.mdで定義された全てのAPI仕様が実装されていることを確認する
   * 静的リソースが正しく配置されていることを確認する
@@ -403,7 +417,7 @@ architecture_design.mdを参照して以下を確認すること
 
 ## 実装要件に応じたガイド
 
-このスキルは、SPEC（`{project_root}/specs/baseline/system/architecture_design.md`）に記載された実装要件に自動的に適応する
+このスキルは、SPEC（`{project_root}/specs/baseline/basic_design/architecture_design.md`）に記載された実装要件に自動的に適応する
 
 ### エンティティ実装が必要な場合
 
@@ -453,3 +467,88 @@ architecture_design.mdを参照して以下を確認すること
 * `{project_root}` は、パラメータで明示的に指定されたパスに置き換える
 * 相対パスでも絶対パスでも構わない
 * 全てのファイル操作は、このプロジェクトルートを基準に行う
+
+---
+
+## 既存コードの扱いと反復的な開発
+
+このインストラクションは、新規生成と既存コードの改修の両方に対応する。
+
+### 既存コードがある場合の確認
+
+実装前に以下を確認する:
+
+1. 対象ファイルが既に存在するか確認
+2. 既存コードがある場合:
+   - 既存コードを読み込んで理解する
+   - 詳細設計書との差異を確認する
+   - ユーザーに改修方針を確認:
+     ```
+     既存のファイルが見つかりました: {ファイル名}
+     
+     どのように進めますか？
+     A. 全面的に再生成する（既存コードを上書き）
+     B. 既存コードを保持して部分修正する
+     C. 不足部分のみ追加する
+     D. 既存コードを確認してから判断する
+     ```
+
+### 新規生成 vs 改修の判断
+
+新規生成の場合:
+* ファイルが存在しない
+* 詳細設計書に基づいて完全に生成
+* テストコードも同時に生成
+
+改修の場合:
+* ファイルが既に存在する
+* 詳細設計書との差異を確認
+* 既存の良い実装は保持
+* 不足部分や誤りのみ修正
+* テストコードも対応して更新
+
+### 実装と詳細設計の同期
+
+重要原則:
+* コード修正時は詳細設計書も更新する
+* 詳細設計書が常に実装の真実を反映する
+* 乖離が発生した場合は即座に同期する
+
+同期が必要なケース:
+* メソッドシグネチャの変更
+* クラス構造の変更
+* エラーハンドリングの追加
+* バリデーションロジックの変更
+
+---
+
+## 次のステップ: 単体テスト実行
+
+コード生成完了後、品質を検証するために単体テストを実行する。
+
+```
+✅ コード生成完了
+
+次のステップ: 単体テストの実行と評価
+
+@agent_skills/jakarta-ee-api-base/instructions/unit_test_execution.md
+
+単体テストを実行してください
+
+パラメータ:
+* project_root: {project_root}
+* target_type: {target_type}
+```
+
+単体テスト実行により以下を確認:
+* 実装が正しく動作するか
+* カバレッジ目標を達成しているか
+* 不足しているテストケースがないか
+* デッドコードが含まれていないか
+
+テスト結果に基づいて、必要に応じて以下のループを実行:
+```
+詳細設計 → コード生成 → テスト実行 → 評価
+    ↑                              ↓
+    └──────── フィードバック ←─────┘
+```

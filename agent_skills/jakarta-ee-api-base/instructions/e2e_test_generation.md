@@ -30,7 +30,7 @@ spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline"
 * 実装完了後にE2Eテストを生成する（code_generation.mdの次のステップ）
 * テストフレームワーク: REST Assured を使用
 * テスト対象: basic_design/behaviors.md（E2Eテスト用）のシナリオ
-* 複数API間の連携、実際のHTTPリクエスト/レスポンス、実際のDBアクセスを含む
+* 複数機能間の連携、実際のHTTPリクエスト/レスポンス、実際のDBアクセスを含む
 * アプリケーションサーバーが起動している状態でテストを実行
 
 ---
@@ -61,7 +61,7 @@ spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline"
 * {spec_directory}/basic_design/behaviors.md - E2Eテストシナリオを確認する
   * システム全体の振る舞い
   * API間連携シナリオ
-  * エンドツーエンドのフロー
+  * E2Eのフロー
   * 例: 認証 → 書籍検索 → 注文作成 → 在庫更新
 
 ---
@@ -161,7 +161,7 @@ public abstract class BaseE2ETest {
 
 * 1シナリオ＝1テストクラスの粒度
 * basic_design/behaviors.md の各Given-When-Thenシナリオを実際のHTTPリクエストとしてテスト
-* 複数APIにまたがるエンドツーエンドのフローをテスト
+* 複数APIにまたがるE2Eのフローをテスト
 * 実際のDBアクセスを含む（テストデータの準備と検証）
 * HTTPステータスコード、レスポンスボディ、ヘッダーの検証
 

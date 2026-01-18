@@ -39,7 +39,7 @@ spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/enhancements/2
 * 既存資料がない場合は、テンプレートから対話的に作成する
 * requirements.md（要件定義書）は所与とする（既に存在している前提）
 * 基本設計フェーズでは、システム全体を一枚岩として設計する（basic_design/配下のみ作成）
-* API単位への分解は、次のタスク分解フェーズで実施する
+* 機能単位への分解は、次のタスク分解フェーズで実施する
 
 作成するSPEC
 
@@ -52,7 +52,7 @@ basic_design/配下（システム全体の基本設計）:
 * external_interface.md - 外部インターフェース仕様書（外部API連携、外部システムとの接続）
 
 注意: 
-* 基本設計フェーズでは、api/フォルダやcommon/フォルダは作成しない
+* 基本設計フェーズでは、detailed_design/フォルダは作成しない
 * 詳細設計（detailed_design.md）は、タスク分解後の詳細設計フェーズで作成する
 * 全ての機能をbasic_design/functional_design.mdに記載する
 
@@ -79,7 +79,7 @@ basic_design/配下（システム全体の基本設計）:
 
 ### 2.1 基本設計テンプレートの展開
 
-@agent_skills/jakarta-ee-api-base/templates/ 配下のテンプレートファイルを {spec_directory}/basic_design/ にコピーする
+@agent_skills/jakarta-ee-api-base/templates/basic_design/ 配下のテンプレートファイルを {spec_directory}/basic_design/ にコピーする
 
 コピー対象ファイル:
 * architecture_design.md - アーキテクチャ設計書
@@ -105,15 +105,15 @@ basic_design/配下（システム全体の基本設計）:
     ├── architecture_design.md       # テンプレートから展開
     ├── functional_design.md         # テンプレートから展開（全機能を含む）
     ├── data_model.md                # テンプレートから展開
-    ├── behaviors.md                 # テンプレートから展開（全振る舞いを含む）
+    ├── behaviors.md                 # templates/basic_design/behaviors.mdから展開（E2Eテスト用）
     └── external_interface.md        # テンプレートから展開
 ```
 
 重要な方針:
-* 基本設計フェーズでは、api/フォルダやcommon/フォルダは作成しない
+* 基本設計フェーズでは、detailed_design/フォルダは作成しない
 * 全ての機能を functional_design.md に記載する
 * 全ての振る舞いを behaviors.md に記載する
-* API単位への分解は、次のタスク分解フェーズで実施する
+* 機能単位への分解は、次のタスク分解フェーズで実施する
 
 ---
 
@@ -239,7 +239,7 @@ basic_design/配下（システム全体の基本設計）:
 * システム全体のデータフロー（シーケンス図 - 論理レベル）
 
 重要な方針:
-* 全ての機能を一枚岩として記述する（共通機能とAPI機能の区別はしない）
+* 全ての機能を一枚岩として記述する（機能の分類はしない）
 * 基本設計では、論理レベルのコンポーネント（「書籍サービス」「社員データアクセス」等）またはレイヤー名（「APIレイヤー」「ビジネスロジック」等）のみを記述
 * 実装クラス名（BookService、EmployeeDao等）やメソッド名（findById()等）は記述しない
 * シーケンス図も論理レベルで記述: `participant 書籍リソース` または `participant APIレイヤー`
@@ -270,7 +270,7 @@ basic_design/配下（システム全体の基本設計）:
 5. 不足している情報をユーザーに確認する
 
 既存資料がない場合:
-* {spec_directory}/basic_design/behaviors.md のテンプレートを開き、ユーザーと対話しながら各セクションを埋めていく
+* templates/basic_design/behaviors.md を {spec_directory}/basic_design/behaviors.md にコピーして展開し、ユーザーと対話しながら各セクションを埋めていく
 
 主要なセクション:
 * システム全体の振る舞い概要
@@ -281,13 +281,13 @@ basic_design/配下（システム全体の基本設計）:
 * エラーケース
 
 重要な方針:
-* 全ての振る舞いを一枚岩として記述する（共通とAPI固有の区別はしない）
+* 全ての振る舞いを一枚岩として記述する（機能の分類はしない）
 * Given-When-Then形式で記述する
 * 具体的なテストケースを含める
 
 対話のポイント:
 * 「システム全体の振る舞いを教えてください」
-* 「各API機能（認証、書籍管理、注文管理等）の振る舞いをGiven-When-Then形式で教えてください」
+* 「各機能機能（認証、書籍管理、注文管理等）の振る舞いをGiven-When-Then形式で教えてください」
 * 「共通処理（認証、エラーハンドリング等）の振る舞いをGiven-When-Then形式で教えてください」
 * 「ドメインモデルのビジネスルールの振る舞いは何ですか？」
 * 「エラーケースは何がありますか？」
@@ -383,7 +383,7 @@ basic_design/配下（システム全体の基本設計）:
 
 注意: 
 * 詳細設計（detailed_design/）は、タスク分解後の詳細設計フェーズで作成します
-* API単位への分解は、次のタスク分解フェーズで実施します
+* 機能単位への分解は、次のタスク分解フェーズで実施します
 ```
 
 ### 5.2 次のステップの案内
@@ -394,10 +394,10 @@ basic_design/配下（システム全体の基本設計）:
 次のステップ:
 1. タスク分解: @agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
    - basic_design/ を分析してタスクに分解
-   - common（共通機能）とAPI単位を識別
+   - 機能を依存関係に基づいてを識別
 2. 詳細設計: @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
    - タスク分解の結果に基づいて detailed_design/ フォルダを作成
-   - common/ と API単位のフォルダを作成
+   - 機能（FUNC_XXX）フォルダを作成
 3. コード生成: @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
    - 各タスクに従って実装
 ```
@@ -421,11 +421,11 @@ basic_design/配下（システム全体の基本設計）:
 
 ### 6.2 基本設計の重要な方針
 
-* 全ての機能を functional_design.md に記載する（共通機能とAPI機能の区別はしない）
-* 全ての振る舞いを behaviors.md に記載する（共通とAPI固有の区別はしない）
-* api/フォルダやcommon/フォルダは作成しない
+* 全ての機能を functional_design.md に記載する（機能の分類はしない）
+* 全ての振る舞いを behaviors.md に記載する（機能の分類はしない）
+* detailed_design/フォルダは作成しない
 * 論理レベルで記述する（実装クラス名、メソッド名、パッケージ名は記述しない）
-* API単位への分解は、次のタスク分解フェーズで実施する
+* 機能単位への分解は、次のタスク分解フェーズで実施する
 
 ---
 

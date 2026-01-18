@@ -1,14 +1,14 @@
 # Struts to JSF マイグレーション - クイックスタートガイド
 
-Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを5ステップで実現します。
+Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを6ステップで実現します。
 
 ---
 
 ## 🎯 マイグレーションアプローチ
 
 ```
-Struts コード → SPEC生成 → タスク分解 → 詳細設計 → JSF コード生成 → E2Eテスト
- (既存コード分析)  (画面単位)  (AIと対話)  (実装+単体テスト)  (Playwright)
+Struts コード → SPEC生成 → タスク分解 → 詳細設計 → JSF コード生成 → テスト実行評価 → E2Eテスト
+ (既存分析)    (画面単位)   (AIと対話)   (実装+単体)    (品質検証)      (Playwright)
 ```
 
 Code-to-Codeの直接変換ではなく、一度SPECとして抽象化することで：
@@ -18,7 +18,7 @@ Code-to-Codeの直接変換ではなく、一度SPECとして抽象化するこ�
 
 ---
 
-## 🚀 5ステップでマイグレーション
+## 🚀 6ステップでマイグレーション
 
 ### ステップ1: 🔍 既存コード分析
 
@@ -57,11 +57,11 @@ Code-to-Codeの直接変換ではなく、一度SPECとして抽象化するこ�
 * spec_directory: projects/jsf-migration/struts-app-jsf/specs
 ```
 
-画面単位でタスクファイルを生成：
-* `setup.md` - セットアップ
-* `common.md` - 共通機能（Entity、Service等）
-* `SCREEN_XXX_*.md` - 各画面の実装タスク
-* `integration_tasks.md` - 結合テスト
+タスクファイルを生成：
+* `setup.md` - セットアップ（特別なタスク、常に最初）
+* `FUNC_001_xxx.md` - 機能別タスク（内容はプロジェクト固有、例: Entity、Service等）
+* `FUNC_002_yyy.md` - 機能別タスク（内容はプロジェクト固有、例: 画面機能）
+* `e2e_test.md` - E2Eテスト
 
 ### ステップ3: 📝 詳細設計（画面単位、AIと対話）
 
@@ -74,7 +74,7 @@ Code-to-Codeの直接変換ではなく、一度SPECとして抽象化するこ�
 
 パラメータ:
 * project_root: projects/jsf-migration/struts-app-jsf
-* screen_id: SCREEN_001_PersonList
+* target_type: FUNC_001_PersonList
 ```
 
 AIと対話しながら：
@@ -105,7 +105,42 @@ AIが：
    * 同じタスク内のコンポーネント間は実際の連携をテスト
    * 例: PersonListBean → PersonService → PersonDao は実際の連携、EntityManagerはモック
 
-### ステップ5: 🧪 E2Eテスト生成
+### ステップ5: 🔍 単体テスト実行評価
+
+```
+@agent_skills/struts-to-jsf-migration/instructions/unit_test_execution.md
+
+単体テストを実行してください。
+
+パラメータ:
+* project_root: projects/jsf-migration/struts-app-jsf
+* target_type: FUNC_001_PersonList
+```
+
+AIが：
+1. 🧪 テスト実行（gradle test jacocoTestReport）
+2. 📊 テスト結果とカバレッジを分析
+3. 🔍 問題を分類:
+   * テスト失敗（アサーション、例外、タイムアウト）
+   * 必要な振る舞い（テストが不足）
+   * デッドコード（到達不可能・冗長）
+   * 設計の誤り（仕様との不一致）
+4. 📋 フィードバックレポートを生成
+5. 💬 ユーザーに推奨アクションを提示
+
+重要：
+* 問題を発見してもユーザー確認なしに修正しない
+* Managed Bean はカバレッジ除外推奨（UI層はE2Eで検証）
+* 必要に応じてステップ3（詳細設計）に戻ってループ
+
+🔄 フィードバックループ:
+```
+詳細設計 → コード生成 → テスト実行評価
+    ↑                         ↓
+    └──── フィードバック ←────┘
+```
+
+### ステップ6: 🧪 E2Eテスト生成
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/e2e_test_generation.md
@@ -141,7 +176,7 @@ Person一覧画面を実装してください。
 
 パラメータ:
 * project_root: projects/jsf-migration/struts-app-jsf
-* task_file: projects/jsf-migration/struts-app-jsf/tasks/SCREEN_001_PersonList.md
+* task_file: projects/jsf-migration/struts-app-jsf/tasks/FUNC_001_PersonList.md
 ```
 
 ---
@@ -220,7 +255,7 @@ Person一覧画面の詳細設計書を作成してください。
 
 パラメータ:
 * project_root: projects/master/person/person-jsf-migrated
-* screen_id: SCREEN_001_PersonList
+* target_type: FUNC_001_PersonList
 ```
 
 #### ステップ4: JSFコード生成
@@ -243,7 +278,7 @@ Person一覧画面を実装してください。
 
 パラメータ:
 * project_root: projects/master/person/person-jsf-migrated
-* task_file: projects/master/person/person-jsf-migrated/tasks/SCREEN_001_PersonList.md
+* task_file: projects/master/person/person-jsf-migrated/tasks/FUNC_001_PersonList.md
 ```
 
 ---
