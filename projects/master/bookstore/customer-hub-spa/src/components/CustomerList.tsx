@@ -30,7 +30,7 @@ const CustomerList = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch('/berry-books-rest/customers/');
+      const response = await fetch('/api/customers/');
       if (!response.ok) {
         throw new Error('顧客データの取得に失敗しました');
       }
@@ -120,7 +120,7 @@ const CustomerList = () => {
     setSaveError(null);
 
     try {
-      const response = await fetch(`/berry-books-rest/customers/${editingCustomer.customerId}`, {
+      const response = await fetch(`/api/customers/${editingCustomer.customerId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

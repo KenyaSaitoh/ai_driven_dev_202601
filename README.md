@@ -18,6 +18,55 @@ Jakarta EE 10とReactを使用したフルスタックWebアプリケーショ�
    
 詳細は [projects/master/bookstore/README.md](projects/master/bookstore/README.md) を参照してください。
 
+## ⚡ クイックスタート: Berry Books フルスタック自動起動
+
+Bookstoreドメインの全アプリケーション（バックエンドAPI 3つ + フロントエンドSPA 3つ）を一括起動できる自動化スクリプトを用意しています。
+
+### 📦 自動実行される処理
+
+1. **GlassFish (Payara Server) の初期化と起動**
+2. **HSQLDB サーバーの起動**
+3. **データソースのセットアップ**
+4. **3つのJakarta EE APIのDB初期化、WAR化、デプロイ**
+   - `back-office-api` - 書籍・在庫管理API
+   - `berry-books-api` - 注文管理API
+   - `customer-hub-api` - 顧客管理API
+5. **3つのReact SPAの依存関係インストールと起動**
+   - `berry-books-spa` (http://localhost:5173)
+   - `back-office-spa` (http://localhost:3001)
+   - `customer-hub-spa` (http://localhost:3000)
+
+### 🚀 実行方法
+
+```bash
+# Git Bashで実行
+./run-berry-books-all.sh
+```
+
+### ✨ 特徴
+
+- ✅ **カラフルなログ出力** - 進行状況を視覚的に確認
+- ✅ **詳細ログファイル** - `logs/`ディレクトリに自動保存
+- ✅ **エラーハンドリング** - 失敗時は即座に停止し、原因を報告
+- ✅ **バックグラウンド実行** - SPAは全てバックグラウンドで起動
+- ✅ **既存チェック** - 既に起動済みの場合は警告のみで続行
+
+### 🛑 停止方法
+
+スクリプト実行後に表示されるPIDを使用：
+
+```bash
+# フロントエンド停止
+kill <PID1> <PID2> <PID3>
+
+# バックエンド停止
+./gradlew cleanupAll
+./gradlew stopPayara
+./gradlew stopHsqldb
+```
+
+> **Note**: 個別のアプリケーションのみを起動したい場合は、後述の「セットアップとコマンド実行ガイド」を参照してください。
+
 ## 📁 プロジェクト構成
 
 このリポジトリは複数の技術スタックを含むマルチプロジェクト構成です。
@@ -277,7 +326,7 @@ Vite開発サーバー上で動作：
 
 ```
 http://localhost:5173   # berry-books-spa
-http://localhost:5174   # back-office-spa
+http://localhost:3001   # back-office-spa
 http://localhost:3000   # customer-hub-spa
 ```
 

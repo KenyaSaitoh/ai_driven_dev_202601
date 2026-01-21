@@ -7,11 +7,11 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // すべてのAPIリクエストを berry-books-api-sdd に転送
-      // berry-books-api-sdd が BFF（Backend for Frontend）として
-      // 他のマイクロサービス（back-office-api-sdd、customer-hub-api）を呼び出す
+      // すべてのAPIリクエストを berry-books-api に転送
+      // berry-books-api が BFF（Backend for Frontend）として
+      // 他のマイクロサービス（back-office-api、customer-hub-api）を呼び出す
       '/api': {
-        target: 'http://localhost:8080/berry-books-api-sdd',
+        target: 'http://localhost:8080/berry-books-api',
         changeOrigin: true,
       }
     }

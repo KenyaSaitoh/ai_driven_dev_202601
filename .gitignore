@@ -1,3 +1,7 @@
+# ログファイル（プロジェクトルート）
+/logs/**
+!/logs/.gitkeep
+
 # Payara Server - domain1配下はディレクトリ構造のみ管理（.gitkeepのみ）
 /payara6/glassfish/domains/domain1/applications/**
 !/payara6/glassfish/domains/domain1/applications/.gitkeep
