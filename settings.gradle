@@ -30,4 +30,3 @@ project(':struts-person').projectDir = file('projects/master/person/struts-perso
 project(':berry-books-api-sdd').projectDir = file('projects/sdd/bookstore/berry-books-api-sdd')
 project(':back-office-api-sdd').projectDir = file('projects/sdd/bookstore/back-office-api-sdd')
 project(':jsf-person-sdd').projectDir = file('projects/sdd/person/jsf-person-sdd')
-project(':struts-to-jsf-person-sdd').projectDir = file('struts-to-jsf-person-sdd')
