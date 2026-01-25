@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ###############################################################################
-# Berry Books Full Stack Application Launcher
+# Bookstore Full Stack Application Launcher
 # 
 # このスクリプトは以下の処理を自動実行します：
 # 1. GlassFish (Payara Server) の初期化と起動
@@ -26,31 +26,40 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# スクリプトのルートディレクトリ
+# スクリプトのルートディレクトリ（プロジェクトルート）
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../" && pwd)"
+cd "$PROJECT_ROOT"
 
 # ログファイル
-LOG_DIR="$SCRIPT_DIR/logs"
+LOG_DIR="$PROJECT_ROOT/logs"
 mkdir -p "$LOG_DIR"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-LOG_FILE="$LOG_DIR/run-berry-books-all_${TIMESTAMP}.log"
+LOG_FILE="$LOG_DIR/run-bookstore-all_${TIMESTAMP}.log"
 
-# ログ出力関数
+# ログ出力関数（文字化け対策: 色コード付きを標準出力、色コードなしをログファイル）
 log() {
-    echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')]${NC} $1" | tee -a "$LOG_FILE"
+    local message="[$(date +'%Y-%m-%d %H:%M:%S')] $1"
+    echo -e "${GREEN}${message}${NC}"
+    echo "$message" >> "$LOG_FILE"
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1" | tee -a "$LOG_FILE"
+    local message="[ERROR] $1"
+    echo -e "${RED}${message}${NC}"
+    echo "$message" >> "$LOG_FILE"
 }
 
 log_warn() {
-    echo -e "${YELLOW}[WARNING]${NC} $1" | tee -a "$LOG_FILE"
+    local message="[WARNING] $1"
+    echo -e "${YELLOW}${message}${NC}"
+    echo "$message" >> "$LOG_FILE"
 }
 
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1" | tee -a "$LOG_FILE"
+    local message="[INFO] $1"
+    echo -e "${BLUE}${message}${NC}"
+    echo "$message" >> "$LOG_FILE"
 }
 
 # エラーハンドラー
@@ -63,7 +72,7 @@ error_exit() {
 # 開始メッセージ
 echo ""
 log "=============================================="
-log "Berry Books Full Stack Launcher"
+log "Bookstore Full Stack Launcher"
 log "=============================================="
 echo ""
 
@@ -146,7 +155,7 @@ sleep 5
 
 # ステップ8: berry-books-spa のセットアップと起動
 log "STEP 8: berry-books-spa のセットアップと起動..."
-cd "$SCRIPT_DIR/projects/master/bookstore/berry-books-spa"
+cd "$PROJECT_ROOT/projects/master/bookstore/berry-books-spa"
 log_info "  -> 依存関係をインストール中..."
 if [ ! -d "node_modules" ]; then
     npm install >> "$LOG_FILE" 2>&1 || error_exit "berry-books-spa の npm install に失敗"
@@ -161,7 +170,7 @@ echo ""
 
 # ステップ9: back-office-spa のセットアップと起動
 log "STEP 9: back-office-spa のセットアップと起動..."
-cd "$SCRIPT_DIR/projects/master/bookstore/back-office-spa"
+cd "$PROJECT_ROOT/projects/master/bookstore/back-office-spa"
 log_info "  -> 依存関係をインストール中..."
 if [ ! -d "node_modules" ]; then
     npm install >> "$LOG_FILE" 2>&1 || error_exit "back-office-spa の npm install に失敗"
@@ -176,7 +185,7 @@ echo ""
 
 # ステップ10: customer-hub-spa のセットアップと起動
 log "STEP 10: customer-hub-spa のセットアップと起動..."
-cd "$SCRIPT_DIR/projects/master/bookstore/customer-hub-spa"
+cd "$PROJECT_ROOT/projects/master/bookstore/customer-hub-spa"
 log_info "  -> 依存関係をインストール中..."
 if [ ! -d "node_modules" ]; then
     npm install >> "$LOG_FILE" 2>&1 || error_exit "customer-hub-spa の npm install に失敗"
@@ -194,7 +203,7 @@ log_info "SPA の起動完了を待機中（15秒）..."
 sleep 15
 
 # 完了メッセージ
-cd "$SCRIPT_DIR"
+cd "$PROJECT_ROOT"
 echo ""
 log "=============================================="
 log "セットアップが完了しました！"

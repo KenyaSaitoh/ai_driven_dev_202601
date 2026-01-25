@@ -16,7 +16,6 @@ include 'struts-person'
 include 'berry-books-api-sdd'
 include 'back-office-api-sdd'
 include 'jsf-person-sdd'
-include 'struts-to-jsf-person-sdd'
 
 // プロジェクトの物理的な場所を指定
 // Master: 完成版プロジェクト（ドメイン別に整理）

@@ -18,7 +18,7 @@ Jakarta EE 10とReactを使用したフルスタックWebアプリケーショ�
    
 詳細は [projects/master/bookstore/README.md](projects/master/bookstore/README.md) を参照してください。
 
-## ⚡ クイックスタート: Berry Books フルスタック自動起動
+## ⚡ クイックスタート: Bookstore フルスタック自動起動
 
 Bookstoreドメインの全アプリケーション（バックエンドAPI 3つ + フロントエンドSPA 3つ）を一括起動できる自動化スクリプトを用意しています。
 
@@ -39,8 +39,9 @@ Bookstoreドメインの全アプリケーション（バックエンドAPI 3つ
 ### 🚀 実行方法
 
 ```bash
-# Git Bashで実行
-./run-berry-books-all.sh
+# Git Bashで実行（プロジェクトルートから）
+cd projects/master/bookstore
+./run-bookstore-all.sh
 ```
 
 ### ✨ 特徴
@@ -66,6 +67,8 @@ kill <PID1> <PID2> <PID3>
 ```
 
 > **Note**: 個別のアプリケーションのみを起動したい場合は、後述の「セットアップとコマンド実行ガイド」を参照してください。
+> 
+> **Note**: SPAのみを再起動したい場合は、`projects/master/bookstore/run-bookstore-spa.sh` を使用してください。
 
 ## 📁 プロジェクト構成
 
