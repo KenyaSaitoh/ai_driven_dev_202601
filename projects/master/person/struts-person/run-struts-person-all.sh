@@ -13,6 +13,10 @@
 
 set -e  # エラーが発生したら即座に終了
 
+# 文字エンコーディング設定（Windows環境での文字化け対策）
+export LANG=C.UTF-8
+export LC_ALL=C.UTF-8
+
 # 色の定義
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -108,13 +112,50 @@ log "STEP 4: TomEE 8 を起動（バックグラウンド）..."
 if ! ./gradlew :struts-person:startTomee8Background >> "$LOG_FILE" 2>&1; then
     log_warn "TomEE 8 の起動が失敗しましたが、続行します（既に起動中の可能性）"
 else
-    log "✓ TomEE 8 が起動しました"
+    log "✓ TomEE 8 の起動コマンドを実行しました"
 fi
 echo ""
 
-# サーバー起動を待機
-log_info "TomEE 8 の起動完了を待機中（15秒）..."
-sleep 15
+# サーバー起動完了を待機（ポート8080がリッスン状態になるまで）
+log_info "TomEE 8 の起動完了を待機中..."
+MAX_WAIT=120  # 最大待機時間（秒）
+WAIT_INTERVAL=2  # チェック間隔（秒）
+ELAPSED=0
+PORT=8080
+
+while [ $ELAPSED -lt $MAX_WAIT ]; do
+    # Windows環境の場合
+    if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
+        if netstat -ano | grep ":$PORT" | grep "LISTENING" > /dev/null 2>&1; then
+            log "✓ TomEE 8 が起動しました（ポート $PORT がリッスン状態）"
+            break
+        fi
+    else
+        # Unix/Linux/Mac環境の場合
+        if lsof -ti:$PORT > /dev/null 2>&1 || nc -z localhost $PORT > /dev/null 2>&1; then
+            log "✓ TomEE 8 が起動しました（ポート $PORT がリッスン状態）"
+            break
+        fi
+    fi
+    
+    sleep $WAIT_INTERVAL
+    ELAPSED=$((ELAPSED + WAIT_INTERVAL))
+    
+    if [ $((ELAPSED % 10)) -eq 0 ]; then
+        log_info "  待機中... (${ELAPSED}秒経過)"
+    fi
+done
+
+if [ $ELAPSED -ge $MAX_WAIT ]; then
+    log_warn "TomEE 8 の起動確認がタイムアウトしました（${MAX_WAIT}秒経過）"
+    log_warn "サーバーログを確認してください: $PROJECT_ROOT/tomee8/logs/catalina.out"
+    log_warn "続行しますが、デプロイが失敗する可能性があります"
+else
+    # 追加の待機時間（ContainerSystemの初期化完了を待つ）
+    log_info "ContainerSystem の初期化完了を待機中（5秒）..."
+    sleep 5
+fi
+echo ""
 
 # ステップ5: struts-person のビルドとデプロイ
 log "STEP 5: struts-person のビルドとデプロイ..."
