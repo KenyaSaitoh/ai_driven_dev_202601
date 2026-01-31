@@ -138,7 +138,7 @@ min_test_count: 10
   - 分岐カバレッジ: 70% (from: architecture_design.md)
   - メソッドカバレッジ: 85% (from: default)
 - テスト範囲: target
-- 除外パターン: **/dto/**, **/*Record.java, **/generated/**
+- 除外パターン: **/dto/**、**/*Record.java、**/generated/**
 ```
 
 #### 1-2. レポートパスの確定
@@ -430,7 +430,7 @@ L78-L82: 未カバー
 
 #### 4-3. behaviors.md との整合性確認
 
-behaviors.md を読み込み、以下を確認:
+behaviors.md は Gherkin 記法で記述されている前提。behaviors.md を読み込み、以下を確認:
 ```
 {project_root}/specs/baseline/detailed_design/{target_type}/behaviors.md
 ```
@@ -545,22 +545,20 @@ if (!isValid(keyword)) {
 - 異常系: キーワードが不正な場合
 
 【推奨アクション】
-behaviors.md に以下のテストシナリオを追加してください：
+behaviors.md に以下のテストシナリオを Gherkin 記法で追加すること。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照。
 
-```markdown
-## 異常系: 書籍が見つからない場合
+```gherkin
+Scenario: 書籍が見つからない場合（異常系）
+  Given 存在しないID "999" で検索する
+  When getBook("999") を呼び出す
+  Then NotFoundException がスローされる
+  And エラーメッセージは "Book not found: 999"
 
-Given: 存在しないID "999" で検索
-When: getBook("999") を呼び出す
-Then: NotFoundException がスローされる
-And: エラーメッセージは "Book not found: 999"
-
-## 異常系: キーワードが不正な場合
-
-Given: 空文字列のキーワードで検索
-When: searchBooks("") を呼び出す
-Then: ValidationException がスローされる
-And: エラーメッセージは "Invalid keyword"
+Scenario: キーワードが不正な場合（異常系）
+  Given 空文字列のキーワードで検索する
+  When searchBooks("") を呼び出す
+  Then ValidationException がスローされる
+  And エラーメッセージは "Invalid keyword"
 ```
 
 その後、以下を実行:
@@ -685,15 +683,14 @@ A. 割引機能は必要か？
 □ 問題2: 例外ハンドリングのテスト不足
   → アクション: behaviors.md に異常系シナリオを追加
   
-  以下をコピーして behaviors.md に追加してください:
+  以下を Gherkin 記法で behaviors.md に追加すること（common_rules.md の「振る舞いの記法（Gherkin）」を参照）:
   
-  ```markdown
-  ## 異常系: 書籍が見つからない場合
-  
-  Given: 存在しないID "999" で検索
-  When: getBook("999") を呼び出す
-  Then: NotFoundException がスローされる
-  And: エラーメッセージは "Book not found: 999"
+  ```gherkin
+  Scenario: 書籍が見つからない場合（異常系）
+    Given 存在しないID "999" で検索する
+    When getBook("999") を呼び出す
+    Then NotFoundException がスローされる
+    And エラーメッセージは "Book not found: 999"
   ```
   
   その後: @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
@@ -830,33 +827,7 @@ A. 割引機能は必要か？
 
 ### テスト実行の制約
 
-* テスト実行はGradleに依存する
-* JUnit 5とJaCoCoがセットアップされている前提
-* テストクラスの命名規則: `*Test.java`
-
-### カバレッジ除外の確認
-
-以下のクラスはカバレッジ計算から除外される:
-* DTOクラス（`*Dto.java`、`**/dto/**`）
-* Recordクラス（`*Record.java`）
-* 自動生成コード（`**/generated/**`）
-* 設定クラス（オプション: `*Config.java`）
-
-除外設定は `build.gradle` で確認できる:
-```gradle
-jacocoTestReport {
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                '**/dto/**',
-                '**/*Dto.class',
-                '**/*Record.class',
-                '**/generated/**'
-            ])
-        }))
-    }
-}
-```
+@agent_skills/jakarta-ee-api-base/principles/architecture.md の「9.3 単体テストの実行規約」を参照する（Gradle/JUnit 5/JaCoCo前提、テストクラス命名`*Test.java`、カバレッジ除外対象）。除外設定は`build.gradle`の`jacocoTestReport`で確認する。
 
 ### フィードバックループの実行
 

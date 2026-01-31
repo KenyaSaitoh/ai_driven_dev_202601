@@ -84,7 +84,7 @@ output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
   * 全ての機能を分析する
   * 何が共通機能で何が機能固有機能かを識別する
 * data_model.md - テーブル定義とERDを確認する（該当する場合）
-* behaviors.md - システム全体の振る舞い（全APIの振る舞いを含む）を確認する
+* behaviors.md - システム全体の振る舞い（全APIの振る舞いを含む）を確認する（Gherkin 記法で記述されている前提）
 * external_interface.md - 外部連携とAPI仕様を確認する（該当する場合）
 
 注意: 
@@ -561,9 +561,7 @@ FUNC_001、FUNC_002...の順で番号を付け、タスクファイルを生成�
 
 ### REST API特有の注意点
 
-* 画面（UI）は含まれないため、View/XHTMLに関するタスクは生成しない
-* API エンドポイント（Resource）のテストは REST Assured や JAX-RS Client を使用する
-* JWT認証、CORS、HTTPステータスコードの適切な使用を考慮する
+@agent_skills/jakarta-ee-api-base/principles/architecture.md の「8.4 REST APIプロジェクトの開発前提」を参照する。
 
 ### プロジェクトルートの扱い
 

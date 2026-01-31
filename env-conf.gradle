@@ -21,36 +21,6 @@ payaraServer {
     adminPassword = ""  // デフォルトは空パスワード
 }
 
-// TomEE 8設定
-tomee8 {
-    // TomEE 8ホームディレクトリ
-    home = "tomee8"
-    
-    // catalinaスクリプトのパス
-    catalinaCmd = System.properties['os.name'].toLowerCase().contains('windows')
-                  ? "tomee8/bin/catalina.bat"
-                  : "tomee8/bin/catalina.sh"
-    
-    // startupスクリプトのパス
-    startupCmd = System.properties['os.name'].toLowerCase().contains('windows')
-                 ? "tomee8/bin/startup.bat"
-                 : "tomee8/bin/startup.sh"
-    
-    // shutdownスクリプトのパス
-    shutdownCmd = System.properties['os.name'].toLowerCase().contains('windows')
-                  ? "tomee8/bin/shutdown.bat"
-                  : "tomee8/bin/shutdown.sh"
-    
-    // ポート設定
-    httpPort = 8080
-    httpsPort = 8443
-    ajpPort = 8009
-    shutdownPort = 8005
-    
-    // webappsディレクトリ
-    webappsDir = "tomee8/webapps"
-}
-
 // HSQLDB Database設定
 hsqldb {
     driverClass = "org.hsqldb.jdbc.JDBCDriver"

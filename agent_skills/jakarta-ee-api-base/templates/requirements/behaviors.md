@@ -6,13 +6,15 @@
 バージョン: 1.0.0  
 最終更新日: [DATE]
 
+記法: シナリオは Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）。principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること。
+
 ---
 
 ## 1. 概要
 
 本文書は、[PROJECT_NAME]システムの要件定義を外形的に捉えた振る舞い仕様書である。E2Eテスト用のシナリオを記述し、システム全体（API層を含む）の受入基準を定義する。
 
-**テスト対象:**
+テスト対象:
 * API層（Resource、JAX-RS）
 * HTTPリクエスト/レスポンス
 * 認証・認可（JWT、Cookie）
@@ -20,11 +22,11 @@
 * 実際のDBアクセス
 * 外部システム連携
 
-**テスト対象外:**
+テスト対象外:
 * Service層の内部的なビジネスロジック（basic_design/behaviors.mdで記述）
 * DAO層の実装詳細（basic_design/behaviors.mdで記述）
 
-**関連ドキュメント:**
+関連ドキュメント:
 * [requirements.md](requirements.md) - 要件定義書（What & Why）
 * [../basic_design/behaviors.md](../basic_design/behaviors.md) - 結合テスト用の振る舞い仕様書（Service層以下）
 * [../basic_design/functional_design.md](../basic_design/functional_design.md) - システム機能設計書

@@ -1,4 +1,4 @@
-﻿# struts-person プロジェクト
+# struts-person プロジェクト
 
 ## 📖 概要
 
@@ -6,81 +6,23 @@
 データベースアクセスには旧来型のDAOクラス（データソース使用）、
 ビジネスロジックにはステートレスセッションBean（EJB）を採用しています。
 
-## 🚀 セットアップとコマンド実行ガイド
+**本プロジェクトはソースコードの提供のみを目的としています。**  
+アプリケーションサーバーやデータベースのセットアップ・起動手順は含みません。ビルドされたWARを、利用者が任意のJava EE 8対応サーバーにデプロイして利用してください。
+
+## 🛠 ビルド
 
 ### 前提条件
 
 - JDK 21以上
 - Gradle 8.x以上
-- Apache TomEE 8（プロジェクトルートの`tomee8/`に配置）
-- HSQLDB（プロジェクトルートの`hsqldb/`に配置）
 
-> **Note:** このプロジェクトはTomEE 8を使用します（Payaraではありません）。
-
-### ① TomEE 8の初期設定（初回のみ・研修開催時に実行）
+### WARのビルド
 
 ```bash
-# 1. TomEE 8のserver.xmlを初期化（クリーンな状態にリセット）
-./gradlew :struts-person:initTomee8Config
-
-# 2. TomEE 8のデータソース設定（HSQLDB接続のための重要な設定）
-./gradlew :struts-person:configureTomee8DataSource
+./gradlew :struts-person:war
 ```
 
-### ② HSQLDBサーバーの起動
-
-```bash
-# HSQLDBサーバーを起動（バックグラウンド）
-./gradlew startHsqldb
-```
-
-### ③ 依存関係の確認
-
-このプロジェクトを開始する前に、以下が起動していることを確認してください：
-
-- **HSQLDBサーバー** （`./gradlew startHsqldb`）
-- **TomEE 8サーバー** （`./gradlew :struts-person:startTomee8`）
-
-> **Note:** TomEE 8は`startTomee8`（フォアグラウンド、Ctrl+Cで停止）または`startTomee8Background`（バックグラウンド）で起動できます。
-> フォアグラウンドモードはログがターミナルに直接表示されるため、デバッグに便利です。
-
-### ④ プロジェクトを開始するときに実行
-
-```bash
-# 1. HSQLDBサーバーを起動（まだ起動していない場合）
-./gradlew startHsqldb
-
-# 2. データベーステーブルとデータを作成（初回のみ）
-./gradlew :struts-person:setupHsqldb
-
-# 3. TomEE 8を起動（フォアグラウンド - Ctrl+Cで停止可能）
-./gradlew :struts-person:startTomee8
-
-# 4. プロジェクトをビルドしてデプロイ（別のターミナルで実行）
-./gradlew :struts-person:deployToTomee8
-```
-
-> **Note:** `deployToTomee8`タスクは自動的に`war`タスクを実行するため、WARファイルのビルドとデプロイを1つのコマンドで実行できます。
-
-### ⑤ プロジェクトを終了するときに1回だけ実行（CleanUp）
-
-```bash
-# プロジェクトをアンデプロイ
-./gradlew :struts-person:undeployFromTomee8
-```
-
-### ⑥ アプリケーション作成・更新のたびに実行
-
-```bash
-# アプリケーションを再ビルドして再デプロイ
-./gradlew :struts-person:deployToTomee8
-```
-
-## 📍 アクセスURL
-
-デプロイ後、以下のURLにアクセス：
-
-- **トップページ**: http://localhost:8080/struts-person/
+成果物は `struts-person/build/libs/struts-person.war` に出力されます。
 
 ## 🎯 プロジェクト構成
 
@@ -116,8 +58,8 @@ projects/master/person/struts-person/
 │   │       │   └── style.css
 │   │       ├── index.jsp
 │   │       ├── personList.jsp          # Strutsタグライブラリ使用
-│   │       ├── personInput.jsp         # Strutsタグライブラリ使用
-│   │       ├── personConfirm.jsp       # Strutsタグライブラリ使用
+│   │       ├── personInput.jsp        # Strutsタグライブラリ使用
+│   │       ├── personConfirm.jsp      # Strutsタグライブラリ使用
 │   │       └── WEB-INF/
 │   │           ├── web.xml
 │   │           └── struts-config.xml   # Struts設定
@@ -132,56 +74,21 @@ projects/master/person/struts-person/
 ## 🔧 使用している技術
 
 - **Java EE 8** (Servlet 4.0, JSP 2.3, EJB 3.2)
-- **Apache TomEE 8.0.x Plume**
 - **Apache Struts 1.3.10** (レガシーフレームワーク)
   - Strutsタグライブラリ（`<logic:iterate>`, `<bean:write>`, `<html:form>`等）
 - **EJB 3.2** (Stateless Session Bean)
-- **JDBC** (旧来型データソースアクセス)
-- **HSQLDB 2.7.x**
+- **JDBC** (データソース経由)
+- **HSQLDB 2.7.x**（接続先はデプロイ先のデータソース設定に依存）
 
-## 📝 データソース設定について
+## 📝 デプロイ時に必要な設定（参考）
 
-TomEE 8でHSQLDBデータソースを使用するには、**2つの設定**が必要です。
-
-### 1. TomEE 8側の設定（`tomee8/conf/tomee.xml`）
-
-データソースのリソース定義を追加します。これは`configureTomee8DataSource`タスクで自動設定されます：
-
-```xml
-<Resource id="HsqldbDS" type="DataSource">
-  JdbcDriver org.hsqldb.jdbc.JDBCDriver
-  JdbcUrl jdbc:hsqldb:hsql://localhost:9001/testdb
-  UserName SA
-  Password 
-  JtaManaged true
-</Resource>
-```
-
-### 2. アプリケーション側の設定（`WEB-INF/web.xml`）
-
-データソースの参照を定義します（既に設定済み）：
-
-```xml
-<resource-ref>
-  <res-ref-name>jdbc/HsqldbDS</res-ref-name>
-  <res-type>javax.sql.DataSource</res-type>
-  <res-auth>Container</res-auth>
-</resource-ref>
-```
-
-### データソース接続情報
+本アプリはJNDIデータソース `jdbc/HsqldbDS` を参照します。Java EE 8対応のアプリケーションサーバーにデプロイする場合、サーバー側で同JNDI名のDataSourceを定義し、接続先DB（例: HSQLDBの `testdb`）を用意してください。
 
 - **JNDI名**: `jdbc/HsqldbDS`
-- **データベース**: `testdb`
-- **ユーザー**: `SA`
-- **パスワード**: （空文字）
-- **TCPサーバー**: `localhost:9001`
+- **想定DB**: HSQLDB `testdb`（ユーザー `SA`、パスワードなし、TCP例: `localhost:9001`）
+- テーブル作成用SQLは `sql/hsqldb/` を参照してください。
 
-### ⚠️ 重要な注意事項
-
-1. **初回セットアップ時**: 必ず`configureTomee8DataSource`タスクを実行してください
-2. **起動順序**: HSQLDBサーバー → TomEE 8 の順で起動してください
-3. **エラー時**: `java.sql.SQLSyntaxErrorException: user lacks privilege or object not found: PERSON`が出る場合は、`setupHsqldb`タスクでテーブルを作成してください
+`WEB-INF/web.xml` の `resource-ref` はすでに設定済みです。
 
 ## 🔍 主な機能
 
@@ -198,43 +105,6 @@ TomEE 8でHSQLDBデータソースを使用するには、**2つの設定**が�
 
 4. **PERSON削除** (`/personDelete.do?personId=xxx`)
    - 指定IDのPERSONを削除
-
-## 🛑 アプリケーションを停止する
-
-### アプリケーションのアンデプロイ
-
-```bash
-./gradlew :struts-person:undeployFromTomee8
-```
-
-### TomEE 8を停止
-
-```bash
-./gradlew :struts-person:stopTomee8
-```
-
-### HSQLDBサーバーを停止
-
-```bash
-./gradlew stopHsqldb
-```
-
-## 🔍 ログ監視
-
-### フォアグラウンドモードの場合
-
-`./gradlew :struts-person:startTomee8`で起動した場合、ログは自動的にターミナルに表示されます。
-Ctrl+Cでサーバーを停止できます。
-
-### バックグラウンドモードの場合
-
-`./gradlew :struts-person:startTomee8Background`で起動した場合は、別のターミナルでログを監視できます：
-
-```bash
-tail -f -n 50 tomee8/logs/catalina.out
-```
-
-> **Note**: Windowsでは**Git Bash**を使用してください。
 
 ## 📚 技術的な特徴
 
@@ -278,7 +148,7 @@ EJB Service (@Stateless)
     ↓
 DAO (JDBC + DataSource)
     ↓
-Database (HSQLDB)
+Database (HSQLDB 等)
 ```
 
 ### 主要クラス
@@ -329,40 +199,16 @@ Strutsタグライブラリを使用して動的コンテンツを表示。
 </logic:iterate>
 ```
 
-## 📋 Gradleタスク一覧
-
-### TomEE 8関連
-
-| タスク | 説明 |
-|--------|------|
-| `:struts-person:initTomee8Config` | server.xmlを初期状態にリセット（研修開催時に実行） |
-| `:struts-person:configureTomee8Ports` | ポートを8080に設定（初回のみ） |
-| `:struts-person:configureTomee8DataSource` | HSQLDBデータソースを設定（初回のみ・重要） |
-| `:struts-person:startTomee8` | TomEE 8を起動（フォアグラウンド、Ctrl+Cで停止） |
-| `:struts-person:startTomee8Background` | TomEE 8をバックグラウンドで起動 |
-| `:struts-person:stopTomee8` | TomEE 8を停止（バックグラウンド起動時） |
-| `:struts-person:restartTomee8` | TomEE 8を再起動 |
-| `:struts-person:deployToTomee8` | アプリケーションをデプロイ（WARビルド含む） |
-| `:struts-person:undeployFromTomee8` | アプリケーションをアンデプロイ |
-
-### プロジェクト関連
+## 📋 Gradleタスク（本プロジェクト）
 
 | タスク | 説明 |
 |--------|------|
 | `:struts-person:war` | WARファイルをビルド |
-| `:struts-person:setupHsqldb` | データベース初期化 |
-
-### HSQLDB関連
-
-| タスク | 説明 |
-|--------|------|
-| `startHsqldb` | HSQLDBサーバーを起動 |
-| `stopHsqldb` | HSQLDBサーバーを停止 |
+| `:struts-person:setupHsqldb` | HSQLDB用のテーブル・データ作成（ローカルでHSQLDBを利用する場合） |
 
 ## 📖 参考リンク
 
 - [Apache Struts 1.3.10 Documentation](https://struts.apache.org/struts1eol-announcement.html)
-- [Apache TomEE 8 Documentation](https://tomee.apache.org/tomee-8.0/)
 - [Java EE 8 Specification](https://jakarta.ee/specifications/platform/8/)
 - [EJB 3.2 Specification](https://jakarta.ee/specifications/enterprise-beans/3.2/)
 - [HSQLDB Documentation](http://hsqldb.org/doc/2.0/guide/)

@@ -31,12 +31,12 @@ change_spec: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline/basic_de
 
 ### 想定されるユースケース
 
-1. **baseline（初回リリース）での手戻り**
+1. baseline（初回リリース）での手戻り
    * 結合テストやE2Eテストで不具合が発覚
    * 基本設計レベルでの修正が必要
    * 変更管理の対象
 
-2. **enhancements（拡張案件）での通常開発**
+2. enhancements（拡張案件）での通常開発
    * 新機能追加に伴う基本設計の更新
    * 既存機能の仕様変更
    * 段階的な機能拡張
@@ -50,13 +50,24 @@ change_spec: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline/basic_de
 
 ### 変更差分管理の方式
 
-* **マスターファイル**: 基本設計SPEC（functional_design.md等）は自由に更新可能
-* **変更差分ファイル**: 変更内容を明示的に記載した CHANGES.md を作成
-* **形式非依存**: Markdown、EXCEL、PDF、Wordなど形式を問わず対応可能
+* マスターファイル: 基本設計SPEC（functional_design.md等）は自由に更新可能
+* 変更差分ファイル: 変更内容を明示的に記載した CHANGES.md を作成
+* 形式非依存: Markdown、EXCEL、PDF、Wordなど形式を問わず対応可能
 
 ---
 
-## 1. ディレクトリ構造
+## 1. 前提条件の確認
+
+### 1.1 Agent Skillsルール（最優先で確認）
+
+* @agent_skills/jakarta-ee-api-base/principles/ - Jakarta EE開発の原則、アーキテクチャ標準、品質基準、セキュリティ標準を確認する
+  * このフォルダ配下の原則ドキュメントを読み込み、共通ルールを遵守すること
+  * 重要: 基本設計変更においても、ルールドキュメントに記載されたすべてのルールを遵守すること
+  * 注意: Agent Skills配下のルールは全プロジェクト共通。プロジェクト固有のルールがある場合は `{project_root}/principles/` も確認すること
+
+---
+
+## 2. ディレクトリ構造
 
 基本設計変更対応に必要なファイル構造：
 
@@ -74,15 +85,16 @@ change_spec: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline/basic_de
 ```
 
 重要：
-* **マスターファイル**（functional_design.md等）: 自由に更新可能
-* **CHANGES.md**: 未適用の変更内容を記載（変更差分の唯一の真実の情報源）
-* **changes_archive/**: 適用済みの変更を保存（履歴管理）
+* マスターファイル（functional_design.md等）: 自由に更新可能
+* CHANGES.md: 未適用の変更内容を記載（変更差分の唯一の真実の情報源）
+* changes_archive/: 適用済みの変更を保存（履歴管理）
+* 振る舞いの記法: behaviors.md のシナリオは Gherkin 記法で記述する。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること。
 
 ---
 
 ## 2. 変更差分ファイルの読み込み
 
-### 2.1 変更差分ファイルの確認
+### 3.1 変更差分ファイルの確認
 
 パラメータで指定された、または規約に基づく変更差分ファイルを確認する：
 
@@ -90,7 +102,7 @@ change_spec: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline/basic_de
 デフォルトパス: {spec_directory}/basic_design/CHANGES.md
 ```
 
-#### 2.1.1 ファイルが存在しない場合
+#### 3.1.1 ファイルが存在しない場合
 
 ```
 変更差分ファイルが見つかりません: {change_spec}
@@ -114,13 +126,13 @@ change_spec: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline/basic_de
 #### functional_design.md の変更
 
 ##### セクション「XXX」
-**追加**:
+追加:
 - 〇〇を追加
 
-**変更**:
+変更:
 - △△を□□に変更
 
-**削除**:
+削除:
 - ××を削除
 
 ### 変更理由
@@ -144,11 +156,11 @@ CHANGES.mdを読み込み、最新の変更エントリを解析する：
 * 変更理由
 * 影響範囲（推定）
 
-### 2.2 変更内容の解析
+### 3.2 変更内容の解析
 
 CHANGES.mdから以下の情報を抽出する：
 
-#### 2.2.1 新規追加
+#### 3.2.1 新規追加
 
 CHANGES.mdの「追加」セクションから：
 * 新しいAPI（エンドポイント）
@@ -157,7 +169,7 @@ CHANGES.mdの「追加」セクションから：
 * 新しい外部API連携
 * 新しい振る舞いシナリオ
 
-#### 2.2.2 更新
+#### 3.2.2 更新
 
 CHANGES.mdの「変更」セクションから：
 * 既存APIのエンドポイント変更（パス、HTTPメソッド、パラメータ）
@@ -177,9 +189,9 @@ CHANGES.mdの「削除」セクションから：
 
 ---
 
-## 3. 影響分析
+## 4. 影響分析
 
-### 3.1 影響を受けるファイルの特定
+### 4.1 影響を受けるファイルの特定
 
 変更箇所から、影響を受けるファイルを特定する
 
@@ -220,7 +232,7 @@ CHANGES.mdの「削除」セクションから：
 {project_root}/src/test/java/{package}/{ClassName}E2ETest.java
 ```
 
-### 3.2 影響範囲のサマリー生成
+### 4.2 影響範囲のサマリー生成
 
 影響分析の結果をサマリーとして出力：
 
@@ -265,15 +277,15 @@ CHANGES.mdの「削除」セクションから：
 
 ---
 
-## 4. 変更タスクの生成
+## 5. 変更タスクの生成
 
-### 4.1 変更タスクファイルの作成
+### 5.1 変更タスクファイルの作成
 
 影響分析の結果をもとに、変更タスクファイルを生成する
 
 出力先: `{project_root}/tasks/change_tasks.md`
 
-### 4.2 変更タスクファイルのテンプレート
+### 5.2 変更タスクファイルのテンプレート
 
 ```markdown
 # 基本設計変更対応タスク
@@ -326,13 +338,13 @@ CHANGES.mdの「削除」セクションから：
 
 ### TASK_CHANGE_001: 詳細設計の更新
 
-**対象**: {spec_directory}/detailed_design/{FUNC_ID}/
+対象: {spec_directory}/detailed_design/{FUNC_ID}/
 
-**変更内容**:
+変更内容:
 - {変更項目1}
 - {変更項目2}
 
-**実行方法**:
+実行方法:
 ```
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
@@ -342,7 +354,7 @@ CHANGES.mdの「削除」セクションから：
 * target_type: {FUNC_ID}
 ```
 
-**注意事項**:
+注意事項:
 * 既存の詳細設計ファイルを読み込み、差分を反映する
 * ユーザーに確認を求める（上書き/部分更新/追加）
 
@@ -350,14 +362,14 @@ CHANGES.mdの「削除」セクションから：
 
 ### TASK_CHANGE_002: コードの更新
 
-**対象**: {source_files}
+対象: {source_files}
 
-**変更内容**:
+変更内容:
 - {クラス名}.java に {メソッド名}() メソッドを追加
 - {Entity名}.java に {フィールド名} フィールドを追加
 - {Resource名}.java に {エンドポイント} を追加
 
-**実行方法**:
+実行方法:
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 
@@ -368,7 +380,7 @@ CHANGES.mdの「削除」セクションから：
 注意: 既存タスクファイルを更新して、変更内容を反映すること
 ```
 
-**注意事項**:
+注意事項:
 * 既存ファイルを読み込み、部分的に更新する
 * ユーザーに確認を求める（再生成/部分修正/追加）
 * 詳細設計書も同期して更新する
@@ -377,13 +389,13 @@ CHANGES.mdの「削除」セクションから：
 
 ### TASK_CHANGE_003: 単体テストの更新
 
-**対象**: {test_files}
+対象: {test_files}
 
-**変更内容**:
+変更内容:
 - {テストクラス名} に {テストメソッド名} を追加
 - 既存テストケースの修正
 
-**実行方法**:
+実行方法:
 ```
 @agent_skills/jakarta-ee-api-base/instructions/unit_test_generation.md
 
@@ -392,7 +404,7 @@ CHANGES.mdの「削除」セクションから：
 * target_type: {FUNC_ID}
 ```
 
-**注意事項**:
+注意事項:
 * 既存テストファイルに新しいテストケースを追加
 * 変更に伴う既存テストの修正
 
@@ -400,12 +412,12 @@ CHANGES.mdの「削除」セクションから：
 
 ### TASK_CHANGE_004: 結合テストの更新
 
-**対象**: {integration_test_files}
+対象: {integration_test_files}
 
-**変更内容**:
+変更内容:
 - {シナリオ} の結合テストを追加
 
-**実行方法**:
+実行方法:
 ```
 @agent_skills/jakarta-ee-api-base/instructions/it_generation.md
 
@@ -414,19 +426,19 @@ CHANGES.mdの「削除」セクションから：
 * spec_directory: {spec_directory}
 ```
 
-**注意事項**:
+注意事項:
 * basic_design/behaviors.md の新しいシナリオをテスト
 
 ---
 
 ### TASK_CHANGE_005: E2Eテストの更新
 
-**対象**: {e2e_test_files}
+対象: {e2e_test_files}
 
-**変更内容**:
+変更内容:
 - {シナリオ} のE2Eテストを追加
 
-**実行方法**:
+実行方法:
 ```
 @agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md
 
@@ -435,7 +447,7 @@ CHANGES.mdの「削除」セクションから：
 * spec_directory: {spec_directory}
 ```
 
-**注意事項**:
+注意事項:
 * requirements/behaviors.md の新しいシナリオをテスト
 
 ---
@@ -444,11 +456,11 @@ CHANGES.mdの「削除」セクションから：
 
 変更タスクは以下の順序で実行する：
 
-1. **TASK_CHANGE_001**: 詳細設計の更新（基盤）
-2. **TASK_CHANGE_002**: コードの更新（実装）
-3. **TASK_CHANGE_003**: 単体テストの更新（検証）
-4. **TASK_CHANGE_004**: 結合テストの更新（検証）
-5. **TASK_CHANGE_005**: E2Eテストの更新（検証）
+1. TASK_CHANGE_001: 詳細設計の更新（基盤）
+2. TASK_CHANGE_002: コードの更新（実装）
+3. TASK_CHANGE_003: 単体テストの更新（検証）
+4. TASK_CHANGE_004: 結合テストの更新（検証）
+5. TASK_CHANGE_005: E2Eテストの更新（検証）
 
 各タスク完了後、次のタスクに進む前にユーザーの確認を待つ。
 
@@ -481,9 +493,9 @@ mv specs/baseline/basic_design/CHANGES.md \
 
 ---
 
-## 5. ユーザーへの確認
+## 6. ユーザーへの確認
 
-### 5.1 変更内容の説明
+### 6.1 変更内容の説明
 
 変更タスクファイル生成後、ユーザーに以下を説明する：
 
@@ -524,9 +536,9 @@ mv specs/baseline/basic_design/CHANGES.md \
 
 ---
 
-## 6. 既存の指示書との統合
+## 7. 既存の指示書との統合
 
-### 6.1 詳細設計の更新
+### 7.1 詳細設計の更新
 
 `detailed_design.md` を呼び出す：
 
@@ -546,7 +558,7 @@ AIは以下のように動作する：
 2. ユーザーに確認（上書き/部分更新/追加/確認）
 3. 選択に応じて更新
 
-### 6.2 コード生成の更新
+### 7.2 コード生成の更新
 
 `code_generation.md` を呼び出す：
 
@@ -566,7 +578,7 @@ AIは以下のように動作する：
 3. 選択に応じて更新
 4. 詳細設計書も同期して更新
 
-### 6.3 テスト生成の更新
+### 7.3 テスト生成の更新
 
 単体テスト、結合テスト、E2Eテストの各指示書を呼び出す。
 
@@ -574,23 +586,23 @@ AIは以下のように動作する：
 
 ---
 
-## 7. 注意事項
+## 8. 注意事項
 
-### 7.1 CHANGES.mdの管理
+### 8.1 CHANGES.mdの管理
 
-* **アクティブな変更**: 未適用の変更は `CHANGES.md` に記載
-* **アーカイブ**: 適用済みの変更は `changes_archive/` に移動
-* **履歴保持**: アーカイブされたファイルは履歴として保持（削除しない）
-* **形式非依存**: マスターファイル（functional_design.md等）はMarkdown、EXCEL、PDF、Word等、任意の形式で管理可能
+* アクティブな変更: 未適用の変更は `CHANGES.md` に記載
+* アーカイブ: 適用済みの変更は `changes_archive/` に移動
+* 履歴保持: アーカイブされたファイルは履歴として保持（削除しない）
+* 形式非依存: マスターファイル（functional_design.md等）はMarkdown、EXCEL、PDF、Word等、任意の形式で管理可能
 
 ### 7.2 変更の記載粒度
 
-* **セクション単位**: 変更箇所を明確に記載（セクション名、行番号等）
-* **変更種別**: 「追加」「変更」「削除」を明示
-* **変更理由**: なぜ変更が必要になったかを記録
-* **影響範囲**: 推定される影響範囲を記載（AIが影響分析時に参考にする）
+* セクション単位: 変更箇所を明確に記載（セクション名、行番号等）
+* 変更種別: 「追加」「変更」「削除」を明示
+* 変更理由: なぜ変更が必要になったかを記録
+* 影響範囲: 推定される影響範囲を記載（AIが影響分析時に参考にする）
 
-### 7.3 baseline と enhancements の対応
+### 8.3 baseline と enhancements の対応
 
 #### baseline（初回リリース）での手戻り
 
@@ -606,7 +618,7 @@ AIは以下のように動作する：
 * baselineと同様の変更管理フローを適用
 * enhancements の basic_design/ にもCHANGES.mdを作成
 
-### 7.4 既存タスクファイルの扱い
+### 8.4 既存タスクファイルの扱い
 
 変更に伴って既存のタスクファイル（例: `tasks/FUNC_002_books.md`）を更新する必要がある場合：
 
@@ -618,7 +630,7 @@ AIは以下のように動作する：
 
 ---
 
-## 8. 実行フロー図
+## 9. 実行フロー図
 
 ```mermaid
 graph TD
@@ -642,7 +654,7 @@ graph TD
 
 ---
 
-## 9. 完了検証
+## 10. 完了検証
 
 すべてのタスク完了後、以下を確認する：
 

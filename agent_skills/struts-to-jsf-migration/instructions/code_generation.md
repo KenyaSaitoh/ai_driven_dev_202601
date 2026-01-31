@@ -98,11 +98,11 @@ skip_infrastructure: false  # 機能タスクではこのパラメータは無�
 
 ### 3. タスク計画に従って実装を実行する
 
-**重要: 各タスクの実行は必ず以下の順序で完了すること**
+重要: 各タスクの実行は必ず以下の順序で完了すること
 
-1. **本番コード生成**: Entity、Service、Managed Bean、Facelets XHTML、DTO等の実装コードを生成
-2. **単体テスト生成**: 生成した本番コードに対応する単体テストコードを生成（必須）
-3. **タスク完了マーク**: タスクファイルでタスクを[X]としてマーク
+1. 本番コード生成: Entity、Service、Managed Bean、Facelets XHTML、DTO等の実装コードを生成
+2. 単体テスト生成: 生成した本番コードに対応する単体テストコードを生成（必須）
+3. タスク完了マーク: タスクファイルでタスクを[X]としてマーク
 
 * タスクごとの実行: 次のタスクに進む前に各タスクを完了する（本番コード生成→単体テスト生成の両方を完了）
 * setupタスク（特別なタスク）の実行時のみ:
@@ -113,7 +113,7 @@ skip_infrastructure: false  # 機能タスクではこのパラメータは無�
 * 機能タスク（FUNC_XXX）の実行時:
   * `skip_infrastructure` パラメータは無視される
   * タスクファイルに記載された実装内容に従う
-  * **必ず本番コード生成の後に単体テスト生成を実行する**
+  * 必ず本番コード生成の後に単体テスト生成を実行する
 * 依存関係の尊重: 順次タスクは順番に実行、並列タスク[P]は一緒に実行可能
 * TDDアプローチに従う: 対応する実装の前にテストを実行する（プロジェクトがTDDを採用している場合）
 * ファイルベースの調整: 同じファイルに影響するタスクは順次実行必須
@@ -138,11 +138,7 @@ architecture_design.mdに記載された技術スタックを厳密に遵守す�
 
 #### ルールの遵守
 
-`@agent_skills/struts-to-jsf-migration/principles/` 配下の原則ドキュメントに記載された共通ルールを全ての実装で遵守する
-* テストカバレッジ基準、アーキテクチャパターン、コーディング規約に従う
-* 品質基準、セキュリティ要件、パフォーマンス基準を満たす
-* マイグレーション特有のマッピング規則（Struts → JSF）に従う
-* プロジェクト固有のルール（`{project_root}/principles/`）がある場合は、それも併せて遵守する
+`@agent_skills/struts-to-jsf-migration/principles/` 配下の原則ドキュメントを遵守する。プロジェクト固有のルール（`{project_root}/principles/`）がある場合は、それも併せて遵守する。
 
 #### SPEC修正の制約
 
@@ -192,24 +188,24 @@ architecture_design.mdに記載された技術スタックを厳密に遵守す�
 
 Entity、Service、Managed Bean、Facelets XHTML、DTO等の実装コードを生成する
 
-**重要: 本番コード生成が完了したら、必ず次のステップ（単体テスト生成）に進むこと。処理を停止してはいけない。**
+重要: 本番コード生成が完了したら、必ず次のステップ（単体テスト生成）に進むこと。処理を停止してはいけない。
 
 #### 単体テスト生成（必須）
 
-**重要: 本番コード生成の直後に、必ず単体テスト生成を実行すること**
+重要: 本番コード生成の直後に、必ず単体テスト生成を実行すること
 
 * 生成した本番コード（Entity、Service、Managed Bean、Facelets XHTML、DTO等）に対応する単体テストコードを生成する
 * セクション5「単体テスト生成ガイドライン」に従ってテストを実装する
 * テストフレームワーク: architecture_design.mdで指定されたフレームワークを使用する（JUnit 5 + Mockito等）
 * テストカバレッジ: architecture_design.mdの目標値を遵守する
 * テストケース設計:
-  * detailed_design/screen/配下の各機能のbehaviors.md（単体テスト用）の各Given-When-Thenシナリオから対応するテストケースを実装
+  * detailed_design/screen/配下の各機能のbehaviors.md（単体テスト用）の各シナリオ（Gherkin 記法の Given-When-Then）から対応するテストケースを実装
   * detailed_design/screen/配下の各機能のdetailed_design.mdの各メソッドシグネチャに対して、正常系、異常系、境界値、バリデーションのテストを作成
 * モック使用の判断:
   * 同じタスク内のコンポーネント → モック不要（実際の連携をテスト）
   * タスク外の依存関係 → モックを使用
 
-**実行順序の確認:**
+実行順序の確認:
 1. ✅ 本番コード生成完了
 2. ✅ 単体テスト生成完了 ← ここまで完了してから処理を終了する
 3. ✅ タスク完了マーク
@@ -222,13 +218,13 @@ Entity、Service、Managed Bean、Facelets XHTML、DTO等の実装コードを�
 
 パフォーマンス最適化、ドキュメント
 
-**注意: ユニットテストは上記「単体テスト生成」ステップで既に生成済みである**
+注意: ユニットテストは上記「単体テスト生成」ステップで既に生成済みである
 
 ### 5. 単体テスト生成ガイドライン（タスク粒度内のテスト）
 
-**重要: このフェーズで生成するのはタスク粒度内の単体テストである**
+重要: このフェーズで生成するのはタスク粒度内の単体テストである
 
-**実行タイミング: セクション4「コア開発（本番コード生成）」の直後に必ず実行すること**
+実行タイミング: セクション4「コア開発（本番コード生成）」の直後に必ず実行すること
 
 本番コード生成が完了したら、処理を停止せずに必ずこのセクションに従って単体テストを生成すること。
 
@@ -258,66 +254,10 @@ Entity、Service、Managed Bean、Facelets XHTML、DTO等の実装コードを�
   * 境界値テスト（null、空文字列、最大値、最小値等）
   * バリデーションテスト
 
-#### 5.3 テストの例
+#### 5.3 単体テストのポイント
 
-ケース1: タスク内の実際の連携をテスト
-```java
-@ExtendWith(MockitoExtension.class)
-class PersonListBeanTest {
-    @Mock
-    private EntityManager em; // タスク外の依存関係はモック
-    
-    private PersonDao personDao;
-    private PersonService personService;
-    private PersonListBean personListBean;
-    
-    @BeforeEach
-    void setUp() {
-        personDao = new PersonDao(em); // タスク内のコンポーネントは実インスタンス
-        personService = new PersonService(personDao); // 実際の連携をテスト
-        personListBean = new PersonListBean(personService);
-    }
-    
-    @Test
-    void testDeletePerson_正常系() {
-        // Given
-        Long personId = 1L;
-        Person person = new Person();
-        person.setPersonId(personId);
-        when(em.find(Person.class, personId)).thenReturn(person);
-        
-        // When
-        String result = personListBean.deletePerson(personId); // Bean→Service→Daoの実際の連携
-        
-        // Then
-        assertNotNull(result);
-        verify(em, times(1)).remove(person);
-    }
-}
-```
-
-ケース2: タスク外の依存関係をモック
-```java
-@ExtendWith(MockitoExtension.class)
-class PersonServiceTest {
-    @Mock
-    private ExternalApiClient externalApiClient; // 別タスクのクライアントはモック
-    
-    private PersonService personService;
-    
-    @Test
-    void testNotifyExternalSystem() {
-        // Given
-        doNothing().when(externalApiClient).notify(any());
-        
-        // When
-        personService.notifyExternalSystem(personId);
-        
-        // Then
-        verify(externalApiClient, times(1)).notify(any());
-    }
-}
-```
+* タスク内の連携: タスク外の依存（EntityManager、他タスクのService/Client等）は @Mock、タスク内の Dao/Service/Bean は実インスタンスで Given-When-Then（when(...).thenReturn(...)、メソッド呼び出し、assert/verify）を書く
+* タスク外の依存: 他タスクのクライアント等は @Mock、doNothing().when(...).メソッド(any()) 等でスタブし、対象メソッドの戻り値・副作用を検証する
 
 #### 5.4 テストデータ
 
@@ -326,134 +266,37 @@ class PersonServiceTest {
 
 ---
 
-## コンポーネント別の参照ドキュメント優先度と使用方法
+## コンポーネント別の参照先
 
 ### 重要: 全てのコンポーネント生成時の共通確認事項
 
-architecture_design.mdを参照して以下を確認すること
-* 言語・バージョン
-* パッケージ配置
-* 命名規則
-* アノテーション
-* ログ出力
+@agent_skills/struts-to-jsf-migration/principles/architecture.md およびプロジェクトの architecture_design.md を参照し、技術スタック・パッケージ・命名規則・アノテーション・ログ方針を遵守する。
 
-### Entity生成時
+### コンポーネント別の参照先（第一参照＝主、第二参照＝補足）
 
-* 技術スタック: architecture_design.mdでJakarta Persistence（JPA）バージョンを確認する
-* 第一参照: data_model.md
-  * テーブル構造、カラム定義、データ型、制約条件を確認する
-  * エンティティ間の関係を確認する
-  * 検証ルールを確認する
-* 第二参照: functional_design.md
-  * クラス設計、属性名、メソッドシグネチャを確認する
-  * ビジネスロジックメソッドがあれば実装する
-* 並行制御: architecture_design.mdで楽観的ロックの使用を確認する
-
-### Service層生成時
-
-* 技術スタック: architecture_design.mdでJakarta CDI, Transactionsバージョンを確認する
-* スコープ: architecture_design.mdで適切なスコープを確認する（通常は`@RequestScoped`）
-* トランザクション: architecture_design.mdで@Transactionalの使用方法を確認する
-* 第一参照: detailed_design/FUNC_XXX/detailed_design.md
-  * Serviceクラスのメソッドシグネチャ、ビジネスロジック、処理フローを確認する
-  * トランザクション境界、例外ハンドリング、バリデーションロジックを確認する
-* 第二参照: screen/配下の該当画面のbehaviors.md
-  * 各メソッドの振る舞い、業務ルール、制約条件を確認する
-  * エッジケースや異常系の処理を確認する
-* 例外処理: architecture_design.mdに従う
-
-### Managed Bean生成時
-
-* 技術スタック: architecture_design.mdでJakarta Faces（JSF）バージョンとCDIを確認する
-* スコープ: functional_design.mdで指定されたスコープを確認する（通常は`@ViewScoped`）
-* 第一参照: detailed_design/FUNC_XXX/detailed_design.md
-  * Managed Bean設計、プロパティ、アクションメソッドを確認する
-  * 画面遷移、Flash Scopeでのデータ受け渡しを確認する
-* 第二参照: screen/配下の該当画面のbehaviors.md
-  * 画面の振る舞い、初期表示、ボタンクリック時の処理を確認する
-  * バリデーションエラー時の処理、エラーメッセージ表示を確認する
-* 第三参照: screen/配下の該当画面のscreen_design.md
-  * 画面レイアウト、入力項目、バリデーションルールを確認する
-
-### Facelets XHTML生成時
-
-* 技術スタック: architecture_design.mdでJakarta Faces（JSF）バージョンを確認する
-* 第一参照: screen/配下の該当画面のscreen_design.md
-  * 画面レイアウト（テーブル、フォーム、ボタン等）を確認する
-  * 表示項目、入力項目、バリデーションルールを確認する
-* 第二参照: detailed_design/FUNC_XXX/detailed_design.md
-  * Managed Beanとのバインディング（`#{beanName.property}`）を確認する
-  * アクションメソッドの呼び出しを確認する
-* JSFコンポーネント:
-  * `<h:form>` - メインフォーム
-  * `<h:dataTable>` - データテーブル（一覧表示）
-  * `<h:inputText>` - テキスト入力
-  * `<h:commandButton>` - ボタン
-  * `<h:outputText>` - テキスト表示
-  * `<h:messages>` - エラーメッセージ表示
-
-### DTO/Model生成時
-
-* 第一参照: detailed_design/FUNC_XXX/detailed_design.md
-  * DTO構造、フィールド名、データ型を確認する
-  * バリデーションアノテーションを確認する
-* 第二参照: data_model.md
-  * Entityとの対応関係、変換ロジックを確認する
-
-### Filter/Interceptor生成時
-
-* 技術スタック: architecture_design.mdでJakarta Servlet, Jakarta Facesを確認する
-* 第一参照: architecture_design.md
-  * 認証フィルターの設計、処理フロー、エラーハンドリングを確認する
-  * セッション管理、ロギングインターセプターの仕様を確認する
-* 第二参照: functional_design.md
-  * セキュリティ要件、認証・認可の仕様を確認する
-
-### 外部連携コンポーネント生成時
-
-* 技術スタック: architecture_design.mdで外部API連携クライアントの使用を確認する
-* 第一参照: external_interface.md
-  * API仕様を確認する
-  * OpenAPI YAMLファイルがあれば、スキーマ定義、認証方式、エラーレスポンスを確認する
-  * 通信プロトコル、タイムアウト設定、リトライポリシーを確認する
-* 第二参照: functional_design.md
-  * 連携クラスの設計、メソッド名、エラーハンドリングを確認する
+| コンポーネント | 第一参照 | 第二参照 | 補足 |
+|---------------|----------|----------|------|
+| Entity | data_model.md（テーブル・カラム・制約・リレーション） | functional_design.md | 楽観的ロックは architecture に従う |
+| Service | detailed_design/…/detailed_design.md（メソッド・処理フロー・トランザクション） | 該当画面の behaviors.md | スコープ（通常 @RequestScoped）・@Transactional は architecture に従う |
+| Managed Bean | detailed_design/…/detailed_design.md（プロパティ・アクションメソッド・画面遷移・Flash Scope） | 該当画面の behaviors.md、screen_design.md | スコープ（通常 @ViewScoped）は functional_design に従う |
+| Facelets XHTML | 該当画面の screen_design.md（レイアウト・表示・入力・バリデーション） | detailed_design/…/detailed_design.md（Beanバインディング・アクション） | h:form, h:dataTable, h:inputText, h:commandButton, h:messages 等 |
+| DTO/Model | detailed_design/…/detailed_design.md（構造・フィールド・バリデーション） | data_model.md（Entity対応） | — |
+| Filter/Interceptor | architecture_design.md（認証フィルター・セッション管理） | functional_design.md（認証・認可仕様） | — |
+| 外部連携 | external_interface.md（API仕様・OpenAPI・タイムアウト） | functional_design.md | — |
 
 ---
 
-## 進捗追跡とエラーハンドリング
+## 進捗と完了
 
-* 完了した各タスク後に進捗を報告する
-* 順次実行タスクが失敗した場合は実行を停止する
-* 並列実行タスク[P]の場合、成功したタスクを続行し、失敗したタスクを報告する
-* デバッグのためのコンテキスト付きの明確なエラーメッセージを提供する
-* 実装を続行できない場合は次の手順を提案する
-* 重要: 完了したタスクについては、タスクファイルでタスクを[X]としてマークする
+* 完了したタスクはタスクファイルで [X] とする。失敗時は停止しユーザーに報告する
 
 ---
 
 ## 完了検証
 
-**重要: 本番コード生成と単体テスト生成の両方が完了していることを確認してから完了とする**
-
-* 本番コード生成が完了していることを確認する
-* **単体テスト生成が完了していることを確認する（必須）**
-* ルールドキュメントのルールと品質基準が遵守されていることを確認する
-* 全ての必須タスクが完了していることを確認する
-* 実装された機能が要件定義と一致することを確認する
-* テストコードが生成され、architecture_design.mdで指定されたテストフレームワークを使用していることを確認する
-* 実装がアーキテクチャ設計に従っていることを確認する
-* クラス設計が機能設計仕様と一致することを検証する
-* SPECとのトレーサビリティ検証
-  * detailed_design/配下の各機能のbehaviors.mdの受入基準（Given-When-Then）が全てテストケースでカバーされていることを確認する
-  * detailed_design/配下の各機能のdetailed_design.mdで定義された全てのManaged Bean、Service、クラス、メソッドが実装されていることを確認する
-  * data_model.mdで定義された全ての制約条件（NOT NULL, UNIQUE, FK等）が実装されていることを確認する
-  * external_interface.mdで定義された全てのAPI仕様が実装されていることを確認する
-  * 静的リソースが正しく配置されていることを確認する
-* 完了した作業の要約とともに最終ステータスを報告する
-  * 本番コード生成の完了を報告
-  * **単体テスト生成の完了を報告（必須）**
-* このタスクファイルのタスクがすべて完了したら、ここで停止する
+* 本番コード生成と単体テスト生成の両方が完了していることを確認する
+* principles および architecture_design.md に従っていること、detailed_design/behaviors.md のシナリオがテストでカバーされていること、detailed_design で定義された Managed Bean・Service・クラス・メソッドが実装されていることを確認する
+* このタスクファイルのタスクがすべて完了したら停止する
 
 ---
 
@@ -619,42 +462,9 @@ architecture_design.mdを参照して以下を確認すること
 
 ---
 
-## 次のステップ: 単体テスト実行
+## 次のステップ
 
-**重要: コード生成タスクでは、本番コード生成と単体テスト生成の両方を完了すること**
-
-コード生成タスク（本タスク）の完了条件:
-1. ✅ 本番コード生成完了
-2. ✅ 単体テスト生成完了 ← ここまで完了してから次のステップに進む
-
-コード生成タスク完了後、品質を検証するために単体テストを実行する。
-
-```
-✅ コード生成完了（本番コード + 単体テスト生成）
-
-次のステップ: 単体テストの実行と評価
-
-@agent_skills/struts-to-jsf-migration/instructions/unit_test_execution.md
-
-単体テストを実行してください
-
-パラメータ:
-* project_root: {project_root}
-* target_type: {target_type}
-```
-
-単体テスト実行により以下を確認:
-* 実装が正しく動作するか
-* カバレッジ目標を達成しているか
-* 不足しているテストケースがないか
-* デッドコードが含まれていないか
-
-テスト結果に基づいて、必要に応じて以下のループを実行:
-```
-詳細設計 → コード生成（本番コード + 単体テスト） → テスト実行 → 評価
-    ↑                                           ↓
-    └──────── フィードバック ←──────────────────┘
-```
+コード生成タスク完了後は、@agent_skills/struts-to-jsf-migration/instructions/unit_test_execution.md に従い単体テストを実行し、動作・カバレッジ・不足ケースを確認する。必要に応じて詳細設計→コード生成→テスト実行のループを行う。
 
 ---
 

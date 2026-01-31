@@ -6,25 +6,27 @@
 バージョン: 1.0.0  
 最終更新日: [DATE]
 
+記法: シナリオは Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）。principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること。下表は GWT の対応関係を示す。実際の記述は Gherkin のキーワードで行うこと。
+
 ---
 
 ## 1. 概要
 
 本文書は、[PROJECT_NAME]システムの基本設計を外形的に捉えた振る舞い仕様書である。結合テスト用のシナリオを記述し、Service層以下（Service + DAO + Entity + DB）の受入基準を定義する。
 
-**テスト対象:**
+テスト対象:
 * Service層のビジネスロジック
 * DAO層のデータアクセス
 * Entity（JPA）のマッピング
 * 実際のDB操作（メモリDB）
 * 外部API呼び出し（WireMockでスタブ化）
 
-**テスト対象外:**
+テスト対象外:
 * API層（Resource、JAX-RS） → requirements/behaviors.mdで記述
 * HTTPリクエスト/レスポンス → requirements/behaviors.mdで記述
 * 認証・認可（JWT、Cookie） → requirements/behaviors.mdで記述
 
-**関連ドキュメント:**
+関連ドキュメント:
 * [../requirements/behaviors.md](../requirements/behaviors.md) - E2Eテスト用の振る舞い仕様書（API層を含む全体）
 * [../requirements/requirements.md](../requirements/requirements.md) - 要件定義書
 * [functional_design.md](functional_design.md) - システム機能設計書
@@ -43,7 +45,7 @@
 |----------------|------------|---------------|
 | [前提条件を記述] | [Serviceメソッドを呼び出し] | [期待される結果を記述] |
 
-**例:**
+例:
 
 | Given（前提条件） | When（操作） | Then（期待結果） |
 |----------------|------------|---------------|
@@ -61,7 +63,7 @@
 |----------------|------------|---------------|
 | [前提条件を記述] | [Daoメソッドを呼び出し] | [期待される結果を記述] |
 
-**例:**
+例:
 
 | Given（前提条件） | When（操作） | Then（期待結果） |
 |----------------|------------|---------------|
@@ -79,7 +81,7 @@
 |----------------|------------|---------------|
 | [エンティティが存在] | [Serviceメソッド内で例外発生] | トランザクション全体がロールバックされる:<br/>- DBの状態は変更されない |
 
-**例:**
+例:
 
 | Given（前提条件） | When（操作） | Then（期待結果） |
 |----------------|------------|---------------|
@@ -97,7 +99,7 @@
 |----------------|------------|---------------|
 | WireMockが以下をスタブ:<br/>- [HTTP_METHOD] [PATH]<br/>- Response: [STATUS_CODE], [BODY] | [Serviceメソッドを呼び出し] | 外部APIが呼ばれる:<br/>- URL: [URL]<br/>- Method: [METHOD]<br/>レスポンスが正しく処理される |
 
-**例:**
+例:
 
 | Given（前提条件） | When（操作） | Then（期待結果） |
 |----------------|------------|---------------|
@@ -121,7 +123,7 @@
 |----------------|------------|---------------|
 | [エンティティに不正な値] | [Serviceメソッドを呼び出し] | ConstraintViolationExceptionがスローされる:<br/>- [field1]: "[error_message1]"<br/>- [field2]: "[error_message2]" |
 
-**例:**
+例:
 
 | Given（前提条件） | When（操作） | Then（期待結果） |
 |----------------|------------|---------------|
@@ -147,13 +149,13 @@
 |----------------|------------|---------------|
 | [関連エンティティが存在] | [エンティティを取得] | [リレーションが正しく取得される] |
 
-**例（OneToMany）:**
+例（OneToMany）:
 
 | Given（前提条件） | When（操作） | Then（期待結果） |
 |----------------|------------|---------------|
 | Category(id=1)<br/>Book(id=1, categoryId=1)<br/>Book(id=2, categoryId=1) | CategoryDao.findById(1) | Categoryエンティティが取得され、<br/>category.books.size() == 2<br/>（Lazy Loadingで書籍リストも取得） |
 
-**例（ManyToOne）:**
+例（ManyToOne）:
 
 | Given（前提条件） | When（操作） | Then（期待結果） |
 |----------------|------------|---------------|
@@ -171,7 +173,7 @@
 |----------------|------------|---------------|
 | [大量のエンティティとリレーション] | [JOIN FETCHを使用したクエリ] | SQLクエリが最小限で実行される:<br/>"[SQL]"<br/>N+1問題が発生しない |
 
-**例:**
+例:
 
 | Given（前提条件） | When（操作） | Then（期待結果） |
 |----------------|------------|---------------|
@@ -189,7 +191,7 @@
 |----------------|------------|---------------|
 | [エンティティが存在、version=N] | [古いバージョンで更新試行] | OptimisticLockExceptionがスローされる<br/>DBの状態は更新されない |
 
-**例:**
+例:
 
 | Given（前提条件） | When（操作） | Then（期待結果） |
 |----------------|------------|---------------|
@@ -201,15 +203,15 @@
 
 各テストケースでは、以下の方針でテストデータを準備する：
 
-1. **@BeforeEach で初期データ投入**
+1. @BeforeEach で初期データ投入
    - EntityManagerを使用してエンティティを永続化
    - em.flush()で強制的にDBに反映
 
-2. **@AfterEach でロールバック**
+2. @AfterEach でロールバック
    - トランザクションロールバックで自動クリーンアップ
    - 次のテストへの影響を防ぐ
 
-3. **テストデータの一意性**
+3. テストデータの一意性
    - UUIDやタイムスタンプを使用して一意なデータを生成
    - テスト間の干渉を防ぐ
 
@@ -256,7 +258,7 @@ stubFor(get(urlEqualTo("/api/[resource]/1"))
 
 ## 13. 参考情報
 
-* **requirements/behaviors.md**: E2Eテスト用の受入基準（API層を含む全体フロー）
-* **functional_design.md**: 機能設計書
-* **data_model.md**: データモデル仕様書
-* **agent_skills/jakarta-ee-api-base/instructions/it_generation.md**: 結合テスト生成指示書
+* requirements/behaviors.md: E2Eテスト用の受入基準（API層を含む全体フロー）
+* functional_design.md: 機能設計書
+* data_model.md: データモデル仕様書
+* agent_skills/jakarta-ee-api-base/instructions/it_generation.md: 結合テスト生成指示書

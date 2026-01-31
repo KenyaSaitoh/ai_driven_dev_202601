@@ -659,6 +659,15 @@ java.lang.RuntimeException: ...
   * ServletContextはコンテナが提供するAPIで、WAR内外のリソースに統一的にアクセス可能
   * 開発環境と本番環境で動作を統一できる
 
+### 8.4 JSFプロジェクトの開発前提
+
+本標準をStrutsからJSFへマイグレーションする場合の開発前提:
+
+* 画面（UI）が含まれる。Managed Bean と Facelets XHTML のタスクを生成する
+* 画面遷移は暗黙的ナビゲーション（戻り値が画面ID）または faces-config.xml で管理
+* セッション管理（ViewScoped、Flash Scope、Session Scope）を考慮
+* Bean Validation、JSFライフサイクル、Unified ELを活用
+
 ---
 
 ## 9. テスト戦略
@@ -690,7 +699,28 @@ Unit Tests (JUnit 5 + Mockito)
 * E2Eテスト:
   * ログイン → 主要業務フロー
   * エラーケース（認証エラー、バリデーションエラー等）
-  * HTTP Client（curl, Postman等）でのAPI呼び出し
+  * HTTP Client（curl, Postman等）でのAPI呼び出し、またはPlaywright等によるブラウザE2E
+
+### 9.3 単体テストの実行規約
+
+単体テストの実行とカバレッジ計測は以下の規約に従う:
+
+* 実行前提: Gradle、JUnit 5、JaCoCoがセットアップされていること
+* テストクラス命名: `*Test.java`
+* カバレッジ除外対象:
+  * DTOクラス（`*Dto.java`、`**/dto/**`）
+  * Recordクラス（`*Record.java`）
+  * Managed Bean（`*Bean.java`、**/bean/**）— UI層のため除外推奨
+  * 自動生成コード（`**/generated/**`）
+  * 設定クラス（オプション: `*Config.java`）
+* 除外設定は`build.gradle`の`jacocoTestReport`で行う
+
+### 9.4 テストデータ管理
+
+結合テスト・E2Eテストにおけるテストデータは以下の方針に従う:
+
+* テスト間の独立性を保つ
+* @BeforeEachで準備、@AfterEachでクリーンアップ、または各テストで一意データ（UUID等）を使用する
 
 ---
 
@@ -777,6 +807,18 @@ Unit Tests (JUnit 5 + Mockito)
   2. JWTトークンの検証（署名、有効期限）
   3. 認証情報をスレッドローカルに保存
   4. 認証失敗時は401エラーを返却
+
+### 11.5 非機能要件の確認原則（詳細設計時）
+
+セキュリティ・パフォーマンス・データ整合性に関する実装判断は、SPECに明記されていない限り人間が判断する。AIは推測で決定してはならない。
+
+確認すべきカテゴリ（SPECにない場合にユーザーに確認）:
+
+* セキュリティ: 認証・認可方式（Form認証、Container Managed Security等）、パスワードハッシュ、入力検証、ログマスキング、SQL/XSS/CSRF対策、アクセス制御粒度（画面単位・ボタン単位・データ単位）
+* パフォーマンス: 一覧の最大件数・ページネーション、キャッシュ、Lazy Loading、N+1回避、非同期、ViewScopedのデータ保持
+* データ整合性・トランザクション: トランザクション境界（Service層/Managed Bean層）、楽観/悲観ロック、論理/物理削除、ロールバック時の画面状態・エラーメッセージ
+
+JSFの場合は画面スコープ（ViewScoped/RequestScoped）、Flash Scope・Session Scopeでのデータ受け渡しも確認対象に含める。各項目の推奨実装・選択肢は本ドキュメントの該当セクション（5, 6, 10）を参照し、詳細設計時に選択肢を提示してユーザーに判断を仰ぐ。
 
 ---
 

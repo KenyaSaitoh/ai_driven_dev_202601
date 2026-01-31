@@ -61,6 +61,7 @@ basic_design/配下（システム全体の基本設計）:
 * behaviors.mdは2種類存在:
   * requirements/behaviors.md: E2Eテスト用（API層含む全体フロー）
   * basic_design/behaviors.md: 結合テスト用（Service層以下の連携）
+* 振る舞いの記法: behaviors.md に記載するシナリオは Gherkin 記法で記述する。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること。
 
 ---
 
@@ -274,7 +275,7 @@ requirements/配下のテンプレート（E2Eテスト用）:
 既存資料がある場合:
 1. 資料を読み込む（ユーザーに@で添付してもらう）
 2. テストシナリオ、受入基準、エラーケース等をMarkdown形式に変換する
-3. テンプレート構造（Given-When-Then形式）に合わせて整形する
+3. テンプレート構造に合わせ、Gherkin 記法（Feature, Scenario, Given, When, Then 等）で整形する
 4. 全ての振る舞いをbasic_design/behaviors.mdに記載
 5. 不足している情報をユーザーに確認する
 
@@ -286,12 +287,12 @@ requirements/配下のテンプレート（E2Eテスト用）:
 * 全API機能の振る舞い（認証API、書籍管理API、注文管理API等、全てを列挙）
 * 共通処理の振る舞い（認証、ログ、エラーハンドリング、トランザクション等）
 * ドメインモデルの振る舞い（ビジネスルール、バリデーション、状態遷移等）
-* システム全体のシナリオ（Given-When-Then形式）
+* システム全体のシナリオ（Gherkin 記法: Feature, Scenario, Given, When, Then 等）
 * エラーケース
 
 重要な方針:
 * 全ての振る舞いを一枚岩として記述する（機能の分類はしない）
-* Given-When-Then形式で記述する
+* Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But 等のキーワードを使用）
 * 具体的なテストケースを含める
 
 対話のポイント:
@@ -318,7 +319,7 @@ requirements/配下のテンプレート（E2Eテスト用）:
 5. 不足している情報（認証方式、ベースURL、エラーレスポンス等）をユーザーに確認する
 
 注意:
-* 外部インターフェースSPECは**本システムが呼び出す外部システムのAPI仕様**のみを記載する
+* 外部インターフェースSPECは本システムが呼び出す外部システムのAPI仕様のみを記載する
 * データベース接続情報、本システムの実装クラス、本システムが公開するAPI仕様は記載しない
 
 既存資料がない場合:
@@ -364,11 +365,7 @@ requirements/配下のテンプレート（E2Eテスト用）:
 
 ### 4.3 Markdownフォーマット規約の確認
 
-@agent_skills/jakarta-ee-api-base/principles/common_rules.md に記載されたMarkdownフォーマット規約に従っているか確認する
-
-* 箇条書きはアスタリスク（`*`）を使用しているか
-* ボールド（太字）を使用していないか
-* 見出しレベルで構造化されているか
+@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「Markdownフォーマット規約」に従っているか確認する。
 
 ---
 
@@ -481,11 +478,7 @@ requirements/配下のテンプレート（E2Eテスト用）:
 
 ### ルールの遵守
 
-@agent_skills/jakarta-ee-api-base/principles/ 配下の原則ドキュメントを遵守する
-
-* 仕様駆動開発の基本ルール
-* Markdownフォーマット規約
-* タスクの完遂責任
+@agent_skills/jakarta-ee-api-base/principles/ 配下の原則ドキュメントを遵守する。
 
 ### ベースラインと拡張機能の違い
 

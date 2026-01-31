@@ -115,7 +115,6 @@ ai_driven_dev_202601/
 │
 ├── payara6/                                         # Payara Server 6
 ├── hsqldb/                                          # HSQLDB Database Server
-├── tomee8/                                          # Apache TomEE 8 (Struts用)
 │
 ├── build.gradle                                     # Javaプロジェクト用ビルド設定
 ├── settings.gradle                                  # Gradleマルチプロジェクト設定
@@ -157,7 +156,6 @@ ai_driven_dev_202601/
 # 実行権限を付与
 chmod +x gradlew
 chmod +x payara6/bin/*
-chmod +x tomee8/bin/*
 chmod +x projects/master/accounting/accounting_etl/*.sh
 chmod +x projects/sdd/accounting/accounting_etl_sdd/*.sh
 ```

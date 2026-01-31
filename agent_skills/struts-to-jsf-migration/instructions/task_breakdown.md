@@ -88,14 +88,14 @@ output_directory: "projects/sdd/person/jsf-person-sdd/tasks"
 * requirements.md - システムの目的、機能要件
 * data_model.md - エンティティとデータベーススキーマを確認
   * persistence.xml設定情報セクションでJNDI名を確認（persistence.xml設定に必要）
-* behaviors.md - システム全体の振る舞い概要と各機能へのリンクを確認
+* behaviors.md - システム全体の振る舞い概要と各機能へのリンクを確認（Gherkin 記法で記述されている前提）
 
 ### 機能単位ドキュメント（detailed_design/配下）
 
 * detailed_design/FUNC_XXX_*/ - 各機能単位のディレクトリ（例: FUNC_001_PersonList, FUNC_002_PersonInput）
   * screen_design.md - 画面レイアウト、入力項目、バリデーション（JSFプロジェクトの場合）
   * detailed_design.md - Managed Bean、Service、データアクセス設計
-  * behaviors.md - 機能の振る舞い仕様（受入基準、Given-When-Then）
+  * behaviors.md - 機能の振る舞い仕様（受入基準、Gherkin 記法のシナリオ）
 
 注意: プロジェクトによって利用可能なドキュメントは異なります。利用可能なものに基づいてタスクを生成してください。
 
@@ -376,8 +376,7 @@ SPECから画面を抽出してタスクファイルを生成：
 
 ### 命名規則
 
-* ファイル名・タスクIDは全てアンダースコア区切り（例: `setup.md`, `T_SETUP_001`）
-* ハイフン（`-`）は使用しません
+@agent_skills/struts-to-jsf-migration/principles/common_rules.md の「タスク成果物の規約」を参照する。
 
 ### SPEC参照の記述
 
@@ -397,10 +396,7 @@ SPECから画面を抽出してタスクファイルを生成：
 
 ### JSF特有の注意点
 
-* 画面（UI）が含まれるため、Managed Bean と Facelets XHTML のタスクを生成する
-* 画面遷移は暗黙的ナビゲーション（戻り値が画面ID）または faces-config.xml で管理
-* セッション管理（ViewScoped、Flash Scope、Session Scope）を考慮
-* Bean Validation、JSFライフサイクル、Unified ELを活用
+@agent_skills/struts-to-jsf-migration/principles/architecture.md の「8.4 JSFプロジェクトの開発前提」を参照する。
 
 ### プロジェクトルートの扱い
 

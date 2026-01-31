@@ -6,6 +6,8 @@
 バージョン: 1.0.0  
 最終更新日: [DATE]
 
+記法: シナリオは Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）。principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること。
+
 ---
 
 ## 1. 概要

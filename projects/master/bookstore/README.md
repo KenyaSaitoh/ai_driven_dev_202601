@@ -87,7 +87,6 @@
 # 実行権限を付与
 chmod +x gradlew
 chmod +x payara6/bin/*
-chmod +x tomee8/bin/*
 chmod +x projects/master/accounting/accounting_etl/*.sh
 chmod +x projects/sdd/accounting/accounting_etl_sdd/*.sh
 ```
