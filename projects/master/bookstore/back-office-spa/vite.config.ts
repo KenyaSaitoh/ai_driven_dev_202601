@@ -8,7 +8,7 @@ export default defineConfig({
     port: 3001,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080/back-office-api-sdd',
+        target: 'http://localhost:8080/back-office-api',
         changeOrigin: true,
       }
     }

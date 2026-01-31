@@ -3,7 +3,7 @@
 # 画像API テストスクリプト
 # ===========================================
 
-API_BASE="http://localhost:8080/berry-books-api-sdd-agile"
+API_BASE="http://localhost:8080/berry-books-api"
 
 echo "========================================="
 echo "  画像API テスト"

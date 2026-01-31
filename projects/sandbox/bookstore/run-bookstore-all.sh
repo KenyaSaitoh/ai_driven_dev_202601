@@ -28,7 +28,7 @@ NC='\033[0m' # No Color
 
 # スクリプトのルートディレクトリ（プロジェクトルート）
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../" && pwd)"
 cd "$PROJECT_ROOT"
 
 # ログファイル
@@ -232,9 +232,9 @@ log "セットアップが完了しました！"
 log "=============================================="
 echo ""
 log "${GREEN}■ バックエンド API${NC}"
-log "  - back-office-api-sandbox:  http://localhost:8080/back-office-api-sandbox/api"
-log "  - berry-books-api-sandbox: http://localhost:8080/berry-books-api-sandbox/api"
-log "  - customer-hub-api-sandbox: http://localhost:8080/customer-hub-api-sandbox/api"
+log "  - back-office-api:  http://localhost:8080/back-office-api/api"
+log "  - berry-books-api:  http://localhost:8080/berry-books-api/api"
+log "  - customer-hub-api: http://localhost:8080/customer-hub-api/api"
 echo ""
 log "${GREEN}■ フロントエンド SPA${NC}"
 log "  - berry-books-spa:  http://localhost:5173 (PID: $BERRY_SPA_PID)"

@@ -74,7 +74,7 @@ Feature: 書籍検索
     Then 空の一覧が返される
 ```
 
-* requirements/behaviors.md（E2E用）、basic_design/behaviors.md（結合テスト用）、detailed_design/{target}/behaviors.md（単体テスト用）のいずれも、上記 Gherkin 記法に従うこと。
+* アジャイル版では usecases/{名}/behaviors.md が結合・E2E・単体テストのシナリオ元となる。上記 Gherkin 記法に従うこと。
 
 シナリオからテストケースを抽出する際の目安:
 
@@ -84,14 +84,11 @@ Feature: 書籍検索
 
 根拠: Gherkin は BDD で広く使われる標準的な記法であり、人間可読かつテスト自動化（Cucumber 等）との親和性が高い。
 
-## タスク成果物の規約
+## コード生成対象の命名規約
 
-タスク分解の成果物（タスクファイル・タスクID）の命名は以下の規約に従う:
+コード生成の対象（target）は `common` または `usecases/{フォルダ名}` である。usecases のフォルダ名はプロジェクト内で統一する（例: ケバブケース order-creation、アンダースコア order_creation のいずれかに揃える）。
 
-* タスクファイル名・タスクIDはアンダースコア区切りを使用する（例: setup.md, FUNC_001_books）
-* ハイフン（`-`）は使用しない
-
-根拠: 一貫した命名により、タスク一覧の可読性とツール連携の安定性を確保する
+根拠: 一貫したフォルダ名により、SPEC と実装の対応が明確になる。
 
 ## Markdownフォーマット規約
 

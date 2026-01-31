@@ -14,109 +14,70 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 > - 詳細な仕様書（specs/）に基づいて、段階的にコードを生成する手法
 > - AIを活用して、仕様書からタスクリスト（tasks/）を生成し、タスクに従って実装を進める
 > - 憲章（principles/）に定められた設計原則とベストプラクティスに従う
-> - 汎用Agent Skills (`agent_skills/jakarta-ee-api-base/`) を使用した開発
+> - アジャイル用Agent Skills (`agent_skills/jakarta-ee-api-agile/`) を使用した開発
 
-## 🤖 Agent Skillsを使った開発
+## 🤖 Agent Skillsを使った開発（アジャイル）
 
-このプロジェクトは、汎用的な Jakarta EE マイクロサービス開発 Agent Skills を使用して開発します。
+このプロジェクトは、アジャイル向け Jakarta EE API 開発 Agent Skills（jakarta-ee-api-agile）を使用します。SPECは `specs/baseline/common/` と `specs/baseline/usecases/{名}/` で管理します。
 
-開発は以下の7段階プロセスで進めます：
+開発は以下の流れで進めます：
 
 ```
-ステップ1: 基本設計（SPEC作成）← AIと対話しながら
+ステップ1: common SPEC + ユースケースSPEC（common/ + usecases/{名}/）
     ↓
-ステップ2: タスク分解（SPEC → タスクリスト）
+ステップ2: タスク分解（common + ユースケース単位）
     ↓
-ステップ3: 詳細設計（SPEC → 詳細設計書）← AIと対話しながら
+ステップ3: コード生成（common 先行 → ユースケース単位）
     ↓
-ステップ4: コード生成（詳細設計書 → 実装コード + 単体テスト）
+ステップ4: 単体テスト実行評価
     ↓
-ステップ5: 単体テスト実行評価（テスト実行 → カバレッジ分析 → フィードバック）
+ステップ5: 結合テスト生成（usecases/*/behaviors.md → JUnit + Weld SE）
     ↓
-ステップ6: 結合テスト生成（basic_design/behaviors.md → JUnit + Weld SE）
-    ↓
-ステップ7: E2Eテスト生成（requirements/behaviors.md → REST Assured）
+ステップ6: E2Eテスト生成（usecases 等の behaviors → REST Assured）
 ```
 
 ---
 
 ### 📋 開発フロー
 
-#### ステップ1: 基本設計（プロジェクト開始時に1回）
+#### ステップ1: common SPEC + ユースケースSPEC（プロジェクト開始時・拡張時）
 
-requirements.mdから、システム全体と機能単位の仕様書をAIと対話しながら作成します。
+common（data_model, external_interface, architecture_design）を先に整え、各ユースケースに userstory.md / behaviors.md を配置します。
 
 ```
-@agent_skills/jakarta-ee-api-base/instructions/basic_design.md
-
-仕様書を作成してください
+@agent_skills/jakarta-ee-api-agile/instructions/common_spec.md   # common/ の3SPEC
+@agent_skills/jakarta-ee-api-agile/instructions/usecase_spec.md   # usecases/{名}/ の userstory + behaviors
 
 パラメータ:
-* project_root: projects/sdd-agile/bookstore/back-office-api-agile
-* spec_directory: projects/sdd-agile/bookstore/back-office-api-agile/specs/baseline
+* project_root: projects/sdd-agile/bookstore/back-office-api
+* spec_directory: projects/sdd-agile/bookstore/back-office-api/specs/baseline
 ```
 
-* 対話の流れ:
-  1. 既存資料（EXCEL、Word等）の有無を確認します
-  2. 既存資料がある場合は、Markdown形式に変換します
-  3. テンプレートを展開し、各仕様書を対話的に作成します
-  4. `specs/baseline/basic_design/*.md` が生成されます
-
-* 生成されるファイル: `specs/baseline/basic_design/*.md`（基本設計SPEC）
+* 配置: `specs/baseline/common/*.md`, `specs/baseline/usecases/{auth|books|category|publisher|stocks|workflow}/userstory.md`, `behaviors.md`
 
 ---
 
-#### ステップ2: タスク分解（プロジェクト開始時に1回）
+#### ステップ2: タスク分解（common + ユースケース単位）
 
-仕様書から実装タスクリストを分解・生成します。
+common 用タスクとユースケース別タスクに分解します。
 
 ```
-@agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
+@agent_skills/jakarta-ee-api-agile/instructions/task_breakdown.md
 
 全タスクを分解してください。
 
 パラメータ:
-* project_root: projects/sdd-agile/bookstore/back-office-api-agile
-* spec_directory: projects/sdd-agile/bookstore/back-office-api-agile/specs/baseline
+* project_root: projects/sdd-agile/bookstore/back-office-api
+* spec_directory: projects/sdd-agile/bookstore/back-office-api/specs/baseline
 ```
 
-* 生成されるファイル: `tasks/*.md`（タスクリスト）
+* 参照: `specs/baseline/common/`, `specs/baseline/usecases/{名}/`
 
 ---
 
-#### ステップ3: 詳細設計（tasks/tasks.mdの順序に従う）
+#### ステップ3: コード生成（tasks/tasks.mdの順序に従う）
 
-**重要**: 実行順序は `tasks/tasks.md` の「タスク概要」表と「実行順序」セクションを参照してください。
-- 「依存タスク」列: このタスクを開始する前に完了が必要なタスク
-- 「並行実行可能」列: このタスクと同時に実行可能な他のタスク
-- 「レベル」列: 同じレベルのタスクは並行実行可能
-
-コマンドテンプレート:
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
-
-[タスクID]の詳細設計書を作成してください。
-
-パラメータ:
-* project_root: projects/sdd-agile/bookstore/back-office-api-agile
-* spec_directory: projects/sdd-agile/bookstore/back-office-api-agile/specs/baseline
-* target_type: [tasks/tasks.mdで確認したタスクID]
-```
-
-対話の流れ:
-1. AIがSPEC（basic_design/）を読み込み、理解した内容を説明します
-2. AIが不明点を質問します
-3. あなたが回答します
-4. `specs/baseline/detailed_design/[タスクID]/detailed_design.md` と `behaviors.md` が生成されます
-
-注意:
-* target_typeは `tasks/tasks.md` のタスクファイル名（拡張子なし）と一致させる
-* 依存タスクの詳細設計が完了してから実行する（tasks/tasks.mdの「依存タスク」列を参照）
-
----
-
-#### ステップ4: コード生成（tasks/tasks.mdの順序に従う）
+common/ の3SPEC と usecases/{名}/userstory.md, behaviors.md を駆動元に、タスクに従い実装と単体テストを生成します。
 
 **重要**: 実行順序は `tasks/tasks.md` の「タスク概要」表と「実行順序」セクションを参照してください。
 - 「依存タスク」列を確認し、依存タスクが完了してから実行
@@ -127,7 +88,7 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 コマンドテンプレート:
 
 ```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-agile/instructions/code_generation.md
 
 [タスクID]を実装してください。
 
@@ -139,7 +100,7 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 使用例（setup）:
 
 ```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-agile/instructions/code_generation.md
 
 setupを実装してください。
 
@@ -156,7 +117,7 @@ setupを実装してください。
 使用例（機能タスク）:
 
 ```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-agile/instructions/code_generation.md
 
 機能タスクを実装してください。
 
@@ -170,7 +131,7 @@ setupを実装してください。
 使用例（FUNC_002）:
 
 ```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
+@agent_skills/jakarta-ee-api-agile/instructions/code_generation.md
 
 FUNC_002を実装してください。
 
@@ -190,7 +151,7 @@ FUNC_002を実装してください。
 単体テストを実行してカバレッジを分析し、品質を検証します。
 
 ```
-@agent_skills/jakarta-ee-api-base/instructions/unit_test_execution.md
+@agent_skills/jakarta-ee-api-agile/instructions/unit_test_execution.md
 
 単体テストを実行してください。
 
@@ -209,7 +170,7 @@ AIが：
 重要：
 * 問題を発見してもユーザー確認なしに修正しない
 * カバレッジ不足やデッドコードを具体的に提案
-* 必要に応じてステップ3（詳細設計）に戻ってループ
+* 必要に応じてコード生成（または common/usecases SPEC の見直し）に戻ってループ
 
 🔄 フィードバックループ:
 ```
@@ -220,7 +181,7 @@ AIが：
 
 ---
 
-#### ステップ6: 結合テスト生成（単体テスト完了後）
+#### ステップ5: 結合テスト生成（単体テスト完了後）
 
 単体テスト完了後に、結合テスト（Integration Test）を生成します。
 
@@ -235,7 +196,7 @@ AIが：
 ```
 
 AIが：
-1. 📄 basic_design/behaviors.md（結合テストシナリオ）を読み込む
+1. 📄 usecases/*/behaviors.md（結合テストシナリオ）を読み込む
 2. 🧪 JUnit 5 + Weld SE を使用した結合テストを生成
    * Service層以下（Service + DAO + Entity + DB）の連携テスト
    * 実際のDBアクセス（メモリDB）
@@ -251,12 +212,12 @@ AIが：
 
 ---
 
-#### ステップ7: E2Eテスト生成（実装完了後）
+#### ステップ6: E2Eテスト生成（実装完了後）
 
 全機能実装完了後に、E2Eテスト（End-to-End Test）を生成します。
 
 ```
-@agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md
+@agent_skills/jakarta-ee-api-agile/instructions/e2e_test_generation.md
 
 E2Eテストを生成してください。
 
@@ -266,7 +227,7 @@ E2Eテストを生成してください。
 ```
 
 AIが：
-1. 📄 requirements/behaviors.md（E2Eテストシナリオ）を読み込む
+1. 📄 usecases/*/behaviors.md 等（E2Eテストシナリオ）を読み込む
 2. 🧪 REST Assured を使用したE2Eテストを生成
    * 複数API間の連携テスト（認証 → 書籍検索 → 在庫更新等）
    * 実際のHTTPリクエスト/レスポンス
@@ -284,69 +245,24 @@ AIが：
 
 ---
 
-### 🔄 基本設計変更対応（手戻り・拡張案件）
+### 🔄 SPEC変更対応（アジャイル）
 
-結合テストやE2Eテストで不具合が見つかり、基本設計に戻る必要がある場合や、拡張案件で新機能を追加する場合に使用します。
-
-#### 使用方法
-
-1. 基本設計SPECのマスターファイルを更新
-   ```bash
-   vim specs/baseline/basic_design/functional_design.md
-   vim specs/baseline/basic_design/data_model.md
-   ```
-
-2. CHANGES.mdを作成して変更内容を記載
-   ```bash
-   cp agent_skills/jakarta-ee-api-base/templates/basic_design/CHANGES_template.md \
-      specs/baseline/basic_design/CHANGES.md
-   vim specs/baseline/basic_design/CHANGES.md
-   ```
-
-3. 変更対応を実行
-   ```
-   @agent_skills/jakarta-ee-api-base/instructions/basic_design_change.md
-   
-   基本設計の変更を適用してください。
-   
-   パラメータ:
-   * project_root: projects/sdd-agile/bookstore/back-office-api-agile
-   * spec_directory: projects/sdd-agile/bookstore/back-office-api-agile/specs/baseline
-   ```
-
-AIが：
-1. 📄 CHANGES.md（変更差分ファイル）を読み込み
-2. 🔍 変更の影響を受けるファイル（詳細設計、コード、テスト）を特定
-3. 📋 変更タスクファイル（`tasks/change_tasks.md`）を生成
-4. 🎯 既存の指示書を呼び出して、影響を受けるファイルを更新
-5. ✅ すべての変更適用後、CHANGES.mdをアーカイブ
-
-#### ディレクトリ構造
-
-```
-specs/baseline/basic_design/
-  ├── functional_design.md      # マスター（自由に編集）
-  ├── data_model.md             # マスター（自由に編集）
-  ├── CHANGES.md                # アクティブな変更（未適用）
-  └── changes_archive/          # 履歴
-      ├── 20260118_book_discount.md
-      └── 20260125_stock_alert.md
-```
+common またはユースケースの仕様変更時は、`@agent_skills/jakarta-ee-api-agile/instructions/spec_change.md` を使用して影響範囲を適用します。変更対象は `specs/baseline/common/` または `specs/baseline/usecases/{名}/` の userstory.md / behaviors.md / common の3SPECです。
 
 ---
 
 ### 📚 詳細情報
 
-詳細は `@agent_skills/jakarta-ee-api-base/README.md` を参照してください。
+詳細は `@agent_skills/jakarta-ee-api-agile/README.md` を参照してください。
 
 #### 開発原則
 
 このプロジェクトは、以下の原則に従って開発されます：
 
-* 場所: `@agent_skills/jakarta-ee-api-base/principles/`
-  * [architecture.md](../../../agent_skills/jakarta-ee-api-base/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
-  * [security.md](../../../agent_skills/jakarta-ee-api-base/principles/security.md) - セキュリティ標準
-  * [common_rules.md](../../../agent_skills/jakarta-ee-api-base/principles/common_rules.md) - 共通ルール
+* 場所: `@agent_skills/jakarta-ee-api-agile/principles/`
+  * [architecture.md](../../../agent_skills/jakarta-ee-api-agile/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
+  * [security.md](../../../agent_skills/jakarta-ee-api-agile/principles/security.md) - セキュリティ標準
+  * [common_rules.md](../../../agent_skills/jakarta-ee-api-agile/principles/common_rules.md) - 共通ルール
 
 * 主な内容:
   * 標準技術スタック（Jakarta EE 10、JPA 3.1、JAX-RS 3.1）
@@ -411,14 +327,17 @@ specs/baseline/basic_design/
 back-office-api-sdd-agile/
 ├── specs/                          # 仕様書（SDD）
 │   ├── baseline/
-│   │   ├── requirements/           # システム要件
-│   │   │   ├── requirements.md    # 要件定義書
-│   │   │   └── behaviors.md       # E2Eテスト用（要件を外形的に捉えた振る舞い）
-│   │   ├── basic_design/           # 基本設計SPEC
-│   │   │   ├── architecture_design.md
-│   │   │   ├── functional_design.md
+│   │   ├── common/                 # 共通SPEC
 │   │   │   ├── data_model.md
-│   │   │   └── behaviors.md       # 結合テスト用（基本設計を外形的に捉えた振る舞い）
+│   │   │   ├── external_interface.md
+│   │   │   └── architecture_design.md
+│   │   ├── usecases/               # ユースケース別
+│   │   │   ├── auth/               # userstory.md, behaviors.md
+│   │   │   ├── books/
+│   │   │   ├── category/
+│   │   │   ├── publisher/
+│   │   │   ├── stocks/
+│   │   │   └── workflow/
 │   │   └── detailed_design/        # 詳細設計SPEC
 │   │       ├── common/
 │   │       │   ├── detailed_design.md
@@ -765,11 +684,11 @@ rm -f hsqldb/data/testdb.*
 
 ### Agent Skills
 
-* [Agent Skills README](../../../agent_skills/jakarta-ee-api-base/README.md) - 使い方ガイド
-* [開発原則](../../../agent_skills/jakarta-ee-api-base/principles/)
-  * [architecture.md](../../../agent_skills/jakarta-ee-api-base/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
-  * [security.md](../../../agent_skills/jakarta-ee-api-base/principles/security.md) - セキュリティ標準
-  * [common_rules.md](../../../agent_skills/jakarta-ee-api-base/principles/common_rules.md) - 共通ルール
+* [Agent Skills README](../../../agent_skills/jakarta-ee-api-agile/README.md) - 使い方ガイド
+* [開発原則](../../../agent_skills/jakarta-ee-api-agile/principles/)
+  * [architecture.md](../../../agent_skills/jakarta-ee-api-agile/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
+  * [security.md](../../../agent_skills/jakarta-ee-api-agile/principles/security.md) - セキュリティ標準
+  * [common_rules.md](../../../agent_skills/jakarta-ee-api-agile/principles/common_rules.md) - 共通ルール
 
 ### Jakarta EE仕様
 

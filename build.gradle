@@ -239,6 +239,7 @@ subprojects {
     }
 
     // アプリケーションをデプロイ
+    // コンテキストルートはフォルダ名（projectDir.name）に統一し、フロントエンドが参照するURLと一致させる
     task deploy {
         group = "payara"
         description = "Deploy the application to Payara Server"
@@ -248,43 +249,39 @@ subprojects {
             // berry-books-mvc-sdd uses simplified WAR name
             def warName = project.name == "berry-books-mvc-sdd" ? "berry-books.war" : "${project.name}.war"
             def warFile = file("${buildDir}/libs/${warName}")
-            
+            def appContextName = project.projectDir.name
             if (!asadmin.exists()) {
                 throw new GradleException("asadmin command not found: ${asadmin}")
             }
             if (!warFile.exists()) {
                 throw new GradleException("WAR file not found: ${warFile}")
             }
-            
-            println "Deploying ${project.name} to Payara Server..."
-            
+            println "Deploying ${project.name} to Payara Server (context root: /${appContextName})..."
             exec {
                 commandLine asadmin.absolutePath, "deploy",
                     "--force=true",
-                    "--contextroot", "/${project.name}",
+                    "--name", appContextName,
+                    "--contextroot", "/${appContextName}",
                     warFile.absolutePath
                 ignoreExitValue = true
             }
-            
-            println "Application deployed: http://localhost:${conf.payaraServer.httpPort}/${project.name}"
+            println "Application deployed: http://localhost:${conf.payaraServer.httpPort}/${appContextName}"
         }
     }
 
-    // アプリケーションをアンデプロイ
+    // アプリケーションをアンデプロイ（デプロイ時の --name = フォルダ名で登録されている）
     task undeploy {
         group = "payara"
         description = "Undeploy the application from Payara Server"
         doLast {
             def asadmin = rootProject.file(conf.payaraServer.asadminCmd)
-            
+            def appContextName = project.projectDir.name
             if (!asadmin.exists()) {
                 throw new GradleException("asadmin command not found: ${asadmin}")
             }
-            
-            println "Undeploying ${project.name} from Payara Server..."
-            
+            println "Undeploying ${project.name} (${appContextName}) from Payara Server..."
             exec {
-                commandLine asadmin.absolutePath, "undeploy", project.name
+                commandLine asadmin.absolutePath, "undeploy", appContextName
                 ignoreExitValue = true
             }
         }

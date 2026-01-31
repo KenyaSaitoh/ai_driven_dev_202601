@@ -4,7 +4,7 @@
 # Windows Git Bash対応版
 # ===========================================
 
-API_BASE="http://localhost:8080/back-office-api-sdd-wf"
+API_BASE="http://localhost:8080/back-office-api"
 
 echo "========================================="
 echo "  Back Office API 簡易テスト"
