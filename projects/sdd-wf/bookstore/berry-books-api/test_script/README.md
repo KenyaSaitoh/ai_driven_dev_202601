@@ -30,11 +30,11 @@ test_script/
 ./gradlew startPayara
 
 # 3. データベースのセットアップ（初回のみ）
-./gradlew :berry-books-api-sdd:setupHsqldb
+./gradlew :berry-books-api-sdd-wf:setupHsqldb
 
 # 4. Berry Books APIをデプロイ
-./gradlew :berry-books-api-sdd:war
-./gradlew :berry-books-api-sdd:deploy
+./gradlew :berry-books-api-sdd-wf:war
+./gradlew :berry-books-api-sdd-wf:deploy
 
 # 5. Customer API（顧客管理）をデプロイ（認証で使用）
 ./gradlew :customer-api:war
@@ -46,7 +46,7 @@ test_script/
 **最も簡単な方法** - 全APIを一度にテスト：
 
 ```bash
-cd projects/sdd-wf/bookstore/berry-books-api-sdd/test_script
+cd projects/sdd-wf/bookstore/berry-books-api-wf/test_script
 ./simple_test.sh
 ```
 
@@ -62,7 +62,7 @@ cd projects/sdd-wf/bookstore/berry-books-api-sdd/test_script
 ### 全APIテストの実行（詳細版）
 
 ```bash
-cd projects/sdd-wf/bookstore/berry-books-api-sdd/test_script
+cd projects/sdd-wf/bookstore/berry-books-api-wf/test_script
 ./test_all.sh
 ```
 
@@ -179,7 +179,7 @@ JWT認証トークンは一時的なCookieファイルに保存され、テス�
 ### 書籍APIだけをテストする場合
 
 ```bash
-cd projects/sdd-wf/bookstore/berry-books-api-sdd/test_script
+cd projects/sdd-wf/bookstore/berry-books-api-wf/test_script
 ./test_books.sh
 ```
 
@@ -206,7 +206,7 @@ cd projects/sdd-wf/bookstore/berry-books-api-sdd/test_script
 ### 注文を作成してテストする場合
 
 ```bash
-cd projects/sdd-wf/bookstore/berry-books-api-sdd/test_script
+cd projects/sdd-wf/bookstore/berry-books-api-wf/test_script
 ./test_orders.sh
 ```
 
@@ -233,15 +233,15 @@ LOGIN_DATA='{"email":"alice@example.com","password":"password"}'
 各スクリプトではデフォルトで以下の設定を使用します：
 
 ```bash
-API_BASE="http://localhost:8080/berry-books-api-sdd"
+API_BASE="http://localhost:8080/berry-books-api-sdd-wf"
 ```
 
 異なるホスト/ポート/コンテキストパスを使用する場合は、各スクリプトのこの行を編集してください。
 
 **例：**
-* 別のポート: `API_BASE="http://localhost:9090/berry-books-api-sdd"`
+* 別のポート: `API_BASE="http://localhost:9090/berry-books-api-sdd-wf"`
 * ルートコンテキスト: `API_BASE="http://localhost:8080"`
-* リモートサーバー: `API_BASE="https://example.com/berry-books-api-sdd"`
+* リモートサーバー: `API_BASE="https://example.com/berry-books-api-sdd-wf"`
 
 ### 注文内容のカスタマイズ
 
@@ -276,10 +276,10 @@ ORDER_DATA='{
 curl http://localhost:8080/customer-api/api/customers/1
 
 # データベースを初期化（テストユーザーを含む）
-./gradlew :berry-books-api-sdd:setupHsqldb
+./gradlew :berry-books-api-sdd-wf:setupHsqldb
 
 # APIを再デプロイ
-./gradlew :berry-books-api-sdd:deploy
+./gradlew :berry-books-api-sdd-wf:deploy
 ./gradlew :customer-api:deploy
 ```
 
@@ -295,11 +295,11 @@ curl http://localhost:8080/customer-api/api/customers/1
 ./gradlew statusPayara
 
 # Berry Books APIが正常にデプロイされているか確認
-curl http://localhost:8080/berry-books-api-sdd/api/books
+curl http://localhost:8080/berry-books-api-sdd-wf/api/books
 
 # APIを再デプロイ
-./gradlew :berry-books-api-sdd:war
-./gradlew :berry-books-api-sdd:deploy
+./gradlew :berry-books-api-sdd-wf:war
+./gradlew :berry-books-api-sdd-wf:deploy
 ```
 
 ### 画像が取得できない（404エラー）
@@ -312,7 +312,7 @@ curl http://localhost:8080/berry-books-api-sdd/api/books
 書籍表紙画像を以下の場所に配置してください：
 
 ```
-projects/sdd-wf/bookstore/berry-books-api-sdd/src/main/webapp/resources/images/covers/
+projects/sdd-wf/bookstore/berry-books-api-wf/src/main/webapp/resources/images/covers/
 ```
 
 ファイル名の規則：

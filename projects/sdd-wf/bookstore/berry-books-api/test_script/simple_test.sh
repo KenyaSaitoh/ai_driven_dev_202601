@@ -4,7 +4,7 @@
 # Windows Git Bash対応版
 # ===========================================
 
-API_BASE="http://localhost:8080/berry-books-api-sdd"
+API_BASE="http://localhost:8080/berry-books-api-sdd-wf"
 COOKIES="cookies.txt"
 
 echo "========================================="

@@ -46,7 +46,7 @@ test_script/
 **最も簡単な方法** - 全APIを一度にテスト：
 
 ```bash
-cd projects/sdd-agile/bookstore/berry-books-api-sdd/test_script
+cd projects/sdd-agile/bookstore/berry-books-api-agile/test_script
 ./simple_test.sh
 ```
 
@@ -62,7 +62,7 @@ cd projects/sdd-agile/bookstore/berry-books-api-sdd/test_script
 ### 全APIテストの実行（詳細版）
 
 ```bash
-cd projects/sdd-agile/bookstore/berry-books-api-sdd/test_script
+cd projects/sdd-agile/bookstore/berry-books-api-agile/test_script
 ./test_all.sh
 ```
 
@@ -179,7 +179,7 @@ JWT認証トークンは一時的なCookieファイルに保存され、テス�
 ### 書籍APIだけをテストする場合
 
 ```bash
-cd projects/sdd-agile/bookstore/berry-books-api-sdd/test_script
+cd projects/sdd-agile/bookstore/berry-books-api-agile/test_script
 ./test_books.sh
 ```
 
@@ -206,7 +206,7 @@ cd projects/sdd-agile/bookstore/berry-books-api-sdd/test_script
 ### 注文を作成してテストする場合
 
 ```bash
-cd projects/sdd-agile/bookstore/berry-books-api-sdd/test_script
+cd projects/sdd-agile/bookstore/berry-books-api-agile/test_script
 ./test_orders.sh
 ```
 
@@ -312,7 +312,7 @@ curl http://localhost:8080/berry-books-api-sdd-agile/api/books
 書籍表紙画像を以下の場所に配置してください：
 
 ```
-projects/sdd-agile/bookstore/berry-books-api-sdd/src/main/webapp/resources/images/covers/
+projects/sdd-agile/bookstore/berry-books-api-agile/src/main/webapp/resources/images/covers/
 ```
 
 ファイル名の規則：

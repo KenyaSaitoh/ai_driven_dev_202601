@@ -45,7 +45,7 @@ test_script/
 **最も簡単な方法** - 全APIを一度にテスト：
 
 ```bash
-cd projects/sdd-agile/bookstore/back-office-api-sdd/test_script
+cd projects/sdd-agile/bookstore/back-office-api-agile/test_script
 ./simple_test.sh
 ```
 
@@ -59,7 +59,7 @@ cd projects/sdd-agile/bookstore/back-office-api-sdd/test_script
 ### 全APIテストの実行（詳細版）
 
 ```bash
-cd projects/sdd-agile/bookstore/back-office-api-sdd/test_script
+cd projects/sdd-agile/bookstore/back-office-api-agile/test_script
 ./test_all.sh
 ```
 
@@ -203,7 +203,7 @@ cd projects/sdd-agile/bookstore/back-office-api-sdd/test_script
 ### 認証APIをテストする場合
 
 ```bash
-cd projects/sdd-agile/bookstore/back-office-api-sdd/test_script
+cd projects/sdd-agile/bookstore/back-office-api-agile/test_script
 ./test_authen.sh
 ```
 
@@ -227,7 +227,7 @@ cd projects/sdd-agile/bookstore/back-office-api-sdd/test_script
 ### 書籍APIだけをテストする場合
 
 ```bash
-cd projects/sdd-agile/bookstore/back-office-api-sdd/test_script
+cd projects/sdd-agile/bookstore/back-office-api-agile/test_script
 ./test_books.sh
 ```
 
@@ -251,7 +251,7 @@ cd projects/sdd-agile/bookstore/back-office-api-sdd/test_script
 ### ワークフローを作成してテストする場合
 
 ```bash
-cd projects/sdd-agile/bookstore/back-office-api-sdd/test_script
+cd projects/sdd-agile/bookstore/back-office-api-agile/test_script
 ./test_workflow.sh
 ```
 

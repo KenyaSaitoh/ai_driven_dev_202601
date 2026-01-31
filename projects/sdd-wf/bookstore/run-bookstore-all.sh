@@ -8,9 +8,9 @@
 # 2. HSQLDB サーバーの起動
 # 3. データソースのセットアップ
 # 4. 3つのJakarta EE APIのDB初期化、WAR化、デプロイ
-#    - back-office-api-sdd
-#    - berry-books-api-sdd
-#    - customer-hub-api
+#    - back-office-api-sdd-wf
+#    - berry-books-api-sdd-wf
+#    - customer-hub-api-sdd-wf
 # 5. 3つのReact SPAの依存関係インストールと起動
 #    - berry-books-spa (http://localhost:5173)
 #    - back-office-spa (http://localhost:3001)
@@ -69,6 +69,20 @@ error_exit() {
     exit 1
 }
 
+# ポートがLISTEN中かチェック（起動済みならスキップ用）
+# HSQLDB=9001, Payara admin=4848
+is_port_in_use() {
+    local port=$1
+    if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
+        netstat -ano 2>/dev/null | grep -E ":$port[^0-9]|:\s*$port\s" | grep -q "LISTENING"
+    else
+        (lsof -i ":$port" 2>/dev/null | grep -q LISTEN) || (bash -c "echo >/dev/tcp/127.0.0.1/$port" 2>/dev/null)
+    fi
+}
+
+# 自フォルダの bookstore（sdd-wf）
+BOOKSTORE_DIR="$PROJECT_ROOT/projects/sdd-wf/bookstore"
+
 # 開始メッセージ
 echo ""
 log "=============================================="
@@ -87,19 +101,27 @@ echo ""
 
 # ステップ2: HSQLDB サーバーの起動
 log "STEP 2: HSQLDB サーバーを起動..."
-if ! ./gradlew startHsqldb >> "$LOG_FILE" 2>&1; then
-    log_warn "HSQLDB の起動が失敗しましたが、続行します（既に起動中の可能性）"
+if is_port_in_use 9001; then
+    log_warn "HSQLDB は既に起動中のためスキップしました（port 9001）"
 else
-    log "✓ HSQLDB サーバーが起動しました"
+    if ! ./gradlew startHsqldb >> "$LOG_FILE" 2>&1; then
+        log_warn "HSQLDB の起動が失敗しましたが、続行します（既に起動中の可能性）"
+    else
+        log "✓ HSQLDB サーバーが起動しました"
+    fi
 fi
 echo ""
 
 # ステップ3: Payara Server の起動
 log "STEP 3: Payara Server を起動..."
-if ! ./gradlew startPayara >> "$LOG_FILE" 2>&1; then
-    log_warn "Payara Server の起動が失敗しましたが、続行します（既に起動中の可能性）"
+if is_port_in_use 4848; then
+    log_warn "Payara Server は既に起動中のためスキップしました（port 4848）"
 else
-    log "✓ Payara Server が起動しました"
+    if ! ./gradlew startPayara >> "$LOG_FILE" 2>&1; then
+        log_warn "Payara Server の起動が失敗しましたが、続行します（既に起動中の可能性）"
+    else
+        log "✓ Payara Server が起動しました"
+    fi
 fi
 echo ""
 
@@ -116,37 +138,37 @@ else
 fi
 echo ""
 
-# ステップ5: back-office-api-sdd のセットアップとデプロイ
-log "STEP 5: back-office-api-sdd のセットアップとデプロイ..."
+# ステップ5: back-office-api-sdd-wf のセットアップとデプロイ
+log "STEP 5: back-office-api-sdd-wf のセットアップとデプロイ..."
 log_info "  -> データベーステーブルを作成中..."
-./gradlew :back-office-api-sdd:setupHsqldb >> "$LOG_FILE" 2>&1 || error_exit "back-office-api-sdd の DB セットアップに失敗"
+./gradlew :back-office-api-sdd-wf:setupHsqldb >> "$LOG_FILE" 2>&1 || error_exit "back-office-api-sdd-wf の DB セットアップに失敗"
 log_info "  -> WAR ファイルをビルド中..."
-./gradlew :back-office-api-sdd:war >> "$LOG_FILE" 2>&1 || error_exit "back-office-api-sdd のビルドに失敗"
+./gradlew :back-office-api-sdd-wf:war >> "$LOG_FILE" 2>&1 || error_exit "back-office-api-sdd-wf のビルドに失敗"
 log_info "  -> デプロイ中..."
-./gradlew :back-office-api-sdd:deploy >> "$LOG_FILE" 2>&1 || error_exit "back-office-api-sdd のデプロイに失敗"
-log "✓ back-office-api-sdd のデプロイが完了しました"
+./gradlew :back-office-api-sdd-wf:deploy >> "$LOG_FILE" 2>&1 || error_exit "back-office-api-sdd-wf のデプロイに失敗"
+log "✓ back-office-api-sdd-wf のデプロイが完了しました"
 echo ""
 
-# ステップ6: berry-books-api-sdd のセットアップとデプロイ
-log "STEP 6: berry-books-api-sdd のセットアップとデプロイ..."
+# ステップ6: berry-books-api-sdd-wf のセットアップとデプロイ
+log "STEP 6: berry-books-api-sdd-wf のセットアップとデプロイ..."
 log_info "  -> データベーステーブルを作成中..."
-./gradlew :berry-books-api-sdd:setupHsqldb >> "$LOG_FILE" 2>&1 || error_exit "berry-books-api-sdd の DB セットアップに失敗"
+./gradlew :berry-books-api-sdd-wf:setupHsqldb >> "$LOG_FILE" 2>&1 || error_exit "berry-books-api-sdd-wf の DB セットアップに失敗"
 log_info "  -> WAR ファイルをビルド中..."
-./gradlew :berry-books-api-sdd:war >> "$LOG_FILE" 2>&1 || error_exit "berry-books-api-sdd のビルドに失敗"
+./gradlew :berry-books-api-sdd-wf:war >> "$LOG_FILE" 2>&1 || error_exit "berry-books-api-sdd-wf のビルドに失敗"
 log_info "  -> デプロイ中..."
-./gradlew :berry-books-api-sdd:deploy >> "$LOG_FILE" 2>&1 || error_exit "berry-books-api-sdd のデプロイに失敗"
-log "✓ berry-books-api-sdd のデプロイが完了しました"
+./gradlew :berry-books-api-sdd-wf:deploy >> "$LOG_FILE" 2>&1 || error_exit "berry-books-api-sdd-wf のデプロイに失敗"
+log "✓ berry-books-api-sdd-wf のデプロイが完了しました"
 echo ""
 
-# ステップ7: customer-hub-api のセットアップとデプロイ
-log "STEP 7: customer-hub-api のセットアップとデプロイ..."
+# ステップ7: customer-hub-api-sdd-wf のセットアップとデプロイ
+log "STEP 7: customer-hub-api-sdd-wf のセットアップとデプロイ..."
 log_info "  -> データベーステーブルを作成中..."
-./gradlew :customer-hub-api:setupHsqldb >> "$LOG_FILE" 2>&1 || error_exit "customer-hub-api の DB セットアップに失敗"
+./gradlew :customer-hub-api-sdd-wf:setupHsqldb >> "$LOG_FILE" 2>&1 || error_exit "customer-hub-api-sdd-wf の DB セットアップに失敗"
 log_info "  -> WAR ファイルをビルド中..."
-./gradlew :customer-hub-api:war >> "$LOG_FILE" 2>&1 || error_exit "customer-hub-api のビルドに失敗"
+./gradlew :customer-hub-api-sdd-wf:war >> "$LOG_FILE" 2>&1 || error_exit "customer-hub-api-sdd-wf のビルドに失敗"
 log_info "  -> デプロイ中..."
-./gradlew :customer-hub-api:deploy >> "$LOG_FILE" 2>&1 || error_exit "customer-hub-api のデプロイに失敗"
-log "✓ customer-hub-api のデプロイが完了しました"
+./gradlew :customer-hub-api-sdd-wf:deploy >> "$LOG_FILE" 2>&1 || error_exit "customer-hub-api-sdd-wf のデプロイに失敗"
+log "✓ customer-hub-api-sdd-wf のデプロイが完了しました"
 echo ""
 
 # APIデプロイの完了を待機
@@ -155,7 +177,7 @@ sleep 5
 
 # ステップ8: berry-books-spa のセットアップと起動
 log "STEP 8: berry-books-spa のセットアップと起動..."
-cd "$PROJECT_ROOT/projects/master/bookstore/berry-books-spa"
+cd "$BOOKSTORE_DIR/berry-books-spa"
 log_info "  -> 依存関係をインストール中..."
 if [ ! -d "node_modules" ]; then
     npm install >> "$LOG_FILE" 2>&1 || error_exit "berry-books-spa の npm install に失敗"
@@ -170,7 +192,7 @@ echo ""
 
 # ステップ9: back-office-spa のセットアップと起動
 log "STEP 9: back-office-spa のセットアップと起動..."
-cd "$PROJECT_ROOT/projects/master/bookstore/back-office-spa"
+cd "$BOOKSTORE_DIR/back-office-spa"
 log_info "  -> 依存関係をインストール中..."
 if [ ! -d "node_modules" ]; then
     npm install >> "$LOG_FILE" 2>&1 || error_exit "back-office-spa の npm install に失敗"
@@ -185,7 +207,7 @@ echo ""
 
 # ステップ10: customer-hub-spa のセットアップと起動
 log "STEP 10: customer-hub-spa のセットアップと起動..."
-cd "$PROJECT_ROOT/projects/master/bookstore/customer-hub-spa"
+cd "$BOOKSTORE_DIR/customer-hub-spa"
 log_info "  -> 依存関係をインストール中..."
 if [ ! -d "node_modules" ]; then
     npm install >> "$LOG_FILE" 2>&1 || error_exit "customer-hub-spa の npm install に失敗"
@@ -209,10 +231,10 @@ log "=============================================="
 log "セットアップが完了しました！"
 log "=============================================="
 echo ""
-log "${GREEN}■ バックエンド API (SDD)${NC}"
-log "  - back-office-api-sdd:  http://localhost:8080/back-office-api-sdd/api"
-log "  - berry-books-api-sdd:  http://localhost:8080/berry-books-api-sdd/api"
-log "  - customer-hub-api:     http://localhost:8080/customer-hub-api/api"
+log "${GREEN}■ バックエンド API (sdd-wf)${NC}"
+log "  - back-office-api-sdd-wf:  http://localhost:8080/back-office-api-sdd-wf/api"
+log "  - berry-books-api-sdd-wf:  http://localhost:8080/berry-books-api-sdd-wf/api"
+log "  - customer-hub-api-sdd-wf: http://localhost:8080/customer-hub-api-sdd-wf/api"
 echo ""
 log "${GREEN}■ フロントエンド SPA${NC}"
 log "  - berry-books-spa:  http://localhost:5173 (PID: $BERRY_SPA_PID)"

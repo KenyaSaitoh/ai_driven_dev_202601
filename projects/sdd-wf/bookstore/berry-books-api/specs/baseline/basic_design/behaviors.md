@@ -292,10 +292,10 @@ stubFor(put(urlEqualTo("/api/stocks/1"))
 
 ```bash
 # 結合テストのみ実行
-./gradlew :berry-books-api-sdd:integrationTest
+./gradlew :berry-books-api-sdd-wf:integrationTest
 
 # 単体テスト→結合テスト→E2Eテストの順に実行
-./gradlew :berry-books-api-sdd:test integrationTest e2eTest
+./gradlew :berry-books-api-sdd-wf:test integrationTest e2eTest
 ```
 
 ---

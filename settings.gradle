@@ -19,9 +19,10 @@ include 'customer-hub-api-sandbox'
 
 // SDD: 仕様駆動開発（Specification-Driven Development）プロジェクト
 // sdd-wf: ウォーターフォール開発用（仕様→タスク分解→詳細設計→実装の順）
-include 'berry-books-api-sdd'
-include 'back-office-api-sdd'
-include 'jsf-person-sdd'
+include 'berry-books-api-sdd-wf'
+include 'back-office-api-sdd-wf'
+include 'customer-hub-api-sdd-wf'
+include 'jsf-person-sdd-wf'
 
 // sdd-agile: アジャイル開発用（bookstore をイテレーション単位で仕様駆動）
 include 'berry-books-api-sdd-agile'
@@ -42,11 +43,12 @@ project(':back-office-api-sandbox').projectDir = file('projects/sandbox/bookstor
 project(':customer-hub-api-sandbox').projectDir = file('projects/sandbox/bookstore/customer-hub-api')
 
 // SDD: 仕様駆動開発プロジェクト（ドメイン別に整理）
-// sdd-wf: ウォーターフォール用
-project(':berry-books-api-sdd').projectDir = file('projects/sdd-wf/bookstore/berry-books-api-sdd')
-project(':back-office-api-sdd').projectDir = file('projects/sdd-wf/bookstore/back-office-api-sdd')
-project(':jsf-person-sdd').projectDir = file('projects/sdd-wf/person/jsf-person-sdd')
+// sdd-wf: ウォーターフォール用（フォルダ名にsddは付けない、論理名で識別）
+project(':berry-books-api-sdd-wf').projectDir = file('projects/sdd-wf/bookstore/berry-books-api')
+project(':back-office-api-sdd-wf').projectDir = file('projects/sdd-wf/bookstore/back-office-api')
+project(':customer-hub-api-sdd-wf').projectDir = file('projects/sdd-wf/bookstore/customer-hub-api')
+project(':jsf-person-sdd-wf').projectDir = file('projects/sdd-wf/person/jsf-person')
 
 // sdd-agile: アジャイル用（bookstore のみ）
-project(':berry-books-api-sdd-agile').projectDir = file('projects/sdd-agile/bookstore/berry-books-api-sdd')
-project(':back-office-api-sdd-agile').projectDir = file('projects/sdd-agile/bookstore/back-office-api-sdd')
+project(':berry-books-api-sdd-agile').projectDir = file('projects/sdd-agile/bookstore/berry-books-api')
+project(':back-office-api-sdd-agile').projectDir = file('projects/sdd-agile/bookstore/back-office-api')

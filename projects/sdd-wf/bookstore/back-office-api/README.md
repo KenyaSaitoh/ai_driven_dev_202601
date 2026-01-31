@@ -1,4 +1,4 @@
-# back-office-api-sdd プロジェクト
+# back-office-api-sdd-wf プロジェクト
 
 ## 📖 概要
 
@@ -49,8 +49,8 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 仕様書を作成してください
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api-wf
+* spec_directory: projects/sdd-wf/bookstore/back-office-api-wf/specs/baseline
 ```
 
 * 対話の流れ:
@@ -73,8 +73,8 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 全タスクを分解してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api-wf
+* spec_directory: projects/sdd-wf/bookstore/back-office-api-wf/specs/baseline
 ```
 
 * 生成されるファイル: `tasks/*.md`（タスクリスト）
@@ -96,8 +96,8 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 [タスクID]の詳細設計書を作成してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api-wf
+* spec_directory: projects/sdd-wf/bookstore/back-office-api-wf/specs/baseline
 * target_type: [tasks/tasks.mdで確認したタスクID]
 ```
 
@@ -129,8 +129,8 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 [タスクID]を実装してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
-* task_file: projects/sdd-wf/bookstore/back-office-api-sdd/tasks/[タスクファイル名]
+* project_root: projects/sdd-wf/bookstore/back-office-api-wf
+* task_file: projects/sdd-wf/bookstore/back-office-api-wf/tasks/[タスクファイル名]
 ```
 
 使用例（setup）:
@@ -141,8 +141,8 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 setupを実装してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
-* task_file: projects/sdd-wf/bookstore/back-office-api-sdd/tasks/setup.md
+* project_root: projects/sdd-wf/bookstore/back-office-api-wf
+* task_file: projects/sdd-wf/bookstore/back-office-api-wf/tasks/setup.md
 * skip_infrastructure: true  # setupタスク専用: DB/APサーバーのインストールをスキップ
 ```
 
@@ -158,8 +158,8 @@ setupを実装してください。
 機能タスクを実装してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
-* task_file: projects/sdd-wf/bookstore/back-office-api-sdd/tasks/FUNC_001_xxx.md
+* project_root: projects/sdd-wf/bookstore/back-office-api-wf
+* task_file: projects/sdd-wf/bookstore/back-office-api-wf/tasks/FUNC_001_xxx.md
 ```
 
 注意: 実際のタスクファイル名は `tasks/tasks.md` を参照してください
@@ -172,8 +172,8 @@ setupを実装してください。
 FUNC_002を実装してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
-* task_file: projects/sdd-wf/bookstore/back-office-api-sdd/tasks/FUNC_002_books.md
+* project_root: projects/sdd-wf/bookstore/back-office-api-wf
+* task_file: projects/sdd-wf/bookstore/back-office-api-wf/tasks/FUNC_002_books.md
 ```
 
 注意:
@@ -192,7 +192,7 @@ FUNC_002を実装してください。
 単体テストを実行してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
+* project_root: projects/sdd-wf/bookstore/back-office-api-wf
 * target_type: FUNC_002_books
 ```
 
@@ -227,8 +227,8 @@ AIが：
 結合テストを生成してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api-wf
+* spec_directory: projects/sdd-wf/bookstore/back-office-api-wf/specs/baseline
 ```
 
 AIが：
@@ -258,8 +258,8 @@ AIが：
 E2Eテストを生成してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api-wf
+* spec_directory: projects/sdd-wf/bookstore/back-office-api-wf/specs/baseline
 ```
 
 AIが：
@@ -307,8 +307,8 @@ AIが：
    基本設計の変更を適用してください。
    
    パラメータ:
-   * project_root: projects/sdd-wf/bookstore/back-office-api-sdd
-   * spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
+   * project_root: projects/sdd-wf/bookstore/back-office-api-wf
+   * spec_directory: projects/sdd-wf/bookstore/back-office-api-wf/specs/baseline
    ```
 
 AIが：
@@ -405,7 +405,7 @@ specs/baseline/basic_design/
 ## プロジェクト構成
 
 ```
-back-office-api-sdd/
+back-office-api-sdd-wf/
 ├── specs/                          # 仕様書（SDD）
 │   ├── baseline/
 │   │   ├── requirements/           # システム要件
@@ -527,13 +527,13 @@ back-office-api-sdd/
 
 ```bash
 # 1. データベーステーブルとデータを作成
-./gradlew :back-office-api-sdd:setupHsqldb
+./gradlew :back-office-api-sdd-wf:setupHsqldb
 
 # 2. プロジェクトをビルド
-./gradlew :back-office-api-sdd:war
+./gradlew :back-office-api-sdd-wf:war
 
 # 3. プロジェクトをデプロイ
-./gradlew :back-office-api-sdd:deploy
+./gradlew :back-office-api-sdd-wf:deploy
 ```
 
 > 重要: `setupHsqldb`を実行すると、`src/main/resources/db/schema.sql`と`sample_data.sql`が実行されます。
@@ -542,54 +542,54 @@ back-office-api-sdd/
 
 ```bash
 # プロジェクトをアンデプロイ
-./gradlew :back-office-api-sdd:undeploy
+./gradlew :back-office-api-sdd-wf:undeploy
 ```
 
 ### ⑥ アプリケーション作成・更新のたびに実行
 
 ```bash
 # アプリケーションを再ビルドして再デプロイ
-./gradlew :back-office-api-sdd:war
-./gradlew :back-office-api-sdd:deploy
+./gradlew :back-office-api-sdd-wf:war
+./gradlew :back-office-api-sdd-wf:deploy
 ```
 
 ## 📍 APIエンドポイント
 
 デプロイ後、以下のベースURLでAPIにアクセスできます：
 
-* ベースURL: http://localhost:8080/back-office-api-sdd/api
-* ウェルカムページ: http://localhost:8080/back-office-api-sdd/
+* ベースURL: http://localhost:8080/back-office-api-sdd-wf/api
+* ウェルカムページ: http://localhost:8080/back-office-api-sdd-wf/
 
 ## 📝 APIの使用例（curl）
 
 ### 1. 全書籍取得
 
 ```bash
-curl -X GET http://localhost:8080/back-office-api-sdd/api/books
+curl -X GET http://localhost:8080/back-office-api-sdd-wf/api/books
 ```
 
 ### 2. 書籍検索（JPQL）
 
 ```bash
-curl -X GET "http://localhost:8080/back-office-api-sdd/api/books/search/jpql?keyword=Java&categoryId=1"
+curl -X GET "http://localhost:8080/back-office-api-sdd-wf/api/books/search/jpql?keyword=Java&categoryId=1"
 ```
 
 ### 3. 書籍検索（Criteria API）
 
 ```bash
-curl -X GET "http://localhost:8080/back-office-api-sdd/api/books/search/criteria?keyword=Java&categoryId=1"
+curl -X GET "http://localhost:8080/back-office-api-sdd-wf/api/books/search/criteria?keyword=Java&categoryId=1"
 ```
 
 ### 4. 在庫取得
 
 ```bash
-curl -X GET http://localhost:8080/back-office-api-sdd/api/stocks/1
+curl -X GET http://localhost:8080/back-office-api-sdd-wf/api/stocks/1
 ```
 
 ### 5. 在庫更新（楽観的ロック）
 
 ```bash
-curl -X PUT http://localhost:8080/back-office-api-sdd/api/stocks/1 \
+curl -X PUT http://localhost:8080/back-office-api-sdd-wf/api/stocks/1 \
   -H "Content-Type: application/json" \
   -d '{
     "quantity": 50,
@@ -602,7 +602,7 @@ curl -X PUT http://localhost:8080/back-office-api-sdd/api/stocks/1 \
 ### 6. カテゴリ一覧取得
 
 ```bash
-curl -X GET http://localhost:8080/back-office-api-sdd/api/categories
+curl -X GET http://localhost:8080/back-office-api-sdd-wf/api/categories
 ```
 
 ## 🧪 テスト
@@ -614,23 +614,23 @@ curl -X GET http://localhost:8080/back-office-api-sdd/api/categories
 #### すべてのテストを実行
 
 ```bash
-./gradlew :back-office-api-sdd:test
+./gradlew :back-office-api-sdd-wf:test
 ```
 
 #### 特定のテストクラスを実行
 
 ```bash
 # BookServiceのテストのみを実行
-./gradlew :back-office-api-sdd:test --tests "*BookServiceTest"
+./gradlew :back-office-api-sdd-wf:test --tests "*BookServiceTest"
 
 # StockServiceのテストのみを実行（楽観的ロックテスト含む）
-./gradlew :back-office-api-sdd:test --tests "*StockServiceTest"
+./gradlew :back-office-api-sdd-wf:test --tests "*StockServiceTest"
 ```
 
 #### テストの継続的実行（変更検知）
 
 ```bash
-./gradlew :back-office-api-sdd:test --continuous
+./gradlew :back-office-api-sdd-wf:test --continuous
 ```
 
 ### テストレポートの確認
@@ -638,7 +638,7 @@ curl -X GET http://localhost:8080/back-office-api-sdd/api/categories
 テスト実行後、HTMLレポートが生成されます：
 
 ```
-projects/sdd-wf/bookstore/back-office-api-sdd/build/reports/tests/test/index.html
+projects/sdd-wf/bookstore/back-office-api-wf/build/reports/tests/test/index.html
 ```
 
 ブラウザで開くとテスト結果の詳細が確認できます。
@@ -647,10 +647,10 @@ projects/sdd-wf/bookstore/back-office-api-sdd/build/reports/tests/test/index.htm
 
 ```bash
 # テストカバレッジレポートを生成
-./gradlew :back-office-api-sdd:jacocoTestReport
+./gradlew :back-office-api-sdd-wf:jacocoTestReport
 
 # カバレッジレポートの場所
-# projects/sdd-wf/bookstore/back-office-api-sdd/build/reports/jacoco/test/html/index.html
+# projects/sdd-wf/bookstore/back-office-api-wf/build/reports/jacoco/test/html/index.html
 ```
 
 ## 📚 アーキテクチャ
@@ -715,7 +715,7 @@ Database (HSQLDB)
 ### アプリケーションのアンデプロイ
 
 ```bash
-./gradlew :back-office-api-sdd:undeploy
+./gradlew :back-office-api-sdd-wf:undeploy
 ```
 
 ### Payara Server全体を停止
@@ -755,7 +755,7 @@ rm -f hsqldb/data/testdb.*
 ./gradlew startHsqldb
 
 # 初期データをセットアップ
-./gradlew :back-office-api-sdd:setupHsqldb
+./gradlew :back-office-api-sdd-wf:setupHsqldb
 ```
 
 ## 📖 参考リンク

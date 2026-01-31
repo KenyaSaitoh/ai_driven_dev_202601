@@ -1,6 +1,6 @@
-# berry-books-api-sdd - データモデル仕様書
+# berry-books-api-sdd-wf - データモデル仕様書
 
-プロジェクトID: berry-books-api-sdd  
+プロジェクトID: berry-books-api-sdd-wf  
 バージョン: 3.0.0  
 最終更新日: 2026-01-10  
 ステータス: サービス分離アーキテクチャ対応完了
@@ -59,13 +59,13 @@ erDiagram
     }
 ```
 
-* 注意: 上記のER図はberry-books-api-sddが管理するテーブルのみを示しています。書籍・在庫・カテゴリ・出版社データはback-office-api-sdd、顧客データはcustomer-hub-apiが管理します。
+* 注意: 上記のER図はberry-books-api-sdd-wfが管理するテーブルのみを示しています。書籍・在庫・カテゴリ・出版社データはback-office-api-sdd-wf、顧客データはcustomer-hub-apiが管理します。
 
 ### 2.2 他のサービスのテーブル構造（参考）
 
-以下は参考情報です。これらのテーブルはberry-books-api-sddでは管理されません。
+以下は参考情報です。これらのテーブルはberry-books-api-sdd-wfでは管理されません。
 
-* back-office-api-sdd管理テーブル:
+* back-office-api-sdd-wf管理テーブル:
 ```mermaid
 erDiagram
     PUBLISHER ||--o{ BOOK : publishes
@@ -311,7 +311,7 @@ erDiagram
 * 主キー: (ORDER_TRAN_ID, ORDER_DETAIL_ID)（複合主キー）
 * 外部キー:
   * ORDER_TRAN_ID → ORDER_TRAN.ORDER_TRAN_ID（サービス内の制約）
-  * BOOK_ID: 外部キー制約なし（書籍データはback-office-api-sddが管理）
+  * BOOK_ID: 外部キー制約なし（書籍データはback-office-api-sdd-wfが管理）
 
 #### 3.7.5 複合主キー
 
@@ -367,7 +367,7 @@ erDiagram
 
 ### 5.1 外部キー制約
 
-#### 5.1.1 berry-books-api-sdd管理テーブル（本サービス）
+#### 5.1.1 berry-books-api-sdd-wf管理テーブル（本サービス）
 
 | 子テーブル | 親テーブル | 外部キー | 動作 |
 |----------|----------|---------|------|
@@ -377,7 +377,7 @@ erDiagram
 
 #### 5.1.2 他のサービス管理テーブル（参考）
 
-* back-office-api-sdd:
+* back-office-api-sdd-wf:
 | 子テーブル | 親テーブル | 外部キー | 動作 |
 |----------|----------|---------|------|
 | BOOK | CATEGORY | CATEGORY_ID | CASCADE |
@@ -411,7 +411,7 @@ erDiagram
 
 ### 6.1 データ削除順序
 
-#### 6.1.1 berry-books-api-sdd管理テーブル
+#### 6.1.1 berry-books-api-sdd-wf管理テーブル
 
 外部キー制約により、以下の順序で削除する必要がある：
 
@@ -420,7 +420,7 @@ erDiagram
 
 #### 6.1.2 他のサービス管理テーブル（参考）
 
-* back-office-api-sdd:
+* back-office-api-sdd-wf:
   1. STOCK
   2. BOOK
   3. CATEGORY

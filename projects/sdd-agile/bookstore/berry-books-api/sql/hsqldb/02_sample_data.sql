@@ -1,4 +1,4 @@
--- berry-books-api-sdd Sample Data
+-- berry-books-api-sdd-agile Sample Data
 -- Database: HSQLDB
 -- Purpose: Sample order data for testing
 

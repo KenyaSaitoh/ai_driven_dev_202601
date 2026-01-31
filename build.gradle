@@ -141,11 +141,11 @@ subprojects {
         
         // JWT and BCrypt dependencies for projects that need authentication
         if (project.name == "berry-books-api" || 
-            project.name == "berry-books-api-sdd" ||
+            project.name == "berry-books-api-sdd-wf" ||
             project.name == "berry-books-api-sdd-agile" ||
             project.name == "berry-books-api-sandbox" ||
             project.name == "back-office-api" ||
-            project.name == "back-office-api-sdd" ||
+            project.name == "back-office-api-sdd-wf" ||
             project.name == "back-office-api-sdd-agile" ||
             project.name == "back-office-api-sandbox") {
             // JWT
@@ -176,15 +176,16 @@ subprojects {
         
         // E2Eテスト: REST Assured（API系プロジェクト用）
         if (project.name == "berry-books-api" || 
-            project.name == "berry-books-api-sdd" ||
+            project.name == "berry-books-api-sdd-wf" ||
             project.name == "berry-books-api-sdd-agile" ||
             project.name == "berry-books-api-sandbox" ||
             project.name == "back-office-api" ||
-            project.name == "back-office-api-sdd" ||
+            project.name == "back-office-api-sdd-wf" ||
             project.name == "back-office-api-sdd-agile" ||
             project.name == "back-office-api-sandbox" ||
             project.name == "customer-hub-api" ||
-            project.name == "customer-hub-api-sandbox") {
+            project.name == "customer-hub-api-sandbox" ||
+            project.name == "customer-hub-api-sdd-wf") {
             testImplementation "io.rest-assured:rest-assured:5.4.0"
             testImplementation "io.rest-assured:json-path:5.4.0"
             testImplementation "io.rest-assured:xml-path:5.4.0"
@@ -550,9 +551,9 @@ subprojects {
 
     // Specification-Driven Development: Clean artifacts while preserving directory structure
     def sddProjects = [
-        "back-office-api-sdd",
-        "berry-books-api-sdd",
-        "jsf-person-sdd",
+        "back-office-api-sdd-wf",
+        "berry-books-api-sdd-wf",
+        "jsf-person-sdd-wf",
         "back-office-api-sdd-agile",
         "berry-books-api-sdd-agile"
     ]
@@ -992,7 +993,7 @@ task cleanupAllSddProjects {
     }
     
     dependsOn subprojects.findAll { 
-        it.name in ["back-office-api-sdd", "berry-books-api-sdd", "jsf-person-sdd",
+        it.name in ["back-office-api-sdd-wf", "berry-books-api-sdd-wf", "jsf-person-sdd-wf",
                     "back-office-api-sdd-agile", "berry-books-api-sdd-agile"]
     }.collect { it.tasks.findByName('cleanSddArtifacts') }.findAll { it != null }
     
@@ -1001,9 +1002,9 @@ task cleanupAllSddProjects {
         println "===================================="
         println "All SDD Projects Cleanup Completed!"
         println "===================================="
-        println "  ✓ back-office-api-sdd (sdd-wf)"
-        println "  ✓ berry-books-api-sdd (sdd-wf)"
-        println "  ✓ jsf-person-sdd (sdd-wf)"
+        println "  ✓ back-office-api-sdd-wf (sdd-wf)"
+        println "  ✓ berry-books-api-sdd-wf (sdd-wf)"
+        println "  ✓ jsf-person-sdd-wf (sdd-wf)"
         println "  ✓ back-office-api-sdd-agile (sdd-agile)"
         println "  ✓ berry-books-api-sdd-agile (sdd-agile)"
         println ""

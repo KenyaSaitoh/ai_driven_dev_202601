@@ -3,7 +3,7 @@
 # 書籍API テストスクリプト
 # ===========================================
 
-API_BASE="http://localhost:8080/berry-books-api-sdd"
+API_BASE="http://localhost:8080/berry-books-api-sdd-wf"
 COOKIES_FILE="cookies_books.txt"
 
 echo "========================================="

@@ -1,4 +1,4 @@
-# berry-books-api-sdd プロジェクト
+# berry-books-api-sdd-wf プロジェクト
 
 ## 📖 概要
 
@@ -49,8 +49,8 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 仕様書を作成してください
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd-wf/bookstore/berry-books-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api-wf/specs/baseline
 ```
 
 * 対話の流れ:
@@ -73,8 +73,8 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 全タスクを分解してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd-wf/bookstore/berry-books-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api-wf/specs/baseline
 ```
 
 * 生成されるファイル: `tasks/*.md`（タスクリスト）
@@ -105,8 +105,8 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 [タスクID]の詳細設計書を作成してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd-wf/bookstore/berry-books-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api-wf/specs/baseline
 * target_type: [tasks/tasks.mdで確認したタスクID]
 ```
 
@@ -118,8 +118,8 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 FUNC_001の詳細設計書を作成してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd-wf/bookstore/berry-books-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api-wf/specs/baseline
 * target_type: FUNC_001_infrastructure
 ```
 
@@ -154,8 +154,8 @@ FUNC_001の詳細設計書を作成してください。
 [タスクID]を実装してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-sdd
-* task_file: projects/sdd-wf/bookstore/berry-books-api-sdd/tasks/[タスクファイル名]
+* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
+* task_file: projects/sdd-wf/bookstore/berry-books-api-wf/tasks/[タスクファイル名]
 ```
 
 使用例（setup）:
@@ -166,8 +166,8 @@ FUNC_001の詳細設計書を作成してください。
 setupを実装してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-sdd
-* task_file: projects/sdd-wf/bookstore/berry-books-api-sdd/tasks/setup.md
+* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
+* task_file: projects/sdd-wf/bookstore/berry-books-api-wf/tasks/setup.md
 * skip_infrastructure: true  # setupタスク専用: DB/APサーバーのインストールをスキップ
 ```
 
@@ -183,8 +183,8 @@ setupを実装してください。
 機能タスクを実装してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-sdd
-* task_file: projects/sdd-wf/bookstore/berry-books-api-sdd/tasks/FUNC_001_xxx.md
+* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
+* task_file: projects/sdd-wf/bookstore/berry-books-api-wf/tasks/FUNC_001_xxx.md
 ```
 
 注意: 実際のタスクファイル名は `tasks/tasks.md` を参照してください
@@ -197,8 +197,8 @@ setupを実装してください。
 FUNC_002を実装してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-sdd
-* task_file: projects/sdd-wf/bookstore/berry-books-api-sdd/tasks/FUNC_002_books.md
+* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
+* task_file: projects/sdd-wf/bookstore/berry-books-api-wf/tasks/FUNC_002_books.md
 ```
 
 注意:
@@ -217,7 +217,7 @@ FUNC_002を実装してください。
 単体テストを実行してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-sdd
+* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
 * target_type: FUNC_002_books
 ```
 
@@ -252,8 +252,8 @@ AIが：
 結合テストを生成してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd-wf/bookstore/berry-books-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api-wf/specs/baseline
 ```
 
 AIが：
@@ -283,8 +283,8 @@ AIが：
 E2Eテストを生成してください。
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd-wf/bookstore/berry-books-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api-wf/specs/baseline
 ```
 
 AIが：
@@ -332,8 +332,8 @@ AIが：
    基本設計の変更を適用してください。
    
    パラメータ:
-   * project_root: projects/sdd-wf/bookstore/berry-books-api-sdd
-   * spec_directory: projects/sdd-wf/bookstore/berry-books-api-sdd/specs/baseline
+   * project_root: projects/sdd-wf/bookstore/berry-books-api-wf
+   * spec_directory: projects/sdd-wf/bookstore/berry-books-api-wf/specs/baseline
    ```
 
 AIが：
@@ -434,7 +434,7 @@ specs/baseline/basic_design/
 ## プロジェクト構成
 
 ```
-berry-books-api-sdd/
+berry-books-api-sdd-wf/
 ├── specs/                          # 仕様書（SDD）
 │   ├── baseline/
 │   │   ├── requirements/           # システム要件
@@ -648,13 +648,13 @@ berry-books-api-sdd/
 
 ```bash
 # 1. データベーステーブルとデータを作成
-./gradlew :berry-books-api-sdd:setupHsqldb
+./gradlew :berry-books-api-sdd-wf:setupHsqldb
 
 # 2. プロジェクトをビルド
-./gradlew :berry-books-api-sdd:war
+./gradlew :berry-books-api-sdd-wf:war
 
 # 3. プロジェクトをデプロイ
-./gradlew :berry-books-api-sdd:deploy
+./gradlew :berry-books-api-sdd-wf:deploy
 ```
 
 > 重要: `setupHsqldb`を実行すると、`src/main/resources/db/schema.sql`と`sample_data.sql`が実行されます。
@@ -663,23 +663,23 @@ berry-books-api-sdd/
 
 ```bash
 # プロジェクトをアンデプロイ
-./gradlew :berry-books-api-sdd:undeploy
+./gradlew :berry-books-api-sdd-wf:undeploy
 ```
 
 ### ⑥ アプリケーション作成・更新のたびに実行
 
 ```bash
 # アプリケーションを再ビルドして再デプロイ
-./gradlew :berry-books-api-sdd:war
-./gradlew :berry-books-api-sdd:deploy
+./gradlew :berry-books-api-sdd-wf:war
+./gradlew :berry-books-api-sdd-wf:deploy
 ```
 
 ## 📍 APIエンドポイント
 
 デプロイ後、以下のベースURLでAPIにアクセスできます：
 
-* ベースURL: http://localhost:8080/berry-books-api-sdd/api
-* ウェルカムページ: http://localhost:8080/berry-books-api-sdd/
+* ベースURL: http://localhost:8080/berry-books-api-sdd-wf/api
+* ウェルカムページ: http://localhost:8080/berry-books-api-sdd-wf/
 
 ## 🔐 JWT認証
 
@@ -727,7 +727,7 @@ customer-hub-api.base-url=http://localhost:8080/customer-hub-api/api/customers
 ### 1. 新規登録
 
 ```bash
-curl -X POST http://localhost:8080/berry-books-api-sdd/api/auth/register \
+curl -X POST http://localhost:8080/berry-books-api-sdd-wf/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "customerName": "山田太郎",
@@ -742,7 +742,7 @@ curl -X POST http://localhost:8080/berry-books-api-sdd/api/auth/register \
 ### 2. ログイン
 
 ```bash
-curl -X POST http://localhost:8080/berry-books-api-sdd/api/auth/login \
+curl -X POST http://localhost:8080/berry-books-api-sdd-wf/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "alice@gmail.com",
@@ -754,26 +754,26 @@ curl -X POST http://localhost:8080/berry-books-api-sdd/api/auth/login \
 ### 3. 全書籍取得
 
 ```bash
-curl -X GET http://localhost:8080/berry-books-api-sdd/api/books
+curl -X GET http://localhost:8080/berry-books-api-sdd-wf/api/books
 ```
 
 ### 4. 書籍検索（カテゴリとキーワード）
 
 ```bash
-curl -X GET "http://localhost:8080/berry-books-api-sdd/api/books/search?categoryId=1&keyword=Java"
+curl -X GET "http://localhost:8080/berry-books-api-sdd-wf/api/books/search?categoryId=1&keyword=Java"
 ```
 
 ### 5. 現在のログインユーザー情報取得
 
 ```bash
-curl -X GET http://localhost:8080/berry-books-api-sdd/api/auth/me \
+curl -X GET http://localhost:8080/berry-books-api-sdd-wf/api/auth/me \
   -b cookies.txt
 ```
 
 ### 6. 注文作成
 
 ```bash
-curl -X POST http://localhost:8080/berry-books-api-sdd/api/orders \
+curl -X POST http://localhost:8080/berry-books-api-sdd-wf/api/orders \
   -H "Content-Type: application/json" \
   -b cookies.txt \
   -d '{
@@ -797,14 +797,14 @@ curl -X POST http://localhost:8080/berry-books-api-sdd/api/orders \
 ### 7. 注文履歴取得
 
 ```bash
-curl -X GET http://localhost:8080/berry-books-api-sdd/api/orders/history \
+curl -X GET http://localhost:8080/berry-books-api-sdd-wf/api/orders/history \
   -b cookies.txt
 ```
 
 ### 8. ログアウト
 
 ```bash
-curl -X POST http://localhost:8080/berry-books-api-sdd/api/auth/logout \
+curl -X POST http://localhost:8080/berry-books-api-sdd-wf/api/auth/logout \
   -b cookies.txt \
   -c cookies.txt
 ```
@@ -818,23 +818,23 @@ curl -X POST http://localhost:8080/berry-books-api-sdd/api/auth/logout \
 #### すべてのテストを実行
 
 ```bash
-./gradlew :berry-books-api-sdd:test
+./gradlew :berry-books-api-sdd-wf:test
 ```
 
 #### 特定のテストクラスを実行
 
 ```bash
 # AddressUtilのテストのみを実行
-./gradlew :berry-books-api-sdd:test --tests "*AddressUtilTest"
+./gradlew :berry-books-api-sdd-wf:test --tests "*AddressUtilTest"
 
 # DeliveryFeeServiceのテストのみを実行
-./gradlew :berry-books-api-sdd:test --tests "*DeliveryFeeServiceTest"
+./gradlew :berry-books-api-sdd-wf:test --tests "*DeliveryFeeServiceTest"
 ```
 
 #### テストの継続的実行（変更検知）
 
 ```bash
-./gradlew :berry-books-api-sdd:test --continuous
+./gradlew :berry-books-api-sdd-wf:test --continuous
 ```
 
 ### テストレポートの確認
@@ -842,7 +842,7 @@ curl -X POST http://localhost:8080/berry-books-api-sdd/api/auth/logout \
 テスト実行後、HTMLレポートが生成されます：
 
 ```
-projects/sdd-wf/bookstore/berry-books-api-sdd/build/reports/tests/test/index.html
+projects/sdd-wf/bookstore/berry-books-api-wf/build/reports/tests/test/index.html
 ```
 
 ブラウザで開くとテスト結果の詳細が確認できます。
@@ -851,10 +851,10 @@ projects/sdd-wf/bookstore/berry-books-api-sdd/build/reports/tests/test/index.htm
 
 ```bash
 # テストカバレッジレポートを生成
-./gradlew :berry-books-api-sdd:jacocoTestReport
+./gradlew :berry-books-api-sdd-wf:jacocoTestReport
 
 # カバレッジレポートの場所
-# projects/sdd-wf/bookstore/berry-books-api-sdd/build/reports/jacoco/test/html/index.html
+# projects/sdd-wf/bookstore/berry-books-api-wf/build/reports/jacoco/test/html/index.html
 ```
 
 ## 📚 アーキテクチャ
@@ -932,7 +932,7 @@ Database (HSQLDB) ← 注文データのみ管理
 ### アプリケーションのアンデプロイ
 
 ```bash
-./gradlew :berry-books-api-sdd:undeploy
+./gradlew :berry-books-api-sdd-wf:undeploy
 ```
 
 ### Payara Server全体を停止
@@ -972,7 +972,7 @@ rm -f hsqldb/data/testdb.*
 ./gradlew startHsqldb
 
 # 初期データをセットアップ
-./gradlew :berry-books-api-sdd:setupHsqldb
+./gradlew :berry-books-api-sdd-wf:setupHsqldb
 ```
 
 ## 📖 参考リンク

@@ -69,6 +69,20 @@ error_exit() {
     exit 1
 }
 
+# ポートがLISTEN中かチェック（起動済みならスキップ用）
+# HSQLDB=9001, Payara admin=4848
+is_port_in_use() {
+    local port=$1
+    if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
+        netstat -ano 2>/dev/null | grep -E ":$port[^0-9]|:\s*$port\s" | grep -q "LISTENING"
+    else
+        (lsof -i ":$port" 2>/dev/null | grep -q LISTEN) || (bash -c "echo >/dev/tcp/127.0.0.1/$port" 2>/dev/null)
+    fi
+}
+
+# 自フォルダの bookstore（sandbox）
+BOOKSTORE_DIR="$PROJECT_ROOT/projects/sandbox/bookstore"
+
 # 開始メッセージ
 echo ""
 log "=============================================="
@@ -87,19 +101,27 @@ echo ""
 
 # ステップ2: HSQLDB サーバーの起動
 log "STEP 2: HSQLDB サーバーを起動..."
-if ! ./gradlew startHsqldb >> "$LOG_FILE" 2>&1; then
-    log_warn "HSQLDB の起動が失敗しましたが、続行します（既に起動中の可能性）"
+if is_port_in_use 9001; then
+    log_warn "HSQLDB は既に起動中のためスキップしました（port 9001）"
 else
-    log "✓ HSQLDB サーバーが起動しました"
+    if ! ./gradlew startHsqldb >> "$LOG_FILE" 2>&1; then
+        log_warn "HSQLDB の起動が失敗しましたが、続行します（既に起動中の可能性）"
+    else
+        log "✓ HSQLDB サーバーが起動しました"
+    fi
 fi
 echo ""
 
 # ステップ3: Payara Server の起動
 log "STEP 3: Payara Server を起動..."
-if ! ./gradlew startPayara >> "$LOG_FILE" 2>&1; then
-    log_warn "Payara Server の起動が失敗しましたが、続行します（既に起動中の可能性）"
+if is_port_in_use 4848; then
+    log_warn "Payara Server は既に起動中のためスキップしました（port 4848）"
 else
-    log "✓ Payara Server が起動しました"
+    if ! ./gradlew startPayara >> "$LOG_FILE" 2>&1; then
+        log_warn "Payara Server の起動が失敗しましたが、続行します（既に起動中の可能性）"
+    else
+        log "✓ Payara Server が起動しました"
+    fi
 fi
 echo ""
 
@@ -170,7 +192,7 @@ echo ""
 
 # ステップ9: back-office-spa のセットアップと起動
 log "STEP 9: back-office-spa のセットアップと起動..."
-cd "$PROJECT_ROOT/projects/sandbox/bookstore/back-office-spa"
+cd "$BOOKSTORE_DIR/back-office-spa"
 log_info "  -> 依存関係をインストール中..."
 if [ ! -d "node_modules" ]; then
     npm install >> "$LOG_FILE" 2>&1 || error_exit "back-office-spa の npm install に失敗"
@@ -185,7 +207,7 @@ echo ""
 
 # ステップ10: customer-hub-spa のセットアップと起動
 log "STEP 10: customer-hub-spa のセットアップと起動..."
-cd "$PROJECT_ROOT/projects/master/bookstore/customer-hub-spa"
+cd "$BOOKSTORE_DIR/customer-hub-spa"
 log_info "  -> 依存関係をインストール中..."
 if [ ! -d "node_modules" ]; then
     npm install >> "$LOG_FILE" 2>&1 || error_exit "customer-hub-spa の npm install に失敗"

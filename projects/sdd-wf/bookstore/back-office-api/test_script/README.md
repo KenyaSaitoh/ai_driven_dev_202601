@@ -33,11 +33,11 @@ test_script/
 ./gradlew startPayara
 
 # 3. データベースのセットアップ（初回のみ）
-./gradlew :back-office-api-sdd:setupHsqldb
+./gradlew :back-office-api-sdd-wf:setupHsqldb
 
 # 4. Back Office APIをデプロイ
-./gradlew :back-office-api-sdd:war
-./gradlew :back-office-api-sdd:deploy
+./gradlew :back-office-api-sdd-wf:war
+./gradlew :back-office-api-sdd-wf:deploy
 ```
 
 ### 🌟 推奨：簡易テスト（Windows Git Bash対応）
@@ -45,7 +45,7 @@ test_script/
 **最も簡単な方法** - 全APIを一度にテスト：
 
 ```bash
-cd projects/sdd-wf/bookstore/back-office-api-sdd/test_script
+cd projects/sdd-wf/bookstore/back-office-api-wf/test_script
 ./simple_test.sh
 ```
 
@@ -59,7 +59,7 @@ cd projects/sdd-wf/bookstore/back-office-api-sdd/test_script
 ### 全APIテストの実行（詳細版）
 
 ```bash
-cd projects/sdd-wf/bookstore/back-office-api-sdd/test_script
+cd projects/sdd-wf/bookstore/back-office-api-wf/test_script
 ./test_all.sh
 ```
 
@@ -203,7 +203,7 @@ cd projects/sdd-wf/bookstore/back-office-api-sdd/test_script
 ### 認証APIをテストする場合
 
 ```bash
-cd projects/sdd-wf/bookstore/back-office-api-sdd/test_script
+cd projects/sdd-wf/bookstore/back-office-api-wf/test_script
 ./test_authen.sh
 ```
 
@@ -227,7 +227,7 @@ cd projects/sdd-wf/bookstore/back-office-api-sdd/test_script
 ### 書籍APIだけをテストする場合
 
 ```bash
-cd projects/sdd-wf/bookstore/back-office-api-sdd/test_script
+cd projects/sdd-wf/bookstore/back-office-api-wf/test_script
 ./test_books.sh
 ```
 
@@ -251,7 +251,7 @@ cd projects/sdd-wf/bookstore/back-office-api-sdd/test_script
 ### ワークフローを作成してテストする場合
 
 ```bash
-cd projects/sdd-wf/bookstore/back-office-api-sdd/test_script
+cd projects/sdd-wf/bookstore/back-office-api-wf/test_script
 ./test_workflow.sh
 ```
 
@@ -277,7 +277,7 @@ cd projects/sdd-wf/bookstore/back-office-api-sdd/test_script
 各スクリプトではデフォルトで以下の設定を使用します：
 
 ```bash
-API_BASE="http://localhost:8080/back-office-api-sdd"
+API_BASE="http://localhost:8080/back-office-api-sdd-wf"
 ```
 
 異なるホスト/ポート/コンテキストパスを使用する場合は、各スクリプトのこの行を編集してください。
@@ -331,11 +331,11 @@ UPDATE_DATA="{
 curl http://localhost:8080/back-office-api/api/books
 
 # データベースを初期化
-./gradlew :back-office-api-sdd:setupHsqldb
+./gradlew :back-office-api-sdd-wf:setupHsqldb
 
 # APIを再デプロイ
-./gradlew :back-office-api-sdd:war
-./gradlew :back-office-api-sdd:deploy
+./gradlew :back-office-api-sdd-wf:war
+./gradlew :back-office-api-sdd-wf:deploy
 ```
 
 ### 在庫更新で楽観ロックエラーが発生する
@@ -382,10 +382,10 @@ APPROVE_DATA='{
 **解決策:**
 ```bash
 # カテゴリ一覧を確認
-curl http://localhost:8080/back-office-api-sdd/api/categories
+curl http://localhost:8080/back-office-api-sdd-wf/api/categories
 
 # 書籍一覧を確認
-curl http://localhost:8080/back-office-api-sdd/api/books
+curl http://localhost:8080/back-office-api-sdd-wf/api/books
 
 # 正しいIDを使用してワークフローを作成
 ```

@@ -62,6 +62,17 @@ error_exit() {
     exit 1
 }
 
+# ポートがLISTEN中かチェック（起動済みならスキップ用）
+# HSQLDB=9001, Payara admin=4848
+is_port_in_use() {
+    local port=$1
+    if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
+        netstat -ano 2>/dev/null | grep -E ":$port[^0-9]|:\s*$port\s" | grep -q "LISTENING"
+    else
+        (lsof -i ":$port" 2>/dev/null | grep -q LISTEN) || (bash -c "echo >/dev/tcp/127.0.0.1/$port" 2>/dev/null)
+    fi
+}
+
 # 開始メッセージ
 echo ""
 log "=============================================="
@@ -71,19 +82,27 @@ echo ""
 
 # ステップ1: HSQLDB サーバーの起動
 log "STEP 1: HSQLDB サーバーを起動..."
-if ! ./gradlew startHsqldb >> "$LOG_FILE" 2>&1; then
-    log_warn "HSQLDB の起動が失敗しましたが、続行します（既に起動中の可能性）"
+if is_port_in_use 9001; then
+    log_warn "HSQLDB は既に起動中のためスキップしました（port 9001）"
 else
-    log "✓ HSQLDB サーバーが起動しました"
+    if ! ./gradlew startHsqldb >> "$LOG_FILE" 2>&1; then
+        log_warn "HSQLDB の起動が失敗しましたが、続行します（既に起動中の可能性）"
+    else
+        log "✓ HSQLDB サーバーが起動しました"
+    fi
 fi
 echo ""
 
 # ステップ2: Payara Server の起動
 log "STEP 2: Payara Server を起動..."
-if ! ./gradlew startPayara >> "$LOG_FILE" 2>&1; then
-    log_warn "Payara Server の起動が失敗しましたが、続行します（既に起動中の可能性）"
+if is_port_in_use 4848; then
+    log_warn "Payara Server は既に起動中のためスキップしました（port 4848）"
 else
-    log "✓ Payara Server が起動しました"
+    if ! ./gradlew startPayara >> "$LOG_FILE" 2>&1; then
+        log_warn "Payara Server の起動が失敗しましたが、続行します（既に起動中の可能性）"
+    else
+        log "✓ Payara Server が起動しました"
+    fi
 fi
 echo ""
 

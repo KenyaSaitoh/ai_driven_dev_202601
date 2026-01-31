@@ -50,6 +50,8 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../../" && pwd)"
 cd "$PROJECT_ROOT"
+# 自フォルダの bookstore（sdd-agile）
+BOOKSTORE_DIR="$PROJECT_ROOT/projects/sdd-agile/bookstore"
 
 # ログディレクトリ
 LOG_DIR="$PROJECT_ROOT/logs"
@@ -143,19 +145,19 @@ if [ "$FULL_REBUILD" = true ]; then
     
     # berry-books-spa
     log_info "  -> berry-books-spa をリビルド中..."
-    cd "$PROJECT_ROOT/projects/master/bookstore/berry-books-spa"
+    cd "$BOOKSTORE_DIR/berry-books-spa"
     rm -rf node_modules package-lock.json
     npm install >> "$LOG_DIR/berry-books-spa_${TIMESTAMP}.log" 2>&1
     
     # back-office-spa
     log_info "  -> back-office-spa をリビルド中..."
-    cd "$PROJECT_ROOT/projects/master/bookstore/back-office-spa"
+    cd "$BOOKSTORE_DIR/back-office-spa"
     rm -rf node_modules package-lock.json
     npm install >> "$LOG_DIR/back-office-spa_${TIMESTAMP}.log" 2>&1
     
     # customer-hub-spa
     log_info "  -> customer-hub-spa をリビルド中..."
-    cd "$PROJECT_ROOT/projects/master/bookstore/customer-hub-spa"
+    cd "$BOOKSTORE_DIR/customer-hub-spa"
     rm -rf node_modules package-lock.json
     npm install >> "$LOG_DIR/customer-hub-spa_${TIMESTAMP}.log" 2>&1
     
@@ -168,13 +170,13 @@ elif [ "$CLEAN_CACHE" = true ]; then
     log "STEP $STEP_NUM: Viteキャッシュをクリア..."
     
     log_info "  -> berry-books-spa のキャッシュをクリア中..."
-    rm -rf "$PROJECT_ROOT/projects/master/bookstore/berry-books-spa/node_modules/.vite"
+    rm -rf "$BOOKSTORE_DIR/berry-books-spa/node_modules/.vite"
     
     log_info "  -> back-office-spa のキャッシュをクリア中..."
-    rm -rf "$PROJECT_ROOT/projects/master/bookstore/back-office-spa/node_modules/.vite"
+    rm -rf "$BOOKSTORE_DIR/back-office-spa/node_modules/.vite"
     
     log_info "  -> customer-hub-spa のキャッシュをクリア中..."
-    rm -rf "$PROJECT_ROOT/projects/master/bookstore/customer-hub-spa/node_modules/.vite"
+    rm -rf "$BOOKSTORE_DIR/customer-hub-spa/node_modules/.vite"
     
     log "✓ キャッシュのクリアが完了しました"
     echo ""
@@ -183,7 +185,7 @@ fi
 
 # berry-books-spa を起動
 log "STEP $STEP_NUM: berry-books-spa を起動..."
-cd "$PROJECT_ROOT/projects/master/bookstore/berry-books-spa"
+cd "$BOOKSTORE_DIR/berry-books-spa"
 nohup npm run dev > "$LOG_DIR/berry-books-spa_${TIMESTAMP}.log" 2>&1 &
 BERRY_SPA_PID=$!
 log "✓ berry-books-spa が起動しました (PID: $BERRY_SPA_PID, PORT: 5173)"
@@ -192,7 +194,7 @@ STEP_NUM=$((STEP_NUM + 1))
 
 # back-office-spa を起動
 log "STEP $STEP_NUM: back-office-spa を起動..."
-cd "$PROJECT_ROOT/projects/master/bookstore/back-office-spa"
+cd "$BOOKSTORE_DIR/back-office-spa"
 nohup npm run dev > "$LOG_DIR/back-office-spa_${TIMESTAMP}.log" 2>&1 &
 BACKOFFICE_SPA_PID=$!
 log "✓ back-office-spa が起動しました (PID: $BACKOFFICE_SPA_PID, PORT: 3001)"
@@ -201,7 +203,7 @@ STEP_NUM=$((STEP_NUM + 1))
 
 # customer-hub-spa を起動
 log "STEP $STEP_NUM: customer-hub-spa を起動..."
-cd "$PROJECT_ROOT/projects/master/bookstore/customer-hub-spa"
+cd "$BOOKSTORE_DIR/customer-hub-spa"
 nohup npm run dev > "$LOG_DIR/customer-hub-spa_${TIMESTAMP}.log" 2>&1 &
 CUSTOMER_SPA_PID=$!
 log "✓ customer-hub-spa が起動しました (PID: $CUSTOMER_SPA_PID, PORT: 3000)"

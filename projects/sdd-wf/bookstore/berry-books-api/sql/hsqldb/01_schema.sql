@@ -1,4 +1,4 @@
--- berry-books-api-sdd Database Schema
+-- berry-books-api-sdd-wf Database Schema
 -- Database: HSQLDB
 -- Purpose: Order management tables only (books/customers managed by other services)
 

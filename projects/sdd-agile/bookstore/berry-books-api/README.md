@@ -1,4 +1,4 @@
-# berry-books-api-sdd プロジェクト（sdd-agile）
+# berry-books-api-sdd-agile プロジェクト（sdd-agile）
 
 ## 📖 概要
 
@@ -52,8 +52,8 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 仕様書を作成してください
 
 パラメータ:
-* project_root: projects/sdd-agile/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd-agile/bookstore/berry-books-api-sdd-agile/specs/baseline
+* project_root: projects/sdd-agile/bookstore/berry-books-api-agile
+* spec_directory: projects/sdd-agile/bookstore/berry-books-api-agile-agile/specs/baseline
 ```
 
 * 対話の流れ:
@@ -76,8 +76,8 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 全タスクを分解してください。
 
 パラメータ:
-* project_root: projects/sdd-agile/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd-agile/bookstore/berry-books-api-sdd-agile/specs/baseline
+* project_root: projects/sdd-agile/bookstore/berry-books-api-agile
+* spec_directory: projects/sdd-agile/bookstore/berry-books-api-agile-agile/specs/baseline
 ```
 
 * 生成されるファイル: `tasks/*.md`（タスクリスト）
@@ -108,8 +108,8 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 [タスクID]の詳細設計書を作成してください。
 
 パラメータ:
-* project_root: projects/sdd-agile/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd-agile/bookstore/berry-books-api-sdd-agile/specs/baseline
+* project_root: projects/sdd-agile/bookstore/berry-books-api-agile
+* spec_directory: projects/sdd-agile/bookstore/berry-books-api-agile-agile/specs/baseline
 * target_type: [tasks/tasks.mdで確認したタスクID]
 ```
 
@@ -121,8 +121,8 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 FUNC_001の詳細設計書を作成してください。
 
 パラメータ:
-* project_root: projects/sdd-agile/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd-agile/bookstore/berry-books-api-sdd-agile/specs/baseline
+* project_root: projects/sdd-agile/bookstore/berry-books-api-agile
+* spec_directory: projects/sdd-agile/bookstore/berry-books-api-agile-agile/specs/baseline
 * target_type: FUNC_001_infrastructure
 ```
 
@@ -157,8 +157,8 @@ FUNC_001の詳細設計書を作成してください。
 [タスクID]を実装してください。
 
 パラメータ:
-* project_root: projects/sdd-agile/bookstore/berry-books-api-sdd
-* task_file: projects/sdd-agile/bookstore/berry-books-api-sdd/tasks/[タスクファイル名]
+* project_root: projects/sdd-agile/bookstore/berry-books-api-agile
+* task_file: projects/sdd-agile/bookstore/berry-books-api-agile/tasks/[タスクファイル名]
 ```
 
 使用例（setup）:
@@ -169,8 +169,8 @@ FUNC_001の詳細設計書を作成してください。
 setupを実装してください。
 
 パラメータ:
-* project_root: projects/sdd-agile/bookstore/berry-books-api-sdd
-* task_file: projects/sdd-agile/bookstore/berry-books-api-sdd/tasks/setup.md
+* project_root: projects/sdd-agile/bookstore/berry-books-api-agile
+* task_file: projects/sdd-agile/bookstore/berry-books-api-agile/tasks/setup.md
 * skip_infrastructure: true  # setupタスク専用: DB/APサーバーのインストールをスキップ
 ```
 
@@ -186,8 +186,8 @@ setupを実装してください。
 機能タスクを実装してください。
 
 パラメータ:
-* project_root: projects/sdd-agile/bookstore/berry-books-api-sdd
-* task_file: projects/sdd-agile/bookstore/berry-books-api-sdd/tasks/FUNC_001_xxx.md
+* project_root: projects/sdd-agile/bookstore/berry-books-api-agile
+* task_file: projects/sdd-agile/bookstore/berry-books-api-agile/tasks/FUNC_001_xxx.md
 ```
 
 注意: 実際のタスクファイル名は `tasks/tasks.md` を参照してください
@@ -200,8 +200,8 @@ setupを実装してください。
 FUNC_002を実装してください。
 
 パラメータ:
-* project_root: projects/sdd-agile/bookstore/berry-books-api-sdd
-* task_file: projects/sdd-agile/bookstore/berry-books-api-sdd/tasks/FUNC_002_books.md
+* project_root: projects/sdd-agile/bookstore/berry-books-api-agile
+* task_file: projects/sdd-agile/bookstore/berry-books-api-agile/tasks/FUNC_002_books.md
 ```
 
 注意:
@@ -220,7 +220,7 @@ FUNC_002を実装してください。
 単体テストを実行してください。
 
 パラメータ:
-* project_root: projects/sdd-agile/bookstore/berry-books-api-sdd
+* project_root: projects/sdd-agile/bookstore/berry-books-api-agile
 * target_type: FUNC_002_books
 ```
 
@@ -255,8 +255,8 @@ AIが：
 結合テストを生成してください。
 
 パラメータ:
-* project_root: projects/sdd-agile/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd-agile/bookstore/berry-books-api-sdd-agile/specs/baseline
+* project_root: projects/sdd-agile/bookstore/berry-books-api-agile
+* spec_directory: projects/sdd-agile/bookstore/berry-books-api-agile-agile/specs/baseline
 ```
 
 AIが：
@@ -286,8 +286,8 @@ AIが：
 E2Eテストを生成してください。
 
 パラメータ:
-* project_root: projects/sdd-agile/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd-agile/bookstore/berry-books-api-sdd-agile/specs/baseline
+* project_root: projects/sdd-agile/bookstore/berry-books-api-agile
+* spec_directory: projects/sdd-agile/bookstore/berry-books-api-agile-agile/specs/baseline
 ```
 
 AIが：
@@ -335,8 +335,8 @@ AIが：
    基本設計の変更を適用してください。
    
    パラメータ:
-   * project_root: projects/sdd-agile/bookstore/berry-books-api-sdd
-   * spec_directory: projects/sdd-agile/bookstore/berry-books-api-sdd-agile/specs/baseline
+   * project_root: projects/sdd-agile/bookstore/berry-books-api-agile
+   * spec_directory: projects/sdd-agile/bookstore/berry-books-api-agile-agile/specs/baseline
    ```
 
 AIが：
@@ -437,7 +437,7 @@ specs/baseline/basic_design/
 ## プロジェクト構成
 
 ```
-berry-books-api-sdd/
+berry-books-api-sdd-agile/
 ├── specs/                          # 仕様書（SDD）
 │   ├── baseline/
 │   │   ├── requirements/           # システム要件
@@ -845,7 +845,7 @@ curl -X POST http://localhost:8080/berry-books-api-sdd-agile/api/auth/logout \
 テスト実行後、HTMLレポートが生成されます：
 
 ```
-projects/sdd-agile/bookstore/berry-books-api-sdd/build/reports/tests/test/index.html
+projects/sdd-agile/bookstore/berry-books-api-agile/build/reports/tests/test/index.html
 ```
 
 ブラウザで開くとテスト結果の詳細が確認できます。
@@ -857,7 +857,7 @@ projects/sdd-agile/bookstore/berry-books-api-sdd/build/reports/tests/test/index.
 ./gradlew :berry-books-api-sdd-agile:jacocoTestReport
 
 # カバレッジレポートの場所
-# projects/sdd-agile/bookstore/berry-books-api-sdd/build/reports/jacoco/test/html/index.html
+# projects/sdd-agile/bookstore/berry-books-api-agile/build/reports/jacoco/test/html/index.html
 ```
 
 ## 📚 アーキテクチャ
