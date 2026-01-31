@@ -3,7 +3,7 @@
 # 認証API テストスクリプト
 # ===========================================
 
-API_BASE="http://localhost:8080/berry-books-api"
+API_BASE="http://localhost:8080/berry-books-api-sdd"
 COOKIES_FILE="cookies_auth.txt"
 
 echo "========================================="
@@ -52,7 +52,7 @@ echo "2️⃣  ログイン"
 echo "-------------------------------------------"
 
 LOGIN_DATA='{
-  "email": "alice@gmail.com",
+  "email": "alice@example.com",
   "password": "password"
 }'
 

@@ -6,8 +6,8 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/_common.sh"
 
-API_BASE="http://localhost:8080/back-office-api"
-COOKIES="cookies_authen.txt"
+API_BASE="http://localhost:8080/back-office-api-sdd"
+COOKIES="cookies_auth.txt"
 
 echo "==========================================="
 echo "  認証API テスト"
@@ -25,7 +25,7 @@ echo "-------------------------------------------"
 
 LOGIN_DATA='{
   "employeeCode": "E00001",
-  "password": "pass001"
+  "password": "password"
 }'
 
 RESPONSE=$(api_post_with_cookie "$API_BASE/api/auth/login" "$LOGIN_DATA" "$COOKIES")
@@ -65,7 +65,7 @@ echo "-------------------------------------------"
 
 INVALID_LOGIN_DATA='{
   "employeeCode": "INVALID",
-  "password": "pass001"
+  "password": "password"
 }'
 
 RESPONSE=$(api_post "$API_BASE/api/auth/login" "$INVALID_LOGIN_DATA")
@@ -114,16 +114,21 @@ echo ""
 echo ""
 
 # ===========================================
-# 4. 現在のログインユーザー情報取得（未実装）
+# 4. 現在のログインユーザー情報取得
 # ===========================================
-echo "4️⃣  現在のログインユーザー情報取得（未実装）"
+echo "4️⃣  現在のログインユーザー情報取得"
 echo "-------------------------------------------"
 
 RESPONSE=$(api_get "$API_BASE/api/auth/me" "$COOKIES")
 HTTP_STATUS=$(extract_http_status "$RESPONSE")
 BODY=$(extract_response_body "$RESPONSE")
 
-if [ "$HTTP_STATUS" == "501" ]; then
+if [ "$HTTP_STATUS" == "200" ]; then
+    print_success "社員情報取得成功 (HTTP $HTTP_STATUS)"
+    echo ""
+    echo "レスポンス:"
+    echo "$BODY"
+elif [ "$HTTP_STATUS" == "501" ]; then
     print_success "501エラー（未実装）が正しく返されました (HTTP $HTTP_STATUS)"
     echo ""
     echo "レスポンス:"
@@ -166,9 +171,9 @@ echo "6️⃣  複数社員でログインテスト"
 echo "-------------------------------------------"
 
 EMPLOYEES=(
-    '{"employeeCode":"E00002","password":"pass002"}'
-    '{"employeeCode":"E00006","password":"pass006"}'
-    '{"employeeCode":"E00009","password":"pass009"}'
+    '{"employeeCode":"E00002","password":"password"}'
+    '{"employeeCode":"E00006","password":"password"}'
+    '{"employeeCode":"E00009","password":"password"}'
 )
 
 for LOGIN_DATA in "${EMPLOYEES[@]}"; do
@@ -202,7 +207,7 @@ print_info "テストされたエンドポイント:"
 echo "   ✓ POST /api/auth/login (成功)"
 echo "   ✓ POST /api/auth/login (失敗 - 存在しない社員)"
 echo "   ✓ POST /api/auth/login (失敗 - 間違ったパスワード)"
-echo "   ✓ GET  /api/auth/me (未実装)"
+echo "   ✓ GET  /api/auth/me"
 echo "   ✓ POST /api/auth/logout"
 echo ""
 

@@ -6,7 +6,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/_common.sh"
 
-API_BASE="http://localhost:8080/back-office-api"
+API_BASE="http://localhost:8080/back-office-api-sdd"
 
 echo "==========================================="
 echo "  書籍API テスト"

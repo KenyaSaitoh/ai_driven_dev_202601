@@ -4,7 +4,7 @@
 # Windows Git Bash対応版
 # ===========================================
 
-API_BASE="http://localhost:8080/berry-books-api"
+API_BASE="http://localhost:8080/berry-books-api-sdd"
 COOKIES="cookies.txt"
 
 echo "========================================="
@@ -23,7 +23,7 @@ echo "-------------------------------------------"
 
 curl -s -X POST "$API_BASE/api/auth/login" \
   -H "Content-Type: application/json" \
-  -d '{"email":"alice@gmail.com","password":"password"}' \
+  -d '{"email":"alice@example.com","password":"password"}' \
   -c $COOKIES \
   -w "\nHTTP Status: %{http_code}\n"
 

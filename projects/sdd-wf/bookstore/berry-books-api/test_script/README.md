@@ -30,11 +30,11 @@ test_script/
 ./gradlew startPayara
 
 # 3. データベースのセットアップ（初回のみ）
-./gradlew :berry-books-api:setupHsqldb
+./gradlew :berry-books-api-sdd:setupHsqldb
 
 # 4. Berry Books APIをデプロイ
-./gradlew :berry-books-api:war
-./gradlew :berry-books-api:deploy
+./gradlew :berry-books-api-sdd:war
+./gradlew :berry-books-api-sdd:deploy
 
 # 5. Customer API（顧客管理）をデプロイ（認証で使用）
 ./gradlew :customer-api:war
@@ -46,23 +46,23 @@ test_script/
 **最も簡単な方法** - 全APIを一度にテスト：
 
 ```bash
-cd projects/master/bookstore/berry-books-api/test_script
+cd projects/sdd-wf/bookstore/berry-books-api-sdd/test_script
 ./simple_test.sh
 ```
 
 このスクリプトは以下をテストします：
-- ログイン
-- 書籍一覧・詳細取得
-- カテゴリフィルタ
-- ユーザー情報取得
-- 注文作成・履歴取得
-- 画像API
-- ログアウト
+* ログイン
+* 書籍一覧・詳細取得
+* カテゴリフィルタ
+* ユーザー情報取得
+* 注文作成・履歴取得
+* 画像API
+* ログアウト
 
 ### 全APIテストの実行（詳細版）
 
 ```bash
-cd projects/master/bookstore/berry-books-api/test_script
+cd projects/sdd-wf/bookstore/berry-books-api-sdd/test_script
 ./test_all.sh
 ```
 
@@ -94,38 +94,38 @@ cd projects/master/bookstore/berry-books-api/test_script
 
 ### 1. test_authen.sh - 認証API
 
-- ✅ ユーザー登録 (`POST /api/auth/register`)
-- ✅ ログイン (`POST /api/auth/login`)
-- ✅ 現在のユーザー情報取得 (`GET /api/auth/me`)
-- ✅ ログアウト (`POST /api/auth/logout`)
-- ✅ ログアウト後のアクセステスト（認証エラー確認）
+* ✅ ユーザー登録 (`POST /api/auth/register`)
+* ✅ ログイン (`POST /api/auth/login`)
+* ✅ 現在のユーザー情報取得 (`GET /api/auth/me`)
+* ✅ ログアウト (`POST /api/auth/logout`)
+* ✅ ログアウト後のアクセステスト（認証エラー確認）
 
 **テストユーザー:**
-- Email: `alice@gmail.com`
-- Password: `password`
+* Email: `alice@example.com`
+* Password: `password`
 
 ### 2. test_books.sh - 書籍API
 
-- ✅ 書籍一覧取得 (`GET /api/books`)
-- ✅ 書籍一覧取得（カテゴリフィルタ付き）(`GET /api/books?categoryId=1`)
-- ✅ 書籍詳細取得 (`GET /api/books/{id}`)
-- ✅ 存在しない書籍IDでのエラーテスト（404確認）
-- ✅ 複数の書籍詳細を連続取得
+* ✅ 書籍一覧取得 (`GET /api/books`)
+* ✅ 書籍一覧取得（カテゴリフィルタ付き）(`GET /api/books?categoryId=1`)
+* ✅ 書籍詳細取得 (`GET /api/books/{id}`)
+* ✅ 存在しない書籍IDでのエラーテスト（404確認）
+* ✅ 複数の書籍詳細を連続取得
 
 ### 3. test_orders.sh - 注文API
 
-- ✅ 注文作成 (`POST /api/orders`)
-- ✅ 注文履歴取得 (`GET /api/orders/history`)
-- ✅ 注文詳細取得 (`GET /api/orders/{id}`)
-- ✅ 存在しない注文IDでのエラーテスト（404確認）
-- ✅ 在庫不足エラーのテスト
+* ✅ 注文作成 (`POST /api/orders`)
+* ✅ 注文履歴取得 (`GET /api/orders/history`)
+* ✅ 注文詳細取得 (`GET /api/orders/{id}`)
+* ✅ 存在しない注文IDでのエラーテスト（404確認）
+* ✅ 在庫不足エラーのテスト
 
 ### 4. test_images.sh - 画像API
 
-- ✅ 書籍表紙画像取得 (`GET /api/images/covers/{bookId}`)
-- ✅ 複数の書籍画像を連続取得
-- ✅ 存在しない書籍IDでのエラーテスト（404確認）
-- ✅ 画像ダウンロードテスト
+* ✅ 書籍表紙画像取得 (`GET /api/images/covers/{bookId}`)
+* ✅ 複数の書籍画像を連続取得
+* ✅ 存在しない書籍IDでのエラーテスト（404確認）
+* ✅ 画像ダウンロードテスト
 
 **注意:** 画像APIは認証不要です。
 
@@ -135,7 +135,7 @@ cd projects/master/bookstore/berry-books-api/test_script
 
 | Email | Password | Customer ID |
 |-------|----------|-------------|
-| alice@gmail.com | password | 1 |
+| alice@example.com | password | 1 |
 | bob@gmail.com | password | 2 |
 | carol@gmail.com | password | 3 |
 
@@ -179,7 +179,7 @@ JWT認証トークンは一時的なCookieファイルに保存され、テス�
 ### 書籍APIだけをテストする場合
 
 ```bash
-cd projects/master/bookstore/berry-books-api/test_script
+cd projects/sdd-wf/bookstore/berry-books-api-sdd/test_script
 ./test_books.sh
 ```
 
@@ -206,7 +206,7 @@ cd projects/master/bookstore/berry-books-api/test_script
 ### 注文を作成してテストする場合
 
 ```bash
-cd projects/master/bookstore/berry-books-api/test_script
+cd projects/sdd-wf/bookstore/berry-books-api-sdd/test_script
 ./test_orders.sh
 ```
 
@@ -225,7 +225,7 @@ cd projects/master/bookstore/berry-books-api/test_script
 各スクリプトの以下の行を編集してください：
 
 ```bash
-LOGIN_DATA='{"email":"alice@gmail.com","password":"password"}'
+LOGIN_DATA='{"email":"alice@example.com","password":"password"}'
 ```
 
 ### API Base URLの変更
@@ -233,15 +233,15 @@ LOGIN_DATA='{"email":"alice@gmail.com","password":"password"}'
 各スクリプトではデフォルトで以下の設定を使用します：
 
 ```bash
-API_BASE="http://localhost:8080/berry-books-api"
+API_BASE="http://localhost:8080/berry-books-api-sdd"
 ```
 
 異なるホスト/ポート/コンテキストパスを使用する場合は、各スクリプトのこの行を編集してください。
 
 **例：**
-- 別のポート: `API_BASE="http://localhost:9090/berry-books-api"`
-- ルートコンテキスト: `API_BASE="http://localhost:8080"`
-- リモートサーバー: `API_BASE="https://example.com/berry-books-api"`
+* 別のポート: `API_BASE="http://localhost:9090/berry-books-api-sdd"`
+* ルートコンテキスト: `API_BASE="http://localhost:8080"`
+* リモートサーバー: `API_BASE="https://example.com/berry-books-api-sdd"`
 
 ### 注文内容のカスタマイズ
 
@@ -263,9 +263,9 @@ ORDER_DATA='{
 ### ログインに失敗する
 
 **原因:**
-- Payara Serverが起動していない
-- Berry Books APIまたはCustomer APIがデプロイされていない
-- データベースにテストユーザーが登録されていない
+* Payara Serverが起動していない
+* Berry Books APIまたはCustomer APIがデプロイされていない
+* データベースにテストユーザーが登録されていない
 
 **解決策:**
 ```bash
@@ -276,18 +276,18 @@ ORDER_DATA='{
 curl http://localhost:8080/customer-api/api/customers/1
 
 # データベースを初期化（テストユーザーを含む）
-./gradlew :berry-books-api:setupHsqldb
+./gradlew :berry-books-api-sdd:setupHsqldb
 
 # APIを再デプロイ
-./gradlew :berry-books-api:deploy
+./gradlew :berry-books-api-sdd:deploy
 ./gradlew :customer-api:deploy
 ```
 
 ### 書籍一覧が取得できない
 
 **原因:**
-- Berry Books APIがデプロイされていない
-- 認証に失敗している
+* Berry Books APIがデプロイされていない
+* 認証に失敗している
 
 **解決策:**
 ```bash
@@ -295,48 +295,48 @@ curl http://localhost:8080/customer-api/api/customers/1
 ./gradlew statusPayara
 
 # Berry Books APIが正常にデプロイされているか確認
-curl http://localhost:8080/berry-books-api/api/books
+curl http://localhost:8080/berry-books-api-sdd/api/books
 
 # APIを再デプロイ
-./gradlew :berry-books-api:war
-./gradlew :berry-books-api:deploy
+./gradlew :berry-books-api-sdd:war
+./gradlew :berry-books-api-sdd:deploy
 ```
 
 ### 画像が取得できない（404エラー）
 
 **原因:**
-- 画像ファイルが配置されていない
+* 画像ファイルが配置されていない
 
 **解決策:**
 
 書籍表紙画像を以下の場所に配置してください：
 
 ```
-projects/master/bookstore/berry-books-api/src/main/webapp/resources/images/covers/
+projects/sdd-wf/bookstore/berry-books-api-sdd/src/main/webapp/resources/images/covers/
 ```
 
 ファイル名の規則：
 ```
 書籍のタイトルをそのままファイル名にする（スペースはアンダースコアに変換）
 
-例:
-- Java_SEディープダイブ.jpg
-- Jakarta_EEによるアーキテクチャ設計.jpg
-- SpringBootでのAPI実践.jpg
+* 例:
+* Java_SEディープダイブ.jpg
+* Jakarta_EEによるアーキテクチャ設計.jpg
+* SpringBootでのAPI実践.jpg
 ```
 
 推奨仕様：
-- 形式: JPG
-- サイズ: 幅400px以上
-- アスペクト比: 2:3 または 3:4
-- ファイルサイズ: 500KB以下
+* 形式: JPG
+* サイズ: 幅400px以上
+* アスペクト比: 2:3 または 3:4
+* ファイルサイズ: 500KB以下
 
 > **Note:** 画像ファイル名は書籍データベースの`BOOK_NAME`カラムの値と一致させる必要があります。
 
 ## 📖 関連ドキュメント
 
-- [Berry Books API README](../README.md)
-- [Customer API README](../../customer-api/README.md)
+* [Berry Books API README](../README.md)
+* [Customer API README](../../customer-api/README.md)
 
 ## 📄 ライセンス
 
