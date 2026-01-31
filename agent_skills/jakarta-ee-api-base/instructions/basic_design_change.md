@@ -12,9 +12,9 @@ change_spec: "ここに変更差分ファイルのパスを入力（省略可）
 
 * 例
 ```yaml
-project_root: "projects/sdd/bookstore/back-office-api-sdd"
-spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline"
-change_spec: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline/basic_design/CHANGES.md"
+project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
+spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
+change_spec: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline/basic_design/CHANGES.md"
 ```
 
 注意

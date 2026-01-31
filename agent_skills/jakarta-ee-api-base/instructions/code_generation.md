@@ -12,15 +12,15 @@ skip_infrastructure: false  # setupタスク専用: trueの場合、インフラ
 
 * 例1: setupタスクの実行
 ```yaml
-project_root: "projects/sdd/bookstore/back-office-api-sdd"
-task_file: "projects/sdd/bookstore/back-office-api-sdd/tasks/setup.md"
+project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
+task_file: "projects/sdd-wf/bookstore/back-office-api-sdd/tasks/setup.md"
 skip_infrastructure: true  # setupタスク実行時のみ有効: DB/APサーバーのインストールをスキップ
 ```
 
 * 例2: 機能タスクの実行
 ```yaml
-project_root: "projects/sdd/bookstore/back-office-api-sdd"
-task_file: "projects/sdd/bookstore/back-office-api-sdd/tasks/FUNC_002_books.md"
+project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
+task_file: "projects/sdd-wf/bookstore/back-office-api-sdd/tasks/FUNC_002_books.md"
 skip_infrastructure: false  # 機能タスクではこのパラメータは無視される
 ```
 

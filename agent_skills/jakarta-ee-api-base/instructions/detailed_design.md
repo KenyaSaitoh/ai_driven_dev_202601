@@ -12,15 +12,15 @@ target_type: "FUNC_XXX_xxx"
 
 * 例1: FUNC_001の詳細設計
 ```yaml
-project_root: "projects/sdd/bookstore/back-office-api-sdd"
-spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline"
+project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
+spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
 target_type: "FUNC_001_auth"
 ```
 
 * 例2: 別の機能の詳細設計
 ```yaml
-project_root: "projects/sdd/bookstore/back-office-api-sdd"
-spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline"
+project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
+spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
 target_type: "FUNC_002_books"
 ```
 

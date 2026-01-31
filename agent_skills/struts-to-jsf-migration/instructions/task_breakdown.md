@@ -12,9 +12,9 @@ output_directory: "ここにタスク出力先のパスを入力（オプショ�
 
 * 例
 ```yaml
-project_root: "projects/sdd/person/jsf-person-sdd"
-spec_directory: "projects/sdd/person/jsf-person-sdd/specs"
-output_directory: "projects/sdd/person/jsf-person-sdd/tasks"
+project_root: "projects/sdd-wf/person/jsf-person-sdd"
+spec_directory: "projects/sdd-wf/person/jsf-person-sdd/specs"
+output_directory: "projects/sdd-wf/person/jsf-person-sdd/tasks"
 ```
 
 注意

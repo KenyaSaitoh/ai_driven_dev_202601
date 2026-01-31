@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="3.0"
+    xmlns="https://jakarta.ee/xml/ns/persistence"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
+                        https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+    
+    <persistence-unit name="bookstorePU" transaction-type="JTA">
+        <jta-data-source>jdbc/HsqldbDS</jta-data-source>
+        
+        <!-- エンティティクラスは自動スキャンされます -->
+        
+        <properties>
+            <!-- EclipseLink固有の設定 -->
+            <property name="eclipselink.target-database" value="org.eclipse.persistence.platform.database.HSQLPlatform"/>
+            <property name="eclipselink.logging.level" value="FINE"/>
+            
+            <!-- HSQLDB SA user credentials (no password) -->
+            <property name="eclipselink.jdbc.user" value="SA"/>
+            <property name="eclipselink.jdbc.password" value=""/>
+        </properties>
+    </persistence-unit>
+</persistence>

@@ -1,0 +1,306 @@
+openapi: 3.0.3
+info:
+  title: Books Stock API - 書籍API
+  description: |
+    バックオフィス書籍在庫管理システムの書籍API仕様
+    
+    書籍マスタ情報の参照機能を提供する。書籍一覧取得、詳細取得、検索機能（カテゴリ・キーワード）を含む。
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:8080/api
+    description: 開発環境
+  - url: https://api.example.com/api
+    description: 本番環境
+
+tags:
+  - name: books
+    description: 書籍操作
+
+paths:
+  /books:
+    get:
+      tags:
+        - books
+      summary: 書籍一覧取得
+      description: すべての書籍情報（在庫情報含む）を取得する
+      operationId: getAllBooks
+      responses:
+        '200':
+          description: 書籍一覧取得成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookDetail'
+        '500':
+          description: サーバー内部エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /books/{id}:
+    get:
+      tags:
+        - books
+      summary: 書籍詳細取得
+      description: 指定された書籍IDの詳細情報を取得する
+      operationId: getBookById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 書籍ID
+          schema:
+            type: integer
+            format: int32
+            example: 1
+      responses:
+        '200':
+          description: 書籍詳細取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookDetail'
+        '404':
+          description: 書籍が見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: サーバー内部エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /books/search:
+    get:
+      tags:
+        - books
+      summary: 書籍検索（デフォルト）
+      description: カテゴリIDまたはキーワードで書籍を検索する（内部的にJPQLを使用）
+      operationId: searchBooks
+      parameters:
+        - name: categoryId
+          in: query
+          description: カテゴリID
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 1
+        - name: keyword
+          in: query
+          description: 検索キーワード（書籍名または著者名）
+          required: false
+          schema:
+            type: string
+            example: サンプル
+      responses:
+        '200':
+          description: 検索成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookDetail'
+        '500':
+          description: サーバー内部エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /books/search/jpql:
+    get:
+      tags:
+        - books
+      summary: 書籍検索（JPQL）
+      description: JPQLを使用してカテゴリIDまたはキーワードで書籍を検索する
+      operationId: searchBooksJpql
+      parameters:
+        - name: categoryId
+          in: query
+          description: カテゴリID
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 1
+        - name: keyword
+          in: query
+          description: 検索キーワード（書籍名または著者名）
+          required: false
+          schema:
+            type: string
+            example: サンプル
+      responses:
+        '200':
+          description: 検索成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookDetail'
+        '500':
+          description: サーバー内部エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /books/search/criteria:
+    get:
+      tags:
+        - books
+      summary: 書籍検索（Criteria API）
+      description: Criteria APIを使用してカテゴリIDまたはキーワードで書籍を検索する
+      operationId: searchBooksCriteria
+      parameters:
+        - name: categoryId
+          in: query
+          description: カテゴリID
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 1
+        - name: keyword
+          in: query
+          description: 検索キーワード（書籍名または著者名）
+          required: false
+          schema:
+            type: string
+            example: サンプル
+      responses:
+        '200':
+          description: 検索成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookDetail'
+        '500':
+          description: サーバー内部エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /books/categories:
+    get:
+      tags:
+        - books
+      summary: カテゴリ一覧取得（書籍API経由）
+      description: カテゴリ名をキー、カテゴリIDを値とするマップ形式で取得する
+      operationId: getCategoriesMap
+      responses:
+        '200':
+          description: カテゴリ一覧取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                example:
+                  文学: 1
+                  ビジネス: 2
+                  技術: 3
+        '500':
+          description: サーバー内部エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    BookDetail:
+      type: object
+      properties:
+        bookId:
+          type: integer
+          format: int32
+          description: 書籍ID
+          example: 1
+        bookName:
+          type: string
+          description: 書籍名
+          example: サンプル書籍
+        author:
+          type: string
+          description: 著者名
+          example: 著者名
+        price:
+          type: number
+          format: double
+          description: 価格（円）
+          example: 2500
+        imageUrl:
+          type: string
+          format: uri
+          description: 画像URL
+          example: http://example.com/image.jpg
+        quantity:
+          type: integer
+          format: int32
+          description: 在庫数
+          example: 10
+        version:
+          type: integer
+          format: int64
+          description: バージョン（楽観的ロック用）
+          example: 1
+        category:
+          $ref: '#/components/schemas/CategoryInfo'
+        publisher:
+          $ref: '#/components/schemas/PublisherInfo'
+
+    CategoryInfo:
+      type: object
+      properties:
+        categoryId:
+          type: integer
+          format: int32
+          description: カテゴリID
+          example: 1
+        categoryName:
+          type: string
+          description: カテゴリ名
+          example: 文学
+
+    PublisherInfo:
+      type: object
+      properties:
+        publisherId:
+          type: integer
+          format: int32
+          description: 出版社ID
+          example: 1
+        publisherName:
+          type: string
+          description: 出版社名
+          example: 出版社A
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: エラータイプ
+          example: NotFound
+        message:
+          type: string
+          description: エラーメッセージ（日本語）
+          example: 書籍が見つかりません

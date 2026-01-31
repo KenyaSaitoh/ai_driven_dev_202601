@@ -12,11 +12,11 @@ Jakarta EE 10とReactを使用したフルスタックWebアプリケーショ�
 
 **Bookstoreドメイン**のフルスタックプロジェクトから始めることをお勧めします：
    
-- **REST API**（バックエンド）: `berry-books-api`、`back-office-api`、`customer-hub-api`
-- **SPA**（フロントエンド）: `berry-books-spa`、`back-office-spa`、`customer-hub-spa`（master/bookstoreのみ）
-- **Desktop**（Swing）: `customer-hub-swing`
+- **REST API**（バックエンド）: `berry-books-api`、`back-office-api`、`customer-hub-api`（master）/ `-sandbox` 付き（sandbox）
+- **SPA**（フロントエンド）: `berry-books-spa`、`back-office-spa`、`customer-hub-spa`（master/bookstore または sandbox/bookstore）
+- **Desktop**（Swing）: `customer-hub-swing`（master のみ）
    
-詳細は [projects/master/bookstore/README.md](projects/master/bookstore/README.md) を参照してください。
+詳細は [projects/master/bookstore/README.md](projects/master/bookstore/README.md) または [projects/sandbox/bookstore/README.md](projects/sandbox/bookstore/README.md) を参照してください。
 
 ## ⚡ クイックスタート: Bookstore フルスタック自動起動
 
@@ -38,11 +38,19 @@ Bookstoreドメインの全アプリケーション（バックエンドAPI 3つ
 
 ### 🚀 実行方法
 
+**master（模範解答）で起動する場合:**
 ```bash
 # Git Bashで実行（プロジェクトルートから）
 cd projects/master/bookstore
 ./run-bookstore-all.sh
 ```
+
+**sandbox（トライアル用）で起動する場合:**
+```bash
+cd projects/sandbox/bookstore
+./run-bookstore-all.sh
+```
+※ sandbox では API のコンテキストルートが `-sandbox` 付き（例: `/berry-books-api-sandbox`）になります。
 
 ### ✨ 特徴
 
@@ -68,48 +76,68 @@ kill <PID1> <PID2> <PID3>
 
 > **Note**: 個別のアプリケーションのみを起動したい場合は、後述の「セットアップとコマンド実行ガイド」を参照してください。
 > 
-> **Note**: SPAのみを再起動したい場合は、`projects/master/bookstore/run-bookstore-spa.sh` を使用してください。
+> **Note**: SPAのみを再起動したい場合は、`projects/master/bookstore/run-bookstore-spa.sh` または `projects/sandbox/bookstore/run-bookstore-spa.sh` を使用してください。
 
 ## 📁 プロジェクト構成
 
 このリポジトリは複数の技術スタックを含むマルチプロジェクト構成です。
-プロジェクトは以下の2つのカテゴリに分類されています。
+プロジェクトは以下の4つのカテゴリに分類されています。
 
 > **Note**: このREADMEでは、環境全体のセットアップと基本的なコマンドを説明します。個別のプロジェクトについては、各ドメインフォルダやプロジェクトのREADME.mdを参照してください（例：[projects/master/bookstore/README.md](projects/master/bookstore/README.md)）。
 
 ### プロジェクトカテゴリ
 
-1. **master/** - 完成版プロジェクト（参照用）
-   - 動作確認済みの完成版コード
+1. **master/** - 完成版プロジェクト（模範解答・参照用）
+   - 動作確認済みの完成版コード。**これ以上手を入れない想定**
    - 学習のリファレンス実装として利用
 
-2. **sdd/** - 仕様駆動開発（Specification-Driven Development）プロジェクト（研修用）
-   - 仕様書からコードを生成する手法を学習
+2. **sandbox/** - トライアル用プロジェクト（プロンプトエンジニアリング等）
+   - master からコピーした完成版。様々なプロンプトエンジニアリングを試すサンドボックス
+   - 自由に改変・試行可能（Gradle プロジェクト名は `-sandbox` 付き）
+
+3. **sdd-wf/** - 仕様駆動開発（ウォーターフォール）プロジェクト（研修用）
+   - 仕様書→タスク分解→詳細設計→実装の順で進める手法を学習
    - AIを活用した段階的な実装プロセスを体験
+
+4. **sdd-agile/** - 仕様駆動開発（アジャイル）プロジェクト（研修用）
+   - 書店ドメイン（bookstore）をイテレーション単位で仕様駆動開発
+   - sdd-wf の bookstore をコピーした構成で、アジャイル向けの進め方を学習
 
 ### ディレクトリ構造
 
 ```
 ai_driven_dev_202601/
 ├── projects/
-│   ├── master/                                      # 完成版プロジェクト（参照用）
+│   ├── master/                                      # 完成版（模範解答・手を入れない想定）
 │   │   ├── bookstore/                               # 書店ドメイン
 │   │   │   ├── berry-books-api/                     # REST API: 注文管理【完成版】
-│   │   │   ├── berry-books-spa/                     # SPA: 注文管理フロントエンド (React+TS)【完成版】
+│   │   │   ├── berry-books-spa/                     # SPA: 注文管理 (React+TS)【完成版】
 │   │   │   ├── back-office-api/                     # REST API: 書籍・在庫管理【完成版】
-│   │   │   ├── back-office-spa/                     # SPA: 書籍管理フロントエンド (React+TS)【完成版】
+│   │   │   ├── back-office-spa/                     # SPA: 書籍管理 (React+TS)【完成版】
 │   │   │   ├── customer-hub-api/                    # REST API: 顧客管理【完成版】
-│   │   │   ├── customer-hub-spa/                    # SPA: 顧客管理フロントエンド (React+TS)【完成版】
+│   │   │   ├── customer-hub-spa/                    # SPA: 顧客管理 (React+TS)【完成版】
 │   │   │   └── customer-hub-swing/                  # Desktop: 顧客管理 (Swing)【完成版】
 │   │   └── person/                                  # 人物管理ドメイン
 │   │       ├── jsf-person/                          # Person管理（JSF + JPA）【完成版】
 │   │       └── struts-person/                       # Person管理（Struts 1.3 + EJB）【完成版】
-│   └── sdd/                                         # 仕様駆動開発（SDD）プロジェクト（研修用）
-│       ├── bookstore/                               # 書店ドメイン
-│       │   ├── berry-books-api-sdd/                 # REST API: 注文管理（SDD研修用）
-│       │   └── back-office-api-sdd/                 # REST API: 書籍・在庫管理（SDD研修用）
-│       └── person/                                  # 人物管理ドメイン
-│           └── jsf-person-sdd/                      # Person管理（JSF + JPA, SDD研修用）
+│   ├── sandbox/                                     # トライアル用（プロンプトエンジニアリング等）
+│   │   └── bookstore/                               # 書店ドメイン（master からコピー）
+│   │       ├── berry-books-api/                      # REST API: 注文管理（-sandbox でビルド）
+│   │       ├── berry-books-spa/                     # SPA: 注文管理
+│   │       ├── back-office-api/                     # REST API: 書籍・在庫管理（-sandbox でビルド）
+│   │       ├── back-office-spa/                     # SPA: 書籍管理
+│   │       ├── customer-hub-api/                    # REST API: 顧客管理（-sandbox でビルド）
+│   │       └── customer-hub-spa/                    # SPA: 顧客管理
+│   ├── sdd-wf/                                      # 仕様駆動開発（ウォーターフォール）研修用
+│   │   ├── bookstore/                               # 書店ドメイン
+│   │   │   ├── berry-books-api-sdd/                 # REST API: 注文管理（SDD研修用）
+│   │   │   └── back-office-api-sdd/                 # REST API: 書籍・在庫管理（SDD研修用）
+│   │   └── person/                                  # 人物管理ドメイン
+│   │       └── jsf-person-sdd/                      # Person管理（JSF + JPA, SDD研修用）
+│   └── sdd-agile/                                   # 仕様駆動開発（アジャイル）研修用
+│       └── bookstore/                               # 書店ドメイン
+│           ├── berry-books-api-sdd/                 # REST API: 注文管理（SDDアジャイル用）
+│           └── back-office-api-sdd/                 # REST API: 書籍・在庫管理（SDDアジャイル用）
 │
 ├── struts-to-jsf-person-sdd/                        # マイグレーションプロジェクト（Struts → JSF）
 │
@@ -157,7 +185,7 @@ ai_driven_dev_202601/
 chmod +x gradlew
 chmod +x payara6/bin/*
 chmod +x projects/master/accounting/accounting_etl/*.sh
-chmod +x projects/sdd/accounting/accounting_etl_sdd/*.sh
+chmod +x projects/sdd-wf/accounting/accounting_etl_sdd/*.sh
 ```
 
 > **Note**: このステップはmacOS/Linuxのみ必要です。Windowsでは不要です。
@@ -204,11 +232,13 @@ chmod +x projects/sdd/accounting/accounting_etl_sdd/*.sh
 
 #### フロントエンド（SPA）
 
-> **Note**: SPAプロジェクトは現在 `master/bookstore` ディレクトリにのみ存在します。
+> **Note**: SPAプロジェクトは `master/bookstore` および `sandbox/bookstore` にあります。
 
 ```bash
-# SPAプロジェクトディレクトリに移動
+# SPAプロジェクトディレクトリに移動（master または sandbox）
 cd projects/master/bookstore/<spa-project-name>
+# または
+cd projects/sandbox/bookstore/<spa-project-name>
 
 # 依存関係をインストール（初回のみ）
 npm install
@@ -217,7 +247,7 @@ npm install
 npm run dev
 ```
 
-> **Note**: 具体的なコマンドについては、各ドメインのREADME.mdを参照してください（例：[projects/master/bookstore/README.md](projects/master/bookstore/README.md)）。
+> **Note**: 具体的なコマンドについては、各ドメインのREADME.mdを参照してください（例：[projects/master/bookstore/README.md](projects/master/bookstore/README.md)、[projects/sandbox/bookstore/README.md](projects/sandbox/bookstore/README.md)）。
 
 ### ⑥ プロジェクトを終了する
 
@@ -247,7 +277,7 @@ npm run dev
 
 ## 🧹 仕様駆動開発（SDD）プロジェクトの成果物クリーンアップ
 
-SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-sdd）は、仕様駆動開発により何度でも再実装できます。
+SDDプロジェクト（sdd-wf / sdd-agile）は、仕様駆動開発により何度でも再実装できます。
 
 成果物は3タイプに分けてクリーンアップできます。要件定義・基本設計SPEC（specs/*/requirements/、specs/*/basic_design/）は絶対に削除されません。
 
@@ -255,10 +285,17 @@ SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-s
 
 タスク分解の結果（tasks/）の中身を削除します。フォルダ自体は空のまま残ります。
 
+**sdd-wf（ウォーターフォール）:**
 ```bash
 ./gradlew :berry-books-api-sdd:cleanTasks
 ./gradlew :back-office-api-sdd:cleanTasks
 ./gradlew :jsf-person-sdd:cleanTasks
+```
+
+**sdd-agile（アジャイル）:**
+```bash
+./gradlew :berry-books-api-sdd-agile:cleanTasks
+./gradlew :back-office-api-sdd-agile:cleanTasks
 ```
 
 削除されるもの: `tasks/`の中身（フォルダは空のまま残る）
@@ -268,11 +305,8 @@ SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-s
 
 詳細設計SPEC（specs/*/detailed_design/）の中身を削除します。フォルダ自体は空のまま残ります。
 
-```bash
-./gradlew :berry-books-api-sdd:cleanDetailedDesign
-./gradlew :back-office-api-sdd:cleanDetailedDesign
-./gradlew :jsf-person-sdd:cleanDetailedDesign
-```
+**sdd-wf:** `./gradlew :berry-books-api-sdd:cleanDetailedDesign` など  
+**sdd-agile:** `./gradlew :berry-books-api-sdd-agile:cleanDetailedDesign` など
 
 削除されるもの: `specs/*/detailed_design/`の中身（フォルダは空のまま残る）
 保持されるもの: `specs/*/basic_design/`, `tasks/`, `src/`
@@ -281,11 +315,8 @@ SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-s
 
 生成された実装コード（src/、build/）を削除します。ディレクトリ構造は空のまま保持されます。
 
-```bash
-./gradlew :berry-books-api-sdd:cleanCode
-./gradlew :back-office-api-sdd:cleanCode
-./gradlew :jsf-person-sdd:cleanCode
-```
+**sdd-wf:** `./gradlew :berry-books-api-sdd:cleanCode` など  
+**sdd-agile:** `./gradlew :berry-books-api-sdd-agile:cleanCode` など
 
 削除されるもの: `src/main/`配下の内容、`src/test/`配下の内容、`build/`
 保持されるもの: `specs/*/requirements/`, `specs/*/basic_design/`, `specs/*/detailed_design/`, `tasks/`, `src/`のディレクトリ構造（.gitkeep付き）
@@ -294,20 +325,19 @@ SDDプロジェクト（berry-books-api-sdd、back-office-api-sdd、jsf-person-s
 
 タスク、詳細設計SPEC、実装コードをすべて削除します。
 
-```bash
-./gradlew :berry-books-api-sdd:cleanAllSdd
-./gradlew :back-office-api-sdd:cleanAllSdd
-./gradlew :jsf-person-sdd:cleanAllSdd
-```
+**sdd-wf:** `./gradlew :berry-books-api-sdd:cleanAllSdd` など  
+**sdd-agile:** `./gradlew :berry-books-api-sdd-agile:cleanAllSdd` など  
+
+**全SDDプロジェクトを一括クリーン:** `./gradlew cleanupAllSddProjects`
 
 削除されるもの: `tasks/`の中身、`specs/*/detailed_design/`の中身、`src/`配下の内容、`build/`
 保持されるもの: `specs/*/requirements/`, `specs/*/basic_design/` （要件定義・基本設計SPECは絶対に削除されない）
 空のまま残るフォルダ: `tasks/`, `specs/*/detailed_design/`, `src/`のディレクトリ構造（.gitkeep付き）
 
 詳細は各プロジェクトのREADME.mdを参照してください：
-- [projects/sdd/bookstore/berry-books-api-sdd/README.md](projects/sdd/bookstore/berry-books-api-sdd/README.md)
-- [projects/sdd/bookstore/back-office-api-sdd/README.md](projects/sdd/bookstore/back-office-api-sdd/README.md)
-- [projects/sdd/person/jsf-person-sdd/README.md](projects/sdd/person/jsf-person-sdd/README.md)
+
+- **sdd-wf:** [berry-books-api-sdd](projects/sdd-wf/bookstore/berry-books-api-sdd/README.md) / [back-office-api-sdd](projects/sdd-wf/bookstore/back-office-api-sdd/README.md) / [jsf-person-sdd](projects/sdd-wf/person/jsf-person-sdd/README.md)
+- **sdd-agile:** [berry-books-api-sdd](projects/sdd-agile/bookstore/berry-books-api-sdd/README.md) / [back-office-api-sdd](projects/sdd-agile/bookstore/back-office-api-sdd/README.md)
 
 ---
 

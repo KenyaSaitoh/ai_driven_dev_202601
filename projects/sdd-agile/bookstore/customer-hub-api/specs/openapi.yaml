@@ -1,0 +1,368 @@
+openapi: 3.0.3
+info:
+  title: Berry Books Customer API
+  description: |
+    Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用した顧客マスタ管理APIです。
+    顧客情報（CUSTOMER テーブル）のみを管理します。
+    
+    ## 主な機能
+    - 顧客情報の取得
+    - 顧客の新規登録・更新・削除
+    - 顧客検索（メールアドレス、誕生日）
+    
+    ## 責務
+    このAPIは顧客マスタの管理に特化しており、注文情報は管理しません。
+    注文情報はアプリケーション層（berry-books-mvc等）が管理します。
+    
+    ## 技術スタック
+    - Jakarta EE 10
+    - JAX-RS 3.1
+    - JPA 3.1
+    - JSON-B 3.0
+    - Payara Server 6
+    - HSQLDB 2.7.x
+  version: 2.0.0
+  contact:
+    name: Berry Books Development Team
+  license:
+    name: Educational Use Only
+
+servers:
+  - url: http://localhost:8080/berry-books-rest
+    description: ローカル開発サーバー
+
+tags:
+  - name: customers
+    description: 顧客管理API
+
+paths:
+  /customers/:
+    get:
+      tags:
+        - customers
+      summary: 全顧客を取得
+      description: |
+        全顧客の基本情報を取得します。
+      operationId: getAllCustomers
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerTO'
+              example:
+                - customerId: 1
+                  customerName: Alice Johnson
+                  email: alice@gmail.com
+                  birthday: "1990-05-15"
+                  address: 123 Main St, Springfield
+                - customerId: 2
+                  customerName: Bob Smith
+                  email: bob@gmail.com
+                  birthday: "1985-08-22"
+                  address: 456 Oak Ave, Shelbyville
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    post:
+      tags:
+        - customers
+      summary: 顧客を新規登録
+      description: |
+        新しい顧客を登録します。
+        注意：パスワードは別途設定が必要です。現在のAPIではパスワードフィールドは含まれていません。
+      operationId: createCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerTO'
+            example:
+              customerName: 山田太郎
+              email: yamada@example.com
+              birthday: "1990-01-01"
+              address: 東京都渋谷区
+      responses:
+        '200':
+          description: 成功（登録された顧客情報を返却）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerTO'
+              example:
+                customerId: 3
+                customerName: 山田太郎
+                email: yamada@example.com
+                birthday: "1990-01-01"
+                address: 東京都渋谷区
+        '409':
+          $ref: '#/components/responses/CustomerExists'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /customers/{customerId}:
+    get:
+      tags:
+        - customers
+      summary: 顧客を取得（主キー検索）
+      description: 顧客IDを指定して、顧客の基本情報を取得します。
+      operationId: getCustomerById
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: 顧客ID
+          schema:
+            type: integer
+            format: int32
+          example: 1
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerTO'
+              example:
+                customerId: 1
+                customerName: Alice Johnson
+                email: alice@gmail.com
+                birthday: "1990-05-15"
+                address: 123 Main St, Springfield
+        '404':
+          $ref: '#/components/responses/CustomerNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    put:
+      tags:
+        - customers
+      summary: 顧客を更新
+      description: |
+        指定した顧客IDの顧客情報を更新します。
+        リクエストボディの情報で既存の顧客情報を置換します。
+      operationId: updateCustomer
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: 顧客ID
+          schema:
+            type: integer
+            format: int32
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerTO'
+            example:
+              customerName: 山田太郎
+              email: yamada@example.com
+              birthday: "1990-01-01"
+              address: 大阪府大阪市
+      responses:
+        '200':
+          description: 成功
+        '404':
+          $ref: '#/components/responses/CustomerNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    delete:
+      tags:
+        - customers
+      summary: 顧客を削除
+      description: 指定した顧客IDの顧客を削除します。
+      operationId: deleteCustomer
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: 顧客ID
+          schema:
+            type: integer
+            format: int32
+          example: 1
+      responses:
+        '200':
+          description: 成功
+        '404':
+          $ref: '#/components/responses/CustomerNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /customers/query_email:
+    get:
+      tags:
+        - customers
+      summary: 顧客を取得（メールアドレス検索）
+      description: |
+        メールアドレスを指定して、顧客の基本情報を取得します。
+        メールアドレスは一意キーとして扱われます。
+      operationId: getCustomerByEmail
+      parameters:
+        - name: email
+          in: query
+          required: true
+          description: メールアドレス
+          schema:
+            type: string
+            format: email
+          example: alice@gmail.com
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerTO'
+              example:
+                customerId: 1
+                customerName: Alice Johnson
+                email: alice@gmail.com
+                birthday: "1990-05-15"
+                address: 123 Main St, Springfield
+        '404':
+          $ref: '#/components/responses/CustomerNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /customers/query_birthday:
+    get:
+      tags:
+        - customers
+      summary: 顧客リストを取得（誕生日検索）
+      description: |
+        指定した誕生日以降の顧客リストを取得します。
+        誕生日はISO 8601形式（YYYY-MM-DD）で指定します。
+      operationId: getCustomersByBirthday
+      parameters:
+        - name: birthday
+          in: query
+          required: true
+          description: 誕生日（ISO 8601形式：YYYY-MM-DD）
+          schema:
+            type: string
+            format: date
+          example: "1990-01-01"
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerTO'
+              example:
+                - customerId: 1
+                  customerName: Alice Johnson
+                  email: alice@gmail.com
+                  birthday: "1990-05-15"
+                  address: 123 Main St, Springfield
+                - customerId: 3
+                  customerName: Charlie Brown
+                  email: charlie@gmail.com
+                  birthday: "1992-03-10"
+                  address: 789 Pine Rd, Capital City
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    CustomerTO:
+      type: object
+      description: |
+        顧客の基本情報を表すデータ転送オブジェクト。
+        セキュリティのため、パスワード情報は含まれません。
+      required:
+        - customerName
+        - email
+        - birthday
+        - address
+      properties:
+        customerId:
+          type: integer
+          format: int32
+          description: 顧客ID（新規登録時は不要、レスポンスには含まれる）
+          example: 1
+        customerName:
+          type: string
+          description: 顧客名
+          minLength: 1
+          maxLength: 100
+          example: Alice Johnson
+        email:
+          type: string
+          format: email
+          description: メールアドレス（一意キー）
+          example: alice@gmail.com
+        birthday:
+          type: string
+          format: date
+          description: 生年月日（ISO 8601形式：YYYY-MM-DD）
+          example: "1990-05-15"
+        address:
+          type: string
+          description: 住所
+          minLength: 1
+          maxLength: 500
+          example: 123 Main St, Springfield
+    
+    ErrorResponse:
+      type: object
+      description: エラーレスポンスを表すデータ転送オブジェクト。
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: |
+            エラーコード
+            - customer.not-found: 顧客が見つからない
+            - customer.exists: 顧客が既に存在する
+            - internal.error: 内部サーバーエラー
+          example: customer.not-found
+        message:
+          type: string
+          description: エラーメッセージ（日本語）
+          example: 指定されたメールアドレスは存在しません
+
+  responses:
+    CustomerNotFound:
+      description: 顧客が見つかりません
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: customer.not-found
+            message: 指定された顧客は存在しません
+    
+    CustomerExists:
+      description: 顧客が既に存在します
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: customer.exists
+            message: 指定されたメールアドレスは既に登録されています
+    
+    InternalServerError:
+      description: 内部サーバーエラー
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: internal.error
+            message: 予期しないエラーが発生しました
+

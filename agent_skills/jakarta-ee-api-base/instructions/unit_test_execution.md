@@ -54,13 +54,13 @@ jacoco_json: null
 
 例1: 最小限
 ```yaml
-project_root: "projects/sdd/bookstore/back-office-api-sdd"
+project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
 target_type: "FUNC_002_books"
 ```
 
 例2: カバレッジ目標カスタマイズ
 ```yaml
-project_root: "projects/sdd/bookstore/back-office-api-sdd"
+project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
 target_type: "FUNC_002_books"
 coverage_targets:
   line: 85
@@ -70,7 +70,7 @@ coverage_targets:
 
 例3: 厳格モード
 ```yaml
-project_root: "projects/sdd/bookstore/back-office-api-sdd"
+project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
 target_type: "FUNC_002_books"
 failure_handling: "stop"
 dead_code_policy: "error"
@@ -287,7 +287,7 @@ L78-L82: 未カバー
 {
   "test_execution": {
     "timestamp": "2025-01-18T12:34:56Z",
-    "project_root": "projects/sdd/bookstore/back-office-api-sdd",
+    "project_root": "projects/sdd-wf/bookstore/back-office-api-sdd",
     "target_type": "FUNC_002_books",
     "duration_seconds": 12.5
   },

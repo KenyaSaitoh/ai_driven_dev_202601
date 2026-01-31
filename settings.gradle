@@ -4,7 +4,7 @@
 
 rootProject.name = 'jee-web-projects-payara'
 
-// Master: 完成版プロジェクト
+// Master: 完成版プロジェクト（模範解答・手を入れない想定）
 include 'berry-books-api'
 include 'customer-hub-api'
 include 'customer-hub-swing'
@@ -12,10 +12,20 @@ include 'back-office-api'
 include 'jsf-person'
 include 'struts-person'
 
+// Sandbox: プロンプトエンジニアリング等のトライアル用（master からコピーした完成版）
+include 'berry-books-api-sandbox'
+include 'back-office-api-sandbox'
+include 'customer-hub-api-sandbox'
+
 // SDD: 仕様駆動開発（Specification-Driven Development）プロジェクト
+// sdd-wf: ウォーターフォール開発用（仕様→タスク分解→詳細設計→実装の順）
 include 'berry-books-api-sdd'
 include 'back-office-api-sdd'
 include 'jsf-person-sdd'
+
+// sdd-agile: アジャイル開発用（bookstore をイテレーション単位で仕様駆動）
+include 'berry-books-api-sdd-agile'
+include 'back-office-api-sdd-agile'
 
 // プロジェクトの物理的な場所を指定
 // Master: 完成版プロジェクト（ドメイン別に整理）
@@ -26,7 +36,17 @@ project(':customer-hub-swing').projectDir = file('projects/master/bookstore/cust
 project(':jsf-person').projectDir = file('projects/master/person/jsf-person')
 project(':struts-person').projectDir = file('projects/master/person/struts-person')
 
-// SDD: 仕様駆動開発（Specification-Driven Development）プロジェクト（ドメイン別に整理）
-project(':berry-books-api-sdd').projectDir = file('projects/sdd/bookstore/berry-books-api-sdd')
-project(':back-office-api-sdd').projectDir = file('projects/sdd/bookstore/back-office-api-sdd')
-project(':jsf-person-sdd').projectDir = file('projects/sdd/person/jsf-person-sdd')
+// Sandbox: トライアル用（bookstore のみ）
+project(':berry-books-api-sandbox').projectDir = file('projects/sandbox/bookstore/berry-books-api')
+project(':back-office-api-sandbox').projectDir = file('projects/sandbox/bookstore/back-office-api')
+project(':customer-hub-api-sandbox').projectDir = file('projects/sandbox/bookstore/customer-hub-api')
+
+// SDD: 仕様駆動開発プロジェクト（ドメイン別に整理）
+// sdd-wf: ウォーターフォール用
+project(':berry-books-api-sdd').projectDir = file('projects/sdd-wf/bookstore/berry-books-api-sdd')
+project(':back-office-api-sdd').projectDir = file('projects/sdd-wf/bookstore/back-office-api-sdd')
+project(':jsf-person-sdd').projectDir = file('projects/sdd-wf/person/jsf-person-sdd')
+
+// sdd-agile: アジャイル用（bookstore のみ）
+project(':berry-books-api-sdd-agile').projectDir = file('projects/sdd-agile/bookstore/berry-books-api-sdd')
+project(':back-office-api-sdd-agile').projectDir = file('projects/sdd-agile/bookstore/back-office-api-sdd')

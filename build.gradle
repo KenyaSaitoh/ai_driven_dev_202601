@@ -142,8 +142,12 @@ subprojects {
         // JWT and BCrypt dependencies for projects that need authentication
         if (project.name == "berry-books-api" || 
             project.name == "berry-books-api-sdd" ||
+            project.name == "berry-books-api-sdd-agile" ||
+            project.name == "berry-books-api-sandbox" ||
             project.name == "back-office-api" ||
-            project.name == "back-office-api-sdd") {
+            project.name == "back-office-api-sdd" ||
+            project.name == "back-office-api-sdd-agile" ||
+            project.name == "back-office-api-sandbox") {
             // JWT
             implementation "io.jsonwebtoken:jjwt-api:0.12.6"
             runtimeOnly "io.jsonwebtoken:jjwt-impl:0.12.6"
@@ -173,9 +177,14 @@ subprojects {
         // E2Eテスト: REST Assured（API系プロジェクト用）
         if (project.name == "berry-books-api" || 
             project.name == "berry-books-api-sdd" ||
+            project.name == "berry-books-api-sdd-agile" ||
+            project.name == "berry-books-api-sandbox" ||
             project.name == "back-office-api" ||
             project.name == "back-office-api-sdd" ||
-            project.name == "customer-hub-api") {
+            project.name == "back-office-api-sdd-agile" ||
+            project.name == "back-office-api-sandbox" ||
+            project.name == "customer-hub-api" ||
+            project.name == "customer-hub-api-sandbox") {
             testImplementation "io.rest-assured:rest-assured:5.4.0"
             testImplementation "io.rest-assured:json-path:5.4.0"
             testImplementation "io.rest-assured:xml-path:5.4.0"
@@ -543,7 +552,9 @@ subprojects {
     def sddProjects = [
         "back-office-api-sdd",
         "berry-books-api-sdd",
-        "jsf-person-sdd"
+        "jsf-person-sdd",
+        "back-office-api-sdd-agile",
+        "berry-books-api-sdd-agile"
     ]
     
     if (project.name in sddProjects) {
@@ -970,7 +981,7 @@ task initHsqldb doLast {
 // 全sddプロジェクトのソースをクリーンアップするタスク
 task cleanupAllSddProjects {
     group = "sdd"
-    description = "Clean all SDD projects (back-office-api-sdd, berry-books-api-sdd, jsf-person-sdd)"
+    description = "Clean all SDD projects (sdd-wf + sdd-agile)"
     
     doFirst {
         println ""
@@ -981,7 +992,8 @@ task cleanupAllSddProjects {
     }
     
     dependsOn subprojects.findAll { 
-        it.name in ["back-office-api-sdd", "berry-books-api-sdd", "jsf-person-sdd"]
+        it.name in ["back-office-api-sdd", "berry-books-api-sdd", "jsf-person-sdd",
+                    "back-office-api-sdd-agile", "berry-books-api-sdd-agile"]
     }.collect { it.tasks.findByName('cleanSddArtifacts') }.findAll { it != null }
     
     doLast {
@@ -989,9 +1001,11 @@ task cleanupAllSddProjects {
         println "===================================="
         println "All SDD Projects Cleanup Completed!"
         println "===================================="
-        println "  ✓ back-office-api-sdd"
-        println "  ✓ berry-books-api-sdd"
-        println "  ✓ jsf-person-sdd"
+        println "  ✓ back-office-api-sdd (sdd-wf)"
+        println "  ✓ berry-books-api-sdd (sdd-wf)"
+        println "  ✓ jsf-person-sdd (sdd-wf)"
+        println "  ✓ back-office-api-sdd-agile (sdd-agile)"
+        println "  ✓ berry-books-api-sdd-agile (sdd-agile)"
         println ""
         println "[INFO] Preserved SPEC files:"
         println "    - specs/*/requirements/ (requirements.md, behaviors.md for E2E tests)"

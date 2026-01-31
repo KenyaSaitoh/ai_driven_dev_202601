@@ -5,7 +5,7 @@
 Jakarta EE 10とJAX-RS 3.1を使ったREST API サービスプロジェクト全般を実装するための汎用Agent Skillです。
 
 このAgent Skillsに含まれるもの:
-* instructions/: 6段階の開発インストラクション（基本設計、タスク分解、詳細設計、コード生成、単体テスト実行評価、E2Eテスト生成）
+* instructions/: 7段階の開発インストラクション（基本設計、タスク分解、詳細設計、コード生成、単体テスト実行評価、結合テスト生成、E2Eテスト生成）
 * principles/: Jakarta EE開発の原則（全プロジェクトで遵守すべき共通ルール、品質基準、アーキテクチャ標準）
 
 対応する実装要件:
@@ -18,7 +18,7 @@ Jakarta EE 10とJAX-RS 3.1を使ったREST API サービスプロジェクト全
 
 ---
 
-## 🚀 超簡単な使い方（6段階プロセス）
+## 🚀 超簡単な使い方（7段階プロセス）
 
 ### ステップ1: 📄 基本設計（SPEC作成）
 
@@ -178,13 +178,7 @@ AIが：
    * 実際のDBアクセス（メモリDB）
    * 外部APIはWireMockでスタブ化
    * アプリケーションサーバー不要
-3. 🏷️ `@Tag("integration")` で結合テストを分離
-
-実行方法:
-```bash
-# 結合テストを実行
-./gradlew integrationTest
-```
+3. 🏷️ `@Tag("integration")` で結合テストを分離（実行はプロジェクトのビルド設定に従う）
 
 ### ステップ7: 🧪 E2Eテスト生成
 
@@ -211,7 +205,7 @@ AIが：
 重要：
 * E2Eテストは実装完了後に実行
 * アプリケーションサーバーが起動している状態で実行
-* `./gradlew e2eTest` で実行（通常の `test` タスクからは除外）
+* `@Tag("e2e")` でE2Eテストを分離（実行はプロジェクトのビルド設定に従う）
 
 ---
 
@@ -292,6 +286,7 @@ specs/baseline/basic_design/
   * トランザクション管理と並行制御（楽観的ロック）
   * データベース構成、REST API設計原則、テスト戦略
   * パフォーマンス考慮事項
+  * 非機能要件の確認原則（詳細設計時は architecture.md の 11.5 を参照）
 
 * セキュリティ標準の主な内容:
   * JWT認証（HttpOnly Cookie、トークンライフサイクル、CSRF対策）
@@ -325,8 +320,8 @@ specs/baseline/basic_design/
 SPECを作成してください
 
 パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
 ```
 
 AIと対話しながらSPECを作成
@@ -338,8 +333,8 @@ AIと対話しながらSPECを作成
 全タスクを分解してください。
 
 パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
 ```
 
 結果:
@@ -359,8 +354,8 @@ tasks/
 書籍APIの詳細設計書を作成してください。
 
 パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
 * target_type: FUNC_002_books
 
 JPQL検索とCriteria API検索の両方を実装する予定です。
@@ -404,8 +399,8 @@ AI: 承知しました。以下を作成しました：
 書籍APIを実装してください。
 
 パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/FUNC_002_books.md
+* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
+* task_file: projects/sdd-wf/bookstore/back-office-api-sdd/tasks/FUNC_002_books.md
 ```
 
 ### 例2: 外部API連携（4段階）
@@ -419,14 +414,14 @@ AI: 承知しました。以下を作成しました：
 全タスクを分解してください。
 
 パラメータ:
-* project_root: projects/sdd/bookstore/berry-books-api-sdd
-* spec_directory: projects/sdd/bookstore/berry-books-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/berry-books-api-sdd
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api-sdd/specs/baseline
 ```
 
 ステップ3: 詳細設計（注文API - 独自実装 + 外部API連携）
 ```
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
-@projects/sdd/bookstore/berry-books-api-sdd/specs
+@projects/sdd-wf/bookstore/berry-books-api-sdd/specs
 
 対象: FUNC_003_orders
 
@@ -463,7 +458,7 @@ AI: 承知しました。DeliveryFeeServiceを追加します。
 ステップ4: コード生成
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/berry-books-api-sdd/specs/baseline/detailed_design/FUNC_003_orders/detailed_design.md
+@projects/sdd-wf/bookstore/berry-books-api-sdd/specs/baseline/detailed_design/FUNC_003_orders/detailed_design.md
 
 注文APIを実装してください。
 ```
@@ -479,7 +474,7 @@ AIが自動実装：
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/back-office-api-sdd/tasks/FUNC_002_stocks.md
+@projects/sdd-wf/bookstore/back-office-api-sdd/tasks/FUNC_002_stocks.md
 
 在庫APIを実装してください。
 楽観的ロック（@Version）を使った在庫更新を実装してください。
@@ -497,7 +492,7 @@ AIが自動実装：
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-@projects/sdd/bookstore/berry-books-api-sdd/tasks/FUNC_001_auth.md
+@projects/sdd-wf/bookstore/berry-books-api-sdd/tasks/FUNC_001_auth.md
 
 認証APIを実装してください。
 ```
@@ -748,7 +743,11 @@ agent_skills/jakarta-ee-api-base/
     ├── basic_design.md               # ステップ1: 基本設計（SPEC作成）
     ├── task_breakdown.md             # ステップ2: タスク分解
     ├── detailed_design.md            # ステップ3: 詳細設計
-    └── code_generation.md            # ステップ4: コード生成
+    ├── code_generation.md            # ステップ4: コード生成（実装+単体テスト）
+    ├── unit_test_execution.md        # ステップ5: 単体テスト実行評価
+    ├── it_generation.md              # ステップ6: 結合テスト生成
+    ├── e2e_test_generation.md        # ステップ7: E2Eテスト生成
+    └── basic_design_change.md        # 基本設計変更対応
 ```
 
 ---

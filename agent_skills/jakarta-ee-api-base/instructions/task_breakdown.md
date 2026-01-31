@@ -12,9 +12,9 @@ output_directory: "ここにタスク出力先のパスを入力（オプショ�
 
 * 例
 ```yaml
-project_root: "projects/sdd/bookstore/back-office-api-sdd"
-spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs"
-output_directory: "projects/sdd/bookstore/back-office-api-sdd/tasks"
+project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
+spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs"
+output_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/tasks"
 ```
 
 注意

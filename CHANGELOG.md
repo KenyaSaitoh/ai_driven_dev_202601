@@ -19,6 +19,6 @@
 ### Added
 - `projects/master/person/jsf-person/run-jsf-person-all.sh` を追加: JSF Person アプリケーションの一括起動スクリプト
 - `projects/master/person/struts-person/run-struts-person-all.sh` を追加: Struts Person アプリケーションの一括起動スクリプト
-- `projects/sdd/bookstore/run-bookstore-all.sh` を追加: SDD版Bookstoreフルスタック一括起動スクリプト（back-office-api-sdd、berry-books-api-sdd、customer-hub-api + 3つのSPA）
-- `projects/sdd/bookstore/run-bookstore-spa.sh` を追加: SDD版Bookstore SPA再起動スクリプト
-- `projects/sdd/person/jsf-person-sdd/run-jsf-person-all.sh` を追加: SDD版JSF Personアプリケーションの一括起動スクリプト
+- `projects/sdd-wf/bookstore/run-bookstore-all.sh` を追加: SDD版Bookstoreフルスタック一括起動スクリプト（back-office-api-sdd、berry-books-api-sdd、customer-hub-api + 3つのSPA）
+- `projects/sdd-wf/bookstore/run-bookstore-spa.sh` を追加: SDD版Bookstore SPA再起動スクリプト
+- `projects/sdd-wf/person/jsf-person-sdd/run-jsf-person-all.sh` を追加: SDD版JSF Personアプリケーションの一括起動スクリプト

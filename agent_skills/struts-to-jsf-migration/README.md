@@ -1,6 +1,6 @@
 # Struts to JSF マイグレーション - クイックスタートガイド
 
-Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを6ステップで実現します。
+Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを7ステップで実現します。
 
 ---
 
@@ -18,7 +18,7 @@ Code-to-Codeの直接変換ではなく、一度SPECとして抽象化するこ�
 
 ---
 
-## 🚀 6ステップでマイグレーション
+## 🚀 7ステップでマイグレーション
 
 ### ステップ1: 🔍 既存コード分析
 
@@ -158,13 +158,7 @@ AIが：
    * 実際のDBアクセス（メモリDB）
    * モックは使用しない
    * アプリケーションサーバー不要
-3. 🏷️ `@Tag("integration")` で結合テストを分離
-
-実行方法:
-```bash
-# 結合テストを実行
-./gradlew integrationTest
-```
+3. 🏷️ `@Tag("integration")` で結合テストを分離（実行はプロジェクトのビルド設定に従う）
 
 ### ステップ7: 🧪 E2Eテスト生成
 
@@ -191,7 +185,7 @@ AIが：
 重要：
 * E2Eテストは実装完了後に実行
 * アプリケーションサーバーが起動している状態で実行
-* `./gradlew e2eTest` で実行（通常の `test` タスクからは除外）
+* `@Tag("e2e")` でE2Eテストを分離（実行はプロジェクトのビルド設定に従う）
 
 ---
 
@@ -270,7 +264,11 @@ agent_skills/struts-to-jsf-migration/
     ├── reverse_engineering.md        # ステップ1: 既存コード分析
     ├── task_breakdown.md             # ステップ2: タスク分解
     ├── detailed_design.md            # ステップ3: 詳細設計（画面単位）
-    └── code_generation.md            # ステップ4: コード生成（参照用）
+    ├── code_generation.md            # ステップ4: コード生成（実装+単体テスト）
+    ├── unit_test_execution.md        # ステップ5: 単体テスト実行評価
+    ├── it_generation.md              # ステップ6: 結合テスト生成
+    ├── e2e_test_generation.md        # ステップ7: E2Eテスト生成
+    └── basic_design_change.md        # 基本設計変更対応
 ```
 
 ---
@@ -321,7 +319,7 @@ Person一覧画面の詳細設計書を作成してください。
 #### ステップ4: JSFコード生成
 
 ```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
+@agent_skills/struts-to-jsf-migration/instructions/code_generation.md
 
 セットアップタスクを実行してください。
 
@@ -332,7 +330,7 @@ Person一覧画面の詳細設計書を作成してください。
 ```
 
 ```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
+@agent_skills/struts-to-jsf-migration/instructions/code_generation.md
 
 Person一覧画面を実装してください。
 

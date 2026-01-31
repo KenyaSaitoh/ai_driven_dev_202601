@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+body {
+    @apply font-sans text-gray-800 bg-white leading-normal min-h-screen;
+  }
+}
+
+@layer components {
+  /* グラデーションボタン */
+.btn-primary {
+    @apply bg-gradient-primary text-white px-6 py-3 rounded-lg font-semibold 
+           transition-all duration-300 hover:bg-gradient-primary-hover 
+           hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-primary-sm {
+    @apply bg-gradient-primary text-white px-4 py-2 rounded-lg font-semibold text-sm
+           transition-all duration-300 hover:bg-gradient-primary-hover 
+           hover:-translate-y-0.5 active:translate-y-0;
+}
+
+.btn-secondary {
+    @apply bg-slate-500 text-white px-6 py-3 rounded-lg font-semibold text-sm
+           transition-all duration-300 hover:bg-slate-600 
+           hover:-translate-y-0.5 active:translate-y-0;
+}
+
+  .btn-secondary-sm {
+    @apply bg-slate-500 text-white px-4 py-2 rounded-lg font-semibold text-sm
+           transition-all duration-300 hover:bg-slate-600 
+           hover:-translate-y-0.5 active:translate-y-0;
+}
+
+.btn-success {
+    @apply bg-green-600 text-white px-6 py-3 rounded-lg font-semibold text-sm
+           transition-all duration-300 hover:bg-green-700 
+           hover:-translate-y-0.5 active:translate-y-0;
+}
+
+  .btn-success-sm {
+    @apply bg-green-600 text-white px-4 py-2 rounded-lg font-semibold text-sm
+           transition-all duration-300 hover:bg-green-700 
+           hover:-translate-y-0.5 active:translate-y-0;
+}
+
+.btn-danger {
+    @apply bg-red-600 text-white px-6 py-3 rounded-lg font-semibold text-sm
+           transition-all duration-300 hover:bg-red-700 
+           hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-danger-sm {
+    @apply bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-sm
+           transition-all duration-300 hover:bg-red-700 
+           hover:-translate-y-0.5 active:translate-y-0;
+}
+
+  /* 赤系のボタン */
+  .btn-light-red-sm {
+    @apply bg-red-300 text-red-900 px-4 py-2 rounded-lg font-semibold text-sm
+           transition-all duration-300 hover:bg-red-400 
+           hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  /* リンクスタイル */
+  .link-primary {
+    @apply text-primary-dark no-underline font-bold transition-all duration-300
+           hover:text-primary-darker hover:translate-x-1 inline-block;
+}
+
+  /* フォーム入力 */
+  .form-input {
+    @apply w-full px-4 py-3 border-2 border-accent rounded-lg text-base
+           transition-all duration-300 bg-white
+           focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10;
+}
+
+/* テーブル */
+  .table-primary {
+    @apply w-full border-collapse bg-white shadow-table rounded-lg overflow-hidden;
+}
+
+  .table-primary th {
+    @apply px-4 py-2 text-left bg-gradient-primary text-white font-semibold tracking-wide text-sm;
+  }
+
+  .table-primary td {
+    @apply px-4 py-2 border border-accent text-sm;
+}
+
+  /* エラーメッセージ */
+  .error-text {
+    @apply text-error font-medium text-sm mt-2 block;
+  }
+
+  .error-message {
+    @apply p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm my-4;
+  }
+
+  /* ローディング */
+  .loading {
+    @apply text-center py-8 text-gray-600;
+}
+
+  /* ページヘッダー */
+.page-header {
+    @apply flex justify-between items-center mb-6;
+}
+
+.page-header h1 {
+    @apply text-2xl font-bold text-gray-900;
+  }
+}
+

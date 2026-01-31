@@ -11,14 +11,14 @@ spec_directory: "ここにSPECディレクトリのパスを入力"
 
 * 例1: ベースライン（初回リリース版）
 ```yaml
-project_root: "projects/sdd/bookstore/back-office-api-sdd"
-spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline"
+project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
+spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
 ```
 
 * 例2: 拡張機能（エンハンスメント）
 ```yaml
-project_root: "projects/sdd/bookstore/back-office-api-sdd"
-spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/enhancements/202512_inventory_alert"
+project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
+spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/enhancements/202512_inventory_alert"
 ```
 
 注意

@@ -203,8 +203,8 @@ AIが自動で以下を実行
 全タスクを分解してください
 
 パラメータ
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
 ```
 
 その後、詳細設計とコード生成を実施する

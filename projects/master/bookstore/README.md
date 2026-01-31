@@ -88,7 +88,7 @@
 chmod +x gradlew
 chmod +x payara6/bin/*
 chmod +x projects/master/accounting/accounting_etl/*.sh
-chmod +x projects/sdd/accounting/accounting_etl_sdd/*.sh
+chmod +x projects/sdd-wf/accounting/accounting_etl_sdd/*.sh
 ```
 
 > **Note**: このステップはmacOS/Linuxのみ必要です。Windowsでは不要です。
@@ -306,6 +306,6 @@ SELECT * FROM PERSON;
 
 - [プロジェクトルートのREADME.md](../../../README.md) - 全体的なセットアップと環境設定
 - [各プロジェクトのREADME.md](.) - プロジェクト固有の詳細情報
-- [仕様駆動開発版](../../sdd/bookstore/) - SDD研修用プロジェクト
+- [仕様駆動開発版](../../sdd-wf/bookstore/) - SDD研修用プロジェクト
 - [Vibe Coding版](../../vibe/bookstore/) - Vibe Coding研修用プロジェクト
 

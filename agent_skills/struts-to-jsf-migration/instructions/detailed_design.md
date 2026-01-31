@@ -12,15 +12,15 @@ target_type: "ここに対象画面のIDを入力（例: FUNC_001_PersonList）"
 
 * 例1: ベースライン（初回リリース版）
 ```yaml
-project_root: "projects/sdd/person/jsf-person-sdd"
-spec_directory: "projects/sdd/person/jsf-person-sdd/specs/baseline"
+project_root: "projects/sdd-wf/person/jsf-person-sdd"
+spec_directory: "projects/sdd-wf/person/jsf-person-sdd/specs/baseline"
 target_type: "FUNC_001_PersonList"
 ```
 
 * 例2: 拡張機能（エンハンスメント）
 ```yaml
-project_root: "projects/sdd/person/jsf-person-sdd"
-spec_directory: "projects/sdd/person/jsf-person-sdd/specs/enhancements/202512_person_search"
+project_root: "projects/sdd-wf/person/jsf-person-sdd"
+spec_directory: "projects/sdd-wf/person/jsf-person-sdd/specs/enhancements/202512_person_search"
 target_type: "FUNC_005_PersonSearch"
 ```
 

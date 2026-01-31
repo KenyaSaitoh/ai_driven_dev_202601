@@ -11,8 +11,8 @@ spec_directory: "ここにSPECディレクトリのパスを入力"
 
 * 例
 ```yaml
-project_root: "projects/sdd/bookstore/back-office-api-sdd"
-spec_directory: "projects/sdd/bookstore/back-office-api-sdd/specs/baseline"
+project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
+spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
 ```
 
 注意

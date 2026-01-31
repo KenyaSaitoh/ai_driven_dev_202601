@@ -533,7 +533,7 @@ skip_infrastructureパラメータ（setupタスク専用）:
 単体テストを実行してください
 
 パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
+* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
 * target_type: FUNC_002_books
 ```
 
@@ -710,8 +710,8 @@ AIが自動で実行:
 SPECを作成してください
 
 パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
 ```
 
 AIと対話しながらSPECを作成
@@ -723,8 +723,8 @@ AIと対話しながらSPECを作成
 全タスクを分解してください
 
 パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
 ```
 
 結果:
@@ -744,8 +744,8 @@ tasks/
 書籍機能の詳細設計書を作成してください
 
 パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
 * target_type: FUNC_002_books
 
 JPQL検索とCriteria API検索の両方を実装する予定です
@@ -789,8 +789,8 @@ AI: 承知しました。以下を作成しました：
 書籍機能を実装してください
 
 パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* task_file: projects/sdd/bookstore/back-office-api-sdd/tasks/FUNC_002_books.md
+* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
+* task_file: projects/sdd-wf/bookstore/back-office-api-sdd/tasks/FUNC_002_books.md
 ```
 
 ステップ5: 単体テスト実行評価
@@ -800,7 +800,7 @@ AI: 承知しました。以下を作成しました：
 単体テストを実行してください
 
 パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
+* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
 * target_type: FUNC_002_books
 ```
 
@@ -813,8 +813,8 @@ AI: 承知しました。以下を作成しました：
 結合テストを生成してください
 
 パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
 ```
 
 実行方法:
@@ -829,8 +829,8 @@ AI: 承知しました。以下を作成しました：
 E2Eテストを生成してください
 
 パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
 ```
 
 実行方法:
@@ -921,8 +921,8 @@ E2Eテストで誤注文のキャンセル機能がないことが判明。
 基本設計の変更を適用してください
 
 パラメータ:
-* project_root: projects/sdd/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
 ```
 
 AIが自動で実行:

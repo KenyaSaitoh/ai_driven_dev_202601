@@ -55,13 +55,13 @@ jacoco_json: null
 
 例1: 最小限
 ```yaml
-project_root: "projects/sdd/person/jsf-person-sdd"
+project_root: "projects/sdd-wf/person/jsf-person-sdd"
 target_type: "FUNC_002_PersonList"
 ```
 
 例2: カバレッジ目標カスタマイズ
 ```yaml
-project_root: "projects/sdd/person/jsf-person-sdd"
+project_root: "projects/sdd-wf/person/jsf-person-sdd"
 target_type: "FUNC_002_PersonList"
 coverage_targets:
   line: 75
