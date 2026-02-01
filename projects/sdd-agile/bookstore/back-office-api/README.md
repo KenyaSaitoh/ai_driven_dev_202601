@@ -600,19 +600,11 @@ rm -f hsqldb/data/testdb.*
 仕様駆動開発により何度でも再実装できます。詳細は [ルートREADMEのSDDクリーンアップ節](../../../README.md#仕様駆動開発sddプロジェクトの成果物クリーンアップ) を参照してください。
 
 ```bash
-# タスクファイルのみ削除（sdd-agileでは tasks/ は最小限）
-./gradlew :back-office-api-sdd-agile:cleanTasks
-
-# 詳細設計SPECのみ削除（sdd-agileでは detailed_design/ は未使用のため無操作）
-./gradlew :back-office-api-sdd-agile:cleanDetailedDesign
-
-# 実装コードのみ削除（src/, build/）
+# 実装コードを削除（src/, build/）。common/, usecases/ は保護されます
 ./gradlew :back-office-api-sdd-agile:cleanCode
-
-# すべて削除（common/, usecases/ は保護）
-./gradlew :back-office-api-sdd-agile:cleanAllSdd
 ```
 
+* sdd-agile ではタスク分解・詳細設計を行わないため、`cleanCode` のみが対象です。
 * 保護されるSPEC: `specs/baseline/common/`, `specs/baseline/usecases/`
 
 ## 📖 参考リンク
