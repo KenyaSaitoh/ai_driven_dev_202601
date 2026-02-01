@@ -780,11 +780,12 @@ rm -f hsqldb/data/testdb.*
 仕様駆動開発により何度でも再実装できます。詳細は [ルートREADMEのSDDクリーンアップ節](../../../README.md#仕様駆動開発sddプロジェクトの成果物クリーンアップ) を参照してください。
 
 ```bash
-# 実装コードを削除（src/, build/）。common/, usecases/ は保護されます
+# 本番コード・単体テストコードを削除（src/main/, src/test/, build/）。common/, usecases/ は保護されます
 ./gradlew :berry-books-api-sdd-agile:cleanCode
 ```
 
 * sdd-agile ではタスク分解・詳細設計を行わないため、`cleanCode` のみが対象です。
+* 削除対象: 本番コード（src/main/）、単体テストコード（src/test/）、ビルド成果物（build/）。ディレクトリ構造は空で保持されます。
 * 保護されるSPEC: `specs/baseline/common/`, `specs/baseline/usecases/`
 
 ## 📖 参考リンク

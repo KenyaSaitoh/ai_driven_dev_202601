@@ -452,9 +452,9 @@ subprojects {
     
     task cleanCode {
         group = "sdd"
-        description = "Clean generated code (src/, build/) - keeps SPEC and empty directory structure"
+        description = "Clean generated code (src/main/, src/test/, build/) - production and unit test code; keeps SPEC and empty directory structure"
         doLast {
-            println "Cleaning generated code for ${project.name}..."
+            println "Cleaning generated code (production + unit test) for ${project.name}..."
             
             // src/main配下のディレクトリ定義
             def srcMainDirs = [
@@ -525,14 +525,20 @@ subprojects {
             }
             
             println ""
-            println "[OK] Generated code cleaned"
+            println "[OK] Generated code cleaned (production + unit test)"
             println "[OK] Directory structure preserved:"
-            println "    - src/main/java/ (with .gitkeep)"
+            println "    - src/main/java/ (production code, with .gitkeep)"
             println "    - src/main/resources/ (with .gitkeep)"
             println "    - src/main/webapp/ (with .gitkeep)"
-            println "    - src/test/java/ (with .gitkeep)"
+            println "    - src/test/java/ (unit test code, with .gitkeep)"
             println "    - src/test/resources/ (with .gitkeep)"
-            println "[OK] SPEC files are preserved (requirements/, basic_design/, detailed_design/)"
+            if (project.name.endsWith('-sdd-agile')) {
+                println "[OK] SPEC files are preserved (specs/baseline/common/, specs/baseline/usecases/)"
+            } else if (project.name.endsWith('-sdd-wf')) {
+                println "[OK] SPEC files are preserved (requirements/, basic_design/, detailed_design/)"
+            } else {
+                println "[OK] Contents under specs/ are not modified"
+            }
         }
     }
     

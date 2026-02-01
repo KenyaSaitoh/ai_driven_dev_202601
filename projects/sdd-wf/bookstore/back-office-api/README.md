@@ -769,13 +769,14 @@ rm -f hsqldb/data/testdb.*
 # 詳細設計SPECのみ削除
 ./gradlew :back-office-api-sdd-wf:cleanDetailedDesign
 
-# 実装コードのみ削除（src/, build/）
+# 本番コード・単体テストコードを削除（src/main/, src/test/, build/）
 ./gradlew :back-office-api-sdd-wf:cleanCode
 
 # すべて削除（requirements/, basic_design/ は保護）
 ./gradlew :back-office-api-sdd-wf:cleanAllSdd
 ```
 
+* cleanCode の削除対象: 本番コード（src/main/）、単体テストコード（src/test/）、ビルド成果物（build/）。ディレクトリ構造は空で保持されます。
 * 保護されるSPEC: `specs/baseline/requirements/`, `specs/baseline/basic_design/`
 
 ## 📖 参考リンク
