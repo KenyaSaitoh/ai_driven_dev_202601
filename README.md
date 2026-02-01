@@ -98,10 +98,12 @@ kill <PID1> <PID2> <PID3>
 3. **sdd-wf/** - 仕様駆動開発（ウォーターフォール）プロジェクト（研修用）
    - 仕様書→タスク分解→詳細設計→実装の順で進める手法を学習
    - AIを活用した段階的な実装プロセスを体験
+   - **注意**: フォルダ名に `-sdd` を付ける古い命名は廃止済み。SDD対象は `back-office-api`、`berry-books-api` のみ。それ以外（SPA、customer-hub-api 等）は master と同じ内容。
 
 4. **sdd-agile/** - 仕様駆動開発（アジャイル）プロジェクト（研修用）
    - 書店ドメイン（bookstore）をイテレーション単位で仕様駆動開発
    - sdd-wf の bookstore をコピーした構成で、アジャイル向けの進め方を学習
+   - **注意**: SDD対象は `back-office-api`、`berry-books-api` のみ。それ以外は master と同じ内容。
 
 ### ディレクトリ構造
 
@@ -130,14 +132,22 @@ ai_driven_dev_202601/
 │   │       └── customer-hub-spa/                    # SPA: 顧客管理
 │   ├── sdd-wf/                                      # 仕様駆動開発（ウォーターフォール）研修用
 │   │   ├── bookstore/                               # 書店ドメイン
-│   │   │   ├── berry-books-api-sdd/                 # REST API: 注文管理（SDD研修用）
-│   │   │   └── back-office-api-sdd/                 # REST API: 書籍・在庫管理（SDD研修用）
+│   │   │   ├── back-office-api/                     # REST API: 書籍・在庫管理【SDD対象】
+│   │   │   ├── berry-books-api/                     # REST API: 注文管理【SDD対象】
+│   │   │   ├── back-office-spa/                     # SPA: 書籍管理（master と同一）
+│   │   │   ├── berry-books-spa/                     # SPA: 注文管理（master と同一）
+│   │   │   ├── customer-hub-api/                    # REST API: 顧客管理（master と同一）
+│   │   │   └── customer-hub-spa/                    # SPA: 顧客管理（master と同一）
 │   │   └── person/                                  # 人物管理ドメイン
-│   │       └── jsf-person-sdd/                      # Person管理（JSF + JPA, SDD研修用）
+│   │       └── jsf-person/                         # Person管理（JSF + JPA, SDD研修用）
 │   └── sdd-agile/                                   # 仕様駆動開発（アジャイル）研修用
 │       └── bookstore/                               # 書店ドメイン
-│           ├── berry-books-api-sdd/                 # REST API: 注文管理（SDDアジャイル用）
-│           └── back-office-api-sdd/                 # REST API: 書籍・在庫管理（SDDアジャイル用）
+│           ├── back-office-api/                     # REST API: 書籍・在庫管理【SDD対象】
+│           ├── berry-books-api/                     # REST API: 注文管理【SDD対象】
+│           ├── back-office-spa/                     # SPA: 書籍管理（master と同一）
+│           ├── berry-books-spa/                     # SPA: 注文管理（master と同一）
+│           ├── customer-hub-api/                    # REST API: 顧客管理（master と同一）
+│           └── customer-hub-spa/                    # SPA: 顧客管理（master と同一）
 │
 ├── struts-to-jsf-person-sdd/                        # マイグレーションプロジェクト（Struts → JSF）
 │
@@ -148,6 +158,9 @@ ai_driven_dev_202601/
 ├── settings.gradle                                  # Gradleマルチプロジェクト設定
 └── env-conf.gradle                                  # 環境設定
 ```
+
+> **sdd-wf / sdd-agile の bookstore について**  
+> SDDの対象となるのは `back-office-api` と `berry-books-api` の2フォルダのみです。`back-office-spa`、`berry-books-spa`、`customer-hub-api`、`customer-hub-spa` は master と同じ内容です。フォルダ名に `-sdd` を付ける古い命名は廃止済みで、Gradle プロジェクト名（例: `berry-books-api-sdd-wf`）で区別します。
 
 ## 🚀 セットアップとコマンド実行ガイド
 
@@ -287,9 +300,9 @@ SDDプロジェクト（sdd-wf / sdd-agile）は、仕様駆動開発により�
 
 **sdd-wf（ウォーターフォール）:**
 ```bash
-./gradlew :berry-books-api-sdd:cleanTasks
-./gradlew :back-office-api-sdd:cleanTasks
-./gradlew :jsf-person-sdd:cleanTasks
+./gradlew :berry-books-api-sdd-wf:cleanTasks
+./gradlew :back-office-api-sdd-wf:cleanTasks
+./gradlew :jsf-person-sdd-wf:cleanTasks
 ```
 
 **sdd-agile（アジャイル）:**
@@ -305,7 +318,7 @@ SDDプロジェクト（sdd-wf / sdd-agile）は、仕様駆動開発により�
 
 詳細設計SPEC（specs/*/detailed_design/）の中身を削除します。フォルダ自体は空のまま残ります。
 
-**sdd-wf:** `./gradlew :berry-books-api-sdd:cleanDetailedDesign` など  
+**sdd-wf:** `./gradlew :berry-books-api-sdd-wf:cleanDetailedDesign` など  
 **sdd-agile:** `./gradlew :berry-books-api-sdd-agile:cleanDetailedDesign` など
 
 削除されるもの: `specs/*/detailed_design/`の中身（フォルダは空のまま残る）
@@ -315,7 +328,7 @@ SDDプロジェクト（sdd-wf / sdd-agile）は、仕様駆動開発により�
 
 生成された実装コード（src/、build/）を削除します。ディレクトリ構造は空のまま保持されます。
 
-**sdd-wf:** `./gradlew :berry-books-api-sdd:cleanCode` など  
+**sdd-wf:** `./gradlew :berry-books-api-sdd-wf:cleanCode` など  
 **sdd-agile:** `./gradlew :berry-books-api-sdd-agile:cleanCode` など
 
 削除されるもの: `src/main/`配下の内容、`src/test/`配下の内容、`build/`
@@ -325,7 +338,7 @@ SDDプロジェクト（sdd-wf / sdd-agile）は、仕様駆動開発により�
 
 タスク、詳細設計SPEC、実装コードをすべて削除します。
 
-**sdd-wf:** `./gradlew :berry-books-api-sdd:cleanAllSdd` など  
+**sdd-wf:** `./gradlew :berry-books-api-sdd-wf:cleanAllSdd` など  
 **sdd-agile:** `./gradlew :berry-books-api-sdd-agile:cleanAllSdd` など  
 
 **全SDDプロジェクトを一括クリーン:** `./gradlew cleanupAllSddProjects`
@@ -336,8 +349,8 @@ SDDプロジェクト（sdd-wf / sdd-agile）は、仕様駆動開発により�
 
 詳細は各プロジェクトのREADME.mdを参照してください：
 
-- **sdd-wf:** [berry-books-api-sdd](projects/sdd-wf/bookstore/berry-books-api-sdd/README.md) / [back-office-api-sdd](projects/sdd-wf/bookstore/back-office-api-sdd/README.md) / [jsf-person-sdd](projects/sdd-wf/person/jsf-person-sdd/README.md)
-- **sdd-agile:** [berry-books-api-sdd](projects/sdd-agile/bookstore/berry-books-api-sdd/README.md) / [back-office-api-sdd](projects/sdd-agile/bookstore/back-office-api-sdd/README.md)
+- **sdd-wf:** [berry-books-api](projects/sdd-wf/bookstore/berry-books-api/README.md) / [back-office-api](projects/sdd-wf/bookstore/back-office-api/README.md) / [jsf-person](projects/sdd-wf/person/jsf-person/README.md)
+- **sdd-agile:** [berry-books-api](projects/sdd-agile/bookstore/berry-books-api/README.md) / [back-office-api](projects/sdd-agile/bookstore/back-office-api/README.md)
 
 ---
 
