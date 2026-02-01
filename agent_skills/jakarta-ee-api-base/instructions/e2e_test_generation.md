@@ -28,7 +28,7 @@ spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
 
 重要な方針
 * 実装完了後にE2Eテストを生成する（code_generation.mdの次のステップ）
-* テストフレームワーク: REST Assured を使用
+* テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）+ REST Assured
 * テスト対象: requirements/behaviors.md（E2Eテスト用）のシナリオ（Gherkin 記法で記述されている前提。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 * 複数機能間の連携、実際のHTTPリクエスト/レスポンス、実際のDBアクセスを含む
 * アプリケーションサーバーが起動している状態でテストを実行
@@ -92,11 +92,13 @@ E2Eテスト生成に必要なライブラリ（プロジェクトのビルド�
 
 ### 3.1 テストケース設計方針
 
-* 1シナリオ＝1テストクラスの粒度
-* basic_design/behaviors.md の各Given-When-Thenシナリオを実際のHTTPリクエストとしてテスト
+* requirements/behaviors.md（E2Eテスト用）の Gherkin シナリオを **Cucumber .feature ファイル**（`src/test/resources/features/e2e` 配下）と **Cucumber ステップ定義**（Java、REST Assured を利用）に変換する
+* 1シナリオ＝1 Feature または 1 Scenario の粒度で .feature に記述
+* 各 Given-When-Then を実際のHTTPリクエストとしてステップ定義で実装
 * 複数APIにまたがるE2Eのフローをテスト
 * 実際のDBアクセスを含む（テストデータの準備と検証）
 * HTTPステータスコード、レスポンスボディ、ヘッダーの検証
+* feature およびステップ定義に @Tag("e2e") を付与し、e2eTest タスクで実行されるようにする
 
 ### 3.2 テストケースのポイント
 

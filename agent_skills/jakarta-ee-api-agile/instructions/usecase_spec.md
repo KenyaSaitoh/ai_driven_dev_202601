@@ -31,7 +31,7 @@ usecase_folder: "order-creation"
 * 必ず先に {spec_directory}/common/ の data_model.md, external_interface.md, architecture_design.md を読み、共通仕様と矛盾しないようにユースケースSPECを作成する
 * 1ユースケース = 1フォルダ。フォルダ名は任意（例: order-creation, book-search, auth）
 * 各ユースケースフォルダには userstory.md と behaviors.md を配置する
-* ユーザーストーリー・受入基準・振る舞い（Gherkin）を、common の3SPECと整合させて記述する
+* ユーザーストーリー・受入基準・振る舞い（Gherkin）を、業務共通SPECの3SPECと整合させて記述する
 
 作成するSPEC
 
@@ -43,10 +43,10 @@ usecase_folder: "order-creation"
 
 ## 1. 前提条件の確認
 
-### 1.1 common SPEC の存在確認
+### 1.1 業務共通SPEC の存在確認
 
 * {spec_directory}/common/data_model.md, external_interface.md, architecture_design.md が存在することを確認する
-* 存在しない場合は、ユーザーに「先に common SPEC を作成してください（common_spec.md を実行）」と伝える
+* 存在しない場合は、ユーザーに「先に業務共通SPECを作成してください（common_spec.md を実行）」と伝える
 
 ### 1.2 Agent Skillsルール（最優先で確認）
 
@@ -54,7 +54,7 @@ usecase_folder: "order-creation"
 
 ---
 
-## 2. common SPEC の読み込み
+## 2. 業務共通SPEC の読み込み
 
 ユースケースSPECを書く前に、以下を読み共通仕様を把握する
 
@@ -83,7 +83,7 @@ usecase_folder: "order-creation"
 ### 4.1 ユーザーストーリー
 
 * 「As a / I want to / So that」形式で記述する
-* common のスコープ（データモデル・外部IF・アーキテクチャ）の範囲内で実現可能なストーリーにする
+* 業務共通SPECのスコープ（データモデル・外部IF・アーキテクチャ）の範囲内で実現可能なストーリーにする
 
 ### 4.2 受入基準
 
@@ -93,7 +93,7 @@ usecase_folder: "order-creation"
 ### 4.3 API仕様（該当する場合）
 
 * このユースケースが提供するエンドポイント（メソッド、パス、説明）を一覧する
-* リクエスト/レスポンス構造、バリデーション、エラーコードは common の data_model / external_interface と矛盾しないようにする
+* リクエスト/レスポンス構造、バリデーション、エラーコードは業務共通SPECの data_model / external_interface と矛盾しないようにする
 
 ### 4.4 ビジネスルール
 
@@ -123,7 +123,7 @@ usecase_folder: "order-creation"
 ## 6. 検証と完了報告
 
 * userstory.md と behaviors.md の内容が一致しているか確認する
-* common の3SPECとの矛盾がないか確認する
+* 業務共通SPECの3SPECとの矛盾がないか確認する
 * ユーザーに作成・更新したファイルのパスと、次のステップ（実装、または任意で実装タスク一覧の作成）を案内する
 
 ---

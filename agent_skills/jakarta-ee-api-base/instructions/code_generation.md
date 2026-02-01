@@ -202,11 +202,11 @@ Entity、Dao、Service、Resource（JAX-RSエンドポイント）、DTO等の�
 
 * 生成した本番コード（Entity、Dao、Service、Resource、DTO等）に対応する単体テストコードを生成する
 * セクション5「単体テスト生成ガイドライン」に従ってテストを実装する
-* テストフレームワーク: architecture_design.mdで指定されたフレームワークを使用する（JUnit 5 + Mockito等）
+* テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）。architecture_design.mdで指定されたカバレッジ等に従う
 * テストカバレッジ: architecture_design.mdの目標値を遵守する
 * テストケース設計:
-  * detailed_design/配下の各タスクのbehaviors.md（単体テスト用）の各シナリオ（Gherkin 記法）から対応するテストケースを実装
-  * detailed_design/配下の各タスクのdetailed_design.mdの各メソッドシグネチャに対して、正常系、異常系、境界値、エッジケースのテストを作成
+  * detailed_design/配下の各タスクのbehaviors.md（単体テスト用）の Gherkin シナリオから **Cucumber .feature ファイル**（`src/test/resources/features/unit` 配下）と **Cucumber ステップ定義**（Java）を生成する
+  * detailed_design/配下の各タスクのdetailed_design.mdの各メソッドシグネチャに対して、正常系、異常系、境界値、エッジケースのシナリオを .feature に反映し、対応するステップ定義を作成
 * モック使用の判断:
   * 同じタスク内のコンポーネント → モック不要（実際の連携をテスト）
   * タスク外の依存関係 → モックを使用
@@ -248,13 +248,14 @@ Entity、Dao、Service、Resource（JAX-RSエンドポイント）、DTO等の�
     * 例: BookService が AuthService に依存する場合、AuthService はモック
     * 例: EntityManager、外部APIクライアント等はモック
 
-* テストフレームワーク: architecture_design.mdで指定されたフレームワークを使用する（JUnit 5 + Mockito等）
+* テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）。ステップ定義は `src/test/java` の適切なパッケージ（例: `...cucumber.steps`）に配置する
 * テストカバレッジ: architecture_design.mdの目標値を遵守する
+* feature ファイルの配置: `src/test/resources/features/unit` 配下。既存の test / integrationTest / e2eTest タスクは JUnit Platform で実行されるため、Cucumber シナリオも同じタスクに含まれる
 
 #### 5.2 テストケース設計
 
-* detailed_design/配下の各タスクのbehaviors.md（単体テスト用）の各シナリオ（Gherkin 記法の Given-When-Then）から対応するテストケースを実装する
-* detailed_design/配下の各タスクのdetailed_design.mdの各メソッドシグネチャに対して、以下のテストを作成する：
+* detailed_design/配下の各タスクのbehaviors.md（単体テスト用）の Gherkin シナリオから **Cucumber .feature** と **Cucumber ステップ定義** を生成する
+* detailed_design/配下の各タスクのdetailed_design.mdの各メソッドシグネチャに対して、以下のテストを .feature とステップ定義で作成する：
   * 正常系テスト（期待する戻り値が返されるか）
   * 異常系テスト（例外が適切にスローされるか）
   * 境界値テスト（null、空文字列、最大値、最小値等）

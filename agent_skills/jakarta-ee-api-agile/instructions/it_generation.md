@@ -23,7 +23,7 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 このインストラクションは、アジャイル版のSPECに基づき結合テスト（Integration Test）を生成するためのものである。
 
 重要な方針
-* テストフレームワーク: JUnit 5 + Weld SE（CDIコンテナ）
+* テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）+ Weld SE（CDIコンテナ）
 * テスト対象: usecases/{名}/behaviors.md のシナリオ（Gherkin記法）。common 用の振る舞いが common/behaviors.md 等で定義されていればそれも参照する
 * Service層以下（Service + DAO + Entity）の実際の連携をテストする。外部APIは WireMock でスタブ化
 * アプリケーションサーバーは不要（Weld SE で CDI コンテナを起動）
@@ -44,10 +44,10 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 
 ## 2. 結合テストの生成
 
-* usecases/{名}/behaviors.md の Gherkin シナリオを、JUnit 5 + Weld SE による結合テストコードに変換する
+* usecases/{名}/behaviors.md の Gherkin シナリオを、**Cucumber の .feature ファイル**（`src/test/resources/features/integration` 配下）と **Cucumber ステップ定義**（Java、Weld SE を利用）に変換する
 * Service層以下を実装で動かし、実際のDB（メモリDB）を使用する
 * 外部API呼び出しは WireMock でスタブ化する（external_interface.md に従う）
-* @Tag("integration") 等で結合テストを分離し、プロジェクトのビルド設定に従う
+* feature およびステップ定義に @Tag("integration") を付与し、プロジェクトの integrationTest タスクで実行されるようにする
 
 ---
 

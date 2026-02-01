@@ -28,7 +28,7 @@ spec_directory: "projects/sdd-wf/person/jsf-person-sdd/specs/baseline"
 
 重要な方針
 * 単体テスト実行評価後に結合テストを生成する（unit_test_execution.mdの次のステップ）
-* テストフレームワーク: JUnit 5 + Weld SE（CDIコンテナ）
+* テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）+ Weld SE（CDIコンテナ）
 * テスト対象: basic_design/behaviors.md（結合テスト用）のシナリオ（Gherkin 記法で記述されている前提。@agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 * Service層以下（Service + Entity）の実際の連携をテスト
 * モックは使用しない（実際のDB操作）
@@ -106,12 +106,13 @@ spec_directory: "projects/sdd-wf/person/jsf-person-sdd/specs/baseline"
 
 ### 3.1 テストケース設計方針
 
-* 1シナリオ＝1テストクラスの粒度
-* basic_design/behaviors.md の各シナリオ（Gherkin 記法の Given-When-Then）をテスト
-* Service層のビジネスロジックを中心にテスト
+* basic_design/behaviors.md の Gherkin シナリオを **Cucumber .feature ファイル**（`src/test/resources/features/integration` 配下）と **Cucumber ステップ定義**（Java、Weld SE を利用）に変換する
+* 1シナリオ＝1 Feature または 1 Scenario の粒度で .feature に記述
+* Service層のビジネスロジックを中心にステップ定義でテスト
 * 実際のDB（メモリDB）を使用
 * Managed Beanは対象外（E2Eテストで検証）
 * トランザクション管理の検証
+* feature およびステップ定義に @Tag("integration") を付与し、integrationTest タスクで実行されるようにする
 
 ### 3.2 テストベースクラス
 

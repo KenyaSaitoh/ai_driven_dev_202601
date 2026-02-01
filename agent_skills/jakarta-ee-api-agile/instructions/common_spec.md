@@ -1,4 +1,4 @@
-# common SPEC 作成インストラクション（アジャイル）
+# 業務共通SPEC 作成インストラクション（アジャイル）
 
 ## パラメータ設定
 
@@ -24,13 +24,13 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 
 ## 概要
 
-このインストラクションは、アジャイル版プロジェクトの共通SPEC（common/）を作成・更新するためのものである。
+このインストラクションは、アジャイル版プロジェクトの業務共通SPEC（common/）を作成・更新するためのものである。
 
 重要な方針
 * common/ には data_model.md, external_interface.md, architecture_design.md の3ファイルのみを配置する
 * functional_design.md は作らない（機能は各ユースケースの userstory.md / behaviors.md で定義する）
-* プロダクトバックログや既存資料（ウォーターフォール用 basic_design 等）があれば、対話的に common の内容を埋める
-* 既存の basic_design から common 用3ファイルへ移行する場合は、basic_design の同名ファイルを common/ にコピー・整理してよい
+* プロダクトバックログや既存資料（ウォーターフォール用 basic_design 等）があれば、対話的に業務共通SPECの内容を埋める
+* 既存の basic_design から業務共通SPEC用3ファイルへ移行する場合は、basic_design の同名ファイルを common/ にコピー・整理してよい
 
 作成するSPEC
 
@@ -52,15 +52,15 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 ### 1.2 既存SPECの確認（移行時）
 
 * {spec_directory}/basic_design/ が存在する場合（ウォーターフォール用）:
-  * data_model.md, external_interface.md, architecture_design.md を読み、common/ 用にコピー・整理するかユーザーに確認する
+  * data_model.md, external_interface.md, architecture_design.md を読み、業務共通SPEC（common/）用にコピー・整理するかユーザーに確認する
 * common/ が既に存在する場合:
-  * 既存の common/ 3ファイルを更新するか、新規作成するかユーザーに確認する
+  * 既存の業務共通SPEC（common/）の3ファイルを更新するか、新規作成するかユーザーに確認する
 
 ---
 
 ## 2. テンプレートの展開
 
-### 2.1 common テンプレートの展開
+### 2.1 業務共通SPEC用テンプレートの展開
 
 @agent_skills/jakarta-ee-api-agile/templates/common/ 配下のテンプレートファイルを {spec_directory}/common/ にコピーする
 
@@ -70,7 +70,7 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 * architecture_design.md - アーキテクチャ設計書
 
 注意
-* 既に common/ にファイルが存在する場合は、ユーザーに「上書きしますか？」と確認する
+* 既に業務共通SPEC（common/）にファイルが存在する場合は、ユーザーに「上書きしますか？」と確認する
 * 既存の basic_design から移行する場合は、コピー後にプレースホルダーを既存内容で置き換える
 
 ### 2.2 ディレクトリ構造の確認
@@ -79,7 +79,7 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 
 ```
 {spec_directory}/
-├── common/                    # 共通SPEC（本インストラクションの成果物）
+├── common/                    # 業務共通SPEC（本インストラクションの成果物）
 │   ├── data_model.md
 │   ├── external_interface.md
 │   └── architecture_design.md
@@ -91,7 +91,7 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 
 ---
 
-## 3. 対話による common SPEC の作成・更新
+## 3. 対話による業務共通SPECの作成・更新
 
 ### 3.1 architecture_design.md
 
@@ -114,7 +114,7 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 
 ## 4. SPECの検証
 
-* common の3ファイル間の整合性を確認する（data_model のテーブルと architecture の永続化方針、external_interface と architecture の連携方針）
+* 業務共通SPECの3ファイル間の整合性を確認する（data_model のテーブルと architecture の永続化方針、external_interface と architecture の連携方針）
 * プレースホルダー（[PROJECT_NAME]、[DATE] 等）が残っていないか確認する
 * @agent_skills/jakarta-ee-api-agile/principles/common_rules.md の Markdown フォーマット規約に従っているか確認する
 
@@ -124,8 +124,8 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 
 ユーザーに以下を報告する
 
-* 作成・更新した common SPEC の一覧: data_model.md, external_interface.md, architecture_design.md のパス
-* 次のステップの案内: ユースケースSPEC作成（usecase_spec.md）、または実装（必要なら task_breakdown.md で tasks/ を用意してから code_generation.md）は common 完了後に行う
+* 作成・更新した業務共通SPECの一覧: data_model.md, external_interface.md, architecture_design.md のパス
+* 次のステップの案内: ユースケースSPEC作成（usecase_spec.md）、または実装（必要なら task_breakdown.md で tasks/ を用意してから code_generation.md）は業務共通SPEC完了後に行う
 
 ---
 

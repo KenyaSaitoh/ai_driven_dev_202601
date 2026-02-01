@@ -37,9 +37,6 @@ CREATE TABLE ORDER_DETAIL (
     FOREIGN KEY (ORDER_TRAN_ID) REFERENCES ORDER_TRAN(ORDER_TRAN_ID) ON DELETE CASCADE
 );
 
--- Index for book reference queries
-CREATE INDEX IDX_BOOK_ID ON ORDER_DETAIL(BOOK_ID);
-
 -- ============================================================
 -- Schema Information
 -- ============================================================

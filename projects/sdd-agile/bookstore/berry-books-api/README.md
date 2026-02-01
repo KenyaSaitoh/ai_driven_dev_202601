@@ -65,7 +65,7 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 ```
 @agent_skills/jakarta-ee-api-agile/instructions/code_generation.md
 
-業務共通（common）の実装を生成してください。
+業務共通（common）のコードを生成してください。
 
 パラメータ:
 * project_root: projects/sdd-agile/bookstore/berry-books-api
@@ -78,7 +78,7 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 ```
 @agent_skills/jakarta-ee-api-agile/instructions/code_generation.md
 
-ユースケース auth の実装を生成してください。
+ユースケース auth のコードを生成してください。
 
 パラメータ:
 * project_root: projects/sdd-agile/bookstore/berry-books-api

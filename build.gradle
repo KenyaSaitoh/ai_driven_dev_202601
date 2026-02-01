@@ -162,6 +162,10 @@ subprojects {
         testImplementation "org.mockito:mockito-core:5.5.0"
         testImplementation "org.mockito:mockito-junit-jupiter:5.5.0"
         
+        // Cucumber（Gherkin / BDD - 全Java系プロジェクト共通）
+        testImplementation "io.cucumber:cucumber-java:7.33.0"
+        testImplementation "io.cucumber:cucumber-junit-platform-engine:7.33.0"
+        
         // 結合テスト: Weld SE（CDIコンテナ）
         testImplementation "org.jboss.weld.se:weld-se-core:5.1.0.Final"
         
@@ -414,7 +418,7 @@ subprojects {
                         delete file
                     }
                 }
-                println "✓ Tasks cleaned (folder kept empty)"
+                println "[OK] Tasks cleaned (folder kept empty)"
             } else {
                 println "No tasks directory found"
             }
@@ -437,7 +441,7 @@ subprojects {
                                 delete file
                             }
                         }
-                        println "✓ Detailed design cleaned (folder kept empty)"
+                        println "[OK] Detailed design cleaned (folder kept empty)"
                     }
                 }
             } else {
@@ -521,14 +525,14 @@ subprojects {
             }
             
             println ""
-            println "✓ Generated code cleaned"
-            println "✓ Directory structure preserved:"
+            println "[OK] Generated code cleaned"
+            println "[OK] Directory structure preserved:"
             println "    - src/main/java/ (with .gitkeep)"
             println "    - src/main/resources/ (with .gitkeep)"
             println "    - src/main/webapp/ (with .gitkeep)"
             println "    - src/test/java/ (with .gitkeep)"
             println "    - src/test/resources/ (with .gitkeep)"
-            println "✓ SPEC files are preserved (requirements/, basic_design/, detailed_design/)"
+            println "[OK] SPEC files are preserved (requirements/, basic_design/, detailed_design/)"
         }
     }
     
@@ -999,11 +1003,11 @@ task cleanupAllSddProjects {
         println "===================================="
         println "All SDD Projects Cleanup Completed!"
         println "===================================="
-        println "  ✓ back-office-api-sdd-wf (sdd-wf)"
-        println "  ✓ berry-books-api-sdd-wf (sdd-wf)"
-        println "  ✓ jsf-person-sdd-wf (sdd-wf)"
-        println "  ✓ back-office-api-sdd-agile (sdd-agile)"
-        println "  ✓ berry-books-api-sdd-agile (sdd-agile)"
+        println "  [OK] back-office-api-sdd-wf (sdd-wf)"
+        println "  [OK] berry-books-api-sdd-wf (sdd-wf)"
+        println "  [OK] jsf-person-sdd-wf (sdd-wf)"
+        println "  [OK] back-office-api-sdd-agile (sdd-agile)"
+        println "  [OK] berry-books-api-sdd-agile (sdd-agile)"
         println ""
         println "[INFO] Preserved SPEC files:"
         println "    - specs/*/requirements/ (requirements.md, behaviors.md for E2E tests)"
@@ -1490,7 +1494,7 @@ task exploreExcelFiles doLast {
             // 一時的な.zipファイルを削除
             zipFile.delete()
             
-            println "  ✓ Extracted successfully to: ${outputDir.absolutePath}"
+            println "  [OK] Extracted successfully to: ${outputDir.absolutePath}"
             println ""
             
         } catch (Exception e) {

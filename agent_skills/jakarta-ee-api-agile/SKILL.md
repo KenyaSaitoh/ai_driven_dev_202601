@@ -56,7 +56,7 @@ AIと対話しながら以下を実施
 ```
 @agent_skills/jakarta-ee-api-agile/instructions/code_generation.md
 
-指定した対象（common または usecases/{名}）の実装を生成してください
+指定した対象（common または usecases/{名}）のコードを生成してください
 
 パラメータ
 * project_root: <プロジェクトルートパス>

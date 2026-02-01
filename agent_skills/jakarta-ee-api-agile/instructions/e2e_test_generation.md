@@ -23,7 +23,7 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 このインストラクションは、アジャイル版のSPECに基づきE2Eテスト（End-to-End Test）を生成するためのものである。
 
 重要な方針
-* テストフレームワーク: REST Assured を使用
+* テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）+ REST Assured
 * テスト対象: usecases/{名}/behaviors.md のシナリオ（Gherkin記法）。E2EとしてAPI層を含む全体フローを検証する
 * usecase_folder 未指定時: usecases/ 配下の各 behaviors.md を集約し、複数ユースケースにまたがるE2Eシナリオも生成可能とする
 * アプリケーションサーバーが起動している状態でテストを実行する
@@ -44,9 +44,9 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 
 ## 2. E2Eテストの生成
 
-* usecases/{名}/behaviors.md の Gherkin シナリオを、REST Assured によるE2Eテストコードに変換する
-* 認証フロー（ログイン→トークン取得）のセットアップ、複数APIの連携、レスポンス検証、テストデータのセットアップ/クリーンアップを実装する
-* @Tag("e2e") 等でE2Eテストを分離し、プロジェクトのビルド設定に従う
+* usecases/{名}/behaviors.md の Gherkin シナリオを、**Cucumber の .feature ファイル**（`src/test/resources/features/e2e` 配下）と **Cucumber ステップ定義**（Java、REST Assured を利用）に変換する
+* 認証フロー（ログイン→トークン取得）のセットアップ、複数APIの連携、レスポンス検証、テストデータのセットアップ/クリーンアップをステップ定義内に実装する
+* feature およびステップ定義に @Tag("e2e") を付与し、プロジェクトの e2eTest タスクで実行されるようにする
 
 ---
 
