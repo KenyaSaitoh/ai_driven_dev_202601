@@ -4,6 +4,13 @@
 
 ### Changed
 
+#### 振舞仕様書（Gherkin）からのテスト生成を Cucumber ベースに統一
+* agent_skills/jakarta-ee-api-agile: `code_generation.md` の単体テスト生成を、behaviors.md の Gherkin から **Cucumber .feature**（`src/test/resources/features/unit`）と **Cucumber ステップ定義**（Java）に変換する方針に変更。JUnit 5 + Cucumber（cucumber-junit-platform-engine）を明記
+* agent_skills/jakarta-ee-api-agile: `it_generation.md` を、結合テストを Cucumber .feature（`features/integration`）＋ステップ定義（Weld SE）に変換する旨に変更。`@Tag("integration")` を記載
+* agent_skills/jakarta-ee-api-agile: `e2e_test_generation.md` を、E2E を Cucumber .feature（`features/e2e`）＋ステップ定義（REST Assured）に変換する旨に変更。`@Tag("e2e")` を記載
+* agent_skills/jakarta-ee-api-base: `code_generation.md` の単体テスト生成ガイドラインを、detailed_design/behaviors.md の Gherkin から Cucumber .feature とステップ定義を生成する形に変更。`it_generation.md`・`e2e_test_generation.md` も同様に Cucumber .feature＋ステップ定義に統一
+* agent_skills/struts-to-jsf-migration: `code_generation.md`・`it_generation.md`・`e2e_test_generation.md` を、behaviors.md から Cucumber .feature と Cucumber ステップ定義を生成する旨に変更（単体: features/unit、結合: features/integration、E2E: features/e2e）。E2E は Playwright をステップ定義で利用
+
 #### agent_skills（jakarta-ee-api-base / struts-to-jsf-migration）の簡略化・7段階化
 * agent_skills/jakarta-ee-api-base: プロセスを6段階から7段階に変更（結合テスト生成・E2Eテスト生成を独立ステップに）。`it_generation.md`・`e2e_test_generation.md` から GitHub Actions・Gradle タスク固有の記述を削除し、依存・設定・テストテンプレートを抽象化。実行・レポート・CI は「注意事項」「参照資料」に集約
 * agent_skills/jakarta-ee-api-base: `code_generation.md` の単体テスト例を簡略化（モック/実インスタンスの扱いを要約）。進捗・完了条件・コンポーネント参照を `principles/architecture.md` および表形式に整理
@@ -50,6 +57,9 @@
 * `agent_skills/jakarta-ee-api-base/instructions/code_generation.md` の番号重複を修正（「11. 静的リソース」を「14.」に修正）
 
 ### Added
+
+#### Cucumber（Gherkin / BDD）のテスト依存関係
+* `build.gradle`: 全 Java 系プロジェクト（customer-hub-swing を除く）のテスト依存に Cucumber を追加。`io.cucumber:cucumber-java:7.33.0` と `io.cucumber:cucumber-junit-platform-engine:7.33.0` を testImplementation で指定。振舞仕様書（behaviors.md）の Gherkin から .feature とステップ定義でテストを実行する前提とする
 
 #### Gradle ビルドへの組み込み
 * アジャイル向け仕様駆動開発用に `projects/sdd-agile`（bookstore）を Gradle ビルドに組み込み: `settings.gradle` に `berry-books-api-sdd-agile`・`back-office-api-sdd-agile` を追加（projectDir は `projects/sdd-agile/bookstore/berry-books-api-sdd` 等）
