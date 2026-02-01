@@ -11,41 +11,38 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 > Note: このプロジェクトは仕様駆動開発（SDD: Specification-Driven Development）の研修用プロジェクトです。
 
 > SDDとは:
-> - 詳細な仕様書（specs/）に基づいて、段階的にコードを生成する手法
-> - AIを活用して、仕様書からタスクリスト（tasks/）を生成し、タスクに従って実装を進める
-> - 憲章（principles/）に定められた設計原則とベストプラクティスに従う
-> - アジャイル用Agent Skills (`agent_skills/jakarta-ee-api-agile/`) を使用した開発
+> - 業務共通SPEC（common/）とユースケースSPEC（usecases/{名}/）に基づいて実装を進める手法（ウォーターフォールの basic_design/ や detailed_design/ は不要）
+> - タスク分解は不要。target 指定で common または usecases/{名} 単位でコード生成
+> - Agent Skills (`agent_skills/jakarta-ee-api-agile/`) の principles/ に定められた設計原則に従う
 
 ## 🤖 Agent Skillsを使った開発（アジャイル）
 
-このプロジェクトは、アジャイル向け Jakarta EE API 開発 Agent Skills（jakarta-ee-api-agile）を使用します。SPECは `specs/baseline/common/` と `specs/baseline/usecases/{名}/` で管理します。
+このプロジェクトは、アジャイル向け Jakarta EE API 開発 Agent Skills（jakarta-ee-api-agile）を使用します。SPECは `specs/baseline/common/` と `specs/baseline/usecases/{名}/` で管理します。**タスク分解（tasks/）は不要**です。
 
 開発は以下の流れで進めます：
 
 ```
-ステップ1: common SPEC + ユースケースSPEC（common/ + usecases/{名}/）
+ステップ1: 業務共通SPEC + ユースケースSPEC（common/ + usecases/{名}/）
     ↓
-ステップ2: タスク分解（common + ユースケース単位）
+ステップ2: コード生成（target=common または target=usecases/{名}）
     ↓
-ステップ3: コード生成（common 先行 → ユースケース単位）
+ステップ3: 単体テスト実行評価
     ↓
-ステップ4: 単体テスト実行評価
+ステップ4: 結合テスト生成（usecases/*/behaviors.md → JUnit + Weld SE）
     ↓
-ステップ5: 結合テスト生成（usecases/*/behaviors.md → JUnit + Weld SE）
-    ↓
-ステップ6: E2Eテスト生成（usecases 等の behaviors → REST Assured）
+ステップ5: E2Eテスト生成（usecases 等の behaviors → REST Assured）
 ```
 
 ---
 
 ### 📋 開発フロー
 
-#### ステップ1: common SPEC + ユースケースSPEC（プロジェクト開始時・拡張時）
+#### ステップ1: 業務共通SPEC + ユースケースSPEC（プロジェクト開始時・拡張時）
 
-common（data_model, external_interface, architecture_design）を先に整え、各ユースケースに userstory.md / behaviors.md を配置します。
+業務共通SPEC（data_model, external_interface, architecture_design）を先に整え、各ユースケースに userstory.md / behaviors.md を配置します。
 
 ```
-@agent_skills/jakarta-ee-api-agile/instructions/common_spec.md   # common/ の3SPEC
+@agent_skills/jakarta-ee-api-agile/instructions/common_spec.md   # 業務共通SPEC（common/）の3SPEC
 @agent_skills/jakarta-ee-api-agile/instructions/usecase_spec.md   # usecases/{名}/ の userstory + behaviors
 
 パラメータ:
@@ -57,96 +54,44 @@ common（data_model, external_interface, architecture_design）を先に整え�
 
 ---
 
-#### ステップ2: タスク分解（common + ユースケース単位）
+#### ステップ2: コード生成（target 指定で実装＋単体テスト）
 
-common 用タスクとユースケース別タスクに分解します。
+業務共通SPEC（common/）の3SPEC と usecases/{名}/userstory.md, behaviors.md を駆動元に、**target** で指定した対象の実装と単体テストを生成します。タスクファイル（tasks/）は不要です。
+
+**実行順序**: 先に `target=common` で業務共通実装を完了し、続いて各ユースケースを `target=usecases/{名}` で順に実装します。
+
+使用例（業務共通・common）:
 
 ```
-@agent_skills/jakarta-ee-api-agile/instructions/task_breakdown.md
+@agent_skills/jakarta-ee-api-agile/instructions/code_generation.md
 
-全タスクを分解してください。
+業務共通（common）の実装を生成してください。
 
 パラメータ:
 * project_root: projects/sdd-agile/bookstore/back-office-api
-* spec_directory: projects/sdd-agile/bookstore/back-office-api/specs/baseline
+* target: common
+* skip_infrastructure: true  # 初回setup時: DB/APサーバーセットアップをスキップする場合
 ```
 
-* 参照: `specs/baseline/common/`, `specs/baseline/usecases/{名}/`
+使用例（ユースケース）:
+
+```
+@agent_skills/jakarta-ee-api-agile/instructions/code_generation.md
+
+ユースケース books の実装を生成してください。
+
+パラメータ:
+* project_root: projects/sdd-agile/bookstore/back-office-api
+* target: usecases/books
+```
+
+* 同様に `target: usecases/auth`, `target: usecases/stocks`, `target: usecases/category`, `target: usecases/publisher`, `target: usecases/workflow` 等で各ユースケースを実装
+
+**SPEC変更時**: SPEC を編集したうえで、本インストラクションで target を指定して再実行すれば差分が反映されます。
 
 ---
 
-#### ステップ3: コード生成（tasks/tasks.mdの順序に従う）
-
-common/ の3SPEC と usecases/{名}/userstory.md, behaviors.md を駆動元に、タスクに従い実装と単体テストを生成します。
-
-**重要**: 実行順序は `tasks/tasks.md` の「タスク概要」表と「実行順序」セクションを参照してください。
-- 「依存タスク」列を確認し、依存タスクが完了してから実行
-- 「並行実行可能」列を確認し、並行実行可能なタスクは同時に実装可能
-
-> 単体テストの方針: タスク粒度内のコンポーネント間は実際の連携をテスト。タスク外の依存関係のみモック化。
-
-コマンドテンプレート:
-
-```
-@agent_skills/jakarta-ee-api-agile/instructions/code_generation.md
-
-[タスクID]を実装してください。
-
-パラメータ:
-* project_root: projects/sdd-agile/bookstore/back-office-api-agile
-* task_file: projects/sdd-agile/bookstore/back-office-api-agile/tasks/[タスクファイル名]
-```
-
-使用例（setup）:
-
-```
-@agent_skills/jakarta-ee-api-agile/instructions/code_generation.md
-
-setupを実装してください。
-
-パラメータ:
-* project_root: projects/sdd-agile/bookstore/back-office-api-agile
-* task_file: projects/sdd-agile/bookstore/back-office-api-agile/tasks/setup.md
-* skip_infrastructure: true  # setupタスク専用: DB/APサーバーのインストールをスキップ
-```
-
-注意:
-* `skip_infrastructure` はsetupタスク実行時のみ有効
-* 機能タスク（FUNC_XXX）ではこのパラメータは無視される
-
-使用例（機能タスク）:
-
-```
-@agent_skills/jakarta-ee-api-agile/instructions/code_generation.md
-
-機能タスクを実装してください。
-
-パラメータ:
-* project_root: projects/sdd-agile/bookstore/back-office-api-agile
-* task_file: projects/sdd-agile/bookstore/back-office-api-agile/tasks/FUNC_001_xxx.md
-```
-
-注意: 実際のタスクファイル名は `tasks/tasks.md` を参照してください
-
-使用例（FUNC_002）:
-
-```
-@agent_skills/jakarta-ee-api-agile/instructions/code_generation.md
-
-FUNC_002を実装してください。
-
-パラメータ:
-* project_root: projects/sdd-agile/bookstore/back-office-api-agile
-* task_file: projects/sdd-agile/bookstore/back-office-api-agile/tasks/FUNC_002_books.md
-```
-
-注意:
-* タスクファイル名は `tasks/tasks.md` のタスクファイル列と一致させる
-* 各タスクファイル（FUNC_XXX.md）のヘッダーにある「依存タスク」を確認して順序を守る
-
----
-
-#### ステップ5: 単体テスト実行評価
+#### ステップ3: 単体テスト実行評価
 
 単体テストを実行してカバレッジを分析し、品質を検証します。
 
@@ -156,8 +101,8 @@ FUNC_002を実装してください。
 単体テストを実行してください。
 
 パラメータ:
-* project_root: projects/sdd-agile/bookstore/back-office-api-agile
-* target_type: FUNC_002_books
+* project_root: projects/sdd-agile/bookstore/back-office-api
+* target: common   # または usecases/books 等、対象ユースケース
 ```
 
 AIが：
@@ -170,29 +115,29 @@ AIが：
 重要：
 * 問題を発見してもユーザー確認なしに修正しない
 * カバレッジ不足やデッドコードを具体的に提案
-* 必要に応じてコード生成（または common/usecases SPEC の見直し）に戻ってループ
+* 必要に応じてコード生成（または 業務共通SPEC/ユースケースSPEC の見直し）に戻ってループ
 
 🔄 フィードバックループ:
 ```
-詳細設計 → コード生成 → テスト実行評価
-    ↑                         ↓
-    └──── フィードバック ←────┘
+コード生成 → テスト実行評価
+    ↑              ↓
+    └── フィードバック ←┘
 ```
 
 ---
 
-#### ステップ5: 結合テスト生成（単体テスト完了後）
+#### ステップ4: 結合テスト生成（単体テスト完了後）
 
 単体テスト完了後に、結合テスト（Integration Test）を生成します。
 
 ```
-@agent_skills/jakarta-ee-api-base/instructions/it_generation.md
+@agent_skills/jakarta-ee-api-agile/instructions/it_generation.md
 
 結合テストを生成してください。
 
 パラメータ:
-* project_root: projects/sdd-agile/bookstore/back-office-api-agile
-* spec_directory: projects/sdd-agile/bookstore/back-office-api-agile/specs/baseline
+* project_root: projects/sdd-agile/bookstore/back-office-api
+* spec_directory: projects/sdd-agile/bookstore/back-office-api/specs/baseline
 ```
 
 AIが：
@@ -212,7 +157,7 @@ AIが：
 
 ---
 
-#### ステップ6: E2Eテスト生成（実装完了後）
+#### ステップ5: E2Eテスト生成（実装完了後）
 
 全機能実装完了後に、E2Eテスト（End-to-End Test）を生成します。
 
@@ -222,8 +167,8 @@ AIが：
 E2Eテストを生成してください。
 
 パラメータ:
-* project_root: projects/sdd-agile/bookstore/back-office-api-agile
-* spec_directory: projects/sdd-agile/bookstore/back-office-api-agile/specs/baseline
+* project_root: projects/sdd-agile/bookstore/back-office-api
+* spec_directory: projects/sdd-agile/bookstore/back-office-api/specs/baseline
 ```
 
 AIが：
@@ -245,9 +190,9 @@ AIが：
 
 ---
 
-### 🔄 SPEC変更対応（アジャイル）
+### 🔄 SPEC変更時
 
-common またはユースケースの仕様変更時は、`@agent_skills/jakarta-ee-api-agile/instructions/spec_change.md` を使用して影響範囲を適用します。変更対象は `specs/baseline/common/` または `specs/baseline/usecases/{名}/` の userstory.md / behaviors.md / common の3SPECです。
+業務共通SPEC またはユースケースの仕様を変更した場合、`@agent_skills/jakarta-ee-api-agile/instructions/code_generation.md` で target を指定して再実行すれば、差分が反映されます。
 
 ---
 
@@ -323,68 +268,38 @@ common またはユースケースの仕様変更時は、`@agent_skills/jakarta
 
 ## プロジェクト構成
 
+### SPEC構成（アジャイル・本プロジェクトの実際の構造）
+
 ```
-back-office-api-sdd-agile/
-├── specs/                          # 仕様書（SDD）
-│   ├── baseline/
-│   │   ├── common/                 # 共通SPEC
-│   │   │   ├── data_model.md
-│   │   │   ├── external_interface.md
-│   │   │   └── architecture_design.md
-│   │   ├── usecases/               # ユースケース別
-│   │   │   ├── auth/               # userstory.md, behaviors.md
-│   │   │   ├── books/
-│   │   │   ├── category/
-│   │   │   ├── publisher/
-│   │   │   ├── stocks/
-│   │   │   └── workflow/
-│   │   └── detailed_design/        # 詳細設計SPEC
-│   │       ├── common/
-│   │       │   ├── detailed_design.md
-│   │       │   └── behaviors.md   # 単体テスト用
-│   │       ├── FUNC_001_books/
-│   │       │   ├── detailed_design.md
-│   │       │   └── behaviors.md
-│   │       ├── FUNC_002_stocks/
-│   │       │   ├── detailed_design.md
-│   │       │   └── behaviors.md
-│   │       └── FUNC_003_categories/
-│   │           ├── detailed_design.md
-│   │           └── behaviors.md
-│   └── enhancements/               # 機能拡張仕様
-├── principles/                     # 開発憲章
-│   └── constitution.md
-├── tasks/                          # タスクリスト（AI生成）
-│   ├── tasks.md
-│   ├── setup.md
-│   ├── FUNC_001_infrastructure.md
-│   ├── FUNC_001_books.md
-│   └── FUNC_002_stocks.md
+specs/
+└── baseline/
+    ├── common/                     # 業務共通SPEC
+    │   ├── architecture_design.md
+    │   ├── data_model.md
+    │   └── external_interface.md
+    └── usecases/                   # ユースケース別（各フォルダに userstory.md, behaviors.md）
+        ├── auth/
+        ├── books/
+        ├── category/
+        ├── publisher/
+        ├── stocks/
+        └── workflow/
+```
+
+* ウォーターフォール版の `basic_design/`、`requirements/`、`detailed_design/`、`tasks/` は本フローでは使用しません。
+
+### プロジェクト全体
+
+```
+back-office-api/
+├── specs/                          # 上記の通り
+├── sql/hsqldb/                     # DDL・DML（setupHsqldb で使用）
 ├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── pro/kensait/backoffice/
-│   │   │       ├── api/              # JAX-RS Resources
-│   │   │       │   ├── dto/          # API DTOs (Records)
-│   │   │       │   └── exception/    # Exception Mappers
-│   │   │       ├── service/          # Business Logic
-│   │   │       ├── dao/              # Data Access Objects
-│   │   │       ├── entity/           # JPA Entities (Book, Stock, Category, Publisher)
-│   │   │       ├── util/             # Utilities
-│   │   │       └── FUNC_001_infrastructure/   # Infrastructure
-│   │   ├── resources/
-│   │   │   ├── META-INF/
-│   │   │   │   └── persistence.xml
-│   │   │   ├── db/
-│   │   │   │   ├── schema.sql
-│   │   │   │   └── sample_data.sql
-│   │   │   └── log4j2.xml
-│   │   └── webapp/
-│   │       └── WEB-INF/
-│   │           └── web.xml
-│   └── test/
-│       └── java/
-│           └── pro/kensait/backoffice/
+│   ├── main/java/
+│   ├── main/resources/
+│   └── main/webapp/
+├── images/covers/                  # 書籍表紙画像
+├── test_script/                    # APIテストスクリプト
 ├── build.gradle
 └── README.md
 ```
@@ -560,7 +475,7 @@ curl -X GET http://localhost:8080/back-office-api-sdd-agile/api/categories
 テスト実行後、HTMLレポートが生成されます：
 
 ```
-projects/sdd-agile/bookstore/back-office-api-agile/build/reports/tests/test/index.html
+projects/sdd-agile/bookstore/back-office-api/build/reports/tests/test/index.html
 ```
 
 ブラウザで開くとテスト結果の詳細が確認できます。
@@ -572,7 +487,7 @@ projects/sdd-agile/bookstore/back-office-api-agile/build/reports/tests/test/inde
 ./gradlew :back-office-api-sdd-agile:jacocoTestReport
 
 # カバレッジレポートの場所
-# projects/sdd-agile/bookstore/back-office-api-agile/build/reports/jacoco/test/html/index.html
+# projects/sdd-agile/bookstore/back-office-api/build/reports/jacoco/test/html/index.html
 ```
 
 ## 📚 アーキテクチャ
@@ -679,6 +594,26 @@ rm -f hsqldb/data/testdb.*
 # 初期データをセットアップ
 ./gradlew :back-office-api-sdd-agile:setupHsqldb
 ```
+
+## 🧹 SDD成果物のクリーンアップ
+
+仕様駆動開発により何度でも再実装できます。詳細は [ルートREADMEのSDDクリーンアップ節](../../../README.md#仕様駆動開発sddプロジェクトの成果物クリーンアップ) を参照してください。
+
+```bash
+# タスクファイルのみ削除（sdd-agileでは tasks/ は最小限）
+./gradlew :back-office-api-sdd-agile:cleanTasks
+
+# 詳細設計SPECのみ削除（sdd-agileでは detailed_design/ は未使用のため無操作）
+./gradlew :back-office-api-sdd-agile:cleanDetailedDesign
+
+# 実装コードのみ削除（src/, build/）
+./gradlew :back-office-api-sdd-agile:cleanCode
+
+# すべて削除（common/, usecases/ は保護）
+./gradlew :back-office-api-sdd-agile:cleanAllSdd
+```
+
+* 保護されるSPEC: `specs/baseline/common/`, `specs/baseline/usecases/`
 
 ## 📖 参考リンク
 

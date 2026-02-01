@@ -283,7 +283,10 @@ npm run dev
 
 SDDプロジェクト（sdd-wf / sdd-agile）は、仕様駆動開発により何度でも再実装できます。
 
-成果物は3タイプに分けてクリーンアップできます。要件定義・基本設計SPEC（specs/*/requirements/、specs/*/basic_design/）は絶対に削除されません。
+成果物は3タイプに分けてクリーンアップできます。
+
+* **sdd-wf**: 要件定義・基本設計SPEC（specs/*/requirements/、specs/*/basic_design/）は絶対に削除されません。
+* **sdd-agile**: 業務共通SPEC・ユースケースSPEC（specs/baseline/common/、specs/baseline/usecases/）は絶対に削除されません。※detailed_design/ は sdd-agile では使用しません。
 
 ### タイプ1: タスクファイルのみクリーンアップ
 

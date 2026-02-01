@@ -758,6 +758,26 @@ rm -f hsqldb/data/testdb.*
 ./gradlew :back-office-api-sdd-wf:setupHsqldb
 ```
 
+## 🧹 SDD成果物のクリーンアップ
+
+仕様駆動開発により何度でも再実装できます。詳細は [ルートREADMEのSDDクリーンアップ節](../../../README.md#仕様駆動開発sddプロジェクトの成果物クリーンアップ) を参照してください。
+
+```bash
+# タスクファイルのみ削除
+./gradlew :back-office-api-sdd-wf:cleanTasks
+
+# 詳細設計SPECのみ削除
+./gradlew :back-office-api-sdd-wf:cleanDetailedDesign
+
+# 実装コードのみ削除（src/, build/）
+./gradlew :back-office-api-sdd-wf:cleanCode
+
+# すべて削除（requirements/, basic_design/ は保護）
+./gradlew :back-office-api-sdd-wf:cleanAllSdd
+```
+
+* 保護されるSPEC: `specs/baseline/requirements/`, `specs/baseline/basic_design/`
+
 ## 📖 参考リンク
 
 ### Agent Skills
