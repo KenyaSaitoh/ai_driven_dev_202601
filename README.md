@@ -50,15 +50,6 @@ cd projects/master/bookstore
 cd projects/sandbox/bookstore
 ./run-bookstore-all.sh
 ```
-※ sandbox では API のコンテキストルートが `-sandbox` 付き（例: `/berry-books-api-sandbox`）になります。
-
-### ✨ 特徴
-
-- ✅ **カラフルなログ出力** - 進行状況を視覚的に確認
-- ✅ **詳細ログファイル** - `logs/`ディレクトリに自動保存
-- ✅ **エラーハンドリング** - 失敗時は即座に停止し、原因を報告
-- ✅ **バックグラウンド実行** - SPAは全てバックグラウンドで起動
-- ✅ **既存チェック** - 既に起動済みの場合は警告のみで続行
 
 ### 🛑 停止方法
 
@@ -98,12 +89,12 @@ kill <PID1> <PID2> <PID3>
 3. **sdd-wf/** - 仕様駆動開発（ウォーターフォール）プロジェクト（研修用）
    - 仕様書→タスク分解→詳細設計→実装の順で進める手法を学習
    - AIを活用した段階的な実装プロセスを体験
-   - **注意**: フォルダ名に `-sdd` を付ける古い命名は廃止済み。SDD対象は `back-office-api`、`berry-books-api` のみ。それ以外（SPA、customer-hub-api 等）は master と同じ内容。
+   - SDD対象は `back-office-api`、`berry-books-api` のみ。それ以外（SPA、customer-hub-api 等）は master と同じ内容。
 
 4. **sdd-agile/** - 仕様駆動開発（アジャイル）プロジェクト（研修用）
    - 書店ドメイン（bookstore）をイテレーション単位で仕様駆動開発
    - sdd-wf の bookstore をコピーした構成で、アジャイル向けの進め方を学習
-   - **注意**: SDD対象は `back-office-api`、`berry-books-api` のみ。それ以外は master と同じ内容。
+   - SDD対象は `back-office-api`、`berry-books-api` のみ。それ以外は master と同じ内容。
 
 ### ディレクトリ構造
 
@@ -160,7 +151,7 @@ ai_driven_dev_202601/
 ```
 
 > **sdd-wf / sdd-agile の bookstore について**  
-> SDDの対象となるのは `back-office-api` と `berry-books-api` の2フォルダのみです。`back-office-spa`、`berry-books-spa`、`customer-hub-api`、`customer-hub-spa` は master と同じ内容です。フォルダ名に `-sdd` を付ける古い命名は廃止済みで、Gradle プロジェクト名（例: `berry-books-api-sdd-wf`）で区別します。
+> SDDの対象となるのは `back-office-api` と `berry-books-api` の2フォルダのみです。`back-office-spa`、`berry-books-spa`、`customer-hub-api`、`customer-hub-spa` は master と同じ内容です。
 
 ## 🚀 セットアップとコマンド実行ガイド
 
