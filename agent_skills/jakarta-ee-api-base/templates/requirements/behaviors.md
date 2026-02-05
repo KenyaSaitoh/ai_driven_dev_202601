@@ -38,10 +38,11 @@
 
 注意: 以下は、詳細設計配下の単体テスト用behaviors.md（templates/detailed_design/behaviors.mdから生成）へのリンクです。
 
-| タスクID | タスク名 | 単体テスト用behaviors.md |
+| ドメイン | ドメイン名 | 単体テスト用behaviors.md |
 |---------|---------|----------------------|
-| FUNC_001 | [機能名1] | [../detailed_design/FUNC_001/behaviors.md](../detailed_design/FUNC_001/behaviors.md) |
-| FUNC_002 | [機能名2] | [../detailed_design/FUNC_002/behaviors.md](../detailed_design/FUNC_002/behaviors.md) |
+| common | 共通ドメイン | [../detailed_design/common/behaviors.md](../detailed_design/common/behaviors.md) |
+| orders | 注文管理 | [../detailed_design/orders/behaviors.md](../detailed_design/orders/behaviors.md) |
+| books_proxy | 書籍API連携 | [../detailed_design/books_proxy/behaviors.md](../detailed_design/books_proxy/behaviors.md) |
 
 ---
 

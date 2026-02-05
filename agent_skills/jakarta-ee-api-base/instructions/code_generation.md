@@ -6,35 +6,37 @@
 
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
-task_file: "ここに実行するタスクファイルのパスを入力"
-skip_infrastructure: false  # setupタスク専用: trueの場合、インフラセットアップをスキップ
+spec_directory: "ここにSPECディレクトリのパスを入力"
+target_domain: "対象ドメイン名"
 ```
 
-* 例1: setupタスクの実行
+* 例1: commonドメインの実装
 ```yaml
 project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
-task_file: "projects/sdd-wf/bookstore/back-office-api-sdd/tasks/setup.md"
-skip_infrastructure: true  # setupタスク実行時のみ有効: DB/APサーバーのインストールをスキップ
+spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
+target_domain: "common"
 ```
 
-* 例2: 機能タスクの実行
+* 例2: ordersドメインの実装
 ```yaml
 project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
-task_file: "projects/sdd-wf/bookstore/back-office-api-sdd/tasks/FUNC_002_books.md"
-skip_infrastructure: false  # 機能タスクではこのパラメータは無視される
+spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
+target_domain: "orders"
 ```
 
 注意
 * パス区切りはOS環境に応じて調整する（Windows: `\`, Unix/Linux/Mac: `/`）
 * 以降、`{project_root}` と表記されている箇所は、上記で設定した値に置き換える
+* 以降、`{spec_directory}` と表記されている箇所は、上記で設定した値に置き換える
+* commonは最優先で実装する必要がある（他のドメインはcommonに依存）
 
 ---
 
 ## 実装の実行
 
-重要: 指定されたタスクファイルのタスクのみを実行し、完了したら停止する。次のタスクに自動的に進んではいけない
+重要: 指定されたドメインの実装のみを実行し、完了したら停止する。次のドメインに自動的に進んではいけない
 
-パラメータとして指定されたプロジェクトルートとタスクファイルに基づいて、以下を実行する
+パラメータとして指定されたプロジェクトルートとドメインに基づいて、以下を実行する
 
 ### 1. 実装コンテキストをロードして分析する
 
@@ -51,11 +53,7 @@ skip_infrastructure: false  # 機能タスクではこのパラメータは無�
    * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
    * 詳細設計やコード生成時に、フレームワーク仕様に従った実装を行う
 
-3. 必須: 指定されたタスクファイルで完全なタスクリストと実行計画を確認する
-   * タスクの「参照SPEC」はMarkdownリンク形式で記述されている（クリック可能）
-   * リンク先のSPECファイルと指定されたセクションを必ず参照する
-
-4. 必須: `{project_root}/specs/baseline/basic_design/architecture_design.md` で以下を確認する
+3. 必須: `{spec_directory}/basic_design/common/architecture_design.md` で以下を確認する
    * 技術スタック（言語、バージョン、フレームワーク、ライブラリ）
    * アーキテクチャパターンとレイヤー構成
    * パッケージ構造と命名規則
@@ -64,67 +62,72 @@ skip_infrastructure: false  # 機能タスクではこのパラメータは無�
    * テスト戦略（テストフレームワーク、カバレッジ目標、テスト方針）
    * コード生成時は、ここで定義された技術スタックを厳密に遵守すること
 
-5. 必須: `{project_root}/specs/baseline/requirements/requirements.md` で機能要件と成功基準を確認する
+4. 必須: `{spec_directory}/requirements/requirements.md` で機能要件と成功基準を確認する
 
-6. 必須: `{project_root}/specs/baseline/basic_design/functional_design.md` でシステム全体の機能設計（全APIを含む）を確認する
-   * これが唯一の真実の情報源（Single Source of Truth）
-   * 全ての機能要件、エンドポイント仕様、ビジネスルールはここに記載されている
+5. 必須: `{spec_directory}/basic_design/common/functional_design.md` で共通機能設計を確認する
+   * 認証、JWT、ログ、エラーハンドリング等の共通機能
 
-7. 必須: 依存タスクの詳細設計を確認する（存在する場合）
-   * タスクファイルのメタデータ「依存タスク」欄を参照
-   * 各依存タスクの `{project_root}/specs/baseline/detailed_design/{依存タスクID}/detailed_design.md` を確認
-   * 例: JPAエンティティ、Dao、セキュリティコンポーネント等
+6. 必須: `{spec_directory}/basic_design/{target_domain}/functional_design.md` で対象ドメインの機能設計を確認する
+   * ドメイン固有の機能要件、エンドポイント仕様、ビジネスルール
 
-8. 必須: 現在のタスクの詳細設計を確認する（存在する場合）
-   * `{project_root}/specs/baseline/detailed_design/{task_id}/detailed_design.md`
+7. 必須: common/の詳細設計を確認する（存在する場合）
+   * `{spec_directory}/detailed_design/common/detailed_design.md`
+   * JPAエンティティ、Dao、セキュリティコンポーネント等の実装設計
+
+8. 必須: 対象ドメインの詳細設計を確認する（存在する場合）
+   * `{spec_directory}/detailed_design/{target_domain}/detailed_design.md`
    * 実装クラス設計、メソッドシグネチャ、アノテーション等
-   * 実装クラス設計、メソッドシグネチャ、アノテーション等
 
-9. 必須: 現在のタスクの振る舞い仕様を確認する（存在する場合）
-   * `{project_root}/specs/baseline/detailed_design/{task_id}/behaviors.md`
+9. 必須: 対象ドメインの振る舞い仕様を確認する（存在する場合）
+   * `{spec_directory}/detailed_design/{target_domain}/behaviors.md`
    * メソッドレベルのテストシナリオ（Gherkin 記法で記述されている前提）
 
-10. 存在する場合: `{project_root}/specs/baseline/basic_design/data_model.md` でテーブル定義とERDを確認する
+10. 存在する場合: `{spec_directory}/basic_design/common/data_model.md` でテーブル定義とERDを確認する
 
-11. 存在する場合: `{project_root}/specs/baseline/basic_design/behaviors.md` でシステム全体の振る舞い（全APIの振る舞いを含む）を確認する
+11. 存在する場合: `{spec_directory}/basic_design/common/behaviors.md` で共通機能の振る舞いを確認する
 
-12. 存在する場合: `{project_root}/specs/baseline/detailed_design/*/behaviors.md` で機能固有の受入基準とテストシナリオを確認する
+12. 存在する場合: `{spec_directory}/basic_design/{target_domain}/behaviors.md` でドメインの振る舞いを確認する
 
-13. 存在する場合: `{project_root}/specs/baseline/basic_design/external_interface.md` で外部連携仕様とAPI仕様を確認する
+13. 存在する場合: `{spec_directory}/basic_design/common/external_interface.md` で外部連携仕様とAPI仕様を確認する
 
-14. 静的リソース: `{project_root}/resources/` フォルダの静的ファイル（画像等）を確認し、セットアップ時に適切な場所にコピーする
+14. 静的リソース: `{project_root}/resources/` フォルダの静的ファイル（画像等）を確認し、適切な場所にコピーする
 
-* 注意: `{project_root}` は、パラメータで明示的に指定されたプロジェクトルートのパスに置き換える
+* 注意: `{project_root}` と `{spec_directory}` は、パラメータで明示的に指定されたパスに置き換える
 
-### 2. タスク構造を解析して抽出する
+### 2. ドメインの実装範囲を確認する
 
-* タスク構成: セットアップ、共通機能、API別実装、結合・テスト
-* タスク依存関係: 順次実行対並列実行ルール
-* タスク詳細: ID、説明、ファイルパス、並列マーカー[P]
-* 実行フロー: 順序と依存関係の要件
+対象ドメインのSPECから、以下を確認する:
 
-### 3. タスク計画に従って実装を実行する
+* ドメインの種類:
+  * common: 共通ドメイン（Entity, Dao, JWT等。最優先実装）
+  * その他: ドメイン固有機能（Resource, Service, DTO等）
 
-重要: 各タスクの実行は必ず以下の順序で完了すること
+* 実装対象のコンポーネント:
+  * common: Entity, Dao, JWT, 認証フィルター、共通Service、ユーティリティ、例外クラス
+  * その他: Resource, ドメイン固有DTO, ドメイン固有Service, 外部API連携クライアント
+
+### 3. ドメインの実装を実行する
+
+重要: 各ドメインの実装は必ず以下の順序で完了すること
 
 1. 本番コード生成: Entity、Dao、Service、Resource（JAX-RSエンドポイント）、DTO等の実装コードを生成
 2. 単体テスト生成: 生成した本番コードに対応する単体テストコードを生成（必須）
-3. タスク完了マーク: タスクファイルでタスクを[X]としてマーク
+3. 実装完了確認: 本番コードと単体テストの両方が正常に生成されたことを確認
 
-* タスクごとの実行: 次のタスクに進む前に各タスクを完了する（本番コード生成→単体テスト生成の両方を完了）
-* setupタスク（特別なタスク）の実行時のみ:
-  * `skip_infrastructure: true`の場合、インフラ関連タスク（DB/APサーバーのインストール等）はスキップする
-  * `skip_infrastructure: false`の場合、すべてのセットアップを実行する
-  * アプリケーション固有のセットアップ（スキーマ作成、初期データ、静的リソース配置等）は常に実行する
-  * リソース配置（画像ファイルのコピー等）を最優先で実行する
-* 機能タスク（FUNC_XXX）の実行時:
-  * `skip_infrastructure` パラメータは無視される
-  * タスクファイルに記載された実装内容に従う
+* commonドメインの実装:
+  * 最優先で実装する（他のドメインはcommonに依存）
+  * Entity, Dao, JWT, 認証フィルター等を実装
+  * データベーススキーマの初期化、静的リソース配置等も実施
+
+* その他のドメインの実装:
+  * commonの実装完了後に実施
+  * ドメイン固有のResource, Service, DTO等を実装
+  * commonのコンポーネントに依存する
+
+* 実装の原則:
+  * TDDアプローチに従う: 対応する実装の前にテストを実行する（プロジェクトがTDDを採用している場合）
   * 必ず本番コード生成の後に単体テスト生成を実行する
-* 依存関係の尊重: 順次タスクは順番に実行、並列タスク[P]は一緒に実行可能
-* TDDアプローチに従う: 対応する実装の前にテストを実行する（プロジェクトがTDDを採用している場合）
-* ファイルベースの調整: 同じファイルに影響するタスクは順次実行必須
-* 検証チェックポイント: 進む前に各タスクの完了を検証する（本番コードと単体テストの両方が生成されていることを確認）
+  * 検証チェックポイント: 本番コードと単体テストの両方が生成されていることを確認
 
 ### 4. 実装実行ルール
 
@@ -172,19 +175,14 @@ architecture_design.mdに記載された技術スタックを厳密に遵守す�
   * 実装詳細の調整が必要な場合は`detailed_design.md`で対応する
   * 上位仕様との矛盾を発見した場合は、実装を停止しユーザーに報告する
 
-#### セットアップ優先
+#### commonドメインの実装（最優先）
 
-プロジェクト構造、依存関係、構成を初期化する
+commonドメインは最初に実装する必要がある:
+* プロジェクト構造、依存関係、構成を初期化する
 * 静的リソースの配置: 必要な画像やファイルを適切な場所にコピーする
 * データベーススキーマのセットアップ
-
-注意: インフラセットアップのスキップ
-* `skip_infrastructure: true` パラメータが指定された場合、以下のインフラ関連タスクはスキップする
-  * データベースサーバーのインストール・起動
-  * アプリケーションサーバーのインストール・設定
-  * ミドルウェアのセットアップ
-* スキップ可能な理由: 開発環境がすでに構築済みの場合や、CI/CD環境で実行する場合
-* 実行するタスク: データベーススキーマ作成、初期データ投入、静的リソース配置などのアプリケーション固有のセットアップは実行する
+* Entity, Dao, JWT, 認証フィルター等の実装
+* 共通例外クラス、ユーティリティクラスの実装
 
 #### コードの前にテスト
 
@@ -226,9 +224,9 @@ Entity、Dao、Service、Resource（JAX-RSエンドポイント）、DTO等の�
 
 注意: ユニットテストは上記「単体テスト生成」ステップで既に生成済みである
 
-### 5. 単体テスト生成ガイドライン（タスク粒度内のテスト）
+### 5. 単体テスト生成ガイドライン（ドメイン単位のテスト）
 
-重要: このフェーズで生成するのはタスク粒度内の単体テストである
+重要: このフェーズで生成するのはドメイン単位の単体テストである
 
 実行タイミング: セクション4「コア開発（本番コード生成）」の直後に必ず実行すること
 
@@ -236,16 +234,16 @@ Entity、Dao、Service、Resource（JAX-RSエンドポイント）、DTO等の�
 
 #### 5.1 基本方針
 
-* テストスコープ: タスクの粒度内
-  * タスク分解で定義された1つのタスク（例: FUNC_002_books）に含まれるコンポーネントをテスト
-  * タスク内のコンポーネント間は実際の連携でテスト可能
-  * タスク外の依存関係はモックを使用
+* テストスコープ: ドメインの粒度内
+  * 対象ドメイン（例: common, orders, books_proxy）に含まれるコンポーネントをテスト
+  * ドメイン内のコンポーネント間は実際の連携でテスト可能
+  * ドメイン外の依存関係はモックを使用
   
 * モック使用の判断基準:
-  * 同じタスク内のコンポーネント → モック不要（実際の連携をテスト）
-    * 例: BookResource → BookService → BookDao （同じタスク内）
-  * タスク外の依存関係 → モックを使用
-    * 例: BookService が AuthService に依存する場合、AuthService はモック
+  * 同じドメイン内のコンポーネント → モック不要（実際の連携をテスト）
+    * 例（ordersドメイン内）: OrderResource → OrderService → OrderDao
+  * ドメイン外の依存関係 → モックを使用
+    * 例: OrderService が AuthService（commonドメイン）に依存する場合、AuthService はモック
     * 例: EntityManager、外部APIクライアント等はモック
 
 * テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）。ステップ定義は `src/test/java` の適切なパッケージ（例: `...cucumber.steps`）に配置する
@@ -254,8 +252,8 @@ Entity、Dao、Service、Resource（JAX-RSエンドポイント）、DTO等の�
 
 #### 5.2 テストケース設計
 
-* detailed_design/配下の各タスクのbehaviors.md（単体テスト用）の Gherkin シナリオから **Cucumber .feature** と **Cucumber ステップ定義** を生成する
-* detailed_design/配下の各タスクのdetailed_design.mdの各メソッドシグネチャに対して、以下のテストを .feature とステップ定義で作成する：
+* detailed_design/{target_domain}/behaviors.md（単体テスト用）の Gherkin シナリオから **Cucumber .feature** と **Cucumber ステップ定義** を生成する
+* detailed_design/{target_domain}/detailed_design.mdの各メソッドシグネチャに対して、以下のテストを .feature とステップ定義で作成する：
   * 正常系テスト（期待する戻り値が返されるか）
   * 異常系テスト（例外が適切にスローされるか）
   * 境界値テスト（null、空文字列、最大値、最小値等）
@@ -263,12 +261,12 @@ Entity、Dao、Service、Resource（JAX-RSエンドポイント）、DTO等の�
 
 #### 5.3 単体テストのポイント
 
-* タスク内の連携: タスク外の依存（EntityManager、他タスクのService等）は @Mock、タスク内の Dao/Service は実インスタンスで Given-When-Then（when(...).thenReturn(...)、メソッド呼び出し、assert）を書く
-* タスク外の依存: 他タスクの Service 等は @Mock、when(...).thenReturn(...) でスタブし、対象メソッドの戻り値・例外を検証する
+* ドメイン内の連携: ドメイン外の依存（EntityManager、他ドメインのService等）は @Mock、ドメイン内の Dao/Service は実インスタンスで Given-When-Then（when(...).thenReturn(...)、メソッド呼び出し、assert）を書く
+* ドメイン外の依存: 他ドメインの Service 等は @Mock、when(...).thenReturn(...) でスタブし、対象メソッドの戻り値・例外を検証する
 
 #### 5.4 テストデータ
 
-* テストデータはdetailed_design/配下のbehaviors.md（単体テスト用）やbasic_design/functional_design.mdの具体例を参考に作成する
+* テストデータはdetailed_design/{target_domain}/behaviors.md（単体テスト用）やbasic_design/{target_domain}/functional_design.mdの具体例を参考に作成する
 * テストデータは各テストケース内でセットアップする（テストの独立性を保つ）
 
 ---
@@ -295,15 +293,15 @@ Entity、Dao、Service、Resource（JAX-RSエンドポイント）、DTO等の�
 
 ## 進捗と完了
 
-* 完了したタスクはタスクファイルで [X] とする。失敗時は停止しユーザーに報告する
+* ドメインの実装が完了したら、完了報告をユーザーに行う。失敗時は停止しユーザーに報告する
 
 ---
 
 ## 完了検証
 
 * 本番コード生成と単体テスト生成の両方が完了していることを確認する
-* principles および architecture_design.md に従っていること、detailed_design/behaviors.md のシナリオがテストでカバーされていること、detailed_design で定義されたクラス・メソッド・エンドポイントが実装されていることを確認する
-* このタスクファイルのタスクがすべて完了したら停止する
+* principles および architecture_design.md に従っていること、detailed_design/{target_domain}/behaviors.md のシナリオがテストでカバーされていること、detailed_design/{target_domain}/detailed_design.md で定義されたクラス・メソッド・エンドポイントが実装されていることを確認する
+* 対象ドメインの実装が完了したら停止する（次のドメインには自動的に進まない）
 
 ---
 
@@ -340,12 +338,13 @@ Entity、Dao、Service、Resource（JAX-RSエンドポイント）、DTO等の�
 
 ## 重要な注意事項
 
-### タスクの実行範囲
+### ドメインの実装範囲
 
-* このインストラクションは、タスクファイルに完全なタスク分解が存在することを前提とする
-* タスクが不完全または欠落している場合は、まず `task_generation.md` インストラクションを使用してタスクリストを生成する
-* 指定されたタスクファイルのタスクのみを実行する。他のタスクファイル（例: 次の機能のタスク）に自動的に進んではいけない
-* タスクは分業の単位である。1つのタスクが完了したら、次のタスクに進む前にユーザーの確認を待つ
+* このインストラクションは、basic_design/配下にドメインフォルダが存在することを前提とする
+* ドメインフォルダが不完全または欠落している場合は、まず基本設計を作成する
+* 指定されたドメインの実装のみを実行する。他のドメイン（例: 次のドメイン）に自動的に進んではいけない
+* ドメインは実装の単位である。1つのドメインが完了したら、次のドメインに進む前にユーザーの確認を待つ
+* commonドメインは必ず最初に実装する（他のドメインはcommonに依存）
 
 ### REST API特有の注意点
 

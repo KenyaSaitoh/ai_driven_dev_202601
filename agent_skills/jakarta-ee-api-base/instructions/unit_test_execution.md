@@ -55,13 +55,13 @@ jacoco_json: null
 例1: 最小限
 ```yaml
 project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
-target_type: "FUNC_002_books"
+target_domain: "books_proxy"
 ```
 
 例2: カバレッジ目標カスタマイズ
 ```yaml
 project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
-target_type: "FUNC_002_books"
+target_domain: "books_proxy"
 coverage_targets:
   line: 85
   branch: 75
@@ -71,7 +71,7 @@ coverage_targets:
 例3: 厳格モード
 ```yaml
 project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
-target_type: "FUNC_002_books"
+target_domain: "books_proxy"
 failure_handling: "stop"
 dead_code_policy: "error"
 min_test_count: 10
@@ -132,7 +132,7 @@ min_test_count: 10
 確定した値をユーザーに表示:
 ```
 📊 テスト実行設定:
-- 対象: FUNC_002_books
+- 対象: books_proxy ドメイン
 - カバレッジ目標:
   - 行カバレッジ: 80% (from: architecture_design.md)
   - 分岐カバレッジ: 70% (from: architecture_design.md)
@@ -288,7 +288,7 @@ L78-L82: 未カバー
   "test_execution": {
     "timestamp": "2025-01-18T12:34:56Z",
     "project_root": "projects/sdd-wf/bookstore/back-office-api-sdd",
-    "target_type": "FUNC_002_books",
+    "target_domain": "books_proxy",
     "duration_seconds": 12.5
   },
   "test_results": {
@@ -452,7 +452,7 @@ behaviors.md は Gherkin 記法で記述されている前提。behaviors.md を
 ┌─────────────────────────────────────────────────────────┐
 │ 📊 単体テスト実行結果サマリー                                │
 ├─────────────────────────────────────────────────────────┤
-│ 対象: FUNC_002_books                                     │
+│ 対象: books_proxy ドメイン                               │
 │ 実行時刻: 2025-01-18 12:34:56                            │
 │ 所要時間: 12.5秒                                         │
 ├─────────────────────────────────────────────────────────┤
@@ -775,7 +775,7 @@ A. 割引機能は必要か？
 ```json
 {
   "timestamp": "2025-01-18T12:34:56Z",
-  "target_type": "FUNC_002_books",
+  "target_domain": "books_proxy",
   "summary": { ... },
   "test_results": { ... },
   "coverage": { ... },

@@ -45,7 +45,7 @@ change_spec: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline/basic
 
 * 基本設計SPECの変更は、専用の変更差分ファイル（CHANGES.md）で管理する
 * 変更差分ファイルから、影響を受けるファイル（詳細設計、コード、テスト）を特定する
-* 変更タスクを生成し、既存の開発フローに統合する
+* 影響を受けるドメインを識別し、既存の開発フローで更新する
 * 適用完了後、変更差分ファイルをアーカイブして履歴を保持する
 
 ### 変更差分管理の方式
@@ -73,11 +73,18 @@ change_spec: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline/basic
 
 ```
 {spec_directory}/basic_design/
-  ├── architecture_design.md (or .xlsx)
-  ├── functional_design.md (or .xlsx)
-  ├── data_model.md (or .xlsx)
-  ├── behaviors.md (or .xlsx)
-  ├── external_interface.md (or .xlsx)
+  ├── common/                       # 共通ドメイン（最優先実装）
+  │   ├── architecture_design.md
+  │   ├── data_model.md
+  │   ├── external_interface.md
+  │   ├── functional_design.md
+  │   └── behaviors.md
+  ├── {domain1}/                    # ドメイン1
+  │   ├── functional_design.md
+  │   └── behaviors.md
+  ├── {domain2}/                    # ドメイン2
+  │   ├── functional_design.md
+  │   └── behaviors.md
   ├── CHANGES.md                    # アクティブな変更（未適用）
   └── changes_archive/              # 適用済み変更のアーカイブ
       ├── 20260118_order_cancel.md
@@ -88,6 +95,7 @@ change_spec: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline/basic
 * マスターファイル（functional_design.md等）: 自由に更新可能
 * CHANGES.md: 未適用の変更内容を記載（変更差分の唯一の真実の情報源）
 * changes_archive/: 適用済みの変更を保存（履歴管理）
+* ドメインフォルダ構成: common/は固定、その他は可変
 * 振る舞いの記法: behaviors.md のシナリオは Gherkin 記法で記述する。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること。
 
 ---
@@ -139,7 +147,8 @@ change_spec: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline/basic
 〇〇の問題が発覚したため
 
 ### 影響範囲（推定）
-- 詳細設計: FUNC_XXX
+- 影響ドメイン: common, orders
+- 詳細設計: detailed_design/orders/detailed_design.md
 - コード: YyyService, ZzzDao
 - テスト: 〇〇テストシナリオ追加
 ---
@@ -200,13 +209,13 @@ CHANGES.mdの「削除」セクションから：
 変更の影響を受ける詳細設計ファイルを特定：
 
 ```
-{spec_directory}/detailed_design/{FUNC_ID}/detailed_design.md
-{spec_directory}/detailed_design/{FUNC_ID}/behaviors.md
+{spec_directory}/detailed_design/{domain}/detailed_design.md
+{spec_directory}/detailed_design/{domain}/behaviors.md
 ```
 
 例：
-* API_001_Books の仕様変更 → `detailed_design/API_001_Books/detailed_design.md`
-* Book エンティティの変更 → `detailed_design/FUNC_001_entity/detailed_design.md`
+* 書籍機能の仕様変更 → `detailed_design/books_proxy/detailed_design.md`
+* Book エンティティの変更 → `detailed_design/common/detailed_design.md`
 
 #### 3.1.2 ソースコードファイル
 
@@ -258,9 +267,13 @@ CHANGES.mdの「削除」セクションから：
 
 ### 影響を受けるファイル
 
+#### 影響ドメイン
+- common（共通ドメイン）
+- orders（注文管理ドメイン）
+
 #### 詳細設計（2ファイル）
-- detailed_design/FUNC_001_entity/detailed_design.md
-- detailed_design/API_002_Order/detailed_design.md
+- detailed_design/common/detailed_design.md
+- detailed_design/orders/detailed_design.md
 
 #### ソースコード（5ファイル）
 - src/main/java/.../entity/OrderTran.java
@@ -277,25 +290,26 @@ CHANGES.mdの「削除」セクションから：
 
 ---
 
-## 5. 変更タスクの生成
+## 5. 影響を受けるドメインの識別
 
-### 5.1 変更タスクファイルの作成
+### 5.1 影響ドメインの特定
 
-影響分析の結果をもとに、変更タスクファイルを生成する
+変更内容から、影響を受けるドメインを特定する
 
-出力先: `{project_root}/tasks/change_tasks.md`
+影響ドメインの識別基準:
+* 共通機能の変更（Entity, Dao, JWT等） → common
+* 特定ドメインの変更（API仕様、ビジネスルール等） → 該当ドメイン
 
-### 5.2 変更タスクファイルのテンプレート
+### 5.2 影響分析サマリー
 
 ```markdown
-# 基本設計変更対応タスク
+# 基本設計変更対応サマリー
 
 ## メタデータ
 
 * プロジェクト: {project_name}
 * 変更日時: {timestamp}
 * 変更理由: {reason}
-* ベースライン更新日: {baseline_date}
 
 ---
 
@@ -317,10 +331,16 @@ CHANGES.mdの「削除」セクションから：
 
 ## 影響分析
 
+### 影響を受けるドメイン
+
+* common: {変更内容概要}
+* orders: {変更内容概要}
+
 ### 詳細設計への影響
 
-* [ ] {spec_directory}/detailed_design/{FUNC_ID}/detailed_design.md - {変更内容}
-* [ ] {spec_directory}/detailed_design/{FUNC_ID}/behaviors.md - {変更内容}
+* [ ] {spec_directory}/detailed_design/common/detailed_design.md - {変更内容}
+* [ ] {spec_directory}/detailed_design/orders/detailed_design.md - {変更内容}
+* [ ] {spec_directory}/detailed_design/orders/behaviors.md - {変更内容}
 
 ### コードへの影響
 
@@ -334,15 +354,11 @@ CHANGES.mdの「削除」セクションから：
 
 ---
 
-## 更新タスク
+## 更新手順
 
-### TASK_CHANGE_001: 詳細設計の更新
+### 1. 詳細設計の更新（影響ドメインごと）
 
-対象: {spec_directory}/detailed_design/{FUNC_ID}/
-
-変更内容:
-- {変更項目1}
-- {変更項目2}
+対象ドメイン: {domain}
 
 実行方法:
 ```
@@ -351,7 +367,7 @@ CHANGES.mdの「削除」セクションから：
 パラメータ:
 * project_root: {project_root}
 * spec_directory: {spec_directory}
-* target_type: {FUNC_ID}
+* target_domain: {domain}
 ```
 
 注意事項:
@@ -360,9 +376,9 @@ CHANGES.mdの「削除」セクションから：
 
 ---
 
-### TASK_CHANGE_002: コードの更新
+### 2. コードの更新（影響ドメインごと）
 
-対象: {source_files}
+対象ドメイン: {domain}
 
 変更内容:
 - {クラス名}.java に {メソッド名}() メソッドを追加
@@ -375,9 +391,8 @@ CHANGES.mdの「削除」セクションから：
 
 パラメータ:
 * project_root: {project_root}
-* task_file: {project_root}/tasks/{FUNC_ID}.md
-
-注意: 既存タスクファイルを更新して、変更内容を反映すること
+* spec_directory: {spec_directory}
+* target_domain: {domain}
 ```
 
 注意事項:
@@ -387,9 +402,9 @@ CHANGES.mdの「削除」セクションから：
 
 ---
 
-### TASK_CHANGE_003: 単体テストの更新
+### 3. 単体テストの更新（影響ドメインごと）
 
-対象: {test_files}
+対象ドメイン: {domain}
 
 変更内容:
 - {テストクラス名} に {テストメソッド名} を追加
@@ -397,11 +412,11 @@ CHANGES.mdの「削除」セクションから：
 
 実行方法:
 ```
-@agent_skills/jakarta-ee-api-base/instructions/unit_test_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/unit_test_execution.md
 
 パラメータ:
 * project_root: {project_root}
-* target_type: {FUNC_ID}
+* target_domain: {domain}
 ```
 
 注意事項:
@@ -410,9 +425,9 @@ CHANGES.mdの「削除」セクションから：
 
 ---
 
-### TASK_CHANGE_004: 結合テストの更新
+### 4. 結合テストの更新
 
-対象: {integration_test_files}
+対象: 影響を受けるドメインの結合テスト
 
 変更内容:
 - {シナリオ} の結合テストを追加
@@ -427,13 +442,13 @@ CHANGES.mdの「削除」セクションから：
 ```
 
 注意事項:
-* basic_design/behaviors.md の新しいシナリオをテスト
+* basic_design/{domain}/behaviors.md の新しいシナリオをテスト
 
 ---
 
-### TASK_CHANGE_005: E2Eテストの更新
+### 5. E2Eテストの更新
 
-対象: {e2e_test_files}
+対象: システム全体のE2Eテスト
 
 変更内容:
 - {シナリオ} のE2Eテストを追加
@@ -452,17 +467,34 @@ CHANGES.mdの「削除」セクションから：
 
 ---
 
-## 実行順序
+## 6. 実行順序
 
-変更タスクは以下の順序で実行する：
+影響を受けるドメインごとに以下の順序で更新する：
 
-1. TASK_CHANGE_001: 詳細設計の更新（基盤）
-2. TASK_CHANGE_002: コードの更新（実装）
-3. TASK_CHANGE_003: 単体テストの更新（検証）
-4. TASK_CHANGE_004: 結合テストの更新（検証）
-5. TASK_CHANGE_005: E2Eテストの更新（検証）
+### 6.1 commonドメインの更新（最優先）
 
-各タスク完了後、次のタスクに進む前にユーザーの確認を待つ。
+commonドメインが影響を受ける場合、最初に更新する：
+
+1. 詳細設計の更新（common）
+2. コードの更新（common）
+3. 単体テストの更新（common）
+
+### 6.2 各ドメインの更新
+
+commonの更新完了後、影響を受ける各ドメインを順次更新：
+
+1. 詳細設計の更新（{domain}）
+2. コードの更新（{domain}）
+3. 単体テストの更新（{domain}）
+
+### 6.3 統合テストの更新
+
+すべてのドメイン更新完了後、統合テストを更新：
+
+4. 結合テストの更新
+5. E2Eテストの更新
+
+各ステップ完了後、次のステップに進む前にユーザーの確認を待つ。
 
 ---
 
@@ -495,44 +527,42 @@ mv specs/baseline/basic_design/CHANGES.md \
 
 ## 6. ユーザーへの確認
 
-### 6.1 変更内容の説明
+### 8.1 変更内容の説明
 
-変更タスクファイル生成後、ユーザーに以下を説明する：
+影響分析完了後、ユーザーに以下を説明する：
 
 ```
 基本設計SPECの変更を検出しました。
 
 変更概要:
 - 変更されたファイル: {files}
+- 影響を受けるドメイン: {domains}
 - 影響を受けるコンポーネント: {components}
-- 生成された変更タスク: {task_count}件
 
-変更タスクファイルを生成しました:
-{project_root}/tasks/change_tasks.md
-
-このファイルには、以下の情報が含まれています:
-1. 変更検出結果（差分）
-2. 影響分析（影響を受けるファイル一覧）
-3. 更新タスク（実行すべき作業）
+影響分析結果:
+1. 影響ドメイン: common, orders
+2. 更新が必要な詳細設計: {count}件
+3. 更新が必要なソースコード: {count}件
+4. 更新が必要なテスト: {count}件
 
 次のステップ:
-1. change_tasks.md を確認してください
-2. 承認後、各タスクを順次実行します
-3. すべてのタスク完了後、ベースラインを更新します
+1. 影響を受けるドメインごとに詳細設計を更新します
+2. 承認後、各ドメインのコードとテストを順次更新します
+3. すべての更新完了後、CHANGES.mdをアーカイブします
 
 続行しますか？ (Y/n)
 ```
 
-### 5.2 承認後の処理
+### 8.2 承認後の処理
 
 ユーザーが承認した場合：
-1. 各タスクを順次実行する（既存の指示書を呼び出し）
-2. 各タスク完了後、ユーザーに確認を求める
-3. すべてのタスク完了後、ベースラインを更新する
+1. 影響を受けるドメインごとに更新を実行する（既存の指示書を呼び出し）
+2. 各ドメイン更新完了後、ユーザーに確認を求める
+3. すべてのドメイン更新完了後、CHANGES.mdをアーカイブする
 
 ユーザーが承認しなかった場合：
 * 処理を中断する
-* change_tasks.md は残す（後で手動実行可能）
+* 影響分析結果は表示済み（後で手動実行可能）
 
 ---
 
@@ -548,7 +578,7 @@ mv specs/baseline/basic_design/CHANGES.md \
 パラメータ:
 * project_root: {project_root}
 * spec_directory: {spec_directory}
-* target_type: {FUNC_ID}
+* target_domain: {domain}
 ```
 
 詳細設計書には「既存のdetailed_design.mdの扱いと反復的なブラッシュアップ」セクションがあり、既存ファイルへの対応が記載されている。
@@ -567,7 +597,8 @@ AIは以下のように動作する：
 
 パラメータ:
 * project_root: {project_root}
-* task_file: {project_root}/tasks/{FUNC_ID}.md
+* spec_directory: {spec_directory}
+* target_domain: {domain}
 ```
 
 コード生成指示書には「既存コードの扱いと反復的な開発」セクションがあり、既存ファイルへの対応が記載されている。
@@ -618,15 +649,14 @@ AIは以下のように動作する：
 * baselineと同様の変更管理フローを適用
 * enhancements の basic_design/ にもCHANGES.mdを作成
 
-### 8.4 既存タスクファイルの扱い
+### 8.4 ドメインの扱い
 
-変更に伴って既存のタスクファイル（例: `tasks/FUNC_002_books.md`）を更新する必要がある場合：
+変更に伴って影響を受けるドメインを識別し、順次更新する：
 
-1. 既存タスクファイルを読み込む
-2. 変更内容を反映（新規タスク追加、既存タスク更新）
-3. 更新後のタスクファイルで `code_generation.md` を実行
-
-または、新しいタスクファイルを作成する（例: `tasks/FUNC_002_books_v2.md`）。
+1. 影響ドメインを特定（common, orders等）
+2. commonが影響を受ける場合、最優先で更新
+3. 各ドメインの詳細設計、コード、テストを更新
+4. 更新は `detailed_design.md` と `code_generation.md` を使用
 
 ---
 
@@ -639,15 +669,16 @@ graph TD
     B -->|あり| D[CHANGES.md読み込み]
     D --> E[変更内容解析]
     E --> F[影響分析]
-    F --> G[変更タスク生成]
+    F --> G[影響ドメイン識別]
     G --> H[ユーザー確認]
     H --> I{承認?}
     I -->|No| J[処理中断]
-    I -->|Yes| K[TASK_CHANGE_001: 詳細設計更新]
-    K --> L[TASK_CHANGE_002: コード更新]
-    L --> M[TASK_CHANGE_003: 単体テスト更新]
-    M --> N[TASK_CHANGE_004: 結合テスト更新]
-    N --> O[TASK_CHANGE_005: E2Eテスト更新]
+    I -->|Yes| K{common影響?}
+    K -->|Yes| L[common更新]
+    K -->|No| M[各ドメイン更新]
+    L --> M
+    M --> N[結合テスト更新]
+    N --> O[E2Eテスト更新]
     O --> P[CHANGES.mdをアーカイブ]
     P --> Q[完了]
 ```
@@ -656,9 +687,9 @@ graph TD
 
 ## 10. 完了検証
 
-すべてのタスク完了後、以下を確認する：
+すべてのドメイン更新完了後、以下を確認する：
 
-* [ ] 変更タスクファイル（change_tasks.md）がすべて完了している
+* [ ] 影響を受けたすべてのドメインが更新されている
 * [ ] 詳細設計書が更新されている
 * [ ] ソースコードが更新されている
 * [ ] テストが更新されている
@@ -671,6 +702,7 @@ graph TD
 基本設計変更対応が完了しました。
 
 変更内容:
+- 更新されたドメイン: {domains}
 - 更新された詳細設計: {count}件
 - 更新されたソースファイル: {count}件
 - 更新されたテストファイル: {count}件
@@ -679,18 +711,15 @@ CHANGES.mdをアーカイブしました:
 {spec_directory}/basic_design/changes_archive/{archive_filename}
 
 次回の変更時には、新しいCHANGES.mdを作成してください。
-
-変更履歴:
-{project_root}/tasks/change_tasks.md
 ```
 
 ---
 
 ## 参考資料
 
-* [task_breakdown.md](task_breakdown.md) - タスク分解（初回実装用）
+* [basic_design.md](basic_design.md) - 基本設計（初回作成用）
 * [detailed_design.md](detailed_design.md) - 詳細設計生成
 * [code_generation.md](code_generation.md) - コード生成
-* [unit_test_generation.md](unit_test_generation.md) - 単体テスト生成
+* [unit_test_execution.md](unit_test_execution.md) - 単体テスト実行評価
 * [it_generation.md](it_generation.md) - 結合テスト生成
 * [e2e_test_generation.md](e2e_test_generation.md) - E2Eテスト生成

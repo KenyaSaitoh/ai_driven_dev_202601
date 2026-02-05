@@ -79,8 +79,8 @@
 ### 影響範囲（推定）
 
 #### 詳細設計
-- FUNC_001_entity/detailed_design.md - ORDER_TRAN エンティティの更新
-- API_002_Order/detailed_design.md - OrderResource、OrderService の更新
+- detailed_design/common/detailed_design.md - ORDER_TRAN エンティティの更新（該当する場合）
+- detailed_design/orders/detailed_design.md - OrderResource、OrderService の更新
 
 #### コード
 - src/main/java/.../entity/OrderTran.java - cancel_reason フィールド追加

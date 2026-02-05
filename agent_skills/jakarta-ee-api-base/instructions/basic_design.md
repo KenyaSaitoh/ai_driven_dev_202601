@@ -38,8 +38,8 @@ spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/enhancement
 * 既存資料（EXCEL、Word、PDF等）がある場合は、それを読み込んでMarkdown形式に変換する
 * 既存資料がない場合は、テンプレートから対話的に作成する
 * requirements.md（要件定義書）は所与とする（既に存在している前提）
-* 基本設計フェーズでは、システム全体を一枚岩として設計する（basic_design/配下のみ作成）
-* 機能単位への分解は、次のタスク分解フェーズで実施する
+* 基本設計は機能（ドメイン）単位でフォルダ分割する
+* フォルダ構成＝実装順序となる（common/ → 各ドメインフォルダ）
 
 作成するSPEC
 
@@ -47,20 +47,25 @@ requirements/配下（システム要件）:
 * requirements.md - 要件定義書（所与、既存）
 * behaviors.md - E2Eテスト用の振る舞い仕様書（システム全体のエンドツーエンドシナリオ）
 
-basic_design/配下（システム全体の基本設計）:
-* architecture_design.md - アーキテクチャ設計書（プロジェクト全体のアーキテクチャ）
-* functional_design.md - 機能設計書（システム全体の機能設計、全APIを含む）
-* data_model.md - データモデル仕様書（ERD、テーブル定義、リレーション）
-* behaviors.md - 結合テスト用の振る舞い仕様書（Service層以下の連携シナリオ）
-* external_interface.md - 外部インターフェース仕様書（外部API連携、外部システムとの接続）
+basic_design/配下（機能単位の基本設計）:
+* common/（固定フォルダ名：最優先実装する共通ドメイン）
+  * architecture_design.md - アーキテクチャ設計書（プロジェクト全体のアーキテクチャ）
+  * data_model.md - データモデル仕様書（共通エンティティのERD、テーブル定義、リレーション）
+  * external_interface.md - 外部インターフェース仕様書（外部API連携、外部システムとの接続）
+  * functional_design.md - 共通機能設計書（認証、JWT、共通Service等）
+  * behaviors.md - 共通機能の振る舞い仕様書（Gherkin記法）
 
-注意: 
+* {ドメイン名}/（可変フォルダ名：プロジェクト固有のドメイン）
+  * functional_design.md - ドメイン機能設計書（そのドメインの機能設計）
+  * behaviors.md - ドメインの振る舞い仕様書（Gherkin記法）
+
+フォルダ構成のルール:
+* common/は固定名で必ず最初に作成・実装する
+* common/以外のフォルダ名は任意（プロジェクトのドメインに応じて命名）
+* common/以外のフォルダはcommon/に依存する
+* フォルダ構成＝実装順序（common/ → 各ドメイン）
 * 基本設計フェーズでは、detailed_design/フォルダは作成しない
-* 詳細設計（detailed_design.md）は、タスク分解後の詳細設計フェーズで作成する
-* 全ての機能をbasic_design/functional_design.mdに記載する
-* behaviors.mdは2種類存在:
-  * requirements/behaviors.md: E2Eテスト用（API層含む全体フロー）
-  * basic_design/behaviors.md: 結合テスト用（Service層以下の連携）
+* 詳細設計（detailed_design/）は、詳細設計フェーズで各フォルダに対応して作成する
 * 振る舞いの記法: behaviors.md に記載するシナリオは Gherkin 記法で記述する。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること。
 
 ---
@@ -82,48 +87,72 @@ basic_design/配下（システム全体の基本設計）:
 
 ---
 
-## 2. テンプレートの展開
+## 2. テンプレートの展開とフォルダ構成
 
-### 2.1 基本設計テンプレートの展開
+### 2.1 common/フォルダの作成とテンプレート展開
 
-@agent_skills/jakarta-ee-api-base/templates/basic_design/ 配下のテンプレートファイルを {spec_directory}/basic_design/ にコピーする
+まず、{spec_directory}/basic_design/common/ フォルダを作成し、テンプレートを展開する
 
-コピー対象ファイル:
-* architecture_design.md - アーキテクチャ設計書
-* functional_design.md - 機能設計書（システム全体、全APIを含む）
-* data_model.md - データモデル仕様書（ERD、テーブル定義）
-* behaviors.md - 振る舞い仕様書（システム全体、全APIの振る舞いを含む）
+@agent_skills/jakarta-ee-api-base/templates/basic_design/ 配下のテンプレートを {spec_directory}/basic_design/common/ にコピー:
+
+* architecture_design.md - アーキテクチャ設計書（プロジェクト全体）
+* data_model.md - データモデル仕様書（共通エンティティ）
 * external_interface.md - 外部インターフェース仕様書
+* functional_design.md - 共通機能設計書（認証、JWT等）
+* behaviors.md - 共通機能の振る舞い仕様書
 
 requirements/配下のテンプレート（E2Eテスト用）:
 * behaviors.md - E2Eテスト用の振る舞い仕様書
 
-注意
-* requirements.mdは既に存在しているため（{spec_directory}/requirements/）、コピーしない
-* 既にファイルが存在する場合は、ユーザーに「上書きしますか？」と確認する
-* テンプレートは「ひな形」として展開する
-* 既存資料（EXCEL、Word等）がある場合は、後の工程でそれらを読み込んで変換する
+### 2.2 ドメインフォルダの作成
 
-### 2.2 ディレクトリ構造の確認
+ユーザーと対話しながら、プロジェクトのドメインを識別し、フォルダを作成する
 
-展開後のディレクトリ構造:
+質問例:
+* 「このプロジェクトには、common以外にどのようなドメイン（機能単位）がありますか？」
+* 「例: 注文管理、書籍管理、画像配信など」
+
+各ドメインフォルダに以下のテンプレートを展開:
+* functional_design.md - ドメイン機能設計書
+* behaviors.md - ドメインの振る舞い仕様書
+
+### 2.3 ディレクトリ構造の確認
+
+展開後のディレクトリ構造（例）:
 
 ```
 {spec_directory}/
-└── basic_design/                    # 基本設計の成果物
-    ├── requirements.md              # 所与（既存）
-    ├── architecture_design.md       # テンプレートから展開
-    ├── functional_design.md         # テンプレートから展開（全機能を含む）
-    ├── data_model.md                # テンプレートから展開
-    ├── behaviors.md                 # templates/basic_design/behaviors.mdから展開（E2Eテスト用）
-    └── external_interface.md        # テンプレートから展開
+├── requirements/
+│   ├── requirements.md              # 所与（既存）
+│   └── behaviors.md                 # E2Eテスト用
+└── basic_design/
+    ├── common/                      # 固定：共通ドメイン（最優先実装）
+    │   ├── architecture_design.md
+    │   ├── data_model.md
+    │   ├── external_interface.md
+    │   ├── functional_design.md
+    │   └── behaviors.md
+    ├── orders/                      # 可変：プロジェクト固有ドメイン
+    │   ├── functional_design.md
+    │   └── behaviors.md
+    ├── books_proxy/                 # 可変：プロジェクト固有ドメイン
+    │   ├── functional_design.md
+    │   └── behaviors.md
+    └── images/                      # 可変：プロジェクト固有ドメイン
+        ├── functional_design.md
+        └── behaviors.md
 ```
 
-重要な方針:
+重要な原則:
+* common/は固定名、他のフォルダ名はプロジェクト固有
+* common/を最初に作成・実装する（他のドメインはcommonに依存）
 * 基本設計フェーズでは、detailed_design/フォルダは作成しない
-* 全ての機能を functional_design.md に記載する
-* 全ての振る舞いを behaviors.md に記載する
-* 機能単位への分解は、次のタスク分解フェーズで実施する
+* フォルダ構成＝実装順序（common/ → 各ドメイン）
+
+注意:
+* 既にファイルが存在する場合は、ユーザーに「上書きしますか？」と確認する
+* テンプレートは「ひな形」として展開する
+* 既存資料（EXCEL、Word等）がある場合は、後の工程でそれらを読み込んで変換する
 
 ---
 
@@ -219,89 +248,140 @@ requirements/配下のテンプレート（E2Eテスト用）:
 * 詳細設計（detailed_design.md）: JPAエンティティクラス設計（@Entity, @Table, @Column, @ManyToOne等のアノテーション、Javaの型、フィールド名）
 * ここでの「エンティティ」: RDBの論理エンティティ（テーブル）を指します。JPAエンティティクラスは詳細設計で扱います
 
-### 3.4 functional_design.mdの作成
+### 3.4 functional_design.mdの作成（common/と各ドメイン）
 
-重要: basic_design/functional_design.mdにはシステム全体の機能設計を記述します。全てのAPI機能を含めます。
+#### 3.4.1 common/functional_design.mdの作成
+
+重要: common/functional_design.mdには共通機能（認証、JWT、共通Service等）を記述します。
 
 まず、既存資料の有無を確認する
 
 質問:
-* 「機能設計に関する既存の資料（EXCEL、Word、PDF等）はありますか？」
-* 「機能一覧、ユーザーストーリー、ビジネスルール等の資料はありますか？」
+* 「共通機能設計に関する既存の資料（EXCEL、Word、PDF等）はありますか？」
+* 「認証、JWT、共通Service等の資料はありますか？」
 
 既存資料がある場合:
 1. 資料を読み込む（ユーザーに@で添付してもらう）
-2. 機能一覧、ユーザーストーリー、ビジネスルール等をMarkdown形式に変換する
+2. 共通機能、認証仕様、ビジネスルール等をMarkdown形式に変換する
 3. テンプレート構造に合わせて整形する
-4. フロー図がある場合は、Mermaid記法に変換する
-5. 全ての機能をbasic_design/functional_design.mdに記載
-6. 不足している情報をユーザーに確認する
+4. common/functional_design.mdに記載
+5. 不足している情報をユーザーに確認する
 
 既存資料がない場合:
-* {spec_directory}/basic_design/functional_design.md のテンプレートを開き、ユーザーと対話しながら各セクションを埋めていく
+* {spec_directory}/basic_design/common/functional_design.md のテンプレートを開き、ユーザーと対話しながら各セクションを埋めていく
 
 主要なセクション:
 * システム概要
-* 全API機能の設計（認証API、書籍管理API、注文管理API等、全てを列挙）
-* 共通機能設計（認証、ログ、エラーハンドリング等）
-* ドメインモデルの機能設計（ビジネスルール、バリデーション、状態遷移等）
-* システム全体のユーザーフロー（Mermaid）
-* システム全体のデータフロー（シーケンス図 - 論理レベル）
+* 共通機能設計（認証、JWT、ログ、エラーハンドリング等）
+* ドメインモデルの機能設計（共通エンティティのビジネスルール、バリデーション、状態遷移等）
+
+対話のポイント:
+* 「認証方式は何を使用しますか？（JWT、セッション等）」
+* 「共通的な機能（認証、ログ、エラーハンドリング等）は何がありますか？」
+* 「共通エンティティのビジネスルールは何ですか？」
+
+#### 3.4.2 各ドメインのfunctional_design.mdの作成
+
+各ドメインフォルダ（orders/, books_proxy/, images/等）のfunctional_design.mdを作成します。
+
+質問:
+* 「{ドメイン名}の機能設計に関する既存の資料はありますか？」
+
+既存資料がある場合:
+1. 資料を読み込む（ユーザーに@で添付してもらう）
+2. ドメイン固有の機能、API仕様、ビジネスルール等をMarkdown形式に変換する
+3. テンプレート構造に合わせて整形する
+4. {ドメイン名}/functional_design.mdに記載
+5. 不足している情報をユーザーに確認する
+
+既存資料がない場合:
+* {spec_directory}/basic_design/{ドメイン名}/functional_design.md のテンプレートを開き、ユーザーと対話しながら各セクションを埋めていく
+
+主要なセクション:
+* ドメイン概要
+* API機能の設計（エンドポイント、リクエスト/レスポンス等）
+* ドメイン固有のビジネスルール
+* データフロー（シーケンス図 - 論理レベル）
 
 重要な方針:
-* 全ての機能を一枚岩として記述する（機能の分類はしない）
-* 基本設計では、論理レベルのコンポーネント（「書籍サービス」「社員データアクセス」等）またはレイヤー名（「APIレイヤー」「ビジネスロジック」等）のみを記述
-* 実装クラス名（BookService、EmployeeDao等）やメソッド名（findById()等）は記述しない
-* シーケンス図も論理レベルで記述: `participant 書籍リソース` または `participant APIレイヤー`
+* 基本設計では、論理レベルのコンポーネント（「注文サービス」「書籍データアクセス」等）またはレイヤー名（「APIレイヤー」「ビジネスロジック」等）のみを記述
+* 実装クラス名（OrderService、BookDao等）やメソッド名（findById()等）は記述しない
+* シーケンス図も論理レベルで記述: `participant 注文リソース` または `participant APIレイヤー`
 * DTO、エンティティの詳細構造、パッケージ名は記述しない（詳細設計で記述）
 
 対話のポイント:
-* 「主要な機能を教えてください」
-* 「認証、書籍管理、注文管理など、どのような機能がありますか？」
-* 「共通的な機能（認証、ログ、エラーハンドリング等）は何がありますか？」
-* 「ドメインモデルのビジネスルールは何ですか？」
-* 「システム全体のユーザーフローを教えてください」
+* 「{ドメイン名}の主要な機能を教えてください」
+* 「どのようなAPI機能がありますか？」
+* 「ドメイン固有のビジネスルールは何ですか？」
+* 「データフローを教えてください」
 
-### 3.5 behaviors.mdの作成
+### 3.5 behaviors.mdの作成（common/と各ドメイン）
 
-重要: basic_design/behaviors.mdにはシステム全体の振る舞いを記述します。全てのAPI機能の振る舞いを含めます。
+#### 3.5.1 common/behaviors.mdの作成
+
+重要: common/behaviors.mdには共通機能の振る舞い（認証、JWT、エラーハンドリング等）を記述します。
 
 まず、既存資料の有無を確認する
 
 質問:
-* 「振る舞い仕様（受入基準、テストシナリオ等）に関する既存の資料（EXCEL、Word、PDF等）はありますか？」
-* 「テストSPECやシナリオ一覧は既にありますか？」
+* 「共通機能の振る舞い仕様（受入基準、テストシナリオ等）に関する既存の資料はありますか？」
 
 既存資料がある場合:
 1. 資料を読み込む（ユーザーに@で添付してもらう）
 2. テストシナリオ、受入基準、エラーケース等をMarkdown形式に変換する
-3. テンプレート構造に合わせ、Gherkin 記法（Feature, Scenario, Given, When, Then 等）で整形する
-4. 全ての振る舞いをbasic_design/behaviors.mdに記載
+3. Gherkin 記法（Feature, Scenario, Given, When, Then 等）で整形する
+4. common/behaviors.mdに記載
 5. 不足している情報をユーザーに確認する
 
 既存資料がない場合:
-* templates/basic_design/behaviors.md を {spec_directory}/basic_design/behaviors.md にコピーして展開し、ユーザーと対話しながら各セクションを埋めていく
+* templates/basic_design/behaviors.md を {spec_directory}/basic_design/common/behaviors.md にコピーして展開し、ユーザーと対話しながら各セクションを埋めていく
 
 主要なセクション:
-* システム全体の振る舞い概要
-* 全API機能の振る舞い（認証API、書籍管理API、注文管理API等、全てを列挙）
+* 共通機能の振る舞い概要
 * 共通処理の振る舞い（認証、ログ、エラーハンドリング、トランザクション等）
-* ドメインモデルの振る舞い（ビジネスルール、バリデーション、状態遷移等）
-* システム全体のシナリオ（Gherkin 記法: Feature, Scenario, Given, When, Then 等）
+* ドメインモデルの振る舞い（共通エンティティのビジネスルール、バリデーション、状態遷移等）
+* Gherkin 記法のシナリオ（Feature, Scenario, Given, When, Then 等）
+* エラーケース
+
+対話のポイント:
+* 「共通機能の振る舞いをGiven-When-Then形式で教えてください」
+* 「認証処理の振る舞いは何ですか？」
+* 「エラーハンドリングの振る舞いは何ですか？」
+* 「エラーケースは何がありますか？」
+
+#### 3.5.2 各ドメインのbehaviors.mdの作成
+
+各ドメインフォルダ（orders/, books_proxy/, images/等）のbehaviors.mdを作成します。
+
+質問:
+* 「{ドメイン名}の振る舞い仕様に関する既存の資料はありますか？」
+
+既存資料がある場合:
+1. 資料を読み込む（ユーザーに@で添付してもらう）
+2. テストシナリオ、受入基準、エラーケース等をMarkdown形式に変換する
+3. Gherkin 記法で整形する
+4. {ドメイン名}/behaviors.mdに記載
+5. 不足している情報をユーザーに確認する
+
+既存資料がない場合:
+* templates/basic_design/behaviors.md を {spec_directory}/basic_design/{ドメイン名}/behaviors.md にコピーして展開し、ユーザーと対話しながら各セクションを埋めていく
+
+主要なセクション:
+* ドメインの振る舞い概要
+* API機能の振る舞い（エンドポイント、リクエスト/レスポンス等）
+* ドメイン固有のビジネスルールの振る舞い
+* Gherkin 記法のシナリオ（Feature, Scenario, Given, When, Then 等）
 * エラーケース
 
 重要な方針:
-* 全ての振る舞いを一枚岩として記述する（機能の分類はしない）
 * Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But 等のキーワードを使用）
 * 具体的なテストケースを含める
 
 対話のポイント:
-* 「システム全体の振る舞いを教えてください」
-* 「各機能機能（認証、書籍管理、注文管理等）の振る舞いをGiven-When-Then形式で教えてください」
-* 「共通処理（認証、エラーハンドリング等）の振る舞いをGiven-When-Then形式で教えてください」
-* 「ドメインモデルのビジネスルールの振る舞いは何ですか？」
+* 「{ドメイン名}の振る舞いをGiven-When-Then形式で教えてください」
+* 「API機能の振る舞いは何ですか？」
+* 「ドメイン固有のビジネスルールの振る舞いは何ですか？」
 * 「エラーケースは何がありますか？」
-* 「エラーメッセージはどう表示しますか？」
 
 ### 3.6 external_interface.mdの作成
 
@@ -379,17 +459,30 @@ requirements/配下のテンプレート（E2Eテスト用）:
 ```
 以下の基本設計SPECを作成しました：
 
-{spec_directory}/basic_design/
-├── requirements.md              # 所与（既存）
-├── architecture_design.md       # アーキテクチャ設計書
-├── functional_design.md         # 機能設計書（全機能を含む）
-├── data_model.md                # データモデル仕様書
-├── behaviors.md                 # 振る舞い仕様書（全振る舞いを含む）
-└── external_interface.md        # 外部インターフェース仕様書
+{spec_directory}/
+├── requirements/
+│   ├── requirements.md              # 所与（既存）
+│   └── behaviors.md                 # E2Eテスト用
+└── basic_design/
+    ├── common/                      # 共通ドメイン（最優先実装）
+    │   ├── architecture_design.md   # アーキテクチャ設計書
+    │   ├── data_model.md            # データモデル仕様書
+    │   ├── external_interface.md    # 外部インターフェース仕様書
+    │   ├── functional_design.md     # 共通機能設計書
+    │   └── behaviors.md             # 共通機能の振る舞い仕様書
+    ├── orders/                      # 注文管理ドメイン
+    │   ├── functional_design.md     # 注文機能設計書
+    │   └── behaviors.md             # 注文の振る舞い仕様書
+    ├── books_proxy/                 # 書籍API連携ドメイン
+    │   ├── functional_design.md     # 書籍連携機能設計書
+    │   └── behaviors.md             # 書籍連携の振る舞い仕様書
+    └── images/                      # 画像配信ドメイン
+        ├── functional_design.md     # 画像配信機能設計書
+        └── behaviors.md             # 画像配信の振る舞い仕様書
 
 注意: 
-* 詳細設計（detailed_design/）は、タスク分解後の詳細設計フェーズで作成します
-* 機能単位への分解は、次のタスク分解フェーズで実施します
+* フォルダ構成＝実装順序（common/ → 各ドメイン）
+* 詳細設計（detailed_design/）は、詳細設計フェーズで各フォルダに対応して作成します
 ```
 
 ### 5.2 次のステップの案内
@@ -398,14 +491,12 @@ requirements/配下のテンプレート（E2Eテスト用）:
 
 ```
 次のステップ:
-1. タスク分解: @agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
-   - basic_design/ を分析してタスクに分解
-   - 機能を依存関係に基づいてを識別
-2. 詳細設計: @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
-   - タスク分解の結果に基づいて detailed_design/ フォルダを作成
-   - 機能（FUNC_XXX）フォルダを作成
-3. コード生成: @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-   - 各タスクに従って実装
+1. 詳細設計: @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
+   - common/の詳細設計を作成（Entity, Dao, JWT等）
+   - 各ドメインの詳細設計を作成（Resource, Service, DTO等）
+2. コード生成: @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
+   - common/を先に実装
+   - 各ドメインを実装
 ```
 
 ---
@@ -414,26 +505,28 @@ requirements/配下のテンプレート（E2Eテスト用）:
 
 ### 6.1 基本設計の成果物
 
-基本設計フェーズでは、システム全体を一枚岩として設計します。
+基本設計フェーズでは、機能（ドメイン）単位でフォルダ分割します。
 
-| ファイル | 記載内容 |
-|---------|---------|
-| requirements/requirements.md | 要件定義書（所与） |
-| requirements/behaviors.md | E2Eテスト用の振る舞い仕様書 |
-| basic_design/architecture_design.md | プロジェクト全体のアーキテクチャ設計 |
-| basic_design/functional_design.md | システム全体の機能設計（全APIを含む） |
-| basic_design/data_model.md | ERD、テーブル定義、リレーション |
-| basic_design/behaviors.md | 結合テスト用の振る舞い仕様書 |
-| behaviors.md | システム全体の振る舞い（全APIの振る舞いを含む） |
-| external_interface.md | 外部API連携仕様 |
+| フォルダ | ファイル | 記載内容 |
+|---------|---------|---------|
+| requirements/ | requirements.md | 要件定義書（所与） |
+| requirements/ | behaviors.md | E2Eテスト用の振る舞い仕様書 |
+| basic_design/common/ | architecture_design.md | プロジェクト全体のアーキテクチャ設計 |
+| basic_design/common/ | data_model.md | 共通エンティティのERD、テーブル定義、リレーション |
+| basic_design/common/ | external_interface.md | 外部API連携仕様 |
+| basic_design/common/ | functional_design.md | 共通機能設計（認証、JWT等） |
+| basic_design/common/ | behaviors.md | 共通機能の振る舞い仕様書 |
+| basic_design/{ドメイン}/ | functional_design.md | ドメイン機能設計 |
+| basic_design/{ドメイン}/ | behaviors.md | ドメインの振る舞い仕様書 |
 
 ### 6.2 基本設計の重要な方針
 
-* 全ての機能を functional_design.md に記載する（機能の分類はしない）
-* 全ての振る舞いを behaviors.md に記載する（機能の分類はしない）
-* detailed_design/フォルダは作成しない
+* common/は固定名で必ず最初に作成・実装する
+* common/以外のフォルダ名はプロジェクト固有（ドメインに応じて命名）
+* フォルダ構成＝実装順序（common/ → 各ドメイン）
+* detailed_design/フォルダは作成しない（詳細設計フェーズで作成）
 * 論理レベルで記述する（実装クラス名、メソッド名、パッケージ名は記述しない）
-* 機能単位への分解は、次のタスク分解フェーズで実施する
+* 基本設計の各フォルダが、詳細設計・コード生成の単位となる
 
 ---
 
@@ -496,6 +589,5 @@ requirements/配下のテンプレート（E2Eテスト用）:
 ## 参考資料
 
 * [common_rules.md](../principles/common_rules.md) - 共通ルール
-* [task_breakdown.md](task_breakdown.md) - タスク分解（次工程）
 * [detailed_design.md](detailed_design.md) - 詳細設計（次工程）
 * [code_generation.md](code_generation.md) - コード生成（次工程）

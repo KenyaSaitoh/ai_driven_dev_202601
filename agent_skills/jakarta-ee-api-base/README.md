@@ -1,7 +1,7 @@
 # Jakarta EE API サービス開発 Agent Skill
 
-バージョン: 5.0.0  
-最終更新日: 2026-02-01
+バージョン: 6.0.0  
+最終更新日: 2026-02-05
 
 ---
 
@@ -9,17 +9,16 @@
 
 Jakarta EE 10とJAX-RS 3.1を使ったREST API サービス開発を支援するAgent Skillです。
 
-このAgent Skillは、SPECからタスク分解、詳細設計、コード生成、単体テスト実行評価、結合テスト、E2Eテストまで7段階で一貫サポートします。振る舞い仕様（behaviors.md）は Gherkin 記法で記述し、単体・結合・E2Eテストは Cucumber（.feature + ステップ定義）で生成する前提です。さらに、基本設計変更対応により、手戻りや拡張案件にも対応します。
+このAgent Skillは、SPECから詳細設計、コード生成、単体テスト実行評価、結合テスト、E2Eテストまで6段階で一貫サポートします。ドメインベースのフォルダ構成により、並行開発を実現。振る舞い仕様（behaviors.md）は Gherkin 記法で記述し、単体・結合・E2Eテストは Cucumber（.feature + ステップ定義）で生成する前提です。さらに、基本設計変更対応により、手戻りや拡張案件にも対応します。
 
 対象プロジェクト例: `projects/sdd-wf/bookstore/back-office-api`, `projects/sdd-wf/bookstore/berry-books-api`
 
 ## クイックスタート
 
-1. 基本設計: `@agent_skills/jakarta-ee-api-base/instructions/basic_design.md` で SPEC を作成
-2. タスク分解: `@agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md` で tasks/ を生成
-3. 詳細設計: `@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md` でタスク単位の詳細設計を作成
-4. コード生成: `@agent_skills/jakarta-ee-api-base/instructions/code_generation.md` で task_file 指定して実装
-5. 単体テスト評価: `unit_test_execution.md` → 結合テスト: `it_generation.md` → E2Eテスト: `e2e_test_generation.md`
+1. 基本設計: `@agent_skills/jakarta-ee-api-base/instructions/basic_design.md` で SPEC を作成（ドメインフォルダ構成）
+2. 詳細設計: `@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md` でドメイン単位の詳細設計を作成
+3. コード生成: `@agent_skills/jakarta-ee-api-base/instructions/code_generation.md` で target_domain 指定して実装
+4. 単体テスト評価: `unit_test_execution.md` → 結合テスト: `it_generation.md` → E2Eテスト: `e2e_test_generation.md`
 
 ---
 
@@ -31,7 +30,7 @@ agent_skills/jakarta-ee-api-base/
 ├── SKILL.md                                    # Agent Skill説明書（エントリポイント）
 │                                               # 7段階プロセス、使い方、実践例を記載
 │
-├── instructions/                               # 開発インストラクション（7段階プロセス + 変更対応）
+├── instructions/                               # 開発インストラクション（6段階プロセス + 変更対応）
 │   │
 │   ├── basic_design.md                        # ステップ1: 基本設計（SPEC作成）
 │   │   └─→ 遵守: principles/common_rules.md
@@ -41,65 +40,63 @@ agent_skills/jakarta-ee-api-base/
 │   │              ├── requirements.md（所与）
 │   │              └── behaviors.md（E2Eテスト用、要件を外形的に捉えた振る舞い）
 │   │              {spec_directory}/basic_design/
-│   │              ├── architecture_design.md（テンプレートから展開）
-│   │              ├── functional_design.md（全機能を含む）
-│   │              ├── data_model.md
-│   │              ├── behaviors.md（結合テスト用、基本設計を外形的に捉えた振る舞い）
-│   │              └── external_interface.md
+│   │              ├── common/                  # 共通ドメイン（最優先実装）
+│   │              │   ├── architecture_design.md
+│   │              │   ├── data_model.md
+│   │              │   ├── external_interface.md
+│   │              │   ├── functional_design.md
+│   │              │   └── behaviors.md
+│   │              ├── {domain1}/               # ドメイン1
+│   │              │   ├── functional_design.md
+│   │              │   └── behaviors.md
+│   │              └── {domain2}/               # ドメイン2
+│   │                  ├── functional_design.md
+│   │                  └── behaviors.md
 │   │
-│   ├── task_breakdown.md                      # ステップ2: タスク分解
+│   ├── detailed_design.md                     # ステップ2: 詳細設計（ドメイン単位）
 │   │   └─→ 遵守: principles/common_rules.md
 │   │   └─→ 参照: frameworks/（該当する場合）
-│   │   └─→ 読込: {project_root}/specs/baseline/basic_design/
-│   │   └─→ 出力: {project_root}/tasks/
-│   │              ├── tasks.md                 # メインタスクリスト（依存関係、実行順序）
-│   │              ├── setup.md                 # setupタスク（特別なタスク、常に最初）
-│   │              ├── FUNC_001_xxx.md          # 機能タスク（内容はプロジェクト固有）
-│   │              └── FUNC_002_yyy.md          # 機能タスク（内容はプロジェクト固有）
-│   │
-│   ├── detailed_design.md                     # ステップ3: 詳細設計
-│   │   └─→ 遵守: principles/common_rules.md
-│   │   └─→ 参照: frameworks/（該当する場合）
-│   │   └─→ 読込: {project_root}/specs/baseline/basic_design/
-│   │   │         {project_root}/tasks/
+│   │   └─→ 読込: {project_root}/specs/baseline/basic_design/{domain}/
 │   │   └─→ 出力: {spec_directory}/detailed_design/
-│   │              ├── FUNC_001_xxx/            # 機能タスク1（内容はプロジェクト固有）
-│   │              │   ├── detailed_design.md  # 詳細設計
-│   │              │   └── behaviors.md        # 単体テスト
-│   │              └── FUNC_002_yyy/            # 機能タスク2（内容はプロジェクト固有）
-│   │                  ├── detailed_design.md  # 機能固有の実装クラス設計
-│   │                  └── behaviors.md        # 機能固有の単体テスト用
+│   │              ├── common/                  # 共通ドメイン（最優先実装）
+│   │              │   ├── detailed_design.md
+│   │              │   └── behaviors.md
+│   │              ├── {domain1}/               # ドメイン1
+│   │              │   ├── detailed_design.md
+│   │              │   └── behaviors.md
+│   │              └── {domain2}/               # ドメイン2
+│   │                  ├── detailed_design.md
+│   │                  └── behaviors.md
 │   │
-│   ├── code_generation.md                     # ステップ4: コード生成（本番＋単体テスト）
+│   ├── code_generation.md                     # ステップ3: コード生成（本番＋単体テスト、ドメイン単位）
 │   │   └─→ 遵守: principles/common_rules.md
 │   │   └─→ 参照: frameworks/（該当する場合）
-│   │   └─→ 読込: {project_root}/specs/baseline/basic_design/
-│   │   │         {project_root}/specs/baseline/detailed_design/
-│   │   │         {project_root}/tasks/
+│   │   └─→ 読込: {project_root}/specs/baseline/basic_design/{domain}/
+│   │   │         {project_root}/specs/baseline/detailed_design/{domain}/
 │   │   └─→ 出力: {project_root}/src/（コード・テスト）
 │   │
-│   ├── unit_test_execution.md                 # ステップ5: 単体テスト実行評価
+│   ├── unit_test_execution.md                 # ステップ4: 単体テスト実行評価
 │   │   └─→ 実行: ./gradlew test jacocoTestReport（プロジェクトの build.gradle に従う）
 │   │   └─→ 分析: テスト結果、カバレッジ、未カバーコード
 │   │   └─→ 出力: フィードバックレポート
 │   │
-│   ├── it_generation.md                       # ステップ6: 結合テスト生成（Cucumber + Weld SE）
+│   ├── it_generation.md                       # ステップ5: 結合テスト生成（Cucumber + Weld SE）
 │   │   └─→ 遵守: principles/common_rules.md
-│   │   └─→ 読込: {project_root}/specs/baseline/basic_design/behaviors.md（Gherkin）
+│   │   └─→ 読込: {project_root}/specs/baseline/basic_design/{domain}/behaviors.md（Gherkin）
 │   │   └─→ 出力: {project_root}/src/test/（.feature + ステップ定義、integration/）
 │   │   └─→ 特徴: Cucumber .feature + ステップ定義、Service層以下・実DB、外部APIはWireMock
 │   │
-│   ├── e2e_test_generation.md                 # ステップ7: E2Eテスト生成（Cucumber + REST Assured）
+│   ├── e2e_test_generation.md                 # ステップ6: E2Eテスト生成（Cucumber + REST Assured）
 │   │   └─→ 遵守: principles/common_rules.md
 │   │   └─→ 読込: {project_root}/specs/baseline/requirements/behaviors.md（Gherkin）
 │   │   └─→ 出力: {project_root}/src/test/（.feature + ステップ定義、e2e/）
 │   │   └─→ 特徴: Cucumber .feature + ステップ定義、複数機能間連携、実HTTP・実DB
 │   │
-│   └── basic_design_change.md                 # 基本設計変更対応（手戻り・拡張案件）
+│   └── basic_design_change.md                 # 基本設計変更対応（手戻り・拡張案件、ドメイン単位）
 │       └─→ 遵守: principles/common_rules.md
 │       └─→ 読込: {spec_directory}/basic_design/CHANGES.md
-│       └─→ 処理: 変更影響分析、タスク生成、既存指示書呼び出し
-│       └─→ 出力: {project_root}/tasks/change_tasks.md、更新された設計/コード
+│       └─→ 処理: 変更影響分析、影響ドメイン識別、既存指示書呼び出し
+│       └─→ 出力: 更新された設計/コード
 │
 ├── principles/                                 # 開発原則（全プロジェクト共通）
 │   │
@@ -181,23 +178,21 @@ agent_skills/jakarta-ee-api-base/
 │       │       ├── books-api.yaml          # 例: 書籍API定義
 │       │       └── （その他API定義）
 │       │
-│       └── detailed_design/                 # ステップ3: 詳細設計（タスク単位）
-│           ├── FUNC_001_xxx/               # 機能タスク1の詳細設計
+│       └── detailed_design/                 # ステップ2: 詳細設計（ドメイン単位）
+│           ├── common/                     # 共通ドメインの詳細設計（最優先実装）
 │           │   ├── detailed_design.md     # 実装クラス設計
 │           │   └── behaviors.md           # 単体テスト用振る舞い仕様
-│           ├── FUNC_002_yyy/               # 機能タスク2の詳細設計
+│           ├── orders/                     # ドメイン1の詳細設計
 │           │   ├── detailed_design.md
 │           │   └── behaviors.md
-│           └── FUNC_003_zzz/               # 機能タスク3の詳細設計
+│           └── books_proxy/                # ドメイン2の詳細設計
 │               ├── detailed_design.md
 │               └── behaviors.md
 │
-├── tasks/                                    # ステップ2: タスク分解の結果
-│   ├── tasks.md                             # メインタスクリスト（依存関係、実行順序）
-│   ├── setup.md                             # setupタスク（特別なタスク、常に最初）
-│   ├── FUNC_001_xxx.md                      # 機能タスク1（例: 認証・認可）
-│   ├── FUNC_002_yyy.md                      # 機能タスク2（例: 書籍管理）
-│   └── FUNC_003_zzz.md                      # 機能タスク3（例: 注文管理）
+├── detailed_design/                         # ステップ2: 詳細設計の結果
+│   ├── common/                              # 共通ドメイン（最優先実装）
+│   ├── orders/                              # ドメイン1（例: 注文管理）
+│   └── books_proxy/                         # ドメイン2（例: 書籍API連携）
 │
 ├── sql/                                      # データベーススクリプト
 │   └── {database_type}/                     # データベース種別（hsqldb, postgresql等）
@@ -325,9 +320,9 @@ agent_skills/jakarta-ee-api-base/
    * basic_design/behaviors.md: 結合テスト用（基本設計を外形的に捉えた振る舞い）
    * detailed_design/{target}/behaviors.md: 単体テスト用（タスク粒度内の振る舞い）
 
-3. **tasks/** - タスク分解の結果
-   * tasks.md がメインタスクリスト（依存関係、実行順序を記載）
-   * 各タスクファイル（FUNC_XXX_xxx.md）が実装タスクを定義
+3. **detailed_design/** - 詳細設計の結果
+   * ドメイン単位で詳細設計を管理
+   * common/ は最優先で実装（他のドメインはcommonに依存）
 
 4. **src/main/java/** - 実装コード
    * Jakarta EE標準のレイヤードアーキテクチャ
@@ -348,11 +343,11 @@ agent_skills/jakarta-ee-api-base/
 
 ---
 
-## 7段階プロセス
+## 6段階プロセス
 
 ### ステップ1: 基本設計（SPEC作成）
 
-目的: システム全体を一枚岩として設計し、基本設計SPECを作成する
+目的: ドメイン単位で基本設計SPECを作成する
 
 インストラクション: `basic_design.md`
 
@@ -377,10 +372,12 @@ AIと対話しながら実施:
 
 注意:
 * requirements.md（要件定義書）は所与とする（既に存在している前提）
-* 基本設計フェーズでは、システム全体を一枚岩として設計する
-* 機能単位への分解は、次のタスク分解フェーズで実施する
-* 振る舞い仕様書は2種類作成（Gherkin記法で記述。Cucumber .feature の元になる）:
+* 基本設計フェーズでは、ドメイン単位で設計を行う
+* ドメイン構造は実装順序を決定する（common/ → 各ドメイン）
+* 振る舞い仕様書は3種類作成（Gherkin記法で記述。Cucumber .feature の元になる）:
   - requirements/behaviors.md: E2Eテスト用（要件を外形的に捉えた振る舞い）
+  - basic_design/{domain}/behaviors.md: 結合テスト用（ドメイン内の連携シナリオ）
+  - detailed_design/{domain}/behaviors.md: 単体テスト用（メソッドレベルのテスト）
   - basic_design/behaviors.md: 結合テスト用（基本設計を外形的に捉えた振る舞い）
 
 生成されるファイル:
@@ -399,47 +396,9 @@ AIと対話しながら実施:
 
 ---
 
-### ステップ2: タスク分解
+### ステップ2: 詳細設計
 
-目的: basic_design/ を分析して、複数人が並行して作業できる実装タスクリストを生成する
-
-インストラクション: `task_breakdown.md`
-
-使い方:
-```
-@agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
-
-タスクを分解してください
-
-パラメータ:
-* project_root: <プロジェクトルートパス>
-* spec_directory: <SPECディレクトリパス>
-* output_directory: <タスク出力先パス（オプション）>
-```
-
-AIが自動で実行:
-1. basic_design/ を分析
-2. 機能を依存関係に基づいて識別し、実装順序を決定
-3. タスクファイルを分解・生成
-4. `tasks/`フォルダに保存
-
-重要: このタスク分解の結果が、次の詳細設計フェーズで detailed_design/ フォルダ構造を決定します
-
-生成されるファイル:
-```
-{project_root}/tasks/
-├── tasks.md                 # メインタスクリスト（依存関係、実行順序）
-├── setup.md                 # setupタスク（特別なタスク、常に最初）
-├── FUNC_001_auth.md         # 機能別タスク（例: 認証・認可）
-├── FUNC_002_books.md        # 機能別タスク（例: 書籍管理）
-└── FUNC_003_orders.md       # 機能別タスク（例: 注文管理）
-```
-
----
-
-### ステップ3: 詳細設計
-
-目的: タスク単位で実装クラス設計と単体テスト用の振る舞い仕様を作成する
+目的: ドメイン単位で実装クラス設計と単体テスト用の振る舞い仕様を作成する
 
 インストラクション: `detailed_design.md`
 
@@ -452,43 +411,44 @@ AIが自動で実行:
 パラメータ:
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
-* target_type: FUNC_XXX_xxx
+* target_domain: common
 ```
 
 AIと対話しながら実施:
-1. タスク分解の結果に基づいて detailed_design/{target_type}/ フォルダを作成
-2. basic_design/functional_design.md を参照して実装設計を作成
+1. basic_design/{target_domain}/ の設計を参照して detailed_design/{target_domain}/ フォルダを作成
+2. basic_design/{target_domain}/functional_design.md を参照して実装設計を作成
 3. 実装レベルの detailed_design.md を生成（クラス設計、メソッドシグネチャ、アノテーション）
-4. 単体テスト用の behaviors.md を新規作成（タスク粒度内のテストシナリオ）
+4. 単体テスト用の behaviors.md を新規作成（ドメイン単位のテストシナリオ）
 5. 不明点をユーザーに質問
 6. 対話で妥当性・充足性を確認
 
 重要:
-* functional_design.md は basic_design/ にのみ存在（唯一の真実の情報源）
+* functional_design.md は basic_design/{domain}/ にのみ存在（唯一の真実の情報源）
+* commonは最優先で詳細設計を作成（他のドメインはcommonに依存）
 * 振る舞い仕様書の3種類の使い分け:
   - requirements/behaviors.md: E2Eテスト用（要件を外形的に捉えた振る舞い）
-  - basic_design/behaviors.md: 結合テスト用（基本設計を外形的に捉えた振る舞い）
-  - detailed_design/{target}/behaviors.md: 単体テスト用（タスク粒度内の振る舞い）
+  - basic_design/{domain}/behaviors.md: 結合テスト用（ドメイン内の連携シナリオ）
+  - detailed_design/{domain}/behaviors.md: 単体テスト用（ドメイン単位の振る舞い）
 
 生成されるファイル:
 ```
 {spec_directory}/detailed_design/
-├── FUNC_001_auth/           # 機能タスク1（例: 認証・認可）
+├── common/                  # 共通ドメイン（最優先実装）
 │   ├── detailed_design.md  # 詳細設計
 │   └── behaviors.md        # 単体テスト
-├── FUNC_002_books/          # 機能タスク2（例: 書籍管理）
-│   ├── detailed_design.md  # 機能固有の実装クラス設計
-│   └── behaviors.md        # 機能固有の単体テスト用
-└── FUNC_003_orders/         # 機能タスク3（例: 注文管理）
+├── orders/                 # ドメイン1（例: 注文管理）
+│   ├── detailed_design.md  # ドメイン固有の実装クラス設計
+│   └── behaviors.md        # ドメイン固有の単体テスト用
+└── books_proxy/            # ドメイン2（例: 書籍API連携）
     ├── detailed_design.md
     └── behaviors.md
 ```
 
 ---
 
-### ステップ4: コード生成（実装+単体テスト）
+### ステップ3: コード生成（実装+単体テスト）
 
-目的: タスク単位で実装コードと単体テストを生成する
+目的: ドメイン単位で実装コードと単体テストを生成する
 
 インストラクション: `code_generation.md`
 
@@ -496,28 +456,22 @@ AIと対話しながら実施:
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 
-タスクを実行してください
+ドメインのコードを生成してください
 
 パラメータ:
 * project_root: <プロジェクトルートパス>
-* task_file: <タスクファイルパス>
-* skip_infrastructure: true  # setupタスク専用: DB/APサーバーのインストールをスキップ（オプション）
+* spec_directory: <SPECディレクトリパス>
+* target_domain: common
 ```
 
 AIが自動で実行:
-1. タスクと詳細設計（detailed_design/配下）を読み込む
+1. 詳細設計（detailed_design/{target_domain}/）を読み込む
 2. コードを生成する（Resource、Service、Dao、Entity、DTO等）
-3. タスク粒度内の単体テストを作成する
-   * detailed_design/behaviors.md（Gherkin）から Cucumber .feature（features/unit）とステップ定義（Java）を生成する場合あり
-   * 同じタスク内のコンポーネント間は実際の連携をテスト
-   * タスク外の依存関係のみモック化
-   * 例: BookService → BookDao は実際の連携、EntityManagerはモック
-4. タスクを完了としてマークする
-
-skip_infrastructureパラメータ（setupタスク専用）:
-* `true`: DB/APサーバーのインストールをスキップ（既存環境を使用）
-* `false`またはパラメータなし: 完全セットアップを実行
-* 注意: 機能タスク（FUNC_XXX）実行時はこのパラメータは無視される
+3. ドメイン単位の単体テストを作成する
+   * detailed_design/{target_domain}/behaviors.md（Gherkin）から Cucumber .feature（features/unit）とステップ定義（Java）を生成
+   * 同じドメイン内のコンポーネント間は実際の連携をテスト
+   * ドメイン外の依存関係のみモック化
+   * 例: OrderService → OrderDao は実際の連携、EntityManagerはモック
 
 生成されるファイル:
 ```
@@ -534,7 +488,7 @@ skip_infrastructureパラメータ（setupタスク専用）:
 
 ---
 
-### ステップ5: 単体テスト実行評価
+### ステップ4: 単体テスト実行評価
 
 目的: 単体テストを実行してカバレッジを分析し、フィードバックを生成する
 
@@ -572,7 +526,7 @@ build/reports/
 
 ---
 
-### ステップ6: 結合テスト生成
+### ステップ5: 結合テスト生成
 
 目的: Service層とDAO層の結合テストを生成する
 
@@ -616,7 +570,7 @@ AIが自動で実行:
 
 ---
 
-### ステップ7: E2Eテスト生成
+### ステップ6: E2Eテスト生成
 
 目的: システム全体のエンドツーエンドテストを生成する
 
@@ -689,9 +643,8 @@ AIが自動で実行:
 
 AIが自動で実行:
 1. CHANGES.md（変更差分ファイル）を読み込み
-2. 変更の影響を受けるファイル（詳細設計、コード、テスト）を特定
-3. 変更タスクファイル（`tasks/change_tasks.md`）を生成
-4. 既存の指示書を呼び出して、影響を受けるファイルを更新
+2. 変更の影響を受けるドメインを識別
+3. 既存の指示書を呼び出して、影響を受けるドメインの設計・コード・テストを更新
    * detailed_design.md → 詳細設計更新
    * code_generation.md → コード更新
    * it_generation.md → 結合テスト更新
@@ -731,62 +684,30 @@ SPECを作成してください
 * spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
 ```
 
-AIと対話しながらSPECを作成
+AIと対話しながらSPECを作成（ドメイン構成を決定）
 
-ステップ2: タスク分解
-```
-@agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
-
-全タスクを分解してください
-
-パラメータ:
-* project_root: projects/sdd-wf/bookstore/back-office-api
-* spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
-```
-
-結果:
-```
-tasks/
-├── tasks.md              ← メインタスクリスト（依存関係、実行順序）
-├── setup.md              ← setupタスク（特別なタスク、常に最初）
-├── FUNC_001_auth.md      ← 機能タスク（例: 認証・認可）
-├── FUNC_002_books.md     ← 機能タスク（例: 書籍管理）
-└── FUNC_003_orders.md    ← 機能タスク（例: 注文管理）
-```
-
-ステップ3: 詳細設計（書籍機能）
+ステップ2: 詳細設計（commonドメイン）
 ```
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
-書籍機能の詳細設計書を作成してください
+commonドメインの詳細設計書を作成してください
 
 パラメータ:
 * project_root: projects/sdd-wf/bookstore/back-office-api
 * spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
-* target_type: FUNC_002_books
-
-JPQL検索とCriteria API検索の両方を実装する予定です
+* target_domain: common
 ```
 
 AIとの対話:
 ```
-AI: タスク分解の結果を確認しました。
-    detailed_design/FUNC_002_books/ フォルダを作成します。
-    basic_design/functional_design.md を参照して書籍機能の実装設計を作成します。
+AI: basic_design/common/ の設計を確認しました。
+    detailed_design/common/ フォルダを作成します。
     
-    【機能概要】（basic_design/functional_design.mdから）
-    * 書籍機能（REST API: /api/books）
-    * エンドポイント:
-      1. GET /api/books - 全書籍取得
-      2. GET /api/books/{id} - 書籍詳細
-      3. GET /api/books/search/jpql - JPQL検索
-      4. GET /api/books/search/criteria - Criteria API検索
-    
-    【関連エンティティ】
-    * Book（テーブル: BOOK + STOCK）
-      * @ManyToOne Category
-      * @ManyToOne Publisher
-      * @SecondaryTable(name="STOCK") for quantity, version
+    【共通ドメイン概要】（basic_design/common/から）
+    * エンティティ: Book, Category, Publisher
+    * Dao: BookDao, CategoryDao, PublisherDao
+    * セキュリティ: JwtUtil, JwtAuthenFilter
+    * 認証API: /api/auth/login
     
     【不明点・確認事項】
     1. 検索条件はkeywordとcategoryIdでよろしいでしょうか？
@@ -795,22 +716,23 @@ AI: タスク分解の結果を確認しました。
 ユーザー: はい、その通りです。keywordは両方を対象にしてください。
 
 AI: 承知しました。以下を作成しました：
-    → specs/baseline/detailed_design/FUNC_002_books/detailed_design.md（実装クラス設計）
-    → specs/baseline/detailed_design/FUNC_002_books/behaviors.md（単体テスト用）
+    → specs/baseline/detailed_design/common/detailed_design.md（実装クラス設計）
+    → specs/baseline/detailed_design/common/behaviors.md（単体テスト用）
 ```
 
-ステップ4: コード生成
+ステップ3: コード生成（commonドメイン）
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 
-書籍機能を実装してください
+commonドメインを実装してください
 
 パラメータ:
 * project_root: projects/sdd-wf/bookstore/back-office-api
-* task_file: projects/sdd-wf/bookstore/back-office-api/tasks/FUNC_002_books.md
+* spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
+* target_domain: common
 ```
 
-ステップ5: 単体テスト実行評価
+ステップ4: 単体テスト実行評価
 ```
 @agent_skills/jakarta-ee-api-base/instructions/unit_test_execution.md
 
@@ -818,12 +740,12 @@ AI: 承知しました。以下を作成しました：
 
 パラメータ:
 * project_root: projects/sdd-wf/bookstore/back-office-api
-* target_type: FUNC_002_books
+* target_domain: common
 ```
 
-（フィードバックに基づいて、必要に応じてステップ3に戻る）
+（commonドメイン完了後、ordersやbooks_proxyなど他のドメインの詳細設計・コード生成・単体テストを実施）
 
-ステップ6: 結合テスト生成
+ステップ5: 結合テスト生成
 ```
 @agent_skills/jakarta-ee-api-base/instructions/it_generation.md
 
@@ -832,6 +754,7 @@ AI: 承知しました。以下を作成しました：
 パラメータ:
 * project_root: projects/sdd-wf/bookstore/back-office-api
 * spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
+* target_domains: all
 ```
 
 実行方法（プロジェクトの build.gradle に定義されたタスクに従う）:
@@ -839,7 +762,7 @@ AI: 承知しました。以下を作成しました：
 ./gradlew integrationTest
 ```
 
-ステップ7: E2Eテスト生成
+ステップ6: E2Eテスト生成
 ```
 @agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md
 
@@ -925,9 +848,10 @@ E2Eテストで誤注文のキャンセル機能がないことが判明。
 顧客からの要望もあり、追加が必要と判断。
 
 ### 影響範囲（推定）
-- 詳細設計: FUNC_003_orders/detailed_design.md
+- 影響ドメイン: orders
+- 詳細設計: detailed_design/orders/detailed_design.md
 - コード: OrderResource.java, OrderService.java, OrderDao.java
-- テスト: 結合テスト、E2Eテスト
+- テスト: 単体テスト、結合テスト、E2Eテスト
 ```
 
 **ステップ3: 変更対応を実行**
@@ -944,14 +868,14 @@ E2Eテストで誤注文のキャンセル機能がないことが判明。
 
 AIが自動で実行:
 1. CHANGES.mdを読み込み
-2. 影響分析（FUNC_003_orders が影響を受ける）
-3. change_tasks.mdを生成
-4. 以下の指示書を順次呼び出し:
-   - detailed_design.md → 詳細設計更新
-   - code_generation.md → コード更新
-   - it_generation.md → 結合テスト更新
+2. 影響ドメイン識別（orders ドメインが影響を受ける）
+3. 以下の指示書を順次呼び出し:
+   - detailed_design.md → ordersドメインの詳細設計更新
+   - code_generation.md → ordersドメインのコード更新
+   - unit_test_execution.md → ordersドメインの単体テスト実行
+   - it_generation.md → ordersドメインの結合テスト更新
    - e2e_test_generation.md → E2Eテスト更新
-5. CHANGES.mdを `changes_archive/20260118_order_cancel.md` に移動
+4. CHANGES.mdを `changes_archive/20260118_order_cancel.md` に移動
 
 **ステップ4: テスト実行**
 

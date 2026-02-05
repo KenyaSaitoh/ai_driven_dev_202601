@@ -9,7 +9,7 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 > SDDとは:
 > - 詳細な仕様書（specs/）に基づいて、段階的にコードを生成する手法
-> - AIを活用して、仕様書からタスクリスト（tasks/）を生成し、タスクに従って実装を進める
+> - AIを活用して、ドメイン単位で段階的に実装を進める
 > - 憲章（principles/）に定められた設計原則とベストプラクティスに従う
 > - 汎用Agent Skills (`agent_skills/jakarta-ee-api-base/`) を使用した開発
 
@@ -17,23 +17,27 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 このプロジェクトは、汎用的な Jakarta EE マイクロサービス開発 Agent Skills を使用して開発します。
 
-開発は以下の7段階プロセスで進めます：
+開発は以下の6段階プロセスで進めます（ドメイン単位）：
 
 ```
-ステップ1: 基本設計（仕様書作成）← AIと対話しながら
+ステップ1: 基本設計（ドメイン構造決定）← AIと対話しながら
     ↓
-ステップ2: タスク分解（仕様書 → タスクリスト）
+ステップ2: 詳細設計（ドメイン単位）← AIと対話しながら
     ↓
-ステップ3: 詳細設計（仕様書 → 詳細設計書）← AIと対話しながら
+ステップ3: コード生成（ドメイン単位：実装コード + 単体テスト）
     ↓
-ステップ4: コード生成（詳細設計→実装→単体テスト）（詳細設計書 → 実装コード）
+ステップ4: 単体テスト実行評価（テスト実行 → カバレッジ分析 → フィードバック）
     ↓
-ステップ5: 単体テスト実行評価（テスト実行 → カバレッジ分析 → フィードバック）
+ステップ5: 結合テスト生成（basic_design/{domain}/behaviors.md → JUnit + Weld SE）
     ↓
-ステップ6: 結合テスト生成（basic_design/behaviors.md → JUnit + Weld SE）
-    ↓
-ステップ7: E2Eテスト生成（requirements/behaviors.md → REST Assured）
+ステップ6: E2Eテスト生成（requirements/behaviors.md → REST Assured）
 ```
+
+**ドメイン構成:**
+- `common/` - 共通ドメイン（JWT認証、エラーハンドリング等。最優先実装）
+- `books_proxy/` - 書籍プロキシドメイン（back-office-apiへのプロキシ）
+- `orders/` - 注文管理ドメイン
+- `images/` - 画像管理ドメイン
 
 ---
 
@@ -41,7 +45,7 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 #### ステップ1: 基本設計（プロジェクト開始時に1回）
 
-requirements.mdから、システム全体と機能単位の仕様書をAIと対話しながら作成します。
+requirements.mdから、ドメイン単位の仕様書をAIと対話しながら作成します。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/basic_design.md
@@ -49,64 +53,53 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 仕様書を作成してください
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
-* spec_directory: projects/sdd-wf/bookstore/berry-books-api-wf/specs/baseline
+* project_root: projects/sdd-wf/bookstore/berry-books-api
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
 ```
 
 * 対話の流れ:
   1. 既存資料（EXCEL、Word等）の有無を確認します
   2. 既存資料がある場合は、Markdown形式に変換します
-  3. テンプレートを展開し、各仕様書を対話的に作成します
-  4. `specs/baseline/basic_design/*.md` が生成されます
+  3. ドメイン構成を決定します（common, books_proxy, orders, images）
+  4. テンプレートを展開し、各ドメインの仕様書を対話的に作成します
+  5. `specs/baseline/basic_design/{domain}/*.md` が生成されます
 
-* 生成されるファイル: `specs/baseline/basic_design/*.md`（基本設計SPEC）
-
----
-
-#### ステップ2: タスク分解（プロジェクト開始時に1回）
-
-仕様書から実装タスクリストを分解・生成します。
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
-
-全タスクを分解してください。
-
-パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
-* spec_directory: projects/sdd-wf/bookstore/berry-books-api-wf/specs/baseline
-```
-
-* 生成されるファイル: `tasks/*.md`（タスクリスト）
-
----
-
-#### ステップ3: 詳細設計
-
-詳細設計は2段階で実施します：
-
-1. システム全体の詳細設計（プロジェクト開始時に1回）
-2. 各機能の詳細設計（各機能ごとに実施）
+* 生成されるファイル: 
+  ```
+  specs/baseline/basic_design/
+  ├── common/                  # 共通ドメイン（最優先実装）
+  │   ├── architecture_design.md
+  │   ├── data_model.md
+  │   ├── external_interface.md
+  │   ├── functional_design.md
+  │   └── behaviors.md
+  ├── books_proxy/             # 書籍プロキシドメイン
+  │   ├── functional_design.md
+  │   └── behaviors.md
+  ├── orders/                  # 注文管理ドメイン
+  │   ├── functional_design.md
+  │   └── behaviors.md
+  └── images/                  # 画像管理ドメイン
+      ├── functional_design.md
+      └── behaviors.md
+  ```
 
 ---
 
-##### 3-1. 詳細設計（tasks/tasks.mdの順序に従う）
+#### ステップ2: 詳細設計（ドメイン単位、commonから順に実施）
 
-**重要**: 実行順序は `tasks/tasks.md` の「タスク概要」表と「実行順序」セクションを参照してください。
-- 「依存タスク」列: このタスクを開始する前に完了が必要なタスク
-- 「並行実行可能」列: このタスクと同時に実行可能な他のタスク
-- 「レベル」列: 同じレベルのタスクは並行実行可能
+**重要**: commonドメインを最優先で実施してください（他のドメインはcommonに依存）。
 
-コマンドテンプレート:
+コマンドテンプレート（commonドメインの例）:
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
-[タスクID]の詳細設計書を作成してください。
+commonドメインの詳細設計書を作成してください
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
-* spec_directory: projects/sdd-wf/bookstore/berry-books-api-wf/specs/baseline
+* project_root: projects/sdd-wf/bookstore/berry-books-api
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
 * target_type: [tasks/tasks.mdで確認したタスクID]
 ```
 
@@ -115,194 +108,146 @@ requirements.mdから、システム全体と機能単位の仕様書をAIと対
 ```
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
 
-FUNC_001の詳細設計書を作成してください。
+commonドメインの詳細設計書を作成してください
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
-* spec_directory: projects/sdd-wf/bookstore/berry-books-api-wf/specs/baseline
-* target_type: FUNC_001_infrastructure
+* project_root: projects/sdd-wf/bookstore/berry-books-api
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
+* target_domain: common
 ```
 
 対話の流れ:
-1. AIがSPEC（basic_design/）を読み込み、理解した内容を説明します
+1. AIがSPEC（`basic_design/{target_domain}/`）を読み込み、理解した内容を説明します
 2. AIが不明点を質問します
 3. あなたが回答します
-4. `specs/baseline/detailed_design/[タスクID]/detailed_design.md` と `behaviors.md` が生成されます
+4. `specs/baseline/detailed_design/{target_domain}/detailed_design.md` と `behaviors.md` が生成されます
 
 注意:
-* target_typeは `tasks/tasks.md` のタスクファイル名（拡張子なし）と一致させる
-* 依存タスクの詳細設計が完了してから実行する（tasks/tasks.mdの「依存タスク」列を参照）
+* `common`ドメインを最優先で実行してください
+* 他のドメインは`common`に依存する可能性が高いため、commonの詳細設計完了後に実行します
 * 詳細設計は対話的なプロセスです。AIの質問には必ず回答してください
 
 ---
 
-#### ステップ4: コード生成（詳細設計→実装→単体テスト）（詳細設計完了後）
+#### ステップ3: コード生成（ドメイン単位、commonから順に実施）
 
-詳細設計書をもとに、実装コードを生成します。
+詳細設計書からドメイン単位でコードを生成します（実装コード + 単体テスト）。
 
-**重要**: 実行順序は `tasks/tasks.md` の「タスク概要」表と「実行順序」セクションを参照してください。
-- 「依存タスク」列を確認し、依存タスクが完了してから実行
-- 「並行実行可能」列を確認し、並行実行可能なタスクは同時に実装可能
+**重要**: `common`ドメインを最優先で実装してください（他のドメインはcommonに依存）。
 
-> 単体テストの方針: タスク粒度内のコンポーネント間は実際の連携をテスト。タスク外の依存関係のみモック化。
+> 単体テストの方針: ドメイン内のコンポーネント間は実際の連携をテスト。ドメイン外の依存関係のみモック化。
 
 コマンドテンプレート:
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 
-[タスクID]を実装してください。
+[ドメイン名]ドメインを実装してください
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
-* task_file: projects/sdd-wf/bookstore/berry-books-api-wf/tasks/[タスクファイル名]
+* project_root: projects/sdd-wf/bookstore/berry-books-api
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
+* target_domain: [ドメイン名]
 ```
 
-使用例（setup）:
+使用例（commonドメイン）:
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 
-setupを実装してください。
+commonドメインを実装してください
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
-* task_file: projects/sdd-wf/bookstore/berry-books-api-wf/tasks/setup.md
-* skip_infrastructure: true  # setupタスク専用: DB/APサーバーのインストールをスキップ
+* project_root: projects/sdd-wf/bookstore/berry-books-api
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
+* target_domain: common
+```
+
+使用例（books_proxyドメイン）:
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
+
+books_proxyドメインを実装してください
+
+パラメータ:
+* project_root: projects/sdd-wf/bookstore/berry-books-api
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
+* target_domain: books_proxy
 ```
 
 注意:
-* `skip_infrastructure` はsetupタスク実行時のみ有効
-* 機能タスク（FUNC_XXX）ではこのパラメータは無視される
-
-使用例（機能タスク）:
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-
-機能タスクを実装してください。
-
-パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
-* task_file: projects/sdd-wf/bookstore/berry-books-api-wf/tasks/FUNC_001_xxx.md
-```
-
-注意: 実際のタスクファイル名は `tasks/tasks.md` を参照してください
-
-使用例（FUNC_002）:
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-
-FUNC_002を実装してください。
-
-パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
-* task_file: projects/sdd-wf/bookstore/berry-books-api-wf/tasks/FUNC_002_books.md
-```
-
-注意:
-* タスクファイル名は `tasks/tasks.md` のタスクファイル列と一致させる
-* 各タスクファイル（FUNC_XXX.md）のヘッダーにある「依存タスク」を確認して順序を守る
+* `common`ドメインを最優先で実装してください
+* 各ドメインは`common`に依存する可能性が高いため、commonの実装完了後に実行します
 
 ---
 
-#### ステップ5: 単体テスト実行評価
+#### ステップ4: 単体テスト実行評価（ドメイン単位）
 
-単体テストを実行してカバレッジを分析し、品質を検証します。
+実装コードと単体テストが生成されたら、ドメイン単位でテストを実行してカバレッジを評価します。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/unit_test_execution.md
 
-単体テストを実行してください。
+単体テストを実行して評価してください
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
-* target_type: FUNC_002_books
+* project_root: projects/sdd-wf/bookstore/berry-books-api
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
+* target_domain: books_proxy
 ```
 
 AIが：
-1. 🧪 テスト実行（gradle test jacocoTestReport）
-2. 📊 テスト結果とカバレッジ分析
-3. 🔍 問題の分類（テスト失敗、必要な振る舞い、デッドコード）
-4. 📋 フィードバックレポート生成
-5. 💬 ユーザーに推奨アクションを提示
+1. 📋 実行可能な単体テストコードを確認
+2. 🚀 テストを実行
+3. 📊 カバレッジを集計
+4. 🔎 80%未満のカバレッジの箇所を特定
+5. ✏️ 修正案を提示または修正実施
 
-重要：
-* 問題を発見してもユーザー確認なしに修正しない
-* カバレッジ不足やデッドコードを具体的に提案
-* 必要に応じてステップ3（詳細設計）に戻ってループ
-
-🔄 フィードバックループ:
-```
-詳細設計 → コード生成 → テスト実行評価
-    ↑                         ↓
-    └──── フィードバック ←────┘
-```
+カバレッジ不足がある場合は、ステップ2（詳細設計）に戻ってフィードバックします。
 
 ---
 
-#### ステップ6: 結合テスト生成（単体テスト完了後）
+#### ステップ5: 結合テスト生成（全ドメイン完了後）
 
-単体テスト完了後に、結合テスト（Integration Test）を生成します。
+すべてのドメインの実装が完了したら、結合テスト（JUnit 5 + Weld SE）を生成します。
 
 ```
-@agent_skills/jakarta-ee-api-base/instructions/it_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/integration_test_generation.md
 
-結合テストを生成してください。
+結合テストを生成してください
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
-* spec_directory: projects/sdd-wf/bookstore/berry-books-api-wf/specs/baseline
+* project_root: projects/sdd-wf/bookstore/berry-books-api
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
+* target_domains: all
 ```
 
 AIが：
-1. 📄 basic_design/behaviors.md（結合テストシナリオ）を読み込む
-2. 🧪 JUnit 5 + Weld SE を使用した結合テストを生成
-   * Service層以下（Service + DAO + Entity + DB）の連携テスト
-   * 実際のDBアクセス（メモリDB）
-   * 外部APIはWireMockでスタブ化
-   * アプリケーションサーバー不要
-3. 🏷️ `@Tag("integration")` で結合テストを分離
-
-実行方法:
-```bash
-# 結合テストを実行
-./gradlew integrationTest
-```
+1. 📄 `basic_design/{domain}/behaviors.md` （Gherkin形式のビヘイビア定義）を読み込み
+2. 🧪 各ドメインのシナリオを結合テストケースに変換
+3. 🚀 JUnit 5 + Weld SEを使用したテストコードを生成
 
 ---
 
-#### ステップ7: E2Eテスト生成（実装完了後）
+#### ステップ6: E2Eテスト生成（全ドメイン完了後）
 
-全機能実装完了後に、E2Eテスト（End-to-End Test）を生成します。
+すべてのドメインの実装が完了したら、E2Eテスト（REST Assured）を生成します。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md
 
-E2Eテストを生成してください。
+E2Eテストを生成してください
 
 パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api-wf
-* spec_directory: projects/sdd-wf/bookstore/berry-books-api-wf/specs/baseline
+* project_root: projects/sdd-wf/bookstore/berry-books-api
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
 ```
 
 AIが：
 1. 📄 requirements/behaviors.md（E2Eテストシナリオ）を読み込む
 2. 🧪 REST Assured を使用したE2Eテストを生成
-   * 複数API間の連携テスト（認証 → 書籍検索 → 注文作成等）
-   * 外部API連携のテスト（back-office-api、customer-hub-api）
-   * 実際のHTTPリクエスト/レスポンス
 3. 🏷️ `@Tag("e2e")` でE2Eテストを分離
-
-実行方法:
-```bash
-# アプリケーションサーバーを起動
-./gradlew run
-
-# 別ターミナルでE2Eテストを実行
-./gradlew e2eTest
-```
 
 ---
 
@@ -312,10 +257,10 @@ AIが：
 
 #### 使用方法
 
-1. **基本設計SPECのマスターファイルを更新**
+1. **ドメイン単位で基本設計SPECを更新**
    ```bash
-   vim specs/baseline/basic_design/functional_design.md
-   vim specs/baseline/basic_design/data_model.md
+   vim specs/baseline/basic_design/common/functional_design.md
+   vim specs/baseline/basic_design/books_proxy/functional_design.md
    ```
 
 2. **CHANGES.mdを作成して変更内容を記載**
@@ -329,31 +274,34 @@ AIが：
    ```
    @agent_skills/jakarta-ee-api-base/instructions/basic_design_change.md
    
-   基本設計の変更を適用してください。
+   基本設計の変更を適用してください
    
    パラメータ:
-   * project_root: projects/sdd-wf/bookstore/berry-books-api-wf
-   * spec_directory: projects/sdd-wf/bookstore/berry-books-api-wf/specs/baseline
+   * project_root: projects/sdd-wf/bookstore/berry-books-api
+   * spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
    ```
 
 AIが：
 1. 📄 CHANGES.md（変更差分ファイル）を読み込み
-2. 🔍 変更の影響を受けるファイル（詳細設計、コード、テスト）を特定
-3. 📋 変更タスクファイル（`tasks/change_tasks.md`）を生成
-4. 🎯 既存の指示書を呼び出して、影響を受けるファイルを更新
-5. ✅ すべての変更適用後、CHANGES.mdをアーカイブ
+2. 🔍 変更の影響を受けるドメインを識別
+3. 🎯 既存の指示書を呼び出して、影響を受けるドメインの設計・コード・テストを更新
+4. ✅ すべての変更適用後、CHANGES.mdをアーカイブ
 
 #### ディレクトリ構造
 
 ```
 specs/baseline/basic_design/
-  ├── functional_design.md      # マスター（自由に編集）
-  ├── data_model.md             # マスター（自由に編集）
-  ├── external_interface.md     # マスター（自由に編集）
+  ├── common/                   # 共通ドメイン（マスター、自由に編集）
+  │   ├── functional_design.md
+  │   ├── data_model.md
+  │   └── behaviors.md
+  ├── books_proxy/              # 書籍プロキシドメイン（マスター、自由に編集）
+  │   ├── functional_design.md
+  │   └── behaviors.md
   ├── CHANGES.md                # アクティブな変更（未適用）
   └── changes_archive/          # 履歴
       ├── 20260118_order_cancel.md
-      └── 20260125_order_history.md
+      └── 20260125_image_upload.md
 ```
 
 ---
@@ -434,43 +382,44 @@ specs/baseline/basic_design/
 ## プロジェクト構成
 
 ```
-berry-books-api-sdd-wf/
+berry-books-api/
 ├── specs/                          # 仕様書（SDD）
 │   ├── baseline/
 │   │   ├── requirements/           # システム要件
 │   │   │   ├── requirements.md    # 要件定義書
 │   │   │   └── behaviors.md       # E2Eテスト用（要件を外形的に捉えた振る舞い）
-│   │   ├── basic_design/           # 基本設計SPEC
-│   │   │   ├── architecture_design.md
-│   │   │   ├── functional_design.md
-│   │   │   ├── data_model.md
-│   │   │   ├── external_interface.md
-│   │   │   └── behaviors.md       # 結合テスト用（基本設計を外形的に捉えた振る舞い）
-│   │   └── detailed_design/        # 詳細設計SPEC
+│   │   ├── basic_design/           # 基本設計SPEC（ドメイン単位）
+│   │   │   ├── common/             # 共通ドメイン
+│   │   │   │   ├── architecture_design.md
+│   │   │   │   ├── functional_design.md
+│   │   │   │   ├── data_model.md
+│   │   │   │   ├── external_interface.md
+│   │   │   │   └── behaviors.md   # 結合テスト用
+│   │   │   ├── books_proxy/        # 書籍プロキシドメイン
+│   │   │   │   ├── functional_design.md
+│   │   │   │   └── behaviors.md
+│   │   │   ├── orders/             # 注文管理ドメイン
+│   │   │   │   ├── functional_design.md
+│   │   │   │   └── behaviors.md
+│   │   │   └── images/             # 画像管理ドメイン
+│   │   │       ├── functional_design.md
+│   │   │       └── behaviors.md
+│   │   └── detailed_design/        # 詳細設計SPEC（ドメイン単位）
 │   │       ├── common/
 │   │       │   ├── detailed_design.md
 │   │       │   └── behaviors.md   # 単体テスト用
-│   │       ├── FUNC_001_auth/
+│   │       ├── books_proxy/
 │   │       │   ├── detailed_design.md
 │   │       │   └── behaviors.md
-│   │       ├── FUNC_002_books/
+│   │       ├── orders/
 │   │       │   ├── detailed_design.md
 │   │       │   └── behaviors.md
-│   │       ├── FUNC_003_orders/
-│   │       │   ├── detailed_design.md
-│   │       │   └── behaviors.md
-│   │       └── FUNC_004_images/
+│   │       └── images/
 │   │           ├── detailed_design.md
 │   │           └── behaviors.md
 │   └── enhancements/               # 機能拡張仕様
 ├── principles/                     # 開発憲章
 │   └── constitution.md
-├── tasks/                          # タスクリスト（AI生成）
-│   ├── tasks.md
-│   ├── setup.md
-│   ├── FUNC_001_infrastructure.md
-│   ├── FUNC_001_auth.md
-│   └── FUNC_002_books.md
 ├── src/
 │   ├── main/
 │   │   ├── java/
@@ -478,7 +427,7 @@ berry-books-api-sdd-wf/
 │   │   │       ├── api/              # JAX-RS Resources
 │   │   │       │   ├── dto/          # API DTOs (Records)
 │   │   │       │   └── exception/    # Exception Mappers
-│   │   │       ├── security/         # JWT, AuthenContext
+│   │   │       ├── security/         # JWT, AuthenContext（共通ドメイン）
 │   │   │       ├── service/          # Business Logic
 │   │   │       │   ├── order/        # 注文処理（独自実装）
 │   │   │       │   └── delivery/     # 配送料金計算
@@ -488,8 +437,7 @@ berry-books-api-sdd-wf/
 │   │   │       │   ├── BackOfficeRestClient.java
 │   │   │       │   ├── CustomerHubRestClient.java
 │   │   │       │   └── dto/          # 外部API用DTO
-│   │   │       ├── util/             # Utilities
-│   │   │       └── FUNC_001_infrastructure/   # Infrastructure
+│   │   │       └── util/             # Utilities（共通ドメイン）
 │   │   ├── resources/
 │   │   │   ├── META-INF/
 │   │   │   │   ├── persistence.xml

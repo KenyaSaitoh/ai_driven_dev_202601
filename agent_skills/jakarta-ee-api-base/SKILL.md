@@ -1,11 +1,11 @@
 ---
 name: jakarta-ee-api-base
-description: Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービス開発を支援。エンティティ実装、外部API連携など多様な実装要件に対応。SPECからタスク分解、詳細設計、コード生成、単体テスト実行評価、結合テスト、E2Eテストまで7段階で一貫サポート。基本設計変更対応も含む。
+description: Jakarta EE 10とJAX-RS 3.1を使ったREST APIサービス開発を支援。エンティティ実装、外部API連携など多様な実装要件に対応。SPECから詳細設計、コード生成、単体テスト実行評価、結合テスト、E2Eテストまで6段階で一貫サポート。基本設計変更対応も含む。ドメインベースのフォルダ構成で並行開発を実現。
 ---
 
 # Jakarta EE API サービス開発 Agent Skill
 
-## 使い方（7段階プロセス）
+## 使い方（6段階プロセス）
 
 ### ステップ1: 基本設計（SPEC作成）
 
@@ -20,37 +20,18 @@ SPECを作成してください
 ```
 
 AIと対話しながら以下を実施（対話的プロセス）
-1. テンプレートを basic_design/ フォルダに展開
+1. テンプレートを basic_design/common/ フォルダに展開
 2. requirements.mdを読み込み、理解内容を説明
 3. ユーザーと対話しながら各SPECの中身を埋める
-4. システム全体のSPEC（architecture_design.md、functional_design.md等）を basic_design/ に作成
+4. ドメインフォルダを作成（common/ + 各ドメイン）
+5. 各ドメインのSPEC（functional_design.md、behaviors.md等）を作成
 
 注意: 
 * requirements.md（要件定義書）は所与とする（既に存在している前提）
-* 基本設計フェーズでは、システム全体を一枚岩として設計する
-* 機能単位への分解は、次のタスク分解フェーズで実施する
+* 基本設計はドメイン単位で分割する（common/ + 各ドメイン）
+* フォルダ構成＝実装順序（common/ → 各ドメイン）
 
-### ステップ2: タスク分解
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
-
-タスクを分解してください
-
-パラメータ
-* project_root: <プロジェクトルートパス>
-* spec_directory: <SPECディレクトリパス>
-* output_directory: <タスク出力先パス>
-```
-
-AIが自動で以下を実行
-1. basic_design/ を分析
-2. 機能を依存関係に基づいて識別し、実装順序を決定
-3. タスクファイルを分解・生成して `tasks/`フォルダに保存
-
-重要: このタスク分解の結果が、次の詳細設計フェーズで detailed_design/ フォルダ構造を決定する
-
-### ステップ3: 詳細設計
+### ステップ2: 詳細設計
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
@@ -60,39 +41,41 @@ AIが自動で以下を実行
 パラメータ
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
-* target_type: FUNC_XXX_xxx
+* target_domain: <ドメイン名>
 ```
 
 AIと対話しながら以下を実施（対話的プロセス）
-1. タスク分解の結果に基づいて detailed_design/{target_type}/ フォルダを作成
-2. basic_design/functional_design.md を参照して実装レベルの detailed_design.md を生成（クラス設計、メソッドシグネチャ）
+1. basic_design/{target_domain}/ の内容に基づいて detailed_design/{target_domain}/ フォルダを作成
+2. basic_design/{target_domain}/functional_design.md を参照して実装レベルの detailed_design.md を生成（クラス設計、メソッドシグネチャ）
 3. 単体テスト用の behaviors.md を新規作成（メソッドレベルのテストシナリオ）
 
 重要: 
-* functional_design.md は basic_design/ にのみ存在（唯一の真実の情報源）
-* behaviors.md はE2Eテスト用（basic_design/）と単体テスト用（detailed_design/）で別物
+* commonを最優先で詳細設計する（他のドメインはcommonに依存）
+* functional_design.md は basic_design/{target_domain}/ に存在（ドメインごとの真実の情報源）
+* behaviors.md はE2Eテスト用（requirements/）、結合テスト用（basic_design/{domain}/）、単体テスト用（detailed_design/{domain}/）の3種類
 
-### ステップ4: コード生成（詳細設計→実装→単体テスト）
+### ステップ3: コード生成（詳細設計→実装→単体テスト）
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
 
-セットアップタスクを実行してください
+ドメインを実装してください
 
 パラメータ
 * project_root: <プロジェクトルートパス>
-* task_file: <タスクファイルパス>
+* spec_directory: <SPECディレクトリパス>
+* target_domain: <ドメイン名>
 ```
 
 AIが自動で以下を実行
-1. タスクと詳細設計を読み込み
+1. 詳細設計（detailed_design/{target_domain}/）を読み込み
 2. 実装コードを生成（Resource、Service、Dao、Entity、DTO等）
-3. タスク粒度内の単体テストを作成
-   * タスク内のコンポーネント間は実際の連携をテスト
-   * タスク外の依存関係のみモック化
-4. タスクを完了としてマーク
+3. ドメイン粒度内の単体テストを作成
+   * ドメイン内のコンポーネント間は実際の連携をテスト
+   * ドメイン外の依存関係のみモック化
+4. commonを最優先で実装（他のドメインはcommonに依存）
 
-### ステップ5: 単体テスト実行評価
+### ステップ4: 単体テスト実行評価
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/unit_test_execution.md
@@ -101,7 +84,7 @@ AIが自動で以下を実行
 
 パラメータ
 * project_root: <プロジェクトルートパス>
-* target_type: FUNC_XXX_xxx
+* target_domain: <ドメイン名>
 ```
 
 AIが自動で以下を実行
@@ -114,7 +97,7 @@ AIが自動で以下を実行
 重要: 
 * 問題を発見してもユーザー確認なしに修正しない
 * カバレッジ不足やデッドコードを具体的に提案
-* 必要に応じてステップ3（詳細設計）に戻ってループ
+* 必要に応じてステップ2（詳細設計）に戻ってループ
 
 フィードバックループ:
 ```
@@ -123,7 +106,7 @@ AIが自動で以下を実行
     └──── フィードバック ←────┘
 ```
 
-### ステップ6: 結合テスト生成
+### ステップ5: 結合テスト生成
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/it_generation.md
@@ -136,13 +119,13 @@ AIが自動で以下を実行
 ```
 
 AIが自動で以下を実行
-1. basic_design/behaviors.md（結合テストシナリオ）を読み込み
-2. JUnit 5 + Weld SE を使用した結合テストを生成
+1. basic_design/{domain}/behaviors.md（結合テストシナリオ）を各ドメインから読み込み
+2. JUnit 5 + Cucumber + Weld SE を使用した結合テストを生成
    * Service層以下（Service + DAO + Entity + DB）の連携テスト
    * 実際のDBアクセス（メモリDB）
    * 外部APIはWireMockでスタブ化
 
-### ステップ7: E2Eテスト生成
+### ステップ6: E2Eテスト生成
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md
@@ -156,7 +139,7 @@ E2Eテストを生成してください
 
 AIが自動で以下を実行
 1. requirements/behaviors.md（E2Eテストシナリオ）を読み込み
-2. REST Assured を使用したE2Eテストを生成
+2. JUnit 5 + Cucumber + REST Assured を使用したE2Eテストを生成
    * API層を含む全体フロー
    * 実際のHTTPリクエスト/レスポンス
 3. テストデータのセットアップ/クリーンアップコードを生成
@@ -178,10 +161,9 @@ AIが自動で以下を実行
 
 AIが自動で以下を実行
 1. CHANGES.md（変更差分ファイル）を読み込み
-2. 変更の影響を受けるファイルを特定
-3. 変更タスクファイル（`tasks/change_tasks.md`）を生成
-4. 既存の指示書を呼び出して更新
-5. CHANGES.mdをアーカイブ
+2. 変更の影響を受けるドメインを識別
+3. 影響を受けるドメインの詳細設計・コード・テストを更新
+4. CHANGES.mdをアーカイブ
 
 使用方法:
 1. 基本設計SPECのマスターファイル（functional_design.md等）を自由に編集
@@ -197,17 +179,33 @@ AIが自動で以下を実行
 
 ## 実践例
 
-```
-@agent_skills/jakarta-ee-api-base/instructions/task_breakdown.md
+### 詳細設計の作成（ドメイン単位）
 
-全タスクを分解してください
+```
+@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
+
+commonドメインの詳細設計を作成してください
 
 パラメータ
 * project_root: projects/sdd-wf/bookstore/back-office-api-sdd
 * spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
+* target_domain: common
 ```
 
-その後、詳細設計とコード生成を実施する
+### コード生成（ドメイン単位）
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
+
+commonドメインのコードを生成してください
+
+パラメータ
+* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
+* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
+* target_domain: common
+```
+
+その後、他のドメイン（orders, books_proxy等）の詳細設計とコード生成を実施する
 
 ---
 
@@ -240,19 +238,20 @@ agent_skills/jakarta-ee-api-base/
 │   │   ├── architecture_design.md
 │   │   ├── functional_design.md
 │   │   ├── data_model.md
-│   │   ├── behaviors.md            # E2Eテスト用
+│   │   ├── behaviors.md            # 結合テスト用
 │   │   └── external_interface.md
+│   ├── requirements/                # 要件定義用テンプレート
+│   │   └── behaviors.md            # E2Eテスト用
 │   └── detailed_design/             # 詳細設計用テンプレート
 │       ├── detailed_design.md
 │       └── behaviors.md            # 単体テスト用
 └── instructions/
-    ├── basic_design.md               # ステップ1: 基本設計（SPEC作成）
-    ├── task_breakdown.md             # ステップ2: タスク分解
-    ├── detailed_design.md            # ステップ3: 詳細設計
-    ├── code_generation.md            # ステップ4: コード生成（実装+単体テスト）
-    ├── unit_test_execution.md        # ステップ5: 単体テスト実行評価
-    ├── it_generation.md              # ステップ6: 結合テスト生成（JUnit + Weld SE）
-    ├── e2e_test_generation.md        # ステップ7: E2Eテスト生成（REST Assured）
+    ├── basic_design.md               # ステップ1: 基本設計（SPEC作成、ドメインフォルダ構成）
+    ├── detailed_design.md            # ステップ2: 詳細設計（ドメイン単位）
+    ├── code_generation.md            # ステップ3: コード生成（実装+単体テスト、ドメイン単位）
+    ├── unit_test_execution.md        # ステップ4: 単体テスト実行評価
+    ├── it_generation.md              # ステップ5: 結合テスト生成（Cucumber + Weld SE）
+    ├── e2e_test_generation.md        # ステップ6: E2Eテスト生成（Cucumber + REST Assured）
     └── basic_design_change.md        # 基本設計変更対応（手戻り・拡張案件）
 ```
 

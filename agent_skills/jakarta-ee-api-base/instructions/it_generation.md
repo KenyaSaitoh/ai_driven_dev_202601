@@ -7,12 +7,21 @@
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
 spec_directory: "ここにSPECディレクトリのパスを入力"
+target_domains: "対象ドメイン名（カンマ区切りで複数指定可能、または all）"
 ```
 
-* 例
+* 例1: 特定のドメインの結合テスト
 ```yaml
 project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
 spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
+target_domains: "common,orders"
+```
+
+* 例2: すべてのドメインの結合テスト
+```yaml
+project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
+spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
+target_domains: "all"
 ```
 
 注意
@@ -29,10 +38,11 @@ spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
 重要な方針
 * 単体テスト実行評価後に結合テストを生成する（unit_test_execution.mdの次のステップ）
 * テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）+ Weld SE（CDIコンテナ）
-* テスト対象: basic_design/behaviors.md（結合テスト用）のシナリオ（Gherkin 記法で記述されている前提。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
+* テスト対象: basic_design/{domain}/behaviors.md（結合テスト用）のシナリオ（Gherkin 記法で記述されている前提。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 * Service層以下（Service + DAO + Entity）の実際の連携をテスト
 * モックは使用しない（外部APIのみWireMockでスタブ化）
 * アプリケーションサーバーは不要（Weld SEでCDIコンテナを起動）
+* ドメイン単位または全ドメインの結合テストを生成
 
 ---
 
@@ -47,36 +57,48 @@ spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
   * 重要: 結合テスト生成においても、ルールドキュメントに記載されたすべてのルールを遵守すること
   * 注意: Agent Skills配下のルールは全プロジェクト共通。プロジェクト固有のルールがある場合は `{project_root}/principles/` も確認すること
 
-### 1.2 基本設計の仕様
+### 1.2 基本設計の仕様（共通）
 
-以下のファイルを読み込み、システム全体の設計を理解する
+まず、共通ドメインのSPECを読み込み、システム全体の設計を理解する
 
-* {spec_directory}/basic_design/architecture_design.md - 技術スタック、パッケージ構造、テスト設定を確認する
+* {spec_directory}/basic_design/common/architecture_design.md - 技術スタック、パッケージ構造、テスト設定を確認する
   * 使用技術スタック
   * データソース設定（JNDI名）
   * 外部API連携設定
 
-* {spec_directory}/basic_design/functional_design.md - システム全体の機能設計（全APIを含む）を確認する
-  * 全てのAPI仕様
-  * ビジネスロジック
-  * データフロー
-
-* {spec_directory}/basic_design/data_model.md - データモデルを確認する（該当する場合）
+* {spec_directory}/basic_design/common/data_model.md - データモデルを確認する（該当する場合）
   * エンティティ定義
   * リレーション
   * 制約
 
-* {spec_directory}/basic_design/behaviors.md - 結合テストシナリオを確認する
+* {spec_directory}/basic_design/common/functional_design.md - 共通機能設計（認証、JWT、ログ、エラーハンドリング等）を確認する
+
+* {spec_directory}/basic_design/common/behaviors.md - 共通機能の振る舞い（結合テスト用）を確認する
+
+* {spec_directory}/basic_design/common/external_interface.md - 外部API仕様を確認する（該当する場合）
+  * 外部APIエンドポイント
+  * リクエスト/レスポンス形式
+  * WireMockスタブ化の対象
+
+### 1.3 基本設計の仕様（対象ドメイン）
+
+対象ドメインのSPECを読み込み、ドメインの設計を理解する
+
+* {spec_directory}/basic_design/{target_domain}/functional_design.md - ドメインの機能設計を確認する
+  * ドメインのAPI仕様
+  * ビジネスロジック
+  * データフロー
+
+* {spec_directory}/basic_design/{target_domain}/behaviors.md - ドメインの振る舞い（結合テスト用）を確認する
   * Service層以下の振る舞い
   * ビジネスロジックの検証シナリオ
   * データアクセスの検証シナリオ
   * 外部API連携の検証シナリオ
   * 例: OrderService → OrderDao → DB + 外部在庫API呼び出し
 
-* {spec_directory}/basic_design/external_interface.md - 外部API仕様を確認する（該当する場合）
-  * 外部APIエンドポイント
-  * リクエスト/レスポンス形式
-  * WireMockスタブ化の対象
+注意:
+* target_domains が "all" の場合、basic_design/配下のすべてのドメインフォルダから behaviors.md を読み込む
+* target_domains が複数ドメイン指定の場合、指定されたドメインの behaviors.md のみを読み込む
 
 ---
 
@@ -109,13 +131,14 @@ spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
 
 ### 3.1 テストケース設計方針
 
-* basic_design/behaviors.md の Gherkin シナリオを **Cucumber .feature ファイル**（`src/test/resources/features/integration` 配下）と **Cucumber ステップ定義**（Java、Weld SE を利用）に変換する
+* 対象ドメインの basic_design/{target_domain}/behaviors.md の Gherkin シナリオを **Cucumber .feature ファイル**（`src/test/resources/features/integration` 配下）と **Cucumber ステップ定義**（Java、Weld SE を利用）に変換する
 * 1シナリオ＝1 Feature または 1 Scenario の粒度で .feature に記述
 * Service層のビジネスロジックを中心にステップ定義でテスト
 * 実際のDB（メモリDB）を使用
 * 外部APIはWireMockでスタブ化
 * API層（Resource）は含まない（E2Eテストで検証）
 * feature およびステップ定義に @Tag("integration") を付与し、integrationTest タスクで実行されるようにする
+* target_domains が "all" の場合、すべてのドメインの behaviors.md からテストを生成
 
 ### 3.2 テストベースクラス
 
@@ -169,11 +192,15 @@ spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
 
 ---
 
-## 6. basic_design/behaviors.md からのテストケース生成
+## 6. basic_design/{target_domain}/behaviors.md からのテストケース生成
 
 ### 6.1 シナリオの読み取り
 
-basic_design/behaviors.md は Gherkin 記法で記述されている。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照の上、各シナリオから Given/When/Then を抽出する。
+basic_design/{target_domain}/behaviors.md は Gherkin 記法で記述されている。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照の上、各シナリオから Given/When/Then を抽出する。
+
+注意:
+* target_domains が "all" の場合、すべてのドメインの behaviors.md からシナリオを読み取る
+* 各ドメインのシナリオは独立してテストする
 
 ### 6.2 シナリオとテストの対応
 
@@ -208,6 +235,6 @@ basic_design/behaviors.md は Gherkin 記法で記述されている。@agent_sk
 * Weld SE公式ドキュメント: https://weld.cdi-spec.org/
 * WireMock公式ドキュメント: https://wiremock.org/
 * JUnit 5公式ドキュメント: https://junit.org/junit5/
-* basic_design/behaviors.md - 結合テストシナリオ
-* basic_design/functional_design.md - 機能仕様
-* basic_design/architecture_design.md - システム構成
+* basic_design/{target_domain}/behaviors.md - 結合テストシナリオ（ドメイン単位）
+* basic_design/{target_domain}/functional_design.md - 機能仕様（ドメイン単位）
+* basic_design/common/architecture_design.md - システム構成

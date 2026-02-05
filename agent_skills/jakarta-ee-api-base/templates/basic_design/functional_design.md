@@ -25,10 +25,11 @@
 
 ### 2.2 機能一覧
 
-| 機能ID | 機能名 | ベースパス | 説明 | 詳細設計書 |
+| ドメイン | 機能名 | ベースパス | 説明 | 詳細設計書 |
 |--------|------|----------|------|----------|
-| FUNC_001 | [機能名1] | /api/[path] | [説明] | [../detailed_design/FUNC_001/detailed_design.md](../detailed_design/FUNC_001/detailed_design.md) |
-| FUNC_002 | [機能名2] | /api/[path] | [説明] | [../detailed_design/FUNC_002/detailed_design.md](../detailed_design/FUNC_002/detailed_design.md) |
+| common | 共通機能（認証等） | /api/auth | [説明] | [../detailed_design/common/detailed_design.md](../detailed_design/common/detailed_design.md) |
+| orders | 注文管理 | /api/orders | [説明] | [../detailed_design/orders/detailed_design.md](../detailed_design/orders/detailed_design.md) |
+| books_proxy | 書籍API連携 | /api/books | [説明] | [../detailed_design/books_proxy/detailed_design.md](../detailed_design/books_proxy/detailed_design.md) |
 
 ---
 
