@@ -36,6 +36,12 @@ target_domain: "orders"
 
 重要: 指定されたドメインの実装のみを実行し、完了したら停止する。次のドメインに自動的に進んではいけない
 
+既存コードの扱い（重要）:
+* 既存のソースコードやテストコードが存在する場合は、それらを削除せずに読み込んで、差分のみを反映する
+* ファイルをゼロから作り直すのではなく、既存の内容を尊重して必要な部分のみを追加・修正する
+* 新規クラス・メソッドの追加、既存メソッドの修正、不要なコードの削除など、必要な変更のみを適用する
+* 新規ファイルが必要な場合のみ、新規作成する
+
 パラメータとして指定されたプロジェクトルートとドメインに基づいて、以下を実行する
 
 ### 1. 実装コンテキストをロードして分析する
@@ -203,7 +209,7 @@ Entity、Dao、Service、Resource（JAX-RSエンドポイント）、DTO等の�
 * テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）。architecture_design.mdで指定されたカバレッジ等に従う
 * テストカバレッジ: architecture_design.mdの目標値を遵守する
 * テストケース設計:
-  * detailed_design/配下の各タスクのbehaviors.md（単体テスト用）の Gherkin シナリオから **Cucumber .feature ファイル**（`src/test/resources/features/unit` 配下）と **Cucumber ステップ定義**（Java）を生成する
+  * detailed_design/配下の各タスクのbehaviors.md（単体テスト用）の Gherkin シナリオから Cucumber .feature ファイル（`src/test/resources/features/unit` 配下）と Cucumber ステップ定義（Java）を生成する
   * detailed_design/配下の各タスクのdetailed_design.mdの各メソッドシグネチャに対して、正常系、異常系、境界値、エッジケースのシナリオを .feature に反映し、対応するステップ定義を作成
 * モック使用の判断:
   * 同じタスク内のコンポーネント → モック不要（実際の連携をテスト）
@@ -252,7 +258,7 @@ Entity、Dao、Service、Resource（JAX-RSエンドポイント）、DTO等の�
 
 #### 5.2 テストケース設計
 
-* detailed_design/{target_domain}/behaviors.md（単体テスト用）の Gherkin シナリオから **Cucumber .feature** と **Cucumber ステップ定義** を生成する
+* detailed_design/{target_domain}/behaviors.md（単体テスト用）の Gherkin シナリオから Cucumber .feature と Cucumber ステップ定義 を生成する
 * detailed_design/{target_domain}/detailed_design.mdの各メソッドシグネチャに対して、以下のテストを .feature とステップ定義で作成する：
   * 正常系テスト（期待する戻り値が返されるか）
   * 異常系テスト（例外が適切にスローされるか）

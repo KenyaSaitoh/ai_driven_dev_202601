@@ -32,6 +32,10 @@ spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
 * テスト対象: requirements/behaviors.md（E2Eテスト用）のシナリオ（Gherkin 記法で記述されている前提。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 * 複数機能間の連携、実際のHTTPリクエスト/レスポンス、実際のDBアクセスを含む
 * アプリケーションサーバーが起動している状態でテストを実行
+* 既存テストの扱い（重要）:
+  * 既存のE2Eテストコード（.feature ファイルやステップ定義）が存在する場合は、それらを削除せずに読み込んで、差分のみを反映する
+  * ファイルをゼロから作り直すのではなく、既存の内容を尊重して必要なテストケースのみを追加・修正する
+  * 新規テストファイルが必要な場合のみ、新規作成する
 
 ---
 
@@ -92,7 +96,7 @@ E2Eテスト生成に必要なライブラリ（プロジェクトのビルド�
 
 ### 3.1 テストケース設計方針
 
-* requirements/behaviors.md（E2Eテスト用）の Gherkin シナリオを **Cucumber .feature ファイル**（`src/test/resources/features/e2e` 配下）と **Cucumber ステップ定義**（Java、REST Assured を利用）に変換する
+* requirements/behaviors.md（E2Eテスト用）の Gherkin シナリオを Cucumber .feature ファイル（`src/test/resources/features/e2e` 配下）と Cucumber ステップ定義（Java、REST Assured を利用）に変換する
 * 1シナリオ＝1 Feature または 1 Scenario の粒度で .feature に記述
 * 各 Given-When-Then を実際のHTTPリクエストとしてステップ定義で実装
 * 複数APIにまたがるE2Eのフローをテスト

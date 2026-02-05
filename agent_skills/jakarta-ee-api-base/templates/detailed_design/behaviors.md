@@ -1,8 +1,8 @@
-# [TARGET_NAME] - 振る舞い仕様書（単体テスト用）
+# [DOMAIN_NAME] - 振る舞い仕様書（単体テスト用）
 
 テンプレートパス: templates/detailed_design/behaviors.md  
-コピー先: {spec_directory}/detailed_design/[TARGET]/behaviors.md  
-ターゲット: [TARGET]  
+コピー先: {spec_directory}/detailed_design/[DOMAIN_NAME]/behaviors.md  
+ドメイン名: [DOMAIN_NAME]  
 バージョン: 1.0.0  
 最終更新日: [DATE]
 
@@ -12,118 +12,144 @@
 
 ## 1. 概要
 
-本文書は、[TARGET_NAME]の単体テスト用の振る舞い、テストシナリオ、受入基準を記述する。
+本文書は、[DOMAIN_NAME]ドメインの単体テスト用の振る舞い、テストシナリオ、受入基準を記述する。
 
-ターゲットの種類:
-* API（JAX-RSリソースクラス）
-* サービス（ビジネスロジック、CDI Bean）
-* DAO（データアクセスオブジェクト）
+テスト対象:
+* Resource（JAX-RS）
+* Service（ビジネスロジック）
+* Dao（データアクセス）
+* セキュリティコンポーネント
 * ユーティリティ
-* 画面（JSF Managed Bean、バッキングビーン）
 
 単体テストの範囲:
-* タスク粒度内の機能をテスト
-* 外部依存（他のサービス、外部API、DBなど）はモック化
-* E2Eテストシナリオは basic_design/behaviors.md を参照すること
+* ドメイン粒度内の機能をテスト
+* ドメイン内のコンポーネント間は実際の連携をテスト可能
+* ドメイン外の依存（他ドメインのService、EntityManager、外部API等）はモック化
+* 結合テストシナリオは ../../basic_design/[DOMAIN_NAME]/behaviors.md を参照すること
+* E2Eテストシナリオは ../../requirements/behaviors.md を参照すること
 
-* 関連ドキュメント:
-  * [detailed_design.md](detailed_design.md) - 詳細設計書
-  * [../../basic_design/functional_design.md](../../basic_design/functional_design.md) - 機能設計書
-  * [../../basic_design/behaviors.md](../../basic_design/behaviors.md) - システム振る舞い仕様書（E2Eテスト用）
+関連ドキュメント:
+* [detailed_design.md](detailed_design.md) - 詳細設計書
+* [../../basic_design/[DOMAIN_NAME]/functional_design.md](../../basic_design/[DOMAIN_NAME]/functional_design.md) - ドメイン機能設計書
+* [../../basic_design/[DOMAIN_NAME]/behaviors.md](../../basic_design/[DOMAIN_NAME]/behaviors.md) - ドメイン振る舞い仕様書（結合テスト用）
 
 ---
 
 ## 2. テストシナリオ
 
-注意: このテンプレートは、API、サービス、DAO、ユーティリティ、画面など、あらゆるタスクの単体テストに使用できます。
+注意: このテンプレートは、Resource、Service、Dao、セキュリティコンポーネント、ユーティリティなど、あらゆるコンポーネントの単体テストに使用できます。
 
-### 2.1 [テストケース名1]
+### 2.1 [コンポーネント名] - [テストケース名1]
 
-#### シナリオ: [シナリオ名]
+#### Feature: [機能名]
+
+#### Scenario: [シナリオ名]
 
 * Given（前提条件）:
   * [前提条件1]
   * [前提条件2]
-  * モック設定: [外部依存のモック設定]
+  * モック設定: [ドメイン外の依存のモック設定]
 
 * When（操作）:
-  * [テスト対象の操作を記述]
-  * 例（API）: `POST /api/books`、リクエストボディ: `{...}`
-  * 例（サービス）: `BookService.createBook(bookDto)`
-  * 例（DAO）: `BookDao.findById(bookId)`
+  * [テスト対象のメソッド呼び出しを記述]
 
 * Then（期待結果）:
-  * [期待される結果を記述]
-  * 例（API）: HTTPステータス 201、レスポンス: `{...}`
-  * 例（サービス）: 戻り値: `Book`オブジェクト、例外なし
-  * 例（DAO）: Optional<Book>に値が存在、属性が一致
-  * データベース状態: [期待される状態]
+  * [期待される戻り値を記述]
+  * [期待される状態変化を記述]
+
+* And（追加の検証）:
+  * [追加の検証項目]
+
+#### テストデータ
+* 入力:
+  ```
+  [入力データの例]
+  ```
+* 期待される出力:
+  ```
+  [期待される出力データの例]
+  ```
 
 ---
 
-### 2.2 [テストケース名2]
+### 2.2 [コンポーネント名] - [テストケース名2: 異常系]
 
-[必要に応じて追加のシナリオを記述]
+#### Feature: [機能名]
 
----
+#### Scenario: [エラーシナリオ名]
 
-## 3. エラーケース
+* Given（前提条件）:
+  * [エラーを引き起こす前提条件]
+  * モック設定: [エラーを返すモック設定]
 
-### 3.1 バリデーションエラー
+* When（操作）:
+  * [テスト対象のメソッド呼び出しを記述]
 
-| シナリオID | 説明 | Given | When | Then |
-|-----------|------|-------|------|------|
-| ERR-VAL-001 | [シナリオ] | [前提条件] | [操作] | 例（API）: 400 Bad Request / 例（サービス）: ValidationException |
-
-### 3.2 ビジネスエラー
-
-| シナリオID | 説明 | Given | When | Then |
-|-----------|------|-------|------|------|
-| ERR-BIZ-001 | [シナリオ] | [前提条件] | [操作] | 例（API）: 409 Conflict / 例（サービス）: BusinessException |
-
-### 3.3 システムエラー
-
-| シナリオID | 説明 | Given | When | Then |
-|-----------|------|-------|------|------|
-| ERR-SYS-001 | [シナリオ] | [前提条件] | [操作] | 例（API）: 500 Internal Server Error / 例（サービス）: RuntimeException |
+* Then（期待結果）:
+  * [期待される例外の種類]
+  * [期待されるエラーメッセージ]
 
 ---
 
-## 4. 受入基準
+### 2.3 [コンポーネント名] - [テストケース名3: 境界値]
 
-### 4.1 機能受入基準
+#### Feature: [機能名]
 
-| 基準ID | 説明 | 受入基準 |
-|--------|------|---------|
-| AC-[XXX]-001 | [基準名] | [受入基準の詳細] |
-| AC-[XXX]-002 | [基準名] | [受入基準の詳細] |
+#### Scenario: [境界値シナリオ名]
 
-### 4.2 品質受入基準
+* Given（前提条件）:
+  * [境界値の前提条件]
 
-| 基準ID | 説明 | 受入基準 |
-|--------|------|---------|
-| QUALITY-[XXX]-001 | [品質要件] | [受入基準] |
+* When（操作）:
+  * [境界値を使用したメソッド呼び出し]
+
+* Then（期待結果）:
+  * [境界値での期待される動作]
+
+#### テストデータ（境界値）
+* 最小値: [最小値]
+* 最大値: [最大値]
+* null: [nullの扱い]
+* 空文字列: [空文字列の扱い]
 
 ---
 
-## 5. テストデータ
+## 3. モック化の方針
 
-### 5.1 正常系テストデータ
+### 3.1 ドメイン内の依存関係
+* [同じドメイン内のコンポーネント] → モック不要（実際の連携をテスト）
 
-| データID | 説明 | データ |
-|---------|------|--------|
-| TD-[XXX]-001 | [データ説明] | [データ内容] |
+### 3.2 ドメイン外の依存関係
+* [他ドメインのService] → モック化
+* EntityManager → モック化
+* [外部APIクライアント] → モック化
 
-### 5.2 異常系テストデータ
+---
 
-| データID | 説明 | データ |
-|---------|------|--------|
-| TD-ERR-001 | [データ説明] | [データ内容] |
+## 4. カバレッジ目標
+
+* ステートメントカバレッジ: 80%以上
+* ブランチカバレッジ: 70%以上
+
+---
+
+## 5. 受入基準
+
+### 5.1 機能要件
+- [ ] すべての正常系テストが成功する
+- [ ] すべての異常系テストが成功する
+- [ ] すべての境界値テストが成功する
+
+### 5.2 品質要件
+- [ ] カバレッジ目標を達成する
+- [ ] テストコードにコメントが適切に記載されている
+- [ ] テストケースが独立している（テスト間の依存関係がない）
 
 ---
 
 ## 6. 参考資料
 
 * [detailed_design.md](detailed_design.md) - 詳細設計書
-* [../../basic_design/functional_design.md](../../basic_design/functional_design.md) - 機能設計書
-* [../../basic_design/behaviors.md](../../basic_design/behaviors.md) - システム振る舞い仕様書（E2Eテスト用）
+* [../../basic_design/[DOMAIN_NAME]/functional_design.md](../../basic_design/[DOMAIN_NAME]/functional_design.md) - ドメイン機能設計書
+* [../../basic_design/[DOMAIN_NAME]/behaviors.md](../../basic_design/[DOMAIN_NAME]/behaviors.md) - ドメイン振る舞い仕様書（結合テスト用）
+* [../../requirements/behaviors.md](../../requirements/behaviors.md) - システム振る舞い仕様書（E2Eテスト用）

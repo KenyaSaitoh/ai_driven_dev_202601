@@ -30,6 +30,7 @@ AIと対話しながら以下を実施（対話的プロセス）
 * requirements.md（要件定義書）は所与とする（既に存在している前提）
 * 基本設計はドメイン単位で分割する（common/ + 各ドメイン）
 * フォルダ構成＝実装順序（common/ → 各ドメイン）
+* 既存SPECファイルがある場合は、削除せずに差分のみを反映する
 
 ### ステップ2: 詳細設計
 
@@ -46,11 +47,15 @@ AIと対話しながら以下を実施（対話的プロセス）
 
 AIと対話しながら以下を実施（対話的プロセス）
 1. basic_design/{target_domain}/ の内容に基づいて detailed_design/{target_domain}/ フォルダを作成
-2. basic_design/{target_domain}/functional_design.md を参照して実装レベルの detailed_design.md を生成（クラス設計、メソッドシグネチャ）
+2. basic_design/{target_domain}/functional_design.md を参照して実装レベルの detailed_design.md を生成
+   * 基本設計とコードの「橋渡し」となる設計判断のみを簡潔に記載
+   * クラス名と責務、主要メソッドのシグネチャ、設計判断を示すアノテーション等
+   * 実装詳細（処理ステップ等）は記載しない（後から人が修正する可能性を考慮）
 3. 単体テスト用の behaviors.md を新規作成（メソッドレベルのテストシナリオ）
 
 重要: 
 * commonを最優先で詳細設計する（他のドメインはcommonに依存）
+* 既存ファイルがある場合は、削除せずに差分のみを反映する
 * functional_design.md は basic_design/{target_domain}/ に存在（ドメインごとの真実の情報源）
 * behaviors.md はE2Eテスト用（requirements/）、結合テスト用（basic_design/{domain}/）、単体テスト用（detailed_design/{domain}/）の3種類
 
@@ -70,9 +75,11 @@ AIと対話しながら以下を実施（対話的プロセス）
 AIが自動で以下を実行
 1. 詳細設計（detailed_design/{target_domain}/）を読み込み
 2. 実装コードを生成（Resource、Service、Dao、Entity、DTO等）
+   * 既存コードがある場合は、削除せずに差分のみを反映する
 3. ドメイン粒度内の単体テストを作成
    * ドメイン内のコンポーネント間は実際の連携をテスト
    * ドメイン外の依存関係のみモック化
+   * 既存テストがある場合は、削除せずに差分のみを反映する
 4. commonを最優先で実装（他のドメインはcommonに依存）
 
 ### ステップ4: 単体テスト実行評価
@@ -116,6 +123,7 @@ AIが自動で以下を実行
 パラメータ
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
+* target_domains: all
 ```
 
 AIが自動で以下を実行
@@ -124,6 +132,7 @@ AIが自動で以下を実行
    * Service層以下（Service + DAO + Entity + DB）の連携テスト
    * 実際のDBアクセス（メモリDB）
    * 外部APIはWireMockでスタブ化
+   * 既存テストがある場合は、削除せずに差分のみを反映する
 
 ### ステップ6: E2Eテスト生成
 
@@ -142,6 +151,7 @@ AIが自動で以下を実行
 2. JUnit 5 + Cucumber + REST Assured を使用したE2Eテストを生成
    * API層を含む全体フロー
    * 実際のHTTPリクエスト/レスポンス
+   * 既存テストがある場合は、削除せずに差分のみを反映する
 3. テストデータのセットアップ/クリーンアップコードを生成
 
 ---
@@ -187,8 +197,8 @@ AIが自動で以下を実行
 commonドメインの詳細設計を作成してください
 
 パラメータ
-* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api
+* spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
 * target_domain: common
 ```
 
@@ -200,8 +210,8 @@ commonドメインの詳細設計を作成してください
 commonドメインのコードを生成してください
 
 パラメータ
-* project_root: projects/sdd-wf/bookstore/back-office-api-sdd
-* spec_directory: projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline
+* project_root: projects/sdd-wf/bookstore/back-office-api
+* spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
 * target_domain: common
 ```
 

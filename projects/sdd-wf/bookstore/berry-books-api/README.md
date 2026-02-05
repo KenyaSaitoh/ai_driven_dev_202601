@@ -100,7 +100,7 @@ commonドメインの詳細設計書を作成してください
 パラメータ:
 * project_root: projects/sdd-wf/bookstore/berry-books-api
 * spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
-* target_type: [tasks/tasks.mdで確認したタスクID]
+* target_domain: common  # または books_proxy, orders, images
 ```
 
 使用例:

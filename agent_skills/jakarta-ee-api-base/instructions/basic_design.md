@@ -37,6 +37,10 @@ spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/enhancement
 * AIとユーザーが対話しながら、各SPECの中身を埋めていく
 * 既存資料（EXCEL、Word、PDF等）がある場合は、それを読み込んでMarkdown形式に変換する
 * 既存資料がない場合は、テンプレートから対話的に作成する
+* 既存SPECの扱い（重要）:
+  * 既存の基本設計SPEC（architecture_design.md, functional_design.md, behaviors.md等）が存在する場合は、それらを削除せずに読み込んで、差分のみを反映する
+  * ファイルをゼロから作り直すのではなく、既存の内容を尊重して必要な部分のみを追加・修正する
+  * 新規SPECファイルが必要な場合のみ、テンプレートから作成する
 * requirements.md（要件定義書）は所与とする（既に存在している前提）
 * 基本設計は機能（ドメイン）単位でフォルダ分割する
 * フォルダ構成＝実装順序となる（common/ → 各ドメインフォルダ）

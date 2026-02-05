@@ -32,10 +32,10 @@ min_test_count: null        # 最小テスト数（未指定ならチェック�
 
 # カバレッジ除外設定（デフォルト: DTO、Record、自動生成コード）
 coverage_exclusions:
-  - "**/dto/**"
-  - "**/*Dto.java"
-  - "**/*Record.java"
-  - "**/generated/**"
+  - "/dto/"
+  - "/*Dto.java"
+  - "/*Record.java"
+  - "/generated/"
 
 # レポート出力設定
 report_formats:
@@ -138,7 +138,7 @@ min_test_count: 10
   - 分岐カバレッジ: 70% (from: architecture_design.md)
   - メソッドカバレッジ: 85% (from: default)
 - テスト範囲: target
-- 除外パターン: **/dto/**、**/*Record.java、**/generated/**
+- 除外パターン: /dto/、/*Record.java、/generated/
 ```
 
 #### 1-2. レポートパスの確定

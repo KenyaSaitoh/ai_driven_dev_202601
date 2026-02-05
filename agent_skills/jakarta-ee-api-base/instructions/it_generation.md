@@ -43,6 +43,10 @@ target_domains: "all"
 * モックは使用しない（外部APIのみWireMockでスタブ化）
 * アプリケーションサーバーは不要（Weld SEでCDIコンテナを起動）
 * ドメイン単位または全ドメインの結合テストを生成
+* 既存テストの扱い（重要）:
+  * 既存の結合テストコード（.feature ファイルやステップ定義）が存在する場合は、それらを削除せずに読み込んで、差分のみを反映する
+  * ファイルをゼロから作り直すのではなく、既存の内容を尊重して必要なテストケースのみを追加・修正する
+  * 新規テストファイルが必要な場合のみ、新規作成する
 
 ---
 
@@ -131,7 +135,7 @@ target_domains: "all"
 
 ### 3.1 テストケース設計方針
 
-* 対象ドメインの basic_design/{target_domain}/behaviors.md の Gherkin シナリオを **Cucumber .feature ファイル**（`src/test/resources/features/integration` 配下）と **Cucumber ステップ定義**（Java、Weld SE を利用）に変換する
+* 対象ドメインの basic_design/{target_domain}/behaviors.md の Gherkin シナリオを Cucumber .feature ファイル（`src/test/resources/features/integration` 配下）と Cucumber ステップ定義（Java、Weld SE を利用）に変換する
 * 1シナリオ＝1 Feature または 1 Scenario の粒度で .feature に記述
 * Service層のビジネスロジックを中心にステップ定義でテスト
 * 実際のDB（メモリDB）を使用

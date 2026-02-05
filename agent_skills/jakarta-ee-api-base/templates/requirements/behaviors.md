@@ -23,26 +23,17 @@
 * 外部システム連携
 
 テスト対象外:
-* Service層の内部的なビジネスロジック（basic_design/behaviors.mdで記述）
-* DAO層の実装詳細（basic_design/behaviors.mdで記述）
+* Service層の内部的なビジネスロジック（basic_design/{domain}/behaviors.mdで記述）
+* DAO層の実装詳細（basic_design/{domain}/behaviors.mdで記述）
 
 関連ドキュメント:
 * [requirements.md](requirements.md) - 要件定義書（What & Why）
-* [../basic_design/behaviors.md](../basic_design/behaviors.md) - 結合テスト用の振る舞い仕様書（Service層以下）
-* [../basic_design/functional_design.md](../basic_design/functional_design.md) - システム機能設計書
-* [../basic_design/architecture_design.md](../basic_design/architecture_design.md) - アーキテクチャ設計書
+* [../basic_design/{domain}/behaviors.md](../basic_design/{domain}/behaviors.md) - 結合テスト用の振る舞い仕様書（Service層以下）
+* [../basic_design/{domain}/functional_design.md](../basic_design/{domain}/functional_design.md) - システム機能設計書
+* [../basic_design/common/architecture_design.md](../basic_design/common/architecture_design.md) - アーキテクチャ設計書
 
 ---
 
-## 2. タスク一覧とリンク
-
-注意: 以下は、詳細設計配下の単体テスト用behaviors.md（templates/detailed_design/behaviors.mdから生成）へのリンクです。
-
-| ドメイン | ドメイン名 | 単体テスト用behaviors.md |
-|---------|---------|----------------------|
-| common | 共通ドメイン | [../detailed_design/common/behaviors.md](../detailed_design/common/behaviors.md) |
-| orders | 注文管理 | [../detailed_design/orders/behaviors.md](../detailed_design/orders/behaviors.md) |
-| books_proxy | 書籍API連携 | [../detailed_design/books_proxy/behaviors.md](../detailed_design/books_proxy/behaviors.md) |
 
 ---
 
