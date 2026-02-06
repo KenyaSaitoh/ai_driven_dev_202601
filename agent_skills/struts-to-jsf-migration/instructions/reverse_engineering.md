@@ -226,7 +226,8 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 
 #### behaviors.md
 
-* 記法: Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）。@agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること。
+* 記法: Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）
+* Gherkin記法の詳細: @agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること
 
 * システム全体の振る舞い:
   * 主要な業務フロー
@@ -285,7 +286,8 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 
 #### behaviors.md
 
-* 記法: Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）。common_rules.md の「振る舞いの記法（Gherkin）」を参照すること。
+* 記法: Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）
+* Gherkin記法の詳細: common_rules.md の「振る舞いの記法（Gherkin）」を参照すること
 
 * 画面の振る舞い:
   * 初期表示時の動作（`@PostConstruct`）

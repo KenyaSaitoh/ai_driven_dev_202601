@@ -34,7 +34,11 @@ spec_directory: "projects/sdd-wf/person/jsf-person-sdd/specs/baseline"
 * テスト対象: basic_design/behaviors.md または requirements/behaviors.md（E2Eテスト用）のシナリオ（Gherkin 記法で記述されている前提。@agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 * 複数画面にまたがるフロー、実際のブラウザ操作、実際のDBアクセスを含む
 * アプリケーションサーバーが起動している状態でテストを実行
-* **既存テストの保護**: 既存の JUnit + Playwright テストコードは削除せず、必要に応じてCucumberテストを追加する
+* **既存テストの扱い（重要）:**
+  * 既存の JUnit + Playwright テストコードは削除せずに保護する
+  * 既存の Cucumber テストコード（.feature ファイルやステップ定義）が存在する場合は、それらを削除せずに読み込んで、差分のみを反映する
+  * ファイルをゼロから作り直すのではなく、既存の内容を尊重して必要なテストケースのみを追加・修正する
+  * 新規テストファイルが必要な場合のみ、新規作成する
 
 ---
 

@@ -88,14 +88,14 @@ output_directory: "projects/sdd-wf/person/jsf-person-sdd/tasks"
 * requirements.md - システムの目的、機能要件
 * data_model.md - エンティティとデータベーススキーマを確認
   * persistence.xml設定情報セクションでJNDI名を確認（persistence.xml設定に必要）
-* behaviors.md - システム全体の振る舞い概要と各機能へのリンクを確認（Gherkin 記法で記述されている前提）
+* behaviors.md - システム全体の振る舞い概要と各機能へのリンクを確認（Gherkin 記法で記述されている前提。@agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 
 ### 機能単位ドキュメント（detailed_design/配下）
 
 * detailed_design/FUNC_XXX_*/ - 各機能単位のディレクトリ（例: FUNC_001_PersonList, FUNC_002_PersonInput）
   * screen_design.md - 画面レイアウト、入力項目、バリデーション（JSFプロジェクトの場合）
   * detailed_design.md - Managed Bean、Service、データアクセス設計
-  * behaviors.md - 機能の振る舞い仕様（受入基準、Gherkin 記法のシナリオ）
+  * behaviors.md - 機能の振る舞い仕様（受入基準、Gherkin 記法のシナリオ。@agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 
 注意: プロジェクトによって利用可能なドキュメントは異なります。利用可能なものに基づいてタスクを生成してください。
 

@@ -34,6 +34,12 @@ skip_infrastructure: false  # 機能タスクではこのパラメータは無�
 
 重要: 指定されたタスクファイルのタスクのみを実行し、完了したら停止する。次のタスクに自動的に進んではいけない
 
+既存コードの扱い（重要）:
+* 既存のソースコードやテストコードが存在する場合は、それらを削除せずに読み込んで、差分のみを反映する
+* ファイルをゼロから作り直すのではなく、既存の内容を尊重して必要な部分のみを追加・修正する
+* 新規クラス・メソッドの追加、既存メソッドの修正、不要なコードの削除など、必要な変更のみを適用する
+* 新規ファイルが必要な場合のみ、新規作成する
+
 パラメータとして指定されたプロジェクトルートとタスクファイルに基づいて、以下を実行する
 
 ### 1. 実装コンテキストをロードして分析する
@@ -69,23 +75,19 @@ skip_infrastructure: false  # 機能タスクではこのパラメータは無�
 
 6. 必須: `{project_root}/specs/baseline/basic_design/functional_design.md` でシステム全体の機能設計、画面一覧、画面遷移図を確認する
 
-7. 必須: `{project_root}/specs/baseline/basic_design/detailed_design.md` で共通処理、JPAエンティティ、Serviceの詳細設計を確認する（存在する場合）
+7. 必須: `{project_root}/specs/baseline/detailed_design/{target_type}/detailed_design.md` で対象画面の詳細設計を確認する（存在する場合）
 
-8. 必須: `{project_root}/specs/baseline/detailed_design/screen/*/functional_design.md` で機能固有のManaged Bean設計、Service設計、データアクセス設計を確認する
+8. 必須: `{project_root}/specs/baseline/detailed_design/{target_type}/behaviors.md` で対象画面の振る舞い仕様を確認する（存在する場合）
 
-9. 必須: `{project_root}/specs/baseline/detailed_design/screen/*/detailed_design.md` で機能固有の詳細設計を確認する（存在する場合）
+9. 存在する場合: `{project_root}/specs/baseline/basic_design/data_model.md` でテーブル定義とERDを確認する
 
-10. 存在する場合: `{project_root}/specs/baseline/basic_design/data_model.md` でテーブル定義とERDを確認する
+10. 存在する場合: `{project_root}/specs/baseline/basic_design/behaviors.md` でシステム全体の振る舞いを確認する
 
-11. 存在する場合: `{project_root}/specs/baseline/basic_design/behaviors.md` でシステム全体の振る舞い、共通処理の振る舞い、受入基準を確認する
+11. 存在する場合: `{project_root}/specs/baseline/basic_design/screen_design.md` で画面レイアウト、入力項目、バリデーションを確認する
 
-12. 存在する場合: `{project_root}/specs/baseline/detailed_design/screen/*/behaviors.md` で機能固有の受入基準とテストシナリオを確認する
+12. 存在する場合: `{project_root}/specs/baseline/basic_design/external_interface.md` で外部連携仕様とAPI仕様を確認する
 
-13. 存在する場合: `{project_root}/specs/baseline/detailed_design/screen/*/screen_design.md` で画面レイアウト、入力項目、バリデーションを確認する
-
-14. 存在する場合: `{project_root}/specs/baseline/basic_design/external_interface.md` で外部連携仕様とAPI仕様を確認する
-
-15. 静的リソース: `{project_root}/resources/` フォルダの静的ファイル（画像等）を確認し、セットアップ時に適切な場所にコピーする
+13. 静的リソース: `{project_root}/resources/` フォルダの静的ファイル（画像等）を確認し、セットアップ時に適切な場所にコピーする
 
 * 注意: `{project_root}` は、パラメータで明示的に指定されたプロジェクトルートのパスに置き換える
 
@@ -238,20 +240,21 @@ Entity、Service、Managed Bean、Facelets XHTML、DTO等の実装コードを�
   
 * モック使用の判断基準:
   * 同じタスク内のコンポーネント → モック不要（実際の連携をテスト）
-    * 例: PersonListBean → PersonService → PersonDao （同じタスク内）
+    * 例: PersonService → EntityManager （同じタスク内）
   * タスク外の依存関係 → モックを使用
     * 例: PersonService が ExternalService に依存する場合、ExternalService はモック
     * 例: EntityManager、外部APIクライアント等はモック
+  * 注意: Managed Beanは基本的にテスト対象外（カバレッジ除外推奨、E2Eテストで検証）
 
 * **テストフレームワーク: JUnit 5 のみ**（Cucumberは使用しない）
 * テストカバレッジ: architecture_design.mdの目標値を遵守する
 * テストクラスの配置: `src/test/java` の適切なパッケージに配置
-* behaviors.md のシナリオ（Gherkin記法）を参考に、Given-When-Then の流れでテストメソッド内にテストロジックを記述する
+* behaviors.md のシナリオ（Gherkin記法で記述されている前提。@agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）を参考に、Given-When-Then の流れでテストメソッド内にテストロジックを記述する
 
 #### 5.2 テストケース設計
 
-* detailed_design/screen/配下の各機能のbehaviors.md（単体テスト用）の Gherkin シナリオを参考に、**JUnit 5** の通常のテストクラスとテストメソッドを生成する
-* detailed_design/screen/配下の各機能のdetailed_design.mdの各メソッドシグネチャに対して、以下のテストメソッドを作成する：
+* detailed_design/{target_type}/behaviors.md（単体テスト用）の Gherkin シナリオを参考に、**JUnit 5** の通常のテストクラスとテストメソッドを生成する
+* detailed_design/{target_type}/detailed_design.mdの各メソッドシグネチャに対して、以下のテストメソッドを作成する：
   * 正常系テスト（期待する戻り値が返されるか）
   * 異常系テスト（例外が適切にスローされるか）
   * 境界値テスト（null、空文字列、最大値、最小値等）
@@ -303,7 +306,7 @@ class PersonServiceTest {
 
 ---
 
-## コンポーネント別の参照先
+## コンポーネント別の参照ドキュメント優先度と使用方法
 
 ### 重要: 全てのコンポーネント生成時の共通確認事項
 
@@ -314,10 +317,10 @@ class PersonServiceTest {
 | コンポーネント | 第一参照 | 第二参照 | 補足 |
 |---------------|----------|----------|------|
 | Entity | data_model.md（テーブル・カラム・制約・リレーション） | functional_design.md | 楽観的ロックは architecture に従う |
-| Service | detailed_design/…/detailed_design.md（メソッド・処理フロー・トランザクション） | 該当画面の behaviors.md | スコープ（通常 @RequestScoped）・@Transactional は architecture に従う |
-| Managed Bean | detailed_design/…/detailed_design.md（プロパティ・アクションメソッド・画面遷移・Flash Scope） | 該当画面の behaviors.md、screen_design.md | スコープ（通常 @ViewScoped）は functional_design に従う |
-| Facelets XHTML | 該当画面の screen_design.md（レイアウト・表示・入力・バリデーション） | detailed_design/…/detailed_design.md（Beanバインディング・アクション） | h:form, h:dataTable, h:inputText, h:commandButton, h:messages 等 |
-| DTO/Model | detailed_design/…/detailed_design.md（構造・フィールド・バリデーション） | data_model.md（Entity対応） | — |
+| Service | detailed_design/{target_type}/detailed_design.md（メソッド・処理フロー・トランザクション） | 該当画面の behaviors.md | スコープ（通常 @RequestScoped）・@Transactional は architecture に従う |
+| Managed Bean | detailed_design/{target_type}/detailed_design.md（プロパティ・アクションメソッド・画面遷移・Flash Scope） | 該当画面の behaviors.md、screen_design.md | スコープ（通常 @ViewScoped）は functional_design に従う |
+| Facelets XHTML | screen_design.md（レイアウト・表示・入力・バリデーション） | detailed_design/{target_type}/detailed_design.md（Beanバインディング・アクション） | h:form, h:dataTable, h:inputText, h:commandButton, h:messages 等 |
+| DTO/Model | detailed_design/{target_type}/detailed_design.md（構造・フィールド・バリデーション） | data_model.md（Entity対応） | — |
 | Filter/Interceptor | architecture_design.md（認証フィルター・セッション管理） | functional_design.md（認証・認可仕様） | — |
 | 外部連携 | external_interface.md（API仕様・OpenAPI・タイムアウト） | functional_design.md | — |
 

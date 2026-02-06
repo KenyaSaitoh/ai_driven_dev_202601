@@ -99,7 +99,11 @@ coverage_targets:
 
 ## 2. 実行フロー
 
-Jakarta EE API版の [unit_test_execution.md](../../jakarta-ee-api-base/instructions/unit_test_execution.md) と基本的に同じフローに従う。behaviors.md への追加・修正時は Gherkin 記法で記述すること。@agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照。
+Jakarta EE API版の [unit_test_execution.md](../../jakarta-ee-api-base/instructions/unit_test_execution.md) と基本的に同じフローに従う。
+
+behaviors.md への追加・修正時の注意:
+* Gherkin 記法で記述すること
+* Gherkin記法の詳細: @agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照
 
 ### JSF特有の注意事項
 

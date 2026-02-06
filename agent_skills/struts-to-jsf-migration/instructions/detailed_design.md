@@ -65,12 +65,12 @@ behaviors.mdの種別（すべてGherkin記法で記述）:
 ### 1.2 システムレベルの仕様
 - {spec_directory}/basic_design/architecture_design.md - 技術スタック、パッケージ構造、セッション管理方針を確認
 - {spec_directory}/basic_design/functional_design.md - システム全体の機能設計、画面遷移図を確認
-- {spec_directory}/basic_design/data_model.md - テーブル定義（ERD）を確認
+- {spec_directory}/basic_design/data_model.md - テーブル定義（ERD）を確認（該当する場合）
 
 ### 1.3 対象画面の仕様
-- {spec_directory}/basic_design/screen_design.md - 対象画面（{target_type}）の画面設計を確認
+- {spec_directory}/basic_design/screen_design.md - 対象画面（{target_type}）の画面設計を確認（該当する場合）
   - レイアウト、入力項目、ボタン、バリデーションルール、初期表示
-- {spec_directory}/basic_design/behaviors.md - 対象画面の振る舞い（該当する場合）を確認
+- {spec_directory}/basic_design/behaviors.md - 対象画面の振る舞いを確認（該当する場合、Gherkin記法で記述されている前提。@agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 
 ---
 
@@ -106,7 +106,7 @@ SPECに明記されていない以下の点はユーザーに質問する:
 ### 3.1 生成するファイル
 
 #### 3.1.1 detailed_design.md（実装クラス設計）
-- 生成先: {spec_directory}/detailed_design/detailed_design/{target_type}/detailed_design.md
+- 生成先: {spec_directory}/detailed_design/{target_type}/detailed_design.md
 - テンプレート: @agent_skills/struts-to-jsf-migration/templates/detailed_design/detailed_design.md
 - 既存ファイルがある場合は、差分のみを反映する
 
@@ -119,7 +119,7 @@ SPECに明記されていない以下の点はユーザーに質問する:
 - 依存関係（@Inject対象）
 
 #### 3.1.2 behaviors.md（単体テスト用の振る舞い仕様書）
-- 生成先: {spec_directory}/detailed_design/detailed_design/{target_type}/behaviors.md
+- 生成先: {spec_directory}/detailed_design/{target_type}/behaviors.md
 - テンプレート: @agent_skills/struts-to-jsf-migration/templates/detailed_design/behaviors.md
 - 既存ファイルがある場合は、差分のみを反映する
 - 記法: Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）

@@ -78,13 +78,13 @@ change_spec: "projects/sdd-wf/person/jsf-person-sdd/specs/baseline/basic_design/
 
 ```
 {spec_directory}/basic_design/
-  ├── architecture_design.md (or .xlsx)
-  ├── functional_design.md (or .xlsx)
-  ├── screen_design.md (or .xlsx)      # JSF特有
-  ├── data_model.md (or .xlsx)
-  ├── behaviors.md (or .xlsx)
-  ├── CHANGES.md                        # アクティブな変更（未適用）
-  └── changes_archive/                  # 適用済み変更のアーカイブ
+  ├── architecture_design.md
+  ├── functional_design.md
+  ├── screen_design.md              # JSF特有
+  ├── data_model.md
+  ├── behaviors.md
+  ├── CHANGES.md                     # アクティブな変更（未適用）
+  └── changes_archive/               # 適用済み変更のアーカイブ
       ├── 20260118_person_edit.md
       └── 20260125_validation_update.md
 ```
@@ -196,13 +196,13 @@ CHANGES.mdの「削除」セクションから：
 
 ---
 
-## 4. 影響分析
+## 3. 影響分析
 
 ### 3.1 影響を受けるファイルの特定
 
 変更箇所から、影響を受けるファイルを特定する
 
-#### 4.1.1 詳細設計ファイル
+#### 3.1.1 詳細設計ファイル
 
 変更の影響を受ける詳細設計ファイルを特定：
 
@@ -212,8 +212,8 @@ CHANGES.mdの「削除」セクションから：
 ```
 
 例：
-* SCREEN_001_PersonList の仕様変更 → `detailed_design/SCREEN_001_PersonList/detailed_design.md`
-* Person エンティティの変更 → `detailed_design/FUNC_001_entity/detailed_design.md`
+* FUNC_001_PersonList の仕様変更 → `detailed_design/FUNC_001_PersonList/detailed_design.md`
+* Person エンティティの変更 → `detailed_design/common/detailed_design.md`
 
 #### 3.1.2 ソースコードファイル
 
@@ -228,8 +228,8 @@ CHANGES.mdの「削除」セクションから：
 例：
 * PersonService にメソッド追加 → `src/main/java/.../PersonService.java`
 * Person エンティティにフィールド追加 → `src/main/java/.../entity/Person.java`
-* SCREEN_001_PersonList の変更 → `src/main/java/.../bean/PersonListBean.java`
-* SCREEN_001_PersonList の変更 → `src/main/webapp/person/list.xhtml`
+* FUNC_001_PersonList の変更 → `src/main/java/.../bean/PersonListBean.java`
+* FUNC_001_PersonList の変更 → `src/main/webapp/person/list.xhtml`
 
 #### 3.1.3 テストファイル
 
@@ -290,25 +290,26 @@ CHANGES.mdの「削除」セクションから：
 
 ---
 
-## 4. 変更タスクの生成
+## 4. 影響を受ける画面の識別
 
-### 4.1 変更タスクファイルの作成
+### 4.1 影響画面の特定
 
-影響分析の結果をもとに、変更タスクファイルを生成する
+変更内容から、影響を受ける画面を特定する
 
-出力先: `{project_root}/tasks/change_tasks.md`
+影響画面の識別基準:
+* 共通機能の変更（Entity, Service等） → 複数画面に影響
+* 特定画面の変更（画面レイアウト、UI部品等） → 該当画面のみ
 
-### 5.2 変更タスクファイルのテンプレート
+### 4.2 影響分析サマリー
 
 ```markdown
-# 基本設計変更対応タスク
+# 基本設計変更対応サマリー
 
 ## メタデータ
 
 * プロジェクト: {project_name}
 * 変更日時: {timestamp}
 * 変更理由: {reason}
-* ベースライン更新日: {baseline_date}
 
 ---
 
@@ -330,10 +331,16 @@ CHANGES.mdの「削除」セクションから：
 
 ## 影響分析
 
+### 影響を受ける画面
+
+* common: {変更内容概要}
+* FUNC_001_PersonList: {変更内容概要}
+
 ### 詳細設計への影響
 
-* [ ] {spec_directory}/detailed_design/{FUNC_ID}/detailed_design.md - {変更内容}
-* [ ] {spec_directory}/detailed_design/{FUNC_ID}/behaviors.md - {変更内容}
+* [ ] {spec_directory}/detailed_design/common/detailed_design.md - {変更内容}
+* [ ] {spec_directory}/detailed_design/FUNC_001_PersonList/detailed_design.md - {変更内容}
+* [ ] {spec_directory}/detailed_design/FUNC_001_PersonList/behaviors.md - {変更内容}
 
 ### コードへの影響
 
@@ -347,15 +354,11 @@ CHANGES.mdの「削除」セクションから：
 
 ---
 
-## 更新タスク
+## 更新手順
 
-### TASK_CHANGE_001: 詳細設計の更新
+### 1. 詳細設計の更新（影響画面ごと）
 
-対象: {spec_directory}/detailed_design/{FUNC_ID}/
-
-変更内容:
-- {変更項目1}
-- {変更項目2}
+対象画面: {FUNC_ID}
 
 実行方法:
 ```
@@ -373,9 +376,9 @@ CHANGES.mdの「削除」セクションから：
 
 ---
 
-### TASK_CHANGE_002: コードの更新
+### 2. コードの更新（影響画面ごと）
 
-対象: {source_files} + {xhtml_files}
+対象画面: {FUNC_ID}
 
 変更内容:
 - {Managed Bean名}.java に {メソッド名}() メソッドを追加
@@ -400,9 +403,9 @@ CHANGES.mdの「削除」セクションから：
 
 ---
 
-### TASK_CHANGE_003: 単体テストの更新
+### 3. 単体テストの更新（影響画面ごと）
 
-対象: {test_files}
+対象画面: {FUNC_ID}
 
 変更内容:
 - {テストクラス名} に {テストメソッド名} を追加
@@ -410,7 +413,7 @@ CHANGES.mdの「削除」セクションから：
 
 実行方法:
 ```
-@agent_skills/struts-to-jsf-migration/instructions/unit_test_generation.md
+@agent_skills/struts-to-jsf-migration/instructions/unit_test_execution.md
 
 パラメータ:
 * project_root: {project_root}
@@ -423,9 +426,9 @@ CHANGES.mdの「削除」セクションから：
 
 ---
 
-### TASK_CHANGE_004: 結合テストの更新
+### 4. 結合テストの更新
 
-対象: {integration_test_files}
+対象: 影響を受ける画面の結合テスト
 
 変更内容:
 - {シナリオ} の結合テストを追加
@@ -444,9 +447,9 @@ CHANGES.mdの「削除」セクションから：
 
 ---
 
-### TASK_CHANGE_005: E2Eテストの更新
+### 5. E2Eテストの更新
 
-対象: {e2e_test_files}
+対象: システム全体のE2Eテスト
 
 変更内容:
 - {シナリオ} のE2Eテストを追加（Playwright使用）
@@ -461,21 +464,38 @@ CHANGES.mdの「削除」セクションから：
 ```
 
 注意事項:
-* requirements/behaviors.md の新しいシナリオをテスト
+* basic_design/behaviors.md の新しいシナリオをテスト
 
 ---
 
-## 実行順序
+## 5. 実行順序
 
-変更タスクは以下の順序で実行する：
+影響を受ける画面ごとに以下の順序で更新する：
 
-1. TASK_CHANGE_001: 詳細設計の更新（基盤）
-2. TASK_CHANGE_002: コードの更新（実装）
-3. TASK_CHANGE_003: 単体テストの更新（検証）
-4. TASK_CHANGE_004: 結合テストの更新（検証）
-5. TASK_CHANGE_005: E2Eテストの更新（検証）
+### 5.1 commonの更新（最優先）
 
-各タスク完了後、次のタスクに進む前にユーザーの確認を待つ。
+commonが影響を受ける場合、最初に更新する：
+
+1. 詳細設計の更新（common）
+2. コードの更新（common）
+3. 単体テストの更新（common）
+
+### 5.2 各画面の更新
+
+commonの更新完了後、影響を受ける各画面を順次更新：
+
+1. 詳細設計の更新（{FUNC_ID}）
+2. コードの更新（{FUNC_ID}）
+3. 単体テストの更新（{FUNC_ID}）
+
+### 5.3 統合テストの更新
+
+すべての画面更新完了後、統合テストを更新：
+
+4. 結合テストの更新
+5. E2Eテストの更新
+
+各ステップ完了後、次のステップに進む前にユーザーの確認を待つ。
 
 ---
 
@@ -508,30 +528,28 @@ mv specs/baseline/basic_design/CHANGES.md \
 
 ## 6. ユーザーへの確認
 
-### 5.1 変更内容の説明
+### 6.1 変更内容の説明
 
-変更タスクファイル生成後、ユーザーに以下を説明する：
+影響分析完了後、ユーザーに以下を説明する：
 
 ```
 基本設計SPECの変更を検出しました。
 
 変更概要:
 - 変更されたファイル: {files}
+- 影響を受ける画面: {screens}
 - 影響を受けるコンポーネント: {components}
-- 生成された変更タスク: {task_count}件
 
-変更タスクファイルを生成しました:
-{project_root}/tasks/change_tasks.md
-
-このファイルには、以下の情報が含まれています:
-1. 変更検出結果（差分）
-2. 影響分析（影響を受けるファイル一覧）
-3. 更新タスク（実行すべき作業）
+影響分析結果:
+1. 影響画面: common, FUNC_001_PersonList
+2. 更新が必要な詳細設計: {count}件
+3. 更新が必要なソースコード: {count}件
+4. 更新が必要なテスト: {count}件
 
 次のステップ:
-1. change_tasks.md を確認してください
-2. 承認後、各タスクを順次実行します
-3. すべてのタスク完了後、ベースラインを更新します
+1. 影響を受ける画面ごとに詳細設計を更新します
+2. 承認後、各画面のコードとテストを順次更新します
+3. すべての更新完了後、CHANGES.mdをアーカイブします
 
 続行しますか？ (Y/n)
 ```
@@ -539,13 +557,13 @@ mv specs/baseline/basic_design/CHANGES.md \
 ### 6.2 承認後の処理
 
 ユーザーが承認した場合：
-1. 各タスクを順次実行する（既存の指示書を呼び出し）
-2. 各タスク完了後、ユーザーに確認を求める
-3. すべてのタスク完了後、ベースラインを更新する
+1. 影響を受ける画面ごとに更新を実行する（既存の指示書を呼び出し）
+2. 各画面更新完了後、ユーザーに確認を求める
+3. すべての画面更新完了後、CHANGES.mdをアーカイブする
 
 ユーザーが承認しなかった場合：
 * 処理を中断する
-* change_tasks.md は残す（後で手動実行可能）
+* 影響分析結果は表示済み（後で手動実行可能）
 
 ---
 
@@ -673,11 +691,11 @@ graph TD
 
 ---
 
-## 10. 完了検証
+## 9. 完了検証
 
-すべてのタスク完了後、以下を確認する：
+すべての画面更新完了後、以下を確認する：
 
-* [ ] 変更タスクファイル（change_tasks.md）がすべて完了している
+* [ ] 影響を受けたすべての画面が更新されている
 * [ ] 詳細設計書が更新されている
 * [ ] ソースコード（Java、XHTML）が更新されている
 * [ ] テストが更新されている
@@ -690,6 +708,7 @@ graph TD
 基本設計変更対応が完了しました。
 
 変更内容:
+- 更新された画面: {screens}
 - 更新された詳細設計: {count}件
 - 更新されたソースファイル: {count}件
 - 更新されたXHTMLファイル: {count}件
@@ -699,9 +718,6 @@ CHANGES.mdをアーカイブしました:
 {spec_directory}/basic_design/changes_archive/{archive_filename}
 
 次回の変更時には、新しいCHANGES.mdを作成してください。
-
-変更履歴:
-{project_root}/tasks/change_tasks.md
 ```
 
 ---
