@@ -37,14 +37,17 @@ target_domains: "all"
 
 重要な方針
 * 単体テスト実行評価後に結合テストを生成する（unit_test_execution.mdの次のステップ）
-* テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）+ Weld SE（CDIコンテナ）
+* **テストフレームワーク（2種類を並行使用）:**
+  * **主: JUnit 5 + Weld SE（CDIコンテナ）** - 従来型の結合テスト（必須）
+  * **補助・実験的: JUnit 5 + Cucumber + Weld SE** - Gherkin記法によるBDD形式テスト（オプション）
 * テスト対象: basic_design/{domain}/behaviors.md（結合テスト用）のシナリオ（Gherkin 記法で記述されている前提。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 * Service層以下（Service + DAO + Entity）の実際の連携をテスト
 * モックは使用しない（外部APIのみWireMockでスタブ化）
 * アプリケーションサーバーは不要（Weld SEでCDIコンテナを起動）
 * ドメイン単位または全ドメインの結合テストを生成
-* 既存テストの扱い（重要）:
-  * 既存の結合テストコード（.feature ファイルやステップ定義）が存在する場合は、それらを削除せずに読み込んで、差分のみを反映する
+* **既存テストの扱い（重要）:**
+  * 既存の JUnit + Weld テストコードは削除せずに保護する
+  * 既存の Cucumber テストコード（.feature ファイルやステップ定義）が存在する場合は、それらを削除せずに読み込んで、差分のみを反映する
   * ファイルをゼロから作り直すのではなく、既存の内容を尊重して必要なテストケースのみを追加・修正する
   * 新規テストファイルが必要な場合のみ、新規作成する
 
@@ -133,16 +136,58 @@ target_domains: "all"
 
 ## 3. 結合テストケース生成
 
-### 3.1 テストケース設計方針
+### 3.1 テストケース設計方針（共通）
 
-* 対象ドメインの basic_design/{target_domain}/behaviors.md の Gherkin シナリオを Cucumber .feature ファイル（`src/test/resources/features/integration` 配下）と Cucumber ステップ定義（Java、Weld SE を利用）に変換する
-* 1シナリオ＝1 Feature または 1 Scenario の粒度で .feature に記述
-* Service層のビジネスロジックを中心にステップ定義でテスト
+* 対象ドメインの basic_design/{target_domain}/behaviors.md のシナリオに基づいてテストを生成
+* Service層のビジネスロジックを中心にテスト
 * 実際のDB（メモリDB）を使用
 * 外部APIはWireMockでスタブ化
 * API層（Resource）は含まない（E2Eテストで検証）
-* feature およびステップ定義に @Tag("integration") を付与し、integrationTest タスクで実行されるようにする
+* @Tag("integration") を付与し、integrationTest タスクで実行されるようにする
 * target_domains が "all" の場合、すべてのドメインの behaviors.md からテストを生成
+
+### 3.2 主テスト: JUnit 5 + Weld SE（従来型、必須）
+
+* `src/test/java` 配下に通常のJUnitテストクラスを作成
+* BaseIntegrationTest を継承（Weld SE によるCDIコンテナ起動、EntityManager管理、WireMock管理）
+* @Tag("integration") を付与
+* テストメソッドは @Test アノテーションで実装
+* behaviors.md のシナリオを参考に、Given-When-Then の流れでテストを記述
+
+**例:**
+```java
+@Tag("integration")
+class OrderServiceIntegrationTest extends BaseIntegrationTest {
+    @Test
+    void testCreateOrder_Success() {
+        // Given: WireMock スタブ設定、テストデータ投入
+        stubFor(get(urlEqualTo("/api/stock/123"))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withBody("{\"available\": true}")));
+        
+        // When: Service メソッド呼び出し
+        Order order = orderService.createOrder(createOrderRequest);
+        
+        // Then: DB検証、WireMock verify
+        assertNotNull(order.getId());
+        verify(getRequestedFor(urlEqualTo("/api/stock/123")));
+    }
+}
+```
+
+### 3.3 補助テスト: JUnit 5 + Cucumber + Weld SE（BDD形式、実験的・オプション）
+
+* behaviors.md の Gherkin シナリオを、**Cucumber の .feature ファイル**（`src/test/resources/features/integration` 配下）と **Cucumber ステップ定義**（Java、Weld SE を利用）に変換する
+* 1シナリオ＝1 Feature または 1 Scenario の粒度で .feature に記述
+* feature およびステップ定義に @Tag("integration") を付与
+* **注意**: Cucumberテストは補助的・実験的な位置づけであり、従来のJUnit + Weldテストを置き換えるものではない
+
+### 3.4 RestAssured や Wiremock の直接利用
+
+* 結合テストでは、必要に応じて RestAssured や Wiremock を直接利用したテストも作成可能
+* これらのテストも削除せず、既存テストと共存させる
+* 例: REST APIエンドポイントを直接呼び出す結合テスト（アプリケーションサーバー起動が必要）
 
 ### 3.2 テストベースクラス
 

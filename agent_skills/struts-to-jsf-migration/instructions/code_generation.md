@@ -196,11 +196,12 @@ Entity、Service、Managed Bean、Facelets XHTML、DTO等の実装コードを�
 
 * 生成した本番コード（Entity、Service、Managed Bean、Facelets XHTML、DTO等）に対応する単体テストコードを生成する
 * セクション5「単体テスト生成ガイドライン」に従ってテストを実装する
-* テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）。architecture_design.mdで指定されたカバレッジ等に従う
+* **テストフレームワーク: JUnit 5 のみ**（Cucumberは使用しない）。architecture_design.mdで指定されたカバレッジ等に従う
 * テストカバレッジ: architecture_design.mdの目標値を遵守する
 * テストケース設計:
-  * detailed_design/screen/配下の各機能のbehaviors.md（単体テスト用）の Gherkin シナリオから **Cucumber .feature ファイル**（`src/test/resources/features/unit` 配下）と **Cucumber ステップ定義**（Java）を生成する
-  * detailed_design/screen/配下の各機能のdetailed_design.mdの各メソッドシグネチャに対して、正常系、異常系、境界値、バリデーションのシナリオを .feature に反映し、対応するステップ定義を作成
+  * detailed_design/screen/配下の各機能のbehaviors.md（単体テスト用）の Gherkin シナリオを参考に、**JUnit 5** の通常のテストクラスとテストメソッドを生成する
+  * detailed_design/screen/配下の各機能のdetailed_design.mdの各メソッドシグネチャに対して、正常系、異常系、境界値、バリデーションのテストメソッドを作成
+  * behaviors.md のシナリオ（Gherkin記法）を参考に、Given-When-Then の流れでテストメソッド内にテストロジックを記述する
 * モック使用の判断:
   * 同じタスク内のコンポーネント → モック不要（実際の連携をテスト）
   * タスク外の依存関係 → モックを使用
@@ -242,28 +243,63 @@ Entity、Service、Managed Bean、Facelets XHTML、DTO等の実装コードを�
     * 例: PersonService が ExternalService に依存する場合、ExternalService はモック
     * 例: EntityManager、外部APIクライアント等はモック
 
-* テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）。ステップ定義は `src/test/java` の適切なパッケージ（例: `...cucumber.steps`）に配置する
+* **テストフレームワーク: JUnit 5 のみ**（Cucumberは使用しない）
 * テストカバレッジ: architecture_design.mdの目標値を遵守する
-* feature ファイルの配置: `src/test/resources/features/unit` 配下。既存の test / integrationTest / e2eTest タスクは JUnit Platform で実行されるため、Cucumber シナリオも同じタスクに含まれる
+* テストクラスの配置: `src/test/java` の適切なパッケージに配置
+* behaviors.md のシナリオ（Gherkin記法）を参考に、Given-When-Then の流れでテストメソッド内にテストロジックを記述する
 
 #### 5.2 テストケース設計
 
-* detailed_design/detailed_design/配下の各機能のbehaviors.md（単体テスト用）の Gherkin シナリオから **Cucumber .feature** と **Cucumber ステップ定義** を生成する
-* detailed_design/detailed_design/配下の各機能のdetailed_design.mdの各メソッドシグネチャに対して、以下のテストを .feature とステップ定義で作成する：
+* detailed_design/screen/配下の各機能のbehaviors.md（単体テスト用）の Gherkin シナリオを参考に、**JUnit 5** の通常のテストクラスとテストメソッドを生成する
+* detailed_design/screen/配下の各機能のdetailed_design.mdの各メソッドシグネチャに対して、以下のテストメソッドを作成する：
   * 正常系テスト（期待する戻り値が返されるか）
   * 異常系テスト（例外が適切にスローされるか）
   * 境界値テスト（null、空文字列、最大値、最小値等）
   * バリデーションテスト
 
+**テスト記述例:**
+```java
+@ExtendWith(MockitoExtension.class)
+class PersonServiceTest {
+    @InjectMocks
+    private PersonService personService;
+    
+    @Mock
+    private EntityManager entityManager;
+    
+    @Test
+    void testFindAll_Success() {
+        // Given: モックのスタブ設定
+        List<Person> testPersons = Arrays.asList(
+            new Person("太郎", "山田", 30),
+            new Person("花子", "鈴木", 25)
+        );
+        when(entityManager.createQuery(anyString(), eq(Person.class)))
+            .thenReturn(mockQuery);
+        when(mockQuery.getResultList()).thenReturn(testPersons);
+        
+        // When: Service メソッド呼び出し
+        List<Person> result = personService.findAll();
+        
+        // Then: 戻り値を検証
+        assertEquals(2, result.size());
+        assertEquals("太郎", result.get(0).getFirstName());
+    }
+}
+```
+
 #### 5.3 単体テストのポイント
 
 * タスク内の連携: タスク外の依存（EntityManager、他タスクのService/Client等）は @Mock、タスク内の Dao/Service/Bean は実インスタンスで Given-When-Then（when(...).thenReturn(...)、メソッド呼び出し、assert/verify）を書く
 * タスク外の依存: 他タスクのクライアント等は @Mock、doNothing().when(...).メソッド(any()) 等でスタブし、対象メソッドの戻り値・副作用を検証する
+* Mockito の @Mock、@InjectMocks、@ExtendWith(MockitoExtension.class) を活用
+* AssertJ や Hamcrest などのアサーションライブラリを活用可能
 
 #### 5.4 テストデータ
 
 * テストデータはdetailed_design/screen/配下のbehaviors.md（単体テスト用）やbasic_design/screen_design.mdの具体例を参考に作成する
 * テストデータは各テストケース内でセットアップする（テストの独立性を保つ）
+* @BeforeEach でテストデータの初期化を行う
 
 ---
 

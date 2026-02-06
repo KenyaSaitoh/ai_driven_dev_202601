@@ -28,12 +28,15 @@ spec_directory: "projects/sdd-wf/person/jsf-person-sdd/specs/baseline"
 
 重要な方針
 * 単体テスト実行評価後に結合テストを生成する（unit_test_execution.mdの次のステップ）
-* テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）+ Weld SE（CDIコンテナ）
+* **テストフレームワーク（2種類を並行使用）:**
+  * **主: JUnit 5 + Weld SE（CDIコンテナ）** - 従来型の結合テスト（必須）
+  * **補助・実験的: JUnit 5 + Cucumber + Weld SE** - Gherkin記法によるBDD形式テスト（オプション）
 * テスト対象: basic_design/behaviors.md（結合テスト用）のシナリオ（Gherkin 記法で記述されている前提。@agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 * Service層以下（Service + Entity）の実際の連携をテスト
 * モックは使用しない（実際のDB操作）
 * アプリケーションサーバーは不要（Weld SEでCDIコンテナを起動）
 * Managed Beanは結合テストの対象外（E2Eテストで検証）
+* **既存テストの保護**: 既存の JUnit + Weld テストコードは削除せず、必要に応じてCucumberテストを追加する
 
 ---
 
@@ -104,15 +107,51 @@ spec_directory: "projects/sdd-wf/person/jsf-person-sdd/specs/baseline"
 
 ## 3. 結合テストケース生成
 
-### 3.1 テストケース設計方針
+### 3.1 テストケース設計方針（共通）
 
-* basic_design/behaviors.md の Gherkin シナリオを **Cucumber .feature ファイル**（`src/test/resources/features/integration` 配下）と **Cucumber ステップ定義**（Java、Weld SE を利用）に変換する
-* 1シナリオ＝1 Feature または 1 Scenario の粒度で .feature に記述
-* Service層のビジネスロジックを中心にステップ定義でテスト
+* basic_design/behaviors.md のシナリオに基づいてテストを生成
+* Service層のビジネスロジックを中心にテスト
 * 実際のDB（メモリDB）を使用
 * Managed Beanは対象外（E2Eテストで検証）
 * トランザクション管理の検証
-* feature およびステップ定義に @Tag("integration") を付与し、integrationTest タスクで実行されるようにする
+* @Tag("integration") を付与し、integrationTest タスクで実行されるようにする
+
+### 3.2 主テスト: JUnit 5 + Weld SE（従来型、必須）
+
+* `src/test/java` 配下に通常のJUnitテストクラスを作成
+* BaseIntegrationTest を継承（Weld SE によるCDIコンテナ起動、EntityManager管理）
+* @Tag("integration") を付与
+* テストメソッドは @Test アノテーションで実装
+* behaviors.md のシナリオを参考に、Given-When-Then の流れでテストを記述
+
+**例:**
+```java
+@Tag("integration")
+class PersonServiceIntegrationTest extends BaseIntegrationTest {
+    @Test
+    void testCreatePerson_Success() {
+        // Given: テストデータ投入
+        Person person = new Person("太郎", "山田", 30);
+        
+        // When: Service メソッド呼び出し
+        personService.create(person);
+        em.flush();
+        em.clear();
+        
+        // Then: DB検証
+        Person saved = em.find(Person.class, person.getId());
+        assertNotNull(saved);
+        assertEquals("太郎", saved.getFirstName());
+    }
+}
+```
+
+### 3.3 補助テスト: JUnit 5 + Cucumber + Weld SE（BDD形式、実験的・オプション）
+
+* basic_design/behaviors.md の Gherkin シナリオを、**Cucumber .feature ファイル**（`src/test/resources/features/integration` 配下）と **Cucumber ステップ定義**（Java、Weld SE を利用）に変換する
+* 1シナリオ＝1 Feature または 1 Scenario の粒度で .feature に記述
+* feature およびステップ定義に @Tag("integration") を付与
+* **注意**: Cucumberテストは補助的・実験的な位置づけであり、従来のJUnit + Weldテストを置き換えるものではない
 
 ### 3.2 テストベースクラス
 

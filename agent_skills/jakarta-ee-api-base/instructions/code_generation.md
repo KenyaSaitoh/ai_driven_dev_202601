@@ -206,11 +206,12 @@ Entity、Dao、Service、Resource（JAX-RSエンドポイント）、DTO等の�
 
 * 生成した本番コード（Entity、Dao、Service、Resource、DTO等）に対応する単体テストコードを生成する
 * セクション5「単体テスト生成ガイドライン」に従ってテストを実装する
-* テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）。architecture_design.mdで指定されたカバレッジ等に従う
+* **テストフレームワーク: JUnit 5 のみ**（Cucumberは使用しない）。architecture_design.mdで指定されたカバレッジ等に従う
 * テストカバレッジ: architecture_design.mdの目標値を遵守する
 * テストケース設計:
-  * detailed_design/配下の各タスクのbehaviors.md（単体テスト用）の Gherkin シナリオから Cucumber .feature ファイル（`src/test/resources/features/unit` 配下）と Cucumber ステップ定義（Java）を生成する
-  * detailed_design/配下の各タスクのdetailed_design.mdの各メソッドシグネチャに対して、正常系、異常系、境界値、エッジケースのシナリオを .feature に反映し、対応するステップ定義を作成
+  * detailed_design/配下の各タスクのbehaviors.md（単体テスト用）の Gherkin シナリオを参考に、**JUnit 5** の通常のテストクラスとテストメソッドを生成する
+  * detailed_design/配下の各タスクのdetailed_design.mdの各メソッドシグネチャに対して、正常系、異常系、境界値、エッジケースのテストメソッドを作成
+  * behaviors.md のシナリオ（Gherkin記法）を参考に、Given-When-Then の流れでテストメソッド内にテストロジックを記述する
 * モック使用の判断:
   * 同じタスク内のコンポーネント → モック不要（実際の連携をテスト）
   * タスク外の依存関係 → モックを使用
@@ -252,28 +253,58 @@ Entity、Dao、Service、Resource（JAX-RSエンドポイント）、DTO等の�
     * 例: OrderService が AuthService（commonドメイン）に依存する場合、AuthService はモック
     * 例: EntityManager、外部APIクライアント等はモック
 
-* テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）。ステップ定義は `src/test/java` の適切なパッケージ（例: `...cucumber.steps`）に配置する
+* **テストフレームワーク: JUnit 5 のみ**（Cucumberは使用しない）
 * テストカバレッジ: architecture_design.mdの目標値を遵守する
-* feature ファイルの配置: `src/test/resources/features/unit` 配下。既存の test / integrationTest / e2eTest タスクは JUnit Platform で実行されるため、Cucumber シナリオも同じタスクに含まれる
+* テストクラスの配置: `src/test/java` の適切なパッケージに配置
+* behaviors.md のシナリオ（Gherkin記法）を参考に、Given-When-Then の流れでテストメソッド内にテストロジックを記述する
 
 #### 5.2 テストケース設計
 
-* detailed_design/{target_domain}/behaviors.md（単体テスト用）の Gherkin シナリオから Cucumber .feature と Cucumber ステップ定義 を生成する
-* detailed_design/{target_domain}/detailed_design.mdの各メソッドシグネチャに対して、以下のテストを .feature とステップ定義で作成する：
+* detailed_design/{target_domain}/behaviors.md（単体テスト用）の Gherkin シナリオを参考に、**JUnit 5** の通常のテストクラスとテストメソッドを生成する
+* detailed_design/{target_domain}/detailed_design.mdの各メソッドシグネチャに対して、以下のテストメソッドを作成する：
   * 正常系テスト（期待する戻り値が返されるか）
   * 異常系テスト（例外が適切にスローされるか）
   * 境界値テスト（null、空文字列、最大値、最小値等）
   * エッジケーステスト
 
+**テスト記述例:**
+```java
+@ExtendWith(MockitoExtension.class)
+class OrderServiceTest {
+    @InjectMocks
+    private OrderService orderService;
+    
+    @Mock
+    private EntityManager entityManager;
+    
+    @Test
+    void testCreateOrder_Success() {
+        // Given: 初期データ、モックのスタブ設定
+        Order testOrder = new Order();
+        when(entityManager.find(Order.class, 1)).thenReturn(testOrder);
+        
+        // When: Service メソッド呼び出し
+        Order result = orderService.createOrder(createRequest);
+        
+        // Then: 戻り値・状態を検証
+        assertNotNull(result.getId());
+        verify(entityManager).persist(any(Order.class));
+    }
+}
+```
+
 #### 5.3 単体テストのポイント
 
 * ドメイン内の連携: ドメイン外の依存（EntityManager、他ドメインのService等）は @Mock、ドメイン内の Dao/Service は実インスタンスで Given-When-Then（when(...).thenReturn(...)、メソッド呼び出し、assert）を書く
 * ドメイン外の依存: 他ドメインの Service 等は @Mock、when(...).thenReturn(...) でスタブし、対象メソッドの戻り値・例外を検証する
+* Mockito の @Mock、@InjectMocks、@ExtendWith(MockitoExtension.class) を活用
+* AssertJ や Hamcrest などのアサーションライブラリを活用可能
 
 #### 5.4 テストデータ
 
 * テストデータはdetailed_design/{target_domain}/behaviors.md（単体テスト用）やbasic_design/{target_domain}/functional_design.mdの具体例を参考に作成する
 * テストデータは各テストケース内でセットアップする（テストの独立性を保つ）
+* @BeforeEach でテストデータの初期化を行う
 
 ---
 

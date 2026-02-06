@@ -28,12 +28,15 @@ spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
 
 重要な方針
 * 実装完了後にE2Eテストを生成する（code_generation.mdの次のステップ）
-* テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）+ REST Assured
+* **テストフレームワーク（2種類を並行使用）:**
+  * **主: JUnit 5 + REST Assured** - 従来型のE2Eテスト（必須）
+  * **補助・実験的: JUnit 5 + Cucumber + REST Assured** - Gherkin記法によるBDD形式テスト（オプション）
 * テスト対象: requirements/behaviors.md（E2Eテスト用）のシナリオ（Gherkin 記法で記述されている前提。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 * 複数機能間の連携、実際のHTTPリクエスト/レスポンス、実際のDBアクセスを含む
 * アプリケーションサーバーが起動している状態でテストを実行
-* 既存テストの扱い（重要）:
-  * 既存のE2Eテストコード（.feature ファイルやステップ定義）が存在する場合は、それらを削除せずに読み込んで、差分のみを反映する
+* **既存テストの扱い（重要）:**
+  * 既存の JUnit + REST Assured テストコードは削除せずに保護する
+  * 既存の Cucumber テストコード（.feature ファイルやステップ定義）が存在する場合は、それらを削除せずに読み込んで、差分のみを反映する
   * ファイルをゼロから作り直すのではなく、既存の内容を尊重して必要なテストケースのみを追加・修正する
   * 新規テストファイルが必要な場合のみ、新規作成する
 
@@ -94,15 +97,59 @@ E2Eテスト生成に必要なライブラリ（プロジェクトのビルド�
 
 ## 3. E2Eテストケース生成
 
-### 3.1 テストケース設計方針
+### 3.1 テストケース設計方針（共通）
 
-* requirements/behaviors.md（E2Eテスト用）の Gherkin シナリオを Cucumber .feature ファイル（`src/test/resources/features/e2e` 配下）と Cucumber ステップ定義（Java、REST Assured を利用）に変換する
-* 1シナリオ＝1 Feature または 1 Scenario の粒度で .feature に記述
-* 各 Given-When-Then を実際のHTTPリクエストとしてステップ定義で実装
+* requirements/behaviors.md のシナリオに基づいてテストを生成
 * 複数APIにまたがるE2Eのフローをテスト
 * 実際のDBアクセスを含む（テストデータの準備と検証）
 * HTTPステータスコード、レスポンスボディ、ヘッダーの検証
-* feature およびステップ定義に @Tag("e2e") を付与し、e2eTest タスクで実行されるようにする
+* @Tag("e2e") を付与し、e2eTest タスクで実行されるようにする
+
+### 3.2 主テスト: JUnit 5 + REST Assured（従来型、必須）
+
+* `src/test/java` 配下に通常のJUnitテストクラスを作成
+* BaseE2ETest を継承（REST Assuredの設定、認証トークン管理）
+* @Tag("e2e") を付与
+* テストメソッドは @Test アノテーションで実装
+* behaviors.md のシナリオを参考に、Given-When-Then の流れでテストを記述
+
+**例:**
+```java
+@Tag("e2e")
+class OrderE2ETest extends BaseE2ETest {
+    @Test
+    void testCreateOrder_E2E() {
+        // Given: 認証トークン取得、初期データ準備
+        String token = login("user@example.com", "password");
+        
+        // When: API呼び出し
+        Response response = given()
+            .header("Authorization", "Bearer " + token)
+            .contentType("application/json")
+            .body(orderRequest)
+            .when()
+            .post("/api/orders");
+        
+        // Then: レスポンス検証
+        response.then()
+            .statusCode(201)
+            .body("orderId", notNullValue());
+    }
+}
+```
+
+### 3.3 補助テスト: JUnit 5 + Cucumber + REST Assured（BDD形式、実験的・オプション）
+
+* requirements/behaviors.md（E2Eテスト用）の Gherkin シナリオを、**Cucumber .feature ファイル**（`src/test/resources/features/e2e` 配下）と **Cucumber ステップ定義**（Java、REST Assured を利用）に変換する
+* 1シナリオ＝1 Feature または 1 Scenario の粒度で .feature に記述
+* 各 Given-When-Then を実際のHTTPリクエストとしてステップ定義で実装
+* feature およびステップ定義に @Tag("e2e") を付与
+* **注意**: Cucumberテストは補助的・実験的な位置づけであり、従来のJUnit + REST Assuredテストを置き換えるものではない
+
+### 3.4 Wiremock の利用
+
+* E2Eテストでも、外部サービスのスタブ化が必要な場合は Wiremock を利用可能
+* Wiremock を使用したテストも削除せず、既存テストと共存させる
 
 ### 3.2 テストケースのポイント
 

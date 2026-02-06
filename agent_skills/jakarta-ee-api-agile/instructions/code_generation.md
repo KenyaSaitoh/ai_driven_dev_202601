@@ -182,10 +182,26 @@ SPEC を読み込んだあと、**いきなりコード生成を始めず**、�
 
 * タスク粒度内の単体テストを生成する
 * target=common: common の3SPECからメソッド・振る舞いを抽出し、単体テストを作成する。data_model のテーブル/エンティティ、architecture_design の共通コンポーネントに基づくテストとする
-* target=usecases/{名}: usecases/{名}/behaviors.md の Gherkin シナリオを、**Cucumber の .feature ファイル**（`src/test/resources/features/unit` 配下）と **Cucumber ステップ定義**（Java）に変換する。同一対象内は実連携、他はモック
-* テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）。ステップ定義は `src/test/java` の適切なパッケージ（例: `...cucumber.steps`）に配置する
-* テストフレームワーク・カバレッジ目標は common/architecture_design.md に従う
-* 既存の test / integrationTest / e2eTest タスクは JUnit Platform で実行されるため、Cucumber シナリオも同じタスクに含まれる。単体テスト用 feature には @Tag で区別する場合はプロジェクトのビルド設定に従う
+* target=usecases/{名}: usecases/{名}/behaviors.md の Gherkin シナリオを参考に、**JUnit 5** の通常のテストクラスとテストメソッドを生成する。同一対象内は実連携、他はモック
+* **テストフレームワーク: JUnit 5 のみ**（Cucumberは使用しない）
+* テストカバレッジ目標は common/architecture_design.md に従う
+* behaviors.md のシナリオ（Gherkin記法）を参考に、Given-When-Then の流れでテストメソッド内にテストロジックを記述する
+
+**テスト記述例:**
+```java
+@Test
+void testCreateOrder_Success() {
+    // Given: 初期データ、モックのスタブ設定
+    when(mockDao.find(1)).thenReturn(testEntity);
+    
+    // When: Service メソッド呼び出し
+    Order result = orderService.createOrder(createRequest);
+    
+    // Then: 戻り値・状態を検証
+    assertNotNull(result.getId());
+    verify(mockDao).persist(any(Order.class));
+}
+```
 
 ---
 

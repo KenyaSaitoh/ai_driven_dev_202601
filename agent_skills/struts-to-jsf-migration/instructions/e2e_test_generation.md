@@ -28,10 +28,13 @@ spec_directory: "projects/sdd-wf/person/jsf-person-sdd/specs/baseline"
 
 重要な方針
 * 実装完了後にE2Eテストを生成する（code_generation.mdの次のステップ）
-* テストフレームワーク: JUnit 5 + Cucumber（cucumber-junit-platform-engine）+ Playwright
+* **テストフレームワーク（2種類を並行使用）:**
+  * **主: JUnit 5 + Playwright** - 従来型のE2Eテスト（必須）
+  * **補助・実験的: JUnit 5 + Cucumber + Playwright** - Gherkin記法によるBDD形式テスト（オプション）
 * テスト対象: basic_design/behaviors.md または requirements/behaviors.md（E2Eテスト用）のシナリオ（Gherkin 記法で記述されている前提。@agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 * 複数画面にまたがるフロー、実際のブラウザ操作、実際のDBアクセスを含む
 * アプリケーションサーバーが起動している状態でテストを実行
+* **既存テストの保護**: 既存の JUnit + Playwright テストコードは削除せず、必要に応じてCucumberテストを追加する
 
 ---
 
@@ -97,15 +100,51 @@ E2Eテスト生成に必要なライブラリ（プロジェクトのビルド�
 
 ## 3. E2Eテストケース生成
 
-### 3.1 テストケース設計方針
+### 3.1 テストケース設計方針（共通）
 
-* basic_design/behaviors.md または requirements/behaviors.md（E2Eテスト用）の Gherkin シナリオを **Cucumber .feature ファイル**（`src/test/resources/features/e2e` 配下）と **Cucumber ステップ定義**（Java、Playwright を利用）に変換する
-* 1シナリオ＝1 Feature または 1 Scenario の粒度で .feature に記述
-* 各 Given-When-Then を実際のブラウザ操作としてステップ定義で実装
+* basic_design/behaviors.md または requirements/behaviors.md のシナリオに基づいてテストを生成
 * 複数画面にまたがるエンドツーエンドのフローをテスト
 * 実際のDBアクセスを含む（テストデータの準備と検証）
 * 画面遷移、ボタンクリック、フォーム入力、バリデーション、エラーメッセージの検証
-* feature およびステップ定義に @Tag("e2e") を付与し、e2eTest タスクで実行されるようにする
+* @Tag("e2e") を付与し、e2eTest タスクで実行されるようにする
+
+### 3.2 主テスト: JUnit 5 + Playwright（従来型、必須）
+
+* `src/test/java` 配下に通常のJUnitテストクラスを作成
+* BaseE2ETest を継承（Playwrightの設定、Browser/Page管理）
+* @Tag("e2e") を付与
+* テストメソッドは @Test アノテーションで実装
+* behaviors.md のシナリオを参考に、Given-When-Then の流れでテストを記述
+
+**例:**
+```java
+@Tag("e2e")
+class PersonListE2ETest extends BaseE2ETest {
+    @Test
+    void testCreatePerson_E2E() {
+        // Given: 一覧画面を表示
+        page.navigate(baseUrl + "/personList.xhtml");
+        
+        // When: 新規追加ボタンをクリックして入力
+        page.locator("text=新規追加").click();
+        page.locator("input[name*='firstName']").fill("太郎");
+        page.locator("input[name*='lastName']").fill("山田");
+        page.locator("input[type='submit']").click();
+        
+        // Then: 一覧画面に戻り、データが表示される
+        page.waitForURL("**/personList.xhtml");
+        assertThat(page.locator("td:has-text('太郎')")).isVisible();
+    }
+}
+```
+
+### 3.3 補助テスト: JUnit 5 + Cucumber + Playwright（BDD形式、実験的・オプション）
+
+* basic_design/behaviors.md または requirements/behaviors.md（E2Eテスト用）の Gherkin シナリオを、**Cucumber .feature ファイル**（`src/test/resources/features/e2e` 配下）と **Cucumber ステップ定義**（Java、Playwright を利用）に変換する
+* 1シナリオ＝1 Feature または 1 Scenario の粒度で .feature に記述
+* 各 Given-When-Then を実際のブラウザ操作としてステップ定義で実装
+* feature およびステップ定義に @Tag("e2e") を付与
+* **注意**: Cucumberテストは補助的・実験的な位置づけであり、従来のJUnit + Playwrightテストを置き換えるものではない
 
 ### 3.2 テストケースのポイント
 
