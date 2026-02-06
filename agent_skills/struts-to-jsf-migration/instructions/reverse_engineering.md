@@ -33,8 +33,14 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 * 技術スタックの記載は移行先を前提とする
 
 出力先
-* `{spec_output_directory}/baseline/basic_design/` - システムレベルのSPEC
-* `{spec_output_directory}/baseline/detailed_design/screen/` - 画面単位のSPEC
+* `{spec_output_directory}/baseline/requirements/` - システム要件
+* `{spec_output_directory}/baseline/basic_design/common/` - 共通設計（技術スタック、データモデル等）
+* `{spec_output_directory}/baseline/basic_design/{screen_group}/` - 画面グループ単位の基本設計
+
+注意:
+* JSFは画面中心のサーバーサイドMVCフレームワークのため、画面グループ単位で設計を行う
+* 詳細設計（`{spec_output_directory}/baseline/detailed_design/`）は後続の詳細設計フェーズで画面単位に生成される
+* リバースエンジニアリングフェーズでは基本設計（basic_design）までを生成する
 
 ---
 
@@ -241,11 +247,44 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
   * 入力検証ルール
   * ActionFormのvalidate()メソッドまたはJSPから抽出
 
-### 2.2 画面単位のSPEC
+### 2.2 画面グループ単位のSPEC
 
-各JSPファイルに対して、以下のSPECを `{spec_output_directory}/baseline/detailed_design/detailed_design/FUNC_XXX_<画面名>/` に生成してください：
+システムを関連する画面群でグルーピングし、各画面グループに対して以下のSPECを `{spec_output_directory}/baseline/basic_design/{screen_group}/` に生成してください：
 
-#### screen_design.md
+画面グループの識別方法:
+* 関連する画面群をグループとしてまとめる（例: 人材管理、注文管理、在庫管理等）
+* Strutsのパッケージ構造やActionクラスの命名から推測
+* 通常、1つの画面グループは複数の画面（JSP）を含み、画面間の遷移フローがある
+
+例:
+* `person_management/` - Person関連の画面グループ（一覧、入力、確認）
+* `order_management/` - Order関連の画面グループ
+
+重要: 
+* JSFは画面中心のサーバーサイドMVCフレームワーク
+* 画面グループは画面遷移フローを持つ関連画面の集まり
+* REST APIのドメイン駆動設計とは異なるアプローチ
+
+#### functional_design.md（画面グループ全体の機能設計）
+
+* 画面一覧:
+  * 画面グループ内の全画面を列挙
+  * 画面ID（FUNC_XXX形式）、画面名、URL、目的を記載
+  * 各JSPファイルから抽出
+
+* 画面遷移図:
+  * Mermaid形式で画面グループ内の画面遷移を図示
+  * struts-config.xmlとActionForwardから抽出
+  * 画面間のフロー（例: 一覧 → 入力 → 確認 → 登録 → 一覧）を明確化
+
+* コンポーネント設計:
+  * 各画面に対応するManaged Bean
+  * 画面グループ内で共有されるServiceクラス
+  * 画面間のデータ受け渡し（Flash Scope、Session Scope等）
+
+#### screen_design.md（画面グループ内全画面の画面設計）
+
+画面グループ内の各画面について以下を記載:
 
 * 画面ID: FUNC_XXX_<画面名>（例: FUNC_001_PersonList）
 * 画面名: <画面の日本語名>
@@ -268,40 +307,28 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
   * 表示するデータの一覧
   * JSPの`<logic:iterate>`と`<bean:write>`から抽出
 
-#### functional_design.md
-
-* Managed Bean設計:
-  * Bean名、スコープ（`@ViewScoped`等）
-  * プロパティ（ActionFormのフィールドに対応）
-  * アクションメソッド（Actionのexecute()に対応）
-
-* Serviceクラス設計:
-  * Service名、メソッドシグネチャ
-  * ビジネスロジックの概要
-  * Struts ServiceクラスやEJBから抽出
-
-* データアクセス:
-  * 使用するEntityクラス
-  * JPQLクエリ（DAOのSQLをJPQLに変換）
-
-#### behaviors.md
+#### behaviors.md（画面グループの振る舞い、E2Eテスト用）
 
 * 記法: Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）
-* Gherkin記法の詳細: common_rules.md の「振る舞いの記法（Gherkin）」を参照すること
+* Gherkin記法の詳細: @agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること
 
-* 画面の振る舞い:
-  * 初期表示時の動作（`@PostConstruct`）
-  * ボタンクリック時の動作（アクションメソッド）
-  * バリデーションエラー時の動作
+* 画面グループ内の主要業務フロー:
+  * 複数画面にまたがる遷移シナリオ（例: 一覧 → 入力 → 確認 → 登録 → 一覧）
+  * Actionクラスのビジネスロジックとstruts-config.xmlから抽出
+  * E2Eテストで検証する画面間フローを記述
 
-* Gherkin 記法のシナリオ:
-  * 主要なユースケースを Feature / Scenario / Given-When-Then で記述
-  * Actionのロジックから抽出
+* エラーハンドリング:
+  * 例外処理のパターン
+  * エラーメッセージの表示方法
 
-* エラーケース:
-  * 想定されるエラー
-  * エラーメッセージ
-  * Actionのエラーハンドリングから抽出
+* バリデーション:
+  * 入力検証ルール
+  * ActionFormのvalidate()メソッドまたはJSPから抽出
+
+注意:
+* behaviors.mdは複数画面にまたがるE2Eテスト用のシナリオを記述
+* 詳細設計（`detailed_design/FUNC_XXX/`）は、この後の詳細設計フェーズ（detailed_design.md）で画面単位に生成される
+* リバースエンジニアリングフェーズでは画面グループ単位の基本設計までを生成する
 
 ---
 

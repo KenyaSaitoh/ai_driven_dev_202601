@@ -425,10 +425,10 @@ graph LR
 
 ## 10. 参考資料
 
-* [システム要件定義](requirements.md) - システム要件
-* [アーキテクチャ設計書](architecture_design.md) - システム全体のアーキテクチャ
-* [データモデル](data_model.md) - データベーススキーマの詳細
-* [振る舞い仕様書](behaviors.md) - システム全体の振る舞い
-* [SCREEN_001_PersonList仕様](../detailed_design/screen/SCREEN_001_PersonList/screen_design.md)
-* [SCREEN_002_PersonInput仕様](../detailed_design/screen/SCREEN_002_PersonInput/screen_design.md)
-* [SCREEN_003_PersonConfirm仕様](../detailed_design/screen/SCREEN_003_PersonConfirm/screen_design.md)
+* [システム要件定義](../../requirements/requirements.md) - システム要件
+* [アーキテクチャ設計書](../common/architecture_design.md) - システム全体のアーキテクチャ
+* [データモデル](../common/data_model.md) - データベーススキーマの詳細
+* [振る舞い仕様書](./behaviors.md) - システム全体の振る舞い
+* [SCREEN_001_PersonList仕様](../../detailed_design/FUNC_001_PersonList/detailed_design.md)
+* [SCREEN_002_PersonInput仕様](../../detailed_design/FUNC_002_PersonInput/detailed_design.md)
+* [SCREEN_003_PersonConfirm仕様](../../detailed_design/FUNC_003_PersonConfirm/detailed_design.md)

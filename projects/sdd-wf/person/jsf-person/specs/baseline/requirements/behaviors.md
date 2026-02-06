@@ -541,10 +541,10 @@ public class GenderConverter implements Converter<String> {
 
 ## 10. 参考資料
 
-* [システム要件定義](requirements.md) - システム要件
-* [アーキテクチャ設計書](architecture_design.md) - システム全体のアーキテクチャ
-* [機能設計書](functional_design.md) - 画面遷移とコンポーネント設計
-* [データモデル](data_model.md) - データベーススキーマの詳細
-* [SCREEN_001_PersonList仕様](../detailed_design/screen/SCREEN_001_PersonList/behaviors.md)
-* [SCREEN_002_PersonInput仕様](../detailed_design/screen/SCREEN_002_PersonInput/behaviors.md)
-* [SCREEN_003_PersonConfirm仕様](../detailed_design/screen/SCREEN_003_PersonConfirm/behaviors.md)
+* [システム要件定義](./requirements.md) - システム要件
+* [アーキテクチャ設計書](../basic_design/common/architecture_design.md) - システム全体のアーキテクチャ
+* [機能設計書](../basic_design/person_management/functional_design.md) - 画面遷移とコンポーネント設計
+* [データモデル](../basic_design/common/data_model.md) - データベーススキーマの詳細
+* [SCREEN_001_PersonList仕様](../detailed_design/FUNC_001_PersonList/behaviors.md)
+* [SCREEN_002_PersonInput仕様](../detailed_design/FUNC_002_PersonInput/behaviors.md)
+* [SCREEN_003_PersonConfirm仕様](../detailed_design/FUNC_003_PersonConfirm/behaviors.md)

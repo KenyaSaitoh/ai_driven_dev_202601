@@ -63,14 +63,18 @@ behaviors.mdの種別（すべてGherkin記法で記述）:
 - @agent_skills/jakarta-ee-api-base/frameworks/ 配下のフレームワーク固有のSPECも確認する
 
 ### 1.2 システムレベルの仕様
-- {spec_directory}/basic_design/architecture_design.md - 技術スタック、パッケージ構造、セッション管理方針を確認
-- {spec_directory}/basic_design/functional_design.md - システム全体の機能設計、画面遷移図を確認
-- {spec_directory}/basic_design/data_model.md - テーブル定義（ERD）を確認（該当する場合）
+- {spec_directory}/basic_design/common/architecture_design.md - 技術スタック、パッケージ構造、セッション管理方針を確認
+- {spec_directory}/basic_design/common/data_model.md - テーブル定義（ERD）を確認
 
-### 1.3 対象画面の仕様
-- {spec_directory}/basic_design/screen_design.md - 対象画面（{target_type}）の画面設計を確認（該当する場合）
+### 1.3 画面グループレベルの仕様
+- {spec_directory}/basic_design/{screen_group}/functional_design.md - 画面グループ全体の機能設計、画面遷移図を確認
+- {spec_directory}/basic_design/{screen_group}/screen_design.md - 対象画面（{target_type}）の画面設計を確認
   - レイアウト、入力項目、ボタン、バリデーションルール、初期表示
-- {spec_directory}/basic_design/behaviors.md - 対象画面の振る舞いを確認（該当する場合、Gherkin記法で記述されている前提。@agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
+- {spec_directory}/basic_design/{screen_group}/behaviors.md - 画面グループの振る舞いを確認（E2Eテスト用、Gherkin記法。@agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
+
+注意:
+* {screen_group}は対象画面が属する画面グループ名（例: person_management）
+* JSFは画面中心のサーバーサイドMVCのため、画面グループ単位で基本設計を管理
 
 ---
 

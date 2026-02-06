@@ -1,0 +1,64 @@
+# Person管理画面グループ - 基本設計変更管理
+
+プロジェクトID: jsf-person  
+画面グループ: person_management  
+バージョン: 1.0.0  
+最終更新日: 2026-02-06
+
+---
+
+## 概要
+
+このファイルは、Person管理画面グループの基本設計変更を管理するためのものです。
+
+* 画面グループ: 関連する画面群（一覧、入力、確認）をまとめたもの
+
+変更内容を記載し、`@agent_skills/struts-to-jsf-migration/instructions/basic_design_change.md` の指示に従って、詳細設計・コード・テストを更新します。
+
+適用完了後は、このファイルの内容を `changes_archive/` フォルダにアーカイブします。
+
+---
+
+## 変更履歴
+
+現時点では変更なし。
+
+---
+
+## 使用方法
+
+1. 変更内容をこのファイルに記載
+2. `basic_design_change.md` の指示に従って影響分析
+3. 詳細設計・コード・テストを更新
+4. 適用完了後、`changes_archive/YYYYMMDD_変更タイトル.md` にアーカイブ
+
+---
+
+## 変更テンプレート
+
+```markdown
+## 変更ID: CHANGE_XXX
+
+### 変更日時
+YYYY-MM-DD HH:MM:SS
+
+### 変更理由
+変更が必要になった理由を記載
+
+### 変更内容
+
+#### 影響を受けるファイル
+- functional_design.md - {変更内容}
+- screen_design.md - {変更内容}
+- behaviors.md - {変更内容}
+
+#### 変更詳細
+具体的な変更内容を記載
+
+### 影響範囲
+- 影響を受ける画面: FUNC_001_PersonList, FUNC_002_PersonInput, FUNC_003_PersonConfirm
+- 影響を受けるコンポーネント: PersonListBean, PersonInputBean, PersonConfirmBean
+
+### 備考
+その他の注意事項
+```

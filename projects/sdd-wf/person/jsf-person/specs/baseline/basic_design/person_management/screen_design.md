@@ -925,8 +925,8 @@ graph LR
 
 ## 13. 参考資料
 
-* [システム要件定義](requirements.md)
-* [機能設計書](functional_design.md)
-* [データモデル](data_model.md)
-* [アーキテクチャ設計書](architecture_design.md)
-* [システム振る舞い仕様書](behaviors.md)
+* [システム要件定義](../../requirements/requirements.md)
+* [機能設計書](./functional_design.md)
+* [データモデル](../common/data_model.md)
+* [アーキテクチャ設計書](../common/architecture_design.md)
+* [システム振る舞い仕様書](./behaviors.md)

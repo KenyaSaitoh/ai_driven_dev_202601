@@ -5,6 +5,21 @@ description: Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレー
 
 # Struts to JSF マイグレーション Agent Skill
 
+## JSF設計の特徴
+
+JSFは画面中心のサーバーサイドMVCフレームワークです：
+
+* **画面グループ**: 関連する画面群（一覧、入力、確認等）をまとめたもの
+* **基本設計**: 画面グループ単位（basic_design/{screen_group}/）
+* **詳細設計**: 画面単位（detailed_design/FUNC_XXX/）
+* **設計の流れ**: 画面グループ全体を設計 → 個別画面を詳細設計
+
+REST APIとの違い:
+* REST API: ドメイン/リソース単位（orders, images等）
+* JSF: 画面グループ単位（person_management等）
+
+---
+
 ## 使い方（7段階プロセス）
 
 ### ステップ1: リバースエンジニアリング
@@ -23,7 +38,13 @@ description: Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレー
 AIが自動で以下を実行
 1. Strutsコード（Action、ActionForm、JSP、EJB、DAO）を分析
 2. 抽象的・論理的なSPECを生成
+   * 共通設計: `specs/baseline/basic_design/common/`
+   * 画面グループ単位の設計: `specs/baseline/basic_design/{screen_group}/`
 3. `specs/`フォルダに保存
+
+生成される構造:
+* 画面グループ: 関連する画面群（一覧、入力、確認等）をまとめたもの
+* JSFは画面中心のサーバーサイドMVCフレームワーク
 
 ### ステップ2: タスク分解
 
@@ -42,7 +63,7 @@ AIが自動で以下を実行
 2. タスクファイルを分解・生成
 3. `tasks/`フォルダに保存
 
-### ステップ3: 詳細設計
+### ステップ3: 詳細設計（画面単位）
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/detailed_design.md
@@ -56,10 +77,11 @@ AIが自動で以下を実行
 ```
 
 AIと対話しながら以下を実施（対話的プロセス）
-1. SPECを読み込み、理解内容を説明
-2. 不明点をユーザーに質問
-3. 対話で妥当性・充足性を確認
-4. `detailed_design.md`を生成
+1. 画面グループの基本設計（basic_design/{screen_group}/）を読み込み
+2. 対象画面の理解内容を説明
+3. 不明点をユーザーに質問
+4. 対話で妥当性・充足性を確認
+5. 画面単位の`detailed_design/FUNC_XXX/detailed_design.md`を生成
 
 ### ステップ4: コード生成（詳細設計→実装→単体テスト）
 
@@ -125,10 +147,11 @@ AIが自動で以下を実行
 ```
 
 AIが自動で以下を実行
-1. basic_design/behaviors.md（結合テストシナリオ）を読み込み
+1. basic_design/{screen_group}/behaviors.md（結合テストシナリオ）を読み込み
 2. JUnit 5 + Weld SE を使用した結合テストを生成
    * Service層以下（Service + DAO + Entity + DB）の連携テスト
    * 実際のDBアクセス（メモリDB）
+   * 画面グループの業務フローを検証
 
 ### ステップ7: E2Eテスト生成
 
@@ -174,12 +197,19 @@ AIが自動で以下を実行
 使用方法:
 1. 基本設計SPECのマスターファイル（functional_design.md、screen_design.md等）を自由に編集
 2. CHANGES.mdを作成して変更内容を明示的に記載
+   * 共通設計の変更: `basic_design/common/CHANGES.md`
+   * 画面グループ固有設計の変更: `basic_design/{screen_group}/CHANGES.md`
 3. 上記コマンドを実行
 4. 適用後、CHANGES.mdは自動的にchanges_archive/に移動
 
 重要:
 * マスターファイルはMarkdown、EXCEL、PDF、Word等、任意の形式で管理可能
 * 変更内容はCHANGES.mdに明示的に記載（形式非依存）
+* 共通設計と画面グループ固有設計で別々のCHANGES.mdを管理
+
+注意:
+* JSFは画面中心のサーバーサイドMVCフレームワーク
+* 画面グループ: 関連する画面群（一覧、入力、確認等）をまとめたもの
 
 ---
 

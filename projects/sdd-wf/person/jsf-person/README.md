@@ -58,12 +58,14 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 ```
 
 * 生成される仕様書:
-  * `requirements.md` - システムの目的、機能要件
-  * `architecture_design.md` - 技術スタック、レイヤー構成
-  * `functional_design.md` - 画面一覧、画面遷移
-  * `data_model.md` - エンティティ、テーブル定義
-  * `screen_design.md` - 画面レイアウト、入力項目
-  * `behaviors.md` - 画面の振る舞い、バリデーション
+  * `requirements/requirements.md` - システムの目的、機能要件
+  * `requirements/behaviors.md` - 要件レベルの振る舞い
+  * `basic_design/common/architecture_design.md` - 技術スタック、レイヤー構成
+  * `basic_design/common/data_model.md` - エンティティ、テーブル定義
+  * `basic_design/common/external_interface.md` - 外部連携仕様
+  * `basic_design/{domain}/functional_design.md` - 画面一覧、画面遷移
+  * `basic_design/{domain}/screen_design.md` - 画面レイアウト、入力項目
+  * `basic_design/{domain}/behaviors.md` - 画面の振る舞い（E2Eテスト用、Gherkin記法）
 
 ---
 
@@ -300,11 +302,20 @@ AIが：
    ```
 
 2. **CHANGES.mdを作成して変更内容を記載**
-   ```bash
-   cp agent_skills/struts-to-jsf-migration/templates/basic_design/CHANGES_template.md \
-      specs/baseline/basic_design/CHANGES.md
-   vim specs/baseline/basic_design/CHANGES.md
-   ```
+   
+   変更の粒度に応じて適切な場所にCHANGES.mdを作成：
+   
+   * 共通設計の変更（Entity、アーキテクチャ等）:
+     ```bash
+     vim specs/baseline/basic_design/common/CHANGES.md
+     ```
+   
+   * 画面グループ固有設計の変更（画面、機能等）:
+     ```bash
+     vim specs/baseline/basic_design/person_management/CHANGES.md
+     ```
+   
+   注意: 画面グループは関連する画面群（一覧、入力、確認等）をまとめたもの
 
 3. **変更対応を実行**
    ```
@@ -328,14 +339,29 @@ AIが：
 
 ```
 specs/baseline/basic_design/
-  ├── functional_design.md      # マスター（自由に編集）
-  ├── screen_design.md          # マスター（自由に編集）
-  ├── data_model.md             # マスター（自由に編集）
-  ├── CHANGES.md                # アクティブな変更（未適用）
-  └── changes_archive/          # 履歴
-      ├── 20260118_person_edit.md
-      └── 20260125_validation_update.md
+  ├── common/                           # 共通設計（必須）
+  │   ├── architecture_design.md        # マスター（自由に編集）
+  │   ├── data_model.md                 # マスター（自由に編集）
+  │   ├── external_interface.md         # マスター（自由に編集）
+  │   ├── functional_design.md          # 共通機能設計
+  │   ├── behaviors.md                  # 共通振る舞い
+  │   ├── CHANGES.md                    # 共通設計の変更管理
+  │   └── changes_archive/              # 共通設計の適用済み変更
+  │       └── 20260120_entity_update.md
+  └── person_management/                # Person管理画面グループ
+      ├── functional_design.md          # マスター（自由に編集）- 画面一覧、画面遷移図
+      ├── screen_design.md              # マスター（自由に編集）- 全画面の画面設計
+      ├── behaviors.md                  # E2Eテスト用（複数画面またぐフロー、Gherkin記法）
+      ├── CHANGES.md                    # 画面グループ設計の変更管理
+      └── changes_archive/              # 画面グループ設計の適用済み変更
+          ├── 20260118_person_edit.md
+          └── 20260125_validation_update.md
 ```
+
+注意:
+* JSFは画面中心のサーバーサイドMVCフレームワーク
+* 画面グループ: 関連する画面群（一覧、入力、確認等）をまとめたもの
+* 画面グループ内で画面遷移フローを持つ
 
 ---
 
@@ -472,18 +498,30 @@ specs/baseline/basic_design/
 ```
 projects/sdd-wf/person/jsf-person/
 ├── specs/                          # 仕様書（マイグレーション時に生成）
+│   ├── README.md                   # Specs構成ガイド
 │   └── baseline/
 │       ├── requirements/           # システム要件
 │       │   ├── requirements.md    # 要件定義書
-│       │   └── behaviors.md       # E2Eテスト用（要件を外形的に捉えた振る舞い）
+│       │   └── behaviors.md       # 要件レベルの振る舞い
 │       ├── basic_design/           # 基本設計
-│       │   ├── architecture_design.md
-│       │   ├── functional_design.md
-│       │   ├── data_model.md
-│       │   ├── screen_design.md
-│       │   ├── external_interface.md
-│       │   └── behaviors.md       # 結合テスト用（基本設計を外形的に捉えた振る舞い）
+│       │   ├── common/             # 共通ドメイン（必須）
+│       │   │   ├── architecture_design.md
+│       │   │   ├── data_model.md
+│       │   │   ├── external_interface.md
+│       │   │   ├── functional_design.md
+│       │   │   ├── behaviors.md
+│       │   │   ├── CHANGES.md
+│       │   │   └── changes_archive/
+│       │   └── person_management/  # Person管理ドメイン
+│       │       ├── functional_design.md
+│       │       ├── screen_design.md
+│       │       ├── behaviors.md   # E2Eテスト用（Gherkin記法）
+│       │       ├── CHANGES.md
+│       │       └── changes_archive/
 │       └── detailed_design/        # 詳細設計
+│           ├── common/             # 共通詳細設計
+│           │   ├── detailed_design.md
+│           │   └── behaviors.md   # 単体テスト用
 │           ├── FUNC_001_PersonList/
 │           │   ├── detailed_design.md
 │           │   └── behaviors.md   # 単体テスト用

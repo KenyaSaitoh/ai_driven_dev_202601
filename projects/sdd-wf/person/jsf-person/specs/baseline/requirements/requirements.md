@@ -228,7 +228,7 @@
 
 ## 6. 参考資料
 
-* [アーキテクチャ設計書](architecture_design.md) - システムアーキテクチャの詳細
-* [データモデル](data_model.md) - データベーススキーマの詳細
-* [機能設計書](functional_design.md) - 画面遷移とコンポーネント設計
-* [振る舞い仕様書](behaviors.md) - システム全体の振る舞い
+* [アーキテクチャ設計書](../basic_design/common/architecture_design.md) - システムアーキテクチャの詳細
+* [データモデル](../basic_design/common/data_model.md) - データベーススキーマの詳細
+* [機能設計書](../basic_design/person_management/functional_design.md) - 画面遷移とコンポーネント設計
+* [振る舞い仕様書](../basic_design/person_management/behaviors.md) - システム全体の振る舞い

@@ -7,14 +7,54 @@ Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを7
 ## 🎯 マイグレーションアプローチ
 
 ```
-Struts コード → SPEC生成 → タスク分解 → 詳細設計 → JSF コード生成 → テスト実行評価 → E2Eテスト
- (既存分析)    (画面単位)   (AIと対話)   (実装+単体)    (品質検証)      (Playwright)
+Struts コード → SPEC生成        → タスク分解 → 詳細設計   → JSF コード生成 → テスト実行評価 → E2Eテスト
+ (既存分析)    (画面グループ単位)   (AIと対話)   (画面単位)   (実装+単体)    (品質検証)      (Playwright)
 ```
 
 Code-to-Codeの直接変換ではなく、一度SPECとして抽象化することで：
 * レガシーな設計パターンを持ち込まない
 * 最新のJakarta EE 10ベストプラクティスを採用
 * ビジネスロジックを正確に保全
+
+JSF特有の設計アプローチ:
+* JSFは画面中心のサーバーサイドMVCフレームワーク
+* リバースエンジニアリングで画面グループ単位の基本設計を生成
+* 詳細設計フェーズで画面単位の実装設計を生成
+* 画面グループ = 関連する画面群（一覧、入力、確認等）をまとめたもの
+
+---
+
+## 📐 JSF設計の粒度（画面グループと画面単位）
+
+JSFは画面中心のサーバーサイドMVCフレームワークです。設計は2段階の粒度で行います：
+
+### 画面グループレベル（basic_design/{screen_group}/）
+
+* **粒度**: 粗い（複数画面をまとめる）
+* **例**: person_management（Person一覧、入力、確認の3画面グループ）
+* **内容**:
+  - 画面一覧
+  - 画面遷移図（一覧 → 入力 → 確認 → 一覧）
+  - グループ内全画面の設計
+  - E2Eテスト（複数画面またぐフロー）
+
+### 画面単位レベル（detailed_design/FUNC_XXX/）
+
+* **粒度**: 細かい（1画面）
+* **例**: FUNC_001_PersonList（Person一覧画面のみ）
+* **内容**:
+  - Managed Bean設計
+  - アクションメソッド設計
+  - 単体テスト（1画面のみ）
+
+### REST APIとの違い
+
+| JSF（画面中心） | REST API（リソース中心） |
+|----------------|------------------------|
+| 画面グループ単位で設計 | ドメイン/リソース単位で設計 |
+| 画面遷移フローが重要 | APIエンドポイントが重要 |
+| person_management | orders, images, books_proxy |
+| 複数画面の遷移 | 独立したリソース操作 |
 
 ---
 
@@ -36,12 +76,25 @@ Code-to-Codeの直接変換ではなく、一度SPECとして抽象化するこ�
 ```
 
 生成されるSPEC:
-* `requirements.md` - システムの目的、機能要件
+
+**共通設計（basic_design/common/）:**
 * `architecture_design.md` - 技術スタック、レイヤー構成
-* `functional_design.md` - 画面一覧、画面遷移
 * `data_model.md` - エンティティ、テーブル定義
+* `external_interface.md` - 外部システム連携
+
+**画面グループ単位（basic_design/{screen_group}/）:**
+* `functional_design.md` - 画面一覧、画面遷移図
 * `screen_design.md` - 画面レイアウト、入力項目
-* `behaviors.md` - 画面の振る舞い、バリデーション
+* `behaviors.md` - 画面グループの振る舞い（E2Eテスト用、Gherkin記法）
+
+**システム要件（requirements/）:**
+* `requirements.md` - システムの目的、機能要件
+* `behaviors.md` - 要件レベルの振る舞い
+
+注意:
+* JSFは画面中心のサーバーサイドMVCフレームワーク
+* 画面グループ: 関連する画面群（一覧、入力、確認等）をまとめたもの
+* 詳細設計（detailed_design/）は後続フェーズで画面単位に生成
 
 ### ステップ2: 📋 タスク分解
 
@@ -73,14 +126,16 @@ Code-to-Codeの直接変換ではなく、一度SPECとして抽象化するこ�
 
 パラメータ:
 * project_root: projects/jsf-migration/struts-app-jsf
+* spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
 * target_type: FUNC_001_PersonList
 ```
 
 AIと対話しながら：
+* 画面グループの基本設計（basic_design/{screen_group}/）を読み込む
 * Managed Bean設計を確認
 * バリデーションルールを確認
 * 画面遷移とデータ受け渡しを確認
-* 詳細設計書を生成
+* 画面単位の詳細設計書（detailed_design/FUNC_XXX/）を生成
 
 ### ステップ4: ⚙️ JSFコード生成（詳細設計→実装→単体テスト）
 
@@ -152,12 +207,13 @@ AIが：
 ```
 
 AIが：
-1. 📄 basic_design/behaviors.md（結合テストシナリオ）を読み込む
+1. 📄 basic_design/{screen_group}/behaviors.md（結合テストシナリオ）を読み込む
 2. 🧪 JUnit 5 + Weld SE を使用した結合テストを生成する
    * Service層以下（Service + Entity + DB）の連携テスト
    * 実際のDBアクセス（メモリDB）
    * モックは使用しない
    * アプリケーションサーバー不要
+   * 画面グループの業務フローを検証
 3. 🏷️ `@Tag("integration")` で結合テストを分離（実行はプロジェクトのビルド設定に従う）
 
 ### ステップ7: 🧪 E2Eテスト生成
@@ -220,18 +276,31 @@ AIが：
 
 ```
 specs/baseline/basic_design/
-  ├── functional_design.md (or .xlsx)
-  ├── screen_design.md (or .xlsx)
-  ├── CHANGES.md              # アクティブな変更
-  └── changes_archive/        # 適用済み変更
-      ├── 20260118_person_edit.md
-      └── 20260125_validation_update.md
+  ├── common/                           # 共通設計
+  │   ├── architecture_design.md
+  │   ├── data_model.md
+  │   ├── CHANGES.md                    # 共通設計の変更管理
+  │   └── changes_archive/              # 適用済み変更
+  │       └── 20260120_entity_update.md
+  └── {screen_group}/                   # 画面グループ別（例: person_management）
+      ├── functional_design.md (or .xlsx)
+      ├── screen_design.md (or .xlsx)
+      ├── CHANGES.md                    # 画面グループ設計の変更管理
+      └── changes_archive/              # 適用済み変更
+          ├── 20260118_person_edit.md
+          └── 20260125_validation_update.md
 ```
 
 重要:
 * マスターファイル（functional_design.md等）は自由に更新
-* 変更内容はCHANGES.mdに明示的に記載
+* 変更内容は適切な粒度のCHANGES.mdに明示的に記載
+* 共通設計の変更: `common/CHANGES.md`
+* 画面グループ固有設計の変更: `{screen_group}/CHANGES.md`
 * Markdown、EXCEL、PDF等、形式非依存
+
+注意:
+* JSFは画面中心のサーバーサイドMVCフレームワーク
+* 画面グループ: 関連する画面群（一覧、入力、確認等）をまとめたもの
 
 ---
 
@@ -364,9 +433,16 @@ Person一覧画面を実装してください。
 
 ### 段階的マイグレーション
 
-* 大規模システムは機能単位で段階的に実施
+* 大規模システムは画面グループ単位で段階的に実施
 * 各段階でテストと検証を実施
 * リスクを最小化
+
+### 画面中心設計（JSF特有）
+
+* JSFは画面中心のサーバーサイドMVCフレームワーク
+* 画面グループ: 関連する画面群（一覧、入力、確認等）をまとめたもの
+* 画面遷移フローを持つ関連画面の集まり
+* REST APIのドメイン駆動設計とは異なるアプローチ
 
 ---
 
