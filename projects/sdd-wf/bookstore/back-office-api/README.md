@@ -45,9 +45,11 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 ### 📋 開発フロー
 
-#### ステップ1: 基本設計（プロジェクト開始時に1回）
+#### ステップ1: 基本設計（要件変更時に繰り返し実行）
 
-requirements.mdから、ドメイン単位の仕様書をAIと対話しながら作成します。
+requirements.mdから、ドメイン単位の仕様書をAIと対話しながら作成・更新します。
+
+**重要**: このステップは要件変更時に何度でも実行できます。初回は新規作成、2回目以降は既存SPECの差分更新となります。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/basic_design.md
@@ -60,11 +62,17 @@ requirements.mdから、ドメイン単位の仕様書をAIと対話しながら
 ```
 
 * 対話の流れ:
-  1. 既存資料（EXCEL、Word等）の有無を確認します
-  2. 既存資料がある場合は、Markdown形式に変換します
-  3. ドメイン構成を決定します（common, books, categories, publishers, stocks, workflows）
-  4. テンプレートを展開し、各ドメインの仕様書を対話的に作成します
-  5. `specs/baseline/basic_design/{domain}/*.md` が生成されます
+  1. 既存SPECファイルの有無を確認し、実行モードを判定します（初回作成 or 増分更新）
+  2. **増分更新モードの場合**:
+     - 既存SPECファイルをすべて読み込みます
+     - インプットファイル（requirements.md等）の変更点を特定します
+     - 差分に関連する箇所のみをSPECファイルに反映します（変更のない箇所は一切触りません）
+  3. **初回作成モードの場合**:
+     - 既存資料（EXCEL、Word等）の有無を確認します
+     - 既存資料がある場合は、Markdown形式に変換します
+     - ドメイン構成を決定します（common, books, categories, publishers, stocks, workflows）
+     - テンプレートを展開し、各ドメインの仕様書を対話的に作成します
+     - `specs/baseline/basic_design/{domain}/*.md` が生成されます
 
 * 生成されるファイル: 
   ```

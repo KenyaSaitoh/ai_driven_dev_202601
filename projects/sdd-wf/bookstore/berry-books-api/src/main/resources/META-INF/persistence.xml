@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
+             https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
+    
+    <persistence-unit name="BerryBooksPU" transaction-type="JTA">
+        <jta-data-source>jdbc/HsqldbDS</jta-data-source>
+        
+        <!-- Entity classes -->
+        <class>pro.kensait.berrybooks.entity.OrderTran</class>
+        <class>pro.kensait.berrybooks.entity.OrderDetail</class>
+        
+        <properties>
+            <!-- Schema generation: none (manual DDL) -->
+            <property name="jakarta.persistence.schema-generation.database.action" value="none"/>
+            
+            <!-- EclipseLink logging -->
+            <property name="eclipselink.logging.level" value="FINE"/>
+            <property name="eclipselink.logging.parameters" value="true"/>
+            <property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.slf4j.SLF4JLogger"/>
+        </properties>
+    </persistence-unit>
+</persistence>
