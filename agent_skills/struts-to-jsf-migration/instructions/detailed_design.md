@@ -45,12 +45,12 @@ target_type: "FUNC_001_PersonList"
 - コード例（コード生成フェーズで生成するため）
 
 生成するファイル:
-- {spec_directory}/detailed_design/detailed_design/FUNC_XXX/detailed_design.md - 実装クラス設計
-- {spec_directory}/detailed_design/detailed_design/FUNC_XXX/behaviors.md - 単体テスト用（Gherkin 記法）
+- {spec_directory}/detailed_design/detailed_design/FUNC_XXX/detailed_design.md - 実装クラス設計（箇条書き）
+- {spec_directory}/detailed_design/detailed_design/FUNC_XXX/behaviors.md - 単体テスト用の振る舞い仕様書（Gherkin 記法、ブラックボックステスト）
 
-behaviors.mdの種別:
-- basic_design/behaviors.md: 結合・E2Eテスト用（画面間遷移、実際のDB・画面レンダリング）
-- detailed_design/detailed_design/FUNC_XXX/behaviors.md: 単体テスト用（1メソッド単位、依存関係はモック）
+behaviors.mdの種別（すべてGherkin記法で記述）:
+- basic_design/behaviors.md: 結合・E2Eテスト用（画面間遷移、実際のDB・画面レンダリング、Gherkin記法）
+- detailed_design/detailed_design/FUNC_XXX/behaviors.md: 単体テスト用（1メソッド単位、ブラックボックステスト、依存関係はモック、Gherkin記法）
 
 ---
 
@@ -118,16 +118,19 @@ SPECに明記されていない以下の点はユーザーに質問する:
 - 画面遷移ルール（outcome）
 - 依存関係（@Inject対象）
 
-#### 3.1.2 behaviors.md（単体テスト用の振る舞い）
+#### 3.1.2 behaviors.md（単体テスト用の振る舞い仕様書）
 - 生成先: {spec_directory}/detailed_design/detailed_design/{target_type}/behaviors.md
 - テンプレート: @agent_skills/struts-to-jsf-migration/templates/detailed_design/behaviors.md
 - 既存ファイルがある場合は、差分のみを反映する
+- 記法: Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）
+- Gherkin記法の詳細: @agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照
 
-記載内容（Gherkin 記法）:
-- メソッドレベルの単体テストシナリオ
+記載内容（Gherkin 記法で記述）:
+- メソッドレベルの単体テストシナリオ（ブラックボックステスト）
+- 各シナリオは Feature, Scenario, Given, When, Then で構成
 - 依存関係はモックを使用
-- 1メソッド＝1テストケースの粒度
-- 境界値テスト、異常系テスト
+- 1メソッド＝1 Scenario の粒度
+- 境界値テスト、異常系テストもGherkin記法で記述
 
 ---
 

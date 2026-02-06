@@ -144,7 +144,7 @@ class OrderTranDaoTest {
         
         verify(em).createQuery(anyString(), eq(OrderTran.class));
         verify(query).setParameter("orderTranId", 999);
-        verify(query.getResultList();
+        verify(query).getResultList();
     }
     
     @Test

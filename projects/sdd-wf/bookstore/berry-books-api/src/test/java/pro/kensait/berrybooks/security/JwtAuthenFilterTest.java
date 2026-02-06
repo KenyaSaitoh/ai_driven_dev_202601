@@ -46,8 +46,8 @@ class JwtAuthenFilterTest {
     
     @BeforeEach
     void setUp() throws IOException {
-        // 共通モック設定
-        when(response.getWriter()).thenReturn(writer);
+        // 共通モック設定（lenient: 使用されない場合でもエラーにしない）
+        lenient().when(response.getWriter()).thenReturn(writer);
     }
     
     @Test
@@ -120,7 +120,6 @@ class JwtAuthenFilterTest {
         // Given: 認証除外パス（/api/auth/login）
         when(request.getRequestURI()).thenReturn("/berry-books-api/api/auth/login");
         when(request.getContextPath()).thenReturn("/berry-books-api");
-        when(request.getCookies()).thenReturn(null);
         
         // When: フィルター実行
         filter.doFilter(request, response, chain);
@@ -137,7 +136,6 @@ class JwtAuthenFilterTest {
         // Given: 認証除外パス（/api/books）
         when(request.getRequestURI()).thenReturn("/berry-books-api/api/books");
         when(request.getContextPath()).thenReturn("/berry-books-api");
-        when(request.getCookies()).thenReturn(null);
         
         // When: フィルター実行
         filter.doFilter(request, response, chain);
@@ -154,7 +152,6 @@ class JwtAuthenFilterTest {
         // Given: 認証除外パス（/api/images）
         when(request.getRequestURI()).thenReturn("/berry-books-api/api/images/covers/1");
         when(request.getContextPath()).thenReturn("/berry-books-api");
-        when(request.getCookies()).thenReturn(null);
         
         // When: フィルター実行
         filter.doFilter(request, response, chain);

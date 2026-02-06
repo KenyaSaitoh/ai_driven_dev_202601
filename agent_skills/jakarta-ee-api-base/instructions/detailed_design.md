@@ -44,10 +44,10 @@ target_domain: "common"
 - 基本設計SPECの内容の繰り返し
 - コード例（コード生成フェーズで生成するため）
 
-behaviors.mdの種別:
-- requirements/behaviors.md: E2Eテスト用（システム全体、API層含む）
-- basic_design/{target_domain}/behaviors.md: 結合テスト用（ドメイン内の連携シナリオ）
-- detailed_design/{target_domain}/behaviors.md: 単体テスト用（1メソッド単位、本フェーズで新規作成）
+behaviors.mdの種別（すべてGherkin記法で記述）:
+- requirements/behaviors.md: E2Eテスト用（システム全体、API層含む、Gherkin記法）
+- basic_design/{target_domain}/behaviors.md: 結合テスト用（ドメイン内の連携シナリオ、Gherkin記法）
+- detailed_design/{target_domain}/behaviors.md: 単体テスト用（1メソッド単位、ブラックボックステスト、Gherkin記法、本フェーズで新規作成）
 
 ---
 
@@ -115,16 +115,19 @@ SPECに明記されていない以下の点はユーザーに質問する:
 - JPQLクエリ（WHERE句、JOIN等）
 - 依存関係（@Inject対象）
 
-#### 3.1.2 behaviors.md（単体テスト用の振る舞い）
+#### 3.1.2 behaviors.md（単体テスト用の振る舞い仕様書）
 - 生成先: {spec_directory}/detailed_design/{target_domain}/behaviors.md
 - テンプレート: @agent_skills/jakarta-ee-api-base/templates/detailed_design/behaviors.md
 - 既存ファイルがある場合は、差分のみを反映する
+- 記法: Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）
+- Gherkin記法の詳細: @agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照
 
-記載内容（Gherkin 記法）:
-- メソッドレベルの単体テストシナリオ
+記載内容（Gherkin 記法で記述）:
+- メソッドレベルの単体テストシナリオ（ブラックボックステスト）
+- 各シナリオは Feature, Scenario, Given, When, Then で構成
 - 依存関係はモックを使用
-- 1メソッド＝1テストケースの粒度
-- 境界値テスト、異常系テスト
+- 1メソッド＝1 Scenario の粒度
+- 境界値テスト、異常系テストもGherkin記法で記述
 
 ---
 
