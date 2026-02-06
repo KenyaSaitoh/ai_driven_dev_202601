@@ -1,5 +1,49 @@
 # Changelog
 
+## 2026/2/5
+
+### Changed
+
+#### タスクベースからドメインベースの開発への移行
+* agent_skills/jakarta-ee-api-base: 開発プロセスを7段階から6段階に変更（タスク分解ステップを削除）。基本設計から直接ドメイン単位で詳細設計・コード生成を実行する方式に変更
+* プロジェクトREADME.md（back-office-api, berry-books-api）: 7段階プロセス→6段階プロセスに更新。ステップ2（タスク分解）を削除し、各ステップをドメイン単位の実行に変更。target_type/task_file → target_domain にパラメータ名を変更。プロジェクト名の -wf サフィックスを削除（back-office-api-wf → back-office-api）
+* プロジェクトREADME.md: ドメイン構成セクションを追加（back-office-api: common, books, categories, publishers, stocks, workflows / berry-books-api: common, books_proxy, orders, images）
+* プロジェクトREADME.md: プロジェクト構成セクションをドメインベースのディレクトリ構造に更新（tasks/ および FUNC_XXX フォルダを削除、basic_design/ および detailed_design/ 配下にドメインフォルダを追加）
+* agent_skills/jakarta-ee-api-base/instructions/basic_design_change.md: 変更タスクファイル（tasks/change_tasks.md）の生成から、影響を受けるドメインの識別に変更
+* agent_skills/jakarta-ee-api-base/SKILL.md: 6段階プロセス、ドメイン単位の実行、target_domain パラメータ、既存ファイルへの差分反映を反映。実践例のプロジェクト名を back-office-api-sdd → back-office-api に修正
+
+#### 詳細設計書の簡潔化
+* agent_skills/jakarta-ee-api-base/instructions/detailed_design.md: 1112行→約150行に削減（約87%削減）。「詳細設計書は基本設計とコードの橋渡しとなる設計判断のみを簡潔に記載」する原則を明記。すべてのコード例を削除。テンプレート例のセクション（### 3.2, 3.3 等）を削除。箇条書き中心の記述に変更
+* agent_skills/struts-to-jsf-migration/instructions/detailed_design.md: 657行→約160行に削減（約76%削減）。コード例を削除し、箇条書き中心に変更
+* 詳細設計で記載すべき情報を明確化: クラス名と責務（1行）、主要メソッドのシグネチャ、設計判断を示すアノテーション、JPQLクエリ、依存関係
+* 詳細設計で記載すべきでない情報を明確化: メソッドの実装詳細、すべてのフィールド定義、getter/setter、バリデーションの詳細、基本設計SPECの繰り返し、コード例
+
+#### 既存ファイルへの差分反映の原則を追加
+* agent_skills/jakarta-ee-api-base: 全指示書（basic_design.md, detailed_design.md, code_generation.md, it_generation.md, e2e_test_generation.md）に「既存ファイルがある場合は、削除せずに読み込んで、差分のみを反映する」という方針を追加
+* 既存の成果物を尊重し、ファイルをゼロから作り直すことを禁止。必要な変更のみを適用する方式に統一
+
+#### テンプレートの更新
+* agent_skills/jakarta-ee-api-base/templates/basic_design/functional_design.md: システム全体の機能設計書からドメイン単位の機能設計書に変更。ドメインの責務、依存関係、提供する機能を記載する形式に更新
+* agent_skills/jakarta-ee-api-base/templates/basic_design/CHANGES_template.md: タスクベースからドメインベースの変更管理に更新。影響を受けるドメインを識別し、ドメイン単位でのファイル変更を記載する形式に変更
+* agent_skills/jakarta-ee-api-base/templates/basic_design/behaviors.md: システム全体からドメイン単位の結合テスト用振る舞い仕様書に更新。ドメイン内のService層以下の連携テストシナリオを記載
+* agent_skills/jakarta-ee-api-base/templates/detailed_design/detailed_design.md: ドメイン単位の簡潔な詳細設計書テンプレートに更新。クラス構成、コンポーネント設計、DTO設計、エンティティ設計等を最小限の情報で記載
+* agent_skills/jakarta-ee-api-base/templates/detailed_design/behaviors.md: ドメイン粒度の単体テスト用振る舞い仕様書に更新。ドメイン内のコンポーネント間は実際の連携をテスト、ドメイン外の依存はモック化
+* agent_skills/jakarta-ee-api-base/templates/requirements/behaviors.md: リンク構造をドメインベースに更新。basic_design/{domain}/behaviors.md へのリンクを修正
+
+#### 太字表記の削除
+* agent_skills/jakarta-ee-api-base/instructions: 全ファイル（detailed_design.md, code_generation.md, it_generation.md, e2e_test_generation.md, basic_design.md, unit_test_execution.md）から `**` による太字表記を削除（計70箇所）
+
+#### Gherkin記法の明確化
+* agent_skills/jakarta-ee-api-base/instructions/detailed_design.md: behaviors.md が Gherkin 記法で記述されること、ブラックボックステストであることを明記。Gherkin記法の詳細は principles/common_rules.md を参照することを追加
+* agent_skills/struts-to-jsf-migration/instructions/detailed_design.md: 同様にGherkin記法、ブラックボックステストを明記
+
+### Removed
+
+#### タスク関連ファイル・フォルダの削除
+* projects/sdd-wf/bookstore/back-office-api/tasks フォルダを削除（ドメインベース開発では不要）
+* projects/sdd-wf/bookstore/berry-books-api/tasks フォルダを削除（ドメインベース開発では不要）
+* プロジェクトREADME.md: tasks/ フォルダ、tasks/tasks.md、FUNC_XXX ディレクトリへの参照をすべて削除
+
 ## 2026/2/1
 
 ### Changed
