@@ -43,9 +43,11 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 ### 📋 開発フロー
 
-#### ステップ1: 基本設計（プロジェクト開始時に1回）
+#### ステップ1: 基本設計（プロジェクト開始時の1フェーズ、AIと対話的に実施）
 
 requirements.mdから、ドメイン単位の仕様書をAIと対話しながら作成します。
+
+このステップは要件変更時に何度でも実行できます。初回は新規作成、2回目以降は既存SPECの差分更新となります。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/basic_design.md
@@ -58,11 +60,25 @@ requirements.mdから、ドメイン単位の仕様書をAIと対話しながら
 ```
 
 * 対話の流れ:
-  1. 既存資料（EXCEL、Word等）の有無を確認します
-  2. 既存資料がある場合は、Markdown形式に変換します
-  3. ドメイン構成を決定します（common, books_proxy, orders, images）
-  4. テンプレートを展開し、各ドメインの仕様書を対話的に作成します
-  5. `specs/baseline/basic_design/{domain}/*.md` が生成されます
+  1. 既存SPECファイルの有無を確認し、実行モードを判定します（初回作成 or 増分更新）
+  2. **増分更新モードの場合**:
+     - 既存SPECファイルをすべて読み込みます
+     - インプットファイル（requirements.md等）の変更点を特定します
+     - 差分に関連する箇所のみをSPECファイルに反映します（変更のない箇所は一切触りません）
+  3. **初回作成モードの場合**:
+     - 既存資料（EXCEL、Word等）の有無を確認します
+     - 既存資料がある場合は、Markdown形式に変換します
+     - ドメイン構成を決定します（common, books_proxy, orders, images）
+     - テンプレートを展開し、各ドメインの仕様書を対話的に作成します
+       * @agent_skills/jakarta-ee-api-base/templates/basic_design/ から5ファイルをコピー
+     - `specs/baseline/basic_design/{domain}/*.md` が生成されます
+
+* テンプレート:
+  - architecture_design.md - アーキテクチャ設計書
+  - data_model.md - データモデル仕様書
+  - external_interface.md - 外部インターフェース仕様書
+  - functional_design.md - 機能設計書
+  - behaviors.md - 振る舞い仕様書（結合テスト用）
 
 * 生成されるファイル: 
   ```
@@ -86,7 +102,7 @@ requirements.mdから、ドメイン単位の仕様書をAIと対話しながら
 
 ---
 
-#### ステップ2: 詳細設計（ドメイン単位、commonから順に実施）
+#### ステップ2: 詳細設計（ドメイン単位、commonから順に実施、AIと対話的に実施）
 
 **重要**: commonドメインを最優先で実施してください（他のドメインはcommonに依存）。
 
@@ -103,24 +119,21 @@ commonドメインの詳細設計書を作成してください
 * target_domain: common  # または books_proxy, orders, images
 ```
 
-使用例:
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md
-
-commonドメインの詳細設計書を作成してください
-
-パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api
-* spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
-* target_domain: common
-```
-
 対話の流れ:
 1. AIがSPEC（`basic_design/{target_domain}/`）を読み込み、理解した内容を説明します
-2. AIが不明点を質問します
-3. あなたが回答します
-4. `specs/baseline/detailed_design/{target_domain}/detailed_design.md` と `behaviors.md` が生成されます
+2. テンプレートを展開します
+   * @agent_skills/jakarta-ee-api-base/templates/detailed_design/ から2ファイルをコピー
+3. AIが不明点を質問します
+4. あなたが回答します
+5. detailed_design.md（実装クラス設計）とbehaviors.md（単体テスト用）を生成します
+   * **簡潔性の原則**: 基本設計とコードの「橋渡し」となる設計判断のみを簡潔に記載
+   * クラス名と責務、主要メソッドのシグネチャ、設計判断を示すアノテーション等
+   * **実装詳細（処理ステップ等）は記載しない**（コードレビューで修正しやすくするため）
+6. `specs/baseline/detailed_design/{target_domain}/detailed_design.md` と `behaviors.md` が生成されます
+
+テンプレート:
+* detailed_design.md - 詳細設計書（実装クラス設計）
+* behaviors.md - 振る舞い仕様書（単体テスト用）
 
 注意:
 * `common`ドメインを最優先で実行してください

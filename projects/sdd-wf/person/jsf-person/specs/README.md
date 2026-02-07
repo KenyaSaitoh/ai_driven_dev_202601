@@ -16,6 +16,10 @@
 * basic_design/は「画面グループ単位」で構成（関連する画面群をまとめる）
 * detailed_design/は「画面単位」で構成（個別画面の実装設計）
 
+テンプレート参照:
+* 基本設計: @agent_skills/struts-to-jsf-migration/templates/basic_design/
+* 詳細設計: @agent_skills/jakarta-ee-api-base/templates/detailed_design/
+
 ---
 
 ## フォルダ構成
@@ -76,6 +80,7 @@ specs/
 #### 2.1 common/ フォルダ（必須）
 
 * すべての画面グループから参照される共通設計を配置
+* テンプレート: @agent_skills/struts-to-jsf-migration/templates/basic_design/
 * 配置するファイル:
   * `architecture_design.md` - 技術スタック、アーキテクチャパターン、パッケージ構造
   * `data_model.md` - エンティティ定義、ERD、テーブル定義
@@ -90,6 +95,7 @@ specs/
 * 画面グループ固有の設計を配置
 * 本プロジェクトでは `person_management/` のみ
 * 画面グループ: 関連する画面群（一覧、入力、確認等）をまとめたもの
+* テンプレート: @agent_skills/struts-to-jsf-migration/templates/basic_design/
 * 配置するファイル:
   * `functional_design.md` - 画面一覧、画面遷移図、画面グループ全体の機能設計
   * `screen_design.md` - 画面グループ内全画面のレイアウト、入力項目、バリデーション（JSF特有）
@@ -109,6 +115,8 @@ specs/
 * 共通コンポーネント（Entity、Dao等）の詳細設計
 * 配置するファイル:
   * `detailed_design.md` - クラス設計、メソッドシグネチャ、設計判断
+    - **簡潔性の原則**: 基本設計とコードの「橋渡し」となる設計判断のみを簡潔に記載
+    - **実装詳細（処理ステップ等）は記載しない**（コードレビューで修正しやすくするため）
   * `behaviors.md` - 単体テスト用振る舞い仕様（Gherkin記法、ブラックボックステスト）
 
 #### 3.2 FUNC_XXX_YYY/ フォルダ（画面/機能ごと）
@@ -117,6 +125,9 @@ specs/
 * フォルダ命名規則: `FUNC_{連番}_{機能名}`
 * 配置するファイル:
   * `detailed_design.md` - ManagedBean、Service等のクラス設計
+    - **簡潔性の原則**: 基本設計とコードの「橋渡し」となる設計判断のみを簡潔に記載
+    - クラス名と責務、主要メソッドのシグネチャ、設計判断を示すアノテーション等
+    - **実装詳細（処理ステップ等）は記載しない**
   * `behaviors.md` - 単体テスト用振る舞い仕様（Gherkin記法）
 
 ---
