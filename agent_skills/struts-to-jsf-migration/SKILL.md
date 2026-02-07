@@ -37,14 +37,23 @@ REST APIとの違い:
 
 AIが自動で以下を実行
 1. Strutsコード（Action、ActionForm、JSP、EJB、DAO）を分析
-2. 抽象的・論理的なSPECを生成
+2. テンプレートを参照してSPECを生成
+   * @agent_skills/struts-to-jsf-migration/templates/basic_design/ から参照
    * 共通設計: `specs/baseline/basic_design/common/`
    * 画面グループ単位の設計: `specs/baseline/basic_design/{screen_group}/`
-3. `specs/`フォルダに保存
+3. 抽象的・論理的なSPECとして`specs/`フォルダに保存
 
 生成される構造:
 * 画面グループ: 関連する画面群（一覧、入力、確認等）をまとめたもの
 * JSFは画面中心のサーバーサイドMVCフレームワーク
+
+テンプレート:
+* architecture_design.md - アーキテクチャ設計書
+* data_model.md - データモデル仕様書
+* external_interface.md - 外部インターフェース仕様書
+* functional_design.md - 機能設計書（画面グループ）
+* screen_design.md - 画面設計書（JSF専用）
+* behaviors.md - 振る舞い仕様書（E2Eテスト用）
 
 ### ステップ2: タスク分解
 
@@ -265,6 +274,15 @@ agent_skills/struts-to-jsf-migration/
 │   ├── architecture.md              # Jakarta EE APIアーキテクチャ標準
 │   ├── security.md                  # セキュリティ標準
 │   └── common_rules.md              # マイグレーションルール、マッピング規則
+├── templates/                        # SPECテンプレート（リバースエンジニアリング用）
+│   └── basic_design/                # 基本設計用テンプレート
+│       ├── architecture_design.md  # アーキテクチャ設計書
+│       ├── data_model.md           # データモデル仕様書
+│       ├── external_interface.md   # 外部インターフェース仕様書
+│       ├── functional_design.md    # 機能設計書（画面グループ）
+│       ├── screen_design.md        # 画面設計書（JSF専用）
+│       ├── behaviors.md            # 振る舞い仕様書（E2Eテスト用）
+│       └── CHANGES_template.md     # 変更管理テンプレート
 └── instructions/
     ├── reverse_engineering.md        # ステップ1: リバースエンジニアリング
     ├── task_breakdown.md             # ステップ2: タスク分解

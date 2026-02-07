@@ -79,9 +79,8 @@ agent_skills/jakarta-ee-api-agile/
     │   ├── data_model.md
     │   └── external_interface.md
     └── usecases/
-        └── _sample/
-            ├── userstory.md
-            └── behaviors.md
+        ├── userstory.md
+        └── behaviors.md
 ```
 
 ---
@@ -185,8 +184,14 @@ agent_skills/jakarta-ee-api-agile/
 
 AIと対話しながら実施:
 1. テンプレートを {spec_directory}/common/ に展開
+   * @agent_skills/jakarta-ee-api-agile/templates/common/ から3ファイルをコピー
 2. common/ に data_model.md, external_interface.md, architecture_design.md を作成・更新
 3. 共通のデータモデル・外部IF・アーキテクチャを定義（functional_design は作らない）
+
+テンプレート:
+* architecture_design.md - アーキテクチャ設計書
+* data_model.md - データモデル仕様書
+* external_interface.md - 外部インターフェース仕様書
 
 注意:
 * 既存の basic_design から移行する場合は、同名ファイルを common/ にコピー・整理してよい
@@ -221,8 +226,14 @@ AIと対話しながら実施:
 
 AIと対話しながら実施:
 1. common/ の3SPECを読み、矛盾しないようにユースケースSPECを作成
-2. {spec_directory}/usecases/{usecase_folder}/ に userstory.md, behaviors.md を作成・更新
-3. 振る舞いは Gherkin 記法で記述（Cucumber .feature の元になる）
+2. テンプレートを展開
+   * @agent_skills/jakarta-ee-api-agile/templates/usecases/ から2ファイルをコピー
+3. {spec_directory}/usecases/{usecase_folder}/ に userstory.md, behaviors.md を作成・更新
+4. 振る舞いは Gherkin 記法で記述（Cucumber .feature の元になる）
+
+テンプレート:
+* userstory.md - ユーザーストーリー
+* behaviors.md - 振る舞い仕様書
 
 生成されるファイル:
 ```

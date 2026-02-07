@@ -21,10 +21,18 @@ SPECを作成してください
 
 AIと対話しながら以下を実施（対話的プロセス）
 1. テンプレートを basic_design/common/ フォルダに展開
+   * @agent_skills/jakarta-ee-api-base/templates/basic_design/ から5ファイルをコピー
 2. requirements.mdを読み込み、理解内容を説明
 3. ユーザーと対話しながら各SPECの中身を埋める
 4. ドメインフォルダを作成（common/ + 各ドメイン）
 5. 各ドメインのSPEC（functional_design.md、behaviors.md等）を作成
+
+テンプレート:
+* architecture_design.md - アーキテクチャ設計書
+* data_model.md - データモデル仕様書
+* external_interface.md - 外部インターフェース仕様書
+* functional_design.md - 機能設計書
+* behaviors.md - 振る舞い仕様書（結合テスト用）
 
 注意: 
 * requirements.md（要件定義書）は所与とする（既に存在している前提）
@@ -47,11 +55,17 @@ AIと対話しながら以下を実施（対話的プロセス）
 
 AIと対話しながら以下を実施（対話的プロセス）
 1. basic_design/{target_domain}/ の内容に基づいて detailed_design/{target_domain}/ フォルダを作成
-2. basic_design/{target_domain}/functional_design.md を参照して実装レベルの detailed_design.md を生成
+2. テンプレートを参照して詳細設計を生成
+   * @agent_skills/jakarta-ee-api-base/templates/detailed_design/ から2ファイルをコピー
+3. basic_design/{target_domain}/functional_design.md を参照して実装レベルの detailed_design.md を生成
    * 基本設計とコードの「橋渡し」となる設計判断のみを簡潔に記載
    * クラス名と責務、主要メソッドのシグネチャ、設計判断を示すアノテーション等
    * 実装詳細（処理ステップ等）は記載しない（後から人が修正する可能性を考慮）
-3. 単体テスト用の behaviors.md を新規作成（メソッドレベルのテストシナリオ）
+4. 単体テスト用の behaviors.md を新規作成（メソッドレベルのテストシナリオ）
+
+テンプレート:
+* detailed_design.md - 詳細設計書
+* behaviors.md - 振る舞い仕様書（単体テスト用）
 
 重要: 
 * commonを最優先で詳細設計する（他のドメインはcommonに依存）

@@ -27,6 +27,7 @@ description: Jakarta EE 10とJAX-RS 3.1を使ったREST APIのアジャイル・
 
 AIと対話しながら以下を実施
 1. テンプレートを `{spec_directory}/common/` に展開
+   * @agent_skills/jakarta-ee-api-agile/templates/common/ から3ファイルをコピー
 2. common/ に data_model.md, external_interface.md, architecture_design.md を作成・更新
 3. 共通のデータモデル・外部IF・アーキテクチャを定義（functional_design は作らない）
 
@@ -45,7 +46,9 @@ AIと対話しながら以下を実施
 
 AIと対話しながら以下を実施
 1. common/ の3SPECを読み、矛盾しないようにユースケースSPECを作成
-2. `{spec_directory}/usecases/{usecase_folder}/` に userstory.md, behaviors.md を作成・更新
+2. テンプレートを `{spec_directory}/usecases/{usecase_folder}/` に展開
+   * @agent_skills/jakarta-ee-api-agile/templates/usecases/ から2ファイルをコピー
+3. userstory.md, behaviors.md を作成・更新
 
 ### ステップ3: 実装（common → 各ユースケース）
 
@@ -130,9 +133,8 @@ agent_skills/jakarta-ee-api-agile/
 │   │   ├── external_interface.md
 │   │   └── architecture_design.md
 │   └── usecases/
-│       └── _sample/
-│           ├── userstory.md
-│           └── behaviors.md
+│       ├── userstory.md
+│       └── behaviors.md
 └── instructions/
     ├── common_spec.md
     ├── usecase_spec.md

@@ -72,8 +72,8 @@ usecase_folder: "order-creation"
 
 ### 3.2 テンプレートのコピー
 
-* @agent_skills/jakarta-ee-api-agile/templates/usecases/_sample/userstory.md を {spec_directory}/usecases/{usecase_folder}/userstory.md にコピーする
-* @agent_skills/jakarta-ee-api-agile/templates/usecases/_sample/behaviors.md を {spec_directory}/usecases/{usecase_folder}/behaviors.md にコピーする
+* @agent_skills/jakarta-ee-api-agile/templates/usecases/userstory.md を {spec_directory}/usecases/{usecase_folder}/userstory.md にコピーする
+* @agent_skills/jakarta-ee-api-agile/templates/usecases/behaviors.md を {spec_directory}/usecases/{usecase_folder}/behaviors.md にコピーする
 * 既にファイルが存在する場合は、更新するか上書きするかユーザーに確認する
 
 ---

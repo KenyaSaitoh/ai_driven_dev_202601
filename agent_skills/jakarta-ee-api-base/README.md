@@ -127,17 +127,17 @@ agent_skills/jakarta-ee-api-base/
 │                                              # - セキュアコーディング（SQLインジェクション、XSS、コマンドインジェクション対策）
 │                                              # - OWASP Top 10対応
 │
-└── templates/                                  # SPECテンプレート
+└── templates/                                  # SPECテンプレート（各インストラクションから参照）
     │
     ├── requirements/                          # 要件定義テンプレート（ステップ1で使用）
     │   └── behaviors.md                       # 振る舞い仕様書テンプレート（E2Eテスト用）
     │
     ├── basic_design/                          # 基本設計テンプレート（ステップ1で使用）
     │   ├── architecture_design.md             # アーキテクチャ設計書テンプレート
-    │   ├── functional_design.md               # 機能設計書テンプレート（システム全体）
+    │   ├── functional_design.md               # 機能設計書テンプレート
     │   ├── data_model.md                      # データモデル仕様書テンプレート
     │   ├── behaviors.md                       # 振る舞い仕様書テンプレート（結合テスト用）
-    │   ├── external_interface.md              # 外部インターフェース仕様書テンプレート
+    │   └── external_interface.md              # 外部インターフェース仕様書テンプレート
     │   └── CHANGES_template.md                # 変更差分ファイルテンプレート（変更対応で使用）
     │
     └── detailed_design/                       # 詳細設計テンプレート（ステップ3で使用）
@@ -366,13 +366,21 @@ AIと対話しながら実施:
 1. requirements/requirements.mdを読み込み、理解内容を説明
 2. requirements/behaviors.md（E2Eテスト用）を作成
 3. テンプレートを basic_design/ フォルダに展開
+   * @agent_skills/jakarta-ee-api-base/templates/basic_design/ から5ファイルをコピー
 4. ユーザーと対話しながら各SPECの中身を埋める
-5. システム全体のSPEC（architecture_design.md、functional_design.md等）を basic_design/ に作成
-6. basic_design/behaviors.md（結合テスト用）を作成
+5. ドメインフォルダを作成（common/ + 各ドメイン）
+6. 各ドメインのSPEC（functional_design.md、behaviors.md等）を作成
+
+テンプレート:
+* architecture_design.md - アーキテクチャ設計書
+* data_model.md - データモデル仕様書
+* external_interface.md - 外部インターフェース仕様書
+* functional_design.md - 機能設計書
+* behaviors.md - 振る舞い仕様書（結合テスト用）
 
 注意:
 * requirements.md（要件定義書）は所与とする（既に存在している前提）
-* 基本設計フェーズでは、ドメイン単位で設計を行う
+* 基本設計はドメイン単位で分割する（common/ + 各ドメイン）
 * ドメイン構造は実装順序を決定する（common/ → 各ドメイン）
 * 振る舞い仕様書は3種類作成（Gherkin記法で記述。Cucumber .feature の元になる）:
   - requirements/behaviors.md: E2Eテスト用（要件を外形的に捉えた振る舞い）
@@ -416,15 +424,22 @@ AIと対話しながら実施:
 
 AIと対話しながら実施:
 1. basic_design/{target_domain}/ の設計を参照して detailed_design/{target_domain}/ フォルダを作成
-2. basic_design/{target_domain}/functional_design.md を参照して実装設計を作成
-3. 実装レベルの detailed_design.md を生成（クラス設計、メソッドシグネチャ、アノテーション）
-4. 単体テスト用の behaviors.md を新規作成（ドメイン単位のテストシナリオ）
-5. 不明点をユーザーに質問
-6. 対話で妥当性・充足性を確認
+2. テンプレートを展開
+   * @agent_skills/jakarta-ee-api-base/templates/detailed_design/ から2ファイルをコピー
+3. basic_design/{target_domain}/functional_design.md を参照して実装設計を作成
+4. 実装レベルの detailed_design.md を生成（クラス設計、メソッドシグネチャ、アノテーション）
+5. 単体テスト用の behaviors.md を新規作成（ドメイン単位のテストシナリオ）
+6. 不明点をユーザーに質問
+7. 対話で妥当性・充足性を確認
+
+テンプレート:
+* detailed_design.md - 詳細設計書（実装クラス設計）
+* behaviors.md - 振る舞い仕様書（単体テスト用）
 
 重要:
 * functional_design.md は basic_design/{domain}/ にのみ存在（唯一の真実の情報源）
 * commonは最優先で詳細設計を作成（他のドメインはcommonに依存）
+* 詳細設計は「基本設計とコードの橋渡し」となる設計判断のみを簡潔に記載
 * 振る舞い仕様書の3種類の使い分け:
   - requirements/behaviors.md: E2Eテスト用（要件を外形的に捉えた振る舞い）
   - basic_design/{domain}/behaviors.md: 結合テスト用（ドメイン内の連携シナリオ）
