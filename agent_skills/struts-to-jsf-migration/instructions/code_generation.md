@@ -6,33 +6,25 @@
 
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
-task_file: "ここに実行するタスクファイルのパスを入力"
-skip_infrastructure: false  # setupタスク専用: trueの場合、インフラセットアップをスキップ
+spec_directory: "ここにSPECディレクトリのパスを入力"
+target_domain: "対象ドメイン名（例: common, person_management）"
 ```
 
-* 例1: setupタスクの実行
+* 例
 ```yaml
 project_root: "projects/sdd-wf/person/jsf-person-sdd"
-task_file: "projects/sdd-wf/person/jsf-person-sdd/tasks/setup.md"
-skip_infrastructure: true  # setupタスク実行時のみ有効: DB/APサーバーのインストールをスキップ
-```
-
-* 例2: 機能タスクの実行
-```yaml
-project_root: "projects/sdd-wf/person/jsf-person-sdd"
-task_file: "projects/sdd-wf/person/jsf-person-sdd/tasks/FUNC_002_PersonList.md"
-skip_infrastructure: false  # 機能タスクではこのパラメータは無視される
+spec_directory: "projects/sdd-wf/person/jsf-person-sdd/specs/baseline"
+target_domain: "person_management"
 ```
 
 注意
 * パス区切りはOS環境に応じて調整する（Windows: `\`, Unix/Linux/Mac: `/`）
 * 以降、`{project_root}` と表記されている箇所は、上記で設定した値に置き換える
+* 以降、`{spec_directory}` と表記されている箇所は、上記で設定した値に置き換える
 
 ---
 
 ## 実装の実行
-
-重要: 指定されたタスクファイルのタスクのみを実行し、完了したら停止する。次のタスクに自動的に進んではいけない
 
 既存コードの扱い（重要）:
 * 既存のソースコードやテストコードが存在する場合は、それらを削除せずに読み込んで、差分のみを反映する
@@ -40,7 +32,7 @@ skip_infrastructure: false  # 機能タスクではこのパラメータは無�
 * 新規クラス・メソッドの追加、既存メソッドの修正、不要なコードの削除など、必要な変更のみを適用する
 * 新規ファイルが必要な場合のみ、新規作成する
 
-パラメータとして指定されたプロジェクトルートとタスクファイルに基づいて、以下を実行する
+パラメータとして指定されたプロジェクトルートとSPECディレクトリに基づいて、以下を実行する
 
 ### 1. 実装コンテキストをロードして分析する
 
@@ -57,11 +49,7 @@ skip_infrastructure: false  # 機能タスクではこのパラメータは無�
    * 特定のフレームワーク（ライブラリ、ツール等）の使用方法、設計パターン、実装例を参照する
    * 詳細設計やコード生成時に、フレームワーク仕様に従った実装を行う
 
-3. 必須: 指定されたタスクファイルで完全なタスクリストと実行計画を確認する
-   * タスクの「参照SPEC」はMarkdownリンク形式で記述されている（クリック可能）
-   * リンク先のSPECファイルと指定されたセクションを必ず参照する
-
-4. 必須: `{project_root}/specs/baseline/basic_design/architecture_design.md` で以下を確認する
+3. 必須: `{spec_directory}/basic_design/architecture_design.md` で以下を確認する
    * 技術スタック（言語、バージョン、フレームワーク、ライブラリ）
    * アーキテクチャパターンとレイヤー構成
    * パッケージ構造と命名規則
@@ -71,44 +59,30 @@ skip_infrastructure: false  # 機能タスクではこのパラメータは無�
    * セッション管理方針（ViewScoped、Flash Scope、Session Scope）
    * コード生成時は、ここで定義された技術スタックを厳密に遵守すること
 
-5. 必須: `{project_root}/specs/baseline/requirements/requirements.md` で機能要件と成功基準を確認する
+4. 必須: `{spec_directory}/requirements/requirements.md` で機能要件と成功基準を確認する
 
-6. 必須: `{project_root}/specs/baseline/basic_design/functional_design.md` でシステム全体の機能設計、画面一覧、画面遷移図を確認する
+5. 必須: `{spec_directory}/basic_design/functional_design.md` でシステム全体の機能設計、画面一覧、画面遷移図を確認する
 
-7. 必須: `{project_root}/specs/baseline/detailed_design/{target_type}/detailed_design.md` で対象画面の詳細設計を確認する（存在する場合）
+6. 必須: `{spec_directory}/detailed_design/{target_domain}/detailed_design.md` で対象ドメインの詳細設計を確認する
 
-8. 必須: `{project_root}/specs/baseline/detailed_design/{target_type}/behaviors.md` で対象画面の振る舞い仕様を確認する（存在する場合）
+7. 必須: `{spec_directory}/detailed_design/{target_domain}/behaviors.md` で対象ドメインの振る舞い仕様を確認する
 
-9. 存在する場合: `{project_root}/specs/baseline/basic_design/data_model.md` でテーブル定義とERDを確認する
+8. 存在する場合: `{spec_directory}/basic_design/data_model.md` でテーブル定義とERDを確認する
 
-10. 存在する場合: `{project_root}/specs/baseline/basic_design/behaviors.md` でシステム全体の振る舞いを確認する
+9. 存在する場合: `{spec_directory}/basic_design/behaviors.md` でシステム全体の振る舞いを確認する
 
-11. 存在する場合: `{project_root}/specs/baseline/basic_design/screen_design.md` で画面レイアウト、入力項目、バリデーションを確認する
+10. 存在する場合: `{spec_directory}/basic_design/screen_design.md` で画面レイアウト、入力項目、バリデーションを確認する
 
-12. 存在する場合: `{project_root}/specs/baseline/basic_design/external_interface.md` で外部連携仕様とAPI仕様を確認する
+11. 存在する場合: `{spec_directory}/basic_design/external_interface.md` で外部連携仕様とAPI仕様を確認する
 
-13. 静的リソース: `{project_root}/resources/` フォルダの静的ファイル（画像等）を確認し、セットアップ時に適切な場所にコピーする
+12. 静的リソース: `{project_root}/resources/` フォルダの静的ファイル（画像等）を確認し、セットアップ時に適切な場所にコピーする
 
-* 注意: `{project_root}` は、パラメータで明示的に指定されたプロジェクトルートのパスに置き換える
+### 2. ドメインの実装を実行する
 
-### 2. タスク構造を解析して抽出する
-
-* タスク構成: セットアップ、共通機能、画面別実装、結合・テスト
-* タスク依存関係: 順次実行対並列実行ルール
-* タスク詳細: ID、説明、ファイルパス、並列マーカー[P]
-* 実行フロー: 順序と依存関係の要件
-
-### 3. タスク計画に従って実装を実行する
-
-重要: 各タスクの実行は必ず以下の順序で完了すること
+重要: 各ドメインの実装は必ず以下の順序で完了すること
 
 1. 本番コード生成: Entity、Service、Managed Bean、Facelets XHTML、DTO等の実装コードを生成
 2. 単体テスト生成: 生成した本番コードに対応する単体テストコードを生成（必須）
-3. タスク完了マーク: タスクファイルでタスクを[X]としてマーク
-
-* タスクごとの実行: 次のタスクに進む前に各タスクを完了する（本番コード生成→単体テスト生成の両方を完了）
-* setupタスク（特別なタスク）の実行時のみ:
-  * `skip_infrastructure: true`の場合、インフラ関連タスク（DB/APサーバーのインストール等）はスキップする
   * `skip_infrastructure: false`の場合、すべてのセットアップを実行する
   * アプリケーション固有のセットアップ（スキーマ作成、初期データ、静的リソース配置等）は常に実行する
   * リソース配置（画像ファイルのコピー等）を最優先で実行する
@@ -233,15 +207,15 @@ Entity、Service、Managed Bean、Facelets XHTML、DTO等の実装コードを�
 
 #### 5.1 基本方針
 
-* テストスコープ: タスクの粒度内
-  * タスク分解で定義された1つのタスク（例: FUNC_001_PersonList）に含まれるコンポーネントをテスト
-  * タスク内のコンポーネント間は実際の連携でテスト可能
-  * タスク外の依存関係はモックを使用
+* テストスコープ: 実装対象ドメイン内
+  * 実装対象のドメイン（例: person_management）に含まれるコンポーネントをテスト
+  * ドメイン内のコンポーネント間は実際の連携でテスト可能
+  * ドメイン外の依存関係はモックを使用
   
 * モック使用の判断基準:
-  * 同じタスク内のコンポーネント → モック不要（実際の連携をテスト）
-    * 例: PersonService → EntityManager （同じタスク内）
-  * タスク外の依存関係 → モックを使用
+  * 同じドメイン内のコンポーネント → モック不要（実際の連携をテスト）
+    * 例: PersonService → EntityManager （同じドメイン内）
+  * ドメイン外の依存関係 → モックを使用
     * 例: PersonService が ExternalService に依存する場合、ExternalService はモック
     * 例: EntityManager、外部APIクライアント等はモック
   * 注意: Managed Beanは基本的にテスト対象外（カバレッジ除外推奨、E2Eテストで検証）
@@ -385,12 +359,12 @@ class PersonServiceTest {
 
 ## 重要な注意事項
 
-### タスクの実行範囲
+### 実装範囲
 
-* このインストラクションは、タスクファイルに完全なタスク分解が存在することを前提とする
-* タスクが不完全または欠落している場合は、まず `task_breakdown.md` インストラクションを使用してタスクリストを生成する
-* 指定されたタスクファイルのタスクのみを実行する。他のタスクファイル（例: 次の機能のタスク）に自動的に進んではいけない
-* タスクは分業の単位である。1つのタスクが完了したら、次のタスクに進む前にユーザーの確認を待つ
+* このインストラクションは、詳細設計書が完成していることを前提とする
+* 詳細設計書が不完全または欠落している場合は、まず `detailed_design.md` インストラクションを使用して詳細設計を生成する
+* 指定されたドメインの実装のみを実行する。他のドメインに自動的に進んではいけない
+* 1つのドメインが完了したら、次のドメインに進む前にユーザーの確認を待つ
 
 ### JSF特有の注意点
 
@@ -514,7 +488,6 @@ class PersonServiceTest {
   * [architecture.md](../principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
   * [security.md](../principles/security.md) - セキュリティ標準
   * [common_rules.md](../principles/common_rules.md) - 共通ルール、マッピング規則
-* [リバースエンジニアリングインストラクション](reverse_engineering.md) - ステップ1: 既存コード分析
-* [タスク分解インストラクション](task_breakdown.md) - ステップ2: タスク分解
-* [詳細設計インストラクション](detailed_design.md) - ステップ3: 詳細設計
-* [単体テスト実行インストラクション](unit_test_execution.md) - ステップ4: 単体テスト実行・評価
+* [リバースエンジニアリングインストラクション](reverse_engineering.md) - 既存コード分析
+* [詳細設計インストラクション](detailed_design.md) - 詳細設計
+* [単体テスト実行インストラクション](unit_test_execution.md) - 単体テスト実行・評価
