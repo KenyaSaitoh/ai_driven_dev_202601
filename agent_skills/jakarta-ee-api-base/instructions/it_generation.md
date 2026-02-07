@@ -50,6 +50,9 @@ target_domains: "all"
   * 既存の Cucumber テストコード（.feature ファイルやステップ定義）が存在する場合は、それらを削除せずに読み込んで、差分のみを反映する
   * ファイルをゼロから作り直すのではなく、既存の内容を尊重して必要なテストケースのみを追加・修正する
   * 新規テストファイルが必要な場合のみ、新規作成する
+  * **既存の単体テスト用CucumberTestRunner.java（src/test/java/.../cucumber/）は削除しない**
+    * このファイルは単体テスト専用で、結合テストとは独立している
+    * ルートbuild.gradleに `junit-platform-suite` 依存関係が追加されているため、コンパイルエラーは発生しない
 
 ---
 
@@ -113,14 +116,27 @@ target_domains: "all"
 
 ### 2.1 依存関係
 
-結合テスト生成に必要なライブラリ（プロジェクトのビルド設定に合わせて追加）:
+結合テスト生成に必要なライブラリ:
 
-* Weld SE (CDI): weld-se-core
-* WireMock (外部APIスタブ): wiremock-jre8
-* JUnit 5: junit-jupiter
-* JPA: Hibernate + HSQLDB (テスト用DB)
+* Weld SE (CDI): `org.jboss.weld.se:weld-se-core:5.1.0.Final`
+* WireMock (外部APIスタブ): `com.github.tomakehurst:wiremock-jre8:2.35.0`
+* Hibernate (JPA実装): `org.hibernate.orm:hibernate-core:6.4.0.Final`
+* JUnit 5: `org.junit.jupiter:junit-jupiter:5.10.0`
+* JUnit Platform: `org.junit.platform:junit-platform-launcher:1.10.0`
+* JUnit Platform Suite: `org.junit.platform:junit-platform-suite:1.10.0`
+* JAX-RS Client: `org.glassfish.jersey.core:jersey-client:3.1.3`
+* JAX-RS JSON処理: `org.glassfish.jersey.media:jersey-media-json-binding:3.1.3`
+* HSQLDB: `org.hsqldb:hsqldb:2.7.2`
 
 * 結合テストクラスには `@Tag("integration")` を付与し、通常の単体テスト実行から分離する
+
+**依存関係の追加方法:**
+* まず、対象プロジェクトの `build.gradle` を確認する
+* プロジェクト内に `build.gradle` が存在しない、または依存関係が定義されていない場合:
+  * 親ディレクトリやプロジェクトルートの `build.gradle` を探索する
+  * 共通のビルドファイルで `subprojects` ブロックや全プロジェクト共通設定が定義されている可能性がある
+  * 見つかった場合、そちらに依存関係を追加する
+* `integrationTest` タスクについても同様に、既存の定義を確認してから追加の要否を判断する
 
 ### 2.2 Weld SE の設定
 
@@ -131,6 +147,53 @@ target_domains: "all"
 * `src/test/resources/META-INF/persistence.xml`: persistence-unit 名は `test-pu`、transaction-type は RESOURCE_LOCAL
 * テスト対象のエンティティを `<class>` で列挙
 * HSQLDB メモリ（jdbc:hsqldb:mem:testdb）、Hibernate で `hbm2ddl.auto=create-drop`、dialect=HSQLDialect
+
+### 2.4 EntityManagerProducer（CDI経由でEntityManagerを提供）
+
+Weld SEでEntityManagerをCDI経由で注入できるようにするProducerクラスを作成する:
+
+```java
+package pro.kensait.berrybooks.integration;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.inject.Disposes;
+import jakarta.enterprise.inject.Produces;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+import jakarta.persistence.PersistenceContext;
+
+@ApplicationScoped
+public class EntityManagerProducer {
+    
+    private static EntityManagerFactory emf;
+    
+    static {
+        emf = Persistence.createEntityManagerFactory("test-pu");
+    }
+    
+    @Produces
+    @RequestScoped
+    @PersistenceContext(unitName = "BerryBooksPU")
+    public EntityManager createEntityManager() {
+        return emf.createEntityManager();
+    }
+    
+    // 重要: @Disposesパラメータに@PersistenceContextを付与しない
+    public void closeEntityManager(@Disposes EntityManager em) {
+        if (em != null && em.isOpen()) {
+            em.close();
+        }
+    }
+    
+    public static void closeEntityManagerFactory() {
+        if (emf != null && emf.isOpen()) {
+            emf.close();
+        }
+    }
+}
+```
 
 ---
 
@@ -153,6 +216,11 @@ target_domains: "all"
 * @Tag("integration") を付与
 * テストメソッドは @Test アノテーションで実装
 * behaviors.md のシナリオを参考に、Given-When-Then の流れでテストを記述
+
+**重要: Weld SEの初期化**
+* Weld SEは `enableDiscovery()` を明示的に呼び出してCDIを有効化する
+* `addPackages(true, BaseIntegrationTest.class.getPackage())` でパッケージをスキャン対象に追加
+* これにより、beans.xmlなしでもCDI Beanが検出される
 
 **例:**
 ```java
@@ -183,6 +251,19 @@ class OrderServiceIntegrationTest extends BaseIntegrationTest {
 * feature およびステップ定義に @Tag("integration") を付与
 * **注意**: Cucumberテストは補助的・実験的な位置づけであり、従来のJUnit + Weldテストを置き換えるものではない
 
+**重要: Cucumberの日本語アノテーション問題について**
+* Cucumberの日本語アノテーション（`io.cucumber.java.ja.*`）はコンパイルエラーが発生する可能性がある
+* **推奨**: Cucumberテストは完全にオプショナルなので、**生成をスキップすることを推奨**
+* どうしてもCucumberテストが必要な場合は、英語アノテーション（`io.cucumber.java.en.*`）を使用すること
+  * `@Given`, `@When`, `@Then`, `@And` は `io.cucumber.java.en` パッケージから import
+  * .feature ファイルも英語で記述する（`# language: ja` は使用しない）
+* Cucumberテストを生成しない場合でも、.feature ファイル（ドキュメント用）は作成してよい（ステップ定義なし）
+
+**Cucumberテストランナーの注意点:**
+* 単体テスト用のCucumberTestRunnerは結合テストと競合する可能性がある
+* 単体テスト用のCucumberTestRunnerは `src/test/java/.../cucumber/` に配置し、結合テストとは分離する
+* 結合テストではCucumberTestRunnerを使用せず、.featureファイルのみを作成する（オプション）
+
 ### 3.4 RestAssured や Wiremock の直接利用
 
 * 結合テストでは、必要に応じて RestAssured や Wiremock を直接利用したテストも作成可能
@@ -194,10 +275,112 @@ class OrderServiceIntegrationTest extends BaseIntegrationTest {
 全結合テストで共通の abstract ベースクラスを用意する。ポイント:
 
 * `@Tag("integration")` を付与
-* `@BeforeAll`: SeContainerInitializer で Weld SE 起動、WireMockServer 起動・configureFor(localhost, ポート)
-* `@AfterAll`: WireMock 停止、container.close()
-* `@BeforeEach`: container から EntityManager 取得、`em.getTransaction().begin()`
+* `@BeforeAll`: 
+  * Weld SE 起動（`new Weld().enableDiscovery().addPackages(true, BaseIntegrationTest.class.getPackage()).initialize()`）
+  * WireMockServer 起動（`new WireMockServer(WireMockConfiguration.wireMockConfig().port(8089))`）
+  * WireMock.configureFor("localhost", 8089)
+  * EntityManagerFactory 作成（`Persistence.createEntityManagerFactory("test-pu")`）
+* `@AfterAll`: EntityManagerFactory.close()、WireMock 停止、container.close()
+* `@BeforeEach`: EntityManager 取得、`em.getTransaction().begin()`
 * `@AfterEach`: トランザクションがアクティブなら rollback、wireMock.resetAll()
+
+**重要な注意点:**
+* Weld SEは `enableDiscovery()` が必須（beans.xmlなしでCDI Beanを検出するため）
+* WireMockの初期化は `WireMockConfiguration.wireMockConfig()` を使用（バージョン2.x系の互換性対応）
+* EntityManagerProducerで `@Disposes` パラメータには `@PersistenceContext` を付与しない（コンパイルエラー回避）
+
+**BaseIntegrationTest実装例:**
+
+```java
+package pro.kensait.berrybooks.integration;
+
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+import org.jboss.weld.environment.se.Weld;
+import org.jboss.weld.environment.se.WeldContainer;
+import org.junit.jupiter.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Tag("integration")
+public abstract class BaseIntegrationTest {
+    
+    private static final Logger logger = LoggerFactory.getLogger(BaseIntegrationTest.class);
+    
+    protected static WeldContainer container;
+    protected static WireMockServer wireMockServer;
+    protected static EntityManagerFactory emf;
+    
+    protected EntityManager em;
+    
+    @BeforeAll
+    public static void setUpAll() {
+        logger.info("[ BaseIntegrationTest#setUpAll ] Starting integration test environment");
+        
+        // Weld SE の起動（enableDiscovery()で明示的にCDIを有効化）
+        Weld weld = new Weld()
+            .enableDiscovery()
+            .addPackages(true, BaseIntegrationTest.class.getPackage());
+        container = weld.initialize();
+        logger.info("[ BaseIntegrationTest#setUpAll ] Weld SE container started");
+        
+        // WireMockServer の起動
+        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(8089));
+        wireMockServer.start();
+        WireMock.configureFor("localhost", 8089);
+        logger.info("[ BaseIntegrationTest#setUpAll ] WireMockServer started on port 8089");
+        
+        // EntityManagerFactory の作成
+        emf = Persistence.createEntityManagerFactory("test-pu");
+        logger.info("[ BaseIntegrationTest#setUpAll ] EntityManagerFactory created");
+    }
+    
+    @AfterAll
+    public static void tearDownAll() {
+        if (emf != null && emf.isOpen()) {
+            emf.close();
+        }
+        if (wireMockServer != null && wireMockServer.isRunning()) {
+            wireMockServer.stop();
+        }
+        if (container != null) {
+            container.close();
+        }
+    }
+    
+    @BeforeEach
+    public void setUp() {
+        em = emf.createEntityManager();
+        em.getTransaction().begin();
+    }
+    
+    @AfterEach
+    public void tearDown() {
+        if (em != null && em.getTransaction().isActive()) {
+            em.getTransaction().rollback();
+        }
+        if (em != null && em.isOpen()) {
+            em.close();
+        }
+        if (wireMockServer != null && wireMockServer.isRunning()) {
+            wireMockServer.resetAll();
+        }
+    }
+    
+    protected void persistAndFlush(Object entity) {
+        em.persist(entity);
+        em.flush();
+    }
+    
+    protected void clearEntityCache() {
+        em.clear();
+    }
+}
+```
 
 ### 3.3 テストケース（Service層）のポイント
 
@@ -207,6 +390,68 @@ class OrderServiceIntegrationTest extends BaseIntegrationTest {
 * Act: Service のメソッドを直接呼び出し
 * Assert: em.flush() 後に em.find で永続化結果を検証、verify() で外部APIが期待どおり呼ばれたことを検証
 * 例外ケース: スタブでエラーレスポンスを返し、assertThrows(期待する例外.class, () -> service.メソッド(...)) で検証
+
+### 3.3.1 JAX-RS Clientを使用した外部API連携テスト
+
+外部APIを直接呼び出す結合テスト（WireMockでスタブ化）を作成する場合:
+
+* ClientBuilder.newClient() でクライアントを作成
+* JSON処理は自動的に利用可能（jersey-media-json-bindingがクラスパスにあるため）
+* `@BeforeEach` でクライアント初期化、`@AfterEach` でクライアントクローズ
+* WireMock の stubFor でスタブを設定、verify でリクエスト検証
+
+**実装例:**
+
+```java
+@Tag("integration")
+class BackOfficeRestClientIntegrationTest extends BaseIntegrationTest {
+    
+    private Client client;
+    private String baseUrl;
+    
+    @BeforeEach
+    @Override
+    public void setUp() {
+        super.setUp();
+        this.client = ClientBuilder.newClient();
+        this.baseUrl = "http://localhost:8089/api";
+    }
+    
+    @AfterEach
+    @Override
+    public void tearDown() {
+        if (client != null) {
+            client.close();
+        }
+        super.tearDown();
+    }
+    
+    @Test
+    void testGetAllBooks_Success() {
+        // Given: WireMockスタブ設定
+        stubFor(get(urlEqualTo("/api/books"))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader("Content-Type", "application/json")
+                .withBody("[{\"bookId\": 1, \"bookName\": \"Java完全理解\"}]")));
+        
+        // When: GET /api/books
+        try (Response response = client.target(baseUrl)
+                .path("/books")
+                .request(MediaType.APPLICATION_JSON)
+                .get()) {
+            
+            // Then: 200 OK
+            assertEquals(200, response.getStatus());
+            List<BookTO> books = response.readEntity(new GenericType<List<BookTO>>() {});
+            assertNotNull(books);
+            assertEquals(1, books.size());
+        }
+        
+        verify(getRequestedFor(urlEqualTo("/api/books")));
+    }
+}
+```
 
 ### 3.4 DAO層の結合テストのポイント
 
@@ -268,6 +513,24 @@ basic_design/{target_domain}/behaviors.md は Gherkin 記法で記述されて�
 ### 7.2 テストの安定性
 
 * テスト間の独立性を保つ（@BeforeEach/@AfterEachで初期化・クリーンアップ）。外部APIはWireMockでスタブ化。テストデータは一意にする（UUID等）。トランザクション境界を明確にする。
+
+### 7.3 既存の単体テスト用Cucumberテストランナーとの競合回避
+
+* 既存の `src/test/java/.../cucumber/CucumberTestRunner.java` は単体テスト用である
+* 結合テストを実行する際、CucumberTestRunnerが存在するとコンパイルエラーが発生する可能性がある（JUnit Platform Suiteの依存関係が不足）
+* 対処方法:
+  * プロジェクトのbuild.gradleまたは共通のbuild.gradleに `org.junit.platform:junit-platform-suite` を追加する
+  * CucumberTestRunnerのインポート文を明示的に記述する（ワイルドカードインポートを避ける）
+  * または、CucumberTestRunnerを単体テスト専用として保持し、結合テストではCucumberを使用しない（.featureファイルのみ作成）
+
+### 7.4 JAX-RS ClientでのJSON処理
+
+* 外部API連携テストでJAX-RS Clientを使用する場合、JSON処理プロバイダーが必要
+* build.gradleに以下が定義されている必要がある:
+  * `org.glassfish.jersey.core:jersey-client`
+  * `org.glassfish.jersey.media:jersey-media-json-binding`
+* これにより、Response.readEntity() でJSONを自動的にデシリアライズできる
+* プロジェクト内のbuild.gradleに定義がない場合、親ディレクトリやプロジェクトルートのbuild.gradleを確認する
 
 ### 7.3 単体テスト vs 結合テスト vs E2Eテスト
 

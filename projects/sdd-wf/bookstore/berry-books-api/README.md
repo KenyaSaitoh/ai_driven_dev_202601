@@ -818,6 +818,93 @@ projects/sdd-wf/bookstore/berry-books-api-wf/build/reports/tests/test/index.html
 # projects/sdd-wf/bookstore/berry-books-api-wf/build/reports/jacoco/test/html/index.html
 ```
 
+### 結合テストの実行
+
+結合テストは、Weld SE（CDIコンテナ）、WireMock（外部APIスタブ）、HSQLDB（メモリDB）を使用して、Service層 + DAO層 + DB + 外部API連携の統合をテストします。
+
+```bash
+# 結合テストを実行
+./gradlew :berry-books-api-sdd-wf:integrationTest
+
+# 単体テストと結合テストを両方実行
+./gradlew :berry-books-api-sdd-wf:test :berry-books-api-sdd-wf:integrationTest
+```
+
+結合テストの特徴:
+* **テスト対象**: Service層 + DAO層 + Entity + DB + 外部API連携
+* **テストフレームワーク**: JUnit 5 + Weld SE + WireMock
+* **データベース**: HSQLDB メモリDB（各テスト後にロールバック）
+* **外部API**: WireMockでスタブ化（back-office-api、customer-hub-api）
+* **タグ**: `@Tag("integration")` で単体テストと分離
+
+結合テストレポート:
+* `build/reports/tests/integrationTest/index.html`
+
+### E2Eテストの実行
+
+E2Eテストは、デプロイ済みのアプリケーション（Payara Server上）に対して、実際のHTTPリクエストを送信してエンドツーエンドの動作を検証します。
+
+#### 前提条件
+
+E2Eテストを実行する前に、以下の準備が必要です：
+
+1. Payara Serverを起動
+```bash
+./gradlew startPayara
+```
+
+2. アプリケーションをデプロイ
+```bash
+./gradlew :berry-books-api-sdd-wf:deploy
+```
+
+3. 外部APIサーバーを起動（back-office-api、customer-hub-api）
+```bash
+# 別ターミナルで
+./gradlew :back-office-api-sdd-wf:deploy
+./gradlew :customer-hub-api-sdd-wf:deploy
+```
+
+#### E2Eテストの実行
+
+```bash
+# E2Eテストを実行（JUnit + REST Assured）
+./gradlew :berry-books-api-sdd-wf:e2eTest
+
+# E2Eテストのみを実行（従来型）
+./gradlew :berry-books-api-sdd-wf:e2eTest --tests "*E2ETest"
+
+# Cucumber E2Eテスト（BDD形式、オプション）
+./gradlew :berry-books-api-sdd-wf:e2eTest --tests "*E2ESteps"
+```
+
+#### E2Eテストの特徴
+
+* **テスト対象**: デプロイ済みアプリケーション全体（REST API → Service → DAO → DB → 外部API）
+* **テストフレームワーク**: 
+  * 主: JUnit 5 + REST Assured（従来型、必須）
+  * 補助: JUnit 5 + Cucumber + REST Assured（BDD形式、実験的）
+* **データベース**: HSQLDB（実際のテストDB、デプロイ済みアプリケーションが使用）
+* **外部API**: 実際のback-office-api、customer-hub-apiと連携
+* **タグ**: `@Tag("e2e")` で単体テスト・結合テストと分離
+
+#### E2Eテストクラス
+
+* `BaseE2ETest` - E2Eテストのベースクラス（REST Assured設定、認証処理）
+* `AuthE2ETest` - 認証API（/api/auth）のE2Eテスト
+* `BookE2ETest` - 書籍API（/api/books）のE2Eテスト
+* `OrderE2ETest` - 注文API（/api/orders）のE2Eテスト
+* `ImageE2ETest` - 画像API（/api/images）のE2Eテスト
+
+#### Cucumber E2E feature files（BDD形式、オプション）
+
+* `features/e2e/auth.feature` - 認証APIのBDDシナリオ
+* `features/e2e/books.feature` - 書籍APIのBDDシナリオ
+* `features/e2e/orders.feature` - 注文APIのBDDシナリオ
+
+E2Eテストレポート:
+* `build/reports/tests/e2eTest/index.html`
+
 ## 📚 アーキテクチャ
 
 ### レイヤー構成

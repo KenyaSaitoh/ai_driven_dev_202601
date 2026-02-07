@@ -41,6 +41,9 @@ spec_directory: "projects/sdd-wf/person/jsf-person-sdd/specs/baseline"
   * 既存の Cucumber テストコード（.feature ファイルやステップ定義）が存在する場合は、それらを削除せずに読み込んで、差分のみを反映する
   * ファイルをゼロから作り直すのではなく、既存の内容を尊重して必要なテストケースのみを追加・修正する
   * 新規テストファイルが必要な場合のみ、新規作成する
+  * **既存の単体テスト用CucumberTestRunner.java（src/test/java/.../cucumber/）は削除しない**
+    * このファイルは単体テスト専用で、結合テストとは独立している
+    * ルートbuild.gradleに `junit-platform-suite` 依存関係が追加されているため、コンパイルエラーは発生しない
 
 ---
 
@@ -89,13 +92,25 @@ spec_directory: "projects/sdd-wf/person/jsf-person-sdd/specs/baseline"
 
 ### 2.1 依存関係
 
-結合テスト生成に必要なライブラリ（プロジェクトのビルド設定に合わせて追加）:
+結合テスト生成に必要なライブラリ:
 
-* Weld SE (CDI): weld-se-core
-* JUnit 5: junit-jupiter
-* JPA: Hibernate + HSQLDB (テスト用DB)
+* Weld SE (CDI): `org.jboss.weld.se:weld-se-core:5.1.0.Final`
+* WireMock (外部APIスタブ): `com.github.tomakehurst:wiremock-jre8:2.35.0`（必要な場合）
+* Hibernate (JPA実装): `org.hibernate.orm:hibernate-core:6.4.0.Final`
+* JUnit 5: `org.junit.jupiter:junit-jupiter:5.10.0`
+* JUnit Platform: `org.junit.platform:junit-platform-launcher:1.10.0`
+* JUnit Platform Suite: `org.junit.platform:junit-platform-suite:1.10.0`
+* HSQLDB: `org.hsqldb:hsqldb:2.7.2`
 
 * 結合テストクラスには `@Tag("integration")` を付与し、通常の単体テスト実行から分離する
+
+**依存関係の追加方法:**
+* まず、対象プロジェクトの `build.gradle` を確認する
+* プロジェクト内に `build.gradle` が存在しない、または依存関係が定義されていない場合:
+  * 親ディレクトリやプロジェクトルートの `build.gradle` を探索する
+  * 共通のビルドファイルで `subprojects` ブロックや全プロジェクト共通設定が定義されている可能性がある
+  * 見つかった場合、そちらに依存関係を追加する
+* `integrationTest` タスクについても同様に、既存の定義を確認してから追加の要否を判断する
 
 ### 2.2 Weld SE の設定
 
@@ -157,15 +172,29 @@ class PersonServiceIntegrationTest extends BaseIntegrationTest {
 * feature およびステップ定義に @Tag("integration") を付与
 * **注意**: Cucumberテストは補助的・実験的な位置づけであり、従来のJUnit + Weldテストを置き換えるものではない
 
+**重要: Cucumberの日本語アノテーション問題について**
+* Cucumberの日本語アノテーション（`io.cucumber.java.ja.*`）はコンパイルエラーが発生する可能性がある
+* **推奨**: Cucumberテストは完全にオプショナルなので、**生成をスキップすることを推奨**
+* どうしてもCucumberテストが必要な場合は、英語アノテーション（`io.cucumber.java.en.*`）を使用すること
+  * `@Given`, `@When`, `@Then`, `@And` は `io.cucumber.java.en` パッケージから import
+  * .feature ファイルも英語で記述する（`# language: ja` は使用しない）
+* Cucumberテストを生成しない場合でも、.feature ファイル（ドキュメント用）は作成してよい（ステップ定義なし）
+
 ### 3.2 テストベースクラス
 
 全結合テストで共通の abstract ベースクラスを用意する。ポイント:
 
 * `@Tag("integration")` を付与
-* @BeforeAll: SeContainerInitializer で Weld SE 起動
-* @AfterAll: container.close()
-* @BeforeEach: container から EntityManager 取得、`em.getTransaction().begin()`
+* @BeforeAll: 
+  * Weld SE 起動（`new Weld().enableDiscovery().addPackages(true, BaseIntegrationTest.class.getPackage()).initialize()`）
+  * EntityManagerFactory 作成（`Persistence.createEntityManagerFactory("test-pu")`）
+* @AfterAll: EntityManagerFactory.close()、container.close()
+* @BeforeEach: EntityManager 取得、`em.getTransaction().begin()`
 * @AfterEach: トランザクションがアクティブなら rollback
+
+**重要な注意点:**
+* Weld SEは `enableDiscovery()` が必須（beans.xmlなしでCDI Beanを検出するため）
+* EntityManagerProducerで `@Disposes` パラメータには `@PersistenceContext` を付与しない（コンパイルエラー回避）
 
 ### 3.3 テストケース（Service層）のポイント
 

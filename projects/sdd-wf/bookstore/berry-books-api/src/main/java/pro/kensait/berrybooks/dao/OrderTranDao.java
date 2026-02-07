@@ -71,7 +71,7 @@ public class OrderTranDao {
      * 顧客IDで注文履歴を取得する
      * 
      * @param customerId 顧客ID
-     * @return 注文履歴リスト（注文日の降順）
+     * @return 注文履歴リスト（注文日の降順、最大100件）
      */
     public List<OrderTran> findByCustomerId(Integer customerId) {
         logger.info("[ OrderTranDao#findByCustomerId ] customerId={}", customerId);
@@ -80,6 +80,7 @@ public class OrderTranDao {
                       "WHERE o.customerId = :customerId ORDER BY o.orderDate DESC";
         TypedQuery<OrderTran> query = em.createQuery(jpql, OrderTran.class);
         query.setParameter("customerId", customerId);
+        query.setMaxResults(100); // 最大件数制限
         
         List<OrderTran> results = query.getResultList();
         

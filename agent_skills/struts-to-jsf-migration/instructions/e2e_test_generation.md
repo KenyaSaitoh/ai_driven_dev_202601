@@ -84,12 +84,22 @@ spec_directory: "projects/sdd-wf/person/jsf-person-sdd/specs/baseline"
 
 ### 2.1 依存関係
 
-E2Eテスト生成に必要なライブラリ（プロジェクトのビルド設定に合わせて追加）:
+E2Eテスト生成に必要なライブラリ:
 
 * Playwright for Java (playwright)
-* JUnit 5
+* JUnit 5: `org.junit.jupiter:junit-jupiter:5.10.0`
+* JUnit Platform: `org.junit.platform:junit-platform-launcher:1.10.0`
+* JUnit Platform Suite: `org.junit.platform:junit-platform-suite:1.10.0` (Cucumber使用時に必要)
 
 * E2Eテストクラスには `@Tag("e2e")` を付与し、通常の単体テスト実行から分離する
+
+**依存関係の追加方法:**
+* まず、対象プロジェクトの `build.gradle` を確認する
+* プロジェクト内に `build.gradle` が存在しない、または依存関係が定義されていない場合:
+  * 親ディレクトリやプロジェクトルートの `build.gradle` を探索する
+  * 共通のビルドファイルで `subprojects` ブロックや全プロジェクト共通設定が定義されている可能性がある
+  * 見つかった場合、そちらに依存関係を追加する
+* `e2eTest` タスクについても同様に、既存の定義を確認してから追加の要否を判断する
 
 ### 2.2 ベースクラスのポイント
 
@@ -150,6 +160,14 @@ class PersonListE2ETest extends BaseE2ETest {
 * feature およびステップ定義に @Tag("e2e") を付与
 * **注意**: Cucumberテストは補助的・実験的な位置づけであり、従来のJUnit + Playwrightテストを置き換えるものではない
 
+**重要: Cucumberの日本語アノテーション問題について**
+* Cucumberの日本語アノテーション（`io.cucumber.java.ja.*`）はコンパイルエラーが発生する可能性がある
+* **推奨**: Cucumberテストは完全にオプショナルなので、**生成をスキップすることを推奨**
+* どうしてもCucumberテストが必要な場合は、英語アノテーション（`io.cucumber.java.en.*`）を使用すること
+  * `@Given`, `@When`, `@Then`, `@And` は `io.cucumber.java.en` パッケージから import
+  * .feature ファイルも英語で記述する（`# language: ja` は使用しない）
+* Cucumberテストを生成しない場合でも、.feature ファイル（ドキュメント用）は作成してよい（ステップ定義なし）
+
 ### 3.2 テストケースのポイント
 
 * 1シナリオ＝1テストクラス、BaseE2ETest を継承。screen_design.md / functional_design.md の画面パス・遷移に合わせる
@@ -208,6 +226,15 @@ behaviors.md は Gherkin 記法で記述されている。@agent_skills/struts-t
 ### 6.3 ブラウザ
 
 * Playwright は chromium / firefox / webkit を選択可能。通常は chromium で十分。
+
+### 6.4 既存の単体テスト用Cucumberテストランナーとの競合回避
+
+* 既存の `src/test/java/.../cucumber/CucumberTestRunner.java` は単体テスト用である
+* E2Eテストを実行する際、CucumberTestRunnerが存在するとコンパイルエラーが発生する可能性がある（JUnit Platform Suiteの依存関係が不足）
+* 対処方法:
+  * プロジェクトのbuild.gradleまたは共通のbuild.gradleに `org.junit.platform:junit-platform-suite` を追加する
+  * CucumberTestRunnerのインポート文を明示的に記述する（ワイルドカードインポートを避ける）
+  * または、CucumberTestRunnerを単体テスト専用として保持し、E2Eテストでは従来のJUnit + Playwrightのみを使用する
 
 ---
 

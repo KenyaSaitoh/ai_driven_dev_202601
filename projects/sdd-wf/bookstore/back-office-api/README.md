@@ -290,14 +290,45 @@ AIが：
    * 実際のDBアクセスを含む
 3. 🏷️ `@Tag("e2e")` でE2Eテストを分離
 
+**生成されたE2Eテストクラス:**
+
+* `BaseE2ETest` - E2Eテストのベースクラス（REST Assured設定、認証機能）
+* `AuthenticationE2ETest` - 認証機能のE2Eテスト
+  * US-LOGIN-001: 社員ログイン成功/失敗
+  * US-LOGIN-002: ログイン後のAPI利用
+  * US-LOGIN-003: 未認証でのAPIアクセス拒否
+* `BookSearchE2ETest` - 書籍検索機能のE2Eテスト
+  * US-SEARCH-001: カテゴリで書籍絞り込み
+  * US-SEARCH-002: キーワードで書籍検索
+  * US-SEARCH-003: 書籍詳細情報取得
+  * E2E-001: ログイン→書籍検索フロー
+* `StockManagementE2ETest` - 在庫管理機能のE2Eテスト
+  * US-STOCK-001: 在庫数更新
+  * US-STOCK-002: 楽観的ロック制御
+  * E2E-003: 在庫更新フロー
+* `WorkflowE2ETest` - ワークフロー機能のE2Eテスト
+  * US-WF-001: ワークフロー作成・申請
+  * US-WF-002: ワークフロー承認（権限チェック含む）
+  * US-WF-003: 承認後の書籍反映確認
+  * E2E-002: ワークフロー作成→承認フロー
+
 実行方法:
 ```bash
-# アプリケーションサーバーを起動
-./gradlew run
+# 1. HSQLDBとPayara Serverを起動
+./gradlew startHsqldb
+./gradlew startPayara
 
-# 別ターミナルでE2Eテストを実行
-./gradlew e2eTest
+# 2. データソース設定
+./gradlew setupDataSource
+
+# 3. アプリケーションデプロイ
+./gradlew :back-office-api:deploy
+
+# 4. E2Eテスト実行
+./gradlew :back-office-api:e2eTest
 ```
+
+詳細は `src/test/resources/e2e-test-readme.md` を参照してください。
 
 ---
 

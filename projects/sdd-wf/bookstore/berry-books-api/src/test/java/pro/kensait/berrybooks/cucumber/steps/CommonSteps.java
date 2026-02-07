@@ -63,11 +63,23 @@ public class CommonSteps {
 
     @かつ("顧客ID={int}の注文が{int}件存在する")
     public void 顧客IDの注文が件存在する(int customerId, int count) {
-        OrderTran order1 = new OrderTran(LocalDate.of(2026, 1, 1), customerId, 5000, 500, "東京都", 1);
+        OrderTran order1 = new OrderTran();
         order1.setOrderTranId(1);
+        order1.setOrderDate(LocalDate.of(2026, 1, 1));
+        order1.setCustomerId(customerId);
+        order1.setTotalPrice(5000);
+        order1.setDeliveryPrice(500);
+        order1.setDeliveryAddress("東京都");
+        order1.setSettlementType(1);
         
-        OrderTran order2 = new OrderTran(LocalDate.of(2026, 1, 2), customerId, 6000, 500, "東京都", 1);
+        OrderTran order2 = new OrderTran();
         order2.setOrderTranId(2);
+        order2.setOrderDate(LocalDate.of(2026, 1, 2));
+        order2.setCustomerId(customerId);
+        order2.setTotalPrice(6000);
+        order2.setDeliveryPrice(500);
+        order2.setDeliveryAddress("東京都");
+        order2.setSettlementType(1);
         
         List<OrderTran> orders = Arrays.asList(order2, order1); // 降順
         when(query.setParameter(anyString(), any())).thenReturn(query);

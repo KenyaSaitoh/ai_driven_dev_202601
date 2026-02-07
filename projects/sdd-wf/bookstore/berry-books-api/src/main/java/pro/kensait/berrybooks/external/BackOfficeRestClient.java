@@ -136,6 +136,37 @@ public class BackOfficeRestClient {
     }
     
     /**
+     * カテゴリIDまたはキーワードで書籍を検索する（Criteria API使用）
+     * 
+     * @param categoryId カテゴリID（省略可）
+     * @param keyword キーワード（省略可）
+     * @return 書籍リスト
+     */
+    public List<BookTO> searchBooksCriteria(Integer categoryId, String keyword) {
+        logger.info("[ BackOfficeRestClient#searchBooksCriteria ] categoryId={}, keyword={}", categoryId, keyword);
+        
+        var target = client.target(baseUrl).path("/books/search/criteria");
+        
+        if (categoryId != null) {
+            target = target.queryParam("categoryId", categoryId);
+        }
+        if (keyword != null && !keyword.isEmpty()) {
+            target = target.queryParam("keyword", keyword);
+        }
+        
+        try (Response response = target.request(MediaType.APPLICATION_JSON).get()) {
+            if (response.getStatus() == 200) {
+                List<BookTO> books = response.readEntity(new GenericType<List<BookTO>>() {});
+                logger.info("[ BackOfficeRestClient#searchBooksCriteria ] Found {} books", books.size());
+                return books;
+            } else {
+                logger.error("[ BackOfficeRestClient#searchBooksCriteria ] Failed with status: {}", response.getStatus());
+                throw new RuntimeException("Failed to search books: " + response.getStatus());
+            }
+        }
+    }
+    
+    /**
      * カテゴリ一覧をマップ形式で取得する
      * 
      * @return カテゴリマップ（カテゴリ名 -> カテゴリID）
