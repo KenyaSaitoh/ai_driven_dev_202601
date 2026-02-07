@@ -1,0 +1,280 @@
+# [PROJECT_NAME] - アーキテクチャ設計書
+
+プロジェクトID: [PROJECT_ID]  
+バージョン: 1.0.0  
+最終更新日: [DATE]  
+ステータス: [STATUS]
+
+* 変更履歴:
+  * v1.0.0 ([DATE]): 初版
+
+---
+
+## 1. 概要
+
+本文書は、[PROJECT_NAME]のアーキテクチャ設計を定義する。技術スタック、アーキテクチャパターン、レイヤー構成、パッケージ構造、トランザクション管理、セキュリティアーキテクチャを記述する。
+
+* フレームワーク: Jakarta Faces (JSF) 4.0
+* アプローチ: サーバーサイドMVC
+* 設計原則: 画面中心設計、レイヤードアーキテクチャ
+
+---
+
+## 2. 技術スタック
+
+### 2.1 コアプラットフォーム
+
+| カテゴリ | 技術 | バージョン | 目的 |
+|---------|-----|----------|------|
+| ランタイム | Java | 21 | 実行環境 |
+| プラットフォーム | Jakarta EE | 10 | フレームワーク基盤 |
+| アプリケーションサーバー | Payara Server | 6.x | デプロイ環境 |
+| データベース | [DATABASE] | [VERSION] | データ永続化 |
+| ビルドツール | Gradle | 8.x | ビルド自動化 |
+
+### 2.2 フレームワーク仕様
+
+| カテゴリ | 仕様 | バージョン | 目的 |
+|---------|-----|----------|------|
+| UI層 | Jakarta Faces (JSF) | 4.0 | サーバーサイドMVC、画面レンダリング |
+| ビジネスロジック | Jakarta CDI | 4.0 | 依存性注入、ライフサイクル管理 |
+| 永続化層 | Jakarta Persistence (JPA) | 3.1 | O/Rマッピング、エンティティ管理 |
+| トランザクション | Jakarta Transactions | 2.0 | トランザクション管理 |
+| バリデーション | Jakarta Bean Validation | 3.0 | 入力検証 |
+| RESTクライアント | MicroProfile REST Client | 3.0 | 外部API呼び出し（該当する場合） |
+| JSON | Jakarta JSON Binding | 3.0 | JSONシリアライゼーション（該当する場合） |
+
+### 2.3 追加ライブラリ
+
+| ライブラリ | バージョン | 目的 |
+|-----------|----------|------|
+| PrimeFaces | 14.x | JSF UIコンポーネント拡張 |
+| [LIBRARY] | [VERSION] | [PURPOSE] |
+
+---
+
+## 3. アーキテクチャ設計
+
+### 3.1 アーキテクチャパターン
+
+* **レイヤードアーキテクチャ**
+  * プレゼンテーション層（Managed Bean + XHTML）
+  * ビジネスロジック層（Service）
+  * データアクセス層（Dao）
+  * 永続化層（Entity + JPA）
+
+* **サーバーサイドMVC**
+  * Model: Managed Bean（@Named, @ViewScoped）+ Entity（JPA）
+  * View: Facelets XHTML
+  * Controller: Managed Bean のアクションメソッド
+
+### 3.2 コンポーネントの責務
+
+#### 3.2.1 プレゼンテーション層
+
+* **Managed Bean** (`@Named`, `@ViewScoped`)
+  * 画面の状態管理（プロパティ）
+  * ユーザー操作の処理（アクションメソッド）
+  * Service層の呼び出し
+  * 画面遷移の制御
+  * バリデーションメッセージの表示
+
+* **XHTML** (Facelets)
+  * UI構造の定義（h:form, h:dataTable等）
+  * Managed Beanとのデータバインディング（EL式: #{bean.property}）
+  * イベントハンドリング（action="#{bean.method()}"）
+  * バリデーションルールの宣言（Bean Validation）
+
+#### 3.2.2 ビジネスロジック層
+
+* **Service** (`@ApplicationScoped`)
+  * ビジネスロジックの実装
+  * トランザクション境界の管理（@Transactional）
+  * 複数Daoの協調制御
+  * 外部APIの呼び出し（該当する場合）
+
+#### 3.2.3 データアクセス層
+
+* **Dao** (`@ApplicationScoped`)
+  * データベースCRUD操作
+  * JPQLクエリの実行
+  * EntityManagerの管理
+
+#### 3.2.4 永続化層
+
+* **Entity** (JPA)
+  * データベーステーブルとのマッピング（@Entity, @Table）
+  * リレーションシップの定義（@OneToMany, @ManyToOne等）
+  * バリデーションルール（@NotNull, @Size等）
+
+---
+
+## 4. パッケージ構造と命名規則
+
+### 4.1 パッケージ構造
+
+```
+[BASE_PACKAGE]
+├── bean/                      # Managed Beans（画面単位）
+│   ├── PersonListBean.java   # @Named, @ViewScoped
+│   ├── PersonInputBean.java
+│   └── PersonConfirmBean.java
+├── service/                   # ビジネスロジック
+│   └── PersonService.java    # @ApplicationScoped, @Transactional
+├── dao/                       # データアクセス
+│   └── PersonDao.java         # @ApplicationScoped
+├── entity/                    # JPAエンティティ
+│   └── Person.java            # @Entity
+├── dto/                       # データ転送オブジェクト（該当する場合）
+│   └── PersonDto.java
+├── security/                  # セキュリティ（該当する場合）
+│   ├── SecurityConfig.java
+│   └── JwtFilter.java
+├── external/                  # 外部API連携（該当する場合）
+│   ├── BooksApiClient.java   # @RegisterRestClient
+│   └── dto/
+│       └── BookDto.java
+└── exception/                 # カスタム例外
+    └── PersonNotFoundException.java
+```
+
+### 4.2 命名規則
+
+* **Managed Bean**: `[画面名]Bean` (例: PersonListBean, PersonInputBean)
+* **Service**: `[エンティティ名]Service` (例: PersonService, OrderService)
+* **Dao**: `[エンティティ名]Dao` (例: PersonDao, OrderDao)
+* **Entity**: `[エンティティ名]` (例: Person, Order)
+* **DTO**: `[エンティティ名]Dto` or `[Request/Response]` (例: PersonDto, CreatePersonRequest)
+* **XHTML**: `[小文字画面名].xhtml` (例: personList.xhtml, personInput.xhtml)
+
+---
+
+## 5. トランザクション管理
+
+### 5.1 トランザクション境界
+
+* トランザクション境界: **Service層**
+* アノテーション: `@Transactional`
+* 伝播レベル: `REQUIRED` (デフォルト)
+* 分離レベル: `READ_COMMITTED` (デフォルト)
+
+### 5.2 トランザクション設計方針
+
+* Managed Beanはトランザクション管理しない（@Transactionalを付与しない）
+* Service層のメソッド単位でトランザクション境界を定義
+* Dao層はトランザクションに参加（新規トランザクションを開始しない）
+* 例外発生時は自動ロールバック
+
+---
+
+## 6. 並行制御
+
+### 6.1 楽観的ロック
+
+* 方式: JPA `@Version`
+* 適用対象: 更新頻度が低いエンティティ
+* 例外: `OptimisticLockException`
+
+### 6.2 悲観的ロック
+
+* 方式: JPA `LockModeType.PESSIMISTIC_WRITE`
+* 適用対象: 更新頻度が高いエンティティ（該当する場合）
+
+---
+
+## 7. エラーハンドリング戦略
+
+### 7.1 例外処理
+
+* ビジネス例外: カスタム例外（checked exception）
+  * 例: `PersonNotFoundException`
+* システム例外: Runtime例外
+  * 例: `IllegalStateException`, `NullPointerException`
+
+### 7.2 エラー画面遷移
+
+* Managed Beanで例外をキャッチ
+* FacesMessage でエラーメッセージを表示
+* 重大なエラーの場合はエラー画面にリダイレクト
+
+---
+
+## 8. セキュリティアーキテクチャ
+
+### 8.1 認証・認可
+
+* 認証方式: [JWT Bearer Token / セッションベース / フォームベース]
+* 認可方式: [ロールベース / クレームベース]
+* 実装: [Jakarta Security / カスタム実装]
+
+### 8.2 セキュリティ対策
+
+* XSS対策: Faceletsの自動エスケープ機能（`h:outputText`）
+* CSRF対策: JSFの`ViewState`トークン
+* SQLインジェクション対策: JPQLパラメータバインディング
+* セキュアなパスワード管理: [ハッシュ化アルゴリズム]
+
+---
+
+## 9. テスト戦略
+
+### 9.1 テストレベル
+
+| テストレベル | 対象 | ツール | カバレッジ目標 |
+|------------|------|--------|--------------|
+| 単体テスト | Service, Dao, Entity | JUnit 5 + Mockito | 80%以上 |
+| 結合テスト | Service + Dao + Entity + DB | JUnit 5 + Weld SE + HSQLDB | 70%以上 |
+| E2Eテスト | 全レイヤー（Managed Bean + Service + Dao + DB） | Playwright | 主要フロー100% |
+
+### 9.2 テスト方針
+
+* Managed Beanは単体テストカバレッジ対象外（E2Eテストで検証）
+* Serviceは単体テストで検証（Daoをモック化）
+* Daoは結合テストで検証（実際のDBアクセス）
+* E2Eテストは画面フローを検証（実際のブラウザ操作）
+
+---
+
+## 10. 非機能要件
+
+### 10.1 パフォーマンス
+
+* 応答時間: [目標値]
+* 大量データ対策: ページネーション（h:dataTable + lazy loading）
+* キャッシング: [戦略]
+
+### 10.2 可用性
+
+* ログ出力: [ログレベル、出力先]
+* 監視: [監視項目]
+
+---
+
+## 11. データソース設定
+
+### 11.1 JNDI設定
+
+* JNDI名: `[JNDI_NAME]` (例: `jdbc/PersonDB`)
+* データソース: [データソース名]
+* 接続プール: [最小接続数]/[最大接続数]
+
+### 11.2 persistence.xml設定
+
+```xml
+<persistence-unit name="[PERSISTENCE_UNIT_NAME]" transaction-type="JTA">
+    <jta-data-source>[JNDI_NAME]</jta-data-source>
+    <properties>
+        <property name="jakarta.persistence.schema-generation.database.action" value="none"/>
+    </properties>
+</persistence-unit>
+```
+
+---
+
+## 12. 参考資料
+
+* [requirements.md](requirements.md) - 要件定義書
+* [data_model.md](data_model.md) - データモデル仕様書
+* [functional_design.md](functional_design.md) - 機能設計書
+* [Jakarta EE 10仕様](https://jakarta.ee/specifications/platform/10/)
+* [Jakarta Faces 4.0仕様](https://jakarta.ee/specifications/faces/4.0/)

@@ -141,7 +141,24 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 
 ## 2. SPECの生成
 
-### 2.1 システムレベルのSPEC
+### 2.1 テンプレートの準備
+
+基本設計SPEC生成時には、以下のテンプレートを参照する
+
+テンプレート参照先:
+* @agent_skills/struts-to-jsf-migration/templates/basic_design/architecture_design.md - アーキテクチャ設計書テンプレート
+* @agent_skills/struts-to-jsf-migration/templates/basic_design/data_model.md - データモデル仕様書テンプレート
+* @agent_skills/struts-to-jsf-migration/templates/basic_design/external_interface.md - 外部インターフェース仕様書テンプレート
+* @agent_skills/struts-to-jsf-migration/templates/basic_design/functional_design.md - 機能設計書テンプレート（画面グループ）
+* @agent_skills/struts-to-jsf-migration/templates/basic_design/screen_design.md - 画面設計書テンプレート（JSF専用）
+* @agent_skills/struts-to-jsf-migration/templates/basic_design/behaviors.md - 振る舞い仕様書テンプレート（E2Eテスト用）
+
+テンプレートの使用方法:
+* 各テンプレートを読み込み、プレースホルダー（[PROJECT_NAME]、[DATE]等）を実際の値に置き換える
+* Strutsコードから抽出した情報をテンプレートの該当セクションに記載する
+* テンプレート構造を維持しながら、プロジェクト固有の情報を追加する
+
+### 2.2 システムレベルのSPEC
 
 以下のSPECを `{spec_output_directory}/baseline/basic_design/` に生成する
 
@@ -162,20 +179,25 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 
 #### architecture_design.md
 
+テンプレート: @agent_skills/struts-to-jsf-migration/templates/basic_design/architecture_design.md
+
+抽出する情報:
 * 技術スタック（移行先を記載）
   * 移行先の技術スタックを記載する
+  * Jakarta EE 10、Jakarta Faces (JSF) 4.0、JPA 3.1、CDI 4.0等
 
 * パッケージ構造
   * Strutsのパッケージ構造を参考に、JSF向けに最適化する
+  * bean/, service/, dao/, entity/, dto/等
 
 * レイヤー構成
-  * Presentation Layer: JSF Managed Bean
+  * Presentation Layer: JSF Managed Bean + Facelets XHTML
   * Business Logic Layer: CDI Service
   * Data Access Layer: JPA Entity、EntityManager
   * Database Layer: 既存データベース
 
 * アーキテクチャパターン
-  * MVC（Model-View-Controller）
+  * サーバーサイドMVC（Model-View-Controller）
   * CDIによる依存性注入
   * JPAによる永続化
   * トランザクション管理
@@ -196,25 +218,37 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 
 #### functional_design.md
 
+テンプレート: @agent_skills/struts-to-jsf-migration/templates/basic_design/functional_design.md
+
+抽出する情報:
 * 画面一覧:
   * 各JSPファイルから画面を抽出
   * 画面ID、画面名、URL、目的を記載
+  * 例: SCREEN_001_PersonList、SCREEN_002_PersonInput、SCREEN_003_PersonConfirm
 
 * 画面遷移図:
   * Mermaid形式で画面遷移を図示
   * struts-config.xmlとActionForwardから抽出
+  * ボタンクリック、リンク、フォーム送信等の遷移トリガーを明記
 
-* コンポーネント設計:
-  * 各機能に対応するManaged Bean
-  * 各機能で使用するServiceクラス
-  * 画面間のデータ受け渡し（Flash Scope、Session Scope等）
+* コンポーネント設計（論理レベル）:
+  * 各機能に対応するManaged Bean（論理名のみ、実装クラス名は詳細設計で決定）
+  * 各機能で使用するServiceクラス（論理名のみ）
+  * 画面間のデータ受け渡し（Flash Scope、View Scope、Session Scope等）
 
 #### data_model.md
 
+テンプレート: @agent_skills/struts-to-jsf-migration/templates/basic_design/data_model.md
+
+抽出する情報:
 * エンティティ一覧（論理名）:
   * StrutsのModel/Entityクラスから抽出
   * または、DAOクラスとSQLスクリプトから推測
   * 注意: 論理エンティティ名のみ。JPAエンティティクラス名は詳細設計で決定
+
+* ER図:
+  * Mermaid ER図記法で記述
+  * テーブル間のリレーションを図示
 
 * テーブル定義（RDB論理設計）:
   * SQLスクリプト（`CREATE TABLE`）から抽出
@@ -224,6 +258,7 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 * テーブル間のリレーション:
   * FOREIGN KEY制約から抽出
   * カーディナリティ（1:1、1:N、N:M）
+  * 外部キー動作（CASCADE、RESTRICT、SET NULL）
 
 注意: 
 * data_model.mdはRDB論理設計（テーブル、カラム、制約）のみを記述
@@ -232,20 +267,27 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 
 #### behaviors.md
 
-* 記法: Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）
-* Gherkin記法の詳細: @agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること
+テンプレート: @agent_skills/struts-to-jsf-migration/templates/basic_design/behaviors.md
 
-* システム全体の振る舞い:
-  * 主要な業務フロー
+記法: Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）  
+Gherkin記法の詳細: @agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること
+
+抽出する情報:
+* 画面グループ全体の振る舞い（E2Eテスト用）:
+  * 主要な画面フローシナリオ（一覧 → 入力 → 確認 → 一覧）
+  * Actionクラスのメソッドとstruts-config.xmlから抽出
   * Serviceクラスのビジネスロジックから抽出
 
 * エラーハンドリング:
+  * バリデーションエラー時の画面動作
+  * ビジネスルールエラー時の画面動作
   * 例外処理のパターン
   * エラーメッセージの表示方法
 
 * バリデーション:
   * 入力検証ルール
   * ActionFormのvalidate()メソッドまたはJSPから抽出
+  * Bean Validation形式に変換
 
 ### 2.2 画面グループ単位のSPEC
 
@@ -267,63 +309,82 @@ spec_output_directory: "projects/jsf-migration/struts-app-jsf/specs"
 
 #### functional_design.md（画面グループ全体の機能設計）
 
+テンプレート: @agent_skills/struts-to-jsf-migration/templates/basic_design/functional_design.md
+
+抽出する情報:
 * 画面一覧:
   * 画面グループ内の全画面を列挙
-  * 画面ID（FUNC_XXX形式）、画面名、URL、目的を記載
+  * 画面ID（SCREEN_XXX形式）、画面名、URL、目的を記載
   * 各JSPファイルから抽出
+  * 例: SCREEN_001_PersonList、SCREEN_002_PersonInput、SCREEN_003_PersonConfirm
 
 * 画面遷移図:
   * Mermaid形式で画面グループ内の画面遷移を図示
   * struts-config.xmlとActionForwardから抽出
   * 画面間のフロー（例: 一覧 → 入力 → 確認 → 登録 → 一覧）を明確化
+  * ボタンクリック、リンク、フォーム送信等の遷移トリガーを明記
 
-* コンポーネント設計:
-  * 各画面に対応するManaged Bean
-  * 画面グループ内で共有されるServiceクラス
-  * 画面間のデータ受け渡し（Flash Scope、Session Scope等）
+* コンポーネント設計（論理レベル）:
+  * 各画面に対応するManaged Bean（論理名のみ）
+  * 画面グループ内で共有されるServiceクラス（論理名のみ）
+  * 画面間のデータ受け渡し（Flash Scope、View Scope、Session Scope等）
 
 #### screen_design.md（画面グループ内全画面の画面設計）
 
-画面グループ内の各画面について以下を記載:
+テンプレート: @agent_skills/struts-to-jsf-migration/templates/basic_design/screen_design.md
 
-* 画面ID: FUNC_XXX_<画面名>（例: FUNC_001_PersonList）
+画面グループ内の各画面について以下を抽出:
+
+* 画面ID: SCREEN_XXX_<画面名>（例: SCREEN_001_PersonList）
 * 画面名: <画面の日本語名>
-* URL: <アクセスURL>
+* URL: <アクセスURL>（例: /personList.xhtml）
 * 目的: <画面の目的>
 
 * 画面レイアウト:
+  * 画面構成図（テキストベースのレイアウト図）
   * 表示項目（一覧表、入力フォーム、ボタン等）
   * JSPのHTMLタグとStrutsタグから抽出
 
-* 入力項目:
-  * 項目名、型、必須/任意、バリデーションルール
-  * ActionFormのフィールドから抽出
+* 入力項目とバリデーション:
+  * 項目名、ラベル、型、必須/任意、最大長、形式
+  * バリデーションルール（Bean Validation形式に変換）
+  * ActionFormのフィールドとvalidate()メソッドから抽出
+  * エラーメッセージ
 
 * ボタンとアクション:
-  * ボタン名、アクション、遷移先画面
-  * JSPの`<html:submit>`とActionForwardから抽出
+  * ボタン名、ラベル、アクション、遷移先画面
+  * JSPの`<html:submit>`、`<html:link>`、ActionForwardから抽出
+  * JSF実装例（h:commandButton、h:link）
 
 * 表示データ:
   * 表示するデータの一覧
-  * JSPの`<logic:iterate>`と`<bean:write>`から抽出
+  * JSPの`<logic:iterate>`、`<bean:write>`から抽出
+  * JSF実装例（h:dataTable、h:outputText）
 
 #### behaviors.md（画面グループの振る舞い、E2Eテスト用）
 
-* 記法: Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）
-* Gherkin記法の詳細: @agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること
+テンプレート: @agent_skills/struts-to-jsf-migration/templates/basic_design/behaviors.md
 
-* 画面グループ内の主要業務フロー:
+記法: Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）  
+Gherkin記法の詳細: @agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること
+
+抽出する情報:
+* 画面グループ内の主要業務フロー（E2Eテスト用）:
   * 複数画面にまたがる遷移シナリオ（例: 一覧 → 入力 → 確認 → 登録 → 一覧）
   * Actionクラスのビジネスロジックとstruts-config.xmlから抽出
-  * E2Eテストで検証する画面間フローを記述
+  * E2Eテストで検証する画面間フローをGherkin記法で記述
+  * Given: データベースの初期状態、When: ブラウザ操作、Then: 期待結果
 
-* エラーハンドリング:
+* エラーハンドリングシナリオ:
+  * バリデーションエラー時の画面動作
+  * ビジネスルールエラー時の画面動作
   * 例外処理のパターン
   * エラーメッセージの表示方法
 
-* バリデーション:
-  * 入力検証ルール
+* バリデーションシナリオ:
+  * 入力検証ルールをGherkin記法で記述
   * ActionFormのvalidate()メソッドまたはJSPから抽出
+  * Bean Validation形式に変換
 
 注意:
 * behaviors.mdは複数画面にまたがるE2Eテスト用のシナリオを記述
