@@ -1,495 +1,273 @@
-# アーキテクチャ設計書
+# Person Management System - アーキテクチャ設計書
+
+プロジェクトID: jsf-person
+バージョン: 1.0.0
+最終更新日: 2026-02-08
+ステータス: 基本設計
+
+* 変更履歴:
+  * v1.0.0 (2026-02-08): 初版（Struts 1.3.10からの移行SPEC）
+
+---
 
 ## 1. 概要
 
-本ドキュメントは、人材管理システム（JSF Person）のアーキテクチャ設計を定義する。
+本文書は、Person Management Systemのアーキテクチャ設計を定義する。技術スタック、アーキテクチャパターン、レイヤー構成、パッケージ構造、トランザクション管理、セキュリティアーキテクチャを記述する。
+
+* フレームワーク: Jakarta Faces (JSF) 4.0
+* アプローチ: サーバーサイドMVC
+* 設計原則: 画面中心設計、レイヤードアーキテクチャ
+* 移行元: Apache Struts 1.3.10 + EJB 3.2 + JDBC
+
+---
 
 ## 2. 技術スタック
 
-### 2.1 アプリケーション基盤
+### 2.1 コアプラットフォーム
 
-* プログラミング言語
-  * Java 21
+| カテゴリ | 技術 | バージョン | 目的 |
+|---------|-----|----------|------|
+| ランタイム | Java | 21 | 実行環境 |
+| プラットフォーム | Jakarta EE | 10 | フレームワーク基盤 |
+| アプリケーションサーバー | Payara Server | 6.x | デプロイ環境 |
+| データベース | HSQLDB | 2.7.x | データ永続化 |
+| ビルドツール | Gradle | 8.x | ビルド自動化 |
 
-* Jakarta EE 10
-  * Jakarta Faces (JSF) 4.0 - プレゼンテーション層
-  * Jakarta Persistence (JPA) 3.1 - データアクセス層
-  * Jakarta CDI 4.0 - 依存性注入
-  * Jakarta Transactions (JTA) 2.0 - トランザクション管理
-  * Jakarta Servlet 6.0 - Webアプリケーション基盤
-  * Jakarta Expression Language 5.0 - 式言語
+### 2.2 フレームワーク仕様
 
-### 2.2 実行環境
+| カテゴリ | 仕様 | バージョン | 目的 |
+|---------|-----|----------|------|
+| UI層 | Jakarta Faces (JSF) | 4.0 | サーバーサイドMVC、画面レンダリング |
+| ビジネスロジック | Jakarta CDI | 4.0 | 依存性注入、ライフサイクル管理 |
+| 永続化層 | Jakarta Persistence (JPA) | 3.1 | O/Rマッピング、エンティティ管理 |
+| トランザクション | Jakarta Transactions | 2.0 | トランザクション管理 |
+| バリデーション | Jakarta Bean Validation | 3.0 | 入力検証 |
 
-* アプリケーションサーバー
-  * Payara Server 6.x（Jakarta EE 10対応）
+### 2.3 追加ライブラリ
 
-* データベース
-  * HSQLDB 2.7.x（既存データベースを継続使用）
+| ライブラリ | バージョン | 目的 |
+|-----------|----------|------|
+| PrimeFaces | 14.x | JSF UIコンポーネント拡張（該当する場合） |
 
-### 2.3 ビルドツール
+---
 
-* ビルドツール
-  * Gradle 8.x
+## 3. アーキテクチャ設計
 
-## 3. アーキテクチャパターン
+### 3.1 アーキテクチャパターン
 
-### 3.1 レイヤードアーキテクチャ
+* **レイヤードアーキテクチャ**
+  * プレゼンテーション層（Managed Bean + XHTML）
+  * ビジネスロジック層（Service）
+  * データアクセス層（Dao）
+  * 永続化層（Entity + JPA）
 
-本システムは、レイヤードアーキテクチャ（Layered Architecture）を採用する。
+* **サーバーサイドMVC**
+  * Model: Managed Bean（@Named, @ViewScoped）+ Entity（JPA）
+  * View: Facelets XHTML
+  * Controller: Managed Bean のアクションメソッド
 
-```mermaid
-graph TB
-    subgraph "Presentation Layer"
-        View[XHTML View<br/>Facelets]
-        Bean[Managed Bean<br/>@Named, @ViewScoped]
-    end
-    
-    subgraph "Business Logic Layer"
-        Service[Service<br/>@RequestScoped, @Transactional]
-    end
-    
-    subgraph "Data Access Layer"
-        Entity[JPA Entity<br/>@Entity]
-        EM[EntityManager<br/>@PersistenceContext]
-    end
-    
-    subgraph "Database Layer"
-        DB[(HSQLDB<br/>PERSONテーブル)]
-    end
-    
-    View -->|EL式| Bean
-    Bean -->|@Inject| Service
-    Service -->|@PersistenceContext| EM
-    EM -->|JPQL| Entity
-    Entity -->|JDBC| DB
-```
+### 3.2 コンポーネントの責務
 
-### 3.2 レイヤーの責務
+#### 3.2.1 プレゼンテーション層
 
-* Presentation Layer（プレゼンテーション層）
-  * 役割: ユーザーインターフェースの提供、画面制御、画面遷移
-  * 技術: JSF Managed Bean、Facelets XHTML
-  * 主要コンポーネント: PersonListBean、PersonInputBean、PersonConfirmBean
-  * 責務:
-    * ユーザー入力の受け取り
-    * 画面表示データの準備
-    * 画面遷移の制御
-    * Serviceクラスの呼び出し
-    * エラーメッセージの表示
+* **Managed Bean** (`@Named`, `@ViewScoped`)
+  * 画面の状態管理（プロパティ）
+  * ユーザー操作の処理（アクションメソッド）
+  * Service層の呼び出し
+  * 画面遷移の制御
+  * バリデーションメッセージの表示
 
-* Business Logic Layer（ビジネスロジック層）
-  * 役割: ビジネスロジックの実装、トランザクション管理
-  * 技術: CDI Service、@Transactional
-  * 主要コンポーネント: PersonService
-  * 責務:
-    * ビジネスルールの実装
-    * トランザクション境界の定義
-    * データアクセス層の呼び出し
-    * ビジネス例外のハンドリング
+* **XHTML** (Facelets)
+  * UI構造の定義（h:form, h:dataTable等）
+  * Managed Beanとのデータバインディング（EL式: #{bean.property}）
+  * イベントハンドリング（action="#{bean.method()}"）
+  * バリデーションルールの宣言（Bean Validation）
 
-* Data Access Layer（データアクセス層）
-  * 役割: データベースアクセス、エンティティ管理
-  * 技術: JPA、EntityManager、JPQL
-  * 主要コンポーネント: Person Entity、EntityManager
-  * 責務:
-    * エンティティのCRUD操作
-    * JPQLクエリの実行
-    * エンティティとデータベースのマッピング
+#### 3.2.2 ビジネスロジック層
 
-* Database Layer（データベース層）
-  * 役割: データの永続化
-  * 技術: HSQLDB
-  * 主要コンポーネント: PERSONテーブル
-  * 責務:
-    * データの保存と取得
-    * データ整合性の保証
+* **Service** (`@ApplicationScoped`)
+  * ビジネスロジックの実装
+  * トランザクション境界の管理（@Transactional）
+  * Daoの協調制御
 
-### 3.3 MVC（Model-View-Controller）パターン
+#### 3.2.3 データアクセス層
 
-JSFは標準的にMVCパターンを実装している:
+* **Dao** (`@ApplicationScoped`)
+  * データベースCRUD操作
+  * JPQLクエリの実行
+  * EntityManagerの管理
 
-* Model: JPA Entity（Person）
-* View: Facelets XHTML（personList.xhtml、personInput.xhtml、personConfirm.xhtml）
-* Controller: Managed Bean（PersonListBean、PersonInputBean、PersonConfirmBean）
+#### 3.2.4 永続化層
 
-### 3.4 依存性注入（CDI）
+* **Entity** (JPA)
+  * データベーステーブルとのマッピング（@Entity, @Table）
+  * リレーションシップの定義（@OneToMany, @ManyToOne等）
+  * バリデーションルール（@NotNull, @Size等）
 
-* CDI（Contexts and Dependency Injection）を使用して、レイヤー間の依存性を管理する
-* @Injectアノテーションによる依存性注入
-* コンストラクタインジェクションまたはフィールドインジェクション
+---
 
-```java
-@Named
-@ViewScoped
-public class PersonListBean implements Serializable {
-    @Inject
-    private PersonService personService;
-}
-```
+## 4. パッケージ構造と命名規則
 
-```java
-@RequestScoped
-@Transactional
-public class PersonService {
-    @PersistenceContext
-    private EntityManager em;
-}
-```
-
-### 3.5 トランザクション管理
-
-* JTA（Jakarta Transactions）による宣言的トランザクション管理
-* @Transactionalアノテーションでトランザクション境界を定義
-* Serviceクラスのパブリックメソッドがトランザクション境界
-
-```java
-@RequestScoped
-@Transactional
-public class PersonService {
-    public void addPerson(Person person) {
-        // トランザクション内で実行される
-    }
-}
-```
-
-## 4. パッケージ構造
-
-### 4.1 パッケージ階層
+### 4.1 パッケージ構造
 
 ```
-pro.kensait.jsf.person/
-├── bean/                   # Presentation Layer
-│   ├── PersonListBean.java
+pro.kensait.person
+├── bean/                      # Managed Beans（画面単位）
+│   ├── PersonListBean.java   # @Named, @ViewScoped
 │   ├── PersonInputBean.java
 │   └── PersonConfirmBean.java
-├── service/                # Business Logic Layer
-│   └── PersonService.java
-└── entity/                 # Data Access Layer
-    └── Person.java
+├── service/                   # ビジネスロジック
+│   └── PersonService.java    # @ApplicationScoped, @Transactional
+├── dao/                       # データアクセス
+│   └── PersonDao.java         # @ApplicationScoped
+├── entity/                    # JPAエンティティ
+│   └── Person.java            # @Entity
+└── exception/                 # カスタム例外（該当する場合）
+    └── PersonNotFoundException.java
 ```
 
-### 4.2 パッケージ詳細
+### 4.2 命名規則
 
-* pro.kensait.jsf.person.bean
-  * JSF Managed Beanを配置
-  * @Named、@ViewScopedアノテーションを使用
-  * ビューとの連携、画面遷移制御を担当
+* **Managed Bean**: `[画面名]Bean` (例: PersonListBean, PersonInputBean)
+* **Service**: `[エンティティ名]Service` (例: PersonService)
+* **Dao**: `[エンティティ名]Dao` (例: PersonDao)
+* **Entity**: `[エンティティ名]` (例: Person)
+* **XHTML**: `[小文字画面名].xhtml` (例: personList.xhtml, personInput.xhtml)
 
-* pro.kensait.jsf.person.service
-  * ビジネスロジックを実装するServiceクラスを配置
-  * @RequestScoped、@Transactionalアノテーションを使用
-  * トランザクション境界を定義
+---
 
-* pro.kensait.jsf.person.entity
-  * JPA Entityクラスを配置
-  * @Entity、@Tableアノテーションを使用
-  * データベーステーブルとのマッピング
+## 5. トランザクション管理
 
-### 4.3 リソースファイル配置
+### 5.1 トランザクション境界
 
-```
-src/main/
-├── java/
-│   └── pro/kensait/jsf/person/
-│       ├── bean/
-│       ├── service/
-│       └── entity/
-├── resources/
-│   └── META-INF/
-│       └── persistence.xml     # JPA設定
-└── webapp/
-    ├── WEB-INF/
-    │   ├── web.xml             # Webアプリケーション設定
-    │   └── faces-config.xml    # JSF設定（オプション）
-    ├── personList.xhtml
-    ├── personInput.xhtml
-    ├── personConfirm.xhtml
-    └── resources/
-        └── css/
-            └── style.css       # スタイルシート
-```
+* トランザクション境界: **Service層**
+* アノテーション: `@Transactional`
+* 伝播レベル: `REQUIRED` (デフォルト)
+* 分離レベル: `READ_COMMITTED` (デフォルト)
 
-## 5. 主要コンポーネント設計
+### 5.2 トランザクション設計方針
 
-### 5.1 Presentation Layer
+* Managed Beanはトランザクション管理しない（@Transactionalを付与しない）
+* Service層のメソッド単位でトランザクション境界を定義
+* Dao層はトランザクションに参加（新規トランザクションを開始しない）
+* 例外発生時は自動ロールバック
 
-#### 5.1.1 Managed Bean
+---
 
-* PersonListBean
-  * 役割: PERSON一覧画面の制御
-  * スコープ: @ViewScoped
-  * 主要メソッド:
-    * init(): 画面初期表示時にPERSONリストを取得
-    * getPersonList(): PERSONリストを返す
+## 6. 並行制御
 
-* PersonInputBean
-  * 役割: PERSON入力画面の制御
-  * スコープ: @ViewScoped
-  * 主要メソッド:
-    * init(): 画面初期表示時に編集モードの場合はデータを取得
-    * confirm(): 確認画面に遷移
-    * cancel(): 一覧画面に戻る
+### 6.1 楽観的ロック
 
-* PersonConfirmBean
-  * 役割: PERSON確認画面の制御
-  * スコープ: @ViewScoped
-  * 主要メソッド:
-    * save(): データを登録・更新して一覧画面に遷移
-    * back(): 入力画面に戻る
+* 方式: JPA `@Version`
+* 適用対象: 更新が必要なエンティティ（該当する場合）
+* 例外: `OptimisticLockException`
 
-#### 5.1.2 画面遷移方式
+注意: 現在のStrutsプロジェクトでは楽観的ロックは実装されていない。JSF移行時に必要に応じて追加を検討する。
 
-* アクションメソッドの戻り値で画面遷移を制御
-* faces-config.xmlのnavigation-ruleは使用せず、戻り値で直接XHTMLファイル名を指定
-* リダイレクト方式: 戻り値に "?faces-redirect=true" を付加
+---
 
-```java
-public String save() {
-    personService.addPerson(person);
-    return "personList?faces-redirect=true";
-}
-```
+## 7. エラーハンドリング戦略
 
-### 5.2 Business Logic Layer
+### 7.1 例外処理
 
-#### 5.2.1 PersonService
+* ビジネス例外: カスタム例外（checked exception）
+  * 例: `PersonNotFoundException`（該当する場合）
+* システム例外: Runtime例外
+  * 例: `IllegalStateException`, `NullPointerException`
 
-* 役割: PERSONビジネスロジックの実装
-* スコープ: @RequestScoped
-* トランザクション: @Transactional（クラスレベル）
-* 主要メソッド:
-  * getAllPersons(): 全PERSONを取得
-  * getPersonById(Integer personId): IDでPERSONを取得
-  * addPerson(Person person): PERSONを追加
-  * updatePerson(Person person): PERSONを更新
-  * deletePerson(Integer personId): PERSONを削除
+### 7.2 エラー画面遷移
 
-#### 5.2.2 トランザクション境界
+* Managed Beanで例外をキャッチ
+* FacesMessage でエラーメッセージを表示
+* 重大なエラーの場合はエラー画面にリダイレクト
 
-* PersonServiceのすべてのパブリックメソッドがトランザクション境界
-* RuntimeExceptionが発生した場合、自動的にロールバック
-* トランザクション分離レベル: READ_COMMITTED
+---
 
-### 5.3 Data Access Layer
-
-#### 5.3.1 Person Entity
-
-* 役割: PERSONテーブルとのマッピング
-* アノテーション:
-  * @Entity: JPAエンティティとして定義
-  * @Table(name = "PERSON"): テーブル名を指定
-  * @Id: 主キー
-  * @GeneratedValue(strategy = GenerationType.IDENTITY): 自動採番
-  * @Column: カラムマッピング
-
-```java
-@Entity
-@Table(name = "PERSON")
-public class Person implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "PERSON_ID")
-    private Integer personId;
-    
-    @Column(name = "PERSON_NAME", nullable = false, length = 30)
-    private String personName;
-    
-    @Column(name = "AGE", nullable = false)
-    private Integer age;
-    
-    @Column(name = "GENDER", nullable = false, length = 10)
-    private String gender;
-}
-```
-
-#### 5.3.2 データアクセス方式
-
-* EntityManagerを使用したJPQL
-* DAOクラスは作成せず、ServiceクラスでEntityManagerを直接使用
-* 理由: 小規模システムのため、DAOレイヤーは冗長
-
-```java
-@RequestScoped
-@Transactional
-public class PersonService {
-    @PersistenceContext
-    private EntityManager em;
-    
-    public List<Person> getAllPersons() {
-        return em.createQuery("SELECT p FROM Person p ORDER BY p.personId", Person.class)
-                 .getResultList();
-    }
-}
-```
-
-## 6. データベース接続設定
-
-### 6.1 データソース設定（インフラ構成）
-
-* JNDI名: `java:app/jdbc/testdb`
-* データベース種別: HSQLDB 2.7.x
-* JDBCドライバー: org.hsqldb.jdbc.JDBCDriver
-* 接続URL: jdbc:hsqldb:hsql://localhost:9001/testdb
-* ユーザー名: SA
-* パスワード: （空文字）
-* 接続プール管理: Payara Server
-* JTAマネージド: true
-
-注意: 接続プール設定（最小/最大接続数、タイムアウト等）の詳細は、インフラ構築時またはデプロイメント設定で決定します。
-
-### 6.2 persistence.xml設定情報
-
-* Persistence Unit名: personPU
-* `<jta-data-source>`: java:app/jdbc/testdb（上記データソース設定のJNDI名）
-* トランザクションタイプ: JTA（Jakarta Transactions）
-* スキーマ自動生成: none（既存スキーマを使用）
-
-注意: persistence.xmlの具体的なXMLコード、エンティティクラスの登録、詳細プロパティ設定は詳細設計フェーズで記述します。
-
-## 7. ビュー技術（Facelets）
-
-### 7.1 Facelets XHTML
-
-* JSPではなく、Facelets XHTMLを使用
-* 拡張子: .xhtml
-* JSF標準のビューテクノロジー
-
-### 7.2 JSFタグライブラリ
-
-* Core Tags（xmlns:f="jakarta.faces.core"）
-  * メタデータ、イベント、コンバーター
-
-* HTML Tags（xmlns:h="jakarta.faces.html"）
-  * HTML要素の生成
-  * <h:form>、<h:inputText>、<h:commandButton>、<h:dataTable>等
-
-* Facelets Tags（xmlns:ui="jakarta.faces.facelets"）
-  * テンプレート、コンポジション
-
-### 7.3 Expression Language（EL）
-
-* EL 5.0を使用
-* 式言語: #{bean.property}
-* メソッド呼び出し: #{bean.actionMethod()}
-
-### 7.4 スタイルシート
-
-* CSS3を使用
-* resources/css/style.cssに配置
-* JSFリソースハンドリング: <h:outputStylesheet name="css/style.css"/>
-
-## 8. セキュリティ設計
+## 8. セキュリティアーキテクチャ
 
 ### 8.1 認証・認可
 
-* 本リリースでは認証・認可機能を実装しない
-* 将来的にJakarta Securityを使用した認証・認可を追加する可能性がある
+* 認証方式: 認証なし（現在のStrutsプロジェクトでは認証機能なし）
+* 認可方式: 認可なし
+* 実装: セキュリティ機能なし
 
-### 8.2 入力検証
+注意: 現在のStrutsプロジェクトではセキュリティ機能は実装されていない。JSF移行時に必要に応じて追加を検討する。
 
-* Bean Validationアノテーションによる入力検証
-* @NotNull、@Size、@Min、@Max等を使用
+### 8.2 セキュリティ対策
 
-### 8.3 XSS対策
+* XSS対策: Faceletsの自動エスケープ機能（`h:outputText`）
+* CSRF対策: JSFの`ViewState`トークン
+* SQLインジェクション対策: JPQLパラメータバインディング
 
-* JSFのデフォルトエスケープ機能を使用
-* <h:outputText>は自動的にHTMLエスケープを行う
+---
 
-### 8.4 CSRF対策
+## 9. テスト戦略
 
-* JSFの<h:form>は自動的にCSRFトークンを生成
-* jakarta.faces.ViewState hidden fieldによる保護
+### 9.1 テストレベル
 
-## 9. エラーハンドリング設計
+| テストレベル | 対象 | ツール | カバレッジ目標 |
+|------------|------|--------|--------------|
+| 単体テスト | Service, Dao, Entity | JUnit 5 + Mockito | 80%以上 |
+| 結合テスト | Service + Dao + Entity + DB | JUnit 5 + Weld SE + HSQLDB | 70%以上 |
+| E2Eテスト | 全レイヤー（Managed Bean + Service + Dao + DB） | Playwright | 主要フロー100% |
 
-### 9.1 例外処理戦略
+### 9.2 テスト方針
 
-* ビジネスロジック層で発生した例外はRuntimeExceptionでラップ
-* プレゼンテーション層でユーザーフレンドリーなメッセージを表示
+* Managed Beanは単体テストカバレッジ対象外（E2Eテストで検証）
+* Serviceは単体テストで検証（Daoをモック化）
+* Daoは結合テストで検証（実際のDBアクセス）
+* E2Eテストは画面フローを検証（実際のブラウザ操作）
 
-### 9.2 例外の種類
+---
 
-* RuntimeException（非チェック例外）
-  * トランザクションを自動的にロールバック
-  * ビジネスロジックエラー、データベースエラー
+## 10. 非機能要件
 
-### 9.3 エラーメッセージ表示
+### 10.1 パフォーマンス
 
-* <h:messages>コンポーネントでエラーメッセージを表示
-* FacesContext.addMessage()でメッセージを追加
+* 応答時間: 一般的なレスポンス時間（要件定義時に明確化）
+* 大量データ対策: ページネーション（該当する場合）
 
-## 10. ログ設計
+### 10.2 可用性
 
-### 10.1 ロギングフレームワーク
+* ログ出力: SLF4J + Log4j2（標準的なログ出力）
+* 監視: 標準的なJVMモニタリング
 
-* Jakarta EE標準のjava.util.loggingを使用
-* または、SLF4J + Logbackを使用する可能性がある
+---
 
-### 10.2 ログレベル
+## 11. データソース設定
 
-* SEVERE: 重大なエラー
-* WARNING: 警告
-* INFO: 情報メッセージ（登録・更新・削除等）
-* FINE: デバッグ情報
+### 11.1 JNDI設定
 
-### 10.3 ログ出力
+* JNDI名: `jdbc/HsqldbDS`（Strutsプロジェクトから継承）
+* 完全修飾JNDI名: `java:comp/env/jdbc/HsqldbDS`
+* データソース種別: HSQLDB
+* 接続プール: Payara Serverのコネクションプール設定に従う
 
-* Serviceクラスで主要な処理のログを出力
-* 例外発生時はスタックトレースをログに記録
+注意: Strutsプロジェクトで使用していたJNDI名をそのまま継続する。web.xmlのresource-refおよびPersonDao.javaで確認済み。
 
-## 11. デプロイメント
+### 11.2 persistence.xml設定
 
-### 11.1 デプロイ形式
+```xml
+<persistence-unit name="personPU" transaction-type="JTA">
+    <jta-data-source>jdbc/HsqldbDS</jta-data-source>
+    <properties>
+        <property name="jakarta.persistence.schema-generation.database.action" value="none"/>
+        <property name="eclipselink.logging.level" value="FINE"/>
+        <property name="eclipselink.logging.parameters" value="true"/>
+    </properties>
+</persistence-unit>
+```
 
-* WARファイル
-* ファイル名: jsf-person.war
+* Persistence Unit名: `personPU`
+* トランザクションタイプ: JTA
+* JNDI名: `jdbc/HsqldbDS`
+* スキーマ生成: none（既存テーブルを使用）
 
-### 11.2 コンテキストパス
+---
 
-* /jsf-person
+## 12. 参考資料
 
-### 11.3 アクセスURL
-
-* 一覧画面: http://localhost:8080/jsf-person/personList.xhtml
-
-## 12. 既存システムとの差異
-
-### 12.1 Strutsアーキテクチャ（移行前）
-
-* Presentation Layer: Struts Action + ActionForm + JSP（Strutsタグライブラリ）
-* Business Logic Layer: EJB 3.2（Stateless Session Bean、JNDIルックアップ）
-* Data Access Layer: DAO（JDBC + DataSource、PreparedStatement）
-
-### 12.2 JSFアーキテクチャ（移行後）
-
-* Presentation Layer: JSF Managed Bean + Facelets XHTML（JSFタグライブラリ）
-* Business Logic Layer: CDI Service（@RequestScoped、@Inject、@Transactional）
-* Data Access Layer: JPA（EntityManager、JPQL、Entity）
-
-### 12.3 主要な改善点
-
-* 依存性注入
-  * 移行前: JNDIルックアップでEJBを取得
-  * 移行後: @Injectで依存性注入
-
-* データアクセス
-  * 移行前: JDBC + PreparedStatement + 手動マッピング
-  * 移行後: JPA + JPQL + 自動マッピング
-
-* ビュー技術
-  * 移行前: JSP + Strutsタグライブラリ
-  * 移行後: Facelets XHTML + JSFタグライブラリ
-
-* トランザクション管理
-  * 移行前: EJBコンテナ管理トランザクション
-  * 移行後: JTA + @Transactional
-
-## 13. 参考資料
-
-* [システム要件定義](requirements.md) - システム要件
-* [データモデル](data_model.md) - データベーススキーマの詳細
-* [機能設計書](functional_design.md) - 画面遷移とコンポーネント設計
-* [振る舞い仕様書](behaviors.md) - システム全体の振る舞い
+* [data_model.md](data_model.md) - データモデル仕様書
+* [functional_design.md](functional_design.md) - 機能設計書
 * [Jakarta EE 10仕様](https://jakarta.ee/specifications/platform/10/)
 * [Jakarta Faces 4.0仕様](https://jakarta.ee/specifications/faces/4.0/)

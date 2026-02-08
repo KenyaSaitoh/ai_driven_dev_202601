@@ -1,7 +1,7 @@
 package pro.kensait.berrybooks.api.dto;
 
 /**
- * 注文明細レスポンスDTO
+ * 注文明細情報レスポンス
  */
 public record OrderDetailResponse(
     Integer orderDetailId,

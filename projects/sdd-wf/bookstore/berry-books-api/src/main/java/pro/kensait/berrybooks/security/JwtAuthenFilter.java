@@ -1,143 +1,112 @@
 package pro.kensait.berrybooks.security;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
-import jakarta.servlet.*;
-import jakarta.servlet.annotation.WebFilter;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 
 /**
  * JWT認証フィルター
- * 
- * リクエストからJWTトークンを抽出し、検証する。
- * 認証成功時はAuthenInfoに認証情報を設定する。
- * 
- * @since 1.0.0
  */
-@WebFilter(urlPatterns = "/api/*")
-public class JwtAuthenFilter implements Filter {
-    
+@Provider
+@Priority(Priorities.AUTHENTICATION)
+public class JwtAuthenFilter implements ContainerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenFilter.class);
-    
-    private static final String COOKIE_NAME = "berry_auth";
     
     @Inject
     private JwtUtil jwtUtil;
     
     @Inject
-    private AuthenInfo authenInfo;
+    private AuthenticatedUser authenticatedUser;
+    
+    @Context
+    private HttpServletRequest httpServletRequest;
     
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+    public void filter(ContainerRequestContext requestContext) throws IOException {
+        String requestUri = requestContext.getUriInfo().getPath();
+        logger.debug("[ JwtAuthenFilter#filter ] Request URI: {}", requestUri);
         
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        HttpServletResponse httpResponse = (HttpServletResponse) response;
-        
-        String requestUri = httpRequest.getRequestURI();
-        String contextPath = httpRequest.getContextPath();
-        String path = requestUri.substring(contextPath.length());
-        
-        logger.info("[ JwtAuthenFilter#doFilter ] path={}", path);
-        
-        // 認証除外パスのチェック
-        if (isPublicPath(path)) {
-            logger.info("[ JwtAuthenFilter#doFilter ] Public path, skipping authentication");
-            chain.doFilter(request, response);
+        // 認証不要なパス（公開API）
+        if (isPublicPath(requestUri)) {
+            logger.debug("[ JwtAuthenFilter#filter ] Public path, skipping authentication");
             return;
         }
         
         try {
-            // CookieからJWTトークンを抽出
-            String token = extractTokenFromCookie(httpRequest);
+            // CookieからJWTを抽出
+            String jwt = jwtUtil.extractJwtFromRequest(httpServletRequest);
             
-            if (token != null && jwtUtil.validateToken(token)) {
-                // JWTから認証情報を取得
-                Integer customerId = jwtUtil.getCustomerIdFromToken(token);
-                String email = jwtUtil.getEmailFromToken(token);
+            if (jwt != null) {
+                // JWTを検証
+                Claims claims = jwtUtil.validateToken(jwt);
                 
-                // AuthenInfoに認証情報を設定
-                authenInfo.setCustomerId(customerId);
-                authenInfo.setEmail(email);
+                // 認証情報をAuthenticatedUserに設定
+                Integer customerId = claims.get("customerId", Integer.class);
+                String customerName = claims.get("customerName", String.class);
                 
-                logger.info("[ JwtAuthenFilter#doFilter ] Authentication successful: customerId={}", customerId);
+                authenticatedUser.setCustomerId(customerId);
+                authenticatedUser.setCustomerName(customerName);
                 
-                // 次のフィルターまたはリソースへ
-                chain.doFilter(request, response);
+                logger.info("[ JwtAuthenFilter#filter ] Authentication successful: customerId={}, customerName={}", 
+                    customerId, customerName);
             } else {
-                // 認証必須パスで未認証の場合
-                if (isSecuredPath(path)) {
-                    logger.warn("[ JwtAuthenFilter#doFilter ] Authentication required: path={}", path);
-                    httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    httpResponse.setContentType("application/json");
-                    httpResponse.getWriter().write("{\"error\":\"認証が必要です\"}");
-                } else {
-                    // 認証不要パス
-                    chain.doFilter(request, response);
+                // JWT認証必須のパスで未認証の場合はエラー
+                if (isSecuredPath(requestUri)) {
+                    logger.warn("[ JwtAuthenFilter#filter ] Authentication required but JWT not found");
+                    requestContext.abortWith(
+                        Response.status(Response.Status.UNAUTHORIZED)
+                            .entity("{\"error\":\"認証が必要です\"}")
+                            .type("application/json")
+                            .build()
+                    );
                 }
             }
-        } catch (Exception e) {
-            logger.error("[ JwtAuthenFilter#doFilter ] Authentication error: {}", e.getMessage(), e);
-            
-            if (isSecuredPath(path)) {
-                httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                httpResponse.setContentType("application/json");
-                httpResponse.getWriter().write("{\"error\":\"認証エラー\"}");
-            } else {
-                chain.doFilter(request, response);
+        } catch (JwtException e) {
+            logger.error("[ JwtAuthenFilter#filter ] Authentication error: {}", e.getMessage());
+            if (isSecuredPath(requestUri)) {
+                requestContext.abortWith(
+                    Response.status(Response.Status.UNAUTHORIZED)
+                        .entity("{\"error\":\"認証エラー\"}")
+                        .type("application/json")
+                        .build()
+                );
             }
         }
     }
     
     /**
-     * CookieからJWTトークンを抽出する
-     * 
-     * @param request HTTPリクエスト
-     * @return JWTトークン（存在しない場合はnull）
-     */
-    private String extractTokenFromCookie(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            return null;
-        }
-        
-        for (Cookie cookie : cookies) {
-            if (COOKIE_NAME.equals(cookie.getName())) {
-                return cookie.getValue();
-            }
-        }
-        
-        return null;
-    }
-    
-    /**
-     * 公開パス（認証不要）かどうかを判定する
+     * 公開パス（認証不要）かどうかを判定
      * 
      * @param path リクエストパス
-     * @return 公開パスの場合はtrue
+     * @return 公開パスの場合true
      */
     private boolean isPublicPath(String path) {
-        return path.startsWith("/api/auth/login")
-                || path.startsWith("/api/auth/logout")
-                || path.startsWith("/api/auth/register")
-                || path.startsWith("/api/books")
-                || path.startsWith("/api/categories")
-                || path.startsWith("/api/images");
+        return path.startsWith("auth/login") 
+                || path.startsWith("auth/logout")
+                || path.startsWith("auth/register")
+                || path.startsWith("books")
+                || path.startsWith("images");
     }
     
     /**
-     * 認証必須パスかどうかを判定する
+     * 認証必須パスかどうかを判定
      * 
      * @param path リクエストパス
-     * @return 認証必須パスの場合はtrue
+     * @return 認証必須パスの場合true
      */
     private boolean isSecuredPath(String path) {
-        return path.startsWith("/api/orders")
-                || path.startsWith("/api/auth/me");
+        return path.startsWith("orders") 
+                || path.startsWith("auth/me");
     }
 }

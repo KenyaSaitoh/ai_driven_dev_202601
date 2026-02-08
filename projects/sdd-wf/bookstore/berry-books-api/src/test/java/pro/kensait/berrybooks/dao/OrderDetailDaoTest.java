@@ -9,11 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pro.kensait.berrybooks.entity.OrderDetail;
-import pro.kensait.berrybooks.entity.OrderDetailPK;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,9 +18,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * OrderDetailDao の単体テスト
- * 
- * @since 1.0.0
+ * OrderDetailDaoの単体テスト
  */
 @ExtendWith(MockitoExtension.class)
 class OrderDetailDaoTest {
@@ -31,116 +26,112 @@ class OrderDetailDaoTest {
     @Mock
     private EntityManager em;
     
-    @Mock
-    private TypedQuery<OrderDetail> query;
-    
     @InjectMocks
     private OrderDetailDao orderDetailDao;
     
+    private OrderDetail testOrderDetail;
+    
     @BeforeEach
-    void setUp() throws Exception {
-        // EntityManagerをDaoにインジェクション
-        Field emField = OrderDetailDao.class.getDeclaredField("em");
-        emField.setAccessible(true);
-        emField.set(orderDetailDao, em);
+    void setUp() {
+        // Given: テストデータを準備（スナップショットパターン）
+        testOrderDetail = new OrderDetail();
+        testOrderDetail.setOrderTranId(1);
+        testOrderDetail.setOrderDetailId(1);
+        testOrderDetail.setBookId(10);
+        testOrderDetail.setBookName("Java入門");
+        testOrderDetail.setPublisherName("技術評論社");
+        testOrderDetail.setPrice(3000);
+        testOrderDetail.setCount(2);
     }
     
-    /**
-     * Scenario: 注文明細を登録する
-     * 
-     * Given: OrderDetailが存在する
-     * When: insert()を呼び出す
-     * Then: EntityManager.persist()が呼び出される
-     *       登録されたOrderDetailが返される
-     */
     @Test
     void testInsert_Success() {
-        // Given
-        OrderDetailPK id = new OrderDetailPK(1, 1);
-        OrderDetail orderDetail = new OrderDetail();
-        orderDetail.setId(id);
-        orderDetail.setBookId(1);
-        orderDetail.setBookName("テスト書籍");
-        orderDetail.setPrice(3000);
-        orderDetail.setCount(2);
+        // Given: EntityManagerがモック化されている
         
-        // When
-        OrderDetail result = orderDetailDao.insert(orderDetail);
+        // When: insert()を呼び出す
+        OrderDetail result = orderDetailDao.insert(testOrderDetail);
         
-        // Then
-        assertNotNull(result);
-        verify(em, times(1)).persist(orderDetail);
+        // Then: persistが呼び出され、スナップショット値が保持される
+        verify(em).persist(testOrderDetail);
+        assertEquals(testOrderDetail, result);
+        assertEquals("Java入門", result.getBookName());
+        assertEquals("技術評論社", result.getPublisherName());
+        assertEquals(3000, result.getPrice());
     }
     
-    /**
-     * Scenario: 注文IDで注文明細一覧を取得
-     * 
-     * Given: EntityManagerがモック化されている
-     *        モック設定: createQuery()が注文明細リストを返す
-     *        注文ID=1の注文明細が3件存在する
-     * When: findByOrderTranId(1)を呼び出す
-     * Then: 3件の注文明細が返される
-     *       注文明細IDの昇順でソートされている
-     */
     @Test
-    void testFindByOrderTranId_Success() {
-        // Given
-        Integer orderTranId = 1;
-        
+    void testFindByOrderTranId_Found() {
+        // Given: 注文ID=1の明細が複数存在する
         OrderDetail detail1 = new OrderDetail();
-        detail1.setId(new OrderDetailPK(orderTranId, 1));
-        detail1.setBookId(1);
-        detail1.setBookName("書籍1");
+        detail1.setOrderTranId(1);
+        detail1.setOrderDetailId(1);
+        detail1.setBookId(10);
+        detail1.setBookName("Java入門");
+        detail1.setPublisherName("技術評論社");
+        detail1.setPrice(3000);
+        detail1.setCount(2);
         
         OrderDetail detail2 = new OrderDetail();
-        detail2.setId(new OrderDetailPK(orderTranId, 2));
-        detail2.setBookId(2);
-        detail2.setBookName("書籍2");
+        detail2.setOrderTranId(1);
+        detail2.setOrderDetailId(2);
+        detail2.setBookId(20);
+        detail2.setBookName("Spring Boot実践");
+        detail2.setPublisherName("翔泳社");
+        detail2.setPrice(3500);
+        detail2.setCount(1);
         
-        OrderDetail detail3 = new OrderDetail();
-        detail3.setId(new OrderDetailPK(orderTranId, 3));
-        detail3.setBookId(3);
-        detail3.setBookName("書籍3");
+        List<OrderDetail> mockResults = Arrays.asList(detail1, detail2);
         
-        List<OrderDetail> details = Arrays.asList(detail1, detail2, detail3);
+        TypedQuery<OrderDetail> mockQuery = mock(TypedQuery.class);
+        when(em.createQuery(anyString(), eq(OrderDetail.class))).thenReturn(mockQuery);
+        when(mockQuery.setParameter("orderTranId", 1)).thenReturn(mockQuery);
+        when(mockQuery.getResultList()).thenReturn(mockResults);
         
-        when(em.createQuery(anyString(), eq(OrderDetail.class))).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(details);
+        // When: findByOrderTranId()を呼び出す
+        List<OrderDetail> results = orderDetailDao.findByOrderTranId(1);
         
-        // When
-        List<OrderDetail> result = orderDetailDao.findByOrderTranId(orderTranId);
+        // Then: 注文明細リストが返される
+        assertNotNull(results);
+        assertEquals(2, results.size());
+        assertEquals(1, results.get(0).getOrderDetailId());
+        assertEquals(2, results.get(1).getOrderDetailId());
         
-        // Then
-        assertEquals(3, result.size());
-        assertEquals(1, result.get(0).getId().getOrderDetailId());
-        assertEquals(2, result.get(1).getId().getOrderDetailId());
-        assertEquals(3, result.get(2).getId().getOrderDetailId());
+        verify(em).createQuery(anyString(), eq(OrderDetail.class));
+        verify(mockQuery).setParameter("orderTranId", 1);
+        verify(mockQuery).getResultList();
     }
     
-    /**
-     * Scenario: 注文明細が存在しない注文IDで検索
-     * 
-     * Given: EntityManagerがモック化されている
-     *        モック設定: createQuery()が空リストを返す
-     * When: findByOrderTranId(999)を呼び出す
-     * Then: 空のリストが返される
-     *       例外はスローされない
-     */
     @Test
-    void testFindByOrderTranId_Empty() {
-        // Given
-        Integer orderTranId = 999;
+    void testFindByOrderTranId_NotFound() {
+        // Given: 存在しない注文ID
+        TypedQuery<OrderDetail> mockQuery = mock(TypedQuery.class);
+        when(em.createQuery(anyString(), eq(OrderDetail.class))).thenReturn(mockQuery);
+        when(mockQuery.setParameter("orderTranId", 999)).thenReturn(mockQuery);
+        when(mockQuery.getResultList()).thenReturn(Arrays.asList());
         
-        when(em.createQuery(anyString(), eq(OrderDetail.class))).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(Collections.emptyList());
+        // When: findByOrderTranId()を呼び出す
+        List<OrderDetail> results = orderDetailDao.findByOrderTranId(999);
         
-        // When
-        List<OrderDetail> result = orderDetailDao.findByOrderTranId(orderTranId);
+        // Then: 空リストが返される
+        assertNotNull(results);
+        assertTrue(results.isEmpty());
         
-        // Then
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        verify(em).createQuery(anyString(), eq(OrderDetail.class));
+        verify(mockQuery).setParameter("orderTranId", 999);
+        verify(mockQuery).getResultList();
+    }
+    
+    @Test
+    void testInsert_SnapshotPreserved() {
+        // Given: スナップショット値が設定されたOrderDetail
+        
+        // When: insert()を呼び出す
+        OrderDetail result = orderDetailDao.insert(testOrderDetail);
+        
+        // Then: スナップショット値が保持される
+        assertEquals("Java入門", result.getBookName());
+        assertEquals("技術評論社", result.getPublisherName());
+        assertEquals(3000, result.getPrice());
+        verify(em).persist(testOrderDetail);
     }
 }

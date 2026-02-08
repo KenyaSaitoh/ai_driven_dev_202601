@@ -1,30 +1,43 @@
-# 機能設計書
+# person_management - 機能設計書（画面グループ）
+
+画面グループ名: person_management
+バージョン: 1.0.0
+最終更新日: 2026-02-08
+ステータス: 基本設計
+
+---
 
 ## 1. 概要
 
-本ドキュメントは、人材管理システム（JSF Person）の機能設計（基本設計）を定義する。画面一覧、画面遷移、画面の役割と機能を記述する。
+本文書は、person_management画面グループの機能設計を記述する。画面一覧、画面遷移、画面の役割と機能を論理レベルで定義する。
 
-注意: 実装クラス（Managed Bean、Service、Dao等）の詳細、メソッドシグネチャ、アノテーションは詳細設計書（detailed_design.md）で記述します。
+* 実装クラス設計（Managed Bean、Service、Dao等）、メソッドシグネチャ、アノテーションは詳細設計（detailed_design/FUNC_XXX/detailed_design.md）で記述する
+* 共通機能（認証、セキュリティ、共通Service等）はcommonドメインを参照すること
+* JSFは画面中心のサーバーサイドMVCフレームワーク
+* 画面グループ: 関連する画面群（一覧、入力、確認等）をまとめたもの
+
+---
 
 ## 2. 画面一覧
 
 ### 2.1 画面リスト
 
-* SCREEN_001_PersonList: PERSON一覧画面
+* SCREEN_001_PersonList: PERSON一覧
   * URL: /personList.xhtml
-  * 目的: 全PERSON情報を一覧表示し、追加・編集・削除のエントリーポイントを提供
-  * 主要機能: 一覧表示、新規追加、編集、削除
+  * 目的: 登録されている全PERSON情報を一覧表示する
+  * 主要機能: 全PERSON取得、新規追加、編集、削除
 
-* SCREEN_002_PersonInput: PERSON入力画面
+* SCREEN_002_PersonInput: PERSON入力
   * URL: /personInput.xhtml
-  * 目的: PERSON情報の入力または編集を行う
-  * モード: 新規追加モードと編集モード
-  * 主要機能: データ入力、バリデーション、確認画面への遷移
+  * 目的: PERSON情報を入力または編集する
+  * 主要機能: PERSON情報の入力フォーム、バリデーション
 
-* SCREEN_003_PersonConfirm: PERSON確認画面
+* SCREEN_003_PersonConfirm: PERSON確認
   * URL: /personConfirm.xhtml
-  * 目的: 入力または編集されたPERSON情報を確認し、登録・更新を実行する
-  * 主要機能: 入力内容確認、登録実行、入力画面への戻り
+  * 目的: 入力したPERSON情報を確認する
+  * 主要機能: 入力内容の表示、登録実行、戻る
+
+---
 
 ## 3. 画面遷移図
 
@@ -33,402 +46,324 @@
 ```mermaid
 graph TD
     Start([システム起動])
-    List[SCREEN_001_PersonList<br/>PERSON一覧画面<br/>personList.xhtml]
-    Input[SCREEN_002_PersonInput<br/>PERSON入力画面<br/>personInput.xhtml]
-    Confirm[SCREEN_003_PersonConfirm<br/>PERSON確認画面<br/>personConfirm.xhtml]
-    
-    Start -->|初回アクセス| List
-    
-    List -->|新規追加ボタン| Input
-    List -->|編集ボタン<br/>personId指定| Input
-    List -->|削除ボタン<br/>personId指定| List
-    
-    Input -->|確認画面へボタン| Confirm
-    Input -->|キャンセルボタン| List
-    
-    Confirm -->|登録ボタン| List
-    Confirm -->|戻るボタン| Input
-    
-    style List fill:#e1f5ff
-    style Input fill:#fff4e1
-    style Confirm fill:#e8f5e9
+    Screen1[SCREEN_001_PersonList<br/>PERSON一覧<br/>personList.xhtml]
+    Screen2[SCREEN_002_PersonInput<br/>PERSON入力<br/>personInput.xhtml]
+    Screen3[SCREEN_003_PersonConfirm<br/>PERSON確認<br/>personConfirm.xhtml]
+
+    Start -->|初回アクセス| Screen1
+
+    Screen1 -->|新規追加ボタン| Screen2
+    Screen1 -->|編集ボタン<br/>personId指定| Screen2
+    Screen1 -->|削除ボタン<br/>personId指定| Screen1
+
+    Screen2 -->|確認画面へボタン| Screen3
+    Screen2 -->|キャンセルボタン| Screen1
+
+    Screen3 -->|登録ボタン| Screen1
+    Screen3 -->|戻るボタン| Screen2
+
+    style Screen1 fill:#e1f5ff
+    style Screen2 fill:#fff4e1
+    style Screen3 fill:#e8f5e9
 ```
 
 ### 3.2 画面遷移詳細
 
-* PERSON一覧画面（personList.xhtml）
-  * → PERSON入力画面（personInput.xhtml）: 新規追加ボタンをクリック
-  * → PERSON入力画面（personInput.xhtml?personId=xxx）: 編集ボタンをクリック
-  * → PERSON一覧画面（personList.xhtml）: 削除ボタンをクリック（即座に削除してリロード）
+* PERSON一覧（personList.xhtml）
+  * → PERSON入力（personInput.xhtml）: "新規追加"リンクをクリック
+  * → PERSON入力（personInput.xhtml?personId=xxx）: "編集"リンクをクリック（既存データを表示）
+  * → PERSON一覧（personList.xhtml）: "削除"リンクをクリック（削除後にリダイレクト）
 
-* PERSON入力画面（personInput.xhtml）
-  * → PERSON確認画面（personConfirm.xhtml）: 確認画面へボタンをクリック
-  * → PERSON一覧画面（personList.xhtml）: キャンセルボタンをクリック
+* PERSON入力（personInput.xhtml）
+  * → PERSON確認（personConfirm.xhtml）: "確認画面へ"ボタンをクリック
+  * → PERSON一覧（personList.xhtml）: "キャンセル"ボタンをクリック
 
-* PERSON確認画面（personConfirm.xhtml）
-  * → PERSON一覧画面（personList.xhtml）: 登録ボタンをクリック（登録・更新後にリダイレクト）
-  * → PERSON入力画面（personInput.xhtml）: 戻るボタンをクリック
+* PERSON確認（personConfirm.xhtml）
+  * → PERSON一覧（personList.xhtml）: "登録"ボタンをクリック（登録後にリダイレクト）
+  * → PERSON入力（personInput.xhtml）: "戻る"ボタンをクリック（history.back()）
 
 ### 3.3 画面遷移のパターン
 
 * 通常遷移（Forward）
-  * 入力画面 → 確認画面
-  * データはFlash ScopeまたはView Scopeで引き継ぐ
+  * PERSON入力 → PERSON確認
+  * データはSession ScopeまたはView Scopeで引き継ぐ（Strutsではsession scope使用）
 
 * リダイレクト遷移（Redirect）
-  * 確認画面 → 一覧画面（登録・更新後）
-  * 一覧画面 → 一覧画面（削除後）
+  * PERSON確認 → PERSON一覧（登録後）
+  * PERSON一覧 → PERSON一覧（削除後）
   * 戻り値に "?faces-redirect=true" を付加
 
 * ブラウザ履歴を使用した戻る
-  * 確認画面 → 入力画面（戻るボタン）
+  * PERSON確認 → PERSON入力（戻るボタン）
   * JavaScript: history.back()
+
+---
 
 ## 4. 画面機能詳細
 
-注意: 以下は論理レベルの記述です。実装クラス（Managed Bean、Service、Dao）の詳細は詳細設計書（detailed_design.md）を参照してください。
+注意: 以下は論理レベルの記述です。実装クラス（Managed Bean、Service、Dao）の詳細は詳細設計書（detailed_design/FUNC_XXX/detailed_design.md）を参照してください。
 
-### 4.1 SCREEN_001_PersonList（PERSON一覧画面）
+### 4.1 SCREEN_001_PersonList（PERSON一覧）
 
 #### 4.1.1 画面の役割
 
-全PERSON情報を一覧表示し、新規追加・編集・削除の操作を提供する。
+登録されている全PERSON情報を一覧表示し、新規追加、編集、削除の操作を提供する。
 
 #### 4.1.2 画面初期表示
 
-1. 画面表示時に全PERSON情報をデータベースから取得
-2. PERSON_ID昇順でソート
-3. 一覧形式で表示
+1. PersonServiceを使用して全PERSONを取得する
+2. 取得したPERSONリストをPERSON_IDの昇順でソートする
+3. 一覧テーブルに表示する
 
-#### 4.1.3 主要機能
+#### 4.1.3 画面機能
 
-* 新規追加
-  * 新規追加ボタンをクリック
-  * PERSON入力画面へ遷移（新規追加モード）
+##### 4.1.3.1 新規追加
 
-* 編集
-  * 各行の編集ボタンをクリック
-  * 選択されたPERSON_IDをパラメータとして渡す
-  * PERSON入力画面へ遷移（編集モード）
+* トリガー: "新規追加"リンクをクリック
+* 処理内容:
+  1. PERSON入力画面に遷移する
+  2. フォームは空の状態で表示される（新規追加モード）
+* 画面遷移: PERSON入力（personInput.xhtml）
+* データ受け渡し: なし（新規追加モード）
 
-* 削除
-  * 各行の削除ボタンをクリック
-  * 指定されたPERSONをデータベースから削除
-  * 削除後、一覧を再表示
+##### 4.1.3.2 編集
 
-#### 4.1.4 表示項目
+* トリガー: 各行の"編集"リンクをクリック
+* 処理内容:
+  1. クリックした行のPERSON_IDをパラメータとして渡す
+  2. PERSON入力画面に遷移する
+  3. PERSON入力画面でIDから既存データを取得して表示する（編集モード）
+* 画面遷移: PERSON入力（personInput.xhtml?personId=xxx）
+* データ受け渡し: URLパラメータ（personId）
 
-* PERSON_ID（人材ID）
-* PERSON_NAME（人材名）
-* AGE（年齢）
-* GENDER（性別）
-* 操作ボタン（編集、削除）
+##### 4.1.3.3 削除
 
-### 4.2 SCREEN_002_PersonInput（PERSON入力画面）
+* トリガー: 各行の"削除"リンクをクリック
+* 処理内容:
+  1. JavaScriptで削除確認ダイアログを表示する（confirm）
+  2. OKをクリックした場合、PersonServiceを使用してPERSONを削除する
+  3. PERSON一覧画面にリダイレクトする
+* 画面遷移: PERSON一覧（personList.xhtml）（リダイレクト）
+* データ受け渡し: URLパラメータ（personId）
+
+#### 4.1.4 ビジネスルール
+
+* 全PERSONをPERSON_IDの昇順で表示する
+* データが0件の場合でもエラーとせず、空の一覧を表示する
+
+#### 4.1.5 エラーハンドリング
+
+* データ取得エラー: エラーメッセージを表示し、空の一覧を表示する
+* 削除エラー: エラーメッセージを表示し、一覧を再表示する
+
+---
+
+### 4.2 SCREEN_002_PersonInput（PERSON入力）
 
 #### 4.2.1 画面の役割
 
-PERSON情報の入力または編集を行う。新規追加モードと編集モードの2つのモードをサポート。
+PERSON情報を入力または編集するためのフォームを提供する。新規追加モードと編集モードの2つのモードがある。
 
 #### 4.2.2 画面初期表示
 
-* 編集モードの場合
-  1. URLパラメータからPERSON_IDを取得
-  2. 指定されたPERSON情報をデータベースから取得
-  3. 取得したデータを入力フィールドに設定
+* 新規追加モード（personId パラメータなし）:
+  1. フォームを空の状態で表示する
+  2. PERSON_IDはnull
 
-* 新規追加モードの場合
-  1. 全入力フィールドを空の状態で表示
+* 編集モード（personId パラメータあり）:
+  1. URLパラメータからPERSON_IDを取得する
+  2. PersonServiceを使用してIDから既存PERSONを取得する
+  3. 取得したPERSON情報をフォームに設定して表示する
 
-#### 4.2.3 主要機能
+#### 4.2.3 画面機能
 
-* 入力項目
-  * PERSON_NAME（人材名）: テキスト入力
-  * AGE（年齢）: 数値入力
-  * GENDER（性別）: ラジオボタン選択（男性/女性）
+##### 4.2.3.1 確認画面へ
 
-* 確認画面へ
-  * 確認画面へボタンをクリック
-  * 入力値をセッションまたはスコープに保存
-  * PERSON確認画面へ遷移
+* トリガー: "確認画面へ"ボタンをクリック
+* 処理内容:
+  1. 入力内容をフォームから取得する
+  2. バリデーションを実行する（Bean Validation）
+  3. バリデーション成功時、PERSON確認画面に遷移する
+  4. バリデーション失敗時、エラーメッセージを表示して画面にとどまる
+* 画面遷移: PERSON確認（personConfirm.xhtml）
+* データ受け渡し: Session Scopeまたはflash Scope（フォームデータ）
 
-* キャンセル
-  * キャンセルボタンをクリック
-  * PERSON一覧画面へリダイレクト（入力内容は破棄）
+##### 4.2.3.2 キャンセル
 
-#### 4.2.4 バリデーション
+* トリガー: "キャンセル"ボタンをクリック
+* 処理内容:
+  1. 入力内容を破棄する
+  2. PERSON一覧画面に遷移する
+* 画面遷移: PERSON一覧（personList.xhtml）
+* データ受け渡し: なし
 
-* PERSON_NAME: 必須、最大50文字
-* AGE: 必須、0以上150以下の整数
-* GENDER: 必須、選択肢から選択
+#### 4.2.4 ビジネスルール
 
-### 4.3 SCREEN_003_PersonConfirm（PERSON確認画面）
+* 名前（PERSON_NAME）: 必須、最大30文字
+* 年齢（AGE）: 必須、整数値
+* 性別（GENDER）: 必須、"male" または "female"
+
+#### 4.2.5 エラーハンドリング
+
+* バリデーションエラー: フィールドごとにエラーメッセージを表示
+* データ取得エラー（編集モード）: エラーメッセージを表示し、一覧画面に戻る
+
+---
+
+### 4.3 SCREEN_003_PersonConfirm（PERSON確認）
 
 #### 4.3.1 画面の役割
 
-入力または編集されたPERSON情報を確認し、登録・更新を実行する。
+入力したPERSON情報を確認し、登録または戻る操作を提供する。
 
 #### 4.3.2 画面初期表示
 
-1. PERSON入力画面から渡されたデータを取得
-2. 入力内容を確認用に表示
-3. 編集モードか新規追加モードかを判定
+1. Session ScopeまたはFlash ScopeからPersonFormデータを取得する
+2. 取得したデータを確認画面に表示する
+3. 性別の値（"male" / "female"）を日本語（"男性" / "女性"）に変換して表示する
 
-#### 4.3.3 主要機能
+#### 4.3.3 画面機能
 
-* 確認表示項目
-  * PERSON_NAME（人材名）: 読み取り専用表示
-  * AGE（年齢）: 読み取り専用表示
-  * GENDER（性別）: 読み取り専用表示（male→男性、female→女性に変換）
+##### 4.3.3.1 登録
 
-* 登録/更新
-  * 登録ボタンをクリック
-  * 新規追加モードの場合: データベースに新規PERSON登録
-  * 編集モードの場合: 既存PERSONを更新
-  * 登録/更新成功後、PERSON一覧画面へリダイレクト
+* トリガー: "登録"ボタンをクリック
+* 処理内容:
+  1. フォームデータをPersonエンティティに変換する
+  2. PERSON_IDがnullの場合は新規追加、PERSON_IDがある場合は更新を実行する
+  3. PersonServiceを使用してデータベースに保存する
+  4. PERSON一覧画面にリダイレクトする
+* 画面遷移: PERSON一覧（personList.xhtml）（リダイレクト）
+* データ受け渡し: なし
 
-* 戻る
-  * 戻るボタンをクリック
-  * PERSON入力画面へ戻る（入力内容は保持）
-  * ブラウザの履歴を使用して戻る
+##### 4.3.3.2 戻る
 
-#### 4.3.4 トランザクション管理
+* トリガー: "戻る"ボタンをクリック
+* 処理内容:
+  1. JavaScript history.back()を使用してPERSON入力画面に戻る
+  2. 入力内容は保持される
+* 画面遷移: PERSON入力（personInput.xhtml）（history.back()）
+* データ受け渡し: Session Scope（既存データを保持）
 
-* 登録/更新処理は単一トランザクションで実行
-* エラー発生時は自動ロールバック
-* 成功時はコミット後に一覧画面へ遷移
+#### 4.3.4 ビジネスルール
 
-## 5. 処理フロー
+* 新規追加の場合、PERSON_IDはnullで、データベース側で自動採番される
+* 更新の場合、PERSON_IDは既存の値を使用する
+* 性別の値は"male"または"female"で保存される
 
-注意: 以下は論理レベルの処理フローです。実装クラス名やメソッド名は詳細設計書（detailed_design.md）を参照してください。
+#### 4.3.5 エラーハンドリング
 
-### 5.1 PERSON一覧表示フロー
+* 登録エラー: エラーメッセージを表示し、入力画面に戻る
+* データベースエラー: エラーメッセージを表示し、一覧画面に戻る
 
-```
-一覧画面表示
-  ↓
-データベースから全PERSON取得
-  ↓
-PERSON_ID昇順でソート
-  ↓
-画面に一覧表示
-```
+---
 
-### 5.2 PERSON追加フロー
+## 5. Managed Bean設計（論理レベル）
 
-```
-一覧画面で新規追加ボタンをクリック
-  ↓
-入力画面表示（新規追加モード）
-  ↓
-PERSON情報を入力
-  ↓
-確認画面へボタンをクリック
-  ↓
-確認画面で入力内容を表示
-  ↓
-登録ボタンをクリック
-  ↓
-データベースに新規PERSON登録
-  ↓
-一覧画面へリダイレクト
-```
+注意: 実装クラス名、メソッドシグネチャ、アノテーションは詳細設計書で記述します。
 
-### 5.3 PERSON編集フロー
+### 5.1 PersonListBean
 
-```
-一覧画面で編集ボタンをクリック
-  ↓
-PERSON_IDをパラメータとして渡す
-  ↓
-入力画面表示（編集モード）
-  ↓
-既存PERSON情報をデータベースから取得
-  ↓
-入力フィールドに既存データを設定
-  ↓
-PERSON情報を編集
-  ↓
-確認画面へボタンをクリック
-  ↓
-確認画面で編集内容を表示
-  ↓
-登録ボタンをクリック
-  ↓
-データベースの既存PERSONを更新
-  ↓
-一覧画面へリダイレクト
-```
+* 責務: PERSON一覧画面の画面状態管理とアクション処理
+* スコープ: ViewScoped（推奨）
+* 主要プロパティ:
+  * personList: List<Person>型、表示するPERSONリスト
+* 主要アクションメソッド:
+  * init(): 画面初期表示時に全PERSONを取得する
+  * deletePerson(personId): 指定IDのPERSONを削除する
 
-### 5.4 PERSON削除フロー
+### 5.2 PersonInputBean
 
-```
-一覧画面で削除ボタンをクリック
-  ↓
-PERSON_IDをパラメータとして渡す
-  ↓
-データベースから指定PERSONを削除
-  ↓
-一覧を再取得
-  ↓
-一覧画面をリロード
-```
+* 責務: PERSON入力画面の画面状態管理とアクション処理
+* スコープ: ViewScoped（推奨）
+* 主要プロパティ:
+  * personId: Integer型、編集対象のPERSON_ID（新規追加時はnull）
+  * personName: String型、人材名
+  * age: Integer型、年齢
+  * gender: String型、性別
+* 主要アクションメソッド:
+  * init(): 画面初期表示時に編集モードの場合は既存データを取得する
+  * confirm(): 確認画面に遷移する
+  * cancel(): 一覧画面に戻る
 
-## 6. 画面間データ受け渡し
+### 5.3 PersonConfirmBean
 
-### 6.1 データ受け渡し方式
+* 責務: PERSON確認画面の画面状態管理とアクション処理
+* スコープ: ViewScoped（推奨）
+* 主要プロパティ:
+  * personForm: PersonForm型、確認するPERSON情報（Session Scopeから取得）
+* 主要アクションメソッド:
+  * register(): PERSONを登録または更新する
+  * back(): JavaScript history.back()で入力画面に戻る
 
-* 一覧画面 → 入力画面（編集モード）
-  * URLパラメータでPERSON_IDを渡す
-  * 例: personInput.xhtml?personId=123
-  * 入力画面の初期化時にPERSON_IDから既存データを取得
+---
 
-* 入力画面 → 確認画面
-  * 入力されたPERSON情報をセッションスコープまたは画面スコープで保持
-  * 確認画面で入力データを参照
+## 6. ビジネスロジック設計（論理レベル）
 
-* 確認画面 → 一覧画面
-  * リダイレクト遷移（データ受け渡しなし）
-  * 一覧画面で再度データベースからデータを取得
+注意: 実装クラス名、メソッドシグネチャは詳細設計書で記述します。
 
-### 6.2 データ保持スコープ
+### 6.1 PersonService
 
-* 画面スコープ
-  * 画面単位のライフサイクル
-  * 一覧画面、入力画面、確認画面で使用
-  * 画面間遷移で状態を維持
+* 責務: PERSONのビジネスロジック
+* 主要機能:
+  * getAllPersons(): 全PERSONを取得する
+  * getPersonById(personId): IDでPERSONを取得する
+  * addPerson(person): PERSONを新規追加する
+  * updatePerson(person): PERSONを更新する
+  * deletePerson(personId): PERSONを削除する
 
-* リクエストスコープ
-  * リクエスト単位のライフサイクル
-  * ビジネスロジック層で使用
-  * ステートレス、トランザクション境界
+### 6.2 トランザクション管理
 
-* フラッシュスコープ
-  * リダイレクト前後でデータを引き継ぐ
-  * 入力画面 → 確認画面のデータ受け渡しに使用可能
+* トランザクション境界: Service層
+* 例外時の動作: 自動ロールバック
 
-## 7. バリデーション
+---
 
-### 7.1 入力検証ルール
+## 7. データモデル
 
-* PERSON_NAME（名前）
-  * 必須入力
-  * 最大長: 30文字
+注意: テーブル定義の詳細はcommon/data_model.mdを参照してください。JPAエンティティクラス設計は詳細設計で記述します。
 
-* AGE（年齢）
-  * 必須入力
-  * 最小値: 0
-  * 最大値: 150
+### 7.1 使用するエンティティ
 
-* GENDER（性別）
-  * 必須入力
-  * 許可値: "male"（男性）または "female"（女性）
+* PERSON: 人材情報を管理するテーブル
+  * 主要フィールド: PERSON_ID, PERSON_NAME, AGE, GENDER
 
-### 7.2 バリデーション実行タイミング
+---
 
-* クライアントサイド
-  * 入力画面でリアルタイムバリデーション（オプション）
-  * JavaScriptによる基本チェック
+## 8. セキュリティ要件
 
-* サーバーサイド
-  * 確認画面へ遷移時に実行
-  * すべての入力値を検証
-  * バリデーションエラー時は入力画面に戻る
+### 8.1 認証・認可
 
-### 7.3 エラーメッセージ表示
+* 認証要件: 不要（現在のシステムでは認証機能なし）
+* 認可要件: なし
+* 保護が必要な画面: なし
 
-* 入力画面上部にエラーメッセージ領域を配置
-* バリデーションエラー時、該当フィールドとメッセージを表示
-* エラーフィールドは赤色でハイライト
+注意: JSF移行時に必要に応じてセキュリティ機能を追加することができます。
 
-## 8. アーキテクチャ概要
+### 8.2 入力検証
 
-注意: 実装クラスの詳細は詳細設計書（detailed_design.md）を参照してください。
+* バリデーション: Bean Validation（@NotNull、@Size等）
+* サニタイゼーション: XSS対策（Faceletsの自動エスケープ）、SQLインジェクション対策（JPQLパラメータバインディング）
 
-### 8.1 レイヤー構成
-
-```mermaid
-graph LR
-    subgraph "プレゼンテーション層"
-        List[一覧画面]
-        Input[入力画面]
-        Confirm[確認画面]
-    end
-    
-    subgraph "ビジネスロジック層"
-        Service[PERSON管理サービス]
-    end
-    
-    subgraph "データアクセス層"
-        Entity[PERSONエンティティ]
-        DB[データベース]
-    end
-    
-    List -->|依存| Service
-    Input -->|依存| Service
-    Confirm -->|依存| Service
-    Service -->|依存| Entity
-    Entity -->|マッピング| DB
-```
-
-### 8.2 レイヤー間の責務
-
-* プレゼンテーション層
-  * 画面表示とユーザー操作の制御
-  * 入力データのバリデーション
-  * ビジネスロジック層への処理委譲
-
-* ビジネスロジック層
-  * PERSON管理のビジネスロジック
-  * トランザクション管理
-  * データアクセス層への処理委譲
-
-* データアクセス層
-  * データベースへのCRUD操作
-  * PERSONエンティティの永続化管理
+---
 
 ## 9. 非機能要件
 
-### 9.1 トランザクション管理
+### 9.1 パフォーマンス
 
-* ビジネスロジック層でトランザクション境界を定義
-* データベース操作は必ずトランザクション内で実行
-* 例外発生時は自動的にロールバック
-* 成功時はコミット
+* 応答時間: 一般的なレスポンス時間
+* 大量データ対策: 現在のシステムでは全件取得のみ。将来的にページネーションを検討可能
 
-### 9.2 エラーハンドリング
+### 9.2 ユーザビリティ
 
-* システムエラー
-  * データベース接続エラー
-  * 予期しない例外
-  * エラーメッセージを画面に表示
-  * ログにエラー詳細を記録
+* エラーメッセージ: 明確で分かりやすいメッセージ
+* 操作性: 直感的なボタン配置、入力補助（プレースホルダー等）
 
-* 業務エラー
-  * バリデーションエラー
-  * データ不整合エラー
-  * エラーメッセージを画面に表示
-  * 入力画面またはエラー画面に遷移
-
-### 9.3 ロギング
-
-* ログ出力レベル
-  * INFO: 登録・更新・削除の成功
-  * WARN: バリデーションエラー、業務エラー
-  * ERROR: システムエラー、予期しない例外
-
-* ログ出力内容
-  * 操作種別（追加/更新/削除）
-  * 対象PERSON_ID
-  * 操作日時
-  * エラー詳細（エラー時）
+---
 
 ## 10. 参考資料
 
-* [システム要件定義](../../requirements/requirements.md) - システム要件
-* [アーキテクチャ設計書](../common/architecture_design.md) - システム全体のアーキテクチャ
-* [データモデル](../common/data_model.md) - データベーススキーマの詳細
-* [振る舞い仕様書](./behaviors.md) - システム全体の振る舞い
-* [SCREEN_001_PersonList仕様](../../detailed_design/FUNC_001_PersonList/detailed_design.md)
-* [SCREEN_002_PersonInput仕様](../../detailed_design/FUNC_002_PersonInput/detailed_design.md)
-* [SCREEN_003_PersonConfirm仕様](../../detailed_design/FUNC_003_PersonConfirm/detailed_design.md)
+* [screen_design.md](screen_design.md) - 画面設計書（レイアウト、入力項目詳細）
+* [behaviors.md](behaviors.md) - 振る舞い仕様書（E2Eテスト用）
+* [../common/functional_design.md](../common/functional_design.md) - 共通機能設計書
+* [../common/data_model.md](../common/data_model.md) - データモデル仕様書
+* [../common/architecture_design.md](../common/architecture_design.md) - アーキテクチャ設計書

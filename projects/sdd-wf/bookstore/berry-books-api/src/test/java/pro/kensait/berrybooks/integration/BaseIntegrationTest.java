@@ -8,23 +8,20 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * 結合テストの基底クラス
+ * 結合テストのベースクラス
  * 
- * 責務:
- * * Weld SE（CDIコンテナ）の起動・停止
- * * WireMockServerの起動・停止
- * * EntityManagerの管理
- * * トランザクション管理（各テストでロールバック）
+ * このクラスは以下を提供する:
+ * - Weld SE（CDIコンテナ）の起動・停止
+ * - WireMockServer（外部APIモック）の起動・停止
+ * - EntityManagerFactoryの作成・破棄
+ * - テストごとのEntityManagerとトランザクション管理
+ * 
+ * @Tag("integration")を付与し、単体テストと分離
  */
 @Tag("integration")
 public abstract class BaseIntegrationTest {
@@ -41,10 +38,11 @@ public abstract class BaseIntegrationTest {
     public static void setUpAll() {
         logger.info("[ BaseIntegrationTest#setUpAll ] Starting integration test environment");
         
-        // Weld SE の起動（明示的にCDIを有効化）
+        // Weld SE の起動（enableDiscovery()で明示的にCDIを有効化）
+        // pro.kensait.berrybooks パッケージ全体をスキャン対象にする
         Weld weld = new Weld()
             .enableDiscovery()
-            .addPackages(true, BaseIntegrationTest.class.getPackage());
+            .addPackages(true, pro.kensait.berrybooks.integration.BaseIntegrationTest.class);
         container = weld.initialize();
         logger.info("[ BaseIntegrationTest#setUpAll ] Weld SE container started");
         
@@ -61,18 +59,14 @@ public abstract class BaseIntegrationTest {
     
     @AfterAll
     public static void tearDownAll() {
-        logger.info("[ BaseIntegrationTest#tearDownAll ] Shutting down integration test environment");
-        
         if (emf != null && emf.isOpen()) {
             emf.close();
             logger.info("[ BaseIntegrationTest#tearDownAll ] EntityManagerFactory closed");
         }
-        
         if (wireMockServer != null && wireMockServer.isRunning()) {
             wireMockServer.stop();
             logger.info("[ BaseIntegrationTest#tearDownAll ] WireMockServer stopped");
         }
-        
         if (container != null) {
             container.close();
             logger.info("[ BaseIntegrationTest#tearDownAll ] Weld SE container closed");
@@ -81,42 +75,29 @@ public abstract class BaseIntegrationTest {
     
     @BeforeEach
     public void setUp() {
-        logger.info("[ BaseIntegrationTest#setUp ] Setting up test");
-        
-        // EntityManager の取得
         em = emf.createEntityManager();
-        
-        // トランザクション開始
         em.getTransaction().begin();
-        
-        logger.info("[ BaseIntegrationTest#setUp ] EntityManager created, transaction started");
+        logger.debug("[ BaseIntegrationTest#setUp ] EntityManager created and transaction started");
     }
     
     @AfterEach
     public void tearDown() {
-        logger.info("[ BaseIntegrationTest#tearDown ] Tearing down test");
-        
-        // トランザクションのロールバック
         if (em != null && em.getTransaction().isActive()) {
             em.getTransaction().rollback();
-            logger.info("[ BaseIntegrationTest#tearDown ] Transaction rolled back");
+            logger.debug("[ BaseIntegrationTest#tearDown ] Transaction rolled back");
         }
-        
-        // EntityManager のクローズ
         if (em != null && em.isOpen()) {
             em.close();
-            logger.info("[ BaseIntegrationTest#tearDown ] EntityManager closed");
+            logger.debug("[ BaseIntegrationTest#tearDown ] EntityManager closed");
         }
-        
-        // WireMock のリセット
         if (wireMockServer != null && wireMockServer.isRunning()) {
             wireMockServer.resetAll();
-            logger.info("[ BaseIntegrationTest#tearDown ] WireMock reset");
+            logger.debug("[ BaseIntegrationTest#tearDown ] WireMock stubs reset");
         }
     }
     
     /**
-     * テストデータをDBに投入してフラッシュする
+     * エンティティを永続化してフラッシュする
      */
     protected void persistAndFlush(Object entity) {
         em.persist(entity);

@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * 注文作成レスポンス・注文履歴レスポンスDTO
+ * 注文情報レスポンス
  */
 public record OrderResponse(
     Integer orderTranId,

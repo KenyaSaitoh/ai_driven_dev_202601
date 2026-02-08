@@ -1,14 +1,14 @@
 package pro.kensait.berrybooks.security;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * JwtUtil の単体テスト
- * 
- * @since 1.0.0
+ * JwtUtilの単体テスト
  */
 class JwtUtilTest {
     
@@ -17,142 +17,88 @@ class JwtUtilTest {
     @BeforeEach
     void setUp() {
         jwtUtil = new JwtUtil();
-        // 手動で初期化
-        try {
-            var secretField = JwtUtil.class.getDeclaredField("secretKey");
-            secretField.setAccessible(true);
-            secretField.set(jwtUtil, "your-secret-key-at-least-256-bits-long-for-hs256-algorithm");
-            jwtUtil.init();
-        } catch (Exception e) {
-            fail("Setup failed: " + e.getMessage());
-        }
+        // Simulate @PostConstruct initialization
+        jwtUtil.init();
     }
     
-    /**
-     * Scenario: 顧客IDとメールアドレスからJWTを生成
-     * 
-     * Given: JwtUtilが初期化されている
-     *        秘密鍵が設定されている
-     *        customerId=1, email="test@example.com"
-     * When: generateToken(1, "test@example.com")を呼び出す
-     * Then: JWTトークン文字列が返される
-     *       トークンが3つのパート（ヘッダー、ペイロード、署名）で構成されている
-     */
     @Test
     void testGenerateToken_Success() {
-        // Given
+        // Given: 顧客情報
         Integer customerId = 1;
-        String email = "test@example.com";
+        String customerName = "山田太郎";
         
-        // When
-        String token = jwtUtil.generateToken(customerId, email);
+        // When: generateToken()を呼び出す
+        String token = jwtUtil.generateToken(customerId, customerName);
         
-        // Then
+        // Then: JWT文字列が返される
         assertNotNull(token);
         assertFalse(token.isEmpty());
-        String[] parts = token.split("\\.");
-        assertEquals(3, parts.length, "JWT should have 3 parts");
+        assertTrue(token.startsWith("eyJ")); // JWTの標準的な開始文字列
     }
     
-    /**
-     * Scenario: 有効なJWTトークンを検証
-     * 
-     * Given: JwtUtilが初期化されている
-     *        有効なJWTトークンが存在する
-     * When: validateToken(validToken)を呼び出す
-     * Then: trueが返される
-     */
     @Test
-    void testValidateToken_ValidToken_ReturnsTrue() {
-        // Given
-        String token = jwtUtil.generateToken(1, "test@example.com");
+    void testValidateToken_Success() {
+        // Given: 有効なJWTトークンを生成
+        Integer customerId = 1;
+        String customerName = "山田太郎";
+        String token = jwtUtil.generateToken(customerId, customerName);
         
-        // When
-        boolean result = jwtUtil.validateToken(token);
+        // When: validateToken()を呼び出す
+        Claims claims = jwtUtil.validateToken(token);
         
-        // Then
-        assertTrue(result, "Valid token should return true");
+        // Then: Claimsが返される
+        assertNotNull(claims);
+        assertEquals(customerId, claims.get("customerId", Integer.class));
+        assertEquals(customerName, claims.get("customerName", String.class));
     }
     
-    /**
-     * Scenario: 不正な署名のJWTトークンを検証
-     * 
-     * Given: JwtUtilが初期化されている
-     *        不正な署名のJWTトークンが存在する
-     * When: validateToken(invalidToken)を呼び出す
-     * Then: falseが返される
-     *       例外はスローされない
-     */
     @Test
-    void testValidateToken_InvalidSignature_ReturnsFalse() {
-        // Given
-        String invalidToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.invalid_signature";
+    void testExtractCustomerId_Success() {
+        // Given: 有効なJWTトークンを生成
+        Integer customerId = 1;
+        String customerName = "山田太郎";
+        String token = jwtUtil.generateToken(customerId, customerName);
         
-        // When
-        boolean result = jwtUtil.validateToken(invalidToken);
+        // When: extractCustomerId()を呼び出す
+        Integer extractedCustomerId = jwtUtil.extractCustomerId(token);
         
-        // Then
-        assertFalse(result, "Invalid token should return false");
+        // Then: customerIdが抽出される
+        assertEquals(customerId, extractedCustomerId);
     }
     
-    /**
-     * Scenario: JWTトークンから顧客IDを抽出
-     * 
-     * Given: JwtUtilが初期化されている
-     *        有効なJWTトークン（customerId=1含む）が存在する
-     * When: getCustomerIdFromToken(token)を呼び出す
-     * Then: 1が返される
-     */
     @Test
-    void testGetCustomerIdFromToken_Success() {
-        // Given
-        Integer expectedCustomerId = 1;
-        String token = jwtUtil.generateToken(expectedCustomerId, "test@example.com");
+    void testExtractCustomerName_Success() {
+        // Given: 有効なJWTトークンを生成
+        Integer customerId = 1;
+        String customerName = "山田太郎";
+        String token = jwtUtil.generateToken(customerId, customerName);
         
-        // When
-        Integer customerId = jwtUtil.getCustomerIdFromToken(token);
+        // When: extractCustomerName()を呼び出す
+        String extractedCustomerName = jwtUtil.extractCustomerName(token);
         
-        // Then
-        assertEquals(expectedCustomerId, customerId, "Customer ID should be extracted correctly");
+        // Then: customerNameが抽出される
+        assertEquals(customerName, extractedCustomerName);
     }
     
-    /**
-     * Scenario: JWTトークンからメールアドレスを抽出
-     * 
-     * Given: JwtUtilが初期化されている
-     *        有効なJWTトークン（email="test@example.com"含む）が存在する
-     * When: getEmailFromToken(token)を呼び出す
-     * Then: "test@example.com"が返される
-     */
     @Test
-    void testGetEmailFromToken_Success() {
-        // Given
-        String expectedEmail = "test@example.com";
-        String token = jwtUtil.generateToken(1, expectedEmail);
+    void testValidateToken_InvalidSignature() {
+        // Given: 不正な署名のJWTトークン
+        String invalidToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIn0.invalid";
         
-        // When
-        String email = jwtUtil.getEmailFromToken(token);
-        
-        // Then
-        assertEquals(expectedEmail, email, "Email should be extracted correctly");
+        // When & Then: validateToken()はJwtExceptionをスロー
+        assertThrows(JwtException.class, () -> {
+            jwtUtil.validateToken(invalidToken);
+        });
     }
     
-    /**
-     * Scenario: 空文字列のトークンを検証
-     * 
-     * Given: JwtUtilが初期化されている
-     * When: validateToken("")を呼び出す
-     * Then: falseが返される
-     */
     @Test
-    void testValidateToken_EmptyToken_ReturnsFalse() {
-        // Given
-        String emptyToken = "";
+    void testValidateToken_MalformedToken() {
+        // Given: 不正な形式のトークン
+        String malformedToken = "not.a.jwt.token";
         
-        // When
-        boolean result = jwtUtil.validateToken(emptyToken);
-        
-        // Then
-        assertFalse(result, "Empty token should return false");
+        // When & Then: validateToken()はJwtExceptionをスロー
+        assertThrows(JwtException.class, () -> {
+            jwtUtil.validateToken(malformedToken);
+        });
     }
 }

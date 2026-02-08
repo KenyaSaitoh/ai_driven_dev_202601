@@ -4,7 +4,7 @@
 バージョン: 1.0.0  
 最終更新日: 2026-02-07
 
-記法: シナリオは Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）。principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること。
+記法: シナリオは Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）
 
 ---
 
@@ -13,375 +13,271 @@
 本文書は、books_proxyドメインの単体テスト用の振る舞い、テストシナリオ、受入基準を記述する。
 
 テスト対象:
-* BookResource（JAX-RS）
+* BookResource（書籍API）
+* CategoryResource（カテゴリAPI）
 
 単体テストの範囲:
-* books_proxyドメイン内の機能をテスト
-* 外部API連携（BackOfficeRestClient）はモック化
-* 結合テストシナリオは ../../basic_design/books_proxy/behaviors.md を参照すること
-* E2Eテストシナリオは ../../requirements/behaviors.md を参照すること
+* 外部API呼び出しの正常系・異常系をテスト
+* BackOfficeRestClientはモック化
+* 実際の外部API呼び出しは結合テストで検証
 
 関連ドキュメント:
 * [detailed_design.md](detailed_design.md) - 詳細設計書
-* [../../basic_design/books_proxy/functional_design.md](../../basic_design/books_proxy/functional_design.md) - 書籍プロキシ機能設計書
-* [../../basic_design/books_proxy/behaviors.md](../../basic_design/books_proxy/behaviors.md) - 書籍プロキシ振る舞い仕様書（結合テスト用）
+* [../../basic_design/books_proxy/functional_design.md](../../basic_design/books_proxy/functional_design.md) - 書籍API連携機能設計書
+* [../../basic_design/books_proxy/behaviors.md](../../basic_design/books_proxy/behaviors.md) - 結合テスト用振る舞い仕様書
 
 ---
 
 ## 2. テストシナリオ
 
-### 2.1 BookResource - 書籍一覧取得（正常系）
+### 2.1 BookResource - 書籍一覧取得
 
-#### Feature: 書籍一覧取得
+#### Feature: 書籍一覧取得API
 
-#### Scenario: 全書籍を取得する
+全書籍の一覧を取得する
+
+#### Scenario: 書籍一覧を正常に取得
 
 * Given（前提条件）:
   * BackOfficeRestClientがモック化されている
-  * モック設定: `getAllBooks()` が BookTO のリストを返す
+  * モック設定: findAllBooks()が書籍リストを返す
 
 * When（操作）:
-  * BookResource.getAllBooks() を呼び出す
+  * BookResource.getAllBooks()を呼び出す
 
 * Then（期待結果）:
-  * HTTPステータス 200 OK が返される
-  * レスポンスボディに BookTO のリスト（JSON）が含まれる
-  * BackOfficeRestClient.getAllBooks() が1回呼ばれる
+  * HTTPステータス200 OKが返される
+  * レスポンスボディにList<BookTO>が含まれる
+  * BackOfficeRestClient.findAllBooks()が1回呼ばれる
 
 #### テストデータ
-
-* モックが返すデータ:
+* モックの戻り値:
   ```json
   [
     {
       "bookId": 1,
       "bookName": "Java完全理解",
-      "author": "著者A",
-      "categoryId": 1,
-      "categoryName": "技術",
-      "publisherId": 1,
-      "publisherName": "出版社A",
+      "author": "山田太郎",
       "price": 3000,
-      "quantity": 10,
-      "version": 1
-    },
-    {
-      "bookId": 2,
-      "bookName": "Spring Boot入門",
-      "author": "著者B",
-      "categoryId": 1,
-      "categoryName": "技術",
-      "publisherId": 2,
-      "publisherName": "出版社B",
-      "price": 2500,
-      "quantity": 5,
-      "version": 1
+      "quantity": 10
     }
   ]
   ```
 
----
-
-### 2.2 BookResource - 書籍詳細取得（正常系）
-
-#### Feature: 書籍詳細取得
-
-#### Scenario: 指定された書籍IDの詳細を取得する
+#### Scenario: 外部API呼び出し失敗時
 
 * Given（前提条件）:
   * BackOfficeRestClientがモック化されている
-  * モック設定: `getBookById(1)` が BookTO を返す
+  * モック設定: findAllBooks()がRuntimeExceptionをスローする
 
 * When（操作）:
-  * BookResource.getBookById(1) を呼び出す
+  * BookResource.getAllBooks()を呼び出す
 
 * Then（期待結果）:
-  * HTTPステータス 200 OK が返される
-  * レスポンスボディに BookTO（JSON）が含まれる
-  * BackOfficeRestClient.getBookById(1) が1回呼ばれる
+  * RuntimeExceptionがスローされる
+  * ExceptionMapperで500 Internal Server Errorに変換される
+
+---
+
+### 2.2 BookResource - 書籍詳細取得
+
+#### Feature: 書籍詳細取得API
+
+書籍IDで書籍詳細を取得する
+
+#### Scenario: 書籍詳細を正常に取得
+
+* Given（前提条件）:
+  * BackOfficeRestClientがモック化されている
+  * モック設定: findBookById(1)が書籍情報を返す
+
+* When（操作）:
+  * BookResource.getBookById(1)を呼び出す
+
+* Then（期待結果）:
+  * HTTPステータス200 OKが返される
+  * レスポンスボディにBookTOが含まれる
+  * bookIdが1である
 
 #### テストデータ
-
-* 入力: `bookId = 1`
-* モックが返すデータ:
+* 入力: bookId = 1
+* モックの戻り値:
   ```json
   {
     "bookId": 1,
     "bookName": "Java完全理解",
-    "author": "著者A",
+    "author": "山田太郎",
     "categoryId": 1,
-    "categoryName": "技術",
     "publisherId": 1,
-    "publisherName": "出版社A",
+    "publisherName": "技術評論社",
     "price": 3000,
     "quantity": 10,
     "version": 1
   }
   ```
 
----
-
-### 2.3 BookResource - 書籍詳細取得（異常系: 書籍が見つからない）
-
-#### Feature: 書籍詳細取得
-
-#### Scenario: 存在しない書籍IDを指定した場合
+#### Scenario: 書籍が存在しない場合
 
 * Given（前提条件）:
   * BackOfficeRestClientがモック化されている
-  * モック設定: `getBookById(999)` が WebApplicationException（404 Not Found）をスローする
+  * モック設定: findBookById(999)がWebApplicationException（404）をスローする
 
 * When（操作）:
-  * BookResource.getBookById(999) を呼び出す
+  * BookResource.getBookById(999)を呼び出す
 
 * Then（期待結果）:
-  * WebApplicationException（404 Not Found）がスローされる
-  * レスポンスボディにエラーメッセージが含まれる
-
-#### テストデータ
-
-* 入力: `bookId = 999`（存在しない書籍ID）
+  * WebApplicationExceptionがスローされる
+  * HTTPステータス404 Not Foundが返される
 
 ---
 
-### 2.4 BookResource - 書籍検索（JPQL、正常系）
+### 2.3 BookResource - 書籍検索（JPQL）
 
-#### Feature: 書籍検索（JPQL）
+#### Feature: 書籍検索API（JPQL版）
 
-#### Scenario: カテゴリIDで書籍を検索する
+カテゴリIDまたはキーワードで書籍を検索する
+
+#### Scenario: カテゴリIDで書籍を検索
 
 * Given（前提条件）:
   * BackOfficeRestClientがモック化されている
-  * モック設定: `searchBooksJpql(1, null)` が BookTO のリストを返す
+  * モック設定: searchBooksJpql(1, null)が該当書籍リストを返す
 
 * When（操作）:
-  * BookResource.searchBooksJpql(1, null) を呼び出す
+  * BookResource.searchBooksJpql(categoryId=1, keyword=null)を呼び出す
 
 * Then（期待結果）:
-  * HTTPステータス 200 OK が返される
-  * レスポンスボディに BookTO のリスト（JSON）が含まれる
-  * BackOfficeRestClient.searchBooksJpql(1, null) が1回呼ばれる
+  * HTTPステータス200 OKが返される
+  * レスポンスボディに該当するList<BookTO>が含まれる
+  * すべての書籍のcategoryIdが1である
+
+#### Scenario: キーワードで書籍を検索
+
+* Given（前提条件）:
+  * BackOfficeRestClientがモック化されている
+  * モック設定: searchBooksJpql(null, "Java")がキーワードに一致する書籍リストを返す
+
+* When（操作）:
+  * BookResource.searchBooksJpql(categoryId=null, keyword="Java")を呼び出す
+
+* Then（期待結果）:
+  * HTTPステータス200 OKが返される
+  * レスポンスボディにList<BookTO>が含まれる
+  * 書籍名に"Java"が含まれる
+
+#### Scenario: 該当書籍がない場合
+
+* Given（前提条件）:
+  * BackOfficeRestClientがモック化されている
+  * モック設定: searchBooksJpql(null, "存在しないキーワード")が空のリストを返す
+
+* When（操作）:
+  * BookResource.searchBooksJpql(categoryId=null, keyword="存在しないキーワード")を呼び出す
+
+* Then（期待結果）:
+  * HTTPステータス200 OKが返される
+  * レスポンスボディに空のリストが含まれる
+
+---
+
+### 2.4 BookResource - 書籍検索（Criteria API）
+
+#### Feature: 書籍検索API（Criteria API版）
+
+カテゴリIDまたはキーワードで書籍を検索する
+
+#### Scenario: カテゴリIDとキーワードの両方で検索
+
+* Given（前提条件）:
+  * BackOfficeRestClientがモック化されている
+  * モック設定: searchBooksCriteria(1, "Java")が両条件に一致する書籍リストを返す
+
+* When（操作）:
+  * BookResource.searchBooksCriteria(categoryId=1, keyword="Java")を呼び出す
+
+* Then（期待結果）:
+  * HTTPステータス200 OKが返される
+  * レスポンスボディにList<BookTO>が含まれる
+  * すべての書籍のcategoryIdが1である
+  * すべての書籍名に"Java"が含まれる
+
+#### Scenario: パラメータなしで検索
+
+* Given（前提条件）:
+  * BackOfficeRestClientがモック化されている
+  * モック設定: searchBooksCriteria(null, null)が全書籍リストを返す
+
+* When（操作）:
+  * BookResource.searchBooksCriteria(categoryId=null, keyword=null)を呼び出す
+
+* Then（期待結果）:
+  * HTTPステータス200 OKが返される
+  * レスポンスボディに全書籍のList<BookTO>が含まれる
+
+---
+
+### 2.5 CategoryResource - カテゴリ一覧取得
+
+#### Feature: カテゴリ一覧取得API
+
+カテゴリ一覧をマップ形式で取得する
+
+#### Scenario: カテゴリ一覧を正常に取得
+
+* Given（前提条件）:
+  * BackOfficeRestClientがモック化されている
+  * モック設定: findAllCategories()がカテゴリリストを返す
+
+* When（操作）:
+  * CategoryResource.getAllCategories()を呼び出す
+
+* Then（期待結果）:
+  * HTTPステータス200 OKが返される
+  * レスポンスボディにMap<String, Integer>が含まれる
+  * キーがカテゴリ名、値がカテゴリIDである
+  * BackOfficeRestClient.findAllCategories()が1回呼ばれる
 
 #### テストデータ
-
-* 入力: `categoryId = 1`, `keyword = null`
-* モックが返すデータ:
+* モックの戻り値:
   ```json
   [
-    {
-      "bookId": 1,
-      "bookName": "Java完全理解",
-      "categoryId": 1,
-      "categoryName": "技術"
-    }
+    {"categoryId": 1, "categoryName": "プログラミング"},
+    {"categoryId": 2, "categoryName": "データベース"},
+    {"categoryId": 3, "categoryName": "ネットワーク"}
   ]
   ```
-
----
-
-### 2.5 BookResource - 書籍検索（JPQL、キーワード検索）
-
-#### Feature: 書籍検索（JPQL）
-
-#### Scenario: キーワードで書籍を検索する
-
-* Given（前提条件）:
-  * BackOfficeRestClientがモック化されている
-  * モック設定: `searchBooksJpql(null, "Java")` が BookTO のリストを返す
-
-* When（操作）:
-  * BookResource.searchBooksJpql(null, "Java") を呼び出す
-
-* Then（期待結果）:
-  * HTTPステータス 200 OK が返される
-  * レスポンスボディに BookTO のリスト（JSON）が含まれる
-  * BackOfficeRestClient.searchBooksJpql(null, "Java") が1回呼ばれる
-
-#### テストデータ
-
-* 入力: `categoryId = null`, `keyword = "Java"`
-* モックが返すデータ:
-  ```json
-  [
-    {
-      "bookId": 1,
-      "bookName": "Java完全理解"
-    },
-    {
-      "bookId": 2,
-      "bookName": "Java入門"
-    }
-  ]
-  ```
-
----
-
-### 2.6 BookResource - 書籍検索（Criteria API、正常系）
-
-#### Feature: 書籍検索（Criteria API）
-
-#### Scenario: カテゴリIDとキーワードで書籍を検索する
-
-* Given（前提条件）:
-  * BackOfficeRestClientがモック化されている
-  * モック設定: `searchBooksCriteria(1, "Java")` が BookTO のリストを返す
-
-* When（操作）:
-  * BookResource.searchBooksCriteria(1, "Java") を呼び出す
-
-* Then（期待結果）:
-  * HTTPステータス 200 OK が返される
-  * レスポンスボディに BookTO のリスト（JSON）が含まれる
-  * BackOfficeRestClient.searchBooksCriteria(1, "Java") が1回呼ばれる
-
-#### テストデータ
-
-* 入力: `categoryId = 1`, `keyword = "Java"`
-* モックが返すデータ:
-  ```json
-  [
-    {
-      "bookId": 1,
-      "bookName": "Java完全理解",
-      "categoryId": 1,
-      "categoryName": "技術"
-    }
-  ]
-  ```
-
----
-
-### 2.7 BookResource - カテゴリ一覧取得（正常系）
-
-#### Feature: カテゴリ一覧取得
-
-#### Scenario: カテゴリ一覧をマップ形式で取得する
-
-* Given（前提条件）:
-  * BackOfficeRestClientがモック化されている
-  * モック設定: `getAllCategories()` がカテゴリマップを返す
-
-* When（操作）:
-  * BookResource.getAllCategories() を呼び出す
-
-* Then（期待結果）:
-  * HTTPステータス 200 OK が返される
-  * レスポンスボディにカテゴリマップ（JSON）が含まれる
-  * BackOfficeRestClient.getAllCategories() が1回呼ばれる
-
-#### テストデータ
-
-* モックが返すデータ:
+* 期待される出力:
   ```json
   {
-    "文学": 1,
-    "ビジネス": 2,
-    "技術": 3
+    "プログラミング": 1,
+    "データベース": 2,
+    "ネットワーク": 3
   }
   ```
 
----
-
-### 2.8 BookResource - 外部APIエラー（異常系）
-
-#### Feature: 外部APIエラーハンドリング
-
-#### Scenario: 外部API呼び出しでネットワークエラーが発生した場合
+#### Scenario: 外部API呼び出し失敗時
 
 * Given（前提条件）:
   * BackOfficeRestClientがモック化されている
-  * モック設定: `getAllBooks()` が ProcessingException をスローする
+  * モック設定: findAllCategories()がRuntimeExceptionをスローする
 
 * When（操作）:
-  * BookResource.getAllBooks() を呼び出す
+  * CategoryResource.getAllCategories()を呼び出す
 
 * Then（期待結果）:
-  * ProcessingException がスローされる
-  * 例外マッパーにより 503 Service Unavailable が返される
-
----
-
-### 2.9 BookResource - 外部APIタイムアウト（異常系）
-
-#### Feature: 外部APIタイムアウトハンドリング
-
-#### Scenario: 外部API呼び出しでタイムアウトが発生した場合
-
-* Given（前提条件）:
-  * BackOfficeRestClientがモック化されている
-  * モック設定: `getBookById(1)` が ProcessingException（タイムアウト）をスローする
-
-* When（操作）:
-  * BookResource.getBookById(1) を呼び出す
-
-* Then（期待結果）:
-  * ProcessingException がスローされる
-  * 例外マッパーにより 503 Service Unavailable が返される
-
----
-
-### 2.10 BookResource - パラメータ検証（境界値）
-
-#### Feature: パラメータ検証
-
-#### Scenario: 書籍ID = 0（最小値）で詳細を取得する
-
-* Given（前提条件）:
-  * BackOfficeRestClientがモック化されている
-  * モック設定: `getBookById(0)` が BookTO を返す
-
-* When（操作）:
-  * BookResource.getBookById(0) を呼び出す
-
-* Then（期待結果）:
-  * HTTPステータス 200 OK が返される
-  * BackOfficeRestClient.getBookById(0) が1回呼ばれる
-
-#### テストデータ（境界値）
-
-* 最小値: `bookId = 0`
-* 通常値: `bookId = 1`
-* null: JAX-RSパスパラメータのため、nullは不可（404 Not Found）
-
----
-
-### 2.11 BookResource - 空の結果（正常系）
-
-#### Feature: 空の結果
-
-#### Scenario: 検索結果が0件の場合
-
-* Given（前提条件）:
-  * BackOfficeRestClientがモック化されている
-  * モック設定: `searchBooksJpql(999, "存在しないキーワード")` が空のリストを返す
-
-* When（操作）:
-  * BookResource.searchBooksJpql(999, "存在しないキーワード") を呼び出す
-
-* Then（期待結果）:
-  * HTTPステータス 200 OK が返される
-  * レスポンスボディに空の配列（JSON）が含まれる
-
-#### テストデータ
-
-* 入力: `categoryId = 999`, `keyword = "存在しないキーワード"`
-* 期待される出力:
-  ```json
-  []
-  ```
+  * RuntimeExceptionがスローされる
+  * ExceptionMapperで500 Internal Server Errorに変換される
 
 ---
 
 ## 3. モック化の方針
 
 ### 3.1 ドメイン内の依存関係
-
-* BookResource → モック不要（テスト対象）
+* BookResource、CategoryResourceはモック不要（テスト対象）
 
 ### 3.2 ドメイン外の依存関係
-
-* BackOfficeRestClient（commonドメイン） → モック化
-* 外部API（back-office-api） → モック化（WireMock、結合テストで使用）
+* BackOfficeRestClient → モック化（Mockitoを使用）
+* 外部API（back-office-api）→ 実際の呼び出しなし（結合テストで検証）
 
 ---
 
@@ -395,25 +291,21 @@
 ## 5. 受入基準
 
 ### 5.1 機能要件
-
-* [ ] すべての正常系テストが成功する
-* [ ] すべての異常系テストが成功する
-* [ ] すべての境界値テストが成功する
-* [ ] 外部APIエラー時のハンドリングが適切に動作する
+- [ ] すべての正常系テストが成功する
+- [ ] すべての異常系テストが成功する
+- [ ] すべての境界値テスト（該当する場合）が成功する
 
 ### 5.2 品質要件
-
-* [ ] カバレッジ目標を達成する
-* [ ] テストコードにコメントが適切に記載されている
-* [ ] テストケースが独立している（テスト間の依存関係がない）
-* [ ] モック化が適切に行われている
+- [ ] カバレッジ目標を達成する
+- [ ] テストコードにコメントが適切に記載されている
+- [ ] テストケースが独立している（テスト間の依存関係がない）
+- [ ] モック設定が適切に行われている
 
 ---
 
 ## 6. 参考資料
 
 * [detailed_design.md](detailed_design.md) - 詳細設計書
-* [../../basic_design/books_proxy/functional_design.md](../../basic_design/books_proxy/functional_design.md) - 書籍プロキシ機能設計書
-* [../../basic_design/books_proxy/behaviors.md](../../basic_design/books_proxy/behaviors.md) - 書籍プロキシ振る舞い仕様書（結合テスト用）
+* [../../basic_design/books_proxy/functional_design.md](../../basic_design/books_proxy/functional_design.md) - 書籍API連携機能設計書
+* [../../basic_design/books_proxy/behaviors.md](../../basic_design/books_proxy/behaviors.md) - 結合テスト用振る舞い仕様書
 * [../../requirements/behaviors.md](../../requirements/behaviors.md) - システム振る舞い仕様書（E2Eテスト用）
-* [../common/detailed_design.md](../common/detailed_design.md) - 共通ドメイン詳細設計書

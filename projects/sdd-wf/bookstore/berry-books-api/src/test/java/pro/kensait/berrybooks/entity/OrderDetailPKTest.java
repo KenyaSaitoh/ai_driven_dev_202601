@@ -5,132 +5,113 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * OrderDetailPK の単体テスト
- * 
- * @since 1.0.0
+ * OrderDetailPKの単体テスト
  */
 class OrderDetailPKTest {
     
-    /**
-     * Scenario: 同じ値のOrderDetailPKが等しい
-     * 
-     * Given: OrderDetailPK pk1 = new OrderDetailPK(1, 1)
-     *        OrderDetailPK pk2 = new OrderDetailPK(1, 1)
-     * When: pk1.equals(pk2)を呼び出す
-     * Then: trueが返される
-     *       pk1.hashCode() == pk2.hashCode()
-     */
     @Test
-    void testEquals_SameValues_ReturnsTrue() {
-        // Given
+    void testEquals_SameValues() {
+        // Given: 同じ値の複合主キー
         OrderDetailPK pk1 = new OrderDetailPK(1, 1);
         OrderDetailPK pk2 = new OrderDetailPK(1, 1);
         
-        // When
-        boolean result = pk1.equals(pk2);
-        
-        // Then
-        assertTrue(result, "Same values should be equal");
-        assertEquals(pk1.hashCode(), pk2.hashCode(), "Hash codes should be equal");
+        // When & Then: equalsがtrueを返す
+        assertEquals(pk1, pk2);
+        assertTrue(pk1.equals(pk2));
     }
     
-    /**
-     * Scenario: 異なる値のOrderDetailPKが等しくない
-     * 
-     * Given: OrderDetailPK pk1 = new OrderDetailPK(1, 1)
-     *        OrderDetailPK pk2 = new OrderDetailPK(1, 2)
-     * When: pk1.equals(pk2)を呼び出す
-     * Then: falseが返される
-     */
     @Test
-    void testEquals_DifferentValues_ReturnsFalse() {
-        // Given
+    void testEquals_DifferentValues() {
+        // Given: 異なる値の複合主キー
         OrderDetailPK pk1 = new OrderDetailPK(1, 1);
         OrderDetailPK pk2 = new OrderDetailPK(1, 2);
         
-        // When
-        boolean result = pk1.equals(pk2);
-        
-        // Then
-        assertFalse(result, "Different values should not be equal");
+        // When & Then: equalsがfalseを返す
+        assertNotEquals(pk1, pk2);
+        assertFalse(pk1.equals(pk2));
     }
     
-    /**
-     * Scenario: nullとの比較
-     * 
-     * Given: OrderDetailPK pk1 = new OrderDetailPK(1, 1)
-     * When: pk1.equals(null)を呼び出す
-     * Then: falseが返される
-     */
     @Test
-    void testEquals_Null_ReturnsFalse() {
-        // Given
+    void testEquals_SameObject() {
+        // Given: 同一オブジェクト
         OrderDetailPK pk1 = new OrderDetailPK(1, 1);
         
-        // When
-        boolean result = pk1.equals(null);
-        
-        // Then
-        assertFalse(result, "Equals with null should return false");
+        // When & Then: equalsがtrueを返す
+        assertEquals(pk1, pk1);
+        assertTrue(pk1.equals(pk1));
     }
     
-    /**
-     * Scenario: 同じインスタンスとの比較
-     * 
-     * Given: OrderDetailPK pk1 = new OrderDetailPK(1, 1)
-     * When: pk1.equals(pk1)を呼び出す
-     * Then: trueが返される
-     */
     @Test
-    void testEquals_SameInstance_ReturnsTrue() {
-        // Given
+    void testEquals_Null() {
+        // Given: 複合主キーとnull
         OrderDetailPK pk1 = new OrderDetailPK(1, 1);
         
-        // When
-        boolean result = pk1.equals(pk1);
-        
-        // Then
-        assertTrue(result, "Same instance should be equal");
+        // When & Then: equalsがfalseを返す
+        assertFalse(pk1.equals(null));
     }
     
-    /**
-     * Scenario: 異なるクラスとの比較
-     * 
-     * Given: OrderDetailPK pk1 = new OrderDetailPK(1, 1)
-     *        Object other = new Object()
-     * When: pk1.equals(other)を呼び出す
-     * Then: falseが返される
-     */
     @Test
-    void testEquals_DifferentClass_ReturnsFalse() {
-        // Given
+    void testEquals_DifferentClass() {
+        // Given: 複合主キーと異なるクラスのオブジェクト
         OrderDetailPK pk1 = new OrderDetailPK(1, 1);
-        Object other = new Object();
+        String other = "not a pk";
         
-        // When
-        boolean result = pk1.equals(other);
-        
-        // Then
-        assertFalse(result, "Different class should not be equal");
+        // When & Then: equalsがfalseを返す
+        assertFalse(pk1.equals(other));
     }
     
-    /**
-     * Scenario: toStringメソッドのテスト
-     * 
-     * Given: OrderDetailPK pk1 = new OrderDetailPK(1, 1)
-     * When: pk1.toString()を呼び出す
-     * Then: 文字列表現が返される
-     */
     @Test
-    void testToString_ReturnsStringRepresentation() {
-        // Given
+    void testHashCode_SameValues() {
+        // Given: 同じ値の複合主キー
         OrderDetailPK pk1 = new OrderDetailPK(1, 1);
+        OrderDetailPK pk2 = new OrderDetailPK(1, 1);
         
-        // When
-        String result = pk1.toString();
+        // When & Then: 同じハッシュコードを返す
+        assertEquals(pk1.hashCode(), pk2.hashCode());
+    }
+    
+    @Test
+    void testHashCode_DifferentValues() {
+        // Given: 異なる値の複合主キー
+        OrderDetailPK pk1 = new OrderDetailPK(1, 1);
+        OrderDetailPK pk2 = new OrderDetailPK(1, 2);
         
-        // Then
-        assertNotNull(result);
-        assertTrue(result.contains("1"), "String representation should contain orderTranId");
+        // When & Then: 異なるハッシュコードを返す（通常は）
+        // 注: ハッシュコードは必ずしも異なるとは限らないが、通常は異なる
+        assertNotEquals(pk1.hashCode(), pk2.hashCode());
+    }
+    
+    @Test
+    void testGettersAndSetters() {
+        // Given: 複合主キー
+        OrderDetailPK pk = new OrderDetailPK();
+        
+        // When: setterを呼び出す
+        pk.setOrderTranId(10);
+        pk.setOrderDetailId(20);
+        
+        // Then: getterが正しい値を返す
+        assertEquals(10, pk.getOrderTranId());
+        assertEquals(20, pk.getOrderDetailId());
+    }
+    
+    @Test
+    void testConstructor_WithParameters() {
+        // When: パラメータ付きコンストラクタで生成
+        OrderDetailPK pk = new OrderDetailPK(5, 15);
+        
+        // Then: 値が正しく設定される
+        assertEquals(5, pk.getOrderTranId());
+        assertEquals(15, pk.getOrderDetailId());
+    }
+    
+    @Test
+    void testConstructor_NoParameters() {
+        // When: デフォルトコンストラクタで生成
+        OrderDetailPK pk = new OrderDetailPK();
+        
+        // Then: 値はnull
+        assertNull(pk.getOrderTranId());
+        assertNull(pk.getOrderDetailId());
     }
 }

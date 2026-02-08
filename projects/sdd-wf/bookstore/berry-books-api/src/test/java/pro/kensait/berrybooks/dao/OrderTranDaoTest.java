@@ -10,21 +10,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pro.kensait.berrybooks.entity.OrderTran;
 
-import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * OrderTranDao の単体テスト
- * 
- * @since 1.0.0
+ * OrderTranDaoの単体テスト
  */
 @ExtendWith(MockitoExtension.class)
 class OrderTranDaoTest {
@@ -32,165 +27,118 @@ class OrderTranDaoTest {
     @Mock
     private EntityManager em;
     
-    @Mock
-    private TypedQuery<OrderTran> query;
-    
     @InjectMocks
     private OrderTranDao orderTranDao;
     
+    private OrderTran testOrderTran;
+    
     @BeforeEach
-    void setUp() throws Exception {
-        // EntityManagerをDaoにインジェクション
-        Field emField = OrderTranDao.class.getDeclaredField("em");
-        emField.setAccessible(true);
-        emField.set(orderTranDao, em);
+    void setUp() {
+        // Given: テストデータを準備
+        testOrderTran = new OrderTran();
+        testOrderTran.setOrderDate(LocalDate.of(2026, 2, 7));
+        testOrderTran.setCustomerId(1);
+        testOrderTran.setTotalPrice(5400);
+        testOrderTran.setDeliveryPrice(400);
+        testOrderTran.setDeliveryAddress("東京都渋谷区1-1-1");
+        testOrderTran.setSettlementType(2);
     }
     
-    /**
-     * Scenario: 注文トランザクションを登録する
-     * 
-     * Given: OrderTranが存在する
-     * When: insert()を呼び出す
-     * Then: EntityManager.persist()が呼び出される
-     *       EntityManager.flush()が呼び出される
-     *       登録されたOrderTranが返される
-     */
     @Test
     void testInsert_Success() {
-        // Given
-        OrderTran orderTran = new OrderTran();
-        orderTran.setCustomerId(1);
-        orderTran.setTotalPrice(5000);
-        orderTran.setDeliveryPrice(500);
-        orderTran.setOrderDate(LocalDate.now());
+        // Given: EntityManagerがモック化されている
         
-        // When
-        OrderTran result = orderTranDao.insert(orderTran);
+        // When: insert()を呼び出す
+        OrderTran result = orderTranDao.insert(testOrderTran);
         
-        // Then
-        assertNotNull(result);
-        verify(em, times(1)).persist(orderTran);
-        verify(em, times(1)).flush();
+        // Then: persistが呼び出され、OrderTranが返される
+        verify(em).persist(testOrderTran);
+        assertEquals(testOrderTran, result);
     }
     
-    /**
-     * Scenario: 注文IDで注文トランザクションを取得する
-     * 
-     * Given: EntityManagerがモック化されている
-     *        モック設定: createQuery()が注文を返す
-     *        orderTranId=1の注文が存在する
-     * When: findById(1)を呼び出す
-     * Then: Optional<OrderTran>が返される
-     *       注文が取得される
-     */
     @Test
     void testFindById_Found() {
-        // Given
-        Integer orderTranId = 1;
-        OrderTran orderTran = new OrderTran();
-        orderTran.setOrderTranId(orderTranId);
-        orderTran.setCustomerId(1);
+        // Given: EntityManagerがモック化されている
+        testOrderTran.setOrderTranId(1);
+        when(em.find(OrderTran.class, 1)).thenReturn(testOrderTran);
         
-        when(em.createQuery(anyString(), eq(OrderTran.class))).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(Collections.singletonList(orderTran));
+        // When: findById()を呼び出す
+        OrderTran result = orderTranDao.findById(1);
         
-        // When
-        Optional<OrderTran> result = orderTranDao.findById(orderTranId);
-        
-        // Then
-        assertTrue(result.isPresent());
-        assertEquals(orderTranId, result.get().getOrderTranId());
-        verify(em, times(1)).createQuery(anyString(), eq(OrderTran.class));
+        // Then: 注文トランザクションが返される
+        assertNotNull(result);
+        assertEquals(1, result.getOrderTranId());
+        assertEquals(1, result.getCustomerId());
+        verify(em).find(OrderTran.class, 1);
     }
     
-    /**
-     * Scenario: 存在しない注文IDで検索
-     * 
-     * Given: EntityManagerがモック化されている
-     *        モック設定: createQuery()が空リストを返す
-     * When: findById(999)を呼び出す
-     * Then: Optional.empty()が返される
-     */
     @Test
     void testFindById_NotFound() {
-        // Given
-        Integer orderTranId = 999;
+        // Given: 存在しない注文ID
+        when(em.find(OrderTran.class, 999)).thenReturn(null);
         
-        when(em.createQuery(anyString(), eq(OrderTran.class))).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(Collections.emptyList());
+        // When: findById()を呼び出す
+        OrderTran result = orderTranDao.findById(999);
         
-        // When
-        Optional<OrderTran> result = orderTranDao.findById(orderTranId);
-        
-        // Then
-        assertFalse(result.isPresent());
+        // Then: nullが返される
+        assertNull(result);
+        verify(em).find(OrderTran.class, 999);
     }
     
-    /**
-     * Scenario: 顧客IDで注文履歴を取得
-     * 
-     * Given: EntityManagerがモック化されている
-     *        モック設定: createQuery()が注文リストを返す
-     *        顧客ID=1の注文が2件存在する
-     * When: findByCustomerId(1)を呼び出す
-     * Then: 2件の注文が返される
-     *       注文日の降順でソートされている
-     */
     @Test
-    void testFindByCustomerId_Success() {
-        // Given
-        Integer customerId = 1;
-        
+    void testFindByCustomerId_Found() {
+        // Given: 顧客ID=1の注文が複数存在する
         OrderTran order1 = new OrderTran();
         order1.setOrderTranId(1);
-        order1.setCustomerId(customerId);
-        order1.setOrderDate(LocalDate.of(2026, 1, 1));
+        order1.setCustomerId(1);
+        order1.setOrderDate(LocalDate.of(2026, 2, 7));
         
         OrderTran order2 = new OrderTran();
         order2.setOrderTranId(2);
-        order2.setCustomerId(customerId);
-        order2.setOrderDate(LocalDate.of(2026, 1, 2));
+        order2.setCustomerId(1);
+        order2.setOrderDate(LocalDate.of(2026, 2, 6));
         
-        List<OrderTran> orders = Arrays.asList(order2, order1); // 降順
+        List<OrderTran> mockResults = Arrays.asList(order1, order2);
         
-        when(em.createQuery(anyString(), eq(OrderTran.class))).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(orders);
+        TypedQuery<OrderTran> mockQuery = mock(TypedQuery.class);
+        when(em.createQuery(anyString(), eq(OrderTran.class))).thenReturn(mockQuery);
+        when(mockQuery.setParameter("customerId", 1)).thenReturn(mockQuery);
+        when(mockQuery.getResultList()).thenReturn(mockResults);
         
-        // When
-        List<OrderTran> result = orderTranDao.findByCustomerId(customerId);
+        // When: findByCustomerId()を呼び出す
+        List<OrderTran> results = orderTranDao.findByCustomerId(1);
         
-        // Then
-        assertEquals(2, result.size());
-        assertEquals(2, result.get(0).getOrderTranId()); // 新しい注文が先
-        assertEquals(1, result.get(1).getOrderTranId());
+        // Then: 注文リストが注文日の降順で返される
+        assertNotNull(results);
+        assertEquals(2, results.size());
+        assertEquals(1, results.get(0).getOrderTranId());
+        assertEquals(2, results.get(1).getOrderTranId());
+        
+        // And: 最初の要素が最新の注文である
+        assertTrue(results.get(0).getOrderDate().isAfter(results.get(1).getOrderDate()));
+        
+        verify(em).createQuery(anyString(), eq(OrderTran.class));
+        verify(mockQuery).setParameter("customerId", 1);
+        verify(mockQuery).getResultList();
     }
     
-    /**
-     * Scenario: 注文が存在しない顧客IDで検索
-     * 
-     * Given: EntityManagerがモック化されている
-     *        モック設定: createQuery()が空リストを返す
-     * When: findByCustomerId(999)を呼び出す
-     * Then: 空のリストが返される
-     *       例外はスローされない
-     */
     @Test
-    void testFindByCustomerId_Empty() {
-        // Given
-        Integer customerId = 999;
+    void testFindByCustomerId_NotFound() {
+        // Given: 存在しない顧客ID
+        TypedQuery<OrderTran> mockQuery = mock(TypedQuery.class);
+        when(em.createQuery(anyString(), eq(OrderTran.class))).thenReturn(mockQuery);
+        when(mockQuery.setParameter("customerId", 999)).thenReturn(mockQuery);
+        when(mockQuery.getResultList()).thenReturn(Arrays.asList());
         
-        when(em.createQuery(anyString(), eq(OrderTran.class))).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(Collections.emptyList());
+        // When: findByCustomerId()を呼び出す
+        List<OrderTran> results = orderTranDao.findByCustomerId(999);
         
-        // When
-        List<OrderTran> result = orderTranDao.findByCustomerId(customerId);
+        // Then: 空リストが返される
+        assertNotNull(results);
+        assertTrue(results.isEmpty());
         
-        // Then
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        verify(em).createQuery(anyString(), eq(OrderTran.class));
+        verify(mockQuery).setParameter("customerId", 999);
+        verify(mockQuery).getResultList();
     }
 }

@@ -1,6 +1,13 @@
 package pro.kensait.berrybooks.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -8,15 +15,10 @@ import java.util.List;
 
 /**
  * 注文トランザクションエンティティ
- * 
- * 注文の基本情報（注文日、顧客ID、合計金額、配送先等）を管理する。
- * 
- * @since 1.0.0
  */
 @Entity
 @Table(name = "ORDER_TRAN")
 public class OrderTran implements Serializable {
-    
     private static final long serialVersionUID = 1L;
     
     @Id
@@ -42,36 +44,11 @@ public class OrderTran implements Serializable {
     @Column(name = "SETTLEMENT_TYPE", nullable = false)
     private Integer settlementType;
     
-    @OneToMany(mappedBy = "orderTran", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "orderTran", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails = new ArrayList<>();
     
-    /**
-     * デフォルトコンストラクタ
-     */
     public OrderTran() {
     }
-    
-    /**
-     * 注文明細を追加する
-     * 
-     * @param orderDetail 注文明細
-     */
-    public void addOrderDetail(OrderDetail orderDetail) {
-        orderDetails.add(orderDetail);
-        orderDetail.setOrderTran(this);
-    }
-    
-    /**
-     * 注文明細を削除する
-     * 
-     * @param orderDetail 注文明細
-     */
-    public void removeOrderDetail(OrderDetail orderDetail) {
-        orderDetails.remove(orderDetail);
-        orderDetail.setOrderTran(null);
-    }
-    
-    // Getters and Setters
     
     public Integer getOrderTranId() {
         return orderTranId;
@@ -137,17 +114,13 @@ public class OrderTran implements Serializable {
         this.orderDetails = orderDetails;
     }
     
-    @Override
-    public String toString() {
-        return "OrderTran{" +
-                "orderTranId=" + orderTranId +
-                ", orderDate=" + orderDate +
-                ", customerId=" + customerId +
-                ", totalPrice=" + totalPrice +
-                ", deliveryPrice=" + deliveryPrice +
-                ", deliveryAddress='" + deliveryAddress + '\'' +
-                ", settlementType=" + settlementType +
-                ", orderDetailsCount=" + (orderDetails != null ? orderDetails.size() : 0) +
-                '}';
+    public void addOrderDetail(OrderDetail orderDetail) {
+        orderDetails.add(orderDetail);
+        orderDetail.setOrderTran(this);
+    }
+    
+    public void removeOrderDetail(OrderDetail orderDetail) {
+        orderDetails.remove(orderDetail);
+        orderDetail.setOrderTran(null);
     }
 }

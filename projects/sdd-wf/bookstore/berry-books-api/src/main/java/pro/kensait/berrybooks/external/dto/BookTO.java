@@ -1,33 +1,95 @@
 package pro.kensait.berrybooks.external.dto;
 
+import java.io.Serializable;
+
 /**
- * 書籍情報転送オブジェクト
- * 
- * back-office-apiからの書籍・在庫情報を転送する。
- * 
- * @param bookId 書籍ID
- * @param bookName 書籍名
- * @param author 著者
- * @param categoryId カテゴリID
- * @param categoryName カテゴリ名
- * @param publisherId 出版社ID
- * @param publisherName 出版社名
- * @param price 価格
- * @param quantity 在庫数
- * @param version 楽観的ロックバージョン
- * 
- * @since 1.0.0
+ * 書籍情報の転送オブジェクト
  */
-public record BookTO(
-    Integer bookId,
-    String bookName,
-    String author,
-    Integer categoryId,
-    String categoryName,
-    Integer publisherId,
-    String publisherName,
-    Integer price,
-    Integer quantity,
-    Long version
-) {
+public class BookTO implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    private Integer bookId;
+    private String bookName;
+    private String author;
+    private Integer categoryId;
+    private Integer publisherId;
+    private String publisherName;
+    private Integer price;
+    private Integer quantity;
+    private Long version;
+    
+    public BookTO() {
+    }
+    
+    public Integer getBookId() {
+        return bookId;
+    }
+    
+    public void setBookId(Integer bookId) {
+        this.bookId = bookId;
+    }
+    
+    public String getBookName() {
+        return bookName;
+    }
+    
+    public void setBookName(String bookName) {
+        this.bookName = bookName;
+    }
+    
+    public String getAuthor() {
+        return author;
+    }
+    
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+    
+    public Integer getCategoryId() {
+        return categoryId;
+    }
+    
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
+    }
+    
+    public Integer getPublisherId() {
+        return publisherId;
+    }
+    
+    public void setPublisherId(Integer publisherId) {
+        this.publisherId = publisherId;
+    }
+    
+    public String getPublisherName() {
+        return publisherName;
+    }
+    
+    public void setPublisherName(String publisherName) {
+        this.publisherName = publisherName;
+    }
+    
+    public Integer getPrice() {
+        return price;
+    }
+    
+    public void setPrice(Integer price) {
+        this.price = price;
+    }
+    
+    public Integer getQuantity() {
+        return quantity;
+    }
+    
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+    
+    public Long getVersion() {
+        return version;
+    }
+    
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 }
