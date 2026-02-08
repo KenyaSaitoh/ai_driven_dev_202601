@@ -84,12 +84,14 @@ AIと対話しながら以下を実施（対話的プロセス）
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
 * target_domain: <ドメイン名>
+* skip_infrastructure: false  # commonドメイン初回setup時のみ: true の場合、インフラセットアップをスキップ
 ```
 
 AIが自動で以下を実行
 1. 詳細設計（detailed_design/{target_domain}/）を読み込み
 2. 実装コードを生成（Resource、Service、Dao、Entity、DTO等）
    * 既存コードがある場合は、削除せずに差分のみを反映する
+   * commonドメイン初回時: skip_infrastructure=true の場合、DB/APサーバーのインストールをスキップ（スキーマ作成・初期データは実行）
 3. ドメイン粒度内の単体テストを作成
    * ドメイン内のコンポーネント間は実際の連携をテスト
    * ドメイン外の依存関係のみモック化
@@ -106,10 +108,13 @@ AIが自動で以下を実行
 パラメータ
 * project_root: <プロジェクトルートパス>
 * target_domain: <ドメイン名>
+* gradle_project_dir: <Gradleタスク実行ディレクトリ>（オプション、マルチプロジェクト構成の場合に指定）
 ```
 
 AIが自動で以下を実行
 1. テスト実行（gradle test jacocoTestReport）
+   * マルチプロジェクト構成の場合、gradle_project_dir で指定したディレクトリでGradleタスクを実行
+   * 未指定の場合は project_root で実行
 2. テスト結果とカバレッジ分析
 3. 問題の分類（テスト失敗、必要な振る舞い、デッドコード、設計の誤り）
 4. フィードバックレポート生成
@@ -119,6 +124,7 @@ AIが自動で以下を実行
 * 問題を発見してもユーザー確認なしに修正しない
 * カバレッジ不足やデッドコードを具体的に提案
 * 必要に応じてステップ2（詳細設計）に戻ってループ
+* マルチプロジェクト構成では gradle_project_dir を適切に指定すること
 
 フィードバックループ:
 ```

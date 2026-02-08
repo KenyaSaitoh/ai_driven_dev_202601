@@ -47,6 +47,11 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 
 ## 2. E2Eテストの生成
 
+**マルチプロジェクト構成の考慮:**
+* Gradleのマルチプロジェクト構成の場合、build.gradleの場所はサブプロジェクトごとに異なる
+* テスト実行時は、適切なbuild.gradleが存在するディレクトリで `./gradlew` コマンドを実行する必要がある
+* ルートプロジェクトの build.gradle でサブプロジェクトのタスクを実行する場合は `:subproject:e2eTest` のような形式を使用
+
 ### 2.1 主テスト: JUnit 5 + REST Assured（従来型、必須）
 
 * `src/test/java` 配下に通常のJUnitテストクラスを作成

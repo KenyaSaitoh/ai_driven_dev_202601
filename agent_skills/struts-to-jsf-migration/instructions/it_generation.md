@@ -112,6 +112,11 @@ spec_directory: "projects/sdd-wf/person/jsf-person-sdd/specs/baseline"
   * 見つかった場合、そちらに依存関係を追加する
 * `integrationTest` タスクについても同様に、既存の定義を確認してから追加の要否を判断する
 
+**マルチプロジェクト構成の考慮:**
+* Gradleのマルチプロジェクト構成の場合、build.gradleの場所はサブプロジェクトごとに異なる
+* テスト実行時は、適切なbuild.gradleが存在するディレクトリで `./gradlew` コマンドを実行する必要がある
+* ルートプロジェクトの build.gradle でサブプロジェクトのタスクを実行する場合は `:subproject:integrationTest` のような形式を使用
+
 ### 2.2 Weld SE の設定
 
 * `src/test/resources/META-INF/beans.xml`: Jakarta EE Beans 4.0、`bean-discovery-mode="all"`

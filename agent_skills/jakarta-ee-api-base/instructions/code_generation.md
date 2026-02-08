@@ -8,19 +8,21 @@
 project_root: "ここにプロジェクトルートのパスを入力"
 spec_directory: "ここにSPECディレクトリのパスを入力"
 target_domain: "対象ドメイン名"
+skip_infrastructure: false  # commonドメイン初回setup時のみ: true の場合、インフラセットアップをスキップ
 ```
 
-* 例1: commonドメインの実装
+* 例1: commonドメインの実装（初回setup時）
 ```yaml
-project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
-spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
+project_root: "projects/sdd-wf/bookstore/back-office-api"
+spec_directory: "projects/sdd-wf/bookstore/back-office-api/specs/baseline"
 target_domain: "common"
+skip_infrastructure: true  # 開発環境がすでに構築済みの場合
 ```
 
 * 例2: ordersドメインの実装
 ```yaml
-project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
-spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
+project_root: "projects/sdd-wf/bookstore/back-office-api"
+spec_directory: "projects/sdd-wf/bookstore/back-office-api/specs/baseline"
 target_domain: "orders"
 ```
 
@@ -29,6 +31,7 @@ target_domain: "orders"
 * 以降、`{project_root}` と表記されている箇所は、上記で設定した値に置き換える
 * 以降、`{spec_directory}` と表記されている箇所は、上記で設定した値に置き換える
 * commonは最優先で実装する必要がある（他のドメインはcommonに依存）
+* `skip_infrastructure` は commonドメイン実装時のみ有効。他のドメインではこのパラメータは無視される
 
 ---
 
@@ -189,6 +192,15 @@ commonドメインは最初に実装する必要がある:
 * データベーススキーマのセットアップ
 * Entity, Dao, JWT, 認証フィルター等の実装
 * 共通例外クラス、ユーティリティクラスの実装
+
+注意: インフラセットアップのスキップ
+* `skip_infrastructure: true` パラメータが指定された場合、以下のインフラ関連タスクはスキップする
+  * データベースサーバーのインストール・起動
+  * アプリケーションサーバーのインストール・設定
+  * ミドルウェアのセットアップ
+* スキップ可能な理由: 開発環境がすでに構築済みの場合や、CI/CD環境で実行する場合
+* 常に実行するタスク: データベーススキーマ作成、初期データ投入、静的リソース配置などのアプリケーション固有のセットアップは実行する
+* `skip_infrastructure` は commonドメイン実装時のみ有効。その他のドメインではこのパラメータは無視される
 
 #### コードの前にテスト
 

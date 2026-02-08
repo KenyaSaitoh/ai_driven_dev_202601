@@ -47,6 +47,12 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 
 ## 2. 結合テストの生成
 
+**マルチプロジェクト構成の考慮:**
+* Gradleのマルチプロジェクト構成の場合、build.gradleの場所はサブプロジェクトごとに異なる
+* 依存関係の追加や設定は、適切なbuild.gradleに対して行う必要がある
+* テスト実行時は、適切なbuild.gradleが存在するディレクトリで `./gradlew` コマンドを実行する
+* ルートプロジェクトの build.gradle でサブプロジェクトのタスクを実行する場合は `:subproject:integrationTest` のような形式を使用
+
 ### 2.1 主テスト: JUnit 5 + Weld SE（従来型、必須）
 
 * `src/test/java` 配下に通常のJUnitテストクラスを作成
