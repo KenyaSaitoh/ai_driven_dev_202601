@@ -226,7 +226,7 @@ specs/
 * **Agent Skills使用時**: `build_script_path` パラメータにリポジトリルートの build.gradle のパスを指定することを推奨
   ```yaml
   project_root: projects/sdd-wf/person/jsf-person
-  build_script_path: ./build.gradle  # リポジトリルートのbuild.gradleを指定
+  build_script_path: build.gradle  # オプション（マルチプロジェクト構成のため指定）
   ```
 
 ### テスト実行時の注意点
@@ -241,7 +241,7 @@ specs/
 パラメータ:
 * project_root: projects/sdd-wf/person/jsf-person
 * target_type: FUNC_001_PersonList
-* build_script_path: ./build.gradle  # リポジトリルートのbuild.gradleを指定
+* build_script_path: build.gradle  # オプション（マルチプロジェクト構成のため指定）
 ```
 
 ---

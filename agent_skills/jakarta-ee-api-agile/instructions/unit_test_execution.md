@@ -5,9 +5,9 @@
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
 target: "common"  # または "usecases/<usecase_folder>" 例: usecases/order-creation
-build_script_path: null   # オプション。build.gradleファイルのパス（未指定時は project_root の build.gradle を使用）
-                          # マルチプロジェクト構成の場合、ルートの build.gradle または サブプロジェクトの build.gradle を指定
-                          # 例: "./build.gradle" (リポジトリルート) または "d:/GitHubRepos/.../build.gradle" (絶対パス)
+build_script_path: null   # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
+                          # build.gradleファイルのパス（未指定時は project_root の build.gradle を使用）
+                          # 例: "build.gradle" (リポジトリルート) または "d:/GitHubRepos/.../build.gradle" (絶対パス)
 ```
 
 * 例: common の単体テストを実行
@@ -60,9 +60,9 @@ target: "usecases/order-creation"
 target に応じて、実行するテストスコープを common 用パッケージ/クラスまたはユースケース用パッケージ/クラスに限定してよい（プロジェクトのテスト構成に依存）。
 
 **マルチプロジェクト構成の考慮:**
-* Gradleのマルチプロジェクト構成の場合、build.gradleの場所はサブプロジェクトごとに異なる
-* build_script_path パラメータでルートの build.gradle のパスを指定すること（例: "./build.gradle"）
-* 指定されたパスからディレクトリ部分を抽出してそのディレクトリで Gradle コマンドを実行する
+* 通常は build_script_path の指定は不要です（project_root の build.gradle を自動使用）
+* マルチプロジェクト構成の場合のみ、build_script_path パラメータでルートの build.gradle のパスを指定します（例: "build.gradle"）
+* 指定されたパスからディレクトリ部分を抽出してそのディレクトリで Gradle コマンドを実行します
 
 ---
 

@@ -330,7 +330,7 @@ AIが自動で実行:
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
 * usecase_folder: <ユースケースフォルダ名>（オプション。指定時はそのユースケースの結合テストのみ）
-* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
+* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
 ```
 
 AIが自動で実行:
@@ -339,6 +339,8 @@ AIが自動で実行:
    * Service層以下（Service + DAO + Entity）の実際の連携をテスト
    * 実際のDB（メモリDB）。外部APIは WireMock でスタブ化
 3. `@Tag("integration")` で結合テストを分離
+4. テスト生成後、自動的に結合テストを実行（./gradlew integrationTest）
+   * テスト結果を分析し、成功/失敗を報告
 
 生成されるファイル:
 ```
@@ -368,7 +370,7 @@ E2Eテストを生成してください
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
 * usecase_folder: <ユースケースフォルダ名>（オプション。指定時はそのユースケースのE2Eのみ）
-* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
+* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
 ```
 
 AIが自動で実行:
@@ -376,6 +378,9 @@ AIが自動で実行:
 2. JUnit 5 + Cucumber（.feature + ステップ定義）+ REST Assured でE2Eテストを生成
    * API層を含む全体フロー、実際のHTTPリクエスト/レスポンス、実DB
 3. `@Tag("e2e")` でE2Eテストを分離
+4. テスト生成後、自動的にE2Eテストを実行（./gradlew e2eTest）
+   * アプリケーションサーバーが起動していることを確認
+   * テスト結果を分析し、成功/失敗を報告
 
 重要: アプリケーションサーバーが起動している状態で実行する
 
@@ -483,7 +488,7 @@ common のコードを生成してください
 パラメータ:
 * project_root: projects/sdd-agile/bookstore/berry-books-api
 * spec_directory: projects/sdd-agile/bookstore/berry-books-api/specs/baseline
-* build_script_path: "./build.gradle"  # マルチプロジェクト構成用
+* build_script_path: "build.gradle"  # マルチプロジェクト構成の場合のみ指定（リポジトリルート）
 ```
 
 ```
@@ -494,7 +499,7 @@ E2Eテストを生成してください
 パラメータ:
 * project_root: projects/sdd-agile/bookstore/berry-books-api
 * spec_directory: projects/sdd-agile/bookstore/berry-books-api/specs/baseline
-* build_script_path: "./build.gradle"  # マルチプロジェクト構成用
+* build_script_path: "build.gradle"  # マルチプロジェクト構成の場合のみ指定（リポジトリルート）
 ```
 
 実行方法（プロジェクトの build.gradle に定義されたタスクに従う）:

@@ -8,9 +8,9 @@
 project_root: "ここにプロジェクトルートのパスを入力"
 spec_directory: "ここにSPECディレクトリのパスを入力"
 target_domains: "対象ドメイン名（カンマ区切りで複数指定可能、または all）"
-build_script_path: null     # オプション。build.gradleファイルのパス（未指定時は project_root の build.gradle を使用）
-                            # マルチプロジェクト構成の場合、ルートの build.gradle または サブプロジェクトの build.gradle を指定
-                            # 例: "./build.gradle" (リポジトリルート) または "d:/GitHubRepos/.../build.gradle" (絶対パス)
+build_script_path: null     # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
+                            # build.gradleファイルのパス（未指定時は project_root の build.gradle を使用）
+                            # 例: "build.gradle" (リポジトリルート) または "d:/GitHubRepos/.../build.gradle" (絶対パス)
 ```
 
 * 例1: 特定のドメインの結合テスト
@@ -18,7 +18,7 @@ build_script_path: null     # オプション。build.gradleファイルのパ�
 project_root: "projects/sdd-wf/bookstore/back-office-api"
 spec_directory: "projects/sdd-wf/bookstore/back-office-api/specs/baseline"
 target_domains: "common,orders"
-build_script_path: "./build.gradle"  # マルチプロジェクト構成用
+build_script_path: "build.gradle"  # マルチプロジェクト構成の場合のみ指定（リポジトリルート）
 ```
 
 * 例2: すべてのドメインの結合テスト
@@ -26,7 +26,7 @@ build_script_path: "./build.gradle"  # マルチプロジェクト構成用
 project_root: "projects/sdd-wf/bookstore/back-office-api"
 spec_directory: "projects/sdd-wf/bookstore/back-office-api/specs/baseline"
 target_domains: "all"
-build_script_path: "./build.gradle"  # マルチプロジェクト構成用
+build_script_path: "build.gradle"  # マルチプロジェクト構成の場合のみ指定（リポジトリルート）
 ```
 
 注意
@@ -144,10 +144,10 @@ build_script_path: "./build.gradle"  # マルチプロジェクト構成用
 * `integrationTest` タスクについても同様に、既存の定義を確認してから追加の要否を判断する
 
 **マルチプロジェクト構成の考慮:**
-* Gradleのマルチプロジェクト構成の場合、build.gradleの場所はサブプロジェクトごとに異なる
-* build_script_path パラメータでルートの build.gradle のパスを指定すること（例: "./build.gradle"）
-* 指定されたパスからディレクトリ部分を抽出してそのディレクトリで `./gradlew` コマンドを実行する
-* ルートプロジェクトの build.gradle でサブプロジェクトのタスクを実行する場合は `:subproject:integrationTest` のような形式を使用
+* 通常は build_script_path パラメータの指定は不要です（project_root の build.gradle を自動使用）
+* マルチプロジェクト構成の場合のみ、build_script_path パラメータでルートの build.gradle のパスを指定します（例: "build.gradle"）
+* 指定されたパスからディレクトリ部分を抽出してそのディレクトリで `./gradlew` コマンドを実行します
+* ルートプロジェクトの build.gradle でサブプロジェクトのタスクを実行する場合は `:subproject:integrationTest` のような形式を使用します
 
 ### 2.2 Weld SE の設定
 
@@ -553,7 +553,65 @@ basic_design/{target_domain}/behaviors.md は Gherkin 記法で記述されて�
 
 ---
 
-## 8. 参考資料
+## 8. 結合テスト実行
+
+テストコード生成後、自動的に結合テストを実行する。
+
+### 8.1 実行ディレクトリの決定
+
+* `build_script_path` パラメータが指定されている場合:
+  * `build_script_path` のディレクトリ部分を抽出（例: "./build.gradle" → "."）
+  * そのディレクトリに `cd` してからGradleタスクを実行
+* `build_script_path` パラメータが未指定の場合:
+  * `{project_root}` でGradleタスクを実行
+
+### 8.2 Gradleタスク実行
+
+```bash
+# build_script_path のディレクトリで以下を実行
+./gradlew integrationTest
+```
+
+実行するタスク:
+* `integrationTest` - 結合テスト実行（@Tag("integration") が付与されたテスト）
+* プロジェクトのbuild.gradleに定義されたタスク名に従うこと
+
+マルチプロジェクト構成の場合:
+* ルートの build.gradle から実行する場合: `./gradlew :subproject:integrationTest`
+* サブプロジェクトの build.gradle から実行する場合: `./gradlew integrationTest`
+
+### 8.3 テスト結果の確認
+
+テスト実行後、以下を確認する:
+
+1. **テスト結果レポート**
+   * `{project_root}/build/reports/tests/integrationTest/index.html`
+   * テスト成功数、失敗数、スキップ数を確認
+
+2. **失敗したテストの分析**
+   * 失敗したテストのスタックトレースを確認
+   * 失敗の原因を特定（アサーション失敗、例外、タイムアウト等）
+
+3. **エラーメッセージ**
+   * Gradleの実行ログからエラーメッセージを抽出
+   * コンパイルエラー、依存関係の問題、設定ミス等を確認
+
+### 8.4 結果の報告
+
+テスト実行結果をユーザーに報告する:
+
+* **成功時**: 
+  * "結合テストが正常に完了しました"
+  * テスト件数と実行時間を表示
+  
+* **失敗時**:
+  * "結合テストで失敗が検出されました"
+  * 失敗したテストの詳細を表示
+  * 推奨される対応策を提示
+
+---
+
+## 9. 参考資料
 
 * Weld SE公式ドキュメント: https://weld.cdi-spec.org/
 * WireMock公式ドキュメント: https://wiremock.org/

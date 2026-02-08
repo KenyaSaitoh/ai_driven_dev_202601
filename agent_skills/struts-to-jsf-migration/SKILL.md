@@ -111,13 +111,13 @@ AIが自動で以下を実行
 パラメータ
 * project_root: projects/jsf-migration/struts-app-jsf
 * target_domain: common  # または person_management 等
-* build_script_path: <build.gradleファイルのパス>（オプション、マルチプロジェクト構成の場合に指定、例: "./build.gradle"）
+* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定（例: "build.gradle"）
 ```
 
 AIが自動で以下を実行
 1. テスト実行（gradle test jacocoTestReport）
-   * マルチプロジェクト構成の場合、build_script_path で指定した build.gradle のディレクトリでGradleタスクを実行
-   * 未指定の場合は project_root で実行
+   * 通常は project_root で実行
+   * マルチプロジェクト構成の場合のみ、build_script_path で指定した build.gradle のディレクトリでGradleタスクを実行
 2. テスト結果とカバレッジ分析
 3. 問題の分類（テスト失敗、必要な振る舞い、デッドコード、設計の誤り）
 4. フィードバックレポート生成
@@ -127,7 +127,7 @@ AIが自動で以下を実行
 * 問題を発見してもユーザー確認なしに修正しない
 * Managed Bean はカバレッジ除外推奨（UI層はE2Eで検証）
 * 必要に応じてステップ2（詳細設計）に戻ってループ
-* マルチプロジェクト構成では build_script_path にルートの build.gradle のパスを指定すること（例: "./build.gradle"）
+* マルチプロジェクト構成の場合のみ、build_script_path にルートの build.gradle のパスを指定します（例: "build.gradle"）
 
 フィードバックループ:
 ```
@@ -146,7 +146,7 @@ AIが自動で以下を実行
 パラメータ
 * project_root: projects/jsf-migration/struts-app-jsf
 * spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
-* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
+* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
 ```
 
 AIが自動で以下を実行
@@ -155,6 +155,8 @@ AIが自動で以下を実行
    * Service層以下（Service + DAO + Entity + DB）の連携テスト
    * 実際のDBアクセス（メモリDB）
    * 画面グループの業務フローを検証
+3. テスト生成後、自動的に結合テストを実行（./gradlew integrationTest）
+   * テスト結果を分析し、成功/失敗を報告
 
 ### ステップ6: E2Eテスト生成
 
@@ -166,13 +168,16 @@ E2Eテストを生成してください
 パラメータ
 * project_root: projects/jsf-migration/struts-app-jsf
 * spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
-* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
+* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
 ```
 
 AIが自動で以下を実行
 1. requirements/behaviors.md（E2Eテストシナリオ）を読み込み
 2. Playwright を使用したE2Eテストを生成
    * 複数画面にまたがるフローをテスト
+3. テスト生成後、自動的にE2Eテストを実行（./gradlew e2eTest）
+   * アプリケーションサーバーが起動していることを確認
+   * テスト結果を分析し、成功/失敗を報告
    * 実際のブラウザ操作
 3. テストデータのセットアップ/クリーンアップコードを生成
 

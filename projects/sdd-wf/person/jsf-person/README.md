@@ -151,14 +151,14 @@ FUNC_002を実装してください。
 パラメータ:
 * project_root: projects/sdd-wf/person/jsf-person
 * target_domain: common  # または person_management
-* build_script_path: ./build.gradle  # マルチプロジェクト構成用（リポジトリルートのbuild.gradleを指定）
+* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
 ```
 
 **マルチプロジェクト構成について:**
 * このプロジェクトは、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成です
-* `build_script_path` パラメータでリポジトリルートの `build.gradle` ファイルのパスを指定します（例: "./build.gradle"）
+* `build_script_path` パラメータでリポジトリルートの `build.gradle` ファイルのパスを指定します（例: "build.gradle"）
 * 指定されたパスからディレクトリ部分が抽出され、そのディレクトリでGradleタスクが実行されます
-* 未指定の場合はデフォルトで `project_root` が使用されます
+* 通常のプロジェクト（非マルチプロジェクト）では、このパラメータの指定は不要です
 
 AIが：
 1. 🧪 テスト実行（gradle test jacocoTestReport）
@@ -195,6 +195,7 @@ AIが：
 パラメータ:
 * project_root: projects/sdd-wf/person/jsf-person
 * spec_directory: projects/sdd-wf/person/jsf-person/specs/baseline
+* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
 ```
 
 AIが：
@@ -226,6 +227,7 @@ E2Eテストを生成してください。
 パラメータ:
 * project_root: projects/sdd-wf/person/jsf-person
 * spec_directory: projects/sdd-wf/person/jsf-person/specs/baseline
+* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
 ```
 
 AIが：

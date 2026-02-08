@@ -520,20 +520,21 @@ AIが自動で実行:
 パラメータ:
 * project_root: <プロジェクトルートパス>
 * target_type: FUNC_XXX_xxx
-* build_script_path: <build.gradleファイルのパス>（オプション、例: "./build.gradle"）
+* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定（例: "build.gradle"）
 ```
 
 AIが自動で実行:
 1. テスト実行（`./gradlew test jacocoTestReport`。Windowsの場合は `gradlew.bat` を使用。プロジェクトの build.gradle に従う）
-   * マルチプロジェクト構成の場合、build_script_path で指定した build.gradle のディレクトリでGradleタスクを実行
-   * 未指定の場合は project_root で実行
+   * 通常は project_root で実行
+   * マルチプロジェクト構成の場合のみ、build_script_path で指定した build.gradle のディレクトリでGradleタスクを実行
 2. テスト結果とカバレッジ分析
 3. 問題の分類（テスト失敗、必要な振る舞い、デッドコード）
 4. フィードバックレポート生成
 5. ユーザーに推奨アクションを提示
 
 注意:
-* Gradleのマルチプロジェクト構成では、ルートの build.gradle のパスを build_script_path で指定すること（例: "./build.gradle"）
+* 通常は build_script_path の指定は不要です
+* マルチプロジェクト構成の場合のみ、ルートの build.gradle のパスを build_script_path で指定します（例: "build.gradle"）
 
 出力:
 ```
@@ -565,7 +566,7 @@ build/reports/
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
 * target_domains: all
-* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
+* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
 ```
 
 AIが自動で実行:
@@ -577,6 +578,9 @@ AIが自動で実行:
    * CDI環境（Weld SE）でのコンポーネント連携
 3. テストデータのセットアップ/クリーンアップコードを生成
 4. `@Tag("integration")` で結合テストを分離
+5. テスト生成後、自動的に結合テストを実行
+   * build_script_path で指定されたディレクトリで `./gradlew integrationTest` を実行
+   * テスト結果を分析し、成功/失敗を報告
 
 重要:
 * 結合テストは単体テスト完了後に実行
@@ -610,7 +614,7 @@ E2Eテストを生成してください
 パラメータ:
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
-* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
+* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
 ```
 
 AIが自動で実行:
@@ -621,6 +625,10 @@ AIが自動で実行:
    * エンドツーエンドのフロー検証
 3. テストデータのセットアップ/クリーンアップコードを生成
 4. `@Tag("e2e")` でE2Eテストを分離
+5. テスト生成後、自動的にE2Eテストを実行
+   * アプリケーションサーバーが起動していることを確認
+   * build_script_path で指定されたディレクトリで `./gradlew e2eTest` を実行
+   * テスト結果を分析し、成功/失敗を報告
 
 重要:
 * E2Eテストは実装完了後に実行
@@ -782,7 +790,7 @@ commonドメインを実装してください
 * project_root: projects/sdd-wf/bookstore/back-office-api
 * spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
 * target_domains: all
-* build_script_path: "./build.gradle"  # マルチプロジェクト構成用
+* build_script_path: "build.gradle"  # マルチプロジェクト構成の場合のみ指定（リポジトリルート）
 ```
 
 実行方法（プロジェクトの build.gradle に定義されたタスクに従う）:
@@ -799,7 +807,7 @@ E2Eテストを生成してください
 パラメータ:
 * project_root: projects/sdd-wf/bookstore/back-office-api
 * spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
-* build_script_path: "./build.gradle"  # マルチプロジェクト構成用
+* build_script_path: "build.gradle"  # マルチプロジェクト構成の場合のみ指定（リポジトリルート）
 ```
 
 実行方法（プロジェクトの build.gradle に定義されたタスクに従う）:

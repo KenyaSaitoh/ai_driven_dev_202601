@@ -84,7 +84,7 @@ AIが自動で以下を実行
 パラメータ
 * project_root: <プロジェクトルートパス>
 * target: common または usecases/{名}
-* build_script_path: <build.gradleファイルのパス>（オプション、マルチプロジェクト構成の場合に指定、例: "./build.gradle"）
+* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定（例: "build.gradle"）
 ```
 
 ### ステップ6: 結合テスト・E2Eテスト生成（合流ポイント）
@@ -99,10 +99,12 @@ AIが自動で以下を実行
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
 * usecase_folder: null  # オプション。指定時はそのユースケースのみ
-* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
+* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
 ```
 
-common / usecases 配下の behaviors を参照して結合・E2Eテストを生成
+common / usecases 配下の behaviors を参照して結合・E2Eテストを生成・実行
+* 結合テスト: ./gradlew integrationTest で自動実行
+* E2Eテスト: ./gradlew e2eTest で自動実行（アプリケーションサーバー起動が前提）
 
 SPEC の更新について
 * アジャイルでは基本設計SPECの「変更管理」は行わない。common または usecases/{名} の SPEC を編集したうえで、code_generation.md を target 指定で再実行し、既存コードへ差分を反映すればよい（spec_change は不要）

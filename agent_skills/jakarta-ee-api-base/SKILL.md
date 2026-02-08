@@ -108,13 +108,13 @@ AIが自動で以下を実行
 パラメータ
 * project_root: <プロジェクトルートパス>
 * target_domain: <ドメイン名>
-* build_script_path: <build.gradleファイルのパス>（オプション、マルチプロジェクト構成の場合に指定、例: "./build.gradle"）
+* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定（例: "build.gradle"）
 ```
 
 AIが自動で以下を実行
 1. テスト実行（gradle test jacocoTestReport）
-   * マルチプロジェクト構成の場合、build_script_path で指定した build.gradle のディレクトリでGradleタスクを実行
-   * 未指定の場合は project_root で実行
+   * 通常は project_root で実行
+   * マルチプロジェクト構成の場合のみ、build_script_path で指定した build.gradle のディレクトリでGradleタスクを実行
 2. テスト結果とカバレッジ分析
 3. 問題の分類（テスト失敗、必要な振る舞い、デッドコード、設計の誤り）
 4. フィードバックレポート生成
@@ -124,7 +124,7 @@ AIが自動で以下を実行
 * 問題を発見してもユーザー確認なしに修正しない
 * カバレッジ不足やデッドコードを具体的に提案
 * 必要に応じてステップ2（詳細設計）に戻ってループ
-* マルチプロジェクト構成では build_script_path にルートの build.gradle のパスを指定すること（例: "./build.gradle"）
+* マルチプロジェクト構成の場合のみ、build_script_path にルートの build.gradle のパスを指定します（例: "build.gradle"）
 
 フィードバックループ:
 ```
@@ -144,7 +144,7 @@ AIが自動で以下を実行
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
 * target_domains: all
-* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
+* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
 ```
 
 AIが自動で以下を実行
@@ -154,6 +154,8 @@ AIが自動で以下を実行
    * 実際のDBアクセス（メモリDB）
    * 外部APIはWireMockでスタブ化
    * 既存テストがある場合は、削除せずに差分のみを反映する
+3. テスト生成後、自動的に結合テストを実行（./gradlew integrationTest）
+   * テスト結果を分析し、成功/失敗を報告
 
 ### ステップ6: E2Eテスト生成
 
@@ -165,7 +167,7 @@ E2Eテストを生成してください
 パラメータ
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
-* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
+* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
 ```
 
 AIが自動で以下を実行
@@ -175,6 +177,9 @@ AIが自動で以下を実行
    * 実際のHTTPリクエスト/レスポンス
    * 既存テストがある場合は、削除せずに差分のみを反映する
 3. テストデータのセットアップ/クリーンアップコードを生成
+4. テスト生成後、自動的にE2Eテストを実行（./gradlew e2eTest）
+   * アプリケーションサーバーが起動していることを確認
+   * テスト結果を分析し、成功/失敗を報告
 
 ---
 

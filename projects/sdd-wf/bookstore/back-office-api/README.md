@@ -214,12 +214,12 @@ booksドメインを実装してください
 パラメータ:
 * project_root: projects/sdd-wf/bookstore/back-office-api
 * target_domain: books
-* build_script_path: ./build.gradle  # マルチプロジェクト構成用（リポジトリルートのbuild.gradleを指定）
+* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
 ```
 
 **マルチプロジェクト構成について:**
 * このプロジェクトは、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成です
-* `build_script_path` パラメータでリポジトリルートの `build.gradle` ファイルのパスを指定します（例: "./build.gradle"）
+* `build_script_path` パラメータでリポジトリルートの `build.gradle` ファイルのパスを指定します（例: "build.gradle"）
 * 指定されたパスからディレクトリ部分が抽出され、そのディレクトリでGradleタスクが実行されます
 * 未指定の場合はデフォルトで `project_root` が使用されますが、マルチプロジェクト構成ではルートの build.gradle を使うため、明示的に指定することを推奨します
 
@@ -257,6 +257,7 @@ AIが：
 * project_root: projects/sdd-wf/bookstore/back-office-api
 * spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
 * target_domains: all
+* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
 ```
 
 AIが：
@@ -289,6 +290,7 @@ E2Eテストを生成してください
 パラメータ:
 * project_root: projects/sdd-wf/bookstore/back-office-api
 * spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
+* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
 ```
 
 AIが：

@@ -208,7 +208,7 @@ AIが：
 パラメータ:
 * project_root: projects/jsf-migration/struts-app-jsf
 * spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
-* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
+* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
 ```
 
 AIが：
@@ -220,6 +220,8 @@ AIが：
    * アプリケーションサーバー不要
    * 画面グループの業務フローを検証
 3. 🏷️ `@Tag("integration")` で結合テストを分離（実行はプロジェクトのビルド設定に従う）
+4. ✅ テスト生成後、自動的に結合テストを実行（./gradlew integrationTest）
+   * テスト結果を分析し、成功/失敗を報告
 
 ### ステップ7: 🧪 E2Eテスト生成
 
@@ -231,7 +233,7 @@ E2Eテストを生成してください。
 パラメータ:
 * project_root: projects/jsf-migration/struts-app-jsf
 * spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
-* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
+* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
 ```
 
 AIが：
@@ -243,6 +245,9 @@ AIが：
    * エンドツーエンドのフロー検証
 3. 📋 テストデータのセットアップ/クリーンアップコードを生成
 4. 🏷️ `@Tag("e2e")` でE2Eテストを分離
+5. ✅ テスト生成後、自動的にE2Eテストを実行（./gradlew e2eTest）
+   * アプリケーションサーバーが起動していることを確認
+   * テスト結果を分析し、成功/失敗を報告
 
 重要：
 * E2Eテストは実装完了後に実行
