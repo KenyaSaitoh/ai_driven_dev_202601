@@ -477,11 +477,13 @@ AIと対話しながら実施:
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
 * target_domain: common
+* skip_infrastructure: false  # commonドメイン初回setup時のみ: true の場合、インフラセットアップをスキップ
 ```
 
 AIが自動で実行:
 1. 詳細設計（detailed_design/{target_domain}/）を読み込む
 2. コードを生成する（Resource、Service、Dao、Entity、DTO等）
+   * commonドメイン初回時: skip_infrastructure=true の場合、DB/APサーバーのインストールをスキップ（スキーマ作成・初期データは実行）
 3. ドメイン単位の単体テストを作成する
    * detailed_design/{target_domain}/behaviors.md（Gherkin）から Cucumber .feature（features/unit）とステップ定義（Java）を生成
    * 同じドメイン内のコンポーネント間は実際の連携をテスト
@@ -518,14 +520,20 @@ AIが自動で実行:
 パラメータ:
 * project_root: <プロジェクトルートパス>
 * target_type: FUNC_XXX_xxx
+* gradle_project_dir: <Gradleタスク実行ディレクトリ>（オプション）
 ```
 
 AIが自動で実行:
 1. テスト実行（`./gradlew test jacocoTestReport`。Windowsの場合は `gradlew.bat` を使用。プロジェクトの build.gradle に従う）
+   * マルチプロジェクト構成の場合、gradle_project_dir で指定したディレクトリでGradleタスクを実行
+   * 未指定の場合は project_root で実行
 2. テスト結果とカバレッジ分析
 3. 問題の分類（テスト失敗、必要な振る舞い、デッドコード）
 4. フィードバックレポート生成
 5. ユーザーに推奨アクションを提示
+
+注意:
+* Gradleのマルチプロジェクト構成では、適切なbuild.gradleが存在するディレクトリを gradle_project_dir で指定すること
 
 出力:
 ```
@@ -745,6 +753,7 @@ commonドメインを実装してください
 * project_root: projects/sdd-wf/bookstore/back-office-api
 * spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
 * target_domain: common
+* skip_infrastructure: true  # 初回setup時: DB/APサーバーセットアップをスキップする場合
 ```
 
 ステップ4: 単体テスト実行評価

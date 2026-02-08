@@ -163,7 +163,7 @@ commonドメインの詳細設計書を作成してください
 * target_domain: [ドメイン名]
 ```
 
-使用例（commonドメイン）:
+使用例（commonドメイン - 初回setup時）:
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
@@ -174,6 +174,7 @@ commonドメインを実装してください
 * project_root: projects/sdd-wf/bookstore/berry-books-api
 * spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
 * target_domain: common
+* skip_infrastructure: true  # 初回setup時: DB/APサーバーセットアップをスキップする場合
 ```
 
 使用例（books_proxyドメイン）:
@@ -192,6 +193,7 @@ books_proxyドメインを実装してください
 注意:
 * `common`ドメインを最優先で実装してください
 * 各ドメインは`common`に依存する可能性が高いため、commonの実装完了後に実行します
+* `skip_infrastructure` は commonドメイン初回setup時のみ有効です（開発環境がすでに構築済みの場合に使用）
 
 ---
 
@@ -208,7 +210,13 @@ books_proxyドメインを実装してください
 * project_root: projects/sdd-wf/bookstore/berry-books-api
 * spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
 * target_domain: books_proxy
+* gradle_project_dir: projects/sdd-wf/bookstore/berry-books-api  # マルチプロジェクト構成用（ルートbuild.gradleを使用するため）
 ```
+
+**マルチプロジェクト構成について:**
+* このプロジェクトは、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成です
+* `gradle_project_dir` パラメータでプロジェクトルートのパスを指定することで、適切なディレクトリでGradleタスクが実行されます
+* 未指定の場合はデフォルトで `project_root` が使用されますが、マルチプロジェクト構成ではルートの build.gradle を使うため、明示的に指定することを推奨します
 
 AIが：
 1. 📋 実行可能な単体テストコードを確認
@@ -776,10 +784,23 @@ curl -X POST http://localhost:8080/berry-books-api-sdd-wf/api/auth/logout \
 
 このプロジェクトには、サービス層のユニットテストが含まれています。テストはJUnit 5とMockitoを使用して実装されています。
 
+**マルチプロジェクト構成について:**
+* このプロジェクトは、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成です
+* Gradleコマンドは、リポジトリルート（`ai_driven_dev_202601/`）で実行します
+* プロジェクト指定は `:プロジェクト名:タスク名` の形式を使用します（例: `:berry-books-api-sdd-wf:test`）
+
 #### すべてのテストを実行
 
+リポジトリルートから実行:
 ```bash
+cd ai_driven_dev_202601
 ./gradlew :berry-books-api-sdd-wf:test
+```
+
+またはプロジェクトルートから実行（相対パスでgradlewを指定）:
+```bash
+cd projects/sdd-wf/bookstore/berry-books-api
+../../../../gradlew test
 ```
 
 #### 特定のテストクラスを実行

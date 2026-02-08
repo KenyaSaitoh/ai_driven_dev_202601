@@ -103,7 +103,13 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 パラメータ:
 * project_root: projects/sdd-agile/bookstore/berry-books-api
 * target: common   # または usecases/books 等、対象ユースケース
+* gradle_project_dir: projects/sdd-agile/bookstore/berry-books-api  # マルチプロジェクト構成用（ルートbuild.gradleを使用するため）
 ```
+
+**マルチプロジェクト構成について:**
+* このプロジェクトは、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成です
+* `gradle_project_dir` パラメータでプロジェクトルートのパスを指定することで、適切なディレクトリでGradleタスクが実行されます
+* 未指定の場合はデフォルトで `project_root` が使用されますが、マルチプロジェクト構成ではルートの build.gradle を使うため、明示的に指定することを推奨します
 
 AIが：
 1. 🧪 テスト実行（gradle test jacocoTestReport）
@@ -615,10 +621,23 @@ curl -X POST http://localhost:8080/berry-books-api-sdd-agile/api/auth/logout \
 
 このプロジェクトには、サービス層のユニットテストが含まれています。テストはJUnit 5とMockitoを使用して実装されています。
 
+**マルチプロジェクト構成について:**
+* このプロジェクトは、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成です
+* Gradleコマンドは、リポジトリルート（`ai_driven_dev_202601/`）で実行します
+* プロジェクト指定は `:プロジェクト名:タスク名` の形式を使用します（例: `:berry-books-api-sdd-agile:test`）
+
 #### すべてのテストを実行
 
+リポジトリルートから実行:
 ```bash
+cd ai_driven_dev_202601
 ./gradlew :berry-books-api-sdd-agile:test
+```
+
+またはプロジェクトルートから実行（相対パスでgradlewを指定）:
+```bash
+cd projects/sdd-agile/bookstore/berry-books-api
+../../../../gradlew test
 ```
 
 #### 特定のテストクラスを実行

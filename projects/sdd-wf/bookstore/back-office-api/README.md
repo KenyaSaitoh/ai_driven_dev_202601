@@ -168,7 +168,7 @@ commonドメインの詳細設計書を作成してください
 * target_domain: common
 ```
 
-使用例（commonドメイン）:
+使用例（commonドメイン - 初回setup時）:
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
@@ -179,6 +179,7 @@ commonドメインを実装してください
 * project_root: projects/sdd-wf/bookstore/back-office-api
 * spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
 * target_domain: common
+* skip_infrastructure: true  # 初回setup時: DB/APサーバーセットアップをスキップする場合
 ```
 
 使用例（他のドメイン）:
@@ -197,6 +198,7 @@ booksドメインを実装してください
 注意:
 * commonドメインを最初に実装してください（他のドメインはcommonに依存）
 * 各ドメインの実装には、本番コード生成と単体テスト生成の両方が含まれます
+* `skip_infrastructure` は commonドメイン初回setup時のみ有効です（開発環境がすでに構築済みの場合に使用）
 
 ---
 
@@ -212,7 +214,13 @@ booksドメインを実装してください
 パラメータ:
 * project_root: projects/sdd-wf/bookstore/back-office-api
 * target_domain: books
+* gradle_project_dir: projects/sdd-wf/bookstore/back-office-api  # マルチプロジェクト構成用（ルートbuild.gradleを使用するため）
 ```
+
+**マルチプロジェクト構成について:**
+* このプロジェクトは、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成です
+* `gradle_project_dir` パラメータでプロジェクトルートのパスを指定することで、適切なディレクトリでGradleタスクが実行されます
+* 未指定の場合はデフォルトで `project_root` が使用されますが、マルチプロジェクト構成ではルートの build.gradle を使うため、明示的に指定することを推奨します
 
 AIが：
 1. 🧪 テスト実行（gradle test jacocoTestReport）
@@ -681,10 +689,23 @@ curl -X GET http://localhost:8080/back-office-api-sdd-wf/api/categories
 
 このプロジェクトには、サービス層のユニットテストが含まれています。テストはJUnit 5とMockitoを使用して実装されています。
 
+**マルチプロジェクト構成について:**
+* このプロジェクトは、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成です
+* Gradleコマンドは、リポジトリルート（`ai_driven_dev_202601/`）で実行します
+* プロジェクト指定は `:プロジェクト名:タスク名` の形式を使用します（例: `:back-office-api-sdd-wf:test`）
+
 #### すべてのテストを実行
 
+リポジトリルートから実行:
 ```bash
+cd ai_driven_dev_202601
 ./gradlew :back-office-api-sdd-wf:test
+```
+
+またはプロジェクトルートから実行（相対パスでgradlewを指定）:
+```bash
+cd projects/sdd-wf/bookstore/back-office-api
+../../../../gradlew test
 ```
 
 #### 特定のテストクラスを実行

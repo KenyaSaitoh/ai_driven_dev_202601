@@ -84,6 +84,7 @@ AIが自動で以下を実行
 パラメータ
 * project_root: <プロジェクトルートパス>
 * target: common または usecases/{名}
+* gradle_project_dir: <Gradleタスク実行ディレクトリ>（オプション、マルチプロジェクト構成の場合に指定）
 ```
 
 ### ステップ6: 結合テスト・E2Eテスト生成（合流ポイント）

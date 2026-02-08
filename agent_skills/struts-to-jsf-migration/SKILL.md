@@ -122,10 +122,13 @@ AIが自動で以下を実行
 パラメータ
 * project_root: projects/jsf-migration/struts-app-jsf
 * target_type: FUNC_001_PersonList
+* gradle_project_dir: <Gradleタスク実行ディレクトリ>（オプション、マルチプロジェクト構成の場合に指定）
 ```
 
 AIが自動で以下を実行
 1. テスト実行（gradle test jacocoTestReport）
+   * マルチプロジェクト構成の場合、gradle_project_dir で指定したディレクトリでGradleタスクを実行
+   * 未指定の場合は project_root で実行
 2. テスト結果とカバレッジ分析
 3. 問題の分類（テスト失敗、必要な振る舞い、デッドコード、設計の誤り）
 4. フィードバックレポート生成
@@ -135,6 +138,7 @@ AIが自動で以下を実行
 * 問題を発見してもユーザー確認なしに修正しない
 * Managed Bean はカバレッジ除外推奨（UI層はE2Eで検証）
 * 必要に応じてステップ3（詳細設計）に戻ってループ
+* マルチプロジェクト構成では gradle_project_dir を適切に指定すること
 
 フィードバックループ:
 ```

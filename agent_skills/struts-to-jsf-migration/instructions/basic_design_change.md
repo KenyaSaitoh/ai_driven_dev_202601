@@ -391,9 +391,8 @@ CHANGES.mdの「削除」セクションから：
 
 パラメータ:
 * project_root: {project_root}
-* task_file: {project_root}/tasks/{FUNC_ID}.md
-
-注意: 既存タスクファイルを更新して、変更内容を反映すること
+* spec_directory: {spec_directory}
+* target_domain: {FUNC_ID}
 ```
 
 注意事項:
@@ -598,7 +597,8 @@ AIは以下のように動作する：
 
 パラメータ:
 * project_root: {project_root}
-* task_file: {project_root}/tasks/{FUNC_ID}.md
+* spec_directory: {spec_directory}
+* target_domain: {FUNC_ID}
 ```
 
 コード生成指示書には「既存コードの扱いと反復的な開発」セクションがあり、既存ファイルへの対応が記載されている。
@@ -649,17 +649,7 @@ AIは以下のように動作する：
 * baselineと同様の変更管理フローを適用
 * enhancements の basic_design/ にもCHANGES.mdを作成
 
-### 8.4 既存タスクファイルの扱い
-
-変更に伴って既存のタスクファイル（例: `tasks/SCREEN_001_PersonList.md`）を更新する必要がある場合：
-
-1. 既存タスクファイルを読み込む
-2. 変更内容を反映（新規タスク追加、既存タスク更新）
-3. 更新後のタスクファイルで `code_generation.md` を実行
-
-または、新しいタスクファイルを作成する（例: `tasks/SCREEN_001_PersonList_v2.md`）。
-
-### 7.5 JSF/Facelets特有の注意事項
+### 8.4 JSF/Facelets特有の注意事項
 
 * XHTMLファイルの変更は、画面設計（screen_design.md）の変更と連動する
 * Managed Beanの変更は、機能設計（functional_design.md）の変更と連動する
@@ -676,15 +666,15 @@ graph TD
     B -->|あり| D[CHANGES.md読み込み]
     D --> E[変更内容解析]
     E --> F[影響分析]
-    F --> G[変更タスク生成]
+    F --> G[変更計画生成]
     G --> H[ユーザー確認]
     H --> I{承認?}
     I -->|No| J[処理中断]
-    I -->|Yes| K[TASK_CHANGE_001: 詳細設計更新]
-    K --> L[TASK_CHANGE_002: コード更新]
-    L --> M[TASK_CHANGE_003: 単体テスト更新]
-    M --> N[TASK_CHANGE_004: 結合テスト更新]
-    N --> O[TASK_CHANGE_005: E2Eテスト更新]
+    I -->|Yes| K[詳細設計更新]
+    K --> L[コード更新]
+    L --> M[単体テスト更新]
+    M --> N[結合テスト更新]
+    N --> O[E2Eテスト更新]
     O --> P[CHANGES.mdをアーカイブ]
     P --> Q[完了]
 ```
@@ -724,9 +714,7 @@ CHANGES.mdをアーカイブしました:
 
 ## 参考資料
 
-* [task_breakdown.md](task_breakdown.md) - タスク分解（初回実装用）
 * [detailed_design.md](detailed_design.md) - 詳細設計生成
 * [code_generation.md](code_generation.md) - コード生成
-* [unit_test_generation.md](unit_test_generation.md) - 単体テスト生成
 * [it_generation.md](it_generation.md) - 結合テスト生成
 * [e2e_test_generation.md](e2e_test_generation.md) - E2Eテスト生成

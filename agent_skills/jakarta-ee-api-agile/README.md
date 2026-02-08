@@ -300,10 +300,12 @@ AIが自動で実行:
 パラメータ:
 * project_root: <プロジェクトルートパス>
 * target: common または usecases/<フォルダ名>
+* gradle_project_dir: <Gradleタスク実行ディレクトリ>（オプション、マルチプロジェクト構成の場合に指定）
 ```
 
 AIが自動で実行:
 1. テスト実行（`./gradlew test jacocoTestReport`。プロジェクトの build.gradle に従う）
+   * マルチプロジェクト構成の場合、gradle_project_dir で指定したディレクトリでGradleタスクを実行
 2. テスト結果とカバレッジ分析
 3. 問題の分類（テスト失敗、必要な振る舞い、デッドコード）
 4. フィードバックレポート生成と推奨アクションの提示

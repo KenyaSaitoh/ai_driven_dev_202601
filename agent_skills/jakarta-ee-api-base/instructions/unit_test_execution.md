@@ -14,6 +14,11 @@ target_type: "FUNC_XXX_xxx"
 ### オプショナルパラメータ
 
 ```yaml
+# Gradleプロジェクト設定
+gradle_project_dir: null    # Gradleタスク実行ディレクトリ（未指定時は project_root）
+                            # マルチプロジェクト構成の場合、サブプロジェクトのパスを指定
+                            # 例: "subprojects/api" または "modules/core"
+
 # カバレッジ目標（未指定時は architecture_design.md → デフォルト値）
 coverage_targets:
   line: null      # 行カバレッジ目標 (0-100)、デフォルト: 80
@@ -163,17 +168,25 @@ min_test_count: 10
 
 #### 2-1. Gradle タスクの実行
 
+テスト実行ディレクトリの決定:
+* gradle_project_dir が指定されている場合: そのディレクトリを使用
+* 未指定の場合: {project_root} を使用
+
 テスト実行コマンド:
 ```bash
-cd {project_root}
+cd {gradle_project_dir または project_root}
 ./gradlew test jacocoTestReport --stacktrace
 ```
 
 Windows の場合:
 ```bash
-cd {project_root}
+cd {gradle_project_dir または project_root}
 gradlew.bat test jacocoTestReport --stacktrace
 ```
+
+注意:
+* マルチプロジェクト構成で、特定のサブプロジェクトのみテストする場合は gradle_project_dir を指定する
+* gradle_project_dir は project_root からの相対パスまたは絶対パスで指定可能
 
 オプション:
 * `test_scope: "target"` の場合: `--tests "*{target_type}*Test"`

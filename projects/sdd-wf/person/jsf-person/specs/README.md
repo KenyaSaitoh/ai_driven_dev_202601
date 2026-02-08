@@ -211,6 +211,41 @@ specs/
 
 ---
 
+## マルチプロジェクト構成について
+
+### Gradle マルチプロジェクト構成
+
+このプロジェクト（jsf-person-sdd-wf）は、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成の一部です。
+
+**重要な考慮事項:**
+
+* **build.gradleの場所**: リポジトリルート（`ai_driven_dev_202601/build.gradle`）
+* **Gradleタスク実行**: リポジトリルートまたはプロジェクトルートで実行可能
+  * ルートから実行: `cd ai_driven_dev_202601 && ./gradlew :jsf-person-sdd-wf:test`
+  * プロジェクトルートから実行: `cd projects/sdd-wf/person/jsf-person && ../../../../gradlew test`
+* **Agent Skills使用時**: `gradle_project_dir` パラメータを指定することを推奨
+  ```yaml
+  project_root: projects/sdd-wf/person/jsf-person
+  gradle_project_dir: .  # リポジトリルートで実行する場合
+  ```
+
+### テスト実行時の注意点
+
+単体テスト実行評価（unit_test_execution.md）使用時は、以下のようにパラメータを指定:
+
+```
+@agent_skills/struts-to-jsf-migration/instructions/unit_test_execution.md
+
+単体テストを実行してください
+
+パラメータ:
+* project_root: projects/sdd-wf/person/jsf-person
+* target_type: FUNC_001_PersonList
+* gradle_project_dir: .  # リポジトリルートでGradleタスクを実行
+```
+
+---
+
 ## 拡張時のガイドライン
 
 ### 新しい画面グループを追加する場合
