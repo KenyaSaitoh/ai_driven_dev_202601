@@ -208,6 +208,7 @@ AIが：
 パラメータ:
 * project_root: projects/jsf-migration/struts-app-jsf
 * spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
+* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
 ```
 
 AIが：
@@ -230,6 +231,7 @@ E2Eテストを生成してください。
 パラメータ:
 * project_root: projects/jsf-migration/struts-app-jsf
 * spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
+* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
 ```
 
 AIが：

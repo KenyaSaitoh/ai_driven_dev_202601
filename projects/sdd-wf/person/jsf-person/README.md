@@ -151,12 +151,13 @@ FUNC_002を実装してください。
 パラメータ:
 * project_root: projects/sdd-wf/person/jsf-person
 * target_domain: common  # または person_management
-* gradle_project_dir: .  # マルチプロジェクト構成用（リポジトリルートでGradleタスクを実行）
+* build_script_path: ./build.gradle  # マルチプロジェクト構成用（リポジトリルートのbuild.gradleを指定）
 ```
 
 **マルチプロジェクト構成について:**
 * このプロジェクトは、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成です
-* `gradle_project_dir` パラメータでGradleタスク実行ディレクトリを指定します（通常は `.` でリポジトリルート）
+* `build_script_path` パラメータでリポジトリルートの `build.gradle` ファイルのパスを指定します（例: "./build.gradle"）
+* 指定されたパスからディレクトリ部分が抽出され、そのディレクトリでGradleタスクが実行されます
 * 未指定の場合はデフォルトで `project_root` が使用されます
 
 AIが：

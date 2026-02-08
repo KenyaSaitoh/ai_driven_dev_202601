@@ -111,12 +111,12 @@ AIが自動で以下を実行
 パラメータ
 * project_root: projects/jsf-migration/struts-app-jsf
 * target_domain: common  # または person_management 等
-* gradle_project_dir: <Gradleタスク実行ディレクトリ>（オプション、マルチプロジェクト構成の場合に指定）
+* build_script_path: <build.gradleファイルのパス>（オプション、マルチプロジェクト構成の場合に指定、例: "./build.gradle"）
 ```
 
 AIが自動で以下を実行
 1. テスト実行（gradle test jacocoTestReport）
-   * マルチプロジェクト構成の場合、gradle_project_dir で指定したディレクトリでGradleタスクを実行
+   * マルチプロジェクト構成の場合、build_script_path で指定した build.gradle のディレクトリでGradleタスクを実行
    * 未指定の場合は project_root で実行
 2. テスト結果とカバレッジ分析
 3. 問題の分類（テスト失敗、必要な振る舞い、デッドコード、設計の誤り）
@@ -127,7 +127,7 @@ AIが自動で以下を実行
 * 問題を発見してもユーザー確認なしに修正しない
 * Managed Bean はカバレッジ除外推奨（UI層はE2Eで検証）
 * 必要に応じてステップ2（詳細設計）に戻ってループ
-* マルチプロジェクト構成では gradle_project_dir を適切に指定すること
+* マルチプロジェクト構成では build_script_path にルートの build.gradle のパスを指定すること（例: "./build.gradle"）
 
 フィードバックループ:
 ```
@@ -146,6 +146,7 @@ AIが自動で以下を実行
 パラメータ
 * project_root: projects/jsf-migration/struts-app-jsf
 * spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
+* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
 ```
 
 AIが自動で以下を実行
@@ -165,6 +166,7 @@ E2Eテストを生成してください
 パラメータ
 * project_root: projects/jsf-migration/struts-app-jsf
 * spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
+* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
 ```
 
 AIが自動で以下を実行

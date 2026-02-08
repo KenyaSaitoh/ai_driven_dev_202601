@@ -5,8 +5,9 @@
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
 target: "common"  # または "usecases/<usecase_folder>" 例: usecases/order-creation
-gradle_project_dir: null  # オプション。Gradleタスク実行ディレクトリ（未指定時は project_root）
-                          # マルチプロジェクト構成の場合、サブプロジェクトのパスを指定
+build_script_path: null   # オプション。build.gradleファイルのパス（未指定時は project_root の build.gradle を使用）
+                          # マルチプロジェクト構成の場合、ルートの build.gradle または サブプロジェクトの build.gradle を指定
+                          # 例: "./build.gradle" (リポジトリルート) または "d:/GitHubRepos/.../build.gradle" (絶対パス)
 ```
 
 * 例: common の単体テストを実行
@@ -49,8 +50,8 @@ target: "usecases/order-creation"
 ## 2. 実行手順
 
 1. テスト実行
-   * 実行ディレクトリ: gradle_project_dir が指定されていればそれを使用、未指定なら project_root
-   * コマンド例: `cd {gradle_project_dir または project_root}` → `./gradlew test jacocoTestReport --stacktrace`
+   * 実行ディレクトリ: build_script_path が指定されていればその build.gradle ファイルのディレクトリ部分を使用、未指定なら project_root
+   * コマンド例: `cd {build_script_path のディレクトリ部分 または project_root}` → `./gradlew test jacocoTestReport --stacktrace`
    * プロジェクトのビルド設定に従う
 2. テスト結果とカバレッジの取得・分析
 3. 問題の分類: テスト失敗、不足している振る舞い、デッドコード、設計の誤り
@@ -60,7 +61,8 @@ target に応じて、実行するテストスコープを common 用パッケ�
 
 **マルチプロジェクト構成の考慮:**
 * Gradleのマルチプロジェクト構成の場合、build.gradleの場所はサブプロジェクトごとに異なる
-* gradle_project_dir パラメータで適切なディレクトリを指定すること
+* build_script_path パラメータでルートの build.gradle のパスを指定すること（例: "./build.gradle"）
+* 指定されたパスからディレクトリ部分を抽出してそのディレクトリで Gradle コマンドを実行する
 
 ---
 

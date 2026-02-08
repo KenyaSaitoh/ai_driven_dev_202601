@@ -223,10 +223,10 @@ specs/
 * **Gradleタスク実行**: リポジトリルートまたはプロジェクトルートで実行可能
   * ルートから実行: `cd ai_driven_dev_202601 && ./gradlew :jsf-person-sdd-wf:test`
   * プロジェクトルートから実行: `cd projects/sdd-wf/person/jsf-person && ../../../../gradlew test`
-* **Agent Skills使用時**: `gradle_project_dir` パラメータを指定することを推奨
+* **Agent Skills使用時**: `build_script_path` パラメータにリポジトリルートの build.gradle のパスを指定することを推奨
   ```yaml
   project_root: projects/sdd-wf/person/jsf-person
-  gradle_project_dir: .  # リポジトリルートで実行する場合
+  build_script_path: ./build.gradle  # リポジトリルートのbuild.gradleを指定
   ```
 
 ### テスト実行時の注意点
@@ -241,7 +241,7 @@ specs/
 パラメータ:
 * project_root: projects/sdd-wf/person/jsf-person
 * target_type: FUNC_001_PersonList
-* gradle_project_dir: .  # リポジトリルートでGradleタスクを実行
+* build_script_path: ./build.gradle  # リポジトリルートのbuild.gradleを指定
 ```
 
 ---

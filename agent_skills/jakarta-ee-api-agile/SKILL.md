@@ -84,7 +84,7 @@ AIが自動で以下を実行
 パラメータ
 * project_root: <プロジェクトルートパス>
 * target: common または usecases/{名}
-* gradle_project_dir: <Gradleタスク実行ディレクトリ>（オプション、マルチプロジェクト構成の場合に指定）
+* build_script_path: <build.gradleファイルのパス>（オプション、マルチプロジェクト構成の場合に指定、例: "./build.gradle"）
 ```
 
 ### ステップ6: 結合テスト・E2Eテスト生成（合流ポイント）
@@ -94,6 +94,12 @@ AIが自動で以下を実行
 ```
 @agent_skills/jakarta-ee-api-agile/instructions/it_generation.md
 @agent_skills/jakarta-ee-api-agile/instructions/e2e_test_generation.md
+
+パラメータ（結合テスト・E2Eテスト共通）
+* project_root: <プロジェクトルートパス>
+* spec_directory: <SPECディレクトリパス>
+* usecase_folder: null  # オプション。指定時はそのユースケースのみ
+* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
 ```
 
 common / usecases 配下の behaviors を参照して結合・E2Eテストを生成

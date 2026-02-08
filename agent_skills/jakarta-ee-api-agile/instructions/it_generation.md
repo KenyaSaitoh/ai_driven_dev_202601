@@ -5,13 +5,17 @@
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
 spec_directory: "ここにSPECディレクトリのパスを入力"
-usecase_folder: null  # オプション。指定時はそのユースケースの結合テストのみ生成
+usecase_folder: null        # オプション。指定時はそのユースケースの結合テストのみ生成
+build_script_path: null     # オプション。build.gradleファイルのパス（未指定時は project_root の build.gradle を使用）
+                            # マルチプロジェクト構成の場合、ルートの build.gradle または サブプロジェクトの build.gradle を指定
+                            # 例: "./build.gradle" (リポジトリルート) または "d:/GitHubRepos/.../build.gradle" (絶対パス)
 ```
 
 * 例
 ```yaml
 project_root: "projects/sdd-agile/bookstore/berry-books-api"
 spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
+build_script_path: "./build.gradle"  # マルチプロジェクト構成用
 ```
 
 注意: パス区切りはOS環境に応じて調整する。以降、`{project_root}`, `{spec_directory}` はパラメータで設定した値に置き換える。
@@ -50,7 +54,8 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 **マルチプロジェクト構成の考慮:**
 * Gradleのマルチプロジェクト構成の場合、build.gradleの場所はサブプロジェクトごとに異なる
 * 依存関係の追加や設定は、適切なbuild.gradleに対して行う必要がある
-* テスト実行時は、適切なbuild.gradleが存在するディレクトリで `./gradlew` コマンドを実行する
+* build_script_path パラメータでルートの build.gradle のパスを指定すること（例: "./build.gradle"）
+* 指定されたパスからディレクトリ部分を抽出してそのディレクトリで `./gradlew` コマンドを実行する
 * ルートプロジェクトの build.gradle でサブプロジェクトのタスクを実行する場合は `:subproject:integrationTest` のような形式を使用
 
 ### 2.1 主テスト: JUnit 5 + Weld SE（従来型、必須）

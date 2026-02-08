@@ -210,12 +210,13 @@ books_proxyドメインを実装してください
 * project_root: projects/sdd-wf/bookstore/berry-books-api
 * spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
 * target_domain: books_proxy
-* gradle_project_dir: projects/sdd-wf/bookstore/berry-books-api  # マルチプロジェクト構成用（ルートbuild.gradleを使用するため）
+* build_script_path: ./build.gradle  # マルチプロジェクト構成用（リポジトリルートのbuild.gradleを指定）
 ```
 
 **マルチプロジェクト構成について:**
 * このプロジェクトは、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成です
-* `gradle_project_dir` パラメータでプロジェクトルートのパスを指定することで、適切なディレクトリでGradleタスクが実行されます
+* `build_script_path` パラメータでリポジトリルートの `build.gradle` ファイルのパスを指定します（例: "./build.gradle"）
+* 指定されたパスからディレクトリ部分が抽出され、そのディレクトリでGradleタスクが実行されます
 * 未指定の場合はデフォルトで `project_root` が使用されますが、マルチプロジェクト構成ではルートの build.gradle を使うため、明示的に指定することを推奨します
 
 AIが：

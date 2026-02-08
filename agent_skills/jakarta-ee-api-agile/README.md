@@ -330,6 +330,7 @@ AIが自動で実行:
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
 * usecase_folder: <ユースケースフォルダ名>（オプション。指定時はそのユースケースの結合テストのみ）
+* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
 ```
 
 AIが自動で実行:
@@ -367,6 +368,7 @@ E2Eテストを生成してください
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
 * usecase_folder: <ユースケースフォルダ名>（オプション。指定時はそのユースケースのE2Eのみ）
+* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
 ```
 
 AIが自動で実行:
@@ -481,6 +483,7 @@ common のコードを生成してください
 パラメータ:
 * project_root: projects/sdd-agile/bookstore/berry-books-api
 * spec_directory: projects/sdd-agile/bookstore/berry-books-api/specs/baseline
+* build_script_path: "./build.gradle"  # マルチプロジェクト構成用
 ```
 
 ```
@@ -491,6 +494,7 @@ E2Eテストを生成してください
 パラメータ:
 * project_root: projects/sdd-agile/bookstore/berry-books-api
 * spec_directory: projects/sdd-agile/bookstore/berry-books-api/specs/baseline
+* build_script_path: "./build.gradle"  # マルチプロジェクト構成用
 ```
 
 実行方法（プロジェクトの build.gradle に定義されたタスクに従う）:

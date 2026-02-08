@@ -520,12 +520,12 @@ AIが自動で実行:
 パラメータ:
 * project_root: <プロジェクトルートパス>
 * target_type: FUNC_XXX_xxx
-* gradle_project_dir: <Gradleタスク実行ディレクトリ>（オプション）
+* build_script_path: <build.gradleファイルのパス>（オプション、例: "./build.gradle"）
 ```
 
 AIが自動で実行:
 1. テスト実行（`./gradlew test jacocoTestReport`。Windowsの場合は `gradlew.bat` を使用。プロジェクトの build.gradle に従う）
-   * マルチプロジェクト構成の場合、gradle_project_dir で指定したディレクトリでGradleタスクを実行
+   * マルチプロジェクト構成の場合、build_script_path で指定した build.gradle のディレクトリでGradleタスクを実行
    * 未指定の場合は project_root で実行
 2. テスト結果とカバレッジ分析
 3. 問題の分類（テスト失敗、必要な振る舞い、デッドコード）
@@ -533,7 +533,7 @@ AIが自動で実行:
 5. ユーザーに推奨アクションを提示
 
 注意:
-* Gradleのマルチプロジェクト構成では、適切なbuild.gradleが存在するディレクトリを gradle_project_dir で指定すること
+* Gradleのマルチプロジェクト構成では、ルートの build.gradle のパスを build_script_path で指定すること（例: "./build.gradle"）
 
 出力:
 ```
@@ -564,6 +564,8 @@ build/reports/
 パラメータ:
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
+* target_domains: all
+* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
 ```
 
 AIが自動で実行:
@@ -608,6 +610,7 @@ E2Eテストを生成してください
 パラメータ:
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
+* build_script_path: null  # オプション。build.gradleファイルのパス（マルチプロジェクト構成用）
 ```
 
 AIが自動で実行:
@@ -779,6 +782,7 @@ commonドメインを実装してください
 * project_root: projects/sdd-wf/bookstore/back-office-api
 * spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
 * target_domains: all
+* build_script_path: "./build.gradle"  # マルチプロジェクト構成用
 ```
 
 実行方法（プロジェクトの build.gradle に定義されたタスクに従う）:
@@ -795,6 +799,7 @@ E2Eテストを生成してください
 パラメータ:
 * project_root: projects/sdd-wf/bookstore/back-office-api
 * spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
+* build_script_path: "./build.gradle"  # マルチプロジェクト構成用
 ```
 
 実行方法（プロジェクトの build.gradle に定義されたタスクに従う）:

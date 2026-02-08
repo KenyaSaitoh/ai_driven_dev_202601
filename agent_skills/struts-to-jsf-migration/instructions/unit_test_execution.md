@@ -15,9 +15,9 @@ target_type: "FUNC_XXX_xxx"
 
 ```yaml
 # Gradleプロジェクト設定
-gradle_project_dir: null    # Gradleタスク実行ディレクトリ（未指定時は project_root）
-                            # マルチプロジェクト構成の場合、サブプロジェクトのパスを指定
-                            # 例: "subprojects/web" または "modules/jsf-app"
+build_script_path: null     # build.gradleファイルのパス（未指定時は project_root の build.gradle を使用）
+                            # マルチプロジェクト構成の場合、ルートの build.gradle または サブプロジェクトの build.gradle を指定
+                            # 例: "./build.gradle" (リポジトリルート) または "d:/GitHubRepos/.../build.gradle" (絶対パス)
 
 # カバレッジ目標（未指定時は architecture_design.md → デフォルト値）
 coverage_targets:
@@ -143,24 +143,25 @@ JSFの Managed Bean は以下の理由でカバレッジ除外を推奨:
 ### Gradle タスクの実行
 
 テスト実行ディレクトリの決定:
-* gradle_project_dir が指定されている場合: そのディレクトリを使用
+* build_script_path が指定されている場合: その build.gradle ファイルのディレクトリ部分を使用
 * 未指定の場合: {project_root} を使用
 
 テスト実行コマンド:
 ```bash
-cd {gradle_project_dir または project_root}
+cd {build_script_path のディレクトリ部分 または project_root}
 ./gradlew test jacocoTestReport --stacktrace
 ```
 
 Windows の場合:
 ```bash
-cd {gradle_project_dir または project_root}
+cd {build_script_path のディレクトリ部分 または project_root}
 gradlew.bat test jacocoTestReport --stacktrace
 ```
 
 注意:
-* マルチプロジェクト構成で、特定のサブプロジェクトのみテストする場合は gradle_project_dir を指定する
-* gradle_project_dir は project_root からの相対パスまたは絶対パスで指定可能
+* マルチプロジェクト構成で、ルートの build.gradle を使用する場合は build_script_path にルートの build.gradle のパスを指定する
+* build_script_path は相対パス（例: "./build.gradle"）または絶対パス（例: "d:/path/to/build.gradle"）で指定可能
+* 指定されたパスからディレクトリ部分を抽出してそのディレクトリで Gradle コマンドを実行する
 
 ---
 

@@ -8,20 +8,25 @@
 project_root: "ここにプロジェクトルートのパスを入力"
 spec_directory: "ここにSPECディレクトリのパスを入力"
 target_domains: "対象ドメイン名（カンマ区切りで複数指定可能、または all）"
+build_script_path: null     # オプション。build.gradleファイルのパス（未指定時は project_root の build.gradle を使用）
+                            # マルチプロジェクト構成の場合、ルートの build.gradle または サブプロジェクトの build.gradle を指定
+                            # 例: "./build.gradle" (リポジトリルート) または "d:/GitHubRepos/.../build.gradle" (絶対パス)
 ```
 
 * 例1: 特定のドメインの結合テスト
 ```yaml
-project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
-spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
+project_root: "projects/sdd-wf/bookstore/back-office-api"
+spec_directory: "projects/sdd-wf/bookstore/back-office-api/specs/baseline"
 target_domains: "common,orders"
+build_script_path: "./build.gradle"  # マルチプロジェクト構成用
 ```
 
 * 例2: すべてのドメインの結合テスト
 ```yaml
-project_root: "projects/sdd-wf/bookstore/back-office-api-sdd"
-spec_directory: "projects/sdd-wf/bookstore/back-office-api-sdd/specs/baseline"
+project_root: "projects/sdd-wf/bookstore/back-office-api"
+spec_directory: "projects/sdd-wf/bookstore/back-office-api/specs/baseline"
 target_domains: "all"
+build_script_path: "./build.gradle"  # マルチプロジェクト構成用
 ```
 
 注意
@@ -140,7 +145,8 @@ target_domains: "all"
 
 **マルチプロジェクト構成の考慮:**
 * Gradleのマルチプロジェクト構成の場合、build.gradleの場所はサブプロジェクトごとに異なる
-* テスト実行時は、適切なbuild.gradleが存在するディレクトリで `./gradlew` コマンドを実行する必要がある
+* build_script_path パラメータでルートの build.gradle のパスを指定すること（例: "./build.gradle"）
+* 指定されたパスからディレクトリ部分を抽出してそのディレクトリで `./gradlew` コマンドを実行する
 * ルートプロジェクトの build.gradle でサブプロジェクトのタスクを実行する場合は `:subproject:integrationTest` のような形式を使用
 
 ### 2.2 Weld SE の設定

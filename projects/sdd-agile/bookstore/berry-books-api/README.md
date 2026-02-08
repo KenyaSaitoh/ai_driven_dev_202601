@@ -103,12 +103,13 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 パラメータ:
 * project_root: projects/sdd-agile/bookstore/berry-books-api
 * target: common   # または usecases/books 等、対象ユースケース
-* gradle_project_dir: projects/sdd-agile/bookstore/berry-books-api  # マルチプロジェクト構成用（ルートbuild.gradleを使用するため）
+* build_script_path: ./build.gradle  # マルチプロジェクト構成用（リポジトリルートのbuild.gradleを指定）
 ```
 
 **マルチプロジェクト構成について:**
 * このプロジェクトは、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成です
-* `gradle_project_dir` パラメータでプロジェクトルートのパスを指定することで、適切なディレクトリでGradleタスクが実行されます
+* `build_script_path` パラメータでリポジトリルートの `build.gradle` ファイルのパスを指定します（例: "./build.gradle"）
+* 指定されたパスからディレクトリ部分が抽出され、そのディレクトリでGradleタスクが実行されます
 * 未指定の場合はデフォルトで `project_root` が使用されますが、マルチプロジェクト構成ではルートの build.gradle を使うため、明示的に指定することを推奨します
 
 AIが：
