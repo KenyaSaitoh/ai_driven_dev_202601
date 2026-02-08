@@ -1,4 +1,4 @@
-# books_proxy - 書籍プロキシドメイン詳細設計書
+# books_proxy - ドメイン詳細設計書
 
 ドメイン名: books_proxy  
 バージョン: 1.0.0  
@@ -28,8 +28,8 @@
 ## 1. ドメイン概要
 
 * ドメイン名: books_proxy
-* 責務: back-office-apiから書籍情報を取得し、フロントエンドに提供するプロキシ層
-* 依存関係: commonドメインに依存（BackOfficeRestClient、外部API用DTO）
+* 責務: back-office-apiから書籍情報を取得し、フロントエンドに提供（プロキシ転送パターン）
+* 依存関係: commonに依存（BackOfficeRestClientを使用）
 
 ---
 
@@ -39,12 +39,18 @@
 
 ```
 pro.kensait.berrybooks
-└── api/                       # JAX-RS Resources
-    └── BookResource.java      # 書籍APIエンドポイント（プロキシ）
+└── api/                    # JAX-RS Resources
+    ├── BookResource.java
+    ├── CategoryResource.java
+    └── dto/
+        └── ErrorResponse.java（共通）
 ```
 
-* 注意: books_proxyドメインはプロキシ転送パターンのため、Service層、DAO層、Entity層は実装しない
-* 外部API連携はcommonドメインのBackOfficeRestClientを使用
+**重要な設計判断**:
+* Service層なし: 外部API呼び出しのみのため、ビジネスロジック層は不要
+* DAO層なし: 書籍データの永続化はback-office-apiが管理
+* Entity層なし: 書籍エンティティはback-office-apiが管理
+* 外部API連携: commonドメインのBackOfficeRestClientを使用
 
 ---
 
@@ -52,14 +58,15 @@ pro.kensait.berrybooks
 
 ### 3.1 Resource - BookResource
 
-**責務**: 書籍API、カテゴリAPIのエンドポイントを提供し、back-office-apiへリクエストをプロキシ転送
+**責務**: 書籍API（back-office-apiへのプロキシ転送）
 
 **アノテーション**:
 * `@Path("/books")`
 * `@ApplicationScoped`
+* `@Produces(MediaType.APPLICATION_JSON)`
 
 **依存関係**:
-* `@Inject BackOfficeRestClient backOfficeRestClient` - 外部API呼び出し
+* `@Inject BackOfficeRestClient backOfficeClient` - back-office-api連携クライアント
 
 **主要メソッド**:
 
@@ -67,178 +74,174 @@ pro.kensait.berrybooks
 
 ```java
 @GET
-@Produces(MediaType.APPLICATION_JSON)
 public Response getAllBooks()
 ```
 
-* **目的**: 全書籍を在庫情報と共に取得
-* **外部API**: `GET /books` (back-office-api)
-* **認証**: 不要（公開エンドポイント）
-* **レスポンス**:
-  * 200 OK: `List<BookTO>`
-  * 500 Internal Server Error: エラー時
-
----
+* **目的**: 全書籍の一覧取得（在庫・カテゴリ・出版社情報含む）
+* **認証**: 不要
+* **処理**: `backOfficeClient.findAllBooks()`を呼び出し、結果をそのまま返却
+* **戻り値**: 200 OK + List<BookTO>
+* **エラー**: 500 Internal Server Error（外部API呼び出し失敗時）
 
 #### getBookById
 
 ```java
 @GET
 @Path("/{bookId}")
-@Produces(MediaType.APPLICATION_JSON)
 public Response getBookById(@PathParam("bookId") Integer bookId)
 ```
 
-* **目的**: 指定された書籍IDの詳細情報を取得
-* **外部API**: `GET /books/{bookId}` (back-office-api)
-* **認証**: 不要（公開エンドポイント）
-* **レスポンス**:
-  * 200 OK: `BookTO`
-  * 404 Not Found: 書籍が見つからない
-  * 500 Internal Server Error: エラー時
-
----
+* **目的**: 書籍IDで書籍詳細を取得
+* **認証**: 不要
+* **処理**: `backOfficeClient.findBookById(bookId)`を呼び出し
+* **戻り値**: 200 OK + BookTO
+* **エラー**: 404 Not Found（書籍が存在しない）、500 Internal Server Error
 
 #### searchBooksJpql
 
 ```java
 @GET
 @Path("/search/jpql")
-@Produces(MediaType.APPLICATION_JSON)
 public Response searchBooksJpql(
     @QueryParam("categoryId") Integer categoryId,
-    @QueryParam("keyword") String keyword
-)
+    @QueryParam("keyword") String keyword)
 ```
 
-* **目的**: カテゴリIDまたはキーワードで書籍を検索（JPQL使用）
-* **外部API**: `GET /books/search/jpql?categoryId={categoryId}&keyword={keyword}` (back-office-api)
-* **認証**: 不要（公開エンドポイント）
-* **レスポンス**:
-  * 200 OK: `List<BookTO>`
-  * 500 Internal Server Error: エラー時
-
----
+* **目的**: カテゴリIDまたはキーワードで書籍検索（JPQL版）
+* **認証**: 不要
+* **処理**: `backOfficeClient.searchBooksJpql(categoryId, keyword)`を呼び出し
+* **戻り値**: 200 OK + List<BookTO>
+* **エラー**: 500 Internal Server Error
 
 #### searchBooksCriteria
 
 ```java
 @GET
 @Path("/search/criteria")
-@Produces(MediaType.APPLICATION_JSON)
 public Response searchBooksCriteria(
     @QueryParam("categoryId") Integer categoryId,
-    @QueryParam("keyword") String keyword
-)
+    @QueryParam("keyword") String keyword)
 ```
 
-* **目的**: カテゴリIDまたはキーワードで書籍を検索（Criteria API使用）
-* **外部API**: `GET /books/search/criteria?categoryId={categoryId}&keyword={keyword}` (back-office-api)
-* **認証**: 不要（公開エンドポイント）
-* **レスポンス**:
-  * 200 OK: `List<BookTO>`
-  * 500 Internal Server Error: エラー時
+* **目的**: カテゴリIDまたはキーワードで書籍検索（Criteria API版）
+* **認証**: 不要
+* **処理**: `backOfficeClient.searchBooksCriteria(categoryId, keyword)`を呼び出し
+* **戻り値**: 200 OK + List<BookTO>
+* **エラー**: 500 Internal Server Error
 
 ---
+
+### 3.2 Resource - CategoryResource
+
+**責務**: カテゴリAPI（back-office-apiへのプロキシ転送）
+
+**アノテーション**:
+* `@Path("/categories")`
+* `@ApplicationScoped`
+* `@Produces(MediaType.APPLICATION_JSON)`
+
+**依存関係**:
+* `@Inject BackOfficeRestClient backOfficeClient` - back-office-api連携クライアント
+
+**主要メソッド**:
 
 #### getAllCategories
 
 ```java
 @GET
-@Path("/categories")
-@Produces(MediaType.APPLICATION_JSON)
 public Response getAllCategories()
 ```
 
 * **目的**: カテゴリ一覧をマップ形式で取得
-* **外部API**: `GET /categories` (back-office-api)
-* **認証**: 不要（公開エンドポイント）
-* **レスポンス**:
-  * 200 OK: `Map<String, Integer>` (カテゴリ名 → カテゴリID)
-  * 500 Internal Server Error: エラー時
+* **認証**: 不要
+* **処理**: `backOfficeClient.findAllCategories()`を呼び出し
+* **戻り値**: 200 OK + Map<String, Integer>（キー: カテゴリ名、値: カテゴリID）
+* **エラー**: 500 Internal Server Error
 
 ---
 
-## 4. 外部API連携
+## 4. DTO設計
 
-### 4.1 BackOfficeRestClient（commonドメイン）
+### 4.1 BookTO（外部API用DTO）
 
-books_proxyドメインは、commonドメインで実装済みのBackOfficeRestClientを使用して外部APIを呼び出す。
+**パッケージ**: `pro.kensait.berrybooks.external.dto`（commonドメインで定義済み）
 
-**使用するメソッド**:
-* `getAllBooks()` - 書籍一覧取得
-* `getBookById(Integer bookId)` - 書籍詳細取得
-* `searchBooksJpql(Integer categoryId, String keyword)` - 書籍検索（JPQL）
-* `searchBooksCriteria(Integer categoryId, String keyword)` - 書籍検索（Criteria API）
-* `getAllCategories()` - カテゴリ一覧取得
+**目的**: 書籍情報の転送オブジェクト
 
-**設定**:
-* ベースURL: `back-office-api.base-url`（MicroProfile Config）
-* デフォルト値: `http://localhost:8080/back-office-api/api`
-* タイムアウト: 接続30秒、読み取り60秒
-
----
-
-## 5. エラーハンドリング
-
-### 5.1 外部APIエラーの扱い
-
-* **404 Not Found**: 外部APIが返す404をそのまま転送
-* **500 Internal Server Error**: 外部APIが返す500をそのまま転送
-* **ネットワークエラー、タイムアウト**: 503 Service Unavailableを返却
-* **例外マッピング**: commonドメインのGenericExceptionMapperで統一的に処理
-
-### 5.2 ログ出力方針
-
-* **INFO**: API呼び出し開始（メソッド名、パラメータ）
-* **WARN**: 外部APIエラー（404, 500等）
-* **ERROR**: ネットワークエラー、タイムアウト、予期しない例外
+**フィールド**:
+* `Integer bookId` - 書籍ID
+* `String bookName` - 書籍名
+* `String author` - 著者
+* `Integer categoryId` - カテゴリID
+* `Integer publisherId` - 出版社ID
+* `String publisherName` - 出版社名
+* `Integer price` - 価格
+* `Integer quantity` - 在庫数
+* `Long version` - バージョン番号（楽観的ロック用）
 
 ---
 
-## 6. 認証・認可
+### 4.2 CategoryTO（外部API用DTO）
 
-### 6.1 認証除外エンドポイント
+**パッケージ**: `pro.kensait.berrybooks.external.dto`（commonドメインで定義済み）
 
-books_proxyドメインの全エンドポイントは認証不要（公開API）:
-* `/api/books` - 書籍一覧取得
-* `/api/books/{bookId}` - 書籍詳細取得
-* `/api/books/search/jpql` - 書籍検索（JPQL）
-* `/api/books/search/criteria` - 書籍検索（Criteria API）
-* `/api/books/categories` - カテゴリ一覧取得
+**目的**: カテゴリ情報の転送オブジェクト
 
-これらのエンドポイントは、JwtAuthenFilterで認証チェックをスキップする。
+**フィールド**:
+* `Integer categoryId` - カテゴリID
+* `String categoryName` - カテゴリ名
 
 ---
 
-## 7. パフォーマンス考慮事項
+## 5. 外部API連携
 
-### 7.1 キャッシング
+### 5.1 BackOfficeRestClient使用
 
-* 現状: キャッシング未実装（常に最新データを外部APIから取得）
-* 将来的な実装候補:
-  * カテゴリ一覧のキャッシング（TTL: 1時間）
-  * 書籍一覧のキャッシング（TTL: 5分）
+**実装方式**: commonドメインのBackOfficeRestClientを使用
 
-### 7.2 タイムアウト
+**呼び出しエンドポイント**:
+* `GET /books` - 書籍一覧取得
+* `GET /books/{bookId}` - 書籍詳細取得
+* `GET /books/search/jpql?categoryId={}&keyword={}` - 書籍検索（JPQL）
+* `GET /books/search/criteria?categoryId={}&keyword={}` - 書籍検索（Criteria API）
+* `GET /categories` - カテゴリ一覧取得
 
-* BackOfficeRestClientのデフォルトタイムアウトを使用
-* 接続タイムアウト: 30秒
-* 読み取りタイムアウト: 60秒
-
----
-
-## 8. トランザクション設計
-
-* トランザクション境界: なし（プロキシ転送のみ、データベースアクセスなし）
+**エラーハンドリング**:
+* 外部API呼び出し失敗時: RuntimeExceptionをスロー
+* ExceptionMapperで統一的なエラーレスポンス（500 Internal Server Error）
 
 ---
 
-## 9. 参考資料
+## 6. セキュリティ設計
+
+### 6.1 認証設定
+
+**認証除外パス**: `/api/books`, `/api/categories`（すべてのエンドポイント）
+
+**理由**: 書籍情報とカテゴリ情報は公開情報のため、認証不要
+
+**実装**: JwtAuthenFilterで上記パスを認証除外リストに追加済み
+
+---
+
+## 7. エラーハンドリング
+
+### 7.1 例外マッピング
+
+| 例外 | HTTPステータス | 説明 |
+|-----|--------------|------|
+| WebApplicationException（404） | 404 Not Found | 書籍が存在しない |
+| ProcessingException | 503 Service Unavailable | 外部API接続エラー |
+| その他RuntimeException | 500 Internal Server Error | システムエラー |
+
+**実装**: ExceptionMapperで統一的なエラーレスポンス（ErrorResponse DTO）を返却
+
+---
+
+## 8. 参考資料
 
 * [behaviors.md](behaviors.md) - 単体テスト用振る舞い仕様書
-* [../../basic_design/books_proxy/functional_design.md](../../basic_design/books_proxy/functional_design.md) - 書籍プロキシ機能設計書
-* [../../basic_design/books_proxy/behaviors.md](../../basic_design/books_proxy/behaviors.md) - 書籍プロキシ振る舞い仕様書（結合テスト用）
+* [../../basic_design/books_proxy/functional_design.md](../../basic_design/books_proxy/functional_design.md) - 書籍API連携機能設計書
+* [../../basic_design/books_proxy/behaviors.md](../../basic_design/books_proxy/behaviors.md) - 結合テスト用振る舞い仕様書
 * [../../basic_design/common/external_interface.md](../../basic_design/common/external_interface.md) - 外部インターフェース仕様書
 * [../../basic_design/common/architecture_design.md](../../basic_design/common/architecture_design.md) - アーキテクチャ設計書
-* [../common/detailed_design.md](../common/detailed_design.md) - 共通ドメイン詳細設計書

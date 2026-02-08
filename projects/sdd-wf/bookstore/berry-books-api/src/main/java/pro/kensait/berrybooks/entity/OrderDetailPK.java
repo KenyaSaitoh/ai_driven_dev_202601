@@ -1,44 +1,24 @@
 package pro.kensait.berrybooks.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * 注文明細の複合主キー
- * 
- * @since 1.0.0
+ * OrderDetailの複合主キークラス
  */
-@Embeddable
 public class OrderDetailPK implements Serializable {
-    
     private static final long serialVersionUID = 1L;
     
-    @Column(name = "ORDER_TRAN_ID")
     private Integer orderTranId;
-    
-    @Column(name = "ORDER_DETAIL_ID")
     private Integer orderDetailId;
     
-    /**
-     * デフォルトコンストラクタ
-     */
     public OrderDetailPK() {
     }
     
-    /**
-     * コンストラクタ
-     * 
-     * @param orderTranId 注文トランザクションID
-     * @param orderDetailId 注文明細ID
-     */
     public OrderDetailPK(Integer orderTranId, Integer orderDetailId) {
         this.orderTranId = orderTranId;
         this.orderDetailId = orderDetailId;
     }
-    
-    // Getters and Setters
     
     public Integer getOrderTranId() {
         return orderTranId;
@@ -68,13 +48,5 @@ public class OrderDetailPK implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(orderTranId, orderDetailId);
-    }
-    
-    @Override
-    public String toString() {
-        return "OrderDetailPK{" +
-                "orderTranId=" + orderTranId +
-                ", orderDetailId=" + orderDetailId +
-                '}';
     }
 }

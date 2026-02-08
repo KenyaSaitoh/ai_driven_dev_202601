@@ -1,29 +1,30 @@
 package pro.kensait.berrybooks.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.io.Serializable;
 
 /**
- * 注文明細エンティティ（スナップショットパターン）
- * 
- * 注文時点の書籍情報（書籍名、出版社名、価格）を保存し、
- * 書籍マスタの変更の影響を受けないようにする。
- * 
- * @since 1.0.0
+ * 注文明細エンティティ（スナップショットパターン適用）
  */
 @Entity
 @Table(name = "ORDER_DETAIL")
+@IdClass(OrderDetailPK.class)
 public class OrderDetail implements Serializable {
-    
     private static final long serialVersionUID = 1L;
     
-    @EmbeddedId
-    private OrderDetailPK id;
+    @Id
+    @Column(name = "ORDER_TRAN_ID")
+    private Integer orderTranId;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("orderTranId")
-    @JoinColumn(name = "ORDER_TRAN_ID", nullable = false)
-    private OrderTran orderTran;
+    @Id
+    @Column(name = "ORDER_DETAIL_ID")
+    private Integer orderDetailId;
     
     @Column(name = "BOOK_ID", nullable = false)
     private Integer bookId;
@@ -40,28 +41,27 @@ public class OrderDetail implements Serializable {
     @Column(name = "COUNT", nullable = false)
     private Integer count;
     
-    /**
-     * デフォルトコンストラクタ
-     */
+    @ManyToOne
+    @JoinColumn(name = "ORDER_TRAN_ID", insertable = false, updatable = false)
+    private OrderTran orderTran;
+    
     public OrderDetail() {
     }
     
-    // Getters and Setters
-    
-    public OrderDetailPK getId() {
-        return id;
+    public Integer getOrderTranId() {
+        return orderTranId;
     }
     
-    public void setId(OrderDetailPK id) {
-        this.id = id;
+    public void setOrderTranId(Integer orderTranId) {
+        this.orderTranId = orderTranId;
     }
     
-    public OrderTran getOrderTran() {
-        return orderTran;
+    public Integer getOrderDetailId() {
+        return orderDetailId;
     }
     
-    public void setOrderTran(OrderTran orderTran) {
-        this.orderTran = orderTran;
+    public void setOrderDetailId(Integer orderDetailId) {
+        this.orderDetailId = orderDetailId;
     }
     
     public Integer getBookId() {
@@ -104,15 +104,11 @@ public class OrderDetail implements Serializable {
         this.count = count;
     }
     
-    @Override
-    public String toString() {
-        return "OrderDetail{" +
-                "id=" + id +
-                ", bookId=" + bookId +
-                ", bookName='" + bookName + '\'' +
-                ", publisherName='" + publisherName + '\'' +
-                ", price=" + price +
-                ", count=" + count +
-                '}';
+    public OrderTran getOrderTran() {
+        return orderTran;
+    }
+    
+    public void setOrderTran(OrderTran orderTran) {
+        this.orderTran = orderTran;
     }
 }

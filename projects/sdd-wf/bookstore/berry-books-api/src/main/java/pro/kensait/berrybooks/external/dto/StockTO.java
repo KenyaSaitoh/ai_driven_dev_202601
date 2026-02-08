@@ -1,21 +1,41 @@
 package pro.kensait.berrybooks.external.dto;
 
+import java.io.Serializable;
+
 /**
- * 在庫情報転送オブジェクト
- * 
- * back-office-apiからの在庫情報を転送する。
- * 
- * @param bookId 書籍ID
- * @param bookName 書籍名
- * @param quantity 在庫数
- * @param version 楽観的ロックバージョン
- * 
- * @since 1.0.0
+ * 在庫情報の転送オブジェクト
  */
-public record StockTO(
-    Integer bookId,
-    String bookName,
-    Integer quantity,
-    Long version
-) {
+public class StockTO implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    private Integer bookId;
+    private Integer quantity;
+    private Long version;
+    
+    public StockTO() {
+    }
+    
+    public Integer getBookId() {
+        return bookId;
+    }
+    
+    public void setBookId(Integer bookId) {
+        this.bookId = bookId;
+    }
+    
+    public Integer getQuantity() {
+        return quantity;
+    }
+    
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+    
+    public Long getVersion() {
+        return version;
+    }
+    
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 }

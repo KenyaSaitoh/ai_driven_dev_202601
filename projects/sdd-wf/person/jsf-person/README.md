@@ -714,9 +714,6 @@ Database (HSQLDB)
 仕様駆動開発により何度でも再実装できます。詳細は [ルートREADMEのSDDクリーンアップ節](../../../../README.md#仕様駆動開発sddプロジェクトの成果物クリーンアップ) を参照してください。
 
 ```bash
-# タスクファイルのみ削除
-./gradlew :jsf-person-sdd-wf:cleanTasks
-
 # 詳細設計SPECのみ削除
 ./gradlew :jsf-person-sdd-wf:cleanDetailedDesign
 

@@ -1,8 +1,8 @@
-# common - 共通ドメイン詳細設計書
+# common - ドメイン詳細設計書
 
-ドメイン名: common（共通ドメイン、最優先実装）  
+ドメイン名: common  
 バージョン: 1.0.0  
-最終更新: 2026-02-06
+最終更新: 2026-02-07
 
 ---
 
@@ -28,8 +28,8 @@
 ## 1. ドメイン概要
 
 * ドメイン名: common
-* 責務: 全ドメインが依存する基盤機能（エンティティ、DAO、JWT認証、外部API連携）を提供
-* 依存関係: なし（最優先実装、他のすべてのドメインがこのcommonに依存）
+* 責務: 注文データの永続化、JWT認証、外部API連携、共通ユーティリティ
+* 依存関係: なし（他のすべてのドメインがcommonに依存）
 
 ---
 
@@ -39,44 +39,36 @@
 
 ```
 pro.kensait.berrybooks
-├── entity/                    # JPAエンティティ（注文関連のみ）
+├── entity/                 # JPAエンティティ
 │   ├── OrderTran.java
 │   ├── OrderDetail.java
 │   └── OrderDetailPK.java
-├── dao/                       # データアクセス（注文関連のみ）
+├── dao/                    # データアクセス
 │   ├── OrderTranDao.java
 │   └── OrderDetailDao.java
-├── security/                  # セキュリティ（JWT認証）
+├── security/               # セキュリティ
 │   ├── JwtUtil.java
 │   ├── JwtAuthenFilter.java
-│   └── AuthenInfo.java
-├── external/                  # 外部API連携
+│   └── AuthenticatedUser.java
+├── external/               # 外部API連携
 │   ├── BackOfficeRestClient.java
 │   ├── CustomerHubRestClient.java
 │   └── dto/
 │       ├── BookTO.java
 │       ├── StockTO.java
+│       ├── CategoryTO.java
 │       └── CustomerTO.java
-├── api/
-│   └── exception/             # 共通例外マッパー
-│       ├── OutOfStockExceptionMapper.java
-│       ├── OptimisticLockExceptionMapper.java
-│       ├── ValidationExceptionMapper.java
-│       └── GenericExceptionMapper.java
-└── common/                    # 共通クラス
-    ├── ErrorResponse.java     # エラーレスポンスDTO
-    └── exception/
-        ├── OutOfStockException.java
-        └── AuthenticationException.java
+└── util/                   # ユーティリティ
+    └── PasswordUtil.java
 ```
 
 ---
 
-## 3. エンティティ設計
+## 3. コンポーネント設計
 
 ### 3.1 Entity - OrderTran
 
-**責務**: 注文トランザクション情報を管理
+**責務**: 注文トランザクションデータの永続化
 
 **アノテーション**:
 * `@Entity`
@@ -84,61 +76,57 @@ pro.kensait.berrybooks
 
 **主要フィールド**:
 * `Integer orderTranId` - `@Id @GeneratedValue(strategy = GenerationType.IDENTITY)`
-* `LocalDate orderDate` - `@Column(name = "ORDER_DATE", nullable = false)`
-* `Integer customerId` - `@Column(name = "CUSTOMER_ID", nullable = false)` ※論理参照のみ
-* `Integer totalPrice` - `@Column(name = "TOTAL_PRICE", nullable = false)`
-* `Integer deliveryPrice` - `@Column(name = "DELIVERY_PRICE", nullable = false)`
-* `String deliveryAddress` - `@Column(name = "DELIVERY_ADDRESS", nullable = false, length = 30)`
-* `Integer settlementType` - `@Column(name = "SETTLEMENT_TYPE", nullable = false)`
+* `LocalDate orderDate` - `@Column(name = "ORDER_DATE")`
+* `Integer customerId` - `@Column(name = "CUSTOMER_ID")`（論理参照のみ）
+* `Integer totalPrice` - `@Column(name = "TOTAL_PRICE")`
+* `Integer deliveryPrice` - `@Column(name = "DELIVERY_PRICE")`
+* `String deliveryAddress` - `@Column(name = "DELIVERY_ADDRESS")`
+* `Integer settlementType` - `@Column(name = "SETTLEMENT_TYPE")`
 * `List<OrderDetail> orderDetails` - `@OneToMany(mappedBy = "orderTran", cascade = CascadeType.ALL)`
-
-**リレーション**:
-* `@OneToMany` - OrderDetail（注文明細）
 
 ---
 
 ### 3.2 Entity - OrderDetail
 
-**責務**: 注文明細情報を管理（スナップショットパターン）
+**責務**: 注文明細データの永続化（スナップショットパターン）
 
 **アノテーション**:
 * `@Entity`
 * `@Table(name = "ORDER_DETAIL")`
+* `@IdClass(OrderDetailPK.class)`
 
 **主要フィールド**:
-* `OrderDetailPK id` - `@EmbeddedId`（複合主キー）
-* `OrderTran orderTran` - `@ManyToOne @MapsId("orderTranId") @JoinColumn(name = "ORDER_TRAN_ID")`
-* `Integer bookId` - `@Column(name = "BOOK_ID", nullable = false)` ※論理参照のみ
-* `String bookName` - `@Column(name = "BOOK_NAME", nullable = false, length = 100)` ※スナップショット
-* `String publisherName` - `@Column(name = "PUBLISHER_NAME", nullable = false, length = 50)` ※スナップショット
-* `Integer price` - `@Column(name = "PRICE", nullable = false)` ※スナップショット
-* `Integer count` - `@Column(name = "COUNT", nullable = false)`
-
-**リレーション**:
-* `@ManyToOne` - OrderTran（注文トランザクション）
+* `Integer orderTranId` - `@Id @Column(name = "ORDER_TRAN_ID")`
+* `Integer orderDetailId` - `@Id @Column(name = "ORDER_DETAIL_ID")`
+* `Integer bookId` - `@Column(name = "BOOK_ID")`（論理参照のみ）
+* `String bookName` - `@Column(name = "BOOK_NAME")`（スナップショット）
+* `String publisherName` - `@Column(name = "PUBLISHER_NAME")`（スナップショット）
+* `Integer price` - `@Column(name = "PRICE")`（スナップショット）
+* `Integer count` - `@Column(name = "COUNT")`
+* `OrderTran orderTran` - `@ManyToOne @JoinColumn(name = "ORDER_TRAN_ID", insertable = false, updatable = false)`
 
 ---
 
-### 3.3 Embeddable - OrderDetailPK
+### 3.3 Entity - OrderDetailPK
 
-**責務**: 注文明細の複合主キー
+**責務**: OrderDetailの複合主キー
 
 **アノテーション**:
 * `@Embeddable`
 
-**主要フィールド**:
-* `Integer orderTranId` - `@Column(name = "ORDER_TRAN_ID")`
-* `Integer orderDetailId` - `@Column(name = "ORDER_DETAIL_ID")`
+**フィールド**:
+* `Integer orderTranId`
+* `Integer orderDetailId`
 
-**注意**: `equals()` と `hashCode()` を実装する必要がある
+**メソッド**:
+* `equals(Object o)` - 複合主キーの比較
+* `hashCode()` - 複合主キーのハッシュ値
 
 ---
 
-## 4. DAO設計
+### 3.4 DAO - OrderTranDao
 
-### 4.1 DAO - OrderTranDao
-
-**責務**: 注文トランザクションのCRUD操作とクエリ実行
+**責務**: ORDER_TRANテーブルのCRUD操作
 
 **アノテーション**:
 * `@ApplicationScoped`
@@ -154,21 +142,17 @@ pro.kensait.berrybooks
 public OrderTran insert(OrderTran orderTran)
 ```
 
-* **目的**: 注文トランザクションを登録
+* **目的**: 注文トランザクションの登録
+* **処理**: `em.persist(orderTran)`
 
 #### findById
 
 ```java
-public Optional<OrderTran> findById(Integer orderTranId)
+public OrderTran findById(Integer orderTranId)
 ```
 
-* **目的**: 注文IDで注文トランザクションを取得
-* **JPQLクエリ**:
-  ```sql
-  SELECT o FROM OrderTran o 
-  LEFT JOIN FETCH o.orderDetails 
-  WHERE o.orderTranId = :orderTranId
-  ```
+* **目的**: 注文トランザクションの主キー検索
+* **処理**: `em.find(OrderTran.class, orderTranId)`
 
 #### findByCustomerId
 
@@ -176,20 +160,19 @@ public Optional<OrderTran> findById(Integer orderTranId)
 public List<OrderTran> findByCustomerId(Integer customerId)
 ```
 
-* **目的**: 顧客IDで注文履歴を取得
+* **目的**: 顧客の注文履歴取得
 * **JPQLクエリ**:
   ```sql
-  SELECT o FROM OrderTran o 
-  LEFT JOIN FETCH o.orderDetails 
-  WHERE o.customerId = :customerId 
+  SELECT o FROM OrderTran o
+  WHERE o.customerId = :customerId
   ORDER BY o.orderDate DESC
   ```
 
 ---
 
-### 4.2 DAO - OrderDetailDao
+### 3.5 DAO - OrderDetailDao
 
-**責務**: 注文明細のCRUD操作
+**責務**: ORDER_DETAILテーブルのCRUD操作
 
 **アノテーション**:
 * `@ApplicationScoped`
@@ -205,7 +188,8 @@ public List<OrderTran> findByCustomerId(Integer customerId)
 public OrderDetail insert(OrderDetail orderDetail)
 ```
 
-* **目的**: 注文明細を登録
+* **目的**: 注文明細の登録
+* **処理**: `em.persist(orderDetail)`
 
 #### findByOrderTranId
 
@@ -213,166 +197,134 @@ public OrderDetail insert(OrderDetail orderDetail)
 public List<OrderDetail> findByOrderTranId(Integer orderTranId)
 ```
 
-* **目的**: 注文IDで注文明細一覧を取得
+* **目的**: 注文IDで明細一覧取得
 * **JPQLクエリ**:
   ```sql
-  SELECT od FROM OrderDetail od 
-  WHERE od.id.orderTranId = :orderTranId 
-  ORDER BY od.id.orderDetailId
+  SELECT od FROM OrderDetail od
+  WHERE od.orderTranId = :orderTranId
+  ORDER BY od.orderDetailId
   ```
 
 ---
 
-## 5. セキュリティコンポーネント
+### 3.6 Security - JwtUtil
 
-### 5.1 Utility - JwtUtil
-
-**責務**: JWT生成・検証、Claims抽出
+**責務**: JWT生成・検証ユーティリティ
 
 **アノテーション**:
 * `@ApplicationScoped`
+
+**依存関係**:
+* なし（io.jsonwebtoken.Jwtsライブラリを使用）
 
 **主要メソッド**:
 
 #### generateToken
 
 ```java
-public String generateToken(Integer customerId, String email)
+public String generateToken(Integer customerId, String customerName)
 ```
 
-* **目的**: 顧客ID、メールアドレスからJWTトークンを生成
-* **Claims**: `customerId`, `email`, `iat`, `exp`
-* **有効期限**: 24時間
+* **目的**: JWT生成
 * **アルゴリズム**: HMAC-SHA256
-* **秘密鍵**: MicroProfile Configから読み込み（設定キー: `jwt.secret`）
+* **有効期限**: 24時間
+* **クレーム**: customerId, customerName
 
 #### validateToken
 
 ```java
-public boolean validateToken(String token)
+public Claims validateToken(String token) throws JwtException
 ```
 
-* **目的**: JWTトークンの有効性を検証
+* **目的**: JWT検証
+* **例外**: JwtException（トークン無効時）
 
-#### getCustomerIdFromToken
+#### extractCustomerId
 
 ```java
-public Integer getCustomerIdFromToken(String token)
+public Integer extractCustomerId(String token)
 ```
 
-* **目的**: JWTトークンから顧客IDを抽出
-
-#### getEmailFromToken
-
-```java
-public String getEmailFromToken(String token)
-```
-
-* **目的**: JWTトークンからメールアドレスを抽出
+* **目的**: トークンからcustomerIdを抽出
 
 ---
 
-### 5.2 Filter - JwtAuthenFilter
+### 3.7 Security - JwtAuthenFilter
 
-**責務**: JWT認証フィルター処理
+**責務**: JWT認証フィルター
 
 **アノテーション**:
-* `@WebFilter(urlPatterns = "/api/*")`
+* `@Provider`
+* `@Priority(Priorities.AUTHENTICATION)`
 
 **依存関係**:
 * `@Inject JwtUtil jwtUtil`
-* `@Inject AuthenInfo authenInfo`
+* `@Inject AuthenticatedUser authenticatedUser`
 
-**認証除外パス**:
-* `/api/auth/login`
-* `/api/auth/logout`
-* `/api/auth/register`
-* `/api/books`（GET）
-* `/api/categories`（GET）
-* `/api/images`
+**実装インターフェース**:
+* `ContainerRequestFilter`
 
-**処理フロー**（概要のみ）:
-1. リクエストから `berry_auth` Cookieを取得
-2. 除外パスの場合はフィルター処理をスキップ
-3. JWTトークンを検証
-4. 検証成功時、AuthenInfoにユーザー情報を設定
-5. 検証失敗時、401 Unauthorizedを返却
+**主要メソッド**:
+
+#### filter
+
+```java
+public void filter(ContainerRequestContext requestContext) throws IOException
+```
+
+* **目的**: リクエストごとのJWT認証
+* **認証除外パス**: `/api/auth/login`, `/api/auth/logout`, `/api/auth/register`, `/api/books`, `/api/images`
+* **処理**: Cookieからトークン取得 → 検証 → AuthenticatedUserに設定
 
 ---
 
-### 5.3 CDI Bean - AuthenInfo
+### 3.8 Security - AuthenticatedUser
 
-**責務**: 認証情報のスレッドローカル管理
+**責務**: 認証済みユーザー情報の保持
 
 **アノテーション**:
 * `@RequestScoped`
 
-**主要フィールド**:
+**フィールド**:
 * `Integer customerId`
-* `String email`
+* `String customerName`
 
-**主要メソッド**:
-
-```java
-public void setCustomerId(Integer customerId)
-public Integer getCustomerId()
-public void setEmail(String email)
-public String getEmail()
-```
+**メソッド**:
+* `setCustomerId(Integer customerId)`
+* `setCustomerName(String customerName)`
+* `getCustomerId()`
+* `getCustomerName()`
+* `isAuthenticated()`
 
 ---
 
-## 6. 外部API連携クライアント
+### 3.9 External - BackOfficeRestClient
 
-### 6.1 RestClient - BackOfficeRestClient
-
-**責務**: back-office-api（書籍・在庫・カテゴリ管理）との連携
+**責務**: back-office-api連携（書籍・在庫・カテゴリ）
 
 **アノテーション**:
 * `@ApplicationScoped`
 
-**設定**:
-* **ベースURL**: MicroProfile Configから読み込み（設定キー: `back-office-api.base-url`）
-* **デフォルト値**: `http://localhost:8080/back-office-api/api`
-* **タイムアウト**: 接続30秒、読み取り60秒
+**依存関係**:
+* `@Inject @RestClient BackOfficeApi backOfficeApi`（MicroProfile REST Client）
 
 **主要メソッド**:
 
-#### getAllBooks
+#### findAllBooks
 
 ```java
-public List<BookTO> getAllBooks()
+public List<BookTO> findAllBooks()
 ```
 
 * **エンドポイント**: `GET /books`
-* **目的**: 全書籍を在庫情報と共に取得
 
-#### getBookById
+#### findBookById
 
 ```java
-public BookTO getBookById(Integer bookId)
+public BookTO findBookById(Integer bookId)
 ```
 
 * **エンドポイント**: `GET /books/{bookId}`
-* **目的**: 書籍詳細を取得
-
-#### searchBooksJpql
-
-```java
-public List<BookTO> searchBooksJpql(Integer categoryId, String keyword)
-```
-
-* **エンドポイント**: `GET /books/search/jpql?categoryId={categoryId}&keyword={keyword}`
-* **目的**: カテゴリIDまたはキーワードで書籍を検索（JPQL使用）
-
-#### getAllCategories
-
-```java
-public Map<String, Integer> getAllCategories()
-```
-
-* **エンドポイント**: `GET /categories`
-* **目的**: カテゴリ一覧をマップ形式で取得
 
 #### findStockById
 
@@ -381,31 +333,35 @@ public StockTO findStockById(Integer bookId)
 ```
 
 * **エンドポイント**: `GET /stocks/{bookId}`
-* **目的**: 在庫情報を取得
 
 #### updateStock
 
 ```java
-public StockTO updateStock(Integer bookId, Integer quantity, Long version)
+public StockTO updateStock(Integer bookId, Long version, Integer newQuantity)
 ```
 
 * **エンドポイント**: `PUT /stocks/{bookId}`
-* **目的**: 在庫を更新（楽観的ロック対応）
-* **リクエストボディ**: `{"quantity": <quantity>, "version": <version>}`
+* **楽観的ロック**: versionパラメータを送信
+
+#### findAllCategories
+
+```java
+public List<CategoryTO> findAllCategories()
+```
+
+* **エンドポイント**: `GET /categories`
 
 ---
 
-### 6.2 RestClient - CustomerHubRestClient
+### 3.10 External - CustomerHubRestClient
 
-**責務**: customer-hub-api（顧客管理）との連携
+**責務**: customer-hub-api連携（顧客管理）
 
 **アノテーション**:
 * `@ApplicationScoped`
 
-**設定**:
-* **ベースURL**: MicroProfile Configから読み込み（設定キー: `customer-hub-api.base-url`）
-* **デフォルト値**: `http://localhost:8080/customer-hub-api/customers`
-* **タイムアウト**: 接続30秒、読み取り60秒
+**依存関係**:
+* `@Inject @RestClient CustomerHubApi customerHubApi`（MicroProfile REST Client）
 
 **主要メソッド**:
 
@@ -415,198 +371,143 @@ public StockTO updateStock(Integer bookId, Integer quantity, Long version)
 public CustomerTO findByEmail(String email)
 ```
 
-* **エンドポイント**: `GET /customers/query_email?email={email}`
-* **目的**: メールアドレスで顧客を検索
+* **エンドポイント**: `GET /customers/email/{email}`
 
-#### findById
-
-```java
-public CustomerTO findById(Integer customerId)
-```
-
-* **エンドポイント**: `GET /customers/{customerId}`
-* **目的**: 顧客IDで顧客情報を取得
-
-#### register
+#### createCustomer
 
 ```java
-public CustomerTO register(CustomerTO customerTO)
+public CustomerTO createCustomer(CustomerTO customer)
 ```
 
-* **エンドポイント**: `POST /customers/`
-* **目的**: 新規顧客を登録
+* **エンドポイント**: `POST /customers`
 
 ---
 
-## 7. 外部API用DTO
+### 3.11 Util - PasswordUtil
 
-### 7.1 Record - BookTO
+**責務**: パスワードハッシュ化・検証
 
-**目的**: 書籍情報の転送（外部APIレスポンス）
+**アノテーション**:
+* `@ApplicationScoped`
+
+**主要メソッド**:
+
+#### hashPassword
+
+```java
+public String hashPassword(String plainPassword)
+```
+
+* **目的**: BCryptハッシュ化
+* **アルゴリズム**: BCrypt（cost=10）
+
+#### verifyPassword
+
+```java
+public boolean verifyPassword(String plainPassword, String hashedPassword)
+```
+
+* **目的**: パスワード検証
+
+---
+
+## 4. DTO設計
+
+### 4.1 外部API用DTO
+
+#### BookTO
+
+**目的**: 書籍情報の転送
 
 **フィールド**:
 * `Integer bookId`
 * `String bookName`
 * `String author`
 * `Integer categoryId`
-* `String categoryName`
 * `Integer publisherId`
 * `String publisherName`
 * `Integer price`
-* `Integer quantity` ※在庫数（@SecondaryTableによる結合）
-* `Long version` ※楽観的ロックバージョン
-
----
-
-### 7.2 Record - StockTO
-
-**目的**: 在庫情報の転送（外部APIレスポンス）
-
-**フィールド**:
-* `Integer bookId`
-* `String bookName`
 * `Integer quantity`
 * `Long version`
 
----
+#### StockTO
 
-### 7.3 Record - CustomerTO
+**目的**: 在庫情報の転送
 
-**目的**: 顧客情報の転送（外部APIレスポンス・リクエスト）
+**フィールド**:
+* `Integer bookId`
+* `Integer quantity`
+* `Long version`
+
+#### CategoryTO
+
+**目的**: カテゴリ情報の転送
+
+**フィールド**:
+* `Integer categoryId`
+* `String categoryName`
+
+#### CustomerTO
+
+**目的**: 顧客情報の転送
 
 **フィールド**:
 * `Integer customerId`
 * `String customerName`
-* `String password` ※BCryptハッシュ
+* `String password`
 * `String email`
 * `LocalDate birthday`
 * `String address`
 
 ---
 
-## 8. 共通例外クラス
+## 5. トランザクション設計
 
-### 8.1 Exception - OutOfStockException
-
-**責務**: 在庫不足エラーを表現
-
-**継承**: `RuntimeException`
-
-**コンストラクタ**:
-```java
-public OutOfStockException(String message)
-```
+* **トランザクション境界**: Service層（OrderService等）
+* **伝播レベル**: REQUIRED（デフォルト）
+* **DAO層**: トランザクション管理なし（Service層で管理）
 
 ---
 
-### 8.2 Exception - AuthenticationException
+## 6. セキュリティ設計
 
-**責務**: 認証失敗エラーを表現
+### 6.1 JWT仕様
 
-**継承**: `RuntimeException`
+* **アルゴリズム**: HMAC-SHA256
+* **シークレットキー**: 環境変数から取得
+* **有効期限**: 24時間
+* **Cookie設定**: HttpOnly, Secure（本番環境）
 
-**コンストラクタ**:
-```java
-public AuthenticationException(String message)
-```
+### 6.2 認証フロー
 
----
-
-## 9. Exception Mapper
-
-### 9.1 ExceptionMapper - OutOfStockExceptionMapper
-
-**責務**: OutOfStockExceptionを409 Conflictレスポンスにマッピング
-
-**アノテーション**:
-* `@Provider`
-
-**実装インターフェース**: `ExceptionMapper<OutOfStockException>`
+1. JwtAuthenFilterがリクエストを受信
+2. Cookieからトークン取得
+3. JwtUtilでトークン検証
+4. AuthenticatedUserに認証情報を設定
+5. Resourceでは@Inject AuthenticatedUserから情報取得
 
 ---
 
-### 9.2 ExceptionMapper - OptimisticLockExceptionMapper
+## 7. 外部API連携設計
 
-**責務**: OptimisticLockExceptionを409 Conflictレスポンスにマッピング
+### 7.1 REST Client設定
 
-**アノテーション**:
-* `@Provider`
+* **実装方式**: MicroProfile REST Client
+* **設定方法**: microprofile-config.properties
+* **タイムアウト**: 接続30秒、読み取り30秒
+* **リトライ**: なし（将来的に実装可能）
 
-**実装インターフェース**: `ExceptionMapper<OptimisticLockException>`
+### 7.2 エラーハンドリング
 
----
-
-### 9.3 ExceptionMapper - ValidationExceptionMapper
-
-**責務**: ConstraintViolationExceptionを400 Bad Requestレスポンスにマッピング
-
-**アノテーション**:
-* `@Provider`
-
-**実装インターフェース**: `ExceptionMapper<ConstraintViolationException>`
+* **外部APIエラー**: WebApplicationExceptionとしてスロー
+* **ネットワークエラー**: ProcessingExceptionとしてスロー
+* **例外マッパー**: ExceptionMapperで統一的なエラーレスポンス
 
 ---
 
-### 9.4 ExceptionMapper - GenericExceptionMapper
-
-**責務**: 予期しない例外を500 Internal Server Errorレスポンスにマッピング
-
-**アノテーション**:
-* `@Provider`
-
-**実装インターフェース**: `ExceptionMapper<Exception>`
-
----
-
-## 10. 共通DTO
-
-### 10.1 Record - ErrorResponse
-
-**目的**: 統一的なエラーレスポンス形式
-
-**フィールド**:
-* `int status` - HTTPステータスコード
-* `String error` - エラー種別
-* `String message` - エラーメッセージ
-* `String path` - リクエストパス
-
----
-
-## 11. 設定情報
-
-### 11.1 MicroProfile Config
-
-**ファイル**: `src/main/resources/META-INF/microprofile-config.properties`
-
-**設定項目**:
-```properties
-# JWT設定
-jwt.secret=your-secret-key-at-least-256-bits-long-for-hs256-algorithm
-
-# 外部API設定
-back-office-api.base-url=http://localhost:8080/back-office-api/api
-customer-hub-api.base-url=http://localhost:8080/customer-hub-api/customers
-```
-
-**読み込み優先順位**:
-1. システムプロパティ
-2. 環境変数
-3. プロパティファイル
-4. デフォルト値
-
----
-
-## 12. トランザクション設計
-
-* **トランザクション境界**: Service層（注文処理のみ、commonドメインではトランザクション不要）
-* **伝播レベル**: デフォルト（REQUIRED）
-
----
-
-## 13. 参考資料
+## 8. 参考資料
 
 * [behaviors.md](behaviors.md) - 単体テスト用振る舞い仕様書
 * [../../basic_design/common/functional_design.md](../../basic_design/common/functional_design.md) - 共通機能設計書
 * [../../basic_design/common/data_model.md](../../basic_design/common/data_model.md) - データモデル仕様書
-* [../../basic_design/common/external_interface.md](../../basic_design/common/external_interface.md) - 外部インターフェース仕様書
 * [../../basic_design/common/architecture_design.md](../../basic_design/common/architecture_design.md) - アーキテクチャ設計書

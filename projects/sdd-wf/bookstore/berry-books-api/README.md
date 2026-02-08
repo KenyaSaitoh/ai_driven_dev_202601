@@ -226,7 +226,7 @@ AIが：
 すべてのドメインの実装が完了したら、結合テスト（JUnit 5 + Weld SE）を生成します。
 
 ```
-@agent_skills/jakarta-ee-api-base/instructions/integration_test_generation.md
+@agent_skills/jakarta-ee-api-base/instructions/it_generation.md
 
 結合テストを生成してください
 

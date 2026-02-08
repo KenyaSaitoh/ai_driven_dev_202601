@@ -116,9 +116,12 @@ subprojects {
             // Jakarta EE 10依存関係（Payara Server用プロジェクト）
             // Jakarta EE 10 API（provided scope）
             compileOnly "jakarta.platform:jakarta.jakartaee-api:10.0.0"
-            
+
             // MicroProfile Config API（Payara Server 6に含まれる - provided scope）
             compileOnly "org.eclipse.microprofile.config:microprofile-config-api:3.0.3"
+
+            // MicroProfile REST Client API（Payara Server 6に含まれる - provided scope）
+            compileOnly "org.eclipse.microprofile.rest.client:microprofile-rest-client-api:3.0"
             
             // Jakarta Faces (JSF) API - JSFプロジェクト用
             compileOnly "jakarta.faces:jakarta.faces-api:4.0.1"
