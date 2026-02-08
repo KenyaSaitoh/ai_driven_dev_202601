@@ -20,23 +20,25 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 
 このプロジェクトは、汎用的な Struts to JSF マイグレーション Agent Skills を使用してマイグレーションします。
 
-マイグレーションは以下の7段階プロセスで進めます：
+マイグレーションは以下の6段階プロセスで進めます（ドメイン単位）：
 
 ```
 ステップ1: 既存コード分析（Strutsコード → 仕様書）
     ↓
-ステップ2: タスク分解（仕様書 → タスクリスト）
+ステップ2: 詳細設計（ドメイン単位で詳細設計）← AIと対話しながら
     ↓
-ステップ3: 詳細設計（画面単位で詳細設計）← AIと対話しながら
+ステップ3: コード生成（詳細設計→実装→単体テスト）（ドメイン単位でJSFコード生成）
     ↓
-ステップ4: コード生成（詳細設計→実装→単体テスト）（タスクリスト → JSFコード）
+ステップ4: 単体テスト実行評価（テスト実行 → カバレッジ分析 → フィードバック）
     ↓
-ステップ5: 単体テスト実行評価（テスト実行 → カバレッジ分析 → フィードバック）
+ステップ5: 結合テスト生成（basic_design/behaviors.md → JUnit + Weld SE）
     ↓
-ステップ6: 結合テスト生成（basic_design/behaviors.md → JUnit + Weld SE）
-    ↓
-ステップ7: E2Eテスト生成（requirements/behaviors.md → Playwright）
+ステップ6: E2Eテスト生成（requirements/behaviors.md → Playwright）
 ```
+
+**ドメイン構成:**
+- `common/` - 共通ドメイン（Entity、Dao等。最優先実装）
+- `person_management/` - Person管理画面グループ（一覧、入力、確認等）
 
 ---
 
@@ -69,79 +71,26 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 
 ---
 
-#### ステップ2: タスク分解（既存コード分析後）
+#### ステップ2: 詳細設計（ドメイン単位）
 
-生成された仕様書から実装タスクを分解します。
+基本設計SPEC（basic_design/）から詳細設計書を生成します。AIと対話しながら進めます。
 
-```
-@agent_skills/struts-to-jsf-migration/instructions/task_breakdown.md
+**実行順序**: commonドメインを最優先で実装し、その後person_managementドメインを実装します。
 
-全タスクを分解してください。
-
-パラメータ:
-* project_root: projects/sdd-wf/person/jsf-person
-* spec_directory: projects/sdd-wf/person/jsf-person/specs
-```
-
-* 生成されるファイル: `tasks/*.md`（タスクリスト）
-
----
-
-#### ステップ3: 詳細設計（tasks/tasks.mdの順序に従う）
-
-**重要**: 実行順序は `tasks/tasks.md` の「タスク概要」表と「実行順序」セクションを参照してください。
-- 「依存タスク」列: このタスクを開始する前に完了が必要なタスク
-- 「並行実行可能」列: このタスクと同時に実行可能な他のタスク
-- 「レベル」列: 同じレベルのタスクは並行実行可能
-
-コマンドテンプレート:
+使用例（commonドメイン）:
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/detailed_design.md
 
-[タスクID]の詳細設計書を作成してください。
+commonドメインの詳細設計書を作成してください
 
 パラメータ:
 * project_root: projects/sdd-wf/person/jsf-person
 * spec_directory: projects/sdd-wf/person/jsf-person/specs/baseline
-* target_type: [tasks/tasks.mdで確認したタスクID]
+* target_domain: common
 ```
 
-対話の流れ:
-1. AIがSPEC（basic_design/）を読み込み、理解した内容を説明します
-2. AIが不明点を質問します（Managed Bean設計、バリデーション、画面遷移等）
-3. あなたが回答します
-4. `specs/baseline/detailed_design/[タスクID]/detailed_design.md` と `behaviors.md` が生成されます
-
-注意:
-* target_typeは `tasks/tasks.md` のタスクファイル名（拡張子なし）と一致させる
-* 依存タスクの詳細設計が完了してから実行する（tasks/tasks.mdの「依存タスク」列を参照）
-
----
-
-#### ステップ4: コード生成（詳細設計→実装→単体テスト）（詳細設計完了後）
-
-詳細設計書に基づいてJSFコードを生成します。
-
-**重要**: 実行順序は `tasks/tasks.md` の「タスク概要」表と「実行順序」セクションを参照してください。
-- 「依存タスク」列を確認し、依存タスクが完了してから実行
-- 「並行実行可能」列を確認し、並行実行可能なタスクは同時に実装可能
-
-> 単体テストの方針: タスク粒度内のコンポーネント間は実際の連携をテスト。タスク外の依存関係のみモック化。
-
-コマンドテンプレート:
-
-```
-@agent_skills/struts-to-jsf-migration/instructions/code_generation.md
-
-[タスクID]を実装してください。
-
-パラメータ:
-* project_root: projects/sdd-wf/person/jsf-person
-* task_file: projects/sdd-wf/person/jsf-person/tasks/[タスクファイル名]
-```
-
-使用例（setup）:
+使用例（person_managementドメイン）:
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/code_generation.md
@@ -190,22 +139,29 @@ FUNC_002を実装してください。
 
 ---
 
-#### ステップ5: 単体テスト実行評価
+#### ステップ4: 単体テスト実行評価
 
 単体テストを実行してカバレッジを分析し、品質を検証します。
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/unit_test_execution.md
 
-単体テストを実行してください。
+単体テストを実行してください
 
 パラメータ:
 * project_root: projects/sdd-wf/person/jsf-person
-* target_type: FUNC_002_PersonList
+* target_domain: common  # または person_management
+* gradle_project_dir: .  # マルチプロジェクト構成用（リポジトリルートでGradleタスクを実行）
 ```
+
+**マルチプロジェクト構成について:**
+* このプロジェクトは、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成です
+* `gradle_project_dir` パラメータでGradleタスク実行ディレクトリを指定します（通常は `.` でリポジトリルート）
+* 未指定の場合はデフォルトで `project_root` が使用されます
 
 AIが：
 1. 🧪 テスト実行（gradle test jacocoTestReport）
+   * マルチプロジェクト構成では、指定されたディレクトリで `:jsf-person-sdd-wf:test` のような形式で実行
 2. 📊 テスト結果とカバレッジ分析
 3. 🔍 問題の分類（テスト失敗、必要な振る舞い、デッドコード）
 4. 📋 フィードバックレポート生成
@@ -214,7 +170,8 @@ AIが：
 重要：
 * 問題を発見してもユーザー確認なしに修正しない
 * Managed Bean はカバレッジ除外推奨（UI層はE2Eで検証）
-* 必要に応じてステップ3（詳細設計）に戻ってループ
+* カバレッジ不足やデッドコードを具体的に提案
+* 必要に応じてステップ2（詳細設計）に戻ってループ
 
 🔄 フィードバックループ:
 ```
@@ -225,7 +182,7 @@ AIが：
 
 ---
 
-#### ステップ6: 結合テスト生成（単体テスト完了後）
+#### ステップ5: 結合テスト生成（全ドメイン完了後）
 
 単体テスト完了後に、結合テスト（Integration Test）を生成します。
 
@@ -256,7 +213,7 @@ AIが：
 
 ---
 
-#### ステップ7: E2Eテスト生成（実装完了後）
+#### ステップ6: E2Eテスト生成（全ドメイン完了後）
 
 全画面実装完了後に、E2Eテスト（End-to-End Test）を生成します。
 

@@ -20,7 +20,7 @@ REST APIとの違い:
 
 ---
 
-## 使い方（7段階プロセス）
+## 使い方（6段階プロセス）
 
 ### ステップ1: リバースエンジニアリング
 
@@ -55,64 +55,53 @@ AIが自動で以下を実行
 * screen_design.md - 画面設計書（JSF専用）
 * behaviors.md - 振る舞い仕様書（E2Eテスト用）
 
-### ステップ2: タスク分解
-
-```
-@agent_skills/struts-to-jsf-migration/instructions/task_breakdown.md
-
-全タスクを分解してください
-
-パラメータ
-* project_root: projects/jsf-migration/struts-app-jsf
-* spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
-```
-
-AIが自動で以下を実行
-1. SPECを読み込み
-2. タスクファイルを分解・生成
-3. `tasks/`フォルダに保存
-
-### ステップ3: 詳細設計（画面単位）
+### ステップ2: 詳細設計（ドメイン単位）
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/detailed_design.md
 
-画面の詳細設計書を作成してください
+ドメインの詳細設計書を作成してください
 
 パラメータ
 * project_root: projects/jsf-migration/struts-app-jsf
 * spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
-* target_type: FUNC_001_PersonList
+* target_domain: common  # または person_management 等
 ```
 
 AIと対話しながら以下を実施（対話的プロセス）
 1. 画面グループの基本設計（basic_design/{screen_group}/）を読み込み
-2. 対象画面の理解内容を説明
+2. 対象ドメインの理解内容を説明
 3. 不明点をユーザーに質問
 4. 対話で妥当性・充足性を確認
-5. 画面単位の`detailed_design/FUNC_XXX/detailed_design.md`を生成
+5. ドメイン単位の`detailed_design/{domain}/detailed_design.md`を生成
 
-### ステップ4: コード生成（詳細設計→実装→単体テスト）
+実行順序: commonドメインを最優先で実装
+
+### ステップ3: コード生成（詳細設計→実装→単体テスト）
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/code_generation.md
 
-セットアップタスクを実行してください
+ドメインのコードを生成してください
 
 パラメータ
 * project_root: projects/jsf-migration/struts-app-jsf
-* task_file: projects/jsf-migration/struts-app-jsf/tasks/setup.md
+* spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
+* target_domain: common  # または person_management 等
+* skip_infrastructure: false  # commonドメイン初回setup時のみ: true の場合、インフラセットアップをスキップ
 ```
 
 AIが自動で以下を実行
-1. タスクと詳細設計を読み込み
+1. 詳細設計を読み込み
 2. JSFコードを生成（Managed Bean、Entity、Service、Facelets XHTML等）
-3. タスク粒度内の単体テストを作成
-   * タスク内のコンポーネント間は実際の連携をテスト
-   * タスク外の依存関係のみモック化
-4. タスクを完了としてマーク
+   * commonドメイン初回時: skip_infrastructure=true の場合、DB/APサーバーのインストールをスキップ（スキーマ作成・初期データは実行）
+3. ドメイン粒度内の単体テストを作成
+   * ドメイン内のコンポーネント間は実際の連携をテスト
+   * ドメイン外の依存関係のみモック化
 
-### ステップ5: 単体テスト実行評価
+実行順序: commonドメインを最優先で実装
+
+### ステップ4: 単体テスト実行評価
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/unit_test_execution.md
@@ -121,7 +110,7 @@ AIが自動で以下を実行
 
 パラメータ
 * project_root: projects/jsf-migration/struts-app-jsf
-* target_type: FUNC_001_PersonList
+* target_domain: common  # または person_management 等
 * gradle_project_dir: <Gradleタスク実行ディレクトリ>（オプション、マルチプロジェクト構成の場合に指定）
 ```
 
@@ -137,7 +126,7 @@ AIが自動で以下を実行
 重要:
 * 問題を発見してもユーザー確認なしに修正しない
 * Managed Bean はカバレッジ除外推奨（UI層はE2Eで検証）
-* 必要に応じてステップ3（詳細設計）に戻ってループ
+* 必要に応じてステップ2（詳細設計）に戻ってループ
 * マルチプロジェクト構成では gradle_project_dir を適切に指定すること
 
 フィードバックループ:
@@ -147,7 +136,7 @@ AIが自動で以下を実行
     └──── フィードバック ←────┘
 ```
 
-### ステップ6: 結合テスト生成
+### ステップ5: 結合テスト生成
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/it_generation.md
@@ -166,7 +155,7 @@ AIが自動で以下を実行
    * 実際のDBアクセス（メモリDB）
    * 画面グループの業務フローを検証
 
-### ステップ7: E2Eテスト生成
+### ステップ6: E2Eテスト生成
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/e2e_test_generation.md
