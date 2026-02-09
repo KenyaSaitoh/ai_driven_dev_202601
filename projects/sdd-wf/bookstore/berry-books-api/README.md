@@ -24,9 +24,11 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
     ↓
 ステップ2: 詳細設計（ドメイン単位）← AIと対話しながら
     ↓
-ステップ3: コード生成（ドメイン単位：実装コード + 単体テスト）
+ステップ3: 本番コード生成（ドメイン単位：実装コードのみ）
     ↓
-ステップ4: 単体テスト実行評価（テスト実行 → カバレッジ分析 → フィードバック）
+ステップ4: 単体テストコード生成（ブラックボックス + ホワイトボックス）
+    ↓
+ステップ5: テスト評価（テスト実行 → カバレッジ分析 → フィードバック）
     ↓
 ステップ5: 結合テスト生成（basic_design/{domain}/behaviors.md → JUnit + Weld SE）
     ↓
@@ -142,9 +144,9 @@ commonドメインの詳細設計書を作成してください
 
 ---
 
-#### ステップ3: コード生成（ドメイン単位、commonから順に実施）
+#### ステップ3: 本番コード生成（ドメイン単位、commonから順に実施）
 
-詳細設計書からドメイン単位でコードを生成します（実装コード + 単体テスト）。
+詳細設計書からドメイン単位で本番コードを生成します。
 
 **重要**: `common`ドメインを最優先で実装してください（他のドメインはcommonに依存）。
 
@@ -201,30 +203,40 @@ books_proxyドメインを実装してください
 
 実装コードと単体テストが生成されたら、ドメイン単位でテストを実行してカバレッジを評価します。
 
-```
-@agent_skills/jakarta-ee-api-base/instructions/unit_test_execution.md
+前提: テストを実行し、Jacocoレポートを生成済み
 
-単体テストを実行して評価してください
+```bash
+# リポジトリルート（ai_driven_dev_202601/）で実行
+cd ../../../../  # プロジェクトルートからリポジトリルートへ移動
+
+# テストを実行してJacocoレポートを生成
+./gradlew :berry-books-api-sdd-wf:test :berry-books-api-sdd-wf:jacocoTestReport
+```
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/test_evaluation.md
+
+テスト実行結果を評価してください
 
 パラメータ:
 * project_root: projects/sdd-wf/bookstore/berry-books-api
+* jacoco_reports_dir: build/reports/jacoco/test
+* test_type: unit
 * spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
-* target_domain: books_proxy
-* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
 ```
 
-**マルチプロジェクト構成について:**
-* このプロジェクトは、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成です
-* `build_script_path` パラメータでリポジトリルートの `build.gradle` ファイルのパスを指定します（例: "build.gradle"）
-* 指定されたパスからディレクトリ部分が抽出され、そのディレクトリでGradleタスクが実行されます
-* 未指定の場合はデフォルトで `project_root` が使用されますが、マルチプロジェクト構成ではルートの build.gradle を使うため、明示的に指定することを推奨します
-
 AIが：
-1. 📋 実行可能な単体テストコードを確認
-2. 🚀 テストを実行
-3. 📊 カバレッジを集計
-4. 🔎 80%未満のカバレッジの箇所を特定
-5. ✏️ 修正案を提示または修正実施
+1. 📊 Jacocoレポート（XML）を読み込む
+2. 📈 カバレッジ評価（行、分岐、メソッド）
+3. 🔍 パッケージ別/クラス別/メソッド別カバレッジ分析
+4. ⚠️ デッドコード検出
+5. 📋 評価レポート生成
+6. 💬 ユーザーに推奨アクションを提示
+
+重要：
+* テスト実行は不要（既に実行済みのレポートを評価）
+* 問題を発見してもユーザー確認なしに修正しない
+* カバレッジ不足やデッドコードを具体的に提案
 
 カバレッジ不足がある場合は、ステップ2（詳細設計）に戻ってフィードバックします。
 
@@ -237,13 +249,27 @@ AIが：
 ```
 @agent_skills/jakarta-ee-api-base/instructions/it_generation.md
 
-結合テストを生成してください
+結合テストコードを生成してください
 
 パラメータ:
 * project_root: projects/sdd-wf/bookstore/berry-books-api
 * spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
 * target_domains: all
-* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
+```
+
+重要: テスト生成のみを実施（テスト実行はリポジトリルートから手動で実行）
+
+実行方法:
+```bash
+# リポジトリルート（ai_driven_dev_202601/）で実行
+cd ../../../../  # プロジェクトルートからリポジトリルートへ移動
+
+# 結合テストを実行してJacocoレポートを生成
+./gradlew :berry-books-api-sdd-wf:integrationTest :berry-books-api-sdd-wf:jacocoIntegrationTestReport
+
+# テスト実行後、評価を実施
+# @agent_skills/jakarta-ee-api-base/instructions/test_evaluation.md
+# パラメータ: test_type=integration, jacoco_reports_dir=build/reports/jacoco/integrationTest
 ```
 
 AIが：
@@ -260,12 +286,30 @@ AIが：
 ```
 @agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md
 
-E2Eテストを生成してください
+E2Eテストコードを生成してください
 
 パラメータ:
 * project_root: projects/sdd-wf/bookstore/berry-books-api
 * spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
-* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
+```
+
+重要: テスト生成のみを実施（テスト実行はリポジトリルートから手動で実行。アプリケーションサーバー起動が前提）
+
+実行方法:
+```bash
+# リポジトリルート（ai_driven_dev_202601/）で実行
+cd ../../../../  # プロジェクトルートからリポジトリルートへ移動
+
+# 1. アプリケーションをビルド＆デプロイ
+./gradlew :berry-books-api-sdd-wf:war
+./gradlew :berry-books-api-sdd-wf:deploy
+
+# 2. E2Eテストを実行してJacocoレポートを生成
+./gradlew :berry-books-api-sdd-wf:e2eTest :berry-books-api-sdd-wf:jacocoE2eTestReport
+
+# テスト実行後、評価を実施
+# @agent_skills/jakarta-ee-api-base/instructions/test_evaluation.md
+# パラメータ: test_type=e2e, jacoco_reports_dir=build/reports/jacoco/e2eTest
 ```
 
 AIが：

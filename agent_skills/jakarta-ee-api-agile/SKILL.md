@@ -1,6 +1,6 @@
 ---
 name: jakarta-ee-api-agile
-description: Jakarta EE 10とJAX-RS 3.1を使ったREST APIのアジャイル・仕様駆動開発を支援。業務共通SPEC（common/）先行、ユースケース単位の開発。タスクは common と各 usecases で既に決まっており、各人がそれに従って実装。合流ポイントは結合テスト。
+description: Jakarta EE 10とJAX-RS 3.1を使ったREST APIのアジャイル・仕様駆動開発を支援。業務共通SPEC（common/）先行、ユースケース単位の開発。本番コードとテストコードの生成を分離し、ブラックボックス・ホワイトボックス両方の観点からテストを実装。タスクは common と各 usecases で既に決まっており、各人がそれに従って実装。合流ポイントは結合テスト。
 ---
 
 # Jakarta EE API アジャイル開発 Agent Skill
@@ -54,12 +54,12 @@ AIと対話しながら以下を実施
 
 タスクは既に業務共通SPEC（common/）と各ユースケースSPEC（usecases/{名}/）で決まっている。各人がそれに従ってコード生成を実行すればよい。アジャイルでは、既存コードに対して code_generation を何度でも再実行し、SPEC に基づく差分を漸進的に反映していく。合流ポイントは結合テスト（ステップ6）である。
 
-### ステップ4: コード生成
+### ステップ4: 本番コード生成
 
 ```
 @agent_skills/jakarta-ee-api-agile/instructions/code_generation.md
 
-指定した対象（common または usecases/{名}）のコードを生成してください
+指定した対象（common または usecases/{名}）の本番コードを生成してください
 
 パラメータ
 * project_root: <プロジェクトルートパス>
@@ -70,41 +70,95 @@ AIと対話しながら以下を実施
 
 AIが自動で以下を実行
 1. target に応じて common 用かユースケース用かを判別
-2. target=common: common/ の3SPECを参照して実装
-3. target=usecases/{名}: common/ + usecases/{名}/userstory.md, behaviors.md を参照して実装
-4. 単体テストを生成
+2. target=common: common/ の3SPECを参照して本番コード実装
+3. target=usecases/{名}: common/ + usecases/{名}/userstory.md, behaviors.md を参照して本番コード実装
+4. 既存コードがある場合は、削除せずに差分のみを反映する
 
-### ステップ5: 単体テスト実行評価
+注意: 単体テストコード生成は次のステップ（ステップ5）で実施
+
+### ステップ5: 単体テストコード生成
 
 ```
-@agent_skills/jakarta-ee-api-agile/instructions/unit_test_execution.md
+@agent_skills/jakarta-ee-api-agile/instructions/unit_test_generation.md
 
-単体テストを実行してください
+単体テストコードを生成してください
 
 パラメータ
 * project_root: <プロジェクトルートパス>
+* spec_directory: <SPECディレクトリパス（オプション、デフォルト: {project_root}/specs/baseline）>
 * target: common または usecases/{名}
-* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定（例: "build.gradle"）
 ```
 
-### ステップ6: 結合テスト・E2Eテスト生成（合流ポイント）
+AIが自動で以下を実行
+1. target に応じた SPEC（common または usecases/{名}/behaviors.md）を読み込む
+2. 本番コード（ステップ4で生成）に対応する単体テストコードを生成
+   * **ブラックボックステスト**: behaviors.mdのGherkinシナリオから外形的な振る舞いをテスト
+   * **ホワイトボックステスト**: 境界値・エッジケース・分岐パスをカバーするテスト
+   * 既存テストがある場合は、削除せずに差分のみを反映する
+
+重要: テスト生成のみを実施（テスト実行は手動で ./gradlew test を実行）
+
+### ステップ6: テスト評価（単体/結合/E2E共通）
+
+```
+@agent_skills/jakarta-ee-api-agile/instructions/test_evaluation.md
+
+テスト実行結果を評価してください
+
+パラメータ
+* project_root: <プロジェクトルートパス>
+* jacoco_reports_dir: build/reports/jacoco/test
+* test_type: unit  # unit, integration, e2e のいずれか
+* spec_directory: <SPECディレクトリパス>
+```
+
+前提: テストは既に実行済み（./gradlew test または integrationTest または e2eTest）
+
+AIが自動で以下を実行
+1. Jacocoレポート（XML）を読み込む
+2. カバレッジ評価（行、分岐、メソッド）
+3. パッケージ別/クラス別/メソッド別カバレッジ分析
+4. デッドコード検出
+5. テスト品質評価（テスト数、失敗分析）
+6. 評価レポート生成
+7. ユーザーに推奨アクションを提示
+
+重要: テスト実行は不要（既に実行済みのレポートを評価）
+
+### ステップ7: 結合テスト・E2Eテスト生成（合流ポイント）
 
 業務共通と各ユースケースの実装は、ここで合流する。結合テストで common + 全ユースケースが連携して動くことを検証する。
 
 ```
 @agent_skills/jakarta-ee-api-agile/instructions/it_generation.md
-@agent_skills/jakarta-ee-api-agile/instructions/e2e_test_generation.md
 
-パラメータ（結合テスト・E2Eテスト共通）
+結合テストコードを生成してください
+
+パラメータ
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
 * usecase_folder: null  # オプション。指定時はそのユースケースのみ
-* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
 ```
 
-common / usecases 配下の behaviors を参照して結合・E2Eテストを生成・実行
-* 結合テスト: ./gradlew integrationTest で自動実行
-* E2Eテスト: ./gradlew e2eTest で自動実行（アプリケーションサーバー起動が前提）
+common / usecases 配下の behaviors を参照して結合テストを生成
+
+重要: テスト生成のみを実施（テスト実行は手動で ./gradlew integrationTest を実行）
+
+```
+@agent_skills/jakarta-ee-api-agile/instructions/e2e_test_generation.md
+
+E2Eテストコードを生成してください
+
+パラメータ
+* project_root: <プロジェクトルートパス>
+* spec_directory: <SPECディレクトリパス>
+```
+
+common / usecases 配下の behaviors を参照してE2Eテストを生成
+
+重要: テスト生成のみを実施（テスト実行は手動で ./gradlew e2eTest を実行。アプリケーションサーバー起動が前提）
+
+テスト実行後、ステップ6（test_evaluation.md）でtest_type=integration または e2eとして評価
 
 SPEC の更新について
 * アジャイルでは基本設計SPECの「変更管理」は行わない。common または usecases/{名} の SPEC を編集したうえで、code_generation.md を target 指定で再実行し、既存コードへ差分を反映すればよい（spec_change は不要）

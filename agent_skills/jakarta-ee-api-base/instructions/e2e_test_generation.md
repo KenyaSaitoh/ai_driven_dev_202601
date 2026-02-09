@@ -7,16 +7,12 @@
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
 spec_directory: "ここにSPECディレクトリのパスを入力"
-build_script_path: null     # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
-                            # build.gradleファイルのパス（未指定時は project_root の build.gradle を使用）
-                            # 例: "build.gradle" (リポジトリルート) または "d:/GitHubRepos/.../build.gradle" (絶対パス)
 ```
 
 * 例
 ```yaml
 project_root: "projects/sdd-wf/bookstore/back-office-api"
 spec_directory: "projects/sdd-wf/bookstore/back-office-api/specs/baseline"
-build_script_path: "build.gradle"  # マルチプロジェクト構成の場合のみ指定（リポジトリルート）
 ```
 
 注意
@@ -100,12 +96,6 @@ E2Eテスト生成に必要なライブラリ:
   * 共通のビルドファイルで `subprojects` ブロックや全プロジェクト共通設定が定義されている可能性がある
   * 見つかった場合、そちらに依存関係を追加する
 * `e2eTest` タスクについても同様に、既存の定義を確認してから追加の要否を判断する
-
-**マルチプロジェクト構成の考慮:**
-* 通常は build_script_path パラメータの指定は不要です（project_root の build.gradle を自動使用）
-* マルチプロジェクト構成の場合のみ、build_script_path パラメータでルートの build.gradle のパスを指定します（例: "build.gradle"）
-* 指定されたパスからディレクトリ部分を抽出してそのディレクトリで `./gradlew` コマンドを実行します
-* ルートプロジェクトの build.gradle でサブプロジェクトのタスクを実行する場合は `:subproject:e2eTest` のような形式を使用します
 
 ### 2.2 ベースクラスのポイント
 
@@ -245,73 +235,43 @@ requirements/behaviors.md は Gherkin 記法で記述されている。@agent_sk
 
 ---
 
-## 7. E2Eテスト実行
+## 7. テストの実行と評価
 
-テストコード生成後、自動的にE2Eテストを実行する。
+E2Eテストコード生成後、以下のステップを実施する:
 
-### 7.1 前提条件の確認
+### 7.1 前提条件
 
 E2Eテスト実行前に以下を確認:
 
 * **アプリケーションサーバーが起動済みであること**
   * E2Eテストは実際のHTTPリクエストを送信するため、サーバーが起動している必要がある
-  * サーバーが起動していない場合は、ユーザーに起動を促すメッセージを表示
 
 * **テスト用データベースが利用可能であること**
   * 本番DBは使用しない
   * テスト用DBが設定されていることを確認
 
-### 7.2 実行ディレクトリの決定
+### 7.2 テスト実行
 
-* `build_script_path` パラメータが指定されている場合:
-  * `build_script_path` のディレクトリ部分を抽出（例: "./build.gradle" → "."）
-  * そのディレクトリに `cd` してからGradleタスクを実行
-* `build_script_path` パラメータが未指定の場合:
-  * `{project_root}` でGradleタスクを実行
-
-### 7.3 Gradleタスク実行
+Gradleタスクを使用してE2Eテストを実行:
 
 ```bash
-# build_script_path のディレクトリで以下を実行
+cd {project_root}
 ./gradlew e2eTest
 ```
 
-実行するタスク:
-* `e2eTest` - E2Eテスト実行（@Tag("e2e") が付与されたテスト）
+* `e2eTest` タスクは、@Tag("e2e") が付与されたテストを実行する
 * プロジェクトのbuild.gradleに定義されたタスク名に従うこと
 
-マルチプロジェクト構成の場合:
-* ルートの build.gradle から実行する場合: `./gradlew :subproject:e2eTest`
-* サブプロジェクトの build.gradle から実行する場合: `./gradlew e2eTest`
+### 7.3 テスト評価
 
-### 7.4 テスト結果の確認
+テスト実行後、@agent_skills/jakarta-ee-api-base/instructions/test_evaluation.md を使用して結果を評価する:
 
-テスト実行後、以下を確認する:
-
-1. **テスト結果レポート**
-   * `{project_root}/build/reports/tests/e2eTest/index.html`
-   * テスト成功数、失敗数、スキップ数を確認
-
-2. **失敗したテストの分析**
-   * 失敗したテストのスタックトレースを確認
-   * 失敗の原因を特定（HTTPステータスコードエラー、レスポンス不一致、タイムアウト等）
-
-3. **エラーメッセージ**
-   * Gradleの実行ログからエラーメッセージを抽出
-   * サーバー接続エラー、認証エラー、データ不整合等を確認
-
-### 7.5 結果の報告
-
-テスト実行結果をユーザーに報告する:
-
-* **成功時**: 
-  * "E2Eテストが正常に完了しました"
-  * テスト件数と実行時間を表示
-  
-* **失敗時**:
-  * "E2Eテストで失敗が検出されました"
-  * 失敗したテストの詳細を表示
-  * 推奨される対応策を提示（サーバー起動確認、データ準備、エンドポイント確認等）
+```yaml
+project_root: "{project_root}"
+jacoco_reports_dir: "{project_root}/build/reports/jacoco/e2eTest"
+test_type: "e2e"
+spec_directory: "{spec_directory}"
+```
 
 ---
 

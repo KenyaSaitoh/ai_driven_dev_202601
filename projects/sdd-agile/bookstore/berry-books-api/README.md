@@ -95,22 +95,27 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 単体テストを実行してカバレッジを分析し、品質を検証します。
 
-```
-@agent_skills/jakarta-ee-api-agile/instructions/unit_test_execution.md
+前提: テストを実行し、Jacocoレポートを生成済み
 
-単体テストを実行してください。
+```bash
+# リポジトリルート（ai_driven_dev_202601/）で実行
+cd ../../../../  # プロジェクトルートからリポジトリルートへ移動
+
+# テストを実行してJacocoレポートを生成
+./gradlew :berry-books-api-sdd-agile:test :berry-books-api-sdd-agile:jacocoTestReport
+```
+
+```
+@agent_skills/jakarta-ee-api-agile/instructions/test_evaluation.md
+
+テスト実行結果を評価してください
 
 パラメータ:
 * project_root: projects/sdd-agile/bookstore/berry-books-api
-* target: common   # または usecases/books 等、対象ユースケース
-* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
+* jacoco_reports_dir: build/reports/jacoco/test
+* test_type: unit
+* spec_directory: projects/sdd-agile/bookstore/berry-books-api/specs/baseline
 ```
-
-**マルチプロジェクト構成について:**
-* このプロジェクトは、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成です
-* `build_script_path` パラメータでリポジトリルートの `build.gradle` ファイルのパスを指定します（例: "build.gradle"）
-* 指定されたパスからディレクトリ部分が抽出され、そのディレクトリでGradleタスクが実行されます
-* 通常のプロジェクト（非マルチプロジェクト）では、このパラメータの指定は不要です
 
 AIが：
 1. 🧪 テスト実行（gradle test jacocoTestReport）
@@ -140,13 +145,14 @@ AIが：
 ```
 @agent_skills/jakarta-ee-api-agile/instructions/it_generation.md
 
-結合テストを生成してください。
+結合テストコードを生成してください
 
 パラメータ:
 * project_root: projects/sdd-agile/bookstore/berry-books-api
 * spec_directory: projects/sdd-agile/bookstore/berry-books-api/specs/baseline
-* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
 ```
+
+重要: テスト生成のみを実施（テスト実行はリポジトリルートから手動で実行）
 
 AIが：
 1. 📄 usecases/*/behaviors.md（結合テストシナリオ）を読み込む
@@ -155,12 +161,20 @@ AIが：
    * 実際のDBアクセス（メモリDB）
    * 外部APIはWireMockでスタブ化
    * アプリケーションサーバー不要
+   * 既存テストがある場合は、削除せずに差分のみを反映する
 3. 🏷️ `@Tag("integration")` で結合テストを分離
 
 実行方法:
 ```bash
-# 結合テストを実行
-./gradlew integrationTest
+# リポジトリルート（ai_driven_dev_202601/）で実行
+cd ../../../../  # プロジェクトルートからリポジトリルートへ移動
+
+# 結合テストを実行してJacocoレポートを生成
+./gradlew :berry-books-api-sdd-agile:integrationTest :berry-books-api-sdd-agile:jacocoIntegrationTestReport
+
+# テスト実行後、評価を実施
+# @agent_skills/jakarta-ee-api-agile/instructions/test_evaluation.md
+# パラメータ: test_type=integration, jacoco_reports_dir=build/reports/jacoco/integrationTest
 ```
 
 ---
@@ -172,29 +186,41 @@ AIが：
 ```
 @agent_skills/jakarta-ee-api-agile/instructions/e2e_test_generation.md
 
-E2Eテストを生成してください。
+E2Eテストコードを生成してください
 
 パラメータ:
 * project_root: projects/sdd-agile/bookstore/berry-books-api
 * spec_directory: projects/sdd-agile/bookstore/berry-books-api/specs/baseline
-* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
 ```
+
+重要: テスト生成のみを実施（テスト実行はリポジトリルートから手動で実行。アプリケーションサーバー起動が前提）
 
 AIが：
 1. 📄 usecases/*/behaviors.md 等（E2Eテストシナリオ）を読み込む
-2. 🧪 REST Assured を使用したE2Eテストを生成
+2. 🧪 JUnit 5 + REST Assured を使用したE2Eテストを生成
    * 複数API間の連携テスト（認証 → 書籍検索 → 注文作成等）
    * 外部API連携のテスト（back-office-api、customer-hub-api）
    * 実際のHTTPリクエスト/レスポンス
+   * 実際のDBアクセスを含む
+   * 既存テストがある場合は、削除せずに差分のみを反映する
 3. 🏷️ `@Tag("e2e")` でE2Eテストを分離
+4. テストデータのセットアップ/クリーンアップコードを生成
 
 実行方法:
 ```bash
-# アプリケーションサーバーを起動
-./gradlew run
+# リポジトリルート（ai_driven_dev_202601/）で実行
+cd ../../../../  # プロジェクトルートからリポジトリルートへ移動
 
-# 別ターミナルでE2Eテストを実行
-./gradlew e2eTest
+# 1. アプリケーションをビルド＆デプロイ
+./gradlew :berry-books-api-sdd-agile:war
+./gradlew :berry-books-api-sdd-agile:deploy
+
+# 2. 別ターミナルでE2Eテストを実行してJacocoレポートを生成
+./gradlew :berry-books-api-sdd-agile:e2eTest :berry-books-api-sdd-agile:jacocoE2eTestReport
+
+# テスト実行後、評価を実施
+# @agent_skills/jakarta-ee-api-agile/instructions/test_evaluation.md
+# パラメータ: test_type=e2e, jacoco_reports_dir=build/reports/jacoco/e2eTest
 ```
 
 ---

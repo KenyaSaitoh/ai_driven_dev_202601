@@ -153,15 +153,17 @@ SPEC を読み込んだあと、**いきなりコード生成を始めず**、�
 
 ---
 
-## 6. 実装の実行
+## 6. 実装の実行（本番コード生成のみ）
 
 * **前提**: 上記「5. 仕様の確認と対話」で不明点・確認事項が 0 件であるか、ユーザーから返答を得て補完済みであること。未確認のままコード生成を開始しない
 * 指定された target（common または usecases/{名}）のみを実行する
 * 既存コードがある場合: 現在の SPEC と既存コードの差分を検出し、必要な追加・修正・削除のみを反映する（漸進的更新）。既存の手書きコードや他 target で生成したコードは破壊しない
-* 既存コードがない場合: 本番コード生成 → 単体テスト生成の順で新規作成する
+* 既存コードがない場合: 本番コード生成を実行する
 * target=common で setup に相当する場合: skip_infrastructure に応じてインフラをスキップするかどうか判断する。アプリケーション固有のセットアップ（スキーマ、初期データ、静的リソース）は常に実行する
 * 技術スタック・パッケージ・命名規則は common/architecture_design.md に厳密に従う
 * 上位SPEC（common の3ファイル、usecases/{名}/userstory.md, behaviors.md）は修正しない
+
+重要: このタスクは本番コード生成のみを行う。単体テスト生成は別タスク（@agent_skills/jakarta-ee-api-agile/instructions/unit_test_generation.md）で実施する
 
 ---
 
@@ -178,30 +180,13 @@ SPEC を読み込んだあと、**いきなりコード生成を始めず**、�
 
 ---
 
-## 8. 単体テスト生成
+## 8. 次のステップ
 
-* タスク粒度内の単体テストを生成する
-* target=common: common の3SPECからメソッド・振る舞いを抽出し、単体テストを作成する。data_model のテーブル/エンティティ、architecture_design の共通コンポーネントに基づくテストとする
-* target=usecases/{名}: usecases/{名}/behaviors.md の Gherkin シナリオを参考に、**JUnit 5** の通常のテストクラスとテストメソッドを生成する。同一対象内は実連携、他はモック
-* **テストフレームワーク: JUnit 5 のみ**（Cucumberは使用しない）
-* テストカバレッジ目標は common/architecture_design.md に従う
-* behaviors.md のシナリオ（Gherkin記法）を参考に、Given-When-Then の流れでテストメソッド内にテストロジックを記述する
+本番コード生成完了後は、以下を実施する：
 
-**テスト記述例:**
-```java
-@Test
-void testCreateOrder_Success() {
-    // Given: 初期データ、モックのスタブ設定
-    when(mockDao.find(1)).thenReturn(testEntity);
-    
-    // When: Service メソッド呼び出し
-    Order result = orderService.createOrder(createRequest);
-    
-    // Then: 戻り値・状態を検証
-    assertNotNull(result.getId());
-    verify(mockDao).persist(any(Order.class));
-}
-```
+1. 単体テストコード生成: @agent_skills/jakarta-ee-api-agile/instructions/unit_test_generation.md を使用して単体テストを生成する
+2. 単体テスト実行: @agent_skills/jakarta-ee-api-base/instructions/unit_test_execution.md に従い単体テストを実行し、動作・カバレッジ・不足ケースを確認する
+3. 必要に応じてSPEC→コード生成→テスト生成→テスト実行のループを行う
 
 ---
 

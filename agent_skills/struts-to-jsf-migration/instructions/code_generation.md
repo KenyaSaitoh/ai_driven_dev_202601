@@ -79,21 +79,19 @@ target_domain: "person_management"
 
 ### 2. ドメインの実装を実行する
 
-重要: 各ドメインの実装は必ず以下の順序で完了すること
+重要: このタスクは本番コード生成のみを行う
 
 1. 本番コード生成: Entity、Service、Managed Bean、Facelets XHTML、DTO等の実装コードを生成
-2. 単体テスト生成: 生成した本番コードに対応する単体テストコードを生成（必須）
+2. 実装完了確認: 本番コードが正常に生成されたことを確認
   * `skip_infrastructure: false`の場合、すべてのセットアップを実行する
   * アプリケーション固有のセットアップ（スキーマ作成、初期データ、静的リソース配置等）は常に実行する
   * リソース配置（画像ファイルのコピー等）を最優先で実行する
-* 機能タスク（FUNC_XXX）の実行時:
-  * `skip_infrastructure` パラメータは無視される
-  * タスクファイルに記載された実装内容に従う
-  * 必ず本番コード生成の後に単体テスト生成を実行する
 * 依存関係の尊重: 順次タスクは順番に実行、並列タスク[P]は一緒に実行可能
-* TDDアプローチに従う: 対応する実装の前にテストを実行する（プロジェクトがTDDを採用している場合）
+* TDDアプローチに従う場合は、対応する実装の前にテストを作成する（プロジェクトがTDDを採用している場合）
 * ファイルベースの調整: 同じファイルに影響するタスクは順次実行必須
-* 検証チェックポイント: 進む前に各タスクの完了を検証する（本番コードと単体テストの両方が生成されていることを確認）
+* 検証チェックポイント: 進む前に本番コードが生成されていることを確認する
+
+注意: 単体テスト生成は別タスク（@agent_skills/struts-to-jsf-migration/instructions/unit_test_generation.md）で実施する
 
 ### 4. 実装実行ルール
 
@@ -164,28 +162,13 @@ architecture_design.mdに記載された技術スタックを厳密に遵守す�
 
 Entity、Service、Managed Bean、Facelets XHTML、DTO等の実装コードを生成する
 
-重要: 本番コード生成が完了したら、必ず次のステップ（単体テスト生成）に進むこと。処理を停止してはいけない。
-
-#### 単体テスト生成（必須）
-
-重要: 本番コード生成の直後に、必ず単体テスト生成を実行すること
-
-* 生成した本番コード（Entity、Service、Managed Bean、Facelets XHTML、DTO等）に対応する単体テストコードを生成する
-* セクション5「単体テスト生成ガイドライン」に従ってテストを実装する
-* **テストフレームワーク: JUnit 5 のみ**（Cucumberは使用しない）。architecture_design.mdで指定されたカバレッジ等に従う
-* テストカバレッジ: architecture_design.mdの目標値を遵守する
-* テストケース設計:
-  * detailed_design/screen/配下の各機能のbehaviors.md（単体テスト用）の Gherkin シナリオを参考に、**JUnit 5** の通常のテストクラスとテストメソッドを生成する
-  * detailed_design/screen/配下の各機能のdetailed_design.mdの各メソッドシグネチャに対して、正常系、異常系、境界値、バリデーションのテストメソッドを作成
-  * behaviors.md のシナリオ（Gherkin記法）を参考に、Given-When-Then の流れでテストメソッド内にテストロジックを記述する
-* モック使用の判断:
-  * 同じタスク内のコンポーネント → モック不要（実際の連携をテスト）
-  * タスク外の依存関係 → モックを使用
+重要: 本番コード生成が完了したら、このタスクは完了。単体テスト生成は別タスクで実施する。
 
 実行順序の確認:
 1. ✅ 本番コード生成完了
-2. ✅ 単体テスト生成完了 ← ここまで完了してから処理を終了する
-3. ✅ タスク完了マーク
+2. ✅ タスク完了マーク
+
+注意: 単体テストコード生成は、@agent_skills/struts-to-jsf-migration/instructions/unit_test_generation.md を使用して別途実施する
 
 #### 結合作業
 
@@ -195,88 +178,7 @@ Entity、Service、Managed Bean、Facelets XHTML、DTO等の実装コードを�
 
 パフォーマンス最適化、ドキュメント
 
-注意: ユニットテストは上記「単体テスト生成」ステップで既に生成済みである
-
-### 5. 単体テスト生成ガイドライン（タスク粒度内のテスト）
-
-重要: このフェーズで生成するのはタスク粒度内の単体テストである
-
-実行タイミング: セクション4「コア開発（本番コード生成）」の直後に必ず実行すること
-
-本番コード生成が完了したら、処理を停止せずに必ずこのセクションに従って単体テストを生成すること。
-
-#### 5.1 基本方針
-
-* テストスコープ: 実装対象ドメイン内
-  * 実装対象のドメイン（例: person_management）に含まれるコンポーネントをテスト
-  * ドメイン内のコンポーネント間は実際の連携でテスト可能
-  * ドメイン外の依存関係はモックを使用
-  
-* モック使用の判断基準:
-  * 同じドメイン内のコンポーネント → モック不要（実際の連携をテスト）
-    * 例: PersonService → EntityManager （同じドメイン内）
-  * ドメイン外の依存関係 → モックを使用
-    * 例: PersonService が ExternalService に依存する場合、ExternalService はモック
-    * 例: EntityManager、外部APIクライアント等はモック
-  * 注意: Managed Beanは基本的にテスト対象外（カバレッジ除外推奨、E2Eテストで検証）
-
-* **テストフレームワーク: JUnit 5 のみ**（Cucumberは使用しない）
-* テストカバレッジ: architecture_design.mdの目標値を遵守する
-* テストクラスの配置: `src/test/java` の適切なパッケージに配置
-* behaviors.md のシナリオ（Gherkin記法で記述されている前提。@agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）を参考に、Given-When-Then の流れでテストメソッド内にテストロジックを記述する
-
-#### 5.2 テストケース設計
-
-* detailed_design/{target_type}/behaviors.md（単体テスト用）の Gherkin シナリオを参考に、**JUnit 5** の通常のテストクラスとテストメソッドを生成する
-* detailed_design/{target_type}/detailed_design.mdの各メソッドシグネチャに対して、以下のテストメソッドを作成する：
-  * 正常系テスト（期待する戻り値が返されるか）
-  * 異常系テスト（例外が適切にスローされるか）
-  * 境界値テスト（null、空文字列、最大値、最小値等）
-  * バリデーションテスト
-
-**テスト記述例:**
-```java
-@ExtendWith(MockitoExtension.class)
-class PersonServiceTest {
-    @InjectMocks
-    private PersonService personService;
-    
-    @Mock
-    private EntityManager entityManager;
-    
-    @Test
-    void testFindAll_Success() {
-        // Given: モックのスタブ設定
-        List<Person> testPersons = Arrays.asList(
-            new Person("太郎", "山田", 30),
-            new Person("花子", "鈴木", 25)
-        );
-        when(entityManager.createQuery(anyString(), eq(Person.class)))
-            .thenReturn(mockQuery);
-        when(mockQuery.getResultList()).thenReturn(testPersons);
-        
-        // When: Service メソッド呼び出し
-        List<Person> result = personService.findAll();
-        
-        // Then: 戻り値を検証
-        assertEquals(2, result.size());
-        assertEquals("太郎", result.get(0).getFirstName());
-    }
-}
-```
-
-#### 5.3 単体テストのポイント
-
-* タスク内の連携: タスク外の依存（EntityManager、他タスクのService/Client等）は @Mock、タスク内の Dao/Service/Bean は実インスタンスで Given-When-Then（when(...).thenReturn(...)、メソッド呼び出し、assert/verify）を書く
-* タスク外の依存: 他タスクのクライアント等は @Mock、doNothing().when(...).メソッド(any()) 等でスタブし、対象メソッドの戻り値・副作用を検証する
-* Mockito の @Mock、@InjectMocks、@ExtendWith(MockitoExtension.class) を活用
-* AssertJ や Hamcrest などのアサーションライブラリを活用可能
-
-#### 5.4 テストデータ
-
-* テストデータはdetailed_design/screen/配下のbehaviors.md（単体テスト用）やbasic_design/screen_design.mdの具体例を参考に作成する
-* テストデータは各テストケース内でセットアップする（テストの独立性を保つ）
-* @BeforeEach でテストデータの初期化を行う
+注意: ユニットテストは別タスク（@agent_skills/struts-to-jsf-migration/instructions/unit_test_generation.md）で生成する
 
 ---
 
@@ -308,9 +210,10 @@ class PersonServiceTest {
 
 ## 完了検証
 
-* 本番コード生成と単体テスト生成の両方が完了していることを確認する
-* principles および architecture_design.md に従っていること、detailed_design/behaviors.md のシナリオがテストでカバーされていること、detailed_design で定義された Managed Bean・Service・クラス・メソッドが実装されていることを確認する
-* このタスクファイルのタスクがすべて完了したら停止する
+* 本番コード生成が完了していることを確認する
+* principles および architecture_design.md に従っていること、detailed_design で定義された Managed Bean・Service・クラス・メソッドが実装されていることを確認する
+* 本番コード生成が完了したら停止する
+* 単体テスト生成は、@agent_skills/struts-to-jsf-migration/instructions/unit_test_generation.md を使用して別途実施する
 
 ---
 
@@ -478,7 +381,11 @@ class PersonServiceTest {
 
 ## 次のステップ
 
-コード生成タスク完了後は、@agent_skills/struts-to-jsf-migration/instructions/unit_test_execution.md に従い単体テストを実行し、動作・カバレッジ・不足ケースを確認する。必要に応じて詳細設計→コード生成→テスト実行のループを行う。
+本番コード生成完了後は、以下を実施する：
+
+1. 単体テストコード生成: @agent_skills/struts-to-jsf-migration/instructions/unit_test_generation.md を使用して単体テストを生成する
+2. 単体テスト実行: @agent_skills/struts-to-jsf-migration/instructions/unit_test_execution.md に従い単体テストを実行し、動作・カバレッジ・不足ケースを確認する
+3. 必要に応じて詳細設計→コード生成→テスト生成→テスト実行のループを行う
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: struts-to-jsf-migration
-description: Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを支援。仕様駆動アプローチ（Spec-Driven Migration）により、リバースエンジニアリング、タスク分解、詳細設計、コード生成、結合テスト、E2Eテストの7段階で確実なマイグレーションを実現。基本設計変更対応も含む。
+description: Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを支援。仕様駆動アプローチ（Spec-Driven Migration）により、リバースエンジニアリング、タスク分解、詳細設計、本番コード生成、テスト生成・評価の7段階で確実なマイグレーションを実現。本番コードとテストコードの生成を分離し、ブラックボックス・ホワイトボックス両方の観点からテストを実装。基本設計変更対応も含む。
 ---
 
 # Struts to JSF マイグレーション Agent Skill
@@ -20,7 +20,7 @@ REST APIとの違い:
 
 ---
 
-## 使い方（6段階プロセス）
+## 使い方（7段階プロセス）
 
 ### ステップ1: リバースエンジニアリング
 
@@ -77,12 +77,12 @@ AIと対話しながら以下を実施（対話的プロセス）
 
 実行順序: commonドメインを最優先で実装
 
-### ステップ3: コード生成（詳細設計→実装→単体テスト）
+### ステップ3: 本番コード生成（詳細設計→実装）
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/code_generation.md
 
-ドメインのコードを生成してください
+ドメインの本番コードを生成してください
 
 パラメータ
 * project_root: projects/jsf-migration/struts-app-jsf
@@ -95,58 +95,87 @@ AIが自動で以下を実行
 1. 詳細設計を読み込み
 2. JSFコードを生成（Managed Bean、Entity、Service、Facelets XHTML等）
    * commonドメイン初回時: skip_infrastructure=true の場合、DB/APサーバーのインストールをスキップ（スキーマ作成・初期データは実行）
-3. ドメイン粒度内の単体テストを作成
-   * ドメイン内のコンポーネント間は実際の連携をテスト
-   * ドメイン外の依存関係のみモック化
+   * 既存コードがある場合は、削除せずに差分のみを反映する
+
+注意: 単体テストコード生成は次のステップ（ステップ4）で実施
 
 実行順序: commonドメインを最優先で実装
 
-### ステップ4: 単体テスト実行評価
+### ステップ4: 単体テストコード生成
 
 ```
-@agent_skills/struts-to-jsf-migration/instructions/unit_test_execution.md
+@agent_skills/struts-to-jsf-migration/instructions/unit_test_generation.md
 
-単体テストを実行してください
-
-パラメータ
-* project_root: projects/jsf-migration/struts-app-jsf
-* target_domain: common  # または person_management 等
-* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定（例: "build.gradle"）
-```
-
-AIが自動で以下を実行
-1. テスト実行（gradle test jacocoTestReport）
-   * 通常は project_root で実行
-   * マルチプロジェクト構成の場合のみ、build_script_path で指定した build.gradle のディレクトリでGradleタスクを実行
-2. テスト結果とカバレッジ分析
-3. 問題の分類（テスト失敗、必要な振る舞い、デッドコード、設計の誤り）
-4. フィードバックレポート生成
-5. ユーザーに推奨アクションを提示
-
-重要:
-* 問題を発見してもユーザー確認なしに修正しない
-* Managed Bean はカバレッジ除外推奨（UI層はE2Eで検証）
-* 必要に応じてステップ2（詳細設計）に戻ってループ
-* マルチプロジェクト構成の場合のみ、build_script_path にルートの build.gradle のパスを指定します（例: "build.gradle"）
-
-フィードバックループ:
-```
-詳細設計 → コード生成 → テスト実行評価
-    ↑                         ↓
-    └──── フィードバック ←────┘
-```
-
-### ステップ5: 結合テスト生成
-
-```
-@agent_skills/struts-to-jsf-migration/instructions/it_generation.md
-
-結合テストを生成してください
+単体テストコードを生成してください
 
 パラメータ
 * project_root: projects/jsf-migration/struts-app-jsf
 * spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
-* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
+* target_domain: common  # または person_management 等
+```
+
+AIが自動で以下を実行
+1. 詳細設計（detailed_design/{target_domain}/）とbehaviors.mdを読み込む
+2. 本番コード（ステップ3で生成）に対応する単体テストコードを生成
+   * **ブラックボックステスト**: behaviors.mdのGherkinシナリオから外形的な振る舞いをテスト
+   * **ホワイトボックステスト**: 境界値・エッジケース・分岐パスをカバーするテスト
+   * 同じドメイン内のコンポーネント間は実際の連携をテスト
+   * ドメイン外の依存関係のみモック化
+   * 既存テストがある場合は、削除せずに差分のみを反映する
+3. @Nestedを使用してテストを構造化（振る舞いテスト、カバレッジ確保テスト）
+
+重要:
+* テスト生成のみを実施（テスト実行は手動で ./gradlew test を実行）
+* behaviors.mdのGherkinシナリオを必ず参考にする
+* Managed Bean はカバレッジ除外推奨（UI層はE2Eで検証）
+
+### ステップ5: テスト評価（単体/結合/E2E共通）
+
+```
+@agent_skills/struts-to-jsf-migration/instructions/test_evaluation.md
+
+テスト実行結果を評価してください
+
+パラメータ
+* project_root: projects/jsf-migration/struts-app-jsf
+* jacoco_reports_dir: build/reports/jacoco/test
+* test_type: unit  # unit, integration, e2e のいずれか
+* spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
+```
+
+前提: テストは既に実行済み（./gradlew test または integrationTest または e2eTest）
+
+AIが自動で以下を実行
+1. Jacocoレポート（XML）を読み込む
+2. カバレッジ評価（行、分岐、メソッド）
+3. パッケージ別/クラス別/メソッド別カバレッジ分析
+4. デッドコード検出
+5. テスト品質評価（テスト数、失敗分析）
+6. 評価レポート生成
+7. ユーザーに推奨アクションを提示
+
+重要:
+* テスト実行は不要（既に実行済みのレポートを評価）
+* 単体テスト、結合テスト、E2Eテストのいずれにも対応
+* Managed Bean はカバレッジ除外推奨（UI層はE2Eで検証）
+
+フィードバックループ:
+```
+詳細設計 → 本番コード生成 → テストコード生成 → テスト実行 → テスト評価
+    ↑                                                        ↓
+    └──────────────────── フィードバック ←──────────────────┘
+```
+
+### ステップ6: 結合テスト生成
+
+```
+@agent_skills/struts-to-jsf-migration/instructions/it_generation.md
+
+結合テストコードを生成してください
+
+パラメータ
+* project_root: projects/jsf-migration/struts-app-jsf
+* spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
 ```
 
 AIが自動で以下を実行
@@ -155,31 +184,36 @@ AIが自動で以下を実行
    * Service層以下（Service + DAO + Entity + DB）の連携テスト
    * 実際のDBアクセス（メモリDB）
    * 画面グループの業務フローを検証
-3. テスト生成後、自動的に結合テストを実行（./gradlew integrationTest）
-   * テスト結果を分析し、成功/失敗を報告
+   * 既存テストがある場合は、削除せずに差分のみを反映する
 
-### ステップ6: E2Eテスト生成
+重要:
+* テスト生成のみを実施（テスト実行は手動で ./gradlew integrationTest を実行）
+* テスト実行後、ステップ5（test_evaluation.md）でtest_type=integrationとして評価
+
+### ステップ7: E2Eテスト生成
 
 ```
 @agent_skills/struts-to-jsf-migration/instructions/e2e_test_generation.md
 
-E2Eテストを生成してください
+E2Eテストコードを生成してください
 
 パラメータ
 * project_root: projects/jsf-migration/struts-app-jsf
 * spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
-* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
 ```
 
 AIが自動で以下を実行
 1. requirements/behaviors.md（E2Eテストシナリオ）を読み込み
 2. Playwright を使用したE2Eテストを生成
    * 複数画面にまたがるフローをテスト
-3. テスト生成後、自動的にE2Eテストを実行（./gradlew e2eTest）
-   * アプリケーションサーバーが起動していることを確認
-   * テスト結果を分析し、成功/失敗を報告
    * 実際のブラウザ操作
+   * 既存テストがある場合は、削除せずに差分のみを反映する
 3. テストデータのセットアップ/クリーンアップコードを生成
+
+重要:
+* テスト生成のみを実施（テスト実行は手動で ./gradlew e2eTest を実行）
+* アプリケーションサーバーが起動していることを確認してからテスト実行
+* テスト実行後、ステップ5（test_evaluation.md）でtest_type=e2eとして評価
 
 ---
 

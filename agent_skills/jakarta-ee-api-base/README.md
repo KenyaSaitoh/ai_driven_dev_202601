@@ -9,7 +9,7 @@
 
 Jakarta EE 10とJAX-RS 3.1を使ったREST API サービス開発を支援するAgent Skillです。
 
-このAgent Skillは、SPECから詳細設計、コード生成、単体テスト実行評価、結合テスト、E2Eテストまで6段階で一貫サポートします。ドメインベースのフォルダ構成により、並行開発を実現。振る舞い仕様（behaviors.md）は Gherkin 記法で記述し、単体・結合・E2Eテストは Cucumber（.feature + ステップ定義）で生成する前提です。さらに、基本設計変更対応により、手戻りや拡張案件にも対応します。
+このAgent Skillは、SPECから詳細設計、コード生成、テスト生成・評価まで7段階で一貫サポートします。本番コードとテストコードの生成を分離し、ブラックボックステスト（外形的な振る舞い）とホワイトボックステスト（内部カバレッジ）の両方の観点からテストを実装します。ドメインベースのフォルダ構成により、並行開発を実現。振る舞い仕様（behaviors.md）は Gherkin 記法で記述します。さらに、基本設計変更対応により、手戻りや拡張案件にも対応します。
 
 対象プロジェクト例: `projects/sdd-wf/bookstore/back-office-api`, `projects/sdd-wf/bookstore/berry-books-api`
 
@@ -17,8 +17,10 @@ Jakarta EE 10とJAX-RS 3.1を使ったREST API サービス開発を支援する
 
 1. 基本設計: `@agent_skills/jakarta-ee-api-base/instructions/basic_design.md` で SPEC を作成（ドメインフォルダ構成）
 2. 詳細設計: `@agent_skills/jakarta-ee-api-base/instructions/detailed_design.md` でドメイン単位の詳細設計を作成
-3. コード生成: `@agent_skills/jakarta-ee-api-base/instructions/code_generation.md` で target_domain 指定して実装
-4. 単体テスト評価: `unit_test_execution.md` → 結合テスト: `it_generation.md` → E2Eテスト: `e2e_test_generation.md`
+3. 本番コード生成: `@agent_skills/jakarta-ee-api-base/instructions/code_generation.md` で target_domain 指定して実装
+4. 単体テスト生成: `unit_test_generation.md` でテストコード生成
+5. テスト評価: `test_evaluation.md` で単体/結合/E2Eテスト結果を評価
+6. 結合テスト生成: `it_generation.md` → E2Eテスト生成: `e2e_test_generation.md`
 
 ---
 
@@ -30,7 +32,7 @@ agent_skills/jakarta-ee-api-base/
 ├── SKILL.md                                    # Agent Skill説明書（エントリポイント）
 │                                               # 7段階プロセス、使い方、実践例を記載
 │
-├── instructions/                               # 開発インストラクション（6段階プロセス + 変更対応）
+├── instructions/                               # 開発インストラクション（7段階プロセス + 変更対応）
 │   │
 │   ├── basic_design.md                        # ステップ1: 基本設計（SPEC作成）
 │   │   └─→ 遵守: principles/common_rules.md
@@ -68,29 +70,36 @@ agent_skills/jakarta-ee-api-base/
 │   │                  ├── detailed_design.md
 │   │                  └── behaviors.md
 │   │
-│   ├── code_generation.md                     # ステップ3: コード生成（本番＋単体テスト、ドメイン単位）
+│   ├── code_generation.md                     # ステップ3: 本番コード生成（ドメイン単位）
 │   │   └─→ 遵守: principles/common_rules.md
 │   │   └─→ 参照: frameworks/（該当する場合）
 │   │   └─→ 読込: {project_root}/specs/baseline/basic_design/{domain}/
 │   │   │         {project_root}/specs/baseline/detailed_design/{domain}/
-│   │   └─→ 出力: {project_root}/src/（コード・テスト）
+│   │   └─→ 出力: {project_root}/src/main/（本番コードのみ）
 │   │
-│   ├── unit_test_execution.md                 # ステップ4: 単体テスト実行評価
-│   │   └─→ 実行: ./gradlew test jacocoTestReport（プロジェクトの build.gradle に従う）
-│   │   └─→ 分析: テスト結果、カバレッジ、未カバーコード
-│   │   └─→ 出力: フィードバックレポート
+│   ├── unit_test_generation.md                # ステップ4: 単体テストコード生成（ドメイン単位）
+│   │   └─→ 遵守: principles/common_rules.md
+│   │   └─→ 読込: {project_root}/specs/baseline/detailed_design/{domain}/
+│   │   └─→ 出力: {project_root}/src/test/（単体テスト）
+│   │   └─→ 特徴: ブラックボックステスト（Gherkinシナリオベース）+ ホワイトボックステスト（カバレッジ確保）
 │   │
-│   ├── it_generation.md                       # ステップ5: 結合テスト生成（Cucumber + Weld SE）
+│   ├── test_evaluation.md                     # ステップ5: テスト評価（単体/結合/E2E共通）
+│   │   └─→ 前提: テストは既に実行済み（./gradlew test/integrationTest/e2eTest）
+│   │   └─→ 読込: {project_root}/build/reports/jacoco/{test_type}/
+│   │   └─→ 分析: カバレッジ、デッドコード、テスト品質
+│   │   └─→ 出力: 評価レポート、推奨アクション
+│   │
+│   ├── it_generation.md                       # ステップ6: 結合テスト生成（JUnit 5 + Weld SE）
 │   │   └─→ 遵守: principles/common_rules.md
 │   │   └─→ 読込: {project_root}/specs/baseline/basic_design/{domain}/behaviors.md（Gherkin）
-│   │   └─→ 出力: {project_root}/src/test/（.feature + ステップ定義、integration/）
-│   │   └─→ 特徴: Cucumber .feature + ステップ定義、Service層以下・実DB、外部APIはWireMock
+│   │   └─→ 出力: {project_root}/src/test/（結合テスト）
+│   │   └─→ 特徴: Service層以下・実DB、外部APIはWireMock
 │   │
-│   ├── e2e_test_generation.md                 # ステップ6: E2Eテスト生成（Cucumber + REST Assured）
+│   ├── e2e_test_generation.md                 # ステップ7: E2Eテスト生成（JUnit 5 + REST Assured）
 │   │   └─→ 遵守: principles/common_rules.md
 │   │   └─→ 読込: {project_root}/specs/baseline/requirements/behaviors.md（Gherkin）
-│   │   └─→ 出力: {project_root}/src/test/（.feature + ステップ定義、e2e/）
-│   │   └─→ 特徴: Cucumber .feature + ステップ定義、複数機能間連携、実HTTP・実DB
+│   │   └─→ 出力: {project_root}/src/test/（E2Eテスト）
+│   │   └─→ 特徴: 複数機能間連携、実HTTP・実DB
 │   │
 │   └── basic_design_change.md                 # 基本設計変更対応（手戻り・拡張案件、ドメイン単位）
 │       └─→ 遵守: principles/common_rules.md
@@ -343,7 +352,7 @@ agent_skills/jakarta-ee-api-base/
 
 ---
 
-## 6段階プロセス
+## 7段階プロセス
 
 ### ステップ1: 基本設計（SPEC作成）
 
@@ -482,75 +491,113 @@ AIと対話しながら実施:
 
 AIが自動で実行:
 1. 詳細設計（detailed_design/{target_domain}/）を読み込む
-2. コードを生成する（Resource、Service、Dao、Entity、DTO等）
+2. 本番コードを生成する（Resource、Service、Dao、Entity、DTO等）
    * commonドメイン初回時: skip_infrastructure=true の場合、DB/APサーバーのインストールをスキップ（スキーマ作成・初期データは実行）
-3. ドメイン単位の単体テストを作成する
-   * detailed_design/{target_domain}/behaviors.md（Gherkin）から Cucumber .feature（features/unit）とステップ定義（Java）を生成
-   * 同じドメイン内のコンポーネント間は実際の連携をテスト
-   * ドメイン外の依存関係のみモック化
-   * 例: OrderService → OrderDao は実際の連携、EntityManagerはモック
+   * 既存コードがある場合は、削除せずに差分のみを反映する
 
 生成されるファイル:
 ```
-{project_root}/src/
-├── main/java/
-│   ├── api/              # JAX-RS Resources
-│   ├── service/          # Business Logic
-│   ├── dao/              # Data Access
-│   └── entity/           # JPA Entities
-└── test/
-    ├── java/.../         # 単体テスト（JUnit 5、Cucumber ステップ定義等）
-    └── resources/features/unit/  # Cucumber .feature（該当する場合）
+{project_root}/src/main/java/
+├── api/              # JAX-RS Resources
+├── service/          # Business Logic
+├── dao/              # Data Access
+└── entity/           # JPA Entities
 ```
+
+注意: 単体テストコード生成は次のステップ（ステップ4）で実施
 
 ---
 
-### ステップ4: 単体テスト実行評価
+### ステップ4: 単体テストコード生成
 
-目的: 単体テストを実行してカバレッジを分析し、フィードバックを生成する
+目的: ドメイン単位で単体テストコードを生成する（ブラックボックス+ホワイトボックス）
 
-インストラクション: `unit_test_execution.md`
+インストラクション: `unit_test_generation.md`
 
 使い方:
 ```
-@agent_skills/jakarta-ee-api-base/instructions/unit_test_execution.md
+@agent_skills/jakarta-ee-api-base/instructions/unit_test_generation.md
 
-単体テストを実行してください
+単体テストコードを生成してください
 
 パラメータ:
 * project_root: <プロジェクトルートパス>
-* target_type: FUNC_XXX_xxx
-* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定（例: "build.gradle"）
+* spec_directory: <SPECディレクトリパス>
+* target_domain: common
 ```
 
 AIが自動で実行:
-1. テスト実行（`./gradlew test jacocoTestReport`。Windowsの場合は `gradlew.bat` を使用。プロジェクトの build.gradle に従う）
-   * 通常は project_root で実行
-   * マルチプロジェクト構成の場合のみ、build_script_path で指定した build.gradle のディレクトリでGradleタスクを実行
-2. テスト結果とカバレッジ分析
-3. 問題の分類（テスト失敗、必要な振る舞い、デッドコード）
-4. フィードバックレポート生成
-5. ユーザーに推奨アクションを提示
+1. 詳細設計（detailed_design/{target_domain}/）とbehaviors.mdを読み込む
+2. 本番コード（ステップ3で生成）に対応する単体テストコードを生成
+   * **ブラックボックステスト**: behaviors.mdのGherkinシナリオから外形的な振る舞いをテスト
+   * **ホワイトボックステスト**: 境界値・エッジケース・分岐パスをカバーするテスト
+   * 同じドメイン内のコンポーネント間は実際の連携をテスト
+   * ドメイン外の依存関係のみモック化
+   * 既存テストがある場合は、削除せずに差分のみを反映する
+3. @Nestedを使用してテストを構造化（振る舞いテスト、カバレッジ確保テスト）
 
-注意:
-* 通常は build_script_path の指定は不要です
-* マルチプロジェクト構成の場合のみ、ルートの build.gradle のパスを build_script_path で指定します（例: "build.gradle"）
+生成されるファイル:
+```
+{project_root}/src/test/java/
+├── service/
+│   └── OrderServiceTest.java
+│       ├── @Nested CreateOrderBehaviorTests  # Gherkinシナリオベース
+│       └── @Nested CreateOrderEdgeCaseTests  # 境界値・エッジケース
+├── dao/
+└── entity/
+```
 
-出力:
-```
-build/reports/
-├── tests/test/index.html        # テスト結果（HTML）
-├── jacoco/test/
-│   ├── html/index.html          # カバレッジ（HTML）
-│   └── jacocoTestReport.json    # カバレッジ（JSON、AI向け）
-└── test-analysis/
-    ├── test_analysis_report.json # 分析レポート（JSON）
-    └── test_analysis_report.md   # 分析レポート（Markdown）
-```
+重要:
+* テスト生成のみを実施（テスト実行は手動で ./gradlew test を実行）
+* behaviors.mdのGherkinシナリオを必ず参考にする
+* カバレッジ目標（architecture_design.md）を達成するテストケースを作成
 
 ---
 
-### ステップ5: 結合テスト生成
+### ステップ5: テスト評価（単体/結合/E2E共通）
+
+目的: テスト実行結果を評価してカバレッジを分析し、フィードバックを生成する
+
+インストラクション: `test_evaluation.md`
+
+使い方:
+```
+@agent_skills/jakarta-ee-api-base/instructions/test_evaluation.md
+
+テスト実行結果を評価してください
+
+パラメータ:
+* project_root: <プロジェクトルートパス>
+* jacoco_reports_dir: build/reports/jacoco/test
+* test_type: unit  # unit, integration, e2e のいずれか
+* spec_directory: <SPECディレクトリパス>
+```
+
+前提: テストは既に実行済み（./gradlew test または integrationTest または e2eTest）
+
+AIが自動で実行:
+1. Jacocoレポート（XML）を読み込む
+2. カバレッジ評価（行、分岐、メソッド）
+3. パッケージ別/クラス別/メソッド別カバレッジ分析
+4. デッドコード検出
+5. テスト品質評価（テスト数、失敗分析）
+6. 評価レポート生成
+7. ユーザーに推奨アクションを提示
+
+出力:
+```
+{project_root}/test-reports/
+└── {test_type}-evaluation-report.md  # 評価レポート
+```
+
+重要:
+* テスト実行は不要（既に実行済みのレポートを評価）
+* 単体テスト、結合テスト、E2Eテストのいずれにも対応
+* 問題を発見してもユーザー確認なしに修正しない
+
+---
+
+### ステップ6: 結合テスト生成
 
 目的: Service層とDAO層の結合テストを生成する
 
@@ -560,46 +607,39 @@ build/reports/
 ```
 @agent_skills/jakarta-ee-api-base/instructions/it_generation.md
 
-結合テストを生成してください
+結合テストコードを生成してください
 
 パラメータ:
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
 * target_domains: all
-* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
 ```
 
 AIが自動で実行:
 1. basic_design/behaviors.md（結合テストシナリオ、Gherkin記法）を読み込む
-2. JUnit 5 + Cucumber（.feature + ステップ定義）+ Weld SE を使用した結合テストを生成する
-   * basic_design/behaviors.md のシナリオを Cucumber の .feature とステップ定義（Java）に変換
+2. JUnit 5 + Weld SE を使用した結合テストを生成する
    * Service層以下（Service + DAO + Entity）の実際の連携をテスト
    * 実際のDB接続（メモリDB）。外部APIは WireMock でスタブ化
    * CDI環境（Weld SE）でのコンポーネント連携
+   * 既存テストがある場合は、削除せずに差分のみを反映する
 3. テストデータのセットアップ/クリーンアップコードを生成
 4. `@Tag("integration")` で結合テストを分離
-5. テスト生成後、自動的に結合テストを実行
-   * build_script_path で指定されたディレクトリで `./gradlew integrationTest` を実行
-   * テスト結果を分析し、成功/失敗を報告
 
 重要:
-* 結合テストは単体テスト完了後に実行
+* テスト生成のみを実施（テスト実行は手動で ./gradlew integrationTest を実行）
+* テスト実行後、ステップ5（test_evaluation.md）でtest_type=integrationとして評価
 * API層は含まない（Service層以下をテスト）
-* 実行方法はプロジェクトの build.gradle に定義されたタスクに従う（例: `./gradlew integrationTest`。通常の `test` タスクからは除外）
 
 生成されるファイル:
 ```
-{project_root}/src/test/
-├── java/.../integration/
-│   ├── BaseIntegrationTest.java   # 結合テスト基底クラス（Weld SE設定）
-│   └── *IT.java                   # 結合テスト用ステップ定義等
-└── resources/features/integration/
-    └── *.feature                  # Cucumber 結合テストシナリオ
+{project_root}/src/test/java/.../integration/
+├── BaseIntegrationTest.java   # 結合テスト基底クラス（Weld SE設定）
+└── *IT.java                   # 結合テスト
 ```
 
 ---
 
-### ステップ6: E2Eテスト生成
+### ステップ7: E2Eテスト生成
 
 目的: システム全体のエンドツーエンドテストを生成する
 
@@ -609,40 +649,32 @@ AIが自動で実行:
 ```
 @agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md
 
-E2Eテストを生成してください
+E2Eテストコードを生成してください
 
 パラメータ:
 * project_root: <プロジェクトルートパス>
 * spec_directory: <SPECディレクトリパス>
-* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
 ```
 
 AIが自動で実行:
 1. requirements/behaviors.md（E2Eテストシナリオ、Gherkin記法）を読み込む
-2. JUnit 5 + Cucumber（.feature + ステップ定義）+ REST Assured を使用したE2Eテストを生成する
-   * requirements/behaviors.md のシナリオを Cucumber の .feature とステップ定義（Java、REST Assured）に変換
+2. JUnit 5 + REST Assured を使用したE2Eテストを生成する
    * 複数機能間の連携、実際のHTTPリクエスト/レスポンス、実際のDBアクセスを含む
    * エンドツーエンドのフロー検証
+   * 既存テストがある場合は、削除せずに差分のみを反映する
 3. テストデータのセットアップ/クリーンアップコードを生成
 4. `@Tag("e2e")` でE2Eテストを分離
-5. テスト生成後、自動的にE2Eテストを実行
-   * アプリケーションサーバーが起動していることを確認
-   * build_script_path で指定されたディレクトリで `./gradlew e2eTest` を実行
-   * テスト結果を分析し、成功/失敗を報告
 
 重要:
-* E2Eテストは実装完了後に実行
-* アプリケーションサーバーが起動している状態で実行
-* 実行方法はプロジェクトの build.gradle に定義されたタスクに従う（例: `./gradlew e2eTest`。通常の `test` タスクからは除外）
+* テスト生成のみを実施（テスト実行は手動で ./gradlew e2eTest を実行）
+* アプリケーションサーバーが起動していることを確認してからテスト実行
+* テスト実行後、ステップ5（test_evaluation.md）でtest_type=e2eとして評価
 
 生成されるファイル:
 ```
-{project_root}/src/test/
-├── java/.../e2e/
-│   ├── BaseE2ETest.java       # E2Eテスト基底クラス
-│   └── *E2ETest.java         # E2Eテスト用ステップ定義等
-└── resources/features/e2e/
-    └── *.feature              # Cucumber E2Eテストシナリオ
+{project_root}/src/test/java/.../e2e/
+├── BaseE2ETest.java       # E2Eテスト基底クラス
+└── *E2ETest.java         # E2Eテスト
 ```
 
 ---

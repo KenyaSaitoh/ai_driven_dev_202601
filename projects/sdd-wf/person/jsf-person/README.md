@@ -27,9 +27,11 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
     ↓
 ステップ2: 詳細設計（ドメイン単位で詳細設計）← AIと対話しながら
     ↓
-ステップ3: コード生成（詳細設計→実装→単体テスト）（ドメイン単位でJSFコード生成）
+ステップ3: 本番コード生成（詳細設計→実装）（ドメイン単位でJSFコード生成）
     ↓
-ステップ4: 単体テスト実行評価（テスト実行 → カバレッジ分析 → フィードバック）
+ステップ4: 単体テストコード生成（ブラックボックス + ホワイトボックス）
+    ↓
+ステップ5: テスト評価（テスト実行 → カバレッジ分析 → フィードバック）
     ↓
 ステップ5: 結合テスト生成（basic_design/behaviors.md → JUnit + Weld SE）
     ↓
@@ -141,34 +143,40 @@ FUNC_002を実装してください。
 
 #### ステップ4: 単体テスト実行評価
 
-単体テストを実行してカバレッジを分析し、品質を検証します。
+テスト実行結果を評価してカバレッジを分析し、品質を検証します。
+
+前提: テストを実行し、Jacocoレポートを生成済み
+
+```bash
+# リポジトリルート（ai_driven_dev_202601/）で実行
+cd ../../../  # プロジェクトルートからリポジトリルートへ移動
+
+# テストを実行してJacocoレポートを生成
+./gradlew :jsf-person-sdd-wf:test :jsf-person-sdd-wf:jacocoTestReport
+```
 
 ```
-@agent_skills/struts-to-jsf-migration/instructions/unit_test_execution.md
+@agent_skills/struts-to-jsf-migration/instructions/test_evaluation.md
 
-単体テストを実行してください
+テスト実行結果を評価してください
 
 パラメータ:
 * project_root: projects/sdd-wf/person/jsf-person
-* target_domain: common  # または person_management
-* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
+* jacoco_reports_dir: build/reports/jacoco/test
+* test_type: unit
+* spec_directory: projects/sdd-wf/person/jsf-person/specs/baseline
 ```
 
-**マルチプロジェクト構成について:**
-* このプロジェクトは、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成です
-* `build_script_path` パラメータでリポジトリルートの `build.gradle` ファイルのパスを指定します（例: "build.gradle"）
-* 指定されたパスからディレクトリ部分が抽出され、そのディレクトリでGradleタスクが実行されます
-* 通常のプロジェクト（非マルチプロジェクト）では、このパラメータの指定は不要です
-
 AIが：
-1. 🧪 テスト実行（gradle test jacocoTestReport）
-   * マルチプロジェクト構成では、指定されたディレクトリで `:jsf-person-sdd-wf:test` のような形式で実行
-2. 📊 テスト結果とカバレッジ分析
-3. 🔍 問題の分類（テスト失敗、必要な振る舞い、デッドコード）
-4. 📋 フィードバックレポート生成
-5. 💬 ユーザーに推奨アクションを提示
+1. 📊 Jacocoレポート（XML）を読み込む
+2. 📈 カバレッジ評価（行、分岐、メソッド）
+3. 🔍 パッケージ別/クラス別/メソッド別カバレッジ分析
+4. ⚠️ デッドコード検出
+5. 📋 評価レポート生成
+6. 💬 ユーザーに推奨アクションを提示
 
 重要：
+* テスト実行は不要（既に実行済みのレポートを評価）
 * 問題を発見してもユーザー確認なしに修正しない
 * Managed Bean はカバレッジ除外推奨（UI層はE2Eで検証）
 * カバレッジ不足やデッドコードを具体的に提案
@@ -176,9 +184,9 @@ AIが：
 
 🔄 フィードバックループ:
 ```
-詳細設計 → コード生成 → テスト実行評価
-    ↑                         ↓
-    └──── フィードバック ←────┘
+詳細設計 → 本番コード生成 → テストコード生成 → テスト実行 → テスト評価
+    ↑                                                        ↓
+    └──────────────────── フィードバック ←──────────────────┘
 ```
 
 ---
@@ -190,13 +198,14 @@ AIが：
 ```
 @agent_skills/struts-to-jsf-migration/instructions/it_generation.md
 
-結合テストを生成してください。
+結合テストコードを生成してください
 
 パラメータ:
 * project_root: projects/sdd-wf/person/jsf-person
 * spec_directory: projects/sdd-wf/person/jsf-person/specs/baseline
-* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
 ```
+
+重要: テスト生成のみを実施（テスト実行はリポジトリルートから手動で実行）
 
 AIが：
 1. 📄 basic_design/behaviors.md（結合テストシナリオ）を読み込む
@@ -205,12 +214,20 @@ AIが：
    * 実際のDBアクセス（メモリDB）
    * モックは使用しない
    * アプリケーションサーバー不要
+   * 既存テストがある場合は、削除せずに差分のみを反映する
 3. 🏷️ `@Tag("integration")` で結合テストを分離
 
 実行方法:
 ```bash
-# 結合テストを実行
-./gradlew integrationTest
+# リポジトリルート（ai_driven_dev_202601/）で実行
+cd ../../../  # プロジェクトルートからリポジトリルートへ移動
+
+# 結合テストを実行してJacocoレポートを生成
+./gradlew :jsf-person-sdd-wf:integrationTest :jsf-person-sdd-wf:jacocoIntegrationTestReport
+
+# テスト実行後、評価を実施
+# @agent_skills/struts-to-jsf-migration/instructions/test_evaluation.md
+# パラメータ: test_type=integration, jacoco_reports_dir=build/reports/jacoco/integrationTest
 ```
 
 ---
@@ -222,13 +239,14 @@ AIが：
 ```
 @agent_skills/struts-to-jsf-migration/instructions/e2e_test_generation.md
 
-E2Eテストを生成してください。
+E2Eテストコードを生成してください
 
 パラメータ:
 * project_root: projects/sdd-wf/person/jsf-person
 * spec_directory: projects/sdd-wf/person/jsf-person/specs/baseline
-* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
 ```
+
+重要: テスト生成のみを実施（テスト実行はリポジトリルートから手動で実行。アプリケーションサーバー起動が前提）
 
 AIが：
 1. 📄 requirements/behaviors.md（E2Eテストシナリオ）を読み込む
@@ -236,15 +254,24 @@ AIが：
    * 複数画面にまたがるフローをテスト（一覧 → 入力 → 確認 → 登録）
    * 実際のブラウザ操作
    * 実際のDBアクセスを含む
+   * 既存テストがある場合は、削除せずに差分のみを反映する
 3. 🏷️ `@Tag("e2e")` でE2Eテストを分離
 
 実行方法:
 ```bash
-# アプリケーションサーバーを起動
-./gradlew run
+# リポジトリルート（ai_driven_dev_202601/）で実行
+cd ../../../  # プロジェクトルートからリポジトリルートへ移動
 
-# 別ターミナルでE2Eテストを実行
-./gradlew e2eTest
+# 1. アプリケーションをビルド＆デプロイ
+./gradlew :jsf-person-sdd-wf:war
+./gradlew :jsf-person-sdd-wf:deploy
+
+# 2. 別ターミナルでE2Eテストを実行してJacocoレポートを生成
+./gradlew :jsf-person-sdd-wf:e2eTest :jsf-person-sdd-wf:jacocoE2eTestReport
+
+# テスト実行後、評価を実施
+# @agent_skills/struts-to-jsf-migration/instructions/test_evaluation.md
+# パラメータ: test_type=e2e, jacoco_reports_dir=build/reports/jacoco/e2eTest
 ```
 
 ---

@@ -8,7 +8,7 @@
 
 Jakarta EE 10とJAX-RS 3.1を使ったREST APIのアジャイル・仕様駆動開発を支援するAgent Skillです。
 
-業務共通SPEC（common/）を先行して作成し、ユースケース単位（usecases/{名}/）でSPECと実装を進めます。タスクは common と各ユースケースで既に決まっており、各人がそれに従ってコード生成を実行します。合流ポイントは結合テストです。振る舞い仕様（behaviors.md）は Gherkin 記法で記述し、単体・結合・E2Eテストは Cucumber（.feature + ステップ定義）で生成する前提です。アジャイルでは基本設計SPECの「変更管理」は行わず、SPEC を編集したうえで code_generation を target 指定で再実行し、既存コードへ差分を漸進的に反映する運用です。
+業務共通SPEC（common/）を先行して作成し、ユースケース単位（usecases/{名}/）でSPECと実装を進めます。本番コードとテストコードの生成を分離し、ブラックボックステスト（外形的な振る舞い）とホワイトボックステスト（内部カバレッジ）の両方の観点からテストを実装します。タスクは common と各ユースケースで既に決まっており、各人がそれに従ってコード生成を実行します。合流ポイントは結合テストです。振る舞い仕様（behaviors.md）は Gherkin 記法で記述します。アジャイルでは基本設計SPECの「変更管理」は行わず、SPEC を編集したうえで code_generation を target 指定で再実行し、既存コードへ差分を漸進的に反映する運用です。
 
 対象プロジェクト例: `projects/sdd-agile/bookstore/berry-books-api`, `projects/sdd-agile/bookstore/back-office-api`
 
@@ -16,8 +16,10 @@ Jakarta EE 10とJAX-RS 3.1を使ったREST APIのアジャイル・仕様駆動�
 
 1. 業務共通SPEC作成: `@agent_skills/jakarta-ee-api-agile/instructions/common_spec.md` で common/ に3SPECを作成
 2. ユースケースSPEC作成: `@agent_skills/jakarta-ee-api-agile/instructions/usecase_spec.md` で各ユースケースに userstory.md, behaviors.md を作成
-3. 実装: `code_generation.md` で target=common または target=usecases/{名} を指定してコード生成
-4. 合流: 結合テストで common + 全ユースケースを検証
+3. 本番コード生成: `code_generation.md` で target=common または target=usecases/{名} を指定してコード生成
+4. テストコード生成: `unit_test_generation.md` で単体テストコードを生成
+5. テスト評価: `test_evaluation.md` でテスト結果を評価
+6. 合流: 結合テストで common + 全ユースケースを検証
 
 ---
 
@@ -45,27 +47,34 @@ agent_skills/jakarta-ee-api-agile/
 │   │              ├── userstory.md
 │   │              └── behaviors.md
 │   │
-│   ├── code_generation.md                      # ステップ3: コード生成（本番＋単体テスト）
+│   ├── code_generation.md                      # ステップ3: 本番コード生成
 │   │   └─→ 遵守: principles/common_rules.md
 │   │   └─→ 読込: {spec_directory}/common/（target=common 時）
 │   │   │         {spec_directory}/usecases/{名}/（target=usecases/{名} 時）
-│   │   └─→ 出力: {project_root}/src/（コード・テスト）
+│   │   └─→ 出力: {project_root}/src/main/（本番コードのみ）
 │   │
-│   ├── unit_test_execution.md                  # ステップ4: 単体テスト実行評価
-│   │   └─→ 実行: ./gradlew test jacocoTestReport（プロジェクトの build.gradle に従う）
-│   │   └─→ 分析: テスト結果、カバレッジ、未カバーコード
-│   │   └─→ 出力: フィードバックレポート
+│   ├── unit_test_generation.md                 # ステップ4: 単体テストコード生成
+│   │   └─→ 遵守: principles/common_rules.md
+│   │   └─→ 読込: {spec_directory}/common/ または usecases/{名}/behaviors.md
+│   │   └─→ 出力: {project_root}/src/test/（単体テスト）
+│   │   └─→ 特徴: ブラックボックステスト（Gherkinシナリオベース）+ ホワイトボックステスト（カバレッジ確保）
 │   │
-│   ├── it_generation.md                        # ステップ5: 結合テスト生成（Cucumber + Weld SE）
+│   ├── test_evaluation.md                      # ステップ5: テスト評価（単体/結合/E2E共通）
+│   │   └─→ 前提: テストは既に実行済み（./gradlew test/integrationTest/e2eTest）
+│   │   └─→ 読込: {project_root}/build/reports/jacoco/{test_type}/
+│   │   └─→ 分析: カバレッジ、デッドコード、テスト品質
+│   │   └─→ 出力: 評価レポート、推奨アクション
+│   │
+│   ├── it_generation.md                        # ステップ6: 結合テスト生成（JUnit 5 + Weld SE）
 │   │   └─→ 遵守: principles/common_rules.md
 │   │   └─→ 読込: {spec_directory}/usecases/ 配下の behaviors.md（Gherkin）
-│   │   └─→ 出力: {project_root}/src/test/（.feature + ステップ定義、integration/）
+│   │   └─→ 出力: {project_root}/src/test/（結合テスト）
 │   │   └─→ 特徴: common + 全ユースケースの連携を検証、実DB、外部APIはWireMock
 │   │
-│   └── e2e_test_generation.md                  # ステップ6: E2Eテスト生成（Cucumber + REST Assured）
+│   └── e2e_test_generation.md                  # ステップ7: E2Eテスト生成（JUnit 5 + REST Assured）
 │       └─→ 遵守: principles/common_rules.md
 │       └─→ 読込: {spec_directory}/usecases/ 配下の behaviors.md（Gherkin）
-│       └─→ 出力: {project_root}/src/test/（.feature + ステップ定義、e2e/）
+│       └─→ 出力: {project_root}/src/test/（E2Eテスト）
 │       └─→ 特徴: 複数ユースケース間連携、実HTTP・実DB
 │
 ├── principles/                                 # 開発原則（全プロジェクト共通）

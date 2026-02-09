@@ -24,11 +24,13 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
     ↓
 ステップ2: 詳細設計（ドメイン単位）← AIと対話しながら
     ↓
-ステップ3: コード生成（ドメイン単位：実装コード + 単体テスト）
+ステップ3: 本番コード生成（ドメイン単位：実装コードのみ）
     ↓
-ステップ4: 単体テスト実行評価（テスト実行 → カバレッジ分析 → フィードバック）
+ステップ4: 単体テストコード生成（ブラックボックス + ホワイトボックス）
     ↓
-ステップ5: 結合テスト生成（basic_design/{domain}/behaviors.md → JUnit + Weld SE）
+ステップ5: テスト評価（テスト実行 → カバレッジ分析 → フィードバック）
+    ↓
+ステップ6: 結合テスト生成（basic_design/{domain}/behaviors.md → JUnit + Weld SE）
     ↓
 ステップ6: E2Eテスト生成（requirements/behaviors.md → REST Assured）
 ```
@@ -149,11 +151,11 @@ commonドメインの詳細設計書を作成してください
 
 ---
 
-#### ステップ3: コード生成（ドメイン単位、commonから順に実施）
+#### ステップ3: 本番コード生成（ドメイン単位、commonから順に実施）
 
 **重要**: commonドメインを最優先で実施してください（他のドメインはcommonに依存）。
 
-> 単体テストの方針: ドメイン内のコンポーネント間は実際の連携をテスト。ドメイン外の依存関係のみモック化。
+> このステップでは本番コードのみを生成します。単体テストコード生成は次のステップ（ステップ4）で実施します。
 
 コマンドテンプレート:
 
@@ -197,38 +199,68 @@ booksドメインを実装してください
 
 注意:
 * commonドメインを最初に実装してください（他のドメインはcommonに依存）
-* 各ドメインの実装には、本番コード生成と単体テスト生成の両方が含まれます
+* このステップでは本番コードのみを生成します（単体テストは次のステップ）
 * `skip_infrastructure` は commonドメイン初回setup時のみ有効です（開発環境がすでに構築済みの場合に使用）
 
 ---
 
-#### ステップ4: 単体テスト実行評価
+#### ステップ4: 単体テストコード生成
 
-単体テストを実行してカバレッジを分析し、品質を検証します。
+ステップ3で生成した本番コードに対応する単体テストコードを生成します。
 
 ```
-@agent_skills/jakarta-ee-api-base/instructions/unit_test_execution.md
+@agent_skills/jakarta-ee-api-base/instructions/unit_test_generation.md
 
-単体テストを実行してください
+単体テストコードを生成してください
 
 パラメータ:
 * project_root: projects/sdd-wf/bookstore/back-office-api
-* target_domain: books
-* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
+* spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
+* target_domain: <ドメイン名>
 ```
 
-**マルチプロジェクト構成について:**
-* このプロジェクトは、リポジトリルートの `build.gradle` を使用するマルチプロジェクト構成です
-* `build_script_path` パラメータでリポジトリルートの `build.gradle` ファイルのパスを指定します（例: "build.gradle"）
-* 指定されたパスからディレクトリ部分が抽出され、そのディレクトリでGradleタスクが実行されます
-* 未指定の場合はデフォルトで `project_root` が使用されますが、マルチプロジェクト構成ではルートの build.gradle を使うため、明示的に指定することを推奨します
+AIが自動で以下を実行:
+* **ブラックボックステスト**: behaviors.mdのGherkinシナリオから外形的な振る舞いをテスト
+* **ホワイトボックステスト**: 境界値・エッジケース・分岐パスをカバーするテスト
+* 既存テストがある場合は、削除せずに差分のみを反映する
+
+重要: テスト生成のみを実施（テスト実行は手動で ./gradlew test を実行）
+
+---
+
+#### ステップ5: テスト評価
+
+単体テストを実行してカバレッジを分析し、品質を検証します。
+
+前提: テストを実行し、Jacocoレポートを生成済み
+
+```bash
+# リポジトリルート（ai_driven_dev_202601/）で実行
+cd ../../../../  # プロジェクトルートからリポジトリルートへ移動
+
+# テストを実行してJacocoレポートを生成
+./gradlew :back-office-api-sdd-wf:test :back-office-api-sdd-wf:jacocoTestReport
+```
+
+```
+@agent_skills/jakarta-ee-api-base/instructions/test_evaluation.md
+
+テスト実行結果を評価してください
+
+パラメータ:
+* project_root: projects/sdd-wf/bookstore/back-office-api
+* jacoco_reports_dir: build/reports/jacoco/test
+* test_type: unit
+* spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
+```
 
 AIが：
-1. 🧪 テスト実行（gradle test jacocoTestReport）
-2. 📊 テスト結果とカバレッジ分析
-3. 🔍 問題の分類（テスト失敗、必要な振る舞い、デッドコード）
-4. 📋 フィードバックレポート生成
-5. 💬 ユーザーに推奨アクションを提示
+1. 📊 Jacocoレポート（XML）を読み込む
+2. 📈 カバレッジ評価（行、分岐、メソッド）
+3. 🔍 パッケージ別/クラス別/メソッド別カバレッジ分析
+4. ⚠️ デッドコード検出
+5. 📋 評価レポート生成
+6. 💬 ユーザーに推奨アクションを提示
 
 重要：
 * 問題を発見してもユーザー確認なしに修正しない
@@ -237,14 +269,14 @@ AIが：
 
 🔄 フィードバックループ:
 ```
-詳細設計 → コード生成 → テスト実行評価
-    ↑                         ↓
-    └──── フィードバック ←────┘
+詳細設計 → 本番コード生成 → テストコード生成 → テスト実行 → テスト評価
+    ↑                                                        ↓
+    └──────────────────── フィードバック ←──────────────────┘
 ```
 
 ---
 
-#### ステップ5: 結合テスト生成（単体テスト完了後）
+#### ステップ6: 結合テスト生成（単体テスト完了後）
 
 単体テスト完了後に、結合テスト（Integration Test）を生成します。
 
@@ -257,7 +289,6 @@ AIが：
 * project_root: projects/sdd-wf/bookstore/back-office-api
 * spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
 * target_domains: all
-* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
 ```
 
 AIが：
@@ -267,13 +298,23 @@ AIが：
    * 実際のDBアクセス（メモリDB）
    * 外部APIはWireMockでスタブ化
    * アプリケーションサーバー不要
+   * 既存テストがある場合は、削除せずに差分のみを反映する
 3. 🏷️ `@Tag("integration")` で結合テストを分離
 4. 📂 各ドメインのシナリオから結合テストを生成
 
+重要: テスト生成のみを実施（テスト実行はリポジトリルートから手動で実行）
+
 実行方法:
 ```bash
-# 結合テストを実行
-./gradlew integrationTest
+# リポジトリルート（ai_driven_dev_202601/）で実行
+cd ../../../../  # プロジェクトルートからリポジトリルートへ移動
+
+# 結合テストを実行してJacocoレポートを生成
+./gradlew :back-office-api-sdd-wf:integrationTest :back-office-api-sdd-wf:jacocoIntegrationTestReport
+
+# テスト実行後、評価を実施
+# @agent_skills/jakarta-ee-api-base/instructions/test_evaluation.md
+# パラメータ: test_type=integration, jacoco_reports_dir=build/reports/jacoco/integrationTest
 ```
 
 ---
@@ -285,21 +326,41 @@ AIが：
 ```
 @agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md
 
-E2Eテストを生成してください
+E2Eテストコードを生成してください
 
 パラメータ:
 * project_root: projects/sdd-wf/bookstore/back-office-api
 * spec_directory: projects/sdd-wf/bookstore/back-office-api/specs/baseline
-* build_script_path: build.gradle  # オプション（このプロジェクトはマルチプロジェクト構成のため指定）
 ```
 
 AIが：
 1. 📄 requirements/behaviors.md（E2Eテストシナリオ）を読み込む
-2. 🧪 REST Assured を使用したE2Eテストを生成
+2. 🧪 JUnit 5 + REST Assured を使用したE2Eテストを生成
    * 複数API間の連携テスト（認証 → 書籍検索 → 在庫更新等）
    * 実際のHTTPリクエスト/レスポンス
    * 実際のDBアクセスを含む
+   * 既存テストがある場合は、削除せずに差分のみを反映する
 3. 🏷️ `@Tag("e2e")` でE2Eテストを分離
+4. テストデータのセットアップ/クリーンアップコードを生成
+
+重要: テスト生成のみを実施（テスト実行はリポジトリルートから手動で実行。アプリケーションサーバー起動が前提）
+
+実行方法:
+```bash
+# リポジトリルート（ai_driven_dev_202601/）で実行
+cd ../../../../  # プロジェクトルートからリポジトリルートへ移動
+
+# 1. アプリケーションをビルド＆デプロイ
+./gradlew :back-office-api-sdd-wf:war
+./gradlew :back-office-api-sdd-wf:deploy
+
+# 2. E2Eテストを実行してJacocoレポートを生成
+./gradlew :back-office-api-sdd-wf:e2eTest :back-office-api-sdd-wf:jacocoE2eTestReport
+
+# テスト実行後、評価を実施
+# @agent_skills/jakarta-ee-api-base/instructions/test_evaluation.md
+# パラメータ: test_type=e2e, jacoco_reports_dir=build/reports/jacoco/e2eTest
+```
 
 **生成されたE2Eテストクラス:**
 

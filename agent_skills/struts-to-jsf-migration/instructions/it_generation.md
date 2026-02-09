@@ -7,16 +7,12 @@
 ```yaml
 project_root: "ここにプロジェクトルートのパスを入力"
 spec_directory: "ここにSPECディレクトリのパスを入力"
-build_script_path: null     # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
-                            # build.gradleファイルのパス（未指定時は project_root の build.gradle を使用）
-                            # 例: "build.gradle" (リポジトリルート) または "d:/GitHubRepos/.../build.gradle" (絶対パス)
 ```
 
 * 例
 ```yaml
 project_root: "projects/sdd-wf/person/jsf-person"
 spec_directory: "projects/sdd-wf/person/jsf-person/specs/baseline"
-build_script_path: "build.gradle"  # マルチプロジェクト構成の場合のみ指定（リポジトリルート）
 ```
 
 注意
@@ -115,13 +111,6 @@ build_script_path: "build.gradle"  # マルチプロジェクト構成の場合�
   * 共通のビルドファイルで `subprojects` ブロックや全プロジェクト共通設定が定義されている可能性がある
   * 見つかった場合、そちらに依存関係を追加する
 * `integrationTest` タスクについても同様に、既存の定義を確認してから追加の要否を判断する
-
-**マルチプロジェクト構成の考慮:**
-* 通常は build_script_path の指定は不要です（project_root の build.gradle を自動使用）
-* マルチプロジェクト構成の場合のみ、以下の対応が必要です：
-  * build_script_path パラメータでルートの build.gradle のパスを指定します（例: "build.gradle"）
-  * 指定されたパスからディレクトリ部分を抽出してそのディレクトリで `./gradlew` コマンドを実行します
-  * ルートプロジェクトの build.gradle でサブプロジェクトのタスクを実行する場合は `:subproject:integrationTest` のような形式を使用します
 
 ### 2.2 Weld SE の設定
 
@@ -274,61 +263,32 @@ basic_design/behaviors.md は Gherkin 記法で記述されている。@agent_sk
 
 ---
 
-## 7. 結合テスト実行
+## 7. テストの実行と評価
 
-テストコード生成後、自動的に結合テストを実行する。
+結合テストコード生成後、以下のステップを実施する:
 
-### 7.1 実行ディレクトリの決定
+### 7.1 テスト実行
 
-* `build_script_path` パラメータが指定されている場合:
-  * `build_script_path` のディレクトリ部分を抽出（例: "build.gradle" → "."）
-  * そのディレクトリに `cd` してからGradleタスクを実行
-* `build_script_path` パラメータが未指定の場合（通常）:
-  * `{project_root}` でGradleタスクを実行
-
-### 7.2 Gradleタスク実行
+Gradleタスクを使用して結合テストを実行:
 
 ```bash
-# build_script_path のディレクトリで以下を実行
+cd {project_root}
 ./gradlew integrationTest
 ```
 
-実行するタスク:
-* `integrationTest` - 結合テスト実行（@Tag("integration") が付与されたテスト）
+* `integrationTest` タスクは、@Tag("integration") が付与されたテストを実行する
 * プロジェクトのbuild.gradleに定義されたタスク名に従うこと
 
-マルチプロジェクト構成の場合:
-* ルートの build.gradle から実行する場合: `./gradlew :subproject:integrationTest`
-* サブプロジェクトの build.gradle から実行する場合: `./gradlew integrationTest`
+### 7.2 テスト評価
 
-### 7.3 テスト結果の確認
+テスト実行後、@agent_skills/struts-to-jsf-migration/instructions/test_evaluation.md を使用して結果を評価する:
 
-テスト実行後、以下を確認する:
-
-1. **テスト結果レポート**
-   * `{project_root}/build/reports/tests/integrationTest/index.html`
-   * テスト成功数、失敗数、スキップ数を確認
-
-2. **失敗したテストの分析**
-   * 失敗したテストのスタックトレースを確認
-   * 失敗の原因を特定（アサーション失敗、例外、タイムアウト等）
-
-3. **エラーメッセージ**
-   * Gradleの実行ログからエラーメッセージを抽出
-   * コンパイルエラー、依存関係の問題、設定ミス等を確認
-
-### 7.4 結果の報告
-
-テスト実行結果をユーザーに報告する:
-
-* **成功時**: 
-  * "結合テストが正常に完了しました"
-  * テスト件数と実行時間を表示
-  
-* **失敗時**:
-  * "結合テストで失敗が検出されました"
-  * 失敗したテストの詳細を表示
-  * 推奨される対応策を提示
+```yaml
+project_root: "{project_root}"
+jacoco_reports_dir: "{project_root}/build/reports/jacoco/integrationTest"
+test_type: "integration"
+spec_directory: "{spec_directory}"
+```
 
 ---
 

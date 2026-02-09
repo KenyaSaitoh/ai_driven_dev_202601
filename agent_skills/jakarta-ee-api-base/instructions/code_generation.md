@@ -117,11 +117,12 @@ target_domain: "orders"
 
 ### 3. ドメインの実装を実行する
 
-重要: 各ドメインの実装は必ず以下の順序で完了すること
+重要: このタスクは本番コード生成のみを行う
 
 1. 本番コード生成: Entity、Dao、Service、Resource（JAX-RSエンドポイント）、DTO等の実装コードを生成
-2. 単体テスト生成: 生成した本番コードに対応する単体テストコードを生成（必須）
-3. 実装完了確認: 本番コードと単体テストの両方が正常に生成されたことを確認
+2. 実装完了確認: 本番コードが正常に生成されたことを確認
+
+注意: 単体テスト生成は別タスク（@agent_skills/jakarta-ee-api-base/instructions/unit_test_generation.md）で実施する
 
 * commonドメインの実装:
   * 最優先で実装する（他のドメインはcommonに依存）
@@ -134,9 +135,9 @@ target_domain: "orders"
   * commonのコンポーネントに依存する
 
 * 実装の原則:
-  * TDDアプローチに従う: 対応する実装の前にテストを実行する（プロジェクトがTDDを採用している場合）
-  * 必ず本番コード生成の後に単体テスト生成を実行する
-  * 検証チェックポイント: 本番コードと単体テストの両方が生成されていることを確認
+  * TDDアプローチに従う場合は、対応する実装の前にテストを作成する（プロジェクトがTDDを採用している場合）
+  * 本番コード生成完了後、別途単体テスト生成タスクを実行する
+  * 検証チェックポイント: 本番コードが正常に生成されていることを確認
 
 ### 4. 実装実行ルール
 
@@ -210,28 +211,13 @@ commonドメインは最初に実装する必要がある:
 
 Entity、Dao、Service、Resource（JAX-RSエンドポイント）、DTO等の実装コードを生成する
 
-重要: 本番コード生成が完了したら、必ず次のステップ（単体テスト生成）に進むこと。処理を停止してはいけない。
-
-#### 単体テスト生成（必須）
-
-重要: 本番コード生成の直後に、必ず単体テスト生成を実行すること
-
-* 生成した本番コード（Entity、Dao、Service、Resource、DTO等）に対応する単体テストコードを生成する
-* セクション5「単体テスト生成ガイドライン」に従ってテストを実装する
-* **テストフレームワーク: JUnit 5 のみ**（Cucumberは使用しない）。architecture_design.mdで指定されたカバレッジ等に従う
-* テストカバレッジ: architecture_design.mdの目標値を遵守する
-* テストケース設計:
-  * detailed_design/配下の各タスクのbehaviors.md（単体テスト用）の Gherkin シナリオを参考に、**JUnit 5** の通常のテストクラスとテストメソッドを生成する
-  * detailed_design/配下の各タスクのdetailed_design.mdの各メソッドシグネチャに対して、正常系、異常系、境界値、エッジケースのテストメソッドを作成
-  * behaviors.md のシナリオ（Gherkin記法）を参考に、Given-When-Then の流れでテストメソッド内にテストロジックを記述する
-* モック使用の判断:
-  * 同じタスク内のコンポーネント → モック不要（実際の連携をテスト）
-  * タスク外の依存関係 → モックを使用
+重要: 本番コード生成が完了したら、このタスクは完了。単体テスト生成は別タスクで実施する。
 
 実行順序の確認:
 1. ✅ 本番コード生成完了
-2. ✅ 単体テスト生成完了 ← ここまで完了してから処理を終了する
-3. ✅ タスク完了マーク
+2. ✅ タスク完了マーク
+
+注意: 単体テストコード生成は、@agent_skills/jakarta-ee-api-base/instructions/unit_test_generation.md を使用して別途実施する
 
 #### 結合作業
 
@@ -241,82 +227,7 @@ Entity、Dao、Service、Resource（JAX-RSエンドポイント）、DTO等の�
 
 パフォーマンス最適化、ドキュメント
 
-注意: ユニットテストは上記「単体テスト生成」ステップで既に生成済みである
-
-### 5. 単体テスト生成ガイドライン（ドメイン単位のテスト）
-
-重要: このフェーズで生成するのはドメイン単位の単体テストである
-
-実行タイミング: セクション4「コア開発（本番コード生成）」の直後に必ず実行すること
-
-本番コード生成が完了したら、処理を停止せずに必ずこのセクションに従って単体テストを生成すること。
-
-#### 5.1 基本方針
-
-* テストスコープ: ドメインの粒度内
-  * 対象ドメイン（例: common, orders, books_proxy）に含まれるコンポーネントをテスト
-  * ドメイン内のコンポーネント間は実際の連携でテスト可能
-  * ドメイン外の依存関係はモックを使用
-  
-* モック使用の判断基準:
-  * 同じドメイン内のコンポーネント → モック不要（実際の連携をテスト）
-    * 例（ordersドメイン内）: OrderResource → OrderService → OrderDao
-  * ドメイン外の依存関係 → モックを使用
-    * 例: OrderService が AuthService（commonドメイン）に依存する場合、AuthService はモック
-    * 例: EntityManager、外部APIクライアント等はモック
-
-* **テストフレームワーク: JUnit 5 のみ**（Cucumberは使用しない）
-* テストカバレッジ: architecture_design.mdの目標値を遵守する
-* テストクラスの配置: `src/test/java` の適切なパッケージに配置
-* behaviors.md のシナリオ（Gherkin記法）を参考に、Given-When-Then の流れでテストメソッド内にテストロジックを記述する
-
-#### 5.2 テストケース設計
-
-* detailed_design/{target_domain}/behaviors.md（単体テスト用）の Gherkin シナリオを参考に、**JUnit 5** の通常のテストクラスとテストメソッドを生成する
-* detailed_design/{target_domain}/detailed_design.mdの各メソッドシグネチャに対して、以下のテストメソッドを作成する：
-  * 正常系テスト（期待する戻り値が返されるか）
-  * 異常系テスト（例外が適切にスローされるか）
-  * 境界値テスト（null、空文字列、最大値、最小値等）
-  * エッジケーステスト
-
-**テスト記述例:**
-```java
-@ExtendWith(MockitoExtension.class)
-class OrderServiceTest {
-    @InjectMocks
-    private OrderService orderService;
-    
-    @Mock
-    private EntityManager entityManager;
-    
-    @Test
-    void testCreateOrder_Success() {
-        // Given: 初期データ、モックのスタブ設定
-        Order testOrder = new Order();
-        when(entityManager.find(Order.class, 1)).thenReturn(testOrder);
-        
-        // When: Service メソッド呼び出し
-        Order result = orderService.createOrder(createRequest);
-        
-        // Then: 戻り値・状態を検証
-        assertNotNull(result.getId());
-        verify(entityManager).persist(any(Order.class));
-    }
-}
-```
-
-#### 5.3 単体テストのポイント
-
-* ドメイン内の連携: ドメイン外の依存（EntityManager、他ドメインのService等）は @Mock、ドメイン内の Dao/Service は実インスタンスで Given-When-Then（when(...).thenReturn(...)、メソッド呼び出し、assert）を書く
-* ドメイン外の依存: 他ドメインの Service 等は @Mock、when(...).thenReturn(...) でスタブし、対象メソッドの戻り値・例外を検証する
-* Mockito の @Mock、@InjectMocks、@ExtendWith(MockitoExtension.class) を活用
-* AssertJ や Hamcrest などのアサーションライブラリを活用可能
-
-#### 5.4 テストデータ
-
-* テストデータはdetailed_design/{target_domain}/behaviors.md（単体テスト用）やbasic_design/{target_domain}/functional_design.mdの具体例を参考に作成する
-* テストデータは各テストケース内でセットアップする（テストの独立性を保つ）
-* @BeforeEach でテストデータの初期化を行う
+注意: ユニットテストは別タスク（@agent_skills/jakarta-ee-api-base/instructions/unit_test_generation.md）で生成する
 
 ---
 
@@ -348,9 +259,10 @@ class OrderServiceTest {
 
 ## 完了検証
 
-* 本番コード生成と単体テスト生成の両方が完了していることを確認する
-* principles および architecture_design.md に従っていること、detailed_design/{target_domain}/behaviors.md のシナリオがテストでカバーされていること、detailed_design/{target_domain}/detailed_design.md で定義されたクラス・メソッド・エンドポイントが実装されていることを確認する
-* 対象ドメインの実装が完了したら停止する（次のドメインには自動的に進まない）
+* 本番コード生成が完了していることを確認する
+* principles および architecture_design.md に従っていること、detailed_design/{target_domain}/detailed_design.md で定義されたクラス・メソッド・エンドポイントが実装されていることを確認する
+* 対象ドメインの本番コード生成が完了したら停止する（次のドメインには自動的に進まない）
+* 単体テスト生成は、@agent_skills/jakarta-ee-api-base/instructions/unit_test_generation.md を使用して別途実施する
 
 ---
 
@@ -464,4 +376,8 @@ class OrderServiceTest {
 
 ## 次のステップ
 
-コード生成タスク完了後は、@agent_skills/jakarta-ee-api-base/instructions/unit_test_execution.md に従い単体テストを実行し、動作・カバレッジ・不足ケースを確認する。必要に応じて詳細設計→コード生成→テスト実行のループを行う。
+本番コード生成完了後は、以下を実施する：
+
+1. 単体テストコード生成: @agent_skills/jakarta-ee-api-base/instructions/unit_test_generation.md を使用して単体テストを生成する
+2. 単体テスト実行: @agent_skills/jakarta-ee-api-base/instructions/unit_test_execution.md に従い単体テストを実行し、動作・カバレッジ・不足ケースを確認する
+3. 必要に応じて詳細設計→コード生成→テスト生成→テスト実行のループを行う

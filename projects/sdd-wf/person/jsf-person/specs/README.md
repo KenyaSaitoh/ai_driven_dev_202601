@@ -223,25 +223,34 @@ specs/
 * **Gradleタスク実行**: リポジトリルートまたはプロジェクトルートで実行可能
   * ルートから実行: `cd ai_driven_dev_202601 && ./gradlew :jsf-person-sdd-wf:test`
   * プロジェクトルートから実行: `cd projects/sdd-wf/person/jsf-person && ../../../../gradlew test`
-* **Agent Skills使用時**: `build_script_path` パラメータにリポジトリルートの build.gradle のパスを指定することを推奨
-  ```yaml
-  project_root: projects/sdd-wf/person/jsf-person
-  build_script_path: build.gradle  # オプション（マルチプロジェクト構成のため指定）
-  ```
 
-### テスト実行時の注意点
+### テスト実行と評価
 
-単体テスト実行評価（unit_test_execution.md）使用時は、以下のようにパラメータを指定:
+テスト実行は手動で行い、その結果を評価します:
+
+```bash
+# リポジトリルート（ai_driven_dev_202601/）で実行
+cd ../../..  # specsフォルダからリポジトリルートへ移動
+
+# テストを実行してJacocoレポートを生成
+./gradlew :jsf-person-sdd-wf:test :jsf-person-sdd-wf:jacocoTestReport
+
+# テスト実行後、評価を実施
+# @agent_skills/struts-to-jsf-migration/instructions/test_evaluation.md
+```
+
+テスト評価（test_evaluation.md）使用時のパラメータ例:
 
 ```
-@agent_skills/struts-to-jsf-migration/instructions/unit_test_execution.md
+@agent_skills/struts-to-jsf-migration/instructions/test_evaluation.md
 
-単体テストを実行してください
+テスト実行結果を評価してください
 
 パラメータ:
 * project_root: projects/sdd-wf/person/jsf-person
-* target_type: FUNC_001_PersonList
-* build_script_path: build.gradle  # オプション（マルチプロジェクト構成のため指定）
+* jacoco_reports_dir: build/reports/jacoco/test
+* test_type: unit
+* spec_directory: projects/sdd-wf/person/jsf-person/specs/baseline
 ```
 
 ---
