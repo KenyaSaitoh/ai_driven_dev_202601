@@ -301,18 +301,6 @@ Markdown形式のテストシナリオ定義書から、Webアプリケーショ
    }
    ```
 
-### ステップ6: READMEの生成
-
-1. README_PLAYWRIGHT.md の生成
-   
-   内容:
-   - テストの概要
-   - セットアップ手順
-   - テスト実行方法
-   - トラブルシューティング
-   - 生成されたファイル一覧
-   - 各シナリオの説明
-
 ---
 
 ## 生成ルール
@@ -371,8 +359,7 @@ Markdown形式のテストシナリオ定義書から、Webアプリケーショ
 │   ├── {scenario2-name}.spec.ts         # シナリオ2のテスト
 │   └── ...
 ├── playwright.config.ts                  # Playwright設定（存在しない場合のみ）
-├── package.json                          # 依存関係（更新）
-└── README_PLAYWRIGHT.md                  # テスト実行ガイド
+└── package.json                          # 依存関係（更新）
 ```
 
 ---
@@ -386,24 +373,7 @@ Markdown形式のテストシナリオ定義書から、Webアプリケーショ
    - テストファイルの数
    - 設定ファイルの有無
 
-2. 次のステップの案内
-   ```
-   以下のコマンドでテストを実行できます:
-   
-   # 依存関係のインストール
-   npm install
-   
-   # Playwrightのインストール
-   npx playwright install
-   
-   # テストの実行
-   npx playwright test
-   
-   # UIモードでの実行（デバッグ用）
-   npx playwright test --ui
-   ```
-
-3. 注意事項
+2. 注意事項
    - アプリケーションサーバーが起動していることを確認
    - 必要に応じてbaseURLを調整
    - テストデータの準備が必要な場合はその旨を伝える
