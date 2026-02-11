@@ -17,22 +17,24 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 このプロジェクトは、汎用的な Jakarta EE マイクロサービス開発 Agent Skills を使用して開発します。
 
-開発は以下の7段階プロセスで進めます（ドメイン単位）：
+開発は以下の8段階プロセスで進めます（ドメイン単位）：
 
 ```
-ステップ1: 基本設計（ドメイン構造決定）← AIと対話しながら
+ステップ1: 基本設計（ドメイン構造決定）
     ↓
-ステップ2: 詳細設計（ドメイン単位）← AIと対話しながら
+ステップ2: 詳細設計（ドメイン単位）
     ↓
-ステップ3: 本番コード生成（ドメイン単位：実装コードのみ）
+ステップ3: 本番コード生成
     ↓
-ステップ4: 単体テストコード生成（ブラックボックス + ホワイトボックス）
+ステップ4: 単体テストコード生成
     ↓
-ステップ5: テスト評価（テスト実行 → カバレッジ分析 → フィードバック）
+ステップ5: 単体テスト実行
     ↓
-ステップ6: 結合テスト生成（basic_design/{domain}/behaviors.md → JUnit + Weld SE）
+ステップ6: 単体テスト評価（カバレッジ分析・フィードバック）
     ↓
-ステップ7: E2Eテスト生成（requirements/requirements.md [EARS] + basic_design/{domain}/behaviors.md [Gherkin] → REST Assured + DBUnit）
+ステップ7: 結合テスト生成
+    ↓
+ステップ8: E2Eテスト生成
 ```
 
 **ドメイン構成:**
@@ -45,11 +47,9 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 ### 📋 開発フロー
 
-#### ステップ1: 基本設計（プロジェクト開始時の1フェーズ、AIと対話的に実施）
+#### ステップ1: 基本設計（プロジェクト開始時の1回、AIと対話的に実施）
 
-requirements.mdから、ドメイン単位の仕様書をAIと対話しながら作成します。
-
-このステップは要件変更時に何度でも実行できます。初回は新規作成、2回目以降は既存SPECの差分更新となります。
+requirements.mdから、ドメイン単位の仕様書をAIと対話しながら作成します。要件変更時は増分更新可能。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/basic_design.md
@@ -61,28 +61,7 @@ requirements.mdから、ドメイン単位の仕様書をAIと対話しながら
 * spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
 ```
 
-* 対話の流れ:
-  1. 既存SPECファイルの有無を確認し、実行モードを判定します（初回作成 or 増分更新）
-  2. **増分更新モードの場合**:
-     - 既存SPECファイルをすべて読み込みます
-     - インプットファイル（requirements.md等）の変更点を特定します
-     - 差分に関連する箇所のみをSPECファイルに反映します（変更のない箇所は一切触りません）
-  3. **初回作成モードの場合**:
-     - 既存資料（EXCEL、Word等）の有無を確認します
-     - 既存資料がある場合は、Markdown形式に変換します
-     - ドメイン構成を決定します（common, books_proxy, orders, images）
-     - テンプレートを展開し、各ドメインの仕様書を対話的に作成します
-       * @agent_skills/jakarta-ee-api-base/templates/basic_design/ から5ファイルをコピー
-     - `specs/baseline/basic_design/{domain}/*.md` が生成されます
-
-* テンプレート:
-  - architecture_design.md - アーキテクチャ設計書
-  - data_model.md - データモデル仕様書
-  - external_interface.md - 外部インターフェース仕様書
-  - functional_design.md - 機能設計書
-  - behaviors.md - 振る舞い仕様書（結合テスト用）
-
-* 生成されるファイル: 
+生成されるファイル: 
   ```
   specs/baseline/basic_design/
   ├── common/                  # 共通ドメイン（最優先実装）
@@ -121,51 +100,17 @@ commonドメインの詳細設計書を作成してください
 * target_domain: common  # または books_proxy, orders, images
 ```
 
-対話の流れ:
-1. AIがSPEC（`basic_design/{target_domain}/`）を読み込み、理解した内容を説明します
-2. テンプレートを展開します
-   * @agent_skills/jakarta-ee-api-base/templates/detailed_design/ から2ファイルをコピー
-3. AIが不明点を質問します
-4. あなたが回答します
-5. detailed_design.md（実装クラス設計）とbehaviors.md（単体テスト用）を生成します
-   * **簡潔性の原則**: 基本設計とコードの「橋渡し」となる設計判断のみを簡潔に記載
-   * クラス名と責務、主要メソッドのシグネチャ、設計判断を示すアノテーション等
-   * **実装詳細（処理ステップ等）は記載しない**（コードレビューで修正しやすくするため）
-6. `specs/baseline/detailed_design/{target_domain}/detailed_design.md` と `behaviors.md` が生成されます
+AIが基本設計を読み込み、対話的に詳細設計書（detailed_design.md）と単体テスト用behaviors.mdを生成します。
 
-テンプレート:
-* detailed_design.md - 詳細設計書（実装クラス設計）
-* behaviors.md - 振る舞い仕様書（単体テスト用）
-
-注意:
-* `common`ドメインを最優先で実行してください
-* 他のドメインは`common`に依存する可能性が高いため、commonの詳細設計完了後に実行します
-* 詳細設計は対話的なプロセスです。AIの質問には必ず回答してください
+**注意:** commonドメインを最優先で実施。他ドメインはcommonに依存します。
 
 ---
 
 #### ステップ3: 本番コード生成（ドメイン単位、commonから順に実施）
 
-詳細設計書からドメイン単位で本番コードを生成します。
+詳細設計書から本番コードを生成します。**重要**: commonドメインを最優先で実装。
 
-**重要**: `common`ドメインを最優先で実装してください（他のドメインはcommonに依存）。
-
-> 単体テストの方針: ドメイン内のコンポーネント間は実際の連携をテスト。ドメイン外の依存関係のみモック化。
-
-コマンドテンプレート:
-
-```
-@agent_skills/jakarta-ee-api-base/instructions/code_generation.md
-
-[ドメイン名]ドメインを実装してください
-
-パラメータ:
-* project_root: projects/sdd-wf/bookstore/berry-books-api
-* spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
-* target_domain: [ドメイン名]
-```
-
-使用例（commonドメイン - 初回setup時）:
+コマンド例（commonドメイン - 初回setup時）:
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/code_generation.md
@@ -199,19 +144,47 @@ books_proxyドメインを実装してください
 
 ---
 
-#### ステップ4: 単体テスト実行評価（ドメイン単位）
+#### ステップ4: 単体テストコード生成（ドメイン単位）
 
-実装コードと単体テストが生成されたら、ドメイン単位でテストを実行してカバレッジを評価します。
+ステップ3で生成した本番コードに対応する単体テストコードを生成します。
 
-前提: テストを実行し、Jacocoレポートを生成済み
+```
+@agent_skills/jakarta-ee-api-base/instructions/unit_test_generation.md
+
+単体テストコードを生成してください
+
+パラメータ:
+* project_root: projects/sdd-wf/bookstore/berry-books-api
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
+* target_domain: common
+```
+
+AIが自動で以下を実行:
+* **ブラックボックステスト**: behaviors.mdのGherkinシナリオから外形的な振る舞いをテスト
+* **ホワイトボックステスト**: 境界値・エッジケース・分岐パスをカバー
+
+---
+
+#### ステップ5: 単体テスト実行（ドメイン単位）
+
+生成された単体テストを実行してJacocoレポートを生成します。
 
 ```bash
 # リポジトリルート（ai_driven_dev_202601/）で実行
 cd ../../../../  # プロジェクトルートからリポジトリルートへ移動
 
-# テストを実行してJacocoレポートを生成
+# 単体テストを実行してJacocoレポートを生成
 ./gradlew :berry-books-api-sdd-wf:test :berry-books-api-sdd-wf:jacocoTestReport
 ```
+
+テストレポート: `build/reports/tests/test/index.html`
+Jacocoレポート: `build/reports/jacoco/test/html/index.html`
+
+---
+
+#### ステップ6: 単体テスト評価（カバレッジ分析）
+
+Jacocoレポートを分析し、テスト品質を評価します。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/test_evaluation.md
@@ -225,26 +198,20 @@ cd ../../../../  # プロジェクトルートからリポジトリルートへ�
 * spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
 ```
 
-AIが：
-1. 📊 Jacocoレポート（XML）を読み込む
+AIが実行する内容:
+1. 📊 Jacocoレポート（XML）を読み込み
 2. 📈 カバレッジ評価（行、分岐、メソッド）
-3. 🔍 パッケージ別/クラス別/メソッド別カバレッジ分析
+3. 🔍 パッケージ別/クラス別/メソッド別分析
 4. ⚠️ デッドコード検出
-5. 📋 評価レポート生成
-6. 💬 ユーザーに推奨アクションを提示
+5. 💬 改善提案
 
-重要：
-* テスト実行は不要（既に実行済みのレポートを評価）
-* 問題を発見してもユーザー確認なしに修正しない
-* カバレッジ不足やデッドコードを具体的に提案
-
-カバレッジ不足がある場合は、ステップ2（詳細設計）に戻ってフィードバックします。
+**注意:** カバレッジ不足がある場合は、ステップ2（詳細設計）に戻ってフィードバック
 
 ---
 
-#### ステップ6: 結合テスト生成（全ドメイン完了後）
+#### ステップ7: 結合テスト生成（全ドメイン完了後）
 
-すべてのドメインの実装が完了したら、結合テスト（JUnit 5 + Weld SE）を生成します。
+全ドメインの実装完了後、結合テスト（JUnit 5 + Weld SE）を生成します。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/it_generation.md
@@ -257,31 +224,19 @@ AIが：
 * target_domains: all
 ```
 
-重要: テスト生成のみを実施（テスト実行はリポジトリルートから手動で実行）
-
-実行方法:
+**テスト実行:**
 ```bash
 # リポジトリルート（ai_driven_dev_202601/）で実行
-cd ../../../../  # プロジェクトルートからリポジトリルートへ移動
-
-# 結合テストを実行してJacocoレポートを生成
 ./gradlew :berry-books-api-sdd-wf:integrationTest :berry-books-api-sdd-wf:jacocoIntegrationTestReport
-
-# テスト実行後、評価を実施
-# @agent_skills/jakarta-ee-api-base/instructions/test_evaluation.md
-# パラメータ: test_type=integration, jacoco_reports_dir=build/reports/jacoco/integrationTest
 ```
 
-AIが：
-1. 📄 `basic_design/{domain}/behaviors.md` （Gherkin形式のビヘイビア定義）を読み込み
-2. 🧪 各ドメインのシナリオを結合テストケースに変換
-3. 🚀 JUnit 5 + Weld SEを使用したテストコードを生成
+AIが`basic_design/{domain}/behaviors.md`を読み込み、JUnit 5 + Weld SEを使用した結合テストを生成。
 
 ---
 
-#### ステップ7: E2Eテスト生成（全ドメイン完了後）
+#### ステップ8: E2Eテスト生成（全ドメイン完了後）
 
-すべてのドメインの実装が完了したら、E2Eテスト（REST Assured + DBUnit）を生成します。
+全ドメインの実装完了後、E2Eテスト（REST Assured + DBUnit）を生成します。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md
@@ -293,98 +248,40 @@ E2Eテストコードを生成してください
 * spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
 ```
 
-AIが：
-1. 📄 要件定義書と基本設計書を読み込む
-   * requirements/requirements.md（EARS記法）: システム全体の機能要件を理解
-   * basic_design/{domain}/functional_design.md: API仕様（エンドポイント、リクエスト/レスポンス形式）
-   * basic_design/{domain}/behaviors.md（Gherkin記法）: 各ドメインの振る舞いとDB更新を確認
-2. 🧪 JUnit 5 + REST Assured + DBUnit を使用したE2Eテストを生成
-   * 複数API間の連携テスト
-   * 実際のHTTPリクエスト/レスポンス
-   * 実際のDBアクセスとDB更新の検証を含む
-   * 既存テストがある場合は、削除せずに差分のみを反映する
-3. 🏷️ `@Tag("e2e")` でE2Eテストを分離
-4. テストデータのセットアップ/クリーンアップコードを生成
-5. 🗄️ DBUnitでDB更新を検証（behaviors.mdの期待値に基づく）
+AIが要件定義書と基本設計書を読み込み、JUnit 5 + REST Assured + DBUnitを使用したE2Eテストを生成。
 
-重要: テスト生成のみを実施（テスト実行はリポジトリルートから手動で実行。アプリケーションサーバー起動が前提）
-
-実行方法:
+**実行方法:**（アプリケーションサーバー起動後）
 ```bash
-# リポジトリルート（ai_driven_dev_202601/）で実行
-cd ../../../../  # プロジェクトルートからリポジトリルートへ移動
-
 # 1. アプリケーションをビルド＆デプロイ
 ./gradlew :berry-books-api-sdd-wf:war
 ./gradlew :berry-books-api-sdd-wf:deploy
 
-# 2. E2Eテストを実行してJacocoレポートを生成
+# 2. E2Eテストを実行
 ./gradlew :berry-books-api-sdd-wf:e2eTest :berry-books-api-sdd-wf:jacocoE2eTestReport
-
-# テスト実行後、評価を実施
-# @agent_skills/jakarta-ee-api-base/instructions/test_evaluation.md
-# パラメータ: test_type=e2e, jacoco_reports_dir=build/reports/jacoco/e2eTest
 ```
-
-AIが：
-1. 📄 requirements/behaviors.md（E2Eテストシナリオ）を読み込む
-2. 🧪 REST Assured を使用したE2Eテストを生成
-3. 🏷️ `@Tag("e2e")` でE2Eテストを分離
 
 ---
 
 ### 🔄 基本設計変更対応（手戻り・拡張案件）
 
-結合テストやE2Eテストで不具合が見つかり、基本設計に戻る必要がある場合や、拡張案件で新機能を追加する場合に使用します。
+結合テスト・E2Eテストで不具合発見時、または機能拡張時に使用します。
 
-#### 使用方法
-
-1. **ドメイン単位で基本設計SPECを更新**
-   ```bash
-   vim specs/baseline/basic_design/common/functional_design.md
-   vim specs/baseline/basic_design/books_proxy/functional_design.md
-   ```
-
-2. **CHANGES.mdを作成して変更内容を記載**
-   ```bash
-   cp agent_skills/jakarta-ee-api-base/templates/basic_design/CHANGES_template.md \
-      specs/baseline/basic_design/CHANGES.md
-   vim specs/baseline/basic_design/CHANGES.md
-   ```
-
-3. **変更対応を実行**
-   ```
-   @agent_skills/jakarta-ee-api-base/instructions/basic_design_change.md
-   
-   基本設計の変更を適用してください
-   
-   パラメータ:
-   * project_root: projects/sdd-wf/bookstore/berry-books-api
-   * spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
-   ```
-
-AIが：
-1. 📄 CHANGES.md（変更差分ファイル）を読み込み
-2. 🔍 変更の影響を受けるドメインを識別
-3. 🎯 既存の指示書を呼び出して、影響を受けるドメインの設計・コード・テストを更新
-4. ✅ すべての変更適用後、CHANGES.mdをアーカイブ
-
-#### ディレクトリ構造
+**手順:**
+1. 基本設計SPECを更新（`specs/baseline/basic_design/{domain}/functional_design.md`等）
+2. CHANGES.mdを作成して変更内容を記載
+3. 変更対応を実行
 
 ```
-specs/baseline/basic_design/
-  ├── common/                   # 共通ドメイン（マスター、自由に編集）
-  │   ├── functional_design.md
-  │   ├── data_model.md
-  │   └── behaviors.md
-  ├── books_proxy/              # 書籍プロキシドメイン（マスター、自由に編集）
-  │   ├── functional_design.md
-  │   └── behaviors.md
-  ├── CHANGES.md                # アクティブな変更（未適用）
-  └── changes_archive/          # 履歴
-      ├── 20260118_order_cancel.md
-      └── 20260125_image_upload.md
+@agent_skills/jakarta-ee-api-base/instructions/basic_design_change.md
+
+基本設計の変更を適用してください
+
+パラメータ:
+* project_root: projects/sdd-wf/bookstore/berry-books-api
+* spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
 ```
+
+AIがCHANGES.mdを読み込み、影響を受けるドメインの設計・コード・テストを自動更新。
 
 ---
 
@@ -394,20 +291,10 @@ specs/baseline/basic_design/
 
 #### 開発原則
 
-このプロジェクトは、以下の原則に従って開発されます：
-
-* 場所: `@agent_skills/jakarta-ee-api-base/principles/`
-  * [architecture.md](../../../agent_skills/jakarta-ee-api-base/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
-  * [security.md](../../../agent_skills/jakarta-ee-api-base/principles/security.md) - セキュリティ標準
-  * [common_rules.md](../../../agent_skills/jakarta-ee-api-base/principles/common_rules.md) - 共通ルール
-
-* 主な内容:
-  * 標準技術スタック（Jakarta EE 10、JPA 3.1、JAX-RS 3.1）
-  * レイヤードアーキテクチャ（API、Security、Service、DAO、Entity）
-  * 開発標準（命名規則、コーディング規約、バリデーション、エラーハンドリング）
-  * セキュリティ実装（JWT認証、HttpOnly Cookie、認証フィルター）
-  * トランザクション管理、外部API連携
-  * テスト戦略、パフォーマンス考慮事項
+詳細は `@agent_skills/jakarta-ee-api-base/principles/` を参照:
+* [architecture.md](../../../agent_skills/jakarta-ee-api-base/principles/architecture.md) - アーキテクチャ標準
+* [security.md](../../../agent_skills/jakarta-ee-api-base/principles/security.md) - セキュリティ標準
+* [common_rules.md](../../../agent_skills/jakarta-ee-api-base/principles/common_rules.md) - 共通ルール
 
 ## 🎯 プロジェクトの特徴
 

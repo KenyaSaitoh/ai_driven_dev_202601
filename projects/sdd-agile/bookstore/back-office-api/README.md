@@ -22,15 +22,17 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 開発は以下の流れで進めます：
 
 ```
-ステップ1: 業務共通SPEC + ユースケースSPEC（common/ + usecases/{名}/）
+ステップ1: 業務共通SPEC + ユースケースSPEC
     ↓
 ステップ2: コード生成（target=common または target=usecases/{名}）
     ↓
-ステップ3: 単体テスト実行評価
+ステップ3: 単体テスト実行
     ↓
-ステップ4: 結合テスト生成（usecases/*/behaviors.md → JUnit + Weld SE）
+ステップ4: 単体テスト評価（カバレッジ分析）
     ↓
-ステップ5: E2Eテスト生成（usecases 等の behaviors → REST Assured）
+ステップ5: 結合テスト生成
+    ↓
+ステップ6: E2Eテスト生成
 ```
 
 ---
@@ -39,28 +41,28 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 #### ステップ1: 業務共通SPEC + ユースケースSPEC（プロジェクト開始時・拡張時）
 
-業務共通SPEC（data_model, external_interface, architecture_design）を先に整え、各ユースケースに userstory.md / behaviors.md を配置します。
+業務共通SPEC（`common/`）とユースケースSPEC（`usecases/{名}/`）を配置します。
 
 ```
-@agent_skills/jakarta-ee-api-agile/instructions/common_spec.md   # 業務共通SPEC（common/）の3SPEC
-@agent_skills/jakarta-ee-api-agile/instructions/usecase_spec.md   # usecases/{名}/ の userstory + behaviors
+@agent_skills/jakarta-ee-api-agile/instructions/common_spec.md
+@agent_skills/jakarta-ee-api-agile/instructions/usecase_spec.md
 
 パラメータ:
 * project_root: projects/sdd-agile/bookstore/back-office-api
 * spec_directory: projects/sdd-agile/bookstore/back-office-api/specs/baseline
 ```
 
-* 配置: `specs/baseline/common/*.md`, `specs/baseline/usecases/{auth|books|category|publisher|stocks|workflow}/userstory.md`, `behaviors.md`
+**配置:** `specs/baseline/common/*.md`, `specs/baseline/usecases/{名}/userstory.md`, `behaviors.md`
 
 ---
 
 #### ステップ2: コード生成（target 指定で実装＋単体テスト）
 
-業務共通SPEC（common/）の3SPEC と usecases/{名}/userstory.md, behaviors.md を駆動元に、**target** で指定した対象の実装と単体テストを生成します。タスクファイル（tasks/）は不要です。
+**target** で指定した対象（common または usecases/{名}）の実装と単体テストを生成します。タスクファイル不要。
 
-**実行順序**: 先に `target=common` で業務共通実装を完了し、続いて各ユースケースを `target=usecases/{名}` で順に実装します。
+**実行順序:** `target=common` → 各ユースケース `target=usecases/{名}`
 
-使用例（業務共通・common）:
+コマンド例（業務共通・common）:
 
 ```
 @agent_skills/jakarta-ee-api-agile/instructions/code_generation.md
@@ -73,7 +75,7 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 * skip_infrastructure: true  # 初回setup時: DB/APサーバーセットアップをスキップする場合
 ```
 
-使用例（ユースケース）:
+コマンド例（ユースケース）:
 
 ```
 @agent_skills/jakarta-ee-api-agile/instructions/code_generation.md
@@ -85,25 +87,32 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 * target: usecases/books
 ```
 
-* 同様に `target: usecases/auth`, `target: usecases/stocks`, `target: usecases/category`, `target: usecases/publisher`, `target: usecases/workflow` 等で各ユースケースを実装
+他のユースケース（auth, stocks, category, publisher, workflow）も同様に `target: usecases/{名}` で実装。
 
-**SPEC変更時**: SPEC を編集したうえで、本インストラクションで target を指定して再実行すれば差分が反映されます。
+**SPEC変更時:** targetを指定して再実行すれば差分が反映されます。
 
 ---
 
-#### ステップ3: 単体テスト実行評価
+#### ステップ3: 単体テスト実行
 
-テスト実行結果を評価してカバレッジを分析し、品質を検証します。
-
-前提: テストを実行し、Jacocoレポートを生成済み
+生成された単体テストを実行してJacocoレポートを生成します。
 
 ```bash
 # リポジトリルート（ai_driven_dev_202601/）で実行
 cd ../../../../  # プロジェクトルートからリポジトリルートへ移動
 
-# テストを実行してJacocoレポートを生成
+# 単体テストを実行してJacocoレポートを生成
 ./gradlew :back-office-api-sdd-agile:test :back-office-api-sdd-agile:jacocoTestReport
 ```
+
+テストレポート: `build/reports/tests/test/index.html`
+Jacocoレポート: `build/reports/jacoco/test/html/index.html`
+
+---
+
+#### ステップ4: 単体テスト評価（カバレッジ分析）
+
+Jacocoレポートを分析し、テスト品質を評価します。
 
 ```
 @agent_skills/jakarta-ee-api-agile/instructions/test_evaluation.md
@@ -117,32 +126,20 @@ cd ../../../../  # プロジェクトルートからリポジトリルートへ�
 * spec_directory: projects/sdd-agile/bookstore/back-office-api/specs/baseline
 ```
 
-AIが：
-1. 📊 Jacocoレポート（XML）を読み込む
+AIが実行する内容:
+1. 📊 Jacocoレポート（XML）を読み込み
 2. 📈 カバレッジ評価（行、分岐、メソッド）
-3. 🔍 パッケージ別/クラス別/メソッド別カバレッジ分析
+3. 🔍 パッケージ別/クラス別/メソッド別分析
 4. ⚠️ デッドコード検出
-5. 📋 評価レポート生成
-6. 💬 ユーザーに推奨アクションを提示
+5. 💬 改善提案
 
-重要：
-* テスト実行は不要（既に実行済みのレポートを評価）
-* 問題を発見してもユーザー確認なしに修正しない
-* カバレッジ不足やデッドコードを具体的に提案
-* 必要に応じてコード生成（または 業務共通SPEC/ユースケースSPEC の見直し）に戻ってループ
-
-🔄 フィードバックループ:
-```
-本番コード生成 → テストコード生成 → テスト実行 → テスト評価
-    ↑                                                 ↓
-    └──────────────── フィードバック ←────────────────┘
-```
+**注意:** カバレッジ不足がある場合は、SPEC見直しまたはコード生成に戻ってフィードバック
 
 ---
 
-#### ステップ4: 結合テスト生成（単体テスト完了後）
+#### ステップ5: 結合テスト生成（単体テスト完了後）
 
-単体テスト完了後に、結合テスト（Integration Test）を生成します。
+単体テスト完了後に、結合テスト（JUnit 5 + Weld SE）を生成します。
 
 ```
 @agent_skills/jakarta-ee-api-agile/instructions/it_generation.md
@@ -154,36 +151,19 @@ AIが：
 * spec_directory: projects/sdd-agile/bookstore/back-office-api/specs/baseline
 ```
 
-重要: テスト生成のみを実施（テスト実行はリポジトリルートから手動で実行）
-
-AIが：
-1. 📄 usecases/*/behaviors.md（結合テストシナリオ）を読み込む
-2. 🧪 JUnit 5 + Weld SE を使用した結合テストを生成
-   * Service層以下（Service + DAO + Entity + DB）の連携テスト
-   * 実際のDBアクセス（メモリDB）
-   * 外部APIはWireMockでスタブ化
-   * アプリケーションサーバー不要
-   * 既存テストがある場合は、削除せずに差分のみを反映する
-3. 🏷️ `@Tag("integration")` で結合テストを分離
-
-実行方法:
+**テスト実行:**
 ```bash
 # リポジトリルート（ai_driven_dev_202601/）で実行
-cd ../../../../  # プロジェクトルートからリポジトリルートへ移動
-
-# 結合テストを実行してJacocoレポートを生成
 ./gradlew :back-office-api-sdd-agile:integrationTest :back-office-api-sdd-agile:jacocoIntegrationTestReport
-
-# テスト実行後、評価を実施
-# @agent_skills/jakarta-ee-api-agile/instructions/test_evaluation.md
-# パラメータ: test_type=integration, jacoco_reports_dir=build/reports/jacoco/integrationTest
 ```
+
+AIが`usecases/*/behaviors.md`を読み込み、JUnit 5 + Weld SEを使用した結合テストを生成。
 
 ---
 
-#### ステップ5: E2Eテスト生成（実装完了後）
+#### ステップ6: E2Eテスト生成（実装完了後）
 
-全機能実装完了後に、E2Eテスト（End-to-End Test）を生成します。
+全機能実装完了後に、E2Eテスト（JUnit 5 + REST Assured）を生成します。
 
 ```
 @agent_skills/jakarta-ee-api-agile/instructions/e2e_test_generation.md
@@ -195,40 +175,23 @@ E2Eテストコードを生成してください
 * spec_directory: projects/sdd-agile/bookstore/back-office-api/specs/baseline
 ```
 
-重要: テスト生成のみを実施（テスト実行はリポジトリルートから手動で実行。アプリケーションサーバー起動が前提）
-
-AIが：
-1. 📄 usecases/*/behaviors.md 等（E2Eテストシナリオ）を読み込む
-2. 🧪 JUnit 5 + REST Assured を使用したE2Eテストを生成
-   * 複数API間の連携テスト（認証 → 書籍検索 → 在庫更新等）
-   * 実際のHTTPリクエスト/レスポンス
-   * 実際のDBアクセスを含む
-   * 既存テストがある場合は、削除せずに差分のみを反映する
-3. 🏷️ `@Tag("e2e")` でE2Eテストを分離
-4. テストデータのセットアップ/クリーンアップコードを生成
-
-実行方法:
+**実行方法:**（アプリケーションサーバー起動後）
 ```bash
-# リポジトリルート（ai_driven_dev_202601/）で実行
-cd ../../../../  # プロジェクトルートからリポジトリルートへ移動
-
 # 1. アプリケーションをビルド＆デプロイ
 ./gradlew :back-office-api-sdd-agile:war
 ./gradlew :back-office-api-sdd-agile:deploy
 
-# 2. 別ターミナルでE2Eテストを実行してJacocoレポートを生成
+# 2. E2Eテストを実行
 ./gradlew :back-office-api-sdd-agile:e2eTest :back-office-api-sdd-agile:jacocoE2eTestReport
-
-# テスト実行後、評価を実施
-# @agent_skills/jakarta-ee-api-agile/instructions/test_evaluation.md
-# パラメータ: test_type=e2e, jacoco_reports_dir=build/reports/jacoco/e2eTest
 ```
+
+AIが`usecases/*/behaviors.md`を読み込み、JUnit 5 + REST Assuredを使用したE2Eテストを生成。
 
 ---
 
-### 🔄 SPEC変更時
+### 🔄 SPEC変更時の対応
 
-業務共通SPEC またはユースケースの仕様を変更した場合、`@agent_skills/jakarta-ee-api-agile/instructions/code_generation.md` で target を指定して再実行すれば、差分が反映されます。
+SPEC更新後、`code_generation.md` で target を指定して再実行すれば差分が反映されます。
 
 ---
 
@@ -238,20 +201,10 @@ cd ../../../../  # プロジェクトルートからリポジトリルートへ�
 
 #### 開発原則
 
-このプロジェクトは、以下の原則に従って開発されます：
-
-* 場所: `@agent_skills/jakarta-ee-api-agile/principles/`
-  * [architecture.md](../../../agent_skills/jakarta-ee-api-agile/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
-  * [security.md](../../../agent_skills/jakarta-ee-api-agile/principles/security.md) - セキュリティ標準
-  * [common_rules.md](../../../agent_skills/jakarta-ee-api-agile/principles/common_rules.md) - 共通ルール
-
-* 主な内容:
-  * 標準技術スタック（Jakarta EE 10、JPA 3.1、JAX-RS 3.1）
-  * レイヤードアーキテクチャ（API、Service、DAO、Entity）
-  * 開発標準（命名規則、コーディング規約、バリデーション、エラーハンドリング）
-  * セキュリティ実装（JWT認証、認証フィルター）
-  * トランザクション管理と並行制御（楽観的ロック）
-  * テスト戦略、パフォーマンス考慮事項
+詳細は `@agent_skills/jakarta-ee-api-agile/principles/` を参照:
+* [architecture.md](../../../agent_skills/jakarta-ee-api-agile/principles/architecture.md) - アーキテクチャ標準
+* [security.md](../../../agent_skills/jakarta-ee-api-agile/principles/security.md) - セキュリティ標準
+* [common_rules.md](../../../agent_skills/jakarta-ee-api-agile/principles/common_rules.md) - 共通ルール
 
 ## 🎯 プロジェクトの特徴（マイクロサービスパターン）
 
@@ -304,41 +257,24 @@ cd ../../../../  # プロジェクトルートからリポジトリルートへ�
 
 ## プロジェクト構成
 
-### SPEC構成（アジャイル・本プロジェクトの実際の構造）
+### SPEC構成（アジャイル）
 
 ```
-specs/
-└── baseline/
-    ├── common/                     # 業務共通SPEC
-    │   ├── architecture_design.md
-    │   ├── data_model.md
-    │   └── external_interface.md
-    └── usecases/                   # ユースケース別（各フォルダに userstory.md, behaviors.md）
-        ├── auth/
-        ├── books/
-        ├── category/
-        ├── publisher/
-        ├── stocks/
-        └── workflow/
+specs/baseline/
+├── common/                     # 業務共通SPEC
+│   ├── architecture_design.md
+│   ├── data_model.md
+│   └── external_interface.md
+└── usecases/                   # ユースケース別（各フォルダに userstory.md, behaviors.md）
+    ├── auth/
+    ├── books/
+    ├── category/
+    ├── publisher/
+    ├── stocks/
+    └── workflow/
 ```
 
-* ウォーターフォール版の `basic_design/`、`requirements/`、`detailed_design/`、`tasks/` は本フローでは使用しません。
-
-### プロジェクト全体
-
-```
-back-office-api/
-├── specs/                          # 上記の通り
-├── sql/hsqldb/                     # DDL・DML（setupHsqldb で使用）
-├── src/
-│   ├── main/java/
-│   ├── main/resources/
-│   └── main/webapp/
-├── images/covers/                  # 書籍表紙画像
-├── test_script/                    # APIテストスクリプト
-├── build.gradle
-└── README.md
-```
+**注意:** ウォーターフォール版の`basic_design/`、`detailed_design/`、`tasks/`は不使用。
 
 ## API仕様
 
@@ -646,16 +582,14 @@ rm -f hsqldb/data/testdb.*
 
 ## 🧹 SDD成果物のクリーンアップ
 
-仕様駆動開発により何度でも再実装できます。詳細は [ルートREADMEのSDDクリーンアップ節](../../../README.md#仕様駆動開発sddプロジェクトの成果物クリーンアップ) を参照してください。
+仕様駆動開発により何度でも再実装できます。
 
 ```bash
-# 本番コード・単体テストコードを削除（src/main/, src/test/, build/）。common/, usecases/ は保護されます
+# 本番コード・単体テストコードを削除（src/main/, src/test/, build/）
 ./gradlew :back-office-api-sdd-agile:cleanCode
 ```
 
-* sdd-agile ではタスク分解・詳細設計を行わないため、`cleanCode` のみが対象です。
-* 削除対象: 本番コード（src/main/）、単体テストコード（src/test/）、ビルド成果物（build/）。ディレクトリ構造は空で保持されます。
-* 保護されるSPEC: `specs/baseline/common/`, `specs/baseline/usecases/`
+**保護されるSPEC:** `specs/baseline/common/`, `specs/baseline/usecases/`
 
 ## 📖 参考リンク
 

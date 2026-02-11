@@ -218,58 +218,34 @@ berry-books-api-sdd-agile (BFF)
 
 ## ⚙️ 起動手順（全体）
 
-以下は、システム全体を起動する完全な手順です。
-
-### ① HSQLDBサーバーを起動
+システム全体を起動する手順です。
 
 ```bash
-# リポジトリルートで実行
+# ① リポジトリルートで: HSQLDB起動
 ./gradlew startHsqldb
-```
 
-### ② Payara Serverを起動
-
-```bash
-# リポジトリルートで実行
+# ② リポジトリルートで: Payara Server起動
 ./gradlew startPayara
-```
 
-### ③ データベースを初期化（初回のみ）
-
-```bash
-# リポジトリルートで実行
+# ③ リポジトリルートで: データベースを初期化（初回のみ）
 ./gradlew :berry-books-api-sdd-agile:setupHsqldb
 ./gradlew :back-office-api-sdd-agile:setupHsqldb
 ./gradlew :customer-hub-api:setupHsqldb
-```
 
-### ④ バックエンドAPIをデプロイ
-
-```bash
-# リポジトリルートで実行
+# ④ リポジトリルートで: バックエンドAPIをデプロイ
 ./gradlew :berry-books-api-sdd-agile:deploy
 ./gradlew :back-office-api-sdd-agile:deploy
 ./gradlew :customer-hub-api:deploy
-```
 
-### ⑤ フロントエンドを起動
-
-```bash
-# berry-books-spaディレクトリで実行
-cd projects/master/bookstore/berry-books-spa
+# ⑤ berry-books-spaディレクトリで: フロントエンドを起動
+cd projects/sdd-agile/bookstore/berry-books-spa
 npm install  # 初回のみ
 npm run dev
 ```
 
-### ⑥ ブラウザでアクセス
+**アクセス:** http://localhost:5173
 
-http://localhost:5173 にアクセスして書店アプリを確認できます。
-
-**初回ログイン用テストユーザー:**
-* メールアドレス: `alice@gmail.com`
-* パスワード: `password`
-
-または、新規登録から新しいアカウントを作成してください。
+**テストユーザー:** `alice@gmail.com` / `password` または新規登録
 
 ## 🛑 アプリケーションを停止する
 
