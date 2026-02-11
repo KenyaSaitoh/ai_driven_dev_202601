@@ -593,16 +593,8 @@ rm -f hsqldb/data/testdb.*
 
 ## 📖 参考リンク
 
-### Agent Skills
-
 * [Agent Skills README](../../../agent_skills/jakarta-ee-api-agile/README.md) - 使い方ガイド
-* [開発原則](../../../agent_skills/jakarta-ee-api-agile/principles/)
-  * [architecture.md](../../../agent_skills/jakarta-ee-api-agile/principles/architecture.md) - Jakarta EE APIアーキテクチャ標準
-  * [security.md](../../../agent_skills/jakarta-ee-api-agile/principles/security.md) - セキュリティ標準
-  * [common_rules.md](../../../agent_skills/jakarta-ee-api-agile/principles/common_rules.md) - 共通ルール
-
-### Jakarta EE仕様
-
+* [開発原則](../../../agent_skills/jakarta-ee-api-agile/principles/) - Architecture, Security, Common Rules
 * [Jakarta EE 10 Platform](https://jakarta.ee/specifications/platform/10/)
 * [Jakarta RESTful Web Services 3.1](https://jakarta.ee/specifications/restful-ws/3.1/)
 * [Jakarta Persistence 3.1](https://jakarta.ee/specifications/persistence/3.1/)
