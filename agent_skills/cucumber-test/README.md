@@ -106,7 +106,7 @@ agent_skills/cucumber-test/
 │       │       │       ├── TestDatabase.java
 │       │       │       └── Hooks.java
 │       │       ├── service/                   # 単体テスト
-│       │       └── architecture/              # ArchiUnitテスト
+│       │       └── architecture/              # ArchUnitテスト
 │       │
 │       └── resources/
 │           └── features/                      # Featureファイル

@@ -1,16 +1,16 @@
 ---
-name: archiunit-test
-description: Jakarta EEプロジェクトのアーキテクチャルールをArchiUnitでテスト自動生成。レイヤー依存関係、命名規則、パッケージ構造、アノテーション使用ルールを検証。JUnit 5統合、カスタムルール対応。
+name: archunit-test
+description: Jakarta EEプロジェクトのアーキテクチャルールをArchUnitでテスト自動生成。レイヤー依存関係、命名規則、パッケージ構造、アノテーション使用ルールを検証。JUnit 5統合、カスタムルール対応。
 ---
 
-# ArchiUnitアーキテクチャテスト生成 Agent Skill
+# ArchUnitアーキテクチャテスト生成 Agent Skill
 
 ## 使い方
 
-### ArchiUnitテストコード生成
+### ArchUnitテストコード生成
 
 ```
-@agent_skills/archiunit-test/instructions/generate_archunit_tests.md
+@agent_skills/archunit-test/instructions/generate_archunit_tests.md
 
 プロジェクトのアーキテクチャテストを生成してください
 
@@ -25,7 +25,7 @@ AIが自動で以下を実行
 2. レイヤードアーキテクチャのルールを定義
 3. 命名規則のルールを定義
 4. アノテーション使用ルールを定義
-5. ArchiUnitテストクラスを生成
+5. ArchUnitテストクラスを生成
 6. README（テスト実行方法）を生成
 
 特徴: プロジェクトのパッケージ構造を自動解析し、適切なアーキテクチャルールを推論します。
@@ -37,7 +37,7 @@ AIが自動で以下を実行
 ### 例1: Berry Books APIのアーキテクチャテスト生成
 
 ```
-@agent_skills/archiunit-test/instructions/generate_archunit_tests.md
+@agent_skills/archunit-test/instructions/generate_archunit_tests.md
 
 Berry Books APIのアーキテクチャテストを生成してください
 
@@ -116,11 +116,11 @@ Jakarta EEプロジェクトの標準的なパッケージ構造を前提とし�
 ## ディレクトリ構造
 
 ```
-agent_skills/archiunit-test/
+agent_skills/archunit-test/
 ├── SKILL.md                          # このファイル
 ├── README.md                         # クイックスタートガイド
 ├── principles/                       # 原則（全プロジェクト共通）
-│   └── archunit_best_practices.md   # ArchiUnitベストプラクティス
+│   └── archunit_best_practices.md   # ArchUnitベストプラクティス
 ├── templates/                        # テンプレート
 │   └── archunit_rules_template.md   # アーキテクチャルールテンプレート
 └── instructions/
@@ -132,5 +132,5 @@ agent_skills/archiunit-test/
 ## 参考資料
 
 * [ArchUnit 公式ドキュメント](https://www.archunit.org/)
-* [ArchiUnitベストプラクティス](principles/archunit_best_practices.md)
+* [ArchUnitベストプラクティス](principles/archunit_best_practices.md)
 * [アーキテクチャルールテンプレート](templates/archunit_rules_template.md)

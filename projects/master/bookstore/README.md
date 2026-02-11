@@ -147,7 +147,7 @@ cd projects/master/bookstore/customer-hub-spa && npm install && npm run dev
 **テスト生成（Agent Skills使用）:**
 
 ```bash
-@agent_skills/archiunit-test/instructions/generate_archunit_tests.md
+@agent_skills/archunit-test/instructions/generate_archunit_tests.md
 
 パラメータ:
 * project_path: projects/master/bookstore/berry-books-api
@@ -156,7 +156,7 @@ cd projects/master/bookstore/customer-hub-spa && npm install && npm run dev
 
 **テスト実行:**
 ```bash
-# すべてのArchiUnitテストを実行
+# すべてのArchUnitテストを実行
 ./gradlew :berry-books-api:test --tests "*architecture.*"
 ./gradlew :back-office-api:test --tests "*architecture.*"
 
@@ -278,7 +278,7 @@ customer-hub-spa → customer-hub-api
 
 **フロントエンド:** React 18、TypeScript 5、Vite 5、React Router v6、Tailwind CSS、Axios
 
-**テスト:** JUnit 5、Mockito、ArchiUnit、Cucumber、Weld SE、Playwright、JaCoCo
+**テスト:** JUnit 5、Mockito、ArchUnit、Cucumber、Weld SE、Playwright、JaCoCo
 
 **ビルド:** Gradle 8.x+、npm 9+
 

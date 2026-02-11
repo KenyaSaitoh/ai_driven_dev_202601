@@ -1,4 +1,4 @@
-# ArchiUnitアーキテクチャテスト生成 Agent Skill
+# ArchUnitアーキテクチャテスト生成 Agent Skill
 
 バージョン: 1.0.0  
 最終更新日: 2026-02-11
@@ -7,7 +7,7 @@
 
 ## 概要
 
-Jakarta EEプロジェクトのアーキテクチャルールをArchiUnitで自動テスト生成するAgent Skillです。
+Jakarta EEプロジェクトのアーキテクチャルールをArchUnitで自動テスト生成するAgent Skillです。
 
 このAgent Skillは、プロジェクトのパッケージ構造を解析し、レイヤー依存関係、命名規則、アノテーション使用ルールなどを検証するテストコードを自動生成します。
 
@@ -15,11 +15,11 @@ Jakarta EEプロジェクトのアーキテクチャルールをArchiUnitで自�
 
 ## クイックスタート
 
-1. ArchiUnit依存関係がbuild.gradleに追加されていることを確認
-2. `@agent_skills/archiunit-test/instructions/generate_archunit_tests.md` でテストコード生成
+1. ArchUnit依存関係がbuild.gradleに追加されていることを確認
+2. `@agent_skills/archunit-test/instructions/generate_archunit_tests.md` でテストコード生成
 
 ```
-@agent_skills/archiunit-test/instructions/generate_archunit_tests.md
+@agent_skills/archunit-test/instructions/generate_archunit_tests.md
 
 プロジェクトのアーキテクチャテストを生成してください
 
@@ -33,7 +33,7 @@ Jakarta EEプロジェクトのアーキテクチャルールをArchiUnitで自�
 ## フォルダ構造
 
 ```
-agent_skills/archiunit-test/
+agent_skills/archunit-test/
 │
 ├── SKILL.md                                    # Agent Skill説明書（エントリポイント）
 │
@@ -45,7 +45,7 @@ agent_skills/archiunit-test/
 │                  {project_path}/README_ARCHUNIT.md
 │
 ├── principles/                                 # 開発原則（全プロジェクト共通）
-│   └── archunit_best_practices.md             # ArchiUnitベストプラクティス
+│   └── archunit_best_practices.md             # ArchUnitベストプラクティス
 │                                               - レイヤードアーキテクチャルール
 │                                               - 命名規則
 │                                               - アノテーションルール
@@ -81,7 +81,7 @@ agent_skills/archiunit-test/
 │   └── test/
 │       └── java/
 │           └── {package_root}/
-│               └── architecture/              # ArchiUnitテスト
+│               └── architecture/              # ArchUnitテスト
 │                   ├── LayeredArchitectureTest.java
 │                   ├── NamingConventionTest.java
 │                   ├── AnnotationRulesTest.java
@@ -274,13 +274,13 @@ public class PackageStructureTest {
 生成されたテストを実行するには:
 
 ```bash
-# 単体テスト（ArchiUnitテストを含む）
+# 単体テスト（ArchUnitテストを含む）
 ./gradlew :berry-books-api:test
 
 # 特定のテストクラスのみ実行
 ./gradlew :berry-books-api:test --tests "*LayeredArchitectureTest"
 
-# すべてのArchiUnitテストを実行
+# すべてのArchUnitテストを実行
 ./gradlew :berry-books-api:test --tests "*architecture.*"
 ```
 
@@ -294,7 +294,7 @@ public class PackageStructureTest {
 
 ### 2. 命名規則の統一
 
-チーム全体で命名規則を統一し、ArchiUnitでルールを強制します。
+チーム全体で命名規則を統一し、ArchUnitでルールを強制します。
 
 ### 3. 継続的な検証
 
@@ -304,7 +304,7 @@ CI/CDパイプラインに組み込み、すべてのコミットでアーキテ
 
 プロジェクト固有のルールは、カスタムルールとして追加します。
 
-詳細は [ArchiUnitベストプラクティス](principles/archunit_best_practices.md) を参照してください。
+詳細は [ArchUnitベストプラクティス](principles/archunit_best_practices.md) を参照してください。
 
 ---
 
@@ -349,6 +349,6 @@ testImplementation "jakarta.platform:jakarta.jakartaee-api:10.0.0"
 ## 参考
 
 * [SKILL.md](SKILL.md) - エントリポイント、クイックリファレンス
-* [ArchiUnitベストプラクティス](principles/archunit_best_practices.md)
+* [ArchUnitベストプラクティス](principles/archunit_best_practices.md)
 * [アーキテクチャルールテンプレート](templates/archunit_rules_template.md)
 * [ArchUnit 公式ドキュメント](https://www.archunit.org/)

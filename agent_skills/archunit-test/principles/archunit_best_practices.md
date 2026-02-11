@@ -1,4 +1,4 @@
-# ArchiUnitベストプラクティス
+# ArchUnitベストプラクティス
 
 バージョン: 1.0.0  
 最終更新日: 2026-02-11
@@ -7,7 +7,7 @@
 
 ## 概要
 
-このドキュメントは、Jakarta EEプロジェクトでArchiUnitを使用する際のベストプラクティスをまとめています。
+このドキュメントは、Jakarta EEプロジェクトでArchUnitを使用する際のベストプラクティスをまとめています。
 
 ---
 
@@ -268,7 +268,7 @@ static final ArchRule rest_resources_should_not_throw_generic_exceptions =
 # すべてのテストを実行
 ./gradlew test
 
-# ArchiUnitテストのみ実行
+# ArchUnitテストのみ実行
 ./gradlew test --tests "*architecture.*"
 
 # 特定のテストクラスのみ実行
@@ -277,7 +277,7 @@ static final ArchRule rest_resources_should_not_throw_generic_exceptions =
 
 ### 6.2 CI/CDパイプラインへの統合
 
-ArchiUnitテストは通常のJUnitテストと同様に実行されるため、CI/CDパイプラインに簡単に統合できます。
+ArchUnitテストは通常のJUnitテストと同様に実行されるため、CI/CDパイプラインに簡単に統合できます。
 
 ```yaml
 # GitHub Actions の例
@@ -306,7 +306,7 @@ ArchiUnitテストは通常のJUnitテストと同様に実行されるため、
 ### 7.2 パフォーマンス
 
 - クラス読み込みの最適化: `@AnalyzeClasses` でスキャン範囲を限定
-- キャッシュの活用: ArchiUnitは自動的にクラス情報をキャッシュ
+- キャッシュの活用: ArchUnitは自動的にクラス情報をキャッシュ
 - 並列実行: JUnit 5の並列実行機能を活用
 
 ### 7.3 保守性
@@ -383,7 +383,7 @@ static final ArchRule layer_dependencies = layeredArchitecture()
 
 ## 10. まとめ
 
-ArchiUnitを活用することで、以下のメリットが得られます：
+ArchUnitを活用することで、以下のメリットが得られます：
 
 1. アーキテクチャの自動検証: コードレビューの負担軽減
 2. 継続的なアーキテクチャ改善: CI/CDパイプラインでの自動チェック

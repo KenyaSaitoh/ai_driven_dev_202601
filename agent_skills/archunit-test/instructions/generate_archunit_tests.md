@@ -1,4 +1,4 @@
-# ArchiUnitアーキテクチャテスト生成指示書
+# ArchUnitアーキテクチャテスト生成指示書
 
 バージョン: 1.0.0  
 最終更新日: 2026-02-11
@@ -7,7 +7,7 @@
 
 ## 目的
 
-Jakarta EEプロジェクトのパッケージ構造を解析し、ArchiUnitによるアーキテクチャテストコード（Java）を自動生成する。
+Jakarta EEプロジェクトのパッケージ構造を解析し、ArchUnitによるアーキテクチャテストコード（Java）を自動生成する。
 
 ---
 
@@ -76,10 +76,10 @@ Jakarta EEプロジェクトのパッケージ構造を解析し、ArchiUnitに�
 
 2. 既存テストの確認
    ```
-   既存のArchiUnitテストファイルを確認
+   既存のArchUnitテストファイルを確認
    ```
 
-### ステップ3: ArchiUnitテストクラスの生成
+### ステップ3: ArchUnitテストクラスの生成
 
 #### 3-1. LayeredArchitectureTest.java の生成
 
@@ -425,11 +425,11 @@ public class PackageStructureTest {
 生成内容:
 
 ```markdown
-# ArchiUnitアーキテクチャテスト
+# ArchUnitアーキテクチャテスト
 
 ## 概要
 
-このプロジェクトでは、ArchiUnitを使用してアーキテクチャルールを検証しています。
+このプロジェクトでは、ArchUnitを使用してアーキテクチャルールを検証しています。
 
 ## テストクラス
 
@@ -452,7 +452,7 @@ public class PackageStructureTest {
 ./gradlew :{プロジェクト名}:test
 ```
 
-### ArchiUnitテストのみ実行
+### ArchUnitテストのみ実行
 ```bash
 ./gradlew :{プロジェクト名}:test --tests "*architecture.*"
 ```
@@ -506,7 +506,7 @@ Entity層（JPA エンティティ）
 ## 参考資料
 
 - [ArchUnit公式ドキュメント](https://www.archunit.org/)
-- [ArchiUnitベストプラクティス](../../agent_skills/archiunit-test/principles/archunit_best_practices.md)
+- [ArchUnitベストプラクティス](../../agent_skills/archiunit-test/principles/archunit_best_practices.md)
 ```
 
 ### ステップ5: 完了確認と報告
@@ -524,10 +524,10 @@ Entity層（JPA エンティティ）
    ```
    以下のコマンドでテストを実行できます:
    
-   # すべてのテスト（単体テストとArchiUnitテスト）
+   # すべてのテスト（単体テストとArchUnitテスト）
    ./gradlew :{プロジェクト名}:test
    
-   # ArchiUnitテストのみ
+   # ArchUnitテストのみ
    ./gradlew :{プロジェクト名}:test --tests "*architecture.*"
    
    # 特定のテストクラス
@@ -535,7 +535,7 @@ Entity層（JPA エンティティ）
    ```
 
 3. 注意事項
-   - ArchiUnit依存関係がbuild.gradleに追加されていることを確認
+   - ArchUnit依存関係がbuild.gradleに追加されていることを確認
    - テストが失敗した場合は、アーキテクチャルールの違反を修正
    - プロジェクト固有のルールは、テストクラスに追加
 
@@ -641,7 +641,7 @@ package_root: pro.kensait.berrybooks
 
 ## 参考資料
 
-* [ArchiUnitベストプラクティス](../principles/archunit_best_practices.md)
+* [ArchUnitベストプラクティス](../principles/archunit_best_practices.md)
 * [アーキテクチャルールテンプレート](../templates/archunit_rules_template.md)
 * [ArchUnit公式ドキュメント](https://www.archunit.org/)
 * [ArchUnit User Guide](https://www.archunit.org/userguide/html/000_Index.html)
