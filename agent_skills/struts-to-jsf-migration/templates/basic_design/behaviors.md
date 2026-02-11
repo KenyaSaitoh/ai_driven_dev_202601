@@ -8,7 +8,7 @@
 
 記法: シナリオは Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）。principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること。
 
-**DBUnit対応:**
+DBUnit対応:
 * Given句: DB初期状態を明記（テーブル名、件数、データ、対応データセット）
 * Then句: DB更新後の期待状態を明記（テーブル名、件数、差分、データ、対応データセット）
 * 検証条件: 主キー、外部キー、CASCADE、トランザクションロールバックを明記
@@ -19,7 +19,7 @@
 
 本文書は、[SCREEN_GROUP_NAME]画面グループの基本設計を外形的に捉えた振る舞い仕様書である。E2Eテスト用のシナリオを記述し、複数画面にまたがる画面フローの受入基準を定義する。
 
-**DBUnitによるテストデータ管理:**
+DBUnitによるテストデータ管理:
 * テストデータは XML/CSV 形式で外部管理（`src/test/resources/datasets/[SCREEN_GROUP_NAME]/`配下）
 * Given句でDB初期状態を明記、対応するXMLデータセットを参照
 * Then句でDB更新後の期待状態を明記、対応するXMLデータセットを参照
@@ -81,7 +81,7 @@
 
 #### DBUnit対応テストデータ
 
-**DB初期状態:**
+DB初期状態:
 ```gherkin
 Given DBに以下のデータが存在する:
   テーブル: [TABLE_NAME]
@@ -92,7 +92,7 @@ Given DBに以下のデータが存在する:
     | 値1     | 値2     | 値3     |
 ```
 
-**DB更新後の期待状態:**
+DB更新後の期待状態:
 ```gherkin
 Then DBのテーブルは以下になる:
   テーブル: [TABLE_NAME]
@@ -321,14 +321,14 @@ Then DBのテーブルは以下になる:
 | [シナリオ2] | `/datasets/[SCREEN_GROUP_NAME]/initial-[scenario2].xml` | `/datasets/[SCREEN_GROUP_NAME]/expected-[scenario2].xml` | TABLE1 |
 | [エラーケース] | `/datasets/[SCREEN_GROUP_NAME]/initial-error.xml` | （変更なし・ロールバック） | TABLE1 |
 
-**データセット配置ルール:**
+データセット配置ルール:
 * ディレクトリ: `src/test/resources/datasets/[SCREEN_GROUP_NAME]/`
 * 命名規則:
   * 初期データ: `initial-{scenario-name}.xml`
   * 期待データ: `expected-{scenario-name}.xml`
   * 共通マスター: `common-master-data.xml`
 
-**データセット記述例（XML）:**
+データセット記述例（XML）:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>

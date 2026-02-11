@@ -28,13 +28,13 @@ spec_directory: "projects/sdd-wf/bookstore/back-office-api/specs/baseline"
 
 重要な方針
 * 実装完了後にE2Eテストを生成する（code_generation.mdの次のステップ）
-* **テストフレームワーク: JUnit 5 + REST Assured**
-* **外部APIモック: Wiremock（必須）** - 外部マイクロサービスをスタブ化
-* **データベーステスト: DBUnit（必須）** - テストデータのセットアップと検証
+* テストフレームワーク: JUnit 5 + REST Assured
+* 外部APIモック: Wiremock（必須） - 外部マイクロサービスをスタブ化
+* データベーステスト: DBUnit（必須） - テストデータのセットアップと検証
 * テスト対象: requirements/behaviors.md（E2Eテスト用）のシナリオ（Gherkin 記法で記述されている前提。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 * 複数機能間の連携、実際のHTTPリクエスト/レスポンス、実際のDBアクセスを含む
 * アプリケーションサーバーが起動している状態でテストを実行
-* **既存テストの扱い（重要）:**
+* 既存テストの扱い（重要）:
   * 既存の JUnit + REST Assured テストコードは削除せずに保護する
   * ファイルをゼロから作り直すのではなく、既存の内容を尊重して必要なテストケースのみを追加・修正する
   * 新規テストファイルが必要な場合のみ、新規作成する
@@ -80,16 +80,16 @@ spec_directory: "projects/sdd-wf/bookstore/back-office-api/specs/baseline"
 
 E2Eテスト生成に必要なライブラリ（すべて必須）:
 
-* **REST Assured**（rest-assured, json-path, xml-path）- REST APIテスト
-* **JUnit 5**: `org.junit.jupiter:junit-jupiter:5.10.0` - テストフレームワーク
-* **JUnit Platform**: `org.junit.platform:junit-platform-launcher:1.10.0` - テスト実行エンジン
-* **Wiremock** (`com.github.tomakehurst:wiremock-jre8:2.35.0`) - 外部APIモック（必須）
-* **DBUnit** (`org.dbunit:dbunit:2.7.3`) - データベーステスト（必須）
-* **Jackson** - JSON処理
+* REST Assured（rest-assured, json-path, xml-path）- REST APIテスト
+* JUnit 5: `org.junit.jupiter:junit-jupiter:5.10.0` - テストフレームワーク
+* JUnit Platform: `org.junit.platform:junit-platform-launcher:1.10.0` - テスト実行エンジン
+* Wiremock (`com.github.tomakehurst:wiremock-jre8:2.35.0`) - 外部APIモック（必須）
+* DBUnit (`org.dbunit:dbunit:2.7.3`) - データベーステスト（必須）
+* Jackson - JSON処理
 
 * E2Eテストクラスには `@Tag("e2e")` を付与し、通常の単体テスト実行から分離する
 
-**依存関係の追加方法:**
+依存関係の追加方法:
 * まず、対象プロジェクトの `build.gradle` を確認する
 * プロジェクト内に `build.gradle` が存在しない、または依存関係が定義されていない場合:
   * 親ディレクトリやプロジェクトルートの `build.gradle` を探索する
@@ -102,8 +102,8 @@ E2Eテスト生成に必要なライブラリ（すべて必須）:
 * `@Tag("e2e")` の abstract ベースクラスを用意する
 * @BeforeAll: architecture_design.md のベースURL・ポートに合わせ、RestAssured.baseURI/basePath と RequestSpecBuilder で Content-Type/Accept を設定
 * 認証が必要なAPI向けに、ログインAPIを呼びトークン（cookie または header）を返す login(employeeCode, password) を用意する
-* **Wiremockサーバーの起動**: @BeforeAll で WireMockServer を起動し、外部API（customer-hub-api等）をスタブ化する
-* **DBUnit初期化**: テストデータのセットアップ用にDBUnitのIDatabaseConnectionを準備する
+* Wiremockサーバーの起動: @BeforeAll で WireMockServer を起動し、外部API（customer-hub-api等）をスタブ化する
+* DBUnit初期化: テストデータのセットアップ用にDBUnitのIDatabaseConnectionを準備する
 
 ---
 
@@ -125,7 +125,7 @@ E2Eテスト生成に必要なライブラリ（すべて必須）:
 * テストメソッドは @Test アノテーションで実装
 * behaviors.md のシナリオを参考に、Given-When-Then の流れでテストを記述
 
-**例:**
+例:
 ```java
 @Tag("e2e")
 class OrderE2ETest extends BaseE2ETest {
@@ -152,7 +152,7 @@ class OrderE2ETest extends BaseE2ETest {
 
 ### 3.3 外部APIのモック化（Wiremock - 必須）
 
-**重要**: E2Eテストでは外部API（他のマイクロサービス）を実際に呼び出すのではなく、Wiremockでスタブ化する。
+重要: E2Eテストでは外部API（他のマイクロサービス）を実際に呼び出すのではなく、Wiremockでスタブ化する。
 
 ```java
 @BeforeAll
@@ -204,7 +204,7 @@ static void teardownWiremock() {
 
 ### 4.1 DBUnitによるデータセットアップ
 
-**重要**: E2EテストではDBUnitを使用してテストデータを準備する。
+重要: E2EテストではDBUnitを使用してテストデータを準備する。
 
 ```java
 private static IDatabaseConnection connection;
@@ -306,10 +306,10 @@ E2Eテストコード生成後、以下のステップを実施する:
 
 E2Eテスト実行前に以下を確認:
 
-* **アプリケーションサーバーが起動済みであること**
+* アプリケーションサーバーが起動済みであること
   * E2Eテストは実際のHTTPリクエストを送信するため、サーバーが起動している必要がある
 
-* **テスト用データベースが利用可能であること**
+* テスト用データベースが利用可能であること
   * 本番DBは使用しない
   * テスト用DBが設定されていることを確認
 

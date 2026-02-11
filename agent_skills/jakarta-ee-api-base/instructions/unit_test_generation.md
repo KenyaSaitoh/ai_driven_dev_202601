@@ -29,8 +29,8 @@ target_domain: "orders"
 このインストラクションは、本番コード（@agent_skills/jakarta-ee-api-base/instructions/code_generation.md で生成されたコード）に対する単体テストコードを生成するためのものである。
 
 重要な原則:
-* **コンテキストの分離**: 本番コード生成とは別タスクとして実行することで、コンテキストを明確に分ける
-* **ブラックボックステストとホワイトボックステストの両立**: 外形的な振る舞いの正しさと内部のカバレッジを両方確保する
+* コンテキストの分離: 本番コード生成とは別タスクとして実行することで、コンテキストを明確に分ける
+* ブラックボックステストとホワイトボックステストの両立: 外形的な振る舞いの正しさと内部のカバレッジを両方確保する
 
 ---
 
@@ -71,28 +71,28 @@ target_domain: "orders"
 
 #### ブラックボックステスト（外形的な振る舞いの検証）
 
-* **目的**: コンポーネントの外部から見た振る舞いの正しさを検証する
-* **駆動元**: `{spec_directory}/detailed_design/{target_domain}/behaviors.md` の Gherkin シナリオ
-* **焦点**: 
+* 目的: コンポーネントの外部から見た振る舞いの正しさを検証する
+* 駆動元: `{spec_directory}/detailed_design/{target_domain}/behaviors.md` の Gherkin シナリオ
+* 焦点: 
   * 入力と出力の関係
   * ビジネスルールの遵守
   * エラーハンドリングの正しさ
   * API契約の遵守
-* **テスト設計**:
+* テスト設計:
   * Given（前提条件）: テストデータ、モックのスタブ設定
   * When（操作）: メソッド呼び出し
   * Then（期待結果）: 戻り値、状態、副作用の検証
 
 #### ホワイトボックステスト（内部カバレッジの確保）
 
-* **目的**: コードの内部構造を理解し、すべてのパスとロジックが正しく動作することを検証する
-* **駆動元**: `{spec_directory}/detailed_design/{target_domain}/detailed_design.md` のメソッドシグネチャと実装詳細
-* **焦点**:
+* 目的: コードの内部構造を理解し、すべてのパスとロジックが正しく動作することを検証する
+* 駆動元: `{spec_directory}/detailed_design/{target_domain}/detailed_design.md` のメソッドシグネチャと実装詳細
+* 焦点:
   * コードカバレッジ（行カバレッジ、分岐カバレッジ）
   * 境界値テスト
   * エッジケース
   * 内部状態の変化
-* **テスト設計**:
+* テスト設計:
   * 正常系テスト（期待する戻り値が返されるか）
   * 異常系テスト（例外が適切にスローされるか）
   * 境界値テスト（null、空文字列、最大値、最小値等）
@@ -129,9 +129,9 @@ target_domain: "orders"
 
 ### 4.1 ブラックボックステストケースの設計
 
-`{spec_directory}/detailed_design/{target_domain}/behaviors.md` の Gherkin シナリオを参考に、**JUnit 5** の通常のテストクラスとテストメソッドを生成する。
+`{spec_directory}/detailed_design/{target_domain}/behaviors.md` の Gherkin シナリオを参考に、JUnit 5 の通常のテストクラスとテストメソッドを生成する。
 
-**Gherkin シナリオからテストメソッドへの変換**
+Gherkin シナリオからテストメソッドへの変換
 
 Gherkin記法:
 ```gherkin
@@ -184,7 +184,7 @@ void testCreateOrder_Success_FromBehavior() {
 * 境界値テスト（null、空文字列、最大値、最小値等）
 * エッジケーステスト
 
-**例: 境界値テスト**
+例: 境界値テスト
 
 ```java
 @Test
@@ -353,7 +353,7 @@ class OrderServiceTest {
 
 ### 7.1 必須フレームワーク
 
-* **テストフレームワーク: JUnit 5 のみ**（Cucumberは使用しない）
+* テストフレームワーク: JUnit 5 のみ（Cucumberは使用しない）
 * モックフレームワーク: Mockito
 * アサーションライブラリ: JUnit 5 Assertions、AssertJ（オプション）
 
@@ -414,20 +414,20 @@ class OrderServiceTest {
 
 ### 9.1 Entityのテスト
 
-* **ブラックボックス**: エンティティの振る舞い（バリデーション、リレーションシップ）
-* **ホワイトボックス**: getter/setter、equals/hashCode、制約違反
+* ブラックボックス: エンティティの振る舞い（バリデーション、リレーションシップ）
+* ホワイトボックス: getter/setter、equals/hashCode、制約違反
 
 ### 9.2 Daoのテスト
 
-* **ブラックボックス**: CRUD操作の正しさ、検索条件の正しさ
-* **ホワイトボックス**: 境界値（null、空リスト）、JPQLの正しさ
-* **DBUnitの活用（推奨）**: DAO層のテストでは、DBUnitを使用したデータ駆動テストを実装することを推奨
+* ブラックボックス: CRUD操作の正しさ、検索条件の正しさ
+* ホワイトボックス: 境界値（null、空リスト）、JPQLの正しさ
+* DBUnitの活用（推奨）: DAO層のテストでは、DBUnitを使用したデータ駆動テストを実装することを推奨
   * テストデータをXML/CSV形式で外部管理
   * データベースの初期状態を明示的に定義
   * 期待するデータベース状態との比較検証
   * 複数のテストケースで共通のテストデータを再利用
 
-**DBUnitを使用したDAOテストの例:**
+DBUnitを使用したDAOテストの例:
 ```java
 @ExtendWith(MockitoExtension.class)
 class OrderDaoTest {
@@ -542,7 +542,7 @@ class OrderDaoTest {
 }
 ```
 
-**テストデータセット例（/datasets/dao/orders-by-customer.xml）:**
+テストデータセット例（/datasets/dao/orders-by-customer.xml）:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>
@@ -561,7 +561,7 @@ class OrderDaoTest {
 </dataset>
 ```
 
-**テストデータセット例（/datasets/dao/orders-date-range.xml）:**
+テストデータセット例（/datasets/dao/orders-date-range.xml）:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>
@@ -580,7 +580,7 @@ class OrderDaoTest {
 </dataset>
 ```
 
-**DBUnitを使用するメリット:**
+DBUnitを使用するメリット:
 * テストデータの外部管理により、コードとデータを分離
 * XMLファイルを見るだけで、テストの前提条件が明確
 * 複数のテストケースで共通データセットを再利用可能
@@ -588,13 +588,13 @@ class OrderDaoTest {
 
 ### 9.3 Serviceのテスト
 
-* **ブラックボックス**: ビジネスロジックの正しさ、トランザクション境界
-* **ホワイトボックス**: 例外ハンドリング、分岐パス、エッジケース
+* ブラックボックス: ビジネスロジックの正しさ、トランザクション境界
+* ホワイトボックス: 例外ハンドリング、分岐パス、エッジケース
 
 ### 9.4 Resource（JAX-RSエンドポイント）のテスト
 
-* **ブラックボックス**: HTTPステータスコード、レスポンス形式、認証・認可
-* **ホワイトボックス**: バリデーションエラー、境界値、エラーレスポンス
+* ブラックボックス: HTTPステータスコード、レスポンス形式、認証・認可
+* ホワイトボックス: バリデーションエラー、境界値、エラーレスポンス
 
 ---
 

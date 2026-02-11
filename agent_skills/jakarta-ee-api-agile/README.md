@@ -156,19 +156,19 @@ agent_skills/jakarta-ee-api-agile/
 
 ### フォルダ構造の注意事項
 
-1. **specs/baseline/common/** - 業務共通の唯一の真実の情報源
+1. specs/baseline/common/ - 業務共通の唯一の真実の情報源
    * data_model.md, external_interface.md, architecture_design.md の3ファイルのみ。functional_design.md は作らない。
 
-2. **specs/baseline/usecases/** - ユースケース単位
+2. specs/baseline/usecases/ - ユースケース単位
    * 1ユースケース = 1フォルダ。userstory.md と behaviors.md を配置。
    * behaviors.md は Gherkin 記法で記述し、結合テスト・E2Eテストの参照元となる。
 
-3. **タスク分解・詳細設計は行わない**
+3. タスク分解・詳細設計は行わない
    * tasks/ フォルダや detailed_design/ は使用しない。common と各ユースケースのSPECを直接 code_generation の駆動元とする。
 
-4. **src/main/java/** - Jakarta EE 標準のレイヤードアーキテクチャ（api → service → dao → entity）。
+4. src/main/java/ - Jakarta EE 標準のレイヤードアーキテクチャ（api → service → dao → entity）。
 
-5. **src/test/** - 単体（@Tag("unit")）、結合（@Tag("integration")）、E2E（@Tag("e2e")）。Cucumber .feature + ステップ定義。
+5. src/test/ - 単体（@Tag("unit")）、結合（@Tag("integration")）、E2E（@Tag("e2e")）。Cucumber .feature + ステップ定義。
 
 ---
 
@@ -386,8 +386,8 @@ AIが自動で実行:
 1. usecases/ 配下の behaviors.md（Gherkin）を読み込む
 2. JUnit 5 + REST Assured + Wiremock + DBUnit でE2Eテストを生成
    * API層を含む全体フロー、実際のHTTPリクエスト/レスポンス、実DB
-   * **Wiremock（必須）**: 外部マイクロサービス（customer-hub-api等）をスタブ化
-   * **DBUnit（必須）**: テストデータ（XML）のセットアップとDB状態の検証
+   * Wiremock（必須）: 外部マイクロサービス（customer-hub-api等）をスタブ化
+   * DBUnit（必須）: テストデータ（XML）のセットアップとDB状態の検証
 3. `@Tag("e2e")` でE2Eテストを分離
 4. テスト生成後、自動的にE2Eテストを実行（./gradlew e2eTest）
    * アプリケーションサーバーが起動していることを確認

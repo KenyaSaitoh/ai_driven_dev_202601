@@ -50,15 +50,15 @@ export class PageName {
 
 #### 2. 命名規則
 
-- **クラス名**: PascalCase + "Page" 接尾辞
+- クラス名: PascalCase + "Page" 接尾辞
   - 良い例: `LoginPage`, `BookListPage`, `CartPage`
   - 悪い例: `login`, `bookList`, `Cart`
 
-- **要素プロパティ名**: camelCase + 要素タイプ接尾辞
+- 要素プロパティ名: camelCase + 要素タイプ接尾辞
   - 良い例: `emailInput`, `submitButton`, `errorMessage`
   - 悪い例: `email`, `btn`, `error`
 
-- **メソッド名**: camelCase + 動詞で開始
+- メソッド名: camelCase + 動詞で開始
   - 良い例: `login()`, `fillForm()`, `submitOrder()`
   - 悪い例: `loginMethod()`, `form()`, `order()`
 
@@ -104,7 +104,7 @@ export class CartPage {
 
 ### アンチパターン
 
-❌ **悪い例**: テストコード内に直接セレクタを記述
+❌ 悪い例: テストコード内に直接セレクタを記述
 
 ```typescript
 test('ログイン', async ({ page }) => {
@@ -114,7 +114,7 @@ test('ログイン', async ({ page }) => {
 });
 ```
 
-✅ **良い例**: Page Objectを使用
+✅ 良い例: Page Objectを使用
 
 ```typescript
 test('ログイン', async ({ page }) => {
@@ -130,21 +130,21 @@ test('ログイン', async ({ page }) => {
 
 ### セレクタの優先順位
 
-1. **`data-testid` 属性**（最推奨）
+1. `data-testid` 属性（最推奨）
    ```typescript
    page.locator('[data-testid="login-button"]')
    ```
    
    理由: テスト専用の属性で、UIの変更に強い
 
-2. **`id` 属性**
+2. `id` 属性
    ```typescript
    page.locator('#loginButton')
    ```
    
    理由: 一意で変更されにくい
 
-3. **ラベルやテキスト**
+3. ラベルやテキスト
    ```typescript
    page.locator('button:has-text("ログイン")')
    page.getByRole('button', { name: 'ログイン' })
@@ -152,7 +152,7 @@ test('ログイン', async ({ page }) => {
    
    理由: ユーザーが見ている内容に基づく
 
-4. **CSSセレクタ**
+4. CSSセレクタ
    ```typescript
    page.locator('button[type="submit"]')
    ```
@@ -163,14 +163,14 @@ test('ログイン', async ({ page }) => {
 
 #### 1. 安定したセレクタを使用
 
-✅ **良い例**:
+✅ 良い例:
 ```typescript
 page.locator('[data-testid="add-to-cart"]')
 page.locator('#checkout-button')
 page.getByRole('button', { name: '注文する' })
 ```
 
-❌ **悪い例**:
+❌ 悪い例:
 ```typescript
 page.locator('div > div > button:nth-child(3)') // 脆弱
 page.locator('.css-abc123') // 自動生成クラス名
@@ -238,13 +238,13 @@ await Promise.all([
 
 ### アンチパターン
 
-❌ **悪い例**: 固定時間の待機
+❌ 悪い例: 固定時間の待機
 
 ```typescript
 await page.waitForTimeout(5000); // 避けるべき
 ```
 
-✅ **良い例**: 条件ベースの待機
+✅ 良い例: 条件ベースの待機
 
 ```typescript
 await page.waitForSelector('[data-testid="order-success"]');
@@ -373,7 +373,7 @@ export default defineConfig({
 
 各テストは他のテストに依存せず、独立して実行できる必要があります。
 
-❌ **悪い例**: テスト間で状態を共有
+❌ 悪い例: テスト間で状態を共有
 
 ```typescript
 let orderId: string;
@@ -387,7 +387,7 @@ test('注文詳細表示', async ({ page }) => {
 });
 ```
 
-✅ **良い例**: 各テストで独立してセットアップ
+✅ 良い例: 各テストで独立してセットアップ
 
 ```typescript
 test('注文詳細表示', async ({ page }) => {
@@ -495,12 +495,12 @@ npx playwright show-trace trace.zip
 
 ### 重要なポイント
 
-1. **Page Object Modelを活用**して保守性を向上
-2. **安定したセレクタ**（data-testid > id > text > CSS）を優先
-3. **自動待機を活用**し、固定時間待機は避ける
-4. **テストの独立性**を確保し、並列実行に対応
-5. **エラーハンドリング**を適切に行い、デバッグ情報を充実
-6. **スクリーンショット・動画**を活用してトラブルシューティング
+1. Page Object Modelを活用して保守性を向上
+2. 安定したセレクタ（data-testid > id > text > CSS）を優先
+3. 自動待機を活用し、固定時間待機は避ける
+4. テストの独立性を確保し、並列実行に対応
+5. エラーハンドリングを適切に行い、デバッグ情報を充実
+6. スクリーンショット・動画を活用してトラブルシューティング
 
 ### チェックリスト
 

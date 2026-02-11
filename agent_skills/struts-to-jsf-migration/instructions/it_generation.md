@@ -28,13 +28,13 @@ spec_directory: "projects/sdd-wf/person/jsf-person/specs/baseline"
 
 重要な方針
 * 単体テスト実行評価後に結合テストを生成する（unit_test_execution.mdの次のステップ）
-* **テストフレームワーク: JUnit 5 + Weld SE（CDIコンテナ）**
+* テストフレームワーク: JUnit 5 + Weld SE（CDIコンテナ）
 * テスト対象: basic_design/behaviors.md（結合テスト用）のシナリオ（Gherkin 記法で記述されている前提。@agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 * Service層以下（Service + Entity）の実際の連携をテスト
 * モックは使用しない（実際のDB操作）
 * アプリケーションサーバーは不要（Weld SEでCDIコンテナを起動）
 * Managed Beanは結合テストの対象外（E2Eテストで検証）
-* **既存テストの扱い（重要）:**
+* 既存テストの扱い（重要）:
   * 既存の JUnit + Weld テストコードは削除せずに保護する
   * ファイルをゼロから作り直すのではなく、既存の内容を尊重して必要なテストケースのみを追加・修正する
   * 新規テストファイルが必要な場合のみ、新規作成する
@@ -97,7 +97,7 @@ spec_directory: "projects/sdd-wf/person/jsf-person/specs/baseline"
 
 * 結合テストクラスには `@Tag("integration")` を付与し、通常の単体テスト実行から分離する
 
-**依存関係の追加方法:**
+依存関係の追加方法:
 * まず、対象プロジェクトの `build.gradle` を確認する
 * プロジェクト内に `build.gradle` が存在しない、または依存関係が定義されていない場合:
   * 親ディレクトリやプロジェクトルートの `build.gradle` を探索する
@@ -125,7 +125,7 @@ spec_directory: "projects/sdd-wf/person/jsf-person/specs/baseline"
 * テスト実行前のクリーンアップとセットアップの自動化
 * テスト実行後のデータベース状態の検証
 
-**テストデータセットの配置:**
+テストデータセットの配置:
 ```
 src/test/resources/datasets/
   ├── persons/
@@ -282,7 +282,7 @@ public abstract class BaseIntegrationTest {
 
 ### 3.2 XMLデータセットの作成例
 
-**`src/test/resources/datasets/persons/initial-data.xml`:**
+`src/test/resources/datasets/persons/initial-data.xml`:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>
@@ -294,7 +294,7 @@ public abstract class BaseIntegrationTest {
 
 ### 3.3 DBUnitを使用したテストケースの実装パターン
 
-**パターン1: 初期データ投入 + DB状態検証**
+パターン1: 初期データ投入 + DB状態検証
 ```java
 @Tag("integration")
 class PersonServiceIntegrationTest extends BaseIntegrationTest {
@@ -349,7 +349,7 @@ class PersonServiceIntegrationTest extends BaseIntegrationTest {
 }
 ```
 
-**パターン2: 期待データセットとの完全比較**
+パターン2: 期待データセットとの完全比較
 ```java
 @Test
 void testUpdatePerson_Success() throws Exception {
@@ -370,22 +370,22 @@ void testUpdatePerson_Success() throws Exception {
 
 ### 3.4 DBUnitのベストプラクティス
 
-1. **データセットの粒度**
+1. データセットの粒度
    * 1テストケース = 1データセット（または複数の組み合わせ）
    * 共通データは別ファイルに分離
    * シナリオ固有データは専用ファイルに配置
 
-2. **カラム名とテーブル名**
+2. カラム名とテーブル名
    * データベースの実際のカラム名・テーブル名を使用（大文字/小文字を統一）
    * `setColumnSensing(true)` で未定義カラムを自動検出
 
-3. **NULL値の扱い**
+3. NULL値の扱い
    * XMLでNULL値を表現: `<TABLE COLUMN="[null]" />`
 
-4. **日付・時刻の扱い**
+4. 日付・時刻の扱い
    * ISO 8601形式で記述: `2024-01-01 12:00:00`
 
-5. **テストの独立性**
+5. テストの独立性
    * 各テストで CLEAN_INSERT を使用（既存データをクリア）
    * @AfterEach でトランザクションロールバック
 
@@ -410,7 +410,7 @@ void testUpdatePerson_Success() throws Exception {
 * テストメソッドは @Test アノテーションで実装
 * behaviors.md のシナリオを参考に、Given-When-Then の流れでテストを記述
 
-**例:**
+例:
 ```java
 @Tag("integration")
 class PersonServiceIntegrationTest extends BaseIntegrationTest {
@@ -444,7 +444,7 @@ class PersonServiceIntegrationTest extends BaseIntegrationTest {
 * @BeforeEach: EntityManager 取得、`em.getTransaction().begin()`
 * @AfterEach: トランザクションがアクティブなら rollback
 
-**重要な注意点:**
+重要な注意点:
 * Weld SEは `enableDiscovery()` が必須（beans.xmlなしでCDI Beanを検出するため）
 * EntityManagerProducerで `@Disposes` パラメータには `@PersistenceContext` を付与しない（コンパイルエラー回避）
 
@@ -469,13 +469,13 @@ class PersonServiceIntegrationTest extends BaseIntegrationTest {
 
 ### 5.1 DBのセットアップ（DBUnit使用を推奨）
 
-結合テストでは、テストデータの投入に **DBUnit を使用する（必須）**:
+結合テストでは、テストデータの投入に DBUnit を使用する（必須）:
 
 * XMLまたはCSV形式でテストデータを外部ファイルとして管理
 * `loadDataSet()` メソッドで初期データを投入
 * EntityManagerを直接使用する方法との併用も可能
 
-**DBUnit使用例（推奨）:**
+DBUnit使用例（推奨）:
 ```java
 @Test
 void testBusinessLogic() throws Exception {
@@ -490,7 +490,7 @@ void testBusinessLogic() throws Exception {
 }
 ```
 
-**EntityManager直接使用例（補助的）:**
+EntityManager直接使用例（補助的）:
 ```java
 @Test
 void testSimpleCase() {
@@ -508,7 +508,7 @@ void testSimpleCase() {
 
 @agent_skills/struts-to-jsf-migration/principles/architecture.md の「9.4 テストデータ管理」と、上記「3. DBUnitによるテストデータ管理」を参照する。
 
-**重要なポイント:**
+重要なポイント:
 * 結合テストでは DBUnit を優先的に使用する
 * テストデータをコードから分離し、XMLまたはCSVで管理
 * データセットの再利用性を高める
@@ -586,8 +586,8 @@ spec_directory: "{spec_directory}"
 
 * Weld SE公式ドキュメント: https://weld.cdi-spec.org/
 * JUnit 5公式ドキュメント: https://junit.org/junit5/
-* **DBUnit公式ドキュメント: http://dbunit.sourceforge.net/**
-* **DBUnitベストプラクティス: http://dbunit.sourceforge.net/bestpractices.html**
+* DBUnit公式ドキュメント: http://dbunit.sourceforge.net/
+* DBUnitベストプラクティス: http://dbunit.sourceforge.net/bestpractices.html
 * basic_design/behaviors.md - 結合テストシナリオ
 * basic_design/functional_design.md - 機能仕様
 * basic_design/architecture_design.md - システム構成

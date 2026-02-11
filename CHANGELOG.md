@@ -36,7 +36,25 @@
 * projects/master/bookstore/berry-books-spa: Playwright E2Eテストコードを自動生成（5つのテストシナリオ、8つのPage Objectクラス、playwright.config.ts、README_PLAYWRIGHT.md）
 * テストシナリオ定義書（playwright_berry-books.md）から、セレクタの自動推論とPage Object Modelパターンによるテストコードを生成
 
+#### Cucumber Featureファイル生成機能の追加
+* agent_skills/cucumber-test/instructions/generate_feature_from_behaviors.md: behaviors.mdからGherkin形式の.featureファイルを自動生成する専用指示書を新規作成。プロジェクト内のbehaviors.mdを自動検索し、behaviors.mdと同じディレクトリに.featureファイルを出力。Gherkin形式または自然言語形式のbehaviors.mdに対応
+* agent_skills/cucumber-test/SKILL.md, README.md: 「ステップ1: Featureファイル生成（behaviors.mdから）」と「ステップ2: Cucumberテストコード生成」の2段階プロセスに更新。フォルダ構造に新規指示書を追加
+* projects/master/bookstore/back-office-api/README.md, berry-books-api/README.md: Cucumber BDD結合テストのセクションを2段階に分けて更新。ステップ1でbehaviors.mdから.featureファイルを生成、ステップ2でStep DefinitionsとTest Runnerを生成する手順を追加
+
 ### Changed
+
+#### E2Eテスト・結合テストツールの明確化とドキュメント整備
+* agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md: E2EテストでWiremock（外部APIスタブ化）とDBUnit（テストデータ管理・DB検証）を必須化。依存関係リスト、BaseE2ETestクラスの@BeforeAllでのWireMockServerとDBUnit初期化、Wiremock使用方法（setup/stubFor/teardown）、DBUnit使用方法（connection/dataset/CLEAN_INSERT/teardown/検証）の詳細なコード例を追加。e2e-test-data.xmlサンプルを追加
+* agent_skills/jakarta-ee-api-agile/instructions/e2e_test_generation.md: 上記と同様にWiremockとDBUnitを必須化。JUnit 5 + REST Assured + Wiremock + DBUnitの使用を明記
+* agent_skills/jakarta-ee-api-base/instructions/it_generation.md: 結合テストでWiremockを必須化（外部APIスタブ化のため）。「外部APIはWireMockでスタブ化」を明記
+* agent_skills/jakarta-ee-api-agile/instructions/it_generation.md: 上記と同様にWiremockを必須化
+* agent_skills/jakarta-ee-api-base/SKILL.md, README.md: E2Eテスト生成の説明を「JUnit 5 + REST Assured + Wiremock + DBUnit」に更新。ステップ7の説明でWiremock（必須）とDBUnit（必須）の役割を明記。ディレクトリ構造のコメントを「REST Assured + Wiremock + DBUnit」に更新
+* agent_skills/jakarta-ee-api-agile/SKILL.md, README.md: 上記と同様にE2Eテストのツール構成を更新。結合テストとE2Eテストの説明でWiremock（必須）とDBUnit（必須）を明記
+
+#### Struts to JSFマイグレーションプロセスの簡素化
+* agent_skills/struts-to-jsf-migration/instructions/e2e_test_generation.md: ファイルを削除（JSF画面テストは結合テストで十分カバー可能なため）
+* agent_skills/struts-to-jsf-migration/SKILL.md: 7段階プロセス→6段階プロセスに変更。ステップ7（E2Eテスト生成）を削除。descriptionを「7段階」→「6段階」に更新。ディレクトリ構造からe2e_test_generation.mdの記述を削除
+* agent_skills/struts-to-jsf-migration/README.md: 「7ステップ」→「6ステップ」に変更。ステップ7（E2Eテスト生成）のセクション全体を削除。マイグレーションフロー図から「E2Eテスト（Playwright）」を削除。ディレクトリ構造を更新
 
 #### SPAのREADME簡素化
 * 全SPAのREADME（master/sandbox/sdd-wf/sdd-agile bookstore配下）: Java/Gradle/Payara/HSQLDBの詳細な起動手順を削除し、フロントエンド開発に集中した内容に変更。バックエンドAPIの起動方法は各プロジェクトのルートREADME.mdを参照するよう案内

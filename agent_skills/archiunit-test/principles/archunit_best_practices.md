@@ -50,9 +50,9 @@ static final ArchRule layer_dependencies_are_respected = layeredArchitecture()
 
 ### 1.3 DTOとEntityの分離
 
-**原則**: DTOとEntityは明確に分離すべき
+原則: DTOとEntityは明確に分離すべき
 
-**理由**:
+理由:
 - DTOはAPI層での入出力に使用
 - EntityはDB層での永続化に使用
 - 分離により、API変更がDB構造に影響しない
@@ -113,7 +113,7 @@ static final ArchRule dao_classes_should_be_suffixed =
 
 ### 3.1 JAX-RS（REST API層）
 
-**必須アノテーション**:
+必須アノテーション:
 - `@Path` - エンドポイントのパス定義
 - `@GET`, `@POST`, `@PUT`, `@DELETE` - HTTPメソッド
 - `@Produces`, `@Consumes` - メディアタイプ
@@ -130,7 +130,7 @@ static final ArchRule resource_classes_should_be_annotated_with_path =
 
 ### 3.2 CDI（依存性注入）
 
-**必須アノテーション**:
+必須アノテーション:
 - `@ApplicationScoped` - サービス層、DAO層
 - `@Inject` - 依存性注入
 
@@ -147,7 +147,7 @@ static final ArchRule service_classes_should_be_annotated_with_application_scope
 
 ### 3.3 JPA（Entity層）
 
-**必須アノテーション**:
+必須アノテーション:
 - `@Entity` - エンティティクラス
 - `@Table` - テーブルマッピング
 - `@Id` - 主キー
@@ -299,21 +299,21 @@ ArchiUnitテストは通常のJUnitテストと同様に実行されるため、
 
 ### 7.1 ルール定義
 
-- **明確なエラーメッセージ**: `because()` メソッドでルールの意図を明示
-- **適切なグループ化**: 関連するルールは同じテストクラスにまとめる
-- **段階的な導入**: 既存プロジェクトには段階的にルールを追加
+- 明確なエラーメッセージ: `because()` メソッドでルールの意図を明示
+- 適切なグループ化: 関連するルールは同じテストクラスにまとめる
+- 段階的な導入: 既存プロジェクトには段階的にルールを追加
 
 ### 7.2 パフォーマンス
 
-- **クラス読み込みの最適化**: `@AnalyzeClasses` でスキャン範囲を限定
-- **キャッシュの活用**: ArchiUnitは自動的にクラス情報をキャッシュ
-- **並列実行**: JUnit 5の並列実行機能を活用
+- クラス読み込みの最適化: `@AnalyzeClasses` でスキャン範囲を限定
+- キャッシュの活用: ArchiUnitは自動的にクラス情報をキャッシュ
+- 並列実行: JUnit 5の並列実行機能を活用
 
 ### 7.3 保守性
 
-- **ドキュメント化**: 各ルールの意図をコメントで記述
-- **テストの独立性**: 各テストは独立して実行できるように
-- **継続的な改善**: プロジェクトの成長に合わせてルールを見直し
+- ドキュメント化: 各ルールの意図をコメントで記述
+- テストの独立性: 各テストは独立して実行できるように
+- 継続的な改善: プロジェクトの成長に合わせてルールを見直し
 
 ---
 
@@ -321,9 +321,9 @@ ArchiUnitテストは通常のJUnitテストと同様に実行されるため、
 
 ### 8.1 テストが遅い
 
-**原因**: スキャン範囲が広すぎる
+原因: スキャン範囲が広すぎる
 
-**解決策**:
+解決策:
 ```java
 @AnalyzeClasses(packages = "pro.kensait.berrybooks", 
                 importOptions = {ImportOption.DoNotIncludeTests.class})
@@ -331,9 +331,9 @@ ArchiUnitテストは通常のJUnitテストと同様に実行されるため、
 
 ### 8.2 誤検知
 
-**原因**: ルールが厳しすぎる、または不適切
+原因: ルールが厳しすぎる、または不適切
 
-**解決策**: 特定のクラスを除外
+解決策: 特定のクラスを除外
 ```java
 @ArchTest
 static final ArchRule layer_dependencies = layeredArchitecture()
@@ -345,7 +345,7 @@ static final ArchRule layer_dependencies = layeredArchitecture()
 
 ### 8.3 既存プロジェクトへの導入
 
-**段階的導入**:
+段階的導入:
 1. まず、命名規則から検証開始
 2. 次に、アノテーションルールを追加
 3. 最後に、レイヤー依存関係ルールを追加
@@ -385,9 +385,9 @@ static final ArchRule layer_dependencies = layeredArchitecture()
 
 ArchiUnitを活用することで、以下のメリットが得られます：
 
-1. **アーキテクチャの自動検証**: コードレビューの負担軽減
-2. **継続的なアーキテクチャ改善**: CI/CDパイプラインでの自動チェック
-3. **チーム全体での規約統一**: ルールの可視化と共有
-4. **リファクタリングの安全性向上**: 意図しない依存関係の検出
+1. アーキテクチャの自動検証: コードレビューの負担軽減
+2. 継続的なアーキテクチャ改善: CI/CDパイプラインでの自動チェック
+3. チーム全体での規約統一: ルールの可視化と共有
+4. リファクタリングの安全性向上: 意図しない依存関係の検出
 
 プロジェクトのアーキテクチャに合わせて、適切なルールを定義し、継続的に改善していくことが重要です。

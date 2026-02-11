@@ -23,11 +23,11 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 このインストラクションは、アジャイル版のSPECに基づき結合テスト（Integration Test）を生成するためのものである。
 
 重要な方針
-* **テストフレームワーク: JUnit 5 + Weld SE（CDIコンテナ）**
+* テストフレームワーク: JUnit 5 + Weld SE（CDIコンテナ）
 * テスト対象: usecases/{名}/behaviors.md のシナリオ（Gherkin記法）。common 用の振る舞いが common/behaviors.md 等で定義されていればそれも参照する
 * Service層以下（Service + DAO + Entity）の実際の連携をテストする。外部APIは WireMock でスタブ化
 * アプリケーションサーバーは不要（Weld SE で CDI コンテナを起動）
-* **既存テストの保護**: 既存の JUnit + Weld テストコードは削除せず、差分を反映する
+* 既存テストの保護: 既存の JUnit + Weld テストコードは削除せず、差分を反映する
 
 ---
 
@@ -51,17 +51,17 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 * BaseIntegrationTest を継承（Weld SE によるCDIコンテナ起動、EntityManager管理）
 * @Tag("integration") を付与
 * Service層以下を実装で動かし、実際のDB（メモリDB）を使用する
-* **DBUnit（必須）**: テストデータの投入・検証に DBUnit を使用する
+* DBUnit（必須）: テストデータの投入・検証に DBUnit を使用する
 * 外部API呼び出しは WireMock でスタブ化する（external_interface.md に従う）
 * テストメソッドは @Test アノテーションで実装
 
-**DBUnitの使用目的:**
+DBUnitの使用目的:
 * テストデータの外部ファイル管理（XML/CSV形式）
 * データベースの初期状態の再現性確保
 * テスト実行前のクリーンアップとセットアップの自動化
 * テスト実行後のデータベース状態の検証
 
-**例:**
+例:
 ```java
 @Tag("integration")
 class OrderServiceIntegrationTest extends BaseIntegrationTest {
@@ -109,7 +109,7 @@ class OrderServiceIntegrationTest extends BaseIntegrationTest {
 
 テストデータは XML または CSV 形式で `src/test/resources/datasets` 配下に配置する:
 
-**ディレクトリ構造例:**
+ディレクトリ構造例:
 ```
 src/test/resources/datasets/
   ├── orders/
@@ -122,7 +122,7 @@ src/test/resources/datasets/
       └── base-data.xml
 ```
 
-**XML形式（FlatXmlDataSet）:**
+XML形式（FlatXmlDataSet）:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>
@@ -138,7 +138,7 @@ src/test/resources/datasets/
 </dataset>
 ```
 
-**CSV形式（各テーブル1ファイル）:**
+CSV形式（各テーブル1ファイル）:
 ```csv
 CUSTOMER_ID,EMAIL,NAME
 1,test@example.com,Test User
@@ -266,7 +266,7 @@ public abstract class BaseIntegrationTest {
 
 ### 3.4 DBUnitを使用したテストケースの実装パターン
 
-**パターン1: 初期データ投入 + DB状態検証**
+パターン1: 初期データ投入 + DB状態検証
 ```java
 @Test
 void testCreateOrder_Success() throws Exception {
@@ -292,7 +292,7 @@ void testCreateOrder_Success() throws Exception {
 }
 ```
 
-**パターン2: 期待データセットとの比較**
+パターン2: 期待データセットとの比較
 ```java
 @Test
 void testUpdateOrder_Success() throws Exception {
@@ -310,7 +310,7 @@ void testUpdateOrder_Success() throws Exception {
 }
 ```
 
-**パターン3: 複数データセットの組み合わせ**
+パターン3: 複数データセットの組み合わせ
 ```java
 @Test
 void testComplexScenario() throws Exception {
@@ -324,28 +324,28 @@ void testComplexScenario() throws Exception {
 
 ### 3.5 DBUnitのベストプラクティス
 
-1. **データセットの粒度**
+1. データセットの粒度
    * 1テストケース = 1データセット（または複数の組み合わせ）
    * 共通マスターデータは別ファイルに分離
    * シナリオ固有データは専用ファイルに配置
 
-2. **カラム名とテーブル名**
+2. カラム名とテーブル名
    * データベースの実際のカラム名・テーブル名を使用（大文字/小文字を統一）
    * `setColumnSensing(true)` で未定義カラムを自動検出
 
-3. **NULL値の扱い**
+3. NULL値の扱い
    * XMLでNULL値を表現: `<TABLE COLUMN="[null]" />`
    * 空文字列とNULLの区別に注意
 
-4. **日付・時刻の扱い**
+4. 日付・時刻の扱い
    * ISO 8601形式で記述: `2024-01-01 12:00:00`
    * タイムスタンプは固定値を使用（再現性確保）
 
-5. **外部キー制約**
+5. 外部キー制約
    * 親テーブル → 子テーブルの順でデータ投入
    * CASCADE設定を考慮したデータセット設計
 
-6. **テストの独立性**
+6. テストの独立性
    * 各テストで CLEAN_INSERT を使用（既存データをクリア）
    * @AfterEach でトランザクションロールバック
 

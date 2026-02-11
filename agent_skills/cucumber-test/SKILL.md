@@ -26,7 +26,7 @@ AIが自動で以下を実行
 3. Gherkin形式の.featureファイルを生成
 4. behaviors.mdと同じディレクトリに保存
 
-**特徴**: 既存のbehaviors.md（振る舞い仕様書）から、Cucumber用の.featureファイルを自動生成します。
+特徴: 既存のbehaviors.md（振る舞い仕様書）から、Cucumber用の.featureファイルを自動生成します。
 
 ### ステップ2: Cucumberテストコード生成
 
@@ -49,7 +49,7 @@ AIが自動で以下を実行
 4. テストコンテキスト管理クラスの生成
 5. README（テスト実行方法）の生成
 
-**特徴**: Gherkin形式のFeatureファイルから、JUnit 5 + Weld SEを使用した結合テストコードを自動生成します。
+特徴: Gherkin形式のFeatureファイルから、JUnit 5 + Weld SEを使用した結合テストコードを自動生成します。
 
 ---
 
@@ -106,7 +106,7 @@ AIが自動で実行:
 
 ### 結合テストの位置づけ
 
-Cucumberテストは**結合テスト**（Integration Test）として実装します：
+Cucumberテストは結合テスト（Integration Test）として実装します：
 
 ```
 単体テスト（Unit Test）- Mockitoでモック化

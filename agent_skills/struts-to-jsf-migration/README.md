@@ -32,9 +32,9 @@ JSFは画面中心のサーバーサイドMVCフレームワークです。設�
 
 ### 画面グループレベル（basic_design/{screen_group}/）
 
-* **粒度**: 粗い（複数画面をまとめる）
-* **例**: person_management（Person一覧、入力、確認の3画面グループ）
-* **内容**:
+* 粒度: 粗い（複数画面をまとめる）
+* 例: person_management（Person一覧、入力、確認の3画面グループ）
+* 内容:
   - 画面一覧
   - 画面遷移図（一覧 → 入力 → 確認 → 一覧）
   - グループ内全画面の設計
@@ -42,9 +42,9 @@ JSFは画面中心のサーバーサイドMVCフレームワークです。設�
 
 ### 画面単位レベル（detailed_design/FUNC_XXX/）
 
-* **粒度**: 細かい（1画面）
-* **例**: FUNC_001_PersonList（Person一覧画面のみ）
-* **内容**:
+* 粒度: 細かい（1画面）
+* 例: FUNC_001_PersonList（Person一覧画面のみ）
+* 内容:
   - Managed Bean設計
   - アクションメソッド設計
   - 単体テスト（1画面のみ）
@@ -79,17 +79,17 @@ JSFは画面中心のサーバーサイドMVCフレームワークです。設�
 
 生成されるSPEC:
 
-**共通設計（basic_design/common/）:**
+共通設計（basic_design/common/）:
 * `architecture_design.md` - 技術スタック、レイヤー構成
 * `data_model.md` - エンティティ、テーブル定義
 * `external_interface.md` - 外部システム連携
 
-**画面グループ単位（basic_design/{screen_group}/）:**
+画面グループ単位（basic_design/{screen_group}/）:
 * `functional_design.md` - 画面一覧、画面遷移図
 * `screen_design.md` - 画面レイアウト、入力項目
 * `behaviors.md` - 画面グループの振る舞い（E2Eテスト用、Gherkin記法）
 
-**システム要件（requirements/）:**
+システム要件（requirements/）:
 * `requirements.md` - システムの目的、機能要件
 * `behaviors.md` - 要件レベルの振る舞い
 

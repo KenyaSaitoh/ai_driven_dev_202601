@@ -108,7 +108,7 @@ DAO層（データアクセス）
 Entity層（JPA エンティティ）
 ```
 
-**検証内容**:
+検証内容:
 - Resource層はService層とDTOにのみ依存
 - Service層はDAO層、Entity、DTOに依存可能
 - DAO層はEntityにのみ依存
@@ -117,40 +117,40 @@ Entity層（JPA エンティティ）
 
 ### 2. 命名規則
 
-**クラス名のサフィックス**:
+クラス名のサフィックス:
 - REST APIクラス: `*Resource`
 - サービスクラス: `*Service` または `*ServiceIF`
 - DAOクラス: `*Dao`
 - Entityクラス: パッケージ `*.entity` に配置
 - DTOクラス: パッケージ `*.dto` に配置、サフィックス `*TO`、`*Request`、`*Response` 等
 
-**パッケージ命名**:
+パッケージ命名:
 - 小文字のみ使用
 - ドメイン駆動設計に準拠
 
 ### 3. アノテーションルール
 
-**JAX-RS（REST API層）**:
+JAX-RS（REST API層）:
 - `@Path` - Resource クラスに付与
 - `@GET`, `@POST`, `@PUT`, `@DELETE` - HTTPメソッド
 - `@Produces`, `@Consumes` - メディアタイプ
 
-**CDI（依存性注入）**:
+CDI（依存性注入）:
 - `@ApplicationScoped`, `@RequestScoped` - スコープ定義
 - `@Inject` - 依存性注入
 
-**JPA（Entity層）**:
+JPA（Entity層）:
 - `@Entity` - Entityクラスに付与
 - `@Table` - テーブルマッピング
 - `@Id` - 主キー
 
-**Bean Validation**:
+Bean Validation:
 - `@Valid` - バリデーション有効化
 - `@NotNull`, `@NotBlank`, `@Email` 等 - 制約
 
 ### 4. パッケージ構造
 
-**標準パッケージ構造**:
+標準パッケージ構造:
 ```
 {package_root}
 ├── api/              # REST APIエンドポイント（@Path）
@@ -165,7 +165,7 @@ Entity層（JPA エンティティ）
 └── util/             # ユーティリティクラス
 ```
 
-**検証内容**:
+検証内容:
 - Entity層からAPI層への依存禁止
 - DTO層からEntity層への依存禁止
 - パッケージ循環依存の検出
@@ -312,32 +312,32 @@ CI/CDパイプラインに組み込み、すべてのコミットでアーキテ
 
 ### テストが失敗する場合
 
-**症状**: レイヤー依存関係の違反が検出される
+症状: レイヤー依存関係の違反が検出される
 
-**原因**: 不適切な依存関係が存在する
+原因: 不適切な依存関係が存在する
 
-**解決策**: 
+解決策: 
 1. 違反箇所をログから特定
 2. 依存関係を修正
 3. または、ルールを調整
 
 ### パッケージ名が異なる場合
 
-**症状**: クラスが見つからない
+症状: クラスが見つからない
 
-**原因**: パッケージ構造が想定と異なる
+原因: パッケージ構造が想定と異なる
 
-**解決策**: 
+解決策: 
 1. `@AnalyzeClasses` のパッケージ名を修正
 2. レイヤー定義のパッケージパターンを修正
 
 ### アノテーションが見つからない場合
 
-**症状**: アノテーションルールが失敗する
+症状: アノテーションルールが失敗する
 
-**原因**: Jakarta EE 10の依存関係が不足
+原因: Jakarta EE 10の依存関係が不足
 
-**解決策**: 
+解決策: 
 build.gradleに依存関係を追加
 ```gradle
 compileOnly "jakarta.platform:jakarta.jakartaee-api:10.0.0"

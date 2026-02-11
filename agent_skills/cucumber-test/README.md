@@ -392,27 +392,27 @@ public class Hooks {
 
 ### 1. Gherkinシナリオの記述
 
-- **ビジネス言語で記述**: 技術的な詳細は避ける
-- **Given-When-Then**: 前提条件、アクション、期待結果を明確に
-- **データテーブル**: 複数のデータを扱う場合は表形式で
+- ビジネス言語で記述: 技術的な詳細は避ける
+- Given-When-Then: 前提条件、アクション、期待結果を明確に
+- データテーブル: 複数のデータを扱う場合は表形式で
 
 ### 2. Step Definitionsの実装
 
-- **再利用可能なステップ**: 共通ステップは`CommonSteps`に集約
-- **パラメータ化**: 正規表現でパラメータを受け取る
-- **アサーション**: JUnit Assertionsを使用
+- 再利用可能なステップ: 共通ステップは`CommonSteps`に集約
+- パラメータ化: 正規表現でパラメータを受け取る
+- アサーション: JUnit Assertionsを使用
 
 ### 3. CDI Beanのテスト
 
-- **Weld SE**: CDIコンテナを起動
-- **依存性注入**: `@Inject`でサービス層・DAO層を注入
-- **スコープ**: `@ApplicationScoped`でシングルトン
+- Weld SE: CDIコンテナを起動
+- 依存性注入: `@Inject`でサービス層・DAO層を注入
+- スコープ: `@ApplicationScoped`でシングルトン
 
 ### 4. データベーステスト
 
-- **トランザクション管理**: 各シナリオ後にロールバック
-- **テストデータ**: Featureファイルで定義
-- **独立性**: 各シナリオは独立して実行可能
+- トランザクション管理: 各シナリオ後にロールバック
+- テストデータ: Featureファイルで定義
+- 独立性: 各シナリオは独立して実行可能
 
 詳細は [Cucumberベストプラクティス](principles/cucumber_best_practices.md) を参照してください。
 
@@ -422,31 +422,31 @@ public class Hooks {
 
 ### CDI Beanが見つからない
 
-**症状**: `UnsatisfiedResolutionException` エラー
+症状: `UnsatisfiedResolutionException` エラー
 
-**原因**: beans.xmlが不足またはCDI Beanが正しくスキャンされていない
+原因: beans.xmlが不足またはCDI Beanが正しくスキャンされていない
 
-**解決策**: 
+解決策: 
 - `src/test/resources/META-INF/beans.xml` を作成
 - `@ApplicationScoped` アノテーションを確認
 
 ### トランザクションがロールバックされない
 
-**症状**: テストデータがデータベースに残る
+症状: テストデータがデータベースに残る
 
-**原因**: トランザクション管理が不適切
+原因: トランザクション管理が不適切
 
-**解決策**: 
+解決策: 
 - `@Before`と`@After`フックでトランザクションを管理
 - `em.getTransaction().rollback()` を確実に呼び出す
 
 ### Featureファイルが見つからない
 
-**症状**: `No features found` エラー
+症状: `No features found` エラー
 
-**原因**: Featureファイルのパスが間違っている
+原因: Featureファイルのパスが間違っている
 
-**解決策**: 
+解決策: 
 - `src/test/resources/features/` にFeatureファイルを配置
 - `@SelectClasspathResource("features")` を確認
 

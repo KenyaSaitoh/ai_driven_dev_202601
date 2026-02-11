@@ -8,7 +8,7 @@
 
 記法: シナリオは Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）。principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること。
 
-**DBUnit対応:**
+DBUnit対応:
 * Given句: DB初期状態を明記（テーブル名、件数、データ、対応データセット）
 * Then句: DB更新後の期待状態を明記（テーブル名、件数、差分、データ、対応データセット）
 * 検証条件: 主キー、外部キー、CASCADE、トランザクションロールバックを明記
@@ -19,7 +19,7 @@
 
 本文書は、[DOMAIN_NAME]ドメインの基本設計を外形的に捉えた振る舞い仕様書である。結合テスト用のシナリオを記述し、Service層以下（Service + DAO + Entity + DB）の受入基準を定義する。
 
-**DBUnitによるテストデータ管理:**
+DBUnitによるテストデータ管理:
 * テストデータは XML/CSV 形式で外部管理（`src/test/resources/datasets/[DOMAIN_NAME]/`配下）
 * Given句でDB初期状態を明記、対応するXMLデータセットを参照
 * Then句でDB更新後の期待状態を明記、対応するXMLデータセットを参照
@@ -83,15 +83,15 @@ Scenario: [シナリオタイトル]
   And [外部APIへの期待される呼び出しを記述]
 ```
 
-**記述ルール:**
+記述ルール:
 
-**Given句（DB初期状態）:**
+Given句（DB初期状態）:
 * テーブル名を大文字で明記（例: ORDER_TRAN）
 * 件数を明記（例: 0件、1件、2件）
 * データセットファイルパスを明記（例: `/datasets/orders/initial-create.xml`）
 * データをテーブル形式で記述（NULL値は `[null]`）
 
-**Then句（DB期待状態）:**
+Then句（DB期待状態）:
 * テーブル名を大文字で明記
 * 件数と差分を明記（例: 1件（+1件追加）、0件（-2件削除）、1件（変更なし））
 * データセットファイルパスを明記（例: `/datasets/orders/expected-created.xml`）
@@ -154,7 +154,7 @@ Scenario: [シナリオタイトル]
       - READ操作のため、DBは更新されない
 ```
 
-**CREATE操作の例:**
+CREATE操作の例:
 ```gherkin
 Scenario: [データ作成シナリオ]
   Given DBのテーブルは空である:
@@ -173,7 +173,7 @@ Scenario: [データ作成シナリオ]
       - 外部キー制約を満たす
 ```
 
-**UPDATE操作の例:**
+UPDATE操作の例:
 ```gherkin
 Scenario: [データ更新シナリオ]
   Given DBに以下のデータが存在する:
@@ -198,7 +198,7 @@ Scenario: [データ更新シナリオ]
       - その他のカラムは変更されない
 ```
 
-**DELETE操作の例（CASCADE削除を含む）:**
+DELETE操作の例（CASCADE削除を含む）:
 ```gherkin
 Scenario: [データ削除シナリオ - CASCADE削除]
   Given DBに親データが存在する:
@@ -361,14 +361,14 @@ Scenario: [外部APIエラー時のロールバック]
 | [シナリオ2] | `/datasets/[DOMAIN_NAME]/initial-[scenario2].xml` | `/datasets/[DOMAIN_NAME]/expected-[scenario2].xml` | TABLE1 |
 | [エラーケース] | `/datasets/[DOMAIN_NAME]/initial-error.xml` | （変更なし・ロールバック） | TABLE1<br>TABLE2 |
 
-**データセット配置ルール:**
+データセット配置ルール:
 * ディレクトリ: `src/test/resources/datasets/[DOMAIN_NAME]/`
 * 命名規則:
   * 初期データ: `initial-{scenario-name}.xml`
   * 期待データ: `expected-{scenario-name}.xml`
   * 共通マスター: `common-master-data.xml`
 
-**データセット記述例（XML）:**
+データセット記述例（XML）:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>

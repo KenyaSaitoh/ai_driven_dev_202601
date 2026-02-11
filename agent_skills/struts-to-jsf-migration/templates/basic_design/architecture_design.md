@@ -57,13 +57,13 @@
 
 ### 3.1 アーキテクチャパターン
 
-* **レイヤードアーキテクチャ**
+* レイヤードアーキテクチャ
   * プレゼンテーション層（Managed Bean + XHTML）
   * ビジネスロジック層（Service）
   * データアクセス層（Dao）
   * 永続化層（Entity + JPA）
 
-* **サーバーサイドMVC**
+* サーバーサイドMVC
   * Model: Managed Bean（@Named, @ViewScoped）+ Entity（JPA）
   * View: Facelets XHTML
   * Controller: Managed Bean のアクションメソッド
@@ -72,14 +72,14 @@
 
 #### 3.2.1 プレゼンテーション層
 
-* **Managed Bean** (`@Named`, `@ViewScoped`)
+* Managed Bean (`@Named`, `@ViewScoped`)
   * 画面の状態管理（プロパティ）
   * ユーザー操作の処理（アクションメソッド）
   * Service層の呼び出し
   * 画面遷移の制御
   * バリデーションメッセージの表示
 
-* **XHTML** (Facelets)
+* XHTML (Facelets)
   * UI構造の定義（h:form, h:dataTable等）
   * Managed Beanとのデータバインディング（EL式: #{bean.property}）
   * イベントハンドリング（action="#{bean.method()}"）
@@ -87,7 +87,7 @@
 
 #### 3.2.2 ビジネスロジック層
 
-* **Service** (`@ApplicationScoped`)
+* Service (`@ApplicationScoped`)
   * ビジネスロジックの実装
   * トランザクション境界の管理（@Transactional）
   * 複数Daoの協調制御
@@ -95,14 +95,14 @@
 
 #### 3.2.3 データアクセス層
 
-* **Dao** (`@ApplicationScoped`)
+* Dao (`@ApplicationScoped`)
   * データベースCRUD操作
   * JPQLクエリの実行
   * EntityManagerの管理
 
 #### 3.2.4 永続化層
 
-* **Entity** (JPA)
+* Entity (JPA)
   * データベーステーブルとのマッピング（@Entity, @Table）
   * リレーションシップの定義（@OneToMany, @ManyToOne等）
   * バリデーションルール（@NotNull, @Size等）
@@ -140,12 +140,12 @@
 
 ### 4.2 命名規則
 
-* **Managed Bean**: `[画面名]Bean` (例: PersonListBean, PersonInputBean)
-* **Service**: `[エンティティ名]Service` (例: PersonService, OrderService)
-* **Dao**: `[エンティティ名]Dao` (例: PersonDao, OrderDao)
-* **Entity**: `[エンティティ名]` (例: Person, Order)
-* **DTO**: `[エンティティ名]Dto` or `[Request/Response]` (例: PersonDto, CreatePersonRequest)
-* **XHTML**: `[小文字画面名].xhtml` (例: personList.xhtml, personInput.xhtml)
+* Managed Bean: `[画面名]Bean` (例: PersonListBean, PersonInputBean)
+* Service: `[エンティティ名]Service` (例: PersonService, OrderService)
+* Dao: `[エンティティ名]Dao` (例: PersonDao, OrderDao)
+* Entity: `[エンティティ名]` (例: Person, Order)
+* DTO: `[エンティティ名]Dto` or `[Request/Response]` (例: PersonDto, CreatePersonRequest)
+* XHTML: `[小文字画面名].xhtml` (例: personList.xhtml, personInput.xhtml)
 
 ---
 
@@ -153,7 +153,7 @@
 
 ### 5.1 トランザクション境界
 
-* トランザクション境界: **Service層**
+* トランザクション境界: Service層
 * アノテーション: `@Transactional`
 * 伝播レベル: `REQUIRED` (デフォルト)
 * 分離レベル: `READ_COMMITTED` (デフォルト)

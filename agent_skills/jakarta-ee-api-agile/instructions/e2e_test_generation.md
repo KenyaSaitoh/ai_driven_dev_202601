@@ -23,14 +23,14 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 このインストラクションは、アジャイル版のSPECに基づきE2Eテスト（End-to-End Test）を生成するためのものである。
 
 重要な方針
-* **テストフレームワーク: JUnit 5 + REST Assured**
-* **外部APIモック: Wiremock（必須）** - 外部マイクロサービスをスタブ化
-* **データベーステスト: DBUnit（必須）** - テストデータのセットアップと検証
+* テストフレームワーク: JUnit 5 + REST Assured
+* 外部APIモック: Wiremock（必須） - 外部マイクロサービスをスタブ化
+* データベーステスト: DBUnit（必須） - テストデータのセットアップと検証
 * テスト対象: usecases/{名}/behaviors.md のシナリオ（Gherkin記法）。E2EとしてAPI層を含む全体フローを検証する
 * usecase_folder 未指定時: usecases/ 配下の各 behaviors.md を集約し、複数ユースケースにまたがるE2Eシナリオも生成可能とする
 * アプリケーションサーバーが起動している状態でテストを実行する
 * 実際のHTTPリクエスト/レスポンス、認証（JWT等）、DBアクセスを含む
-* **既存テストの保護**: 既存の JUnit + REST Assured テストコードは削除せず、差分を反映する
+* 既存テストの保護: 既存の JUnit + REST Assured テストコードは削除せず、差分を反映する
 
 ---
 
@@ -49,10 +49,10 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 
 ### 2.1 依存関係（すべて必須）
 
-* **REST Assured**（rest-assured, json-path, xml-path）- REST APIテスト
-* **JUnit 5** - テストフレームワーク
-* **Wiremock** (`com.github.tomakehurst:wiremock-jre8:2.35.0`) - 外部APIモック（必須）
-* **DBUnit** (`org.dbunit:dbunit:2.7.3`) - データベーステスト（必須）
+* REST Assured（rest-assured, json-path, xml-path）- REST APIテスト
+* JUnit 5 - テストフレームワーク
+* Wiremock (`com.github.tomakehurst:wiremock-jre8:2.35.0`) - 外部APIモック（必須）
+* DBUnit (`org.dbunit:dbunit:2.7.3`) - データベーステスト（必須）
 
 ### 2.2 JUnit 5 + REST Assured
 
@@ -63,7 +63,7 @@ spec_directory: "projects/sdd-agile/bookstore/berry-books-api/specs/baseline"
 * behaviors.md のシナリオを参考に、Given-When-Then の流れでテストを記述
 * 認証フロー（ログイン→トークン取得）のセットアップ、複数APIの連携、レスポンス検証、テストデータのセットアップ/クリーンアップを実装する
 
-**例:**
+例:
 ```java
 @Tag("e2e")
 class OrderUseCaseE2ETest extends BaseE2ETest {
@@ -82,7 +82,7 @@ class OrderUseCaseE2ETest extends BaseE2ETest {
 
 ### 2.3 外部APIのモック化（Wiremock - 必須）
 
-**重要**: E2Eテストでは外部API（他のマイクロサービス）を実際に呼び出すのではなく、Wiremockでスタブ化する。
+重要: E2Eテストでは外部API（他のマイクロサービス）を実際に呼び出すのではなく、Wiremockでスタブ化する。
 
 ```java
 @BeforeAll
@@ -109,7 +109,7 @@ static void teardownWiremock() {
 
 ### 2.4 テストデータの準備（DBUnit - 必須）
 
-**重要**: E2EテストではDBUnitを使用してテストデータを準備する。
+重要: E2EテストではDBUnitを使用してテストデータを準備する。
 
 ```java
 private static IDatabaseConnection connection;
@@ -161,10 +161,10 @@ E2Eテストコード生成後、以下のステップを実施する:
 
 E2Eテスト実行前に以下を確認:
 
-* **アプリケーションサーバーが起動済みであること**
+* アプリケーションサーバーが起動済みであること
   * E2Eテストは実際のHTTPリクエストを送信するため、サーバーが起動している必要がある
 
-* **テスト用データベースが利用可能であること**
+* テスト用データベースが利用可能であること
   * 本番DBは使用しない
   * テスト用DBが設定されていることを確認
 

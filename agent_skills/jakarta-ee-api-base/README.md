@@ -319,34 +319,34 @@ agent_skills/jakarta-ee-api-base/
 
 ### フォルダ構造の注意事項
 
-1. **specs/baseline/** - バージョン管理される唯一の真実の情報源
+1. specs/baseline/ - バージョン管理される唯一の真実の情報源
    * requirements/: 要件定義（所与）とE2Eテスト用振る舞い仕様
    * basic_design/: システム全体の基本設計と結合テスト用振る舞い仕様
    * detailed_design/: タスク単位の詳細設計と単体テスト用振る舞い仕様
 
-2. **振る舞い仕様書（behaviors.md）の3種類**
+2. 振る舞い仕様書（behaviors.md）の3種類
    * requirements/behaviors.md: E2Eテスト用（要件を外形的に捉えた振る舞い）
    * basic_design/behaviors.md: 結合テスト用（基本設計を外形的に捉えた振る舞い）
    * detailed_design/{target}/behaviors.md: 単体テスト用（タスク粒度内の振る舞い）
 
-3. **detailed_design/** - 詳細設計の結果
+3. detailed_design/ - 詳細設計の結果
    * ドメイン単位で詳細設計を管理
    * common/ は最優先で実装（他のドメインはcommonに依存）
 
-4. **src/main/java/** - 実装コード
+4. src/main/java/ - 実装コード
    * Jakarta EE標準のレイヤードアーキテクチャ
    * api → service → dao → entity の依存関係
 
-5. **src/test/** - テストコード（3層構造）
+5. src/test/ - テストコード（3層構造）
    * 単体テスト（@Tag("unit")）: モックを使用、コンポーネント単体をテスト。Cucumber .feature（features/unit）＋ステップ定義の場合あり
    * 結合テスト（@Tag("integration")）: Cucumber .feature（features/integration）＋ステップ定義、Weld SE、実DB、外部APIはWireMock
    * E2Eテスト（@Tag("e2e")）: Cucumber .feature（features/e2e）＋ステップ定義、REST Assured、実サーバー・実DB
 
-6. **build/reports/** - テスト・カバレッジレポート
+6. build/reports/ - テスト・カバレッジレポート
    * ステップ5で生成される分析レポート
    * Git除外対象
 
-7. **CHANGES.md** - 基本設計変更管理
+7. CHANGES.md - 基本設計変更管理
    * basic_design/CHANGES.md: アクティブな変更（未適用）
    * basic_design/changes_archive/: 適用済み変更の履歴
 
@@ -529,8 +529,8 @@ AIが自動で実行:
 AIが自動で実行:
 1. 詳細設計（detailed_design/{target_domain}/）とbehaviors.mdを読み込む
 2. 本番コード（ステップ3で生成）に対応する単体テストコードを生成
-   * **ブラックボックステスト**: behaviors.mdのGherkinシナリオから外形的な振る舞いをテスト
-   * **ホワイトボックステスト**: 境界値・エッジケース・分岐パスをカバーするテスト
+   * ブラックボックステスト: behaviors.mdのGherkinシナリオから外形的な振る舞いをテスト
+   * ホワイトボックステスト: 境界値・エッジケース・分岐パスをカバーするテスト
    * 同じドメイン内のコンポーネント間は実際の連携をテスト
    * ドメイン外の依存関係のみモック化
    * 既存テストがある場合は、削除せずに差分のみを反映する
@@ -660,8 +660,8 @@ AIが自動で実行:
 1. requirements/behaviors.md（E2Eテストシナリオ、Gherkin記法）を読み込む
 2. JUnit 5 + REST Assured + Wiremock + DBUnit を使用したE2Eテストを生成する
    * 複数機能間の連携、実際のHTTPリクエスト/レスポンス、実際のDBアクセスを含む
-   * **Wiremock（必須）**: 外部マイクロサービス（customer-hub-api等）をスタブ化
-   * **DBUnit（必須）**: テストデータ（XML）のセットアップとDB状態の検証
+   * Wiremock（必須）: 外部マイクロサービス（customer-hub-api等）をスタブ化
+   * DBUnit（必須）: テストデータ（XML）のセットアップとDB状態の検証
    * エンドツーエンドのフロー検証
    * 既存テストがある場合は、削除せずに差分のみを反映する
 3. テストデータXMLファイル（`src/test/resources/dataset/e2e-test-data.xml`）を生成
@@ -859,7 +859,7 @@ E2Eテストを生成してください
 
 E2Eテストで不具合が見つかり、注文キャンセル機能を追加する必要が発生した場合の例。
 
-**ステップ1: 基本設計SPECを更新**
+ステップ1: 基本設計SPECを更新
 
 ```bash
 # 機能設計書を編集してキャンセル機能を追加
@@ -869,7 +869,7 @@ vim specs/baseline/basic_design/functional_design.md
 vim specs/baseline/basic_design/data_model.md
 ```
 
-**ステップ2: CHANGES.mdを作成**
+ステップ2: CHANGES.mdを作成
 
 ```bash
 # テンプレートをコピー
@@ -895,20 +895,20 @@ CHANGES.mdの記載例:
 
 #### functional_design.md の変更
 ##### セクション「API一覧」
-**追加**:
+追加:
 - API_002_Order に DELETE /orders/{id} エンドポイント追加
   - リクエスト: cancel_reason（必須、VARCHAR(255)）
   - レスポンス: 200 OK または 404 Not Found
 
 #### data_model.md の変更
 ##### テーブル「ORDER_TRAN」
-**追加**:
+追加:
 | カラム名 | 型 | NULL | デフォルト | 説明 |
 |---------|-----|------|-----------|------|
 | cancel_reason | VARCHAR(255) | YES | NULL | キャンセル理由 |
 
 #### behaviors.md の変更（結合テスト用）
-**追加**:
+追加:
 - シナリオ: 注文キャンセル
   - 前提: 注文が作成済み
   - 実行: DELETE /orders/{id} with cancel_reason
@@ -925,7 +925,7 @@ E2Eテストで誤注文のキャンセル機能がないことが判明。
 - テスト: 単体テスト、結合テスト、E2Eテスト
 ```
 
-**ステップ3: 変更対応を実行**
+ステップ3: 変更対応を実行
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/basic_design_change.md
@@ -948,7 +948,7 @@ AIが自動で実行:
    - e2e_test_generation.md → E2Eテスト更新
 4. CHANGES.mdを `changes_archive/20260118_order_cancel.md` に移動
 
-**ステップ4: テスト実行**
+ステップ4: テスト実行
 
 ```bash
 # 単体テスト

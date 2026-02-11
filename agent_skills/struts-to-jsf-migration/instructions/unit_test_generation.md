@@ -29,9 +29,9 @@ target_domain: "person_management"
 このインストラクションは、本番コード（@agent_skills/struts-to-jsf-migration/instructions/code_generation.md で生成されたコード）に対する単体テストコードを生成するためのものである。
 
 重要な原則:
-* **コンテキストの分離**: 本番コード生成とは別タスクとして実行することで、コンテキストを明確に分ける
-* **ブラックボックステストとホワイトボックステストの両立**: 外形的な振る舞いの正しさと内部のカバレッジを両方確保する
-* **JSF特有の考慮事項**: Managed Bean、Service、Entityに焦点を当てる（XHTMLはE2Eテストで検証）
+* コンテキストの分離: 本番コード生成とは別タスクとして実行することで、コンテキストを明確に分ける
+* ブラックボックステストとホワイトボックステストの両立: 外形的な振る舞いの正しさと内部のカバレッジを両方確保する
+* JSF特有の考慮事項: Managed Bean、Service、Entityに焦点を当てる（XHTMLはE2Eテストで検証）
 
 ---
 
@@ -75,30 +75,30 @@ target_domain: "person_management"
 
 #### ブラックボックステスト（外形的な振る舞いの検証）
 
-* **目的**: コンポーネントの外部から見た振る舞いの正しさを検証する
-* **駆動元**: `{spec_directory}/detailed_design/{target_domain}/behaviors.md` の Gherkin シナリオ
-* **焦点**: 
+* 目的: コンポーネントの外部から見た振る舞いの正しさを検証する
+* 駆動元: `{spec_directory}/detailed_design/{target_domain}/behaviors.md` の Gherkin シナリオ
+* 焦点: 
   * 入力と出力の関係
   * ビジネスルールの遵守
   * 画面遷移の正しさ
   * エラーハンドリングの正しさ
   * バリデーションの正しさ
-* **テスト設計**:
+* テスト設計:
   * Given（前提条件）: テストデータ、モックのスタブ設定、セッション・Flashスコープの初期化
   * When（操作）: アクションメソッド呼び出し、Serviceメソッド呼び出し
   * Then（期待結果）: 戻り値（画面ID）、Bean状態、FacesMessage、副作用の検証
 
 #### ホワイトボックステスト（内部カバレッジの確保）
 
-* **目的**: コードの内部構造を理解し、すべてのパスとロジックが正しく動作することを検証する
-* **駆動元**: `{spec_directory}/detailed_design/{target_domain}/detailed_design.md` のメソッドシグネチャと実装詳細
-* **焦点**:
+* 目的: コードの内部構造を理解し、すべてのパスとロジックが正しく動作することを検証する
+* 駆動元: `{spec_directory}/detailed_design/{target_domain}/detailed_design.md` のメソッドシグネチャと実装詳細
+* 焦点:
   * コードカバレッジ（行カバレッジ、分岐カバレッジ）
   * 境界値テスト
   * バリデーションエラーケース
   * エッジケース
   * 内部状態の変化
-* **テスト設計**:
+* テスト設計:
   * 正常系テスト（期待する戻り値が返されるか）
   * 異常系テスト（例外が適切にスローされるか）
   * 境界値テスト（null、空文字列、最大値、最小値等）
@@ -131,9 +131,9 @@ target_domain: "person_management"
 
 ### 3.3 Managed Beanのテスト戦略
 
-* **基本方針**: Managed Beanは基本的にテスト対象外（カバレッジ除外推奨、E2Eテストで検証）
-* **例外**: ビジネスロジックが Managed Bean に実装されている場合はテスト対象とする
-* **重点**: Service層のテストに注力する
+* 基本方針: Managed Beanは基本的にテスト対象外（カバレッジ除外推奨、E2Eテストで検証）
+* 例外: ビジネスロジックが Managed Bean に実装されている場合はテスト対象とする
+* 重点: Service層のテストに注力する
 
 ---
 
@@ -141,9 +141,9 @@ target_domain: "person_management"
 
 ### 4.1 ブラックボックステストケースの設計
 
-`{spec_directory}/detailed_design/{target_domain}/behaviors.md` の Gherkin シナリオを参考に、**JUnit 5** の通常のテストクラスとテストメソッドを生成する。
+`{spec_directory}/detailed_design/{target_domain}/behaviors.md` の Gherkin シナリオを参考に、JUnit 5 の通常のテストクラスとテストメソッドを生成する。
 
-**Gherkin シナリオからテストメソッドへの変換**
+Gherkin シナリオからテストメソッドへの変換
 
 Gherkin記法:
 ```gherkin
@@ -191,7 +191,7 @@ void testLoadPersons_Success_FromBehavior() {
 * 境界値テスト（null、空文字列、最大値、最小値等）
 * バリデーションエラーテスト
 
-**例: 境界値テスト**
+例: 境界値テスト
 
 ```java
 @Test
@@ -429,7 +429,7 @@ class PersonBeanTest {
 
 ### 7.1 必須フレームワーク
 
-* **テストフレームワーク: JUnit 5 のみ**（Cucumberは使用しない）
+* テストフレームワーク: JUnit 5 のみ（Cucumberは使用しない）
 * モックフレームワーク: Mockito
 * アサーションライブラリ: JUnit 5 Assertions、AssertJ（オプション）
 
@@ -490,19 +490,19 @@ class PersonBeanTest {
 
 ### 9.1 Entityのテスト
 
-* **ブラックボックス**: エンティティの振る舞い（バリデーション、リレーションシップ）
-* **ホワイトボックス**: getter/setter、equals/hashCode、制約違反
+* ブラックボックス: エンティティの振る舞い（バリデーション、リレーションシップ）
+* ホワイトボックス: getter/setter、equals/hashCode、制約違反
 
 ### 9.2 Serviceのテスト（最重要）
 
-* **ブラックボックス**: ビジネスロジックの正しさ、トランザクション境界
-* **ホワイトボックス**: 例外ハンドリング、分岐パス、エッジケース
-* **DBUnitの活用（推奨）**: Service層がデータアクセス処理を含む場合、DBUnitを使用したデータ駆動テストを実装することを推奨
+* ブラックボックス: ビジネスロジックの正しさ、トランザクション境界
+* ホワイトボックス: 例外ハンドリング、分岐パス、エッジケース
+* DBUnitの活用（推奨）: Service層がデータアクセス処理を含む場合、DBUnitを使用したデータ駆動テストを実装することを推奨
   * テストデータをXML/CSV形式で外部管理
   * データベースの初期状態を明示的に定義
   * 期待するデータベース状態との比較検証
 
-**DBUnitを使用したServiceテストの例:**
+DBUnitを使用したServiceテストの例:
 ```java
 @ExtendWith(MockitoExtension.class)
 class PersonServiceTest {
@@ -616,7 +616,7 @@ class PersonServiceTest {
 }
 ```
 
-**テストデータセット例（/datasets/service/persons-findall.xml）:**
+テストデータセット例（/datasets/service/persons-findall.xml）:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>
@@ -626,7 +626,7 @@ class PersonServiceTest {
 </dataset>
 ```
 
-**テストデータセット例（/datasets/service/persons-age-range.xml）:**
+テストデータセット例（/datasets/service/persons-age-range.xml）:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>
@@ -640,12 +640,12 @@ class PersonServiceTest {
 
 ### 9.3 Managed Beanのテスト（該当する場合のみ）
 
-* **ブラックボックス**: 画面遷移の正しさ、FacesMessageの生成、Flash Scopeの使用
-* **ホワイトボックス**: バリデーションエラー、アクションメソッドの分岐
+* ブラックボックス: 画面遷移の正しさ、FacesMessageの生成、Flash Scopeの使用
+* ホワイトボックス: バリデーションエラー、アクションメソッドの分岐
 
 ### 9.4 Facelets XHTMLのテスト
 
-* **基本方針**: 単体テストの対象外（E2Eテストで検証）
+* 基本方針: 単体テストの対象外（E2Eテストで検証）
 
 ---
 

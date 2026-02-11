@@ -26,17 +26,17 @@ Jakarta EEプロジェクトのパッケージ構造を解析し、ArchiUnitに�
 
 ### ステップ1: プロジェクト構造の解析
 
-1. **プロジェクトルートの確認**
+1. プロジェクトルートの確認
    ```
    project_path が存在することを確認
    ```
 
-2. **パッケージ構造の解析**
+2. パッケージ構造の解析
    ```
    {project_path}/src/main/java/{package_rootのパス}/ 配下を解析
    ```
 
-3. **レイヤーの識別**
+3. レイヤーの識別
    
    以下のパッケージを探索し、存在するレイヤーを特定:
    - `api` または `resource` - REST APIエンドポイント層
@@ -50,7 +50,7 @@ Jakarta EEプロジェクトのパッケージ構造を解析し、ArchiUnitに�
    - `common` - 共通ユーティリティ
    - `util` - ユーティリティクラス
 
-4. **クラスの分類**
+4. クラスの分類
    
    各レイヤーのクラスを分類:
    - Resource/APIクラス（`@Path`アノテーション）
@@ -59,7 +59,7 @@ Jakarta EEプロジェクトのパッケージ構造を解析し、ArchiUnitに�
    - Entityクラス（`@Entity`アノテーション）
    - DTOクラス（サフィックス: `TO`, `Request`, `Response`等）
 
-5. **依存関係の確認**
+5. 依存関係の確認
    
    実際の依存関係を確認し、違反がないかチェック:
    - Resource → Service
@@ -69,12 +69,12 @@ Jakarta EEプロジェクトのパッケージ構造を解析し、ArchiUnitに�
 
 ### ステップ2: テスト出力ディレクトリの準備
 
-1. **出力ディレクトリの作成**
+1. 出力ディレクトリの作成
    ```
    {test_output_dir}/{package_rootのパス}/architecture/ ディレクトリを作成
    ```
 
-2. **既存テストの確認**
+2. 既存テストの確認
    ```
    既存のArchiUnitテストファイルを確認
    ```
@@ -83,11 +83,11 @@ Jakarta EEプロジェクトのパッケージ構造を解析し、ArchiUnitに�
 
 #### 3-1. LayeredArchitectureTest.java の生成
 
-**目的**: レイヤー依存関係を検証
+目的: レイヤー依存関係を検証
 
-**ファイルパス**: `{test_output_dir}/{package_rootのパス}/architecture/LayeredArchitectureTest.java`
+ファイルパス: `{test_output_dir}/{package_rootのパス}/architecture/LayeredArchitectureTest.java`
 
-**生成内容**:
+生成内容:
 
 ```java
 package {package_root}.architecture;
@@ -161,17 +161,17 @@ public class LayeredArchitectureTest {
 }
 ```
 
-**注意点**:
+注意点:
 - 存在しないレイヤーは定義から除外
 - プロジェクト固有のレイヤー構造に合わせて調整
 
 #### 3-2. NamingConventionTest.java の生成
 
-**目的**: 命名規則を検証
+目的: 命名規則を検証
 
-**ファイルパス**: `{test_output_dir}/{package_rootのパス}/architecture/NamingConventionTest.java`
+ファイルパス: `{test_output_dir}/{package_rootのパス}/architecture/NamingConventionTest.java`
 
-**生成内容**:
+生成内容:
 
 ```java
 package {package_root}.architecture;
@@ -252,17 +252,17 @@ public class NamingConventionTest {
 }
 ```
 
-**注意点**:
+注意点:
 - プロジェクト固有の命名規則に合わせて調整
 - インターフェースとクラスを区別
 
 #### 3-3. AnnotationRulesTest.java の生成
 
-**目的**: アノテーション使用ルールを検証
+目的: アノテーション使用ルールを検証
 
-**ファイルパス**: `{test_output_dir}/{package_rootのパス}/architecture/AnnotationRulesTest.java`
+ファイルパス: `{test_output_dir}/{package_rootのパス}/architecture/AnnotationRulesTest.java`
 
-**生成内容**:
+生成内容:
 
 ```java
 package {package_root}.architecture;
@@ -337,17 +337,17 @@ public class AnnotationRulesTest {
 }
 ```
 
-**注意点**:
+注意点:
 - Jakarta EE 10のアノテーションパッケージを使用
 - プロジェクト固有のアノテーション使用ルールに合わせて調整
 
 #### 3-4. PackageStructureTest.java の生成
 
-**目的**: パッケージ構造とサイクル依存を検証
+目的: パッケージ構造とサイクル依存を検証
 
-**ファイルパス**: `{test_output_dir}/{package_rootのパス}/architecture/PackageStructureTest.java`
+ファイルパス: `{test_output_dir}/{package_rootのパス}/architecture/PackageStructureTest.java`
 
-**生成内容**:
+生成内容:
 
 ```java
 package {package_root}.architecture;
@@ -414,15 +414,15 @@ public class PackageStructureTest {
 }
 ```
 
-**注意点**:
+注意点:
 - サイクル依存のチェックは負荷が高いため、必要に応じて調整
 - プロジェクト固有の依存関係ルールを追加
 
 ### ステップ4: README_ARCHUNIT.md の生成（generate_readme=trueの場合）
 
-**ファイルパス**: `{project_path}/README_ARCHUNIT.md`
+ファイルパス: `{project_path}/README_ARCHUNIT.md`
 
-**生成内容**:
+生成内容:
 
 ```markdown
 # ArchiUnitアーキテクチャテスト
@@ -513,14 +513,14 @@ Entity層（JPA エンティティ）
 
 すべてのファイル生成が完了したら、以下を確認してユーザーに報告する:
 
-1. **生成されたファイル一覧**
+1. 生成されたファイル一覧
    - LayeredArchitectureTest.java
    - NamingConventionTest.java
    - AnnotationRulesTest.java
    - PackageStructureTest.java
    - README_ARCHUNIT.md（オプション）
 
-2. **次のステップの案内**
+2. 次のステップの案内
    ```
    以下のコマンドでテストを実行できます:
    
@@ -534,7 +534,7 @@ Entity層（JPA エンティティ）
    ./gradlew :{プロジェクト名}:test --tests "*LayeredArchitectureTest"
    ```
 
-3. **注意事項**
+3. 注意事項
    - ArchiUnit依存関係がbuild.gradleに追加されていることを確認
    - テストが失敗した場合は、アーキテクチャルールの違反を修正
    - プロジェクト固有のルールは、テストクラスに追加
@@ -545,33 +545,33 @@ Entity層（JPA エンティティ）
 
 ### 必須事項
 
-1. **遵守するベストプラクティス**
+1. 遵守するベストプラクティス
    - `@agent_skills/archiunit-test/principles/archunit_best_practices.md` を参照
    - JUnit 5との統合（`@ArchTest`アノテーション）
    - わかりやすいエラーメッセージ（`because()`メソッド）
    - 適切なルールのグループ化
 
-2. **Java型定義**
+2. Java型定義
    - 厳密な型定義を使用
    - Jakarta EE 10のアノテーションを使用
    - static finalなArchRuleフィールド
 
-3. **コメント**
+3. コメント
    - 日本語でクラス・メソッドの説明を記述
    - ルールの意図を明確に記述
    - 各テストクラスにJavadocを追加
 
-4. **コード品質**
+4. コード品質
    - 標準的なJavaコーディング規約に準拠
    - 変数名・メソッド名は英語（camelCase）
    - クラス名はPascalCase
 
 ### 任意事項
 
-1. **カスタムルールの追加**
+1. カスタムルールの追加
    - プロジェクト固有のルールは、必要に応じて追加
 
-2. **ルールの無効化**
+2. ルールの無効化
    - 特定のクラスやパッケージを除外する場合は、`.ignoreDependency()`を使用
 
 ---
@@ -618,20 +618,20 @@ Entity層（JPA エンティティ）
 
 ### 例1: Berry Books APIのアーキテクチャテスト
 
-**入力パラメータ**:
+入力パラメータ:
 ```
 project_path: projects/master/bookstore/berry-books-api
 package_root: pro.kensait.berrybooks
 ```
 
-**解析結果**:
+解析結果:
 - 発見されたレイヤー: api, service, dao, entity, dto, security, external
 - Resourceクラス: 5個
 - Serviceクラス: 4個
 - DAOクラス: 2個
 - Entityクラス: 3個
 
-**生成されるテスト**:
+生成されるテスト:
 - LayeredArchitectureTest.java - レイヤー依存関係の検証
 - NamingConventionTest.java - 命名規則の検証
 - AnnotationRulesTest.java - アノテーションルールの検証

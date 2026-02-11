@@ -455,7 +455,7 @@ static final ArchRule services_should_only_use_allowed_dependencies =
 
 このテンプレートを使用して、プロジェクトに適したArchiUnitルールを定義してください。
 
-**重要なポイント**:
+重要なポイント:
 1. プロジェクトのアーキテクチャに合わせてルールをカスタマイズ
 2. `because()` メソッドでルールの意図を明示
 3. 段階的にルールを追加（既存プロジェクトの場合）

@@ -708,10 +708,10 @@ Unit Tests (JUnit 5 + Mockito)
 * 実行前提: Gradle、JUnit 5、JaCoCoがセットアップされていること
 * テストクラス命名: `*Test.java`
 * カバレッジ除外対象:
-  * DTOクラス（`*Dto.java`、`**/dto/**`）
+  * DTOクラス（`*Dto.java`、`/dto/`）
   * Recordクラス（`*Record.java`）
-  * Managed Bean（`*Bean.java`、**/bean/**）— UI層のため除外推奨
-  * 自動生成コード（`**/generated/**`）
+  * Managed Bean（`*Bean.java`、/bean/）— UI層のため除外推奨
+  * 自動生成コード（`/generated/`）
   * 設定クラス（オプション: `*Config.java`）
 * 除外設定は`build.gradle`の`jacocoTestReport`で行う
 

@@ -28,17 +28,17 @@ Jakarta EEプロジェクトのビジネス要件を分析し、Cucumber BDD（�
 
 ### ステップ1: プロジェクト構造の解析
 
-1. **プロジェクトルートの確認**
+1. プロジェクトルートの確認
    ```
    project_path が存在することを確認
    ```
 
-2. **ビジネスロジックの解析**
+2. ビジネスロジックの解析
    ```
    {project_path}/src/main/java/{package_rootのパス}/ 配下を解析
    ```
 
-3. **主要機能の識別**
+3. 主要機能の識別
    
    以下のパッケージを探索し、ビジネス機能を特定:
    - `service` - ビジネスロジック層（テスト対象）
@@ -46,7 +46,7 @@ Jakarta EEプロジェクトのビジネス要件を分析し、Cucumber BDD（�
    - `entity` - エンティティ
    - `api` - REST APIエンドポイント
 
-4. **既存Featureファイルの確認**
+4. 既存Featureファイルの確認
    
    `feature_file`パラメータが指定されている場合、既存のFeatureファイルを読み込む。
    指定されていない場合は、ビジネスロジックから自動生成する。
@@ -55,12 +55,12 @@ Jakarta EEプロジェクトのビジネス要件を分析し、Cucumber BDD（�
 
 #### 2-1. 既存Featureファイルの解析（feature_file指定時）
 
-1. **Featureファイルを読み込む**
+1. Featureファイルを読み込む
    ```
    feature_file のパスからGherkinファイルを読み込む
    ```
 
-2. **シナリオを抽出**
+2. シナリオを抽出
    - 機能名（Feature）
    - 背景（Background）
    - シナリオ（Scenario）
@@ -69,7 +69,7 @@ Jakarta EEプロジェクトのビジネス要件を分析し、Cucumber BDD（�
 
 #### 2-2. Featureファイルの自動生成（feature_file未指定時）
 
-1. **ビジネス機能の分析**
+1. ビジネス機能の分析
    
    サービス層のメソッドを分析し、主要なビジネス機能を特定:
    - 注文管理（OrderService）
@@ -77,7 +77,7 @@ Jakarta EEプロジェクトのビジネス要件を分析し、Cucumber BDD（�
    - 在庫管理（StockService）
    - 書籍検索（BookService）
 
-2. **Gherkinシナリオの生成**
+2. Gherkinシナリオの生成
    
    各ビジネス機能に対してGherkinシナリオを生成:
    
@@ -100,7 +100,7 @@ Jakarta EEプロジェクトのビジネス要件を分析し、Cucumber BDD（�
        ならば {エラー処理の確認}
    ```
 
-3. **Featureファイルの命名**
+3. Featureファイルの命名
    
    機能名に基づいてファイル名を決定:
    - 注文管理 → `order_management.feature`
@@ -109,14 +109,14 @@ Jakarta EEプロジェクトのビジネス要件を分析し、Cucumber BDD（�
 
 ### ステップ3: 出力ディレクトリの準備
 
-1. **テストディレクトリの作成**
+1. テストディレクトリの作成
    ```
    {test_output_dir}/{package_rootのパス}/cucumber/
    {test_output_dir}/{package_rootのパス}/cucumber/steps/
    {test_output_dir}/{package_rootのパス}/cucumber/support/
    ```
 
-2. **Featureディレクトリの作成**
+2. Featureディレクトリの作成
    ```
    {features_output_dir}/
    ```
@@ -125,9 +125,9 @@ Jakarta EEプロジェクトのビジネス要件を分析し、Cucumber BDD（�
 
 #### 4-1. Step Definitionsクラスの構造
 
-**ファイルパス**: `{test_output_dir}/{package_rootのパス}/cucumber/steps/{Feature名}Steps.java`
+ファイルパス: `{test_output_dir}/{package_rootのパス}/cucumber/steps/{Feature名}Steps.java`
 
-**生成内容**:
+生成内容:
 
 ```java
 package {package_root}.cucumber.steps;
@@ -186,7 +186,7 @@ public class {Feature名}Steps {
 }
 ```
 
-**注意点**:
+注意点:
 - Gherkinステップのパターンは正規表現で定義
 - パラメータは`{int}`, `{string}`, `{double}`等で受け取る
 - DataTableは複数行のデータを扱う際に使用
@@ -228,9 +228,9 @@ public class CommonSteps {
 
 #### 5-1. TestContextクラス
 
-**ファイルパス**: `{test_output_dir}/{package_rootのパス}/cucumber/support/TestContext.java`
+ファイルパス: `{test_output_dir}/{package_rootのパス}/cucumber/support/TestContext.java`
 
-**目的**: テストシナリオ間でデータを共有
+目的: テストシナリオ間でデータを共有
 
 ```java
 package {package_root}.cucumber.support;
@@ -312,9 +312,9 @@ public class TestContext {
 
 #### 5-2. Hooksクラス
 
-**ファイルパス**: `{test_output_dir}/{package_rootのパス}/cucumber/support/Hooks.java`
+ファイルパス: `{test_output_dir}/{package_rootのパス}/cucumber/support/Hooks.java`
 
-**目的**: テストライフサイクル管理（トランザクション管理）
+目的: テストライフサイクル管理（トランザクション管理）
 
 ```java
 package {package_root}.cucumber.support;
@@ -384,9 +384,9 @@ public class Hooks {
 
 #### 5-3. TestDatabaseクラス
 
-**ファイルパス**: `{test_output_dir}/{package_rootのパス}/cucumber/support/TestDatabase.java`
+ファイルパス: `{test_output_dir}/{package_rootのパス}/cucumber/support/TestDatabase.java`
 
-**目的**: テストデータベースの初期化
+目的: テストデータベースの初期化
 
 ```java
 package {package_root}.cucumber.support;
@@ -431,7 +431,7 @@ public class TestDatabase {
 
 ### ステップ6: テストランナークラスの生成
 
-**ファイルパス**: `{test_output_dir}/{package_rootのパス}/cucumber/CucumberIntegrationTestRunner.java`
+ファイルパス: `{test_output_dir}/{package_rootのパス}/cucumber/CucumberIntegrationTestRunner.java`
 
 ```java
 package {package_root}.cucumber;
@@ -469,7 +469,7 @@ public class CucumberIntegrationTestRunner {
 
 #### 7-1. beans.xml
 
-**ファイルパス**: `{project_path}/src/test/resources/META-INF/beans.xml`
+ファイルパス: `{project_path}/src/test/resources/META-INF/beans.xml`
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -484,7 +484,7 @@ public class CucumberIntegrationTestRunner {
 
 #### 7-2. persistence.xml（テスト用）
 
-**ファイルパス**: `{project_path}/src/test/resources/META-INF/persistence.xml`
+ファイルパス: `{project_path}/src/test/resources/META-INF/persistence.xml`
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -518,9 +518,9 @@ public class CucumberIntegrationTestRunner {
 
 ### ステップ8: README_CUCUMBER.md の生成（generate_readme=trueの場合）
 
-**ファイルパス**: `{project_path}/README_CUCUMBER.md`
+ファイルパス: `{project_path}/README_CUCUMBER.md`
 
-**生成内容**:
+生成内容:
 
 ```markdown
 # Cucumber BDD結合テスト
@@ -582,13 +582,13 @@ Weld SEを使用してCDI Beanを起動し、実際のサービス層・DAO層�
 
 すべてのファイル生成が完了したら、以下を確認してユーザーに報告する:
 
-1. **生成されたファイル一覧**
+1. 生成されたファイル一覧
    - Featureファイルの数
    - Step Definitionsクラスの数
    - テストサポートクラス
    - テストランナー
 
-2. **次のステップの案内**
+2. 次のステップの案内
    ```
    以下のコマンドでテストを実行できます:
    
@@ -599,7 +599,7 @@ Weld SEを使用してCDI Beanを起動し、実際のサービス層・DAO層�
    # build/reports/cucumber/cucumber.html を開く
    ```
 
-3. **注意事項**
+3. 注意事項
    - Cucumber依存関係がbuild.gradleに追加されていることを確認
    - テストが失敗した場合は、ビジネスロジックまたはシナリオを確認
    - Featureファイルは日本語で記述可能（`# language: ja`を追加）
@@ -610,7 +610,7 @@ Weld SEを使用してCDI Beanを起動し、実際のサービス層・DAO層�
 
 ### 必須事項
 
-1. **遵守するベストプラクティス**
+1. 遵守するベストプラクティス
    - `@agent_skills/cucumber-test/principles/cucumber_best_practices.md` を参照
    - Gherkinシナリオは自然言語で記述
    - Step Definitionsは再利用可能に
@@ -618,29 +618,29 @@ Weld SEを使用してCDI Beanを起動し、実際のサービス層・DAO層�
    - CDI統合（Weld SE）
    - トランザクション管理
 
-2. **Java型定義**
+2. Java型定義
    - 厳密な型定義を使用
    - Jakarta EE 10のアノテーションを使用
    - `@Inject`で依存性注入
 
-3. **コメント**
+3. コメント
    - 日本語でクラス・メソッドの説明を記述
    - Gherkinステップの意図を明確に記述
    - 各クラスにJavadocを追加
 
-4. **コード品質**
+4. コード品質
    - 標準的なJavaコーディング規約に準拠
    - 変数名・メソッド名は英語（camelCase）
    - クラス名はPascalCase
 
 ### 任意事項
 
-1. **タグの使用**
+1. タグの使用
    - `@integration` - 結合テストタグ
    - `@order` - 注文管理関連
    - `@customer` - 顧客管理関連
 
-2. **シナリオアウトライン**
+2. シナリオアウトライン
    - 複数のデータパターンをテストする場合に使用
 
 ---
