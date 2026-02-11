@@ -6,9 +6,9 @@
 # SPAを再起動するスクリプトです
 #
 # 使用方法:
-#   ./run-bookstore-spa.sh           # 通常の再起動
-#   ./run-bookstore-spa.sh --clean   # Viteキャッシュクリア + 再起動
-#   ./run-bookstore-spa.sh --rebuild # 完全リビルド (node_modules削除 + npm install + 再起動)
+#   ./start-bookstore-spa-only.sh           # 通常の再起動
+#   ./start-bookstore-spa-only.sh --clean   # Viteキャッシュクリア + 再起動
+#   ./start-bookstore-spa-only.sh --rebuild # 完全リビルド (node_modules削除 + npm install + 再起動)
 ###############################################################################
 
 set -e
@@ -249,8 +249,8 @@ log "  $LOG_DIR/back-office-spa_${TIMESTAMP}.log"
 log "  $LOG_DIR/customer-hub-spa_${TIMESTAMP}.log"
 echo ""
 log "${BLUE}■ スクリプトの使い方${NC}"
-log "  通常再起動:           ./run-bookstore-spa.sh"
-log "  キャッシュクリア:     ./run-bookstore-spa.sh --clean"
-log "  完全リビルド:         ./run-bookstore-spa.sh --rebuild"
+log "  通常再起動:           ./start-bookstore-spa-only.sh"
+log "  キャッシュクリア:     ./start-bookstore-spa-only.sh --clean"
+log "  完全リビルド:         ./start-bookstore-spa-only.sh --rebuild"
 echo ""
 log "=============================================="

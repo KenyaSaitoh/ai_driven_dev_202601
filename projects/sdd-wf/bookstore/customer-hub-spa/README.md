@@ -9,22 +9,13 @@ Berry Books オンライン書店の顧客管理SPA（React + TypeScript）で�
 
 ### 前提条件
 
-- Node.js 18以上
-- npm または yarn
-- バックエンドAPIが起動していること
+- **Node.js 18以上**
+- **npm または yarn**
+- **バックエンドAPI** (`customer-hub-api`) が起動していること
 
-> **Note:** ① と ② の手順は、ルートの`README.md`を参照してください。
+> **Note:** バックエンドAPIの起動方法は、各プロジェクトのルートREADME.mdを参照してください。
 
-### ③ 依存関係の確認
-
-このプロジェクトを開始する前に、以下が起動していることを確認してください：
-
-- **① HSQLDBサーバー** （`./gradlew startHsqldb`）
-- **② Payara Server** （`./gradlew startPayara`）
-- **データベース初期化済み**
-- **バックエンドAPIがデプロイ済み**
-
-### ④ プロジェクトを開始するときに1回だけ実行
+### セットアップ手順
 
 ```bash
 # 1. プロジェクトのディレクトリに移動
@@ -46,17 +37,13 @@ npm run dev
 インストール後、VSCodeを再読み込みすることをお勧めします：
 - `Ctrl+Shift+P` → "Reload Window" を実行
 
-### ⑤ プロジェクトを終了するときに1回だけ実行（CleanUp）
+### 開発サーバーの停止
 
 ```bash
 # 開発サーバーのターミナルで Ctrl+C を押す
 ```
 
-### ⑥ アプリケーション作成・更新のたびに実行
-
-開発中はファイルを保存すると**自動的に再読み込み**されます（HMR）。手動での再起動は不要です。
-
-**プロダクション用ビルド:**
+### プロダクション用ビルド
 
 ```bash
 # プロダクション用にビルド
@@ -174,67 +161,10 @@ server: {
 }
 ```
 
-## ⚙️ 起動手順（全体）
+## 📚 関連ドキュメント
 
-以下は、システム全体を起動する完全な手順です。
-
-### ① HSQLDBサーバーを起動
-
-```bash
-# プロジェクトルートで実行
-./gradlew startHsqldb
-```
-
-### ② Payara Serverを起動
-
-```bash
-# プロジェクトルートで実行
-./gradlew startPayara
-```
-
-### ③ データベースを初期化（初回のみ）
-
-```bash
-# プロジェクトルートで実行（プロジェクトに応じて適切なコマンドを使用）
-./gradlew setupDatabase
-```
-
-### ④ バックエンドAPIをデプロイ
-
-```bash
-# プロジェクトルートで実行（プロジェクトに応じて適切なコマンドを使用）
-./gradlew deployAPI
-```
-
-### ⑤ フロントエンドを起動
-
-```bash
-# customer-hub-spaディレクトリで実行
-cd projects/master/bookstore/customer-hub-spa
-npm install  # 初回のみ
-npm run dev
-```
-
-### ⑥ ブラウザでアクセス
-
-http://localhost:3000 にアクセスして顧客一覧を確認できます。
-
-## 🛑 アプリケーションを停止する
-
-### 停止手順
-
-```bash
-# 1. フロントエンドを停止（開発サーバーのターミナルで Ctrl+C）
-
-# 2. バックエンドをアンデプロイ（プロジェクトルートで実行）
-./gradlew undeployAPI
-
-# 3. Payara Serverを停止（プロジェクトルートで実行）
-./gradlew stopPayara
-
-# 4. HSQLDBサーバーを停止（プロジェクトルートで実行）
-./gradlew stopHsqldb
-```
+- [Bookstore プロジェクト全体のREADME](../README.md) - システム全体の起動・停止手順
+- [Customer Hub API README](../customer-hub-api/README.md) - バックエンドAPIの詳細
 
 ## 📖 参考リンク
 

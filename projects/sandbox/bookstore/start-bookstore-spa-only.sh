@@ -1,21 +1,17 @@
 #!/bin/bash
 
 ###############################################################################
-# Bookstore SPA Restart Script (SDD)
+# Bookstore SPA Restart Script
 # 
 # SPAを再起動するスクリプトです
 #
 # 使用方法:
-#   ./run-bookstore-spa.sh           # 通常の再起動
-#   ./run-bookstore-spa.sh --clean   # Viteキャッシュクリア + 再起動
-#   ./run-bookstore-spa.sh --rebuild # 完全リビルド (node_modules削除 + npm install + 再起動)
+#   ./start-bookstore-spa-only.sh           # 通常の再起動
+#   ./start-bookstore-spa-only.sh --clean   # Viteキャッシュクリア + 再起動
+#   ./start-bookstore-spa-only.sh --rebuild # 完全リビルド (node_modules削除 + npm install + 再起動)
 ###############################################################################
 
 set -e
-
-# 文字エンコーディング設定（Windows環境での文字化け対策）
-export LANG=C.UTF-8
-export LC_ALL=C.UTF-8
 
 # オプション処理
 CLEAN_CACHE=false
@@ -50,8 +46,6 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../" && pwd)"
 cd "$PROJECT_ROOT"
-# 自フォルダの bookstore（sdd-agile）
-BOOKSTORE_DIR="$PROJECT_ROOT/projects/sdd-agile/bookstore"
 
 # ログディレクトリ
 LOG_DIR="$PROJECT_ROOT/logs"
@@ -76,7 +70,7 @@ log_info() {
 
 echo ""
 log "=============================================="
-log "Bookstore SPA Restart (SDD)"
+log "Bookstore SPA Restart"
 if [ "$FULL_REBUILD" = true ]; then
     log "モード: 完全リビルド (node_modules削除 + npm install)"
 elif [ "$CLEAN_CACHE" = true ]; then
@@ -145,19 +139,19 @@ if [ "$FULL_REBUILD" = true ]; then
     
     # berry-books-spa
     log_info "  -> berry-books-spa をリビルド中..."
-    cd "$BOOKSTORE_DIR/berry-books-spa"
+    cd "$PROJECT_ROOT/projects/sandbox/bookstore/berry-books-spa"
     rm -rf node_modules package-lock.json
     npm install >> "$LOG_DIR/berry-books-spa_${TIMESTAMP}.log" 2>&1
     
     # back-office-spa
     log_info "  -> back-office-spa をリビルド中..."
-    cd "$BOOKSTORE_DIR/back-office-spa"
+    cd "$PROJECT_ROOT/projects/sandbox/bookstore/back-office-spa"
     rm -rf node_modules package-lock.json
     npm install >> "$LOG_DIR/back-office-spa_${TIMESTAMP}.log" 2>&1
     
     # customer-hub-spa
     log_info "  -> customer-hub-spa をリビルド中..."
-    cd "$BOOKSTORE_DIR/customer-hub-spa"
+    cd "$PROJECT_ROOT/projects/sandbox/bookstore/customer-hub-spa"
     rm -rf node_modules package-lock.json
     npm install >> "$LOG_DIR/customer-hub-spa_${TIMESTAMP}.log" 2>&1
     
@@ -170,13 +164,13 @@ elif [ "$CLEAN_CACHE" = true ]; then
     log "STEP $STEP_NUM: Viteキャッシュをクリア..."
     
     log_info "  -> berry-books-spa のキャッシュをクリア中..."
-    rm -rf "$BOOKSTORE_DIR/berry-books-spa/node_modules/.vite"
+    rm -rf "$PROJECT_ROOT/projects/sandbox/bookstore/berry-books-spa/node_modules/.vite"
     
     log_info "  -> back-office-spa のキャッシュをクリア中..."
-    rm -rf "$BOOKSTORE_DIR/back-office-spa/node_modules/.vite"
+    rm -rf "$PROJECT_ROOT/projects/sandbox/bookstore/back-office-spa/node_modules/.vite"
     
     log_info "  -> customer-hub-spa のキャッシュをクリア中..."
-    rm -rf "$BOOKSTORE_DIR/customer-hub-spa/node_modules/.vite"
+    rm -rf "$PROJECT_ROOT/projects/sandbox/bookstore/customer-hub-spa/node_modules/.vite"
     
     log "✓ キャッシュのクリアが完了しました"
     echo ""
@@ -185,7 +179,7 @@ fi
 
 # berry-books-spa を起動
 log "STEP $STEP_NUM: berry-books-spa を起動..."
-cd "$BOOKSTORE_DIR/berry-books-spa"
+cd "$PROJECT_ROOT/projects/sandbox/bookstore/berry-books-spa"
 nohup npm run dev > "$LOG_DIR/berry-books-spa_${TIMESTAMP}.log" 2>&1 &
 BERRY_SPA_PID=$!
 log "✓ berry-books-spa が起動しました (PID: $BERRY_SPA_PID, PORT: 5173)"
@@ -194,7 +188,7 @@ STEP_NUM=$((STEP_NUM + 1))
 
 # back-office-spa を起動
 log "STEP $STEP_NUM: back-office-spa を起動..."
-cd "$BOOKSTORE_DIR/back-office-spa"
+cd "$PROJECT_ROOT/projects/sandbox/bookstore/back-office-spa"
 nohup npm run dev > "$LOG_DIR/back-office-spa_${TIMESTAMP}.log" 2>&1 &
 BACKOFFICE_SPA_PID=$!
 log "✓ back-office-spa が起動しました (PID: $BACKOFFICE_SPA_PID, PORT: 3001)"
@@ -203,7 +197,7 @@ STEP_NUM=$((STEP_NUM + 1))
 
 # customer-hub-spa を起動
 log "STEP $STEP_NUM: customer-hub-spa を起動..."
-cd "$BOOKSTORE_DIR/customer-hub-spa"
+cd "$PROJECT_ROOT/projects/sandbox/bookstore/customer-hub-spa"
 nohup npm run dev > "$LOG_DIR/customer-hub-spa_${TIMESTAMP}.log" 2>&1 &
 CUSTOMER_SPA_PID=$!
 log "✓ customer-hub-spa が起動しました (PID: $CUSTOMER_SPA_PID, PORT: 3000)"
@@ -249,8 +243,8 @@ log "  $LOG_DIR/back-office-spa_${TIMESTAMP}.log"
 log "  $LOG_DIR/customer-hub-spa_${TIMESTAMP}.log"
 echo ""
 log "${BLUE}■ スクリプトの使い方${NC}"
-log "  通常再起動:           ./run-bookstore-spa.sh"
-log "  キャッシュクリア:     ./run-bookstore-spa.sh --clean"
-log "  完全リビルド:         ./run-bookstore-spa.sh --rebuild"
+log "  通常再起動:           ./start-bookstore-spa-only.sh"
+log "  キャッシュクリア:     ./start-bookstore-spa-only.sh --clean"
+log "  完全リビルド:         ./start-bookstore-spa-only.sh --rebuild"
 echo ""
 log "=============================================="

@@ -1,5 +1,59 @@
 # Changelog
 
+## 2026/2/10
+
+### Added
+
+#### DBUnitテストフレームワークの導入
+* build.gradle: 全Javaプロジェクトのテスト依存関係に `org.dbunit:dbunit:2.7.3` を追加。データベーステストにおける初期状態の準備と期待値の検証をDBUnitで実施する前提とする
+
+#### DBUnitによるデータベーステストの組み込み（agent_skills）
+* agent_skills/jakarta-ee-api-agile/instructions/unit_test_generation.md: DaoレイヤーのテストでDBUnitを推奨。JdbcDatabaseTesterを使用したデータ駆動テストの実装例を追加
+* agent_skills/jakarta-ee-api-agile/instructions/it_generation.md: 結合テストでDBUnitを必須化。BaseIntegrationTestへのDBUnit統合（setUpAll, tearDownAll, setUp, tearDown, setupDatabaseTester, loadDataSet, getDatabaseTable, assertDatabaseState メソッド）、XMLデータセットの使用パターン、ベストプラクティスを追加
+* agent_skills/jakarta-ee-api-base/instructions/unit_test_generation.md: DaoレイヤーのテストでDBUnitを推奨（モックEntityManagerを使用したJdbcDatabaseTesterの実装例を追加）
+* agent_skills/jakarta-ee-api-base/instructions/it_generation.md: 結合テストでDBUnitを必須化。BaseIntegrationTestへのDBUnit統合、データセット管理、テストデータ準備の詳細手順を追加。参考資料にDBUnit公式リンクを追加
+* agent_skills/struts-to-jsf-migration/instructions/unit_test_generation.md: ServiceレイヤーのテストでDBUnitを推奨（データアクセスを伴う場合）
+* agent_skills/struts-to-jsf-migration/instructions/it_generation.md: 結合テストでDBUnitを必須化。BaseIntegrationTestへのDBUnit統合、データセット管理の詳細を追加
+
+### Changed
+
+#### 振る舞い仕様書テンプレートのDBUnit対応
+* agent_skills/jakarta-ee-api-base/templates/basic_design/behaviors.md: Gherkinシナリオに詳細なDB状態管理を追加。Given句で初期DB状態（テーブル名、件数、データセットパス、データ）を明記、Then句で期待DB状態（更新後のデータ、検証条件：PK自動採番、FK制約、CASCADE削除、楽観的ロックのVERSION、トランザクションのコミット/ロールバック）を明記。CREATE/UPDATE/DELETE/READ/Transactionの各パターン例、DBUnitデータセット対応表、DBUnit参考資料リンクを追加
+* agent_skills/struts-to-jsf-migration/templates/basic_design/behaviors.md: 上記と同様にDB状態管理をGherkinシナリオに追加（E2E重視の構成に適合）
+
+#### プロジェクトの振る舞い仕様書のDBUnit対応（12ファイル）
+* projects/sdd-agile/bookstore/back-office-api/specs/baseline/usecases: stocks/behaviors.md（在庫管理：READ + UPDATE + 楽観的ロック）、workflow/behaviors.md（ワークフロー管理：状態遷移 CREATED→APPLIED→APPROVED）、publisher/behaviors.md（出版社一覧：READ）、category/behaviors.md（カテゴリ一覧：READ）にDBUnit対応を追加
+* projects/sdd-agile/bookstore/berry-books-api/specs/baseline/usecases: orders/behaviors.md（注文管理：CREATE + ロールバック + 外部API連携）、auth/behaviors.md（認証管理：外部API連携のみ、DB操作なし）、books/behaviors.md（書籍管理：外部API連携のみ、DB操作なし）にDBUnit対応を追加
+* projects/sdd-wf/bookstore/back-office-api/specs/baseline/basic_design: books/behaviors.md（書籍管理：READ + リレーション）、stocks/behaviors.md（在庫管理：UPDATE + 楽観的ロック + 外部API連携）、workflows/behaviors.md（ワークフロー管理：状態遷移 + 却下）、common/behaviors.md（共通ドメイン：認証 + DAO + リレーション）にDBUnit対応を追加
+* projects/sdd-wf/bookstore/berry-books-api/specs/baseline/basic_design: books_proxy/behaviors.md（書籍API連携：外部API連携のみ、DB操作なし）にDBUnit対応を追加
+* 全振る舞い仕様書に以下を追加: Given句での初期DB状態の明記（テーブル、件数、データセットパス）、Then句での期待DB状態の明記（更新結果、検証条件）、READ操作での「DBの状態は変化しない」の明記、トランザクション制御（コミット/ロールバック）の検証、DBUnitデータセット対応表、DBUnit/WireMock参考資料リンク
+
+## 2026/2/11
+
+### Added
+
+#### Playwright E2Eテストの自動生成
+* projects/master/bookstore/berry-books-spa: Playwright E2Eテストコードを自動生成（5つのテストシナリオ、8つのPage Objectクラス、playwright.config.ts、README_PLAYWRIGHT.md）
+* テストシナリオ定義書（playwright_berry-books.md）から、セレクタの自動推論とPage Object Modelパターンによるテストコードを生成
+
+### Changed
+
+#### SPAのREADME簡素化
+* 全SPAのREADME（master/sandbox/sdd-wf/sdd-agile bookstore配下）: Java/Gradle/Payara/HSQLDBの詳細な起動手順を削除し、フロントエンド開発に集中した内容に変更。バックエンドAPIの起動方法は各プロジェクトのルートREADME.mdを参照するよう案内
+
+#### READMEの表現統一
+* projects/master/bookstore/README.md: 「研修開催につき最後に1回だけ実行」→「プロジェクトを終了するときに実行」に変更し、表現を統一
+* projects/master/bookstore/README.md: 全Gradleコマンドブロックから冗長な「# プロジェクトルートで実行」コメントを削除（84行目に明記済み）
+
+#### 起動スクリプトのログイン情報表示
+* 全プロジェクト（master / sandbox / sdd-wf / sdd-agile）の `run-bookstore-all.sh` にログイン情報セクションを追加: berry-books-spa（alice@example.com）および back-office-spa（E00001）のログイン認証情報を起動完了時にコンソールに表示
+
+#### 要件定義書のEARS記法への統合
+* projects/sdd-wf/bookstore/back-office-api/specs/baseline/requirements: requirements.mdをEARS記法（Event-driven, Unwanted behavior, Optional features, State-driven）に変換。behaviors.mdの受入基準を統合し、behaviors.mdを削除
+* projects/sdd-wf/bookstore/berry-books-api/specs/baseline/requirements: requirements.mdをEARS記法に変換。認証API、書籍API、注文API、画像APIの要件をWHEN/IF-THEN/WHERE/WHILEパターンで記述。behaviors.mdを削除
+* projects/sdd-wf/person/jsf-person/specs/baseline/requirements: requirements.mdをEARS記法に変換。PERSON一覧表示、追加、編集、削除の機能要件をEARSパターンで記述。behaviors.mdを削除
+* 全requirements.md: 機能要件ID（FR-XXX-001など）に一意識別子を付与し、トレーサビリティを確保。太字表記（**による）を削除し、プレーンテキストに統一
+
 ## 2026/2/5
 
 ### Changed

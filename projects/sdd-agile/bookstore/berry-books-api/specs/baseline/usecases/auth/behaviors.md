@@ -20,21 +20,54 @@
 
 ```gherkin
 Scenario: 正しいメール・パスワードでログインする
-  Given customer-hub-api に顧客が存在する（email="alice@gmail.com", password=BCryptハッシュ）
+  Given WireMockがcustomer-hub-apiをスタブする:
+    | Method | Path              | Response                                               |
+    | POST   | /api/auth/login   | 200 OK, {"customerId":1,"email":"alice@gmail.com"}   |
+  
+  And このAPIではDBに顧客データを保持しない:
+    検証:
+      - 顧客データは customer-hub-api（外部API）が管理
+      - berry-books-api のDBには顧客テーブルは存在しない
+  
   When POST /api/auth/login に {"email":"alice@gmail.com","password":"password123"} を送る
+  
   Then レスポンスは 200 OK
   And HttpOnly Cookie に JWT が設定される
-  And レスポンスボディに顧客情報が含まれる
+  And レスポンスボディに顧客情報が含まれる:
+    | customerId | email              |
+    | 1          | alice@gmail.com    |
+  
+  And DBの状態は変化しない:
+    検証:
+      - 認証はステートレス（JWTトークン方式）
+      - DBにセッション情報は保存しない
+      - 外部API呼び出しのみでDB更新なし
 
 Scenario: パスワードが誤っている
-  Given customer-hub-api に顧客が存在する（email="alice@gmail.com"）
+  Given WireMockがcustomer-hub-apiをスタブする:
+    | Method | Path            | Response           |
+    | POST   | /api/auth/login | 401 Unauthorized   |
+  
   When POST /api/auth/login に {"email":"alice@gmail.com","password":"wrong"} を送る
+  
   Then レスポンスは 401 Unauthorized
+  
+  And DBの状態は変化しない:
+    検証:
+      - 認証エラーのため、DB操作は行われない
 
 Scenario: 顧客が存在しない
-  Given customer-hub-api に該当顧客が存在しない
+  Given WireMockがcustomer-hub-apiをスタブする:
+    | Method | Path            | Response           |
+    | POST   | /api/auth/login | 404 Not Found      |
+  
   When POST /api/auth/login に {"email":"notfound@example.com","password":"password123"} を送る
+  
   Then レスポンスは 401 Unauthorized
+  
+  And DBの状態は変化しない:
+    検証:
+      - 顧客が存在しないため、DB操作は行われない
 ```
 
 ### Feature: ログアウト
@@ -42,30 +75,79 @@ Scenario: 顧客が存在しない
 ```gherkin
 Scenario: ログアウトで Cookie が無効化される
   Given 認証済み（JWT Cookie が設定されている）
+  
   When POST /api/auth/logout を送る
+  
   Then レスポンスは 200 OK
   And JWT Cookie が削除または無効化される
+  
+  And DBの状態は変化しない:
+    検証:
+      - ログアウトはステートレス（Cookieクリアのみ）
+      - DBにセッション情報は保存していないため、DB操作は行われない
 ```
 
 ### Feature: 新規登録
 
 ```gherkin
 Scenario: 新規顧客を登録する
-  Given メールアドレスが未登録である
-  When POST /api/auth/register に顧客情報を送る
+  Given WireMockがcustomer-hub-apiをスタブする:
+    | Method | Path               | Response                                          |
+    | POST   | /api/customers     | 201 Created, {"customerId":1,"email":"new@example.com"} |
+  
+  When POST /api/auth/register に顧客情報を送る:
+    | email           | password     | name      |
+    | new@example.com | password123  | 新規ユーザー |
+  
   Then レスポンスは 200 OK
-  And customer-hub-api に顧客が作成される
-  And レスポンスに作成された顧客情報が含まれる
+  And レスポンスに作成された顧客情報が含まれる:
+    | customerId | email           |
+    | 1          | new@example.com |
+  
+  And DBの状態は変化しない:
+    検証:
+      - 顧客データは customer-hub-api（外部API）が管理
+      - berry-books-api のDBには顧客テーブルは存在しない
+      - 外部API呼び出しのみでDB更新なし
 
 Scenario: メールアドレスが重複している
-  Given customer-hub-api に同じメールの顧客が既に存在する
-  When POST /api/auth/register にそのメールで登録する
+  Given WireMockがcustomer-hub-apiをスタブする:
+    | Method | Path           | Response        |
+    | POST   | /api/customers | 409 Conflict    |
+  
+  When POST /api/auth/register にそのメールで登録する:
+    | email              | password    |
+    | existing@example.com | password123 |
+  
   Then レスポンスは 409 Conflict
+  
+  And DBの状態は変化しない:
+    検証:
+      - メールアドレス重複のため、顧客は作成されない
+      - DB操作は行われない
 ```
 
 ---
 
-## 3. 受入基準との対応
+## 3. DBUnitデータセット対応表
+
+| シナリオ | 初期データセット | 期待データセット | 検証テーブル | 備考 |
+|---------|----------------|----------------|------------|------|
+| 正しいメール・パスワードでログインする | （なし） | （なし） | （なし） | 外部API連携のみ、DB操作なし |
+| パスワードが誤っている | （なし） | （なし） | （なし） | 外部API連携のみ、DB操作なし |
+| 顧客が存在しない | （なし） | （なし） | （なし） | 外部API連携のみ、DB操作なし |
+| ログアウト | （なし） | （なし） | （なし） | ステートレス、DB操作なし |
+| 新規顧客を登録する | （なし） | （なし） | （なし） | 外部API連携のみ、DB操作なし |
+| メールアドレスが重複している | （なし） | （なし） | （なし） | 外部API連携のみ、DB操作なし |
+
+**注意:**
+* このユースケースは外部API（customer-hub-api）連携がメインであり、berry-books-api のDBは操作しない
+* テストは WireMock によるスタブ化と、JWT/Cookieの検証が中心
+* DBUnitは使用しない（DB操作がないため）
+
+---
+
+## 4. 受入基準との対応
 
 | 受入基準 | 対応シナリオ |
 |---------|-------------|

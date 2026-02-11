@@ -62,15 +62,35 @@ Feature: 注文履歴取得
 
   Scenario: 注文履歴を取得
     Given DBに以下の注文が存在する:
-      | orderId | customerId | orderDate  |
-      | 1       | 1          | 2026-01-01 |
-      | 2       | 1          | 2026-01-02 |
-    And 注文明細が存在する:
-      | orderItemId | orderId | bookId | quantity |
-      | 1           | 1       | 1      | 2        |
-      | 2           | 2       | 2      | 1        |
+      テーブル: ORDER_TRAN
+      件数: 2件
+      データセット: /datasets/common/initial-orders.xml
+      データ:
+        | ORDER_TRAN_ID | CUSTOMER_ID | ORDER_DATE | TOTAL_AMOUNT | STATUS    |
+        | 1             | 1           | 2026-01-01 | 5000         | COMPLETED |
+        | 2             | 1           | 2026-01-02 | 3000         | PENDING   |
+    
+    And DBに以下の注文明細が存在する:
+      テーブル: ORDER_DETAIL
+      件数: 2件
+      データ:
+        | ORDER_DETAIL_ID | ORDER_TRAN_ID | BOOK_ID | QUANTITY | PRICE |
+        | 1               | 1             | 1       | 2        | 2500  |
+        | 2               | 2             | 2       | 1        | 3000  |
+    
     When OrderDao.findByCustomerId(customerId=1)を呼び出す
-    Then 顧客ID=1の注文2件が返される
+    
+    Then 顧客ID=1の注文2件が返される:
+      データ:
+        | ORDER_TRAN_ID | CUSTOMER_ID | ORDER_DATE |
+        | 1             | 1           | 2026-01-01 |
+        | 2             | 1           | 2026-01-02 |
+    
+    And DBの状態は変化しない:
+      テーブル: ORDER_TRAN, ORDER_DETAIL
+      件数: 2件（変更なし）
+      検証:
+        - READ操作のため、DBは更新されない
 ```
 
 ---
@@ -86,22 +106,52 @@ Feature: 注文詳細取得
   注文詳細を取得（注文明細を含む）
 
   Scenario: 注文詳細を取得
-    Given DBに注文とリレーションデータが存在する:
-      | orderId | customerId | orderDate  |
-      | 1       | 1          | 2026-01-01 |
-    And 注文明細が存在する:
-      | orderItemId | orderId | bookId | quantity |
-      | 1           | 1       | 1      | 2        |
-      | 2           | 1       | 2      | 1        |
+    Given DBに以下の注文が存在する:
+      テーブル: ORDER_TRAN
+      件数: 1件
+      データセット: /datasets/common/initial-order-with-details.xml
+      データ:
+        | ORDER_TRAN_ID | CUSTOMER_ID | ORDER_DATE | TOTAL_AMOUNT | STATUS    |
+        | 1             | 1           | 2026-01-01 | 5000         | COMPLETED |
+    
+    And DBに以下の注文明細が存在する:
+      テーブル: ORDER_DETAIL
+      件数: 2件
+      データ:
+        | ORDER_DETAIL_ID | ORDER_TRAN_ID | BOOK_ID | QUANTITY | PRICE |
+        | 1               | 1             | 1       | 2        | 2500  |
+        | 2               | 1             | 2       | 1        | 2500  |
+    
     When OrderDao.findById(orderId=1)を呼び出す
+    
     Then 注文詳細が取得される:
-      | orderId | customerId | orderItemCount |
-      | 1       | 1          | 2              |
+      データ:
+        | orderId | customerId | totalAmount | orderItemCount |
+        | 1       | 1          | 5000        | 2              |
+      検証:
+        - ORDER_TRAN と ORDER_DETAIL のリレーションが正しく取得される
+        - 注文明細が2件含まれる
+    
+    And DBの状態は変化しない:
+      テーブル: ORDER_TRAN, ORDER_DETAIL
+      件数: 1件、2件（変更なし）
+      検証:
+        - READ操作のため、DBは更新されない
 ```
 
 ---
 
-## 5. 参考資料
+## 5. DBUnitデータセット対応表
+
+| シナリオ | 初期データセット | 期待データセット | 検証テーブル |
+|---------|----------------|----------------|------------|
+| 注文履歴取得 | `/datasets/common/initial-orders.xml` | （変更なし） | ORDER_TRAN<br>ORDER_DETAIL |
+| 注文詳細取得 | `/datasets/common/initial-order-with-details.xml` | （変更なし） | ORDER_TRAN<br>ORDER_DETAIL |
+
+---
+
+## 6. 参考資料
 
 * [functional_design.md](functional_design.md) - 共通機能設計書
 * [data_model.md](data_model.md) - データモデル仕様書
+* DBUnit公式ドキュメント: http://dbunit.sourceforge.net/

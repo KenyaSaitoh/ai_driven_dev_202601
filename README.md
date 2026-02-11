@@ -42,21 +42,36 @@ Bookstoreドメインの全アプリケーション（バックエンドAPI 3つ
 ```bash
 # Git Bashで実行（プロジェクトルートから）
 cd projects/master/bookstore
-./run-bookstore-all.sh
+./start-bookstore-api-spa-all.sh
 ```
 
 **sandbox（トライアル用）で起動する場合:**
 ```bash
 cd projects/sandbox/bookstore
-./run-bookstore-all.sh
+./start-bookstore-api-spa-all.sh
 ```
 
 ### 🛑 停止方法
 
-スクリプト実行後に表示されるPIDを使用：
+**推奨: 一括停止スクリプトを使用**
 
 ```bash
-# フロントエンド停止
+# すべてを停止（SPA、API、Payara、HSQLDB）
+cd projects/master/bookstore  # または projects/sandbox/bookstore
+./stop-bookstore-all.sh
+```
+
+**または、SPAのみを停止する場合:**
+
+```bash
+cd projects/master/bookstore  # または projects/sandbox/bookstore
+./stop-bookstore-spa-only.sh
+```
+
+**個別に停止する場合:**
+
+```bash
+# フロントエンド停止（スクリプト実行後に表示されるPIDを使用）
 kill <PID1> <PID2> <PID3>
 
 # バックエンド停止
@@ -67,7 +82,7 @@ kill <PID1> <PID2> <PID3>
 
 > **Note**: 個別のアプリケーションのみを起動したい場合は、後述の「セットアップとコマンド実行ガイド」を参照してください。
 > 
-> **Note**: SPAのみを再起動したい場合は、`projects/master/bookstore/run-bookstore-spa.sh` または `projects/sandbox/bookstore/run-bookstore-spa.sh` を使用してください。
+> **Note**: SPAのみを再起動したい場合は、`projects/master/bookstore/start-bookstore-spa-only.sh` または `projects/sandbox/bookstore/start-bookstore-spa-only.sh` を使用してください。SPAのみを停止する場合は、`stop-bookstore-spa-only.sh` を使用してください。
 
 ## 📁 プロジェクト構成
 

@@ -438,6 +438,101 @@ class OrderServiceTest {
 
 * **ブラックボックス**: CRUD操作の正しさ、検索条件の正しさ
 * **ホワイトボックス**: 境界値（null、空リスト）、JPQLの正しさ
+* **DBUnitの活用（推奨）**: DAO層のテストでは、DBUnitを使用したデータ駆動テストを実装することを推奨
+  * テストデータをXML/CSV形式で外部管理
+  * データベースの初期状態を明示的に定義
+  * 期待するデータベース状態との比較検証
+
+**DBUnitを使用したDAOテストの例:**
+```java
+@ExtendWith(MockitoExtension.class)
+class OrderDaoTest {
+    
+    @InjectMocks
+    private OrderDao orderDao;
+    
+    @Mock
+    private EntityManager entityManager;
+    
+    private IDatabaseTester databaseTester;
+    
+    @BeforeEach
+    void setUp() throws Exception {
+        // DBUnitのセットアップ
+        databaseTester = new JdbcDatabaseTester(
+            "org.hsqldb.jdbcDriver", 
+            "jdbc:hsqldb:mem:testdb", 
+            "SA", ""
+        );
+    }
+    
+    @Test
+    @DisplayName("顧客IDで注文を検索 - 複数件存在する場合")
+    void testFindByCustomerId_MultipleOrders() throws Exception {
+        // Given: DBUnitでテストデータを投入
+        IDataSet dataSet = new FlatXmlDataSetBuilder()
+            .setColumnSensing(true)
+            .build(getClass().getResourceAsStream("/datasets/dao/orders-by-customer.xml"));
+        databaseTester.setDataSet(dataSet);
+        databaseTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+        databaseTester.onSetup();
+        
+        // モックの設定（実際のクエリ結果を返す）
+        TypedQuery<OrderTran> mockQuery = mock(TypedQuery.class);
+        when(entityManager.createQuery(anyString(), eq(OrderTran.class)))
+            .thenReturn(mockQuery);
+        
+        List<OrderTran> expectedOrders = Arrays.asList(
+            createOrderTran(1L, 100L),
+            createOrderTran(2L, 100L)
+        );
+        when(mockQuery.getResultList()).thenReturn(expectedOrders);
+        
+        // When: 顧客IDで検索
+        List<OrderTran> result = orderDao.findByCustomerId(100L);
+        
+        // Then: 2件の注文が取得される
+        assertEquals(2, result.size());
+        assertEquals(100L, result.get(0).getCustomerId());
+        assertEquals(100L, result.get(1).getCustomerId());
+        
+        // クエリが正しく実行されたことを検証
+        verify(entityManager).createQuery(
+            contains("WHERE o.customerId = :customerId"), 
+            eq(OrderTran.class)
+        );
+    }
+    
+    @Test
+    @DisplayName("注文IDで検索 - 存在しない場合はnull")
+    void testFindById_NotFound() throws Exception {
+        // Given: 空のデータベース
+        IDataSet dataSet = new FlatXmlDataSetBuilder()
+            .build(getClass().getResourceAsStream("/datasets/dao/empty.xml"));
+        databaseTester.setDataSet(dataSet);
+        databaseTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+        databaseTester.onSetup();
+        
+        when(entityManager.find(OrderTran.class, 999L)).thenReturn(null);
+        
+        // When: 存在しないIDで検索
+        OrderTran result = orderDao.findById(999L);
+        
+        // Then: nullが返される
+        assertNull(result);
+    }
+}
+```
+
+**テストデータセット例（/datasets/dao/orders-by-customer.xml）:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+  <CUSTOMER CUSTOMER_ID="100" EMAIL="customer@example.com" NAME="Test Customer" />
+  <ORDER_TRAN ORDER_TRAN_ID="1" CUSTOMER_ID="100" TOTAL_AMOUNT="5000" STATUS="COMPLETED" />
+  <ORDER_TRAN ORDER_TRAN_ID="2" CUSTOMER_ID="100" TOTAL_AMOUNT="3000" STATUS="PENDING" />
+</dataset>
+```
 
 ### 12.3 Serviceのテスト（target=usecases/{名}）
 

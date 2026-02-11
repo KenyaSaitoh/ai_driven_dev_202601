@@ -8,11 +8,22 @@
 
 記法: シナリオは Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）。principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること。
 
+**DBUnit対応:**
+* Given句: DB初期状態を明記（テーブル名、件数、データ、対応データセット）
+* Then句: DB更新後の期待状態を明記（テーブル名、件数、差分、データ、対応データセット）
+* 検証条件: 主キー、外部キー、CASCADE、トランザクションロールバックを明記
+
 ---
 
 ## 1. 概要
 
 本文書は、[DOMAIN_NAME]ドメインの基本設計を外形的に捉えた振る舞い仕様書である。結合テスト用のシナリオを記述し、Service層以下（Service + DAO + Entity + DB）の受入基準を定義する。
+
+**DBUnitによるテストデータ管理:**
+* テストデータは XML/CSV 形式で外部管理（`src/test/resources/datasets/[DOMAIN_NAME]/`配下）
+* Given句でDB初期状態を明記、対応するXMLデータセットを参照
+* Then句でDB更新後の期待状態を明記、対応するXMLデータセットを参照
+* データベースの状態を明示的に検証
 
 テスト対象:
 * ドメイン内のService層のビジネスロジック
@@ -41,33 +52,51 @@
 
 #### Feature: [機能名]
 
-#### Scenario: [シナリオタイトル]
+```gherkin
+Scenario: [シナリオタイトル]
+  Given DBに以下のデータが存在する:
+    テーブル: [TABLE_NAME]
+    件数: N件
+    データセット: /datasets/[DOMAIN_NAME]/initial-[scenario].xml
+    データ:
+      | COLUMN1 | COLUMN2 | COLUMN3 |
+      | 値1     | 値2     | 値3     |
+  
+  And [外部APIのスタブ設定を記述]:
+    | Method | Path | Response |
+    | GET    | /api | {...}    |
+  
+  When [Service名].[メソッド名]([パラメータ])を呼び出す
+  
+  Then DBのテーブルは以下になる:
+    テーブル: [TABLE_NAME]
+    件数: M件（±差分）
+    データセット: /datasets/[DOMAIN_NAME]/expected-[scenario].xml
+    データ:
+      | COLUMN1 | COLUMN2 | COLUMN3 |
+      | 値1     | 値2     | 値3     |
+    検証:
+      - [主キー・外部キー・制約の検証条件]
+      - [CASCADE動作の検証]
+      - [トランザクション動作の検証]
+  
+  And [外部APIへの期待される呼び出しを記述]
+```
 
-* Given（前提条件）:
-  * [DBの初期状態を記述]
-  * [外部APIのスタブ設定を記述]
-  * [その他の前提条件]
+**記述ルール:**
 
-* When（操作）:
-  * [Serviceメソッドを呼び出す操作を記述]
+**Given句（DB初期状態）:**
+* テーブル名を大文字で明記（例: ORDER_TRAN）
+* 件数を明記（例: 0件、1件、2件）
+* データセットファイルパスを明記（例: `/datasets/orders/initial-create.xml`）
+* データをテーブル形式で記述（NULL値は `[null]`）
 
-* Then（期待結果）:
-  * [期待されるビジネスロジックの結果を記述]
-  * [DBの期待される状態を記述]
-  * [外部APIへの期待される呼び出しを記述]
-
-* And（追加の検証）:
-  * [追加の検証項目]
-
-#### テストデータ
-* 初期データ:
-  ```sql
-  [DBの初期データを記述]
-  ```
-* 期待されるデータ:
-  ```sql
-  [テスト後のDBの期待状態を記述]
-  ```
+**Then句（DB期待状態）:**
+* テーブル名を大文字で明記
+* 件数と差分を明記（例: 1件（+1件追加）、0件（-2件削除）、1件（変更なし））
+* データセットファイルパスを明記（例: `/datasets/orders/expected-created.xml`）
+* 更新後の全行をテーブル形式で記述
+* 検証条件を明記（主キー、外部キー、CASCADE、トランザクション）
 
 ---
 
@@ -75,18 +104,26 @@
 
 #### Feature: [機能名]
 
-#### Scenario: [エラーシナリオタイトル]
-
-* Given（前提条件）:
-  * [エラーを引き起こす前提条件を記述]
-
-* When（操作）:
-  * [Serviceメソッドを呼び出す操作を記述]
-
-* Then（期待結果）:
-  * [期待される例外の種類を記述]
-  * [期待されるエラーメッセージを記述]
-  * [DBの期待される状態（ロールバック等）を記述]
+```gherkin
+Scenario: [エラーシナリオタイトル]
+  Given DBに以下のデータが存在する:
+    テーブル: [TABLE_NAME]
+    件数: N件
+    データセット: /datasets/[DOMAIN_NAME]/initial-error-case.xml
+  
+  And [エラーを引き起こす条件を記述]
+  
+  When [Service名].[メソッド名]([パラメータ])を呼び出す
+  
+  Then [ExceptionName]がスローされる
+  
+  And DBの状態は変化しない:
+    テーブル: [TABLE_NAME]
+    件数: N件（変更なし）
+    検証:
+      - トランザクションがロールバックされる
+      - 例外発生前の状態が保持される
+```
 
 ---
 
@@ -96,17 +133,101 @@
 
 #### Feature: [機能名]
 
-#### Scenario: [シナリオタイトル]
+```gherkin
+Scenario: [シナリオタイトル]
+  Given DBに以下のデータが存在する:
+    テーブル: [TABLE_NAME]
+    件数: N件
+    データセット: /datasets/[DOMAIN_NAME]/initial-dao-test.xml
+    データ:
+      | COLUMN1 | COLUMN2 | COLUMN3 |
+      | 値1     | 値2     | 値3     |
+  
+  When [Dao名].[メソッド名]([パラメータ])を呼び出す
+  
+  Then [期待される件数]件のデータが返される
+  
+  And DBの状態は変化しない:
+    テーブル: [TABLE_NAME]
+    件数: N件（変更なし）
+    検証:
+      - READ操作のため、DBは更新されない
+```
 
-* Given（前提条件）:
-  * [DBの初期状態を記述]
+**CREATE操作の例:**
+```gherkin
+Scenario: [データ作成シナリオ]
+  Given DBのテーブルは空である:
+    テーブル: [TABLE_NAME]
+    件数: 0件
+  
+  When [Dao名].create([エンティティ])を呼び出す
+  
+  Then DBのテーブルは以下になる:
+    テーブル: [TABLE_NAME]
+    件数: 1件（+1件追加）
+    データセット: /datasets/[DOMAIN_NAME]/expected-dao-created.xml
+    検証:
+      - 主キーが自動採番される
+      - NOT NULL制約を満たす
+      - 外部キー制約を満たす
+```
 
-* When（操作）:
-  * [Daoメソッドを呼び出す操作を記述]
+**UPDATE操作の例:**
+```gherkin
+Scenario: [データ更新シナリオ]
+  Given DBに以下のデータが存在する:
+    テーブル: [TABLE_NAME]
+    件数: 1件
+    データセット: /datasets/[DOMAIN_NAME]/initial-before-update.xml
+    データ:
+      | ID | STATUS  |
+      | 1  | PENDING |
+  
+  When [Dao名].update(id=1, status="COMPLETED")を呼び出す
+  
+  Then DBのテーブルは以下になる:
+    テーブル: [TABLE_NAME]
+    件数: 1件（変更なし）
+    データセット: /datasets/[DOMAIN_NAME]/expected-after-update.xml
+    データ:
+      | ID | STATUS    |
+      | 1  | COMPLETED |
+    検証:
+      - ID=1 の STATUS が更新される
+      - その他のカラムは変更されない
+```
 
-* Then（期待結果）:
-  * [期待されるデータ取得結果を記述]
-  * [期待されるデータ更新結果を記述]
+**DELETE操作の例（CASCADE削除を含む）:**
+```gherkin
+Scenario: [データ削除シナリオ - CASCADE削除]
+  Given DBに親データが存在する:
+    テーブル: PARENT_TABLE
+    件数: 1件
+    データ:
+      | PARENT_ID | NAME |
+      | 1         | Test |
+  
+  And DBに子データが存在する:
+    テーブル: CHILD_TABLE
+    件数: 2件
+    データ:
+      | CHILD_ID | PARENT_ID | VALUE |
+      | 1        | 1         | A     |
+      | 2        | 1         | B     |
+  
+  When [Dao名].delete(parentId=1)を呼び出す
+  
+  Then DBの親テーブルは以下になる:
+    テーブル: PARENT_TABLE
+    件数: 0件（-1件削除）
+  
+  And DBの子テーブルは以下になる:
+    テーブル: CHILD_TABLE
+    件数: 0件（-2件削除）
+    検証:
+      - PARENT_ID=1 に紐づく子データがすべて削除される（CASCADE DELETE）
+```
 
 ---
 
@@ -116,17 +237,45 @@
 
 #### Feature: [機能名]
 
-#### Scenario: [トランザクションのコミット/ロールバックシナリオ]
+```gherkin
+Scenario: [トランザクションコミット]
+  Given DBに以下のデータが存在する:
+    テーブル: [TABLE_NAME]
+    件数: N件
+    データセット: /datasets/[DOMAIN_NAME]/initial-transaction.xml
+  
+  When [Service名].[メソッド名]([パラメータ])を呼び出す
+  
+  Then トランザクションがコミットされる
+  
+  And DBのテーブルは以下になる:
+    テーブル: [TABLE_NAME]
+    件数: M件（±差分）
+    データセット: /datasets/[DOMAIN_NAME]/expected-committed.xml
+    検証:
+      - 全ての変更がコミットされる
+      - データの整合性が保たれる
+```
 
-* Given（前提条件）:
-  * [トランザクション開始前の状態]
-
-* When（操作）:
-  * [トランザクション内の操作を記述]
-
-* Then（期待結果）:
-  * [コミット/ロールバックの期待される結果を記述]
-  * [DBの期待される状態を記述]
+```gherkin
+Scenario: [トランザクションロールバック]
+  Given DBに以下のデータが存在する:
+    テーブル: [TABLE_NAME]
+    件数: N件
+    データセット: /datasets/[DOMAIN_NAME]/initial-rollback.xml
+  
+  When [Service名].[メソッド名]([パラメータ])を呼び出す
+  
+  Then [ExceptionName]がスローされる
+  
+  And DBの状態は変化しない:
+    テーブル: [TABLE_NAME]
+    件数: N件（変更なし）
+    検証:
+      - トランザクションがロールバックされる
+      - 全ての変更が取り消される
+      - 例外発生前の状態が保持される
+```
 
 ---
 
@@ -136,17 +285,55 @@
 
 #### Feature: [機能名]
 
-#### Scenario: [外部API連携シナリオ]
+```gherkin
+Scenario: [外部API連携シナリオ]
+  Given WireMockが外部APIをスタブする:
+    | Method | Path           | Response     |
+    | GET    | /api/resource  | {data: ...}  |
+    | PUT    | /api/resource  | {success: OK}|
+  
+  And DBに以下のデータが存在する:
+    テーブル: [TABLE_NAME]
+    件数: N件
+    データセット: /datasets/[DOMAIN_NAME]/initial-api-call.xml
+  
+  When [Service名].[メソッド名]([パラメータ])を呼び出す
+  
+  Then 外部APIが呼び出される:
+    リクエスト: [Method] [Path]
+    ボディ: [Request Body]
+  
+  And DBのテーブルは以下になる:
+    テーブル: [TABLE_NAME]
+    件数: M件（±差分）
+    データセット: /datasets/[DOMAIN_NAME]/expected-after-api-call.xml
+    検証:
+      - 外部APIのレスポンスに基づいてDBが更新される
+      - データの整合性が保たれる
+```
 
-* Given（前提条件）:
-  * [WireMockのスタブ設定を記述]
-
-* When（操作）:
-  * [外部API呼び出しを含むServiceメソッドを呼び出す]
-
-* Then（期待結果）:
-  * [期待される外部APIへのリクエストを記述]
-  * [期待される外部APIからのレスポンス処理を記述]
+```gherkin
+Scenario: [外部APIエラー時のロールバック]
+  Given WireMockが外部APIをスタブする:
+    | Method | Path          | Response                |
+    | GET    | /api/resource | 500エラー（Internal Error）|
+  
+  And DBに以下のデータが存在する:
+    テーブル: [TABLE_NAME]
+    件数: N件
+    データセット: /datasets/[DOMAIN_NAME]/initial-api-error.xml
+  
+  When [Service名].[メソッド名]([パラメータ])を呼び出す
+  
+  Then [ExceptionName]がスローされる
+  
+  And DBの状態は変化しない:
+    テーブル: [TABLE_NAME]
+    件数: N件（変更なし）
+    検証:
+      - トランザクションがロールバックされる
+      - 外部APIエラー時にDBの整合性が保たれる
+```
 
 ---
 
@@ -166,10 +353,38 @@
 
 ---
 
-## 7. 参考資料
+## 7. DBUnitデータセット対応表
+
+| シナリオ | 初期データセット | 期待データセット | 検証テーブル |
+|---------|----------------|----------------|------------|
+| [シナリオ1] | `/datasets/[DOMAIN_NAME]/initial-[scenario1].xml` | `/datasets/[DOMAIN_NAME]/expected-[scenario1].xml` | TABLE1<br>TABLE2 |
+| [シナリオ2] | `/datasets/[DOMAIN_NAME]/initial-[scenario2].xml` | `/datasets/[DOMAIN_NAME]/expected-[scenario2].xml` | TABLE1 |
+| [エラーケース] | `/datasets/[DOMAIN_NAME]/initial-error.xml` | （変更なし・ロールバック） | TABLE1<br>TABLE2 |
+
+**データセット配置ルール:**
+* ディレクトリ: `src/test/resources/datasets/[DOMAIN_NAME]/`
+* 命名規則:
+  * 初期データ: `initial-{scenario-name}.xml`
+  * 期待データ: `expected-{scenario-name}.xml`
+  * 共通マスター: `common-master-data.xml`
+
+**データセット記述例（XML）:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+  <TABLE_NAME COLUMN1="値1" COLUMN2="値2" COLUMN3="[null]" />
+  <TABLE_NAME COLUMN1="値3" COLUMN2="値4" COLUMN3="値5" />
+</dataset>
+```
+
+---
+
+## 8. 参考資料
 
 * [functional_design.md](functional_design.md) - ドメイン機能設計書
 * [../../detailed_design/[DOMAIN_NAME]/behaviors.md](../../detailed_design/[DOMAIN_NAME]/behaviors.md) - 単体テスト用の振る舞い仕様書
 * [../../requirements/behaviors.md](../../requirements/behaviors.md) - E2Eテスト用の振る舞い仕様書
 * [../common/architecture_design.md](../common/architecture_design.md) - アーキテクチャ設計書
 * [../common/data_model.md](../common/data_model.md) - データモデル仕様書
+* DBUnit公式ドキュメント: http://dbunit.sourceforge.net/
+* @agent_skills/jakarta-ee-api-base/instructions/it_generation.md - 結合テスト生成インストラクション

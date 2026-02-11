@@ -8,11 +8,22 @@
 
 記法: シナリオは Gherkin 記法で記述する（Feature, Scenario, Given, When, Then, And, But）。principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照すること。
 
+**DBUnit対応:**
+* Given句: DB初期状態を明記（テーブル名、件数、データ、対応データセット）
+* Then句: DB更新後の期待状態を明記（テーブル名、件数、差分、データ、対応データセット）
+* 検証条件: 主キー、外部キー、CASCADE、トランザクションロールバックを明記
+
 ---
 
 ## 1. 概要
 
 本文書は、[SCREEN_GROUP_NAME]画面グループの基本設計を外形的に捉えた振る舞い仕様書である。E2Eテスト用のシナリオを記述し、複数画面にまたがる画面フローの受入基準を定義する。
+
+**DBUnitによるテストデータ管理:**
+* テストデータは XML/CSV 形式で外部管理（`src/test/resources/datasets/[SCREEN_GROUP_NAME]/`配下）
+* Given句でDB初期状態を明記、対応するXMLデータセットを参照
+* Then句でDB更新後の期待状態を明記、対応するXMLデータセットを参照
+* データベースの状態を明示的に検証
 
 テスト対象:
 * 画面グループ内の複数画面にまたがるフロー
@@ -68,17 +79,31 @@
 * And（追加の検証）:
   * [追加の検証項目]
 
-#### テストデータ
+#### DBUnit対応テストデータ
 
-* 初期データ:
-  ```sql
-  [DBの初期データを記述]
-  ```
+**DB初期状態:**
+```gherkin
+Given DBに以下のデータが存在する:
+  テーブル: [TABLE_NAME]
+  件数: N件
+  データセット: /datasets/[SCREEN_GROUP_NAME]/initial-[scenario].xml
+  データ:
+    | COLUMN1 | COLUMN2 | COLUMN3 |
+    | 値1     | 値2     | 値3     |
+```
 
-* 期待されるデータ:
-  ```sql
-  [テスト後のDBの期待状態を記述]
-  ```
+**DB更新後の期待状態:**
+```gherkin
+Then DBのテーブルは以下になる:
+  テーブル: [TABLE_NAME]
+  件数: M件（±差分）
+  データセット: /datasets/[SCREEN_GROUP_NAME]/expected-[scenario].xml
+  データ:
+    | COLUMN1 | COLUMN2 | COLUMN3 |
+    | 値1     | 値2     | 値3     |
+  検証:
+    - [主キー・外部キー・制約の検証条件]
+```
 
 ---
 
@@ -288,7 +313,33 @@
 
 ---
 
-## 7. 参考資料
+## 7. DBUnitデータセット対応表
+
+| シナリオ | 初期データセット | 期待データセット | 検証テーブル |
+|---------|----------------|----------------|------------|
+| [シナリオ1] | `/datasets/[SCREEN_GROUP_NAME]/initial-[scenario1].xml` | `/datasets/[SCREEN_GROUP_NAME]/expected-[scenario1].xml` | TABLE1<br>TABLE2 |
+| [シナリオ2] | `/datasets/[SCREEN_GROUP_NAME]/initial-[scenario2].xml` | `/datasets/[SCREEN_GROUP_NAME]/expected-[scenario2].xml` | TABLE1 |
+| [エラーケース] | `/datasets/[SCREEN_GROUP_NAME]/initial-error.xml` | （変更なし・ロールバック） | TABLE1 |
+
+**データセット配置ルール:**
+* ディレクトリ: `src/test/resources/datasets/[SCREEN_GROUP_NAME]/`
+* 命名規則:
+  * 初期データ: `initial-{scenario-name}.xml`
+  * 期待データ: `expected-{scenario-name}.xml`
+  * 共通マスター: `common-master-data.xml`
+
+**データセット記述例（XML）:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+  <TABLE_NAME COLUMN1="値1" COLUMN2="値2" COLUMN3="[null]" />
+  <TABLE_NAME COLUMN1="値3" COLUMN2="値4" COLUMN3="値5" />
+</dataset>
+```
+
+---
+
+## 8. 参考資料
 
 * [functional_design.md](functional_design.md) - 画面グループ機能設計書
 * [screen_design.md](screen_design.md) - 画面設計書
@@ -296,3 +347,5 @@
 * [../../requirements/behaviors.md](../../requirements/behaviors.md) - システム全体の振る舞い仕様書
 * [../common/architecture_design.md](../common/architecture_design.md) - アーキテクチャ設計書
 * [../common/data_model.md](../common/data_model.md) - データモデル仕様書
+* DBUnit公式ドキュメント: http://dbunit.sourceforge.net/
+* @agent_skills/struts-to-jsf-migration/instructions/it_generation.md - 結合テスト生成インストラクション

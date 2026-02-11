@@ -497,6 +497,146 @@ class PersonBeanTest {
 
 * **ブラックボックス**: ビジネスロジックの正しさ、トランザクション境界
 * **ホワイトボックス**: 例外ハンドリング、分岐パス、エッジケース
+* **DBUnitの活用（推奨）**: Service層がデータアクセス処理を含む場合、DBUnitを使用したデータ駆動テストを実装することを推奨
+  * テストデータをXML/CSV形式で外部管理
+  * データベースの初期状態を明示的に定義
+  * 期待するデータベース状態との比較検証
+
+**DBUnitを使用したServiceテストの例:**
+```java
+@ExtendWith(MockitoExtension.class)
+class PersonServiceTest {
+    
+    @InjectMocks
+    private PersonService personService;
+    
+    @Mock
+    private EntityManager entityManager;
+    
+    private IDatabaseTester databaseTester;
+    
+    @BeforeEach
+    void setUp() throws Exception {
+        // DBUnitのセットアップ
+        databaseTester = new JdbcDatabaseTester(
+            "org.hsqldb.jdbcDriver", 
+            "jdbc:hsqldb:mem:testdb", 
+            "SA", ""
+        );
+        
+        // DatabaseConfigの設定
+        DatabaseConfig config = databaseTester.getConnection().getConfig();
+        config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, 
+            new HsqldbDataTypeFactory());
+    }
+    
+    @AfterEach
+    void tearDown() throws Exception {
+        if (databaseTester != null) {
+            databaseTester.onTearDown();
+        }
+    }
+    
+    @Test
+    @DisplayName("全ての人物を検索 - 複数件存在する場合")
+    void testFindAll_MultiplePersons() throws Exception {
+        // Given: DBUnitでテストデータを投入
+        IDataSet dataSet = new FlatXmlDataSetBuilder()
+            .setColumnSensing(true)
+            .build(getClass().getResourceAsStream("/datasets/service/persons-findall.xml"));
+        databaseTester.setDataSet(dataSet);
+        databaseTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+        databaseTester.onSetup();
+        
+        // モックの設定（実際のクエリ結果を返す）
+        TypedQuery<Person> mockQuery = mock(TypedQuery.class);
+        when(entityManager.createQuery(anyString(), eq(Person.class)))
+            .thenReturn(mockQuery);
+        
+        List<Person> expectedPersons = Arrays.asList(
+            new Person("太郎", "山田", 30),
+            new Person("花子", "鈴木", 25),
+            new Person("次郎", "佐藤", 35)
+        );
+        when(mockQuery.getResultList()).thenReturn(expectedPersons);
+        
+        // When: 全検索
+        List<Person> result = personService.findAll();
+        
+        // Then: 3件の人物が取得される
+        assertEquals(3, result.size());
+        assertEquals("太郎", result.get(0).getFirstName());
+        assertEquals("花子", result.get(1).getFirstName());
+        assertEquals("次郎", result.get(2).getFirstName());
+        
+        // クエリが正しく実行されたことを検証
+        verify(entityManager).createQuery(
+            contains("SELECT p FROM Person p"), 
+            eq(Person.class)
+        );
+    }
+    
+    @Test
+    @DisplayName("年齢範囲で人物を検索")
+    void testFindByAgeRange() throws Exception {
+        // Given: DBUnitで様々な年齢の人物データを投入
+        IDataSet dataSet = new FlatXmlDataSetBuilder()
+            .setColumnSensing(true)
+            .build(getClass().getResourceAsStream("/datasets/service/persons-age-range.xml"));
+        databaseTester.setDataSet(dataSet);
+        databaseTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+        databaseTester.onSetup();
+        
+        // モックの設定
+        TypedQuery<Person> mockQuery = mock(TypedQuery.class);
+        when(entityManager.createQuery(anyString(), eq(Person.class)))
+            .thenReturn(mockQuery);
+        when(mockQuery.setParameter(anyString(), any())).thenReturn(mockQuery);
+        
+        // 年齢範囲内の人物のみを返す
+        List<Person> expectedPersons = Arrays.asList(
+            new Person("太郎", "山田", 30),
+            new Person("花子", "鈴木", 25)
+        );
+        when(mockQuery.getResultList()).thenReturn(expectedPersons);
+        
+        // When: 20歳〜30歳で検索
+        List<Person> result = personService.findByAgeRange(20, 30);
+        
+        // Then: 範囲内の人物のみ取得される
+        assertEquals(2, result.size());
+        assertTrue(result.stream().allMatch(person -> 
+            person.getAge() >= 20 && person.getAge() <= 30
+        ));
+        
+        // パラメータが正しく設定されたことを検証
+        verify(mockQuery).setParameter("minAge", 20);
+        verify(mockQuery).setParameter("maxAge", 30);
+    }
+}
+```
+
+**テストデータセット例（/datasets/service/persons-findall.xml）:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+  <PERSON PERSON_ID="1" FIRST_NAME="太郎" LAST_NAME="山田" AGE="30" />
+  <PERSON PERSON_ID="2" FIRST_NAME="花子" LAST_NAME="鈴木" AGE="25" />
+  <PERSON PERSON_ID="3" FIRST_NAME="次郎" LAST_NAME="佐藤" AGE="35" />
+</dataset>
+```
+
+**テストデータセット例（/datasets/service/persons-age-range.xml）:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+  <PERSON PERSON_ID="1" FIRST_NAME="太郎" LAST_NAME="山田" AGE="30" />
+  <PERSON PERSON_ID="2" FIRST_NAME="花子" LAST_NAME="鈴木" AGE="25" />
+  <PERSON PERSON_ID="3" FIRST_NAME="次郎" LAST_NAME="佐藤" AGE="35" />
+  <PERSON PERSON_ID="4" FIRST_NAME="四郎" LAST_NAME="高橋" AGE="18" />
+  <PERSON PERSON_ID="5" FIRST_NAME="五郎" LAST_NAME="伊藤" AGE="45" />
+</dataset>
+```
 
 ### 9.3 Managed Beanのテスト（該当する場合のみ）
 

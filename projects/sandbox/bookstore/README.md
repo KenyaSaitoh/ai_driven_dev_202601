@@ -47,7 +47,7 @@
 
 ```bash
 # このディレクトリ（projects/sandbox/bookstore）から実行
-./run-bookstore-all.sh
+./start-bookstore-api-spa-all.sh
 ```
 
 このスクリプトは以下を自動実行します：
@@ -57,7 +57,21 @@
 4. 3つのJakarta EE API（**-sandbox**）のDB初期化、WAR化、デプロイ
 5. 3つのReact SPAの依存関係インストールと起動
 
-> **Note**: SPAのみを再起動したい場合は、`./run-bookstore-spa.sh` を使用してください。
+### 📦 その他の便利スクリプト
+
+```bash
+# SPAのみを再起動
+./start-bookstore-spa-only.sh
+
+# SPAのみを停止
+./stop-bookstore-spa-only.sh
+
+# すべてを停止（SPA、API、Payara、HSQLDB）
+./stop-bookstore-all.sh
+
+# データベースのみ起動/再起動
+./start-database.sh
+```
 
 ### 前提条件
 
@@ -199,9 +213,24 @@ tail -f -n 50 payara6/glassfish/domains/domain1/logs/server.log
 
 ## 🧹 クリーンアップ
 
-### プロジェクトを終了するとき
+### ⚡ 一括停止（推奨）
 
-作業終了時にアプリケーションをアンデプロイします：
+すべてのアプリケーション（SPA、API、Payara、HSQLDB）を一括停止できる自動化スクリプトを用意しています：
+
+```bash
+# このディレクトリ（projects/sandbox/bookstore）から実行
+./stop-bookstore-all.sh
+```
+
+このスクリプトは以下を自動実行します：
+1. React SPA（3つ）を停止
+2. Jakarta EE API（3つ）をアンデプロイ
+3. Payara Serverを停止
+4. HSQLDBサーバーを停止
+
+### 個別に停止する場合
+
+作業終了時にアプリケーションを個別にアンデプロイします：
 
 ```bash
 # プロジェクトルートで実行（sandbox 用）
@@ -237,6 +266,20 @@ tail -f -n 50 payara6/glassfish/domains/domain1/logs/server.log
 - [customer-hub-spa/README.md](customer-hub-spa/README.md)
 
 ## 🗄️ データベース設定
+
+### ⚡ データベース起動/再起動
+
+データベース（HSQLDB）のみを起動または再起動するスクリプトを用意しています：
+
+```bash
+# このディレクトリ（projects/sandbox/bookstore）から実行
+./start-database.sh
+```
+
+このスクリプトは以下を実行します：
+- HSQLDBが起動中の場合は再起動
+- HSQLDBが停止中の場合は起動
+- 接続確認と詳細情報を表示
 
 ### HSQLDB接続情報
 

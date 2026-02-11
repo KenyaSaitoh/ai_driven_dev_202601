@@ -148,7 +148,28 @@ target_domains: "all"
 * テスト対象のエンティティを `<class>` で列挙
 * HSQLDB メモリ（jdbc:hsqldb:mem:testdb）、Hibernate で `hbm2ddl.auto=create-drop`、dialect=HSQLDialect
 
-### 2.4 EntityManagerProducer（CDI経由でEntityManagerを提供）
+### 2.4 DBUnitの導入（必須）
+
+結合テストでは、テストデータの管理にDBUnitを使用する（必須）:
+
+* DBUnit: `org.dbunit:dbunit:2.7.3`（プロジェクトのbuild.gradleに追加済み）
+* テストデータをXML/CSV形式で外部管理
+* データベースの初期状態を明示的に定義し、再現性を確保
+* テスト実行前のクリーンアップとセットアップの自動化
+* テスト実行後のデータベース状態の検証
+
+**テストデータセットの配置:**
+```
+src/test/resources/datasets/
+  ├── {domain}/
+  │   ├── initial-data.xml
+  │   ├── expected-after-operation.xml
+  │   └── scenario-specific-data.xml
+  └── common/
+      └── master-data.xml
+```
+
+### 2.5 EntityManagerProducer（CDI経由でEntityManagerを提供）
 
 Weld SEでEntityManagerをCDI経由で注入できるようにするProducerクラスを作成する:
 
@@ -197,7 +218,348 @@ public class EntityManagerProducer {
 
 ---
 
-## 3. 結合テストケース生成
+## 3. DBUnitによるテストデータ管理（必須）
+
+### 3.1 BaseIntegrationTestへのDBUnit統合
+
+BaseIntegrationTestクラスにDBUnitサポートを追加する:
+
+```java
+package pro.kensait.berrybooks.integration;
+
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+import org.dbunit.IDatabaseTester;
+import org.dbunit.JdbcDatabaseTester;
+import org.dbunit.database.DatabaseConfig;
+import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.ITable;
+import org.dbunit.dataset.csv.CsvDataSet;
+import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.dbunit.ext.hsqldb.HsqldbDataTypeFactory;
+import org.dbunit.operation.DatabaseOperation;
+import org.jboss.weld.environment.se.Weld;
+import org.jboss.weld.environment.se.WeldContainer;
+import org.junit.jupiter.api.*;
+
+import java.io.File;
+
+@Tag("integration")
+public abstract class BaseIntegrationTest {
+    
+    protected static WeldContainer container;
+    protected static WireMockServer wireMockServer;
+    protected static EntityManagerFactory emf;
+    
+    protected EntityManager em;
+    protected IDatabaseTester databaseTester;
+    
+    @BeforeAll
+    public static void setUpAll() {
+        // Weld SE の起動
+        Weld weld = new Weld()
+            .enableDiscovery()
+            .addPackages(true, BaseIntegrationTest.class.getPackage());
+        container = weld.initialize();
+        
+        // WireMockServer の起動
+        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(8089));
+        wireMockServer.start();
+        WireMock.configureFor("localhost", 8089);
+        
+        // EntityManagerFactory の作成
+        emf = Persistence.createEntityManagerFactory("test-pu");
+    }
+    
+    @AfterAll
+    public static void tearDownAll() {
+        if (emf != null && emf.isOpen()) {
+            emf.close();
+        }
+        if (wireMockServer != null && wireMockServer.isRunning()) {
+            wireMockServer.stop();
+        }
+        if (container != null) {
+            container.close();
+        }
+    }
+    
+    @BeforeEach
+    public void setUp() throws Exception {
+        em = emf.createEntityManager();
+        em.getTransaction().begin();
+        
+        // DBUnitのセットアップ
+        setupDatabaseTester();
+    }
+    
+    @AfterEach
+    public void tearDown() throws Exception {
+        // トランザクションロールバック
+        if (em != null && em.getTransaction().isActive()) {
+            em.getTransaction().rollback();
+        }
+        if (em != null && em.isOpen()) {
+            em.close();
+        }
+        
+        // WireMock リセット
+        if (wireMockServer != null && wireMockServer.isRunning()) {
+            wireMockServer.resetAll();
+        }
+        
+        // DBUnit クリーンアップ
+        if (databaseTester != null) {
+            databaseTester.onTearDown();
+        }
+    }
+    
+    /**
+     * DBUnitのセットアップ
+     */
+    protected void setupDatabaseTester() throws Exception {
+        // JDBC接続情報（persistence.xmlと同じ）
+        String jdbcUrl = "jdbc:hsqldb:mem:testdb";
+        String user = "SA";
+        String password = "";
+        
+        // JdbcDatabaseTesterの作成
+        databaseTester = new JdbcDatabaseTester(
+            "org.hsqldb.jdbcDriver", jdbcUrl, user, password
+        );
+        
+        // DatabaseConfigの設定（HSQLDB用）
+        DatabaseConfig config = databaseTester.getConnection().getConfig();
+        config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, 
+            new HsqldbDataTypeFactory());
+    }
+    
+    /**
+     * XMLデータセットをロードしてDBに投入
+     */
+    protected void loadDataSet(String dataSetPath) throws Exception {
+        IDataSet dataSet = new FlatXmlDataSetBuilder()
+            .setColumnSensing(true)
+            .build(getClass().getResourceAsStream(dataSetPath));
+        databaseTester.setDataSet(dataSet);
+        databaseTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+        databaseTester.onSetup();
+    }
+    
+    /**
+     * CSVデータセットをロードしてDBに投入
+     */
+    protected void loadCsvDataSet(String dataSetDir) throws Exception {
+        IDataSet dataSet = new CsvDataSet(new File(dataSetDir));
+        databaseTester.setDataSet(dataSet);
+        databaseTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+        databaseTester.onSetup();
+    }
+    
+    /**
+     * データベースの特定テーブルを取得
+     */
+    protected ITable getDatabaseTable(String tableName) throws Exception {
+        return databaseTester.getConnection()
+            .createDataSet()
+            .getTable(tableName);
+    }
+    
+    /**
+     * データベースの状態を期待XMLと比較
+     */
+    protected void assertDatabaseState(String expectedDataSetPath, String... tableNames) 
+            throws Exception {
+        IDataSet expectedDataSet = new FlatXmlDataSetBuilder()
+            .setColumnSensing(true)
+            .build(getClass().getResourceAsStream(expectedDataSetPath));
+        
+        IDataSet actualDataSet = databaseTester.getConnection().createDataSet(tableNames);
+        
+        for (String tableName : tableNames) {
+            ITable expectedTable = expectedDataSet.getTable(tableName);
+            ITable actualTable = actualDataSet.getTable(tableName);
+            
+            org.dbunit.Assertion.assertEquals(expectedTable, actualTable);
+        }
+    }
+    
+    protected void persistAndFlush(Object entity) {
+        em.persist(entity);
+        em.flush();
+    }
+    
+    protected void clearEntityCache() {
+        em.clear();
+    }
+}
+```
+
+### 3.2 XMLデータセットの作成例
+
+**`src/test/resources/datasets/orders/initial-data.xml`:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+  <!-- 顧客マスター -->
+  <CUSTOMER CUSTOMER_ID="1" EMAIL="customer1@example.com" NAME="Customer One" />
+  <CUSTOMER CUSTOMER_ID="2" EMAIL="customer2@example.com" NAME="Customer Two" />
+  
+  <!-- 商品マスター -->
+  <PRODUCT PRODUCT_ID="101" PRODUCT_NAME="Product A" PRICE="1000" STOCK="100" />
+  <PRODUCT PRODUCT_ID="102" PRODUCT_NAME="Product B" PRICE="2000" STOCK="50" />
+  
+  <!-- 既存注文（検証用） -->
+  <ORDER_TRAN ORDER_TRAN_ID="1" CUSTOMER_ID="1" TOTAL_AMOUNT="3000" 
+              STATUS="COMPLETED" ORDER_DATE="2024-01-01 10:00:00" />
+  <ORDER_DETAIL ORDER_DETAIL_ID="1" ORDER_TRAN_ID="1" PRODUCT_ID="101" 
+                QUANTITY="2" PRICE="1000" />
+  <ORDER_DETAIL ORDER_DETAIL_ID="2" ORDER_TRAN_ID="1" PRODUCT_ID="102" 
+                QUANTITY="1" PRICE="2000" />
+</dataset>
+```
+
+### 3.3 DBUnitを使用したテストケースの実装パターン
+
+**パターン1: 初期データ投入 + DB状態検証**
+```java
+@Tag("integration")
+class OrderServiceIntegrationTest extends BaseIntegrationTest {
+    
+    private OrderService orderService;
+    
+    @BeforeEach
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        orderService = container.select(OrderService.class).get();
+    }
+    
+    @Test
+    void testCreateOrder_Success() throws Exception {
+        // Arrange: DBUnitで初期データ投入（顧客、商品マスター）
+        loadDataSet("/datasets/orders/initial-customers-products.xml");
+        
+        CreateOrderRequest request = new CreateOrderRequest(1L, 
+            Arrays.asList(
+                new OrderItemRequest(101L, 2),
+                new OrderItemRequest(102L, 1)
+            ));
+        
+        // WireMockスタブ設定（外部在庫API）
+        stubFor(get(urlEqualTo("/api/stock/101"))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withBody("{\"available\": true, \"stock\": 100}")));
+        stubFor(get(urlEqualTo("/api/stock/102"))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withBody("{\"available\": true, \"stock\": 50}")));
+        
+        // Act
+        OrderTran order = orderService.createOrder(request);
+        em.flush();
+        em.clear();
+        
+        // Assert: DBUnit でテーブル検証
+        ITable orderTable = getDatabaseTable("ORDER_TRAN");
+        assertEquals(1, orderTable.getRowCount());
+        assertEquals("1", orderTable.getValue(0, "CUSTOMER_ID").toString());
+        assertEquals("3000", orderTable.getValue(0, "TOTAL_AMOUNT").toString());
+        
+        ITable detailTable = getDatabaseTable("ORDER_DETAIL");
+        assertEquals(2, detailTable.getRowCount());
+        
+        // WireMock verify
+        verify(getRequestedFor(urlEqualTo("/api/stock/101")));
+        verify(getRequestedFor(urlEqualTo("/api/stock/102")));
+    }
+}
+```
+
+**パターン2: 期待データセットとの完全比較**
+```java
+@Test
+void testUpdateOrderStatus_Success() throws Exception {
+    // Arrange: 更新前の状態を投入
+    loadDataSet("/datasets/orders/order-before-status-update.xml");
+    
+    // Act: ステータスを更新
+    orderService.updateOrderStatus(1L, "SHIPPED");
+    em.flush();
+    em.clear();
+    
+    // Assert: 期待する状態と完全一致を検証
+    assertDatabaseState("/datasets/orders/order-after-status-update.xml", 
+        "ORDER_TRAN");
+}
+```
+
+**パターン3: DAO層の複雑な検索テスト**
+```java
+@Test
+void testFindOrdersByDateRange_MultipleResults() throws Exception {
+    // Arrange: 複数の注文データを投入
+    loadDataSet("/datasets/orders/orders-in-date-range.xml");
+    
+    OrderDao orderDao = container.select(OrderDao.class).get();
+    LocalDate startDate = LocalDate.of(2024, 1, 1);
+    LocalDate endDate = LocalDate.of(2024, 1, 31);
+    
+    // Act
+    List<OrderTran> orders = orderDao.findByDateRange(startDate, endDate);
+    
+    // Assert
+    assertEquals(5, orders.size());
+    // 日付順でソートされていることを確認
+    for (int i = 0; i < orders.size() - 1; i++) {
+        assertTrue(orders.get(i).getOrderDate()
+            .isBefore(orders.get(i + 1).getOrderDate()) ||
+            orders.get(i).getOrderDate()
+            .equals(orders.get(i + 1).getOrderDate()));
+    }
+}
+```
+
+### 3.4 DBUnitのベストプラクティス
+
+1. **データセットの粒度**
+   * 1テストケース = 1データセット（または複数の組み合わせ）
+   * 共通マスターデータは別ファイルに分離
+   * シナリオ固有データは専用ファイルに配置
+
+2. **データセットのネーミング規則**
+   * `{feature}-initial-data.xml` - テスト開始時の初期状態
+   * `{feature}-expected-result.xml` - テスト実行後の期待状態
+   * `{feature}-scenario-{name}.xml` - 特定シナリオ用データ
+
+3. **カラム名とテーブル名**
+   * データベースの実際のカラム名・テーブル名を使用（大文字/小文字を統一）
+   * `setColumnSensing(true)` で未定義カラムを自動検出
+
+4. **NULL値の扱い**
+   * XMLでNULL値を表現: `<TABLE COLUMN="[null]" />`
+   * 空文字列とNULLの区別に注意
+
+5. **日付・時刻の扱い**
+   * ISO 8601形式で記述: `2024-01-01 12:00:00`
+   * タイムスタンプは固定値を使用（再現性確保）
+
+6. **外部キー制約**
+   * 親テーブル → 子テーブルの順でデータ投入
+   * CASCADE設定を考慮したデータセット設計
+
+7. **テストの独立性**
+   * 各テストで CLEAN_INSERT を使用（既存データをクリア）
+   * @AfterEach でトランザクションロールバック
+
+---
+
+## 4. 結合テストケース生成
 
 ### 3.1 テストケース設計方針（共通）
 
@@ -462,15 +824,54 @@ class BackOfficeRestClientIntegrationTest extends BaseIntegrationTest {
 
 ---
 
-## 4. テストデータの準備
+## 5. テストデータの準備
 
-### 4.1 DBのセットアップ
+### 5.1 DBのセットアップ（DBUnit使用を推奨）
 
-* @BeforeEach で EntityManager を使い、依存関係を満たすエンティティを em.persist で投入し、em.flush() で反映する
+結合テストでは、テストデータの投入に **DBUnit を使用する（必須）**:
 
-### 4.2 テストデータ管理のベストプラクティス
+* XMLまたはCSV形式でテストデータを外部ファイルとして管理
+* `loadDataSet()` メソッドで初期データを投入
+* EntityManagerを直接使用する方法との併用も可能
 
-@agent_skills/jakarta-ee-api-base/principles/architecture.md の「9.4 テストデータ管理」を参照する。
+**DBUnit使用例（推奨）:**
+```java
+@Test
+void testBusinessLogic() throws Exception {
+    // DBUnitでマスターデータと初期状態を投入
+    loadDataSet("/datasets/scenario/initial-state.xml");
+    
+    // 必要に応じてEntityManagerで追加データ投入
+    em.persist(additionalEntity);
+    em.flush();
+    
+    // テスト実行...
+}
+```
+
+**EntityManager直接使用例（補助的）:**
+```java
+@Test
+void testSimpleCase() {
+    // シンプルなケースではEntityManagerを直接使用してもよい
+    Customer customer = new Customer("test@example.com", "Test User");
+    em.persist(customer);
+    em.flush();
+    em.clear();
+    
+    // テスト実行...
+}
+```
+
+### 5.2 テストデータ管理のベストプラクティス
+
+@agent_skills/jakarta-ee-api-base/principles/architecture.md の「9.4 テストデータ管理」と、上記「3. DBUnitによるテストデータ管理」を参照する。
+
+**重要なポイント:**
+* 結合テストでは DBUnit を優先的に使用する
+* テストデータをコードから分離し、XMLまたはCSVで管理
+* データセットの再利用性を高める
+* 外部キー制約を考慮したデータ投入順序
 
 ---
 
@@ -571,11 +972,13 @@ spec_directory: "{spec_directory}"
 
 ---
 
-## 9. 参考資料
+## 10. 参考資料
 
 * Weld SE公式ドキュメント: https://weld.cdi-spec.org/
 * WireMock公式ドキュメント: https://wiremock.org/
 * JUnit 5公式ドキュメント: https://junit.org/junit5/
+* **DBUnit公式ドキュメント: http://dbunit.sourceforge.net/**
+* **DBUnitベストプラクティス: http://dbunit.sourceforge.net/bestpractices.html**
 * basic_design/{target_domain}/behaviors.md - 結合テストシナリオ（ドメイン単位）
 * basic_design/{target_domain}/functional_design.md - 機能仕様（ドメイン単位）
 * basic_design/common/architecture_design.md - システム構成

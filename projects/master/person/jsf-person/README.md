@@ -1,4 +1,4 @@
-﻿# jsf-person プロジェクト
+# jsf-person プロジェクト
 
 ## 📖 概要
 
@@ -6,6 +6,31 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 エンティティ、永続化コンテキスト、トランザクション管理を学習できます。
 
 ## 🚀 セットアップとコマンド実行ガイド
+
+### ⚡ 自動起動スクリプト（推奨）
+
+全アプリケーション（バックエンド + HSQLDB + Payara）を一括起動できる自動化スクリプトを用意しています：
+
+```bash
+# このディレクトリ（projects/master/person/jsf-person）から実行
+./start-jsf-person-all.sh
+```
+
+このスクリプトは以下を自動実行します：
+1. HSQLDB サーバーの起動
+2. Payara Server の起動
+3. データソースのセットアップ
+4. jsf-person のDB初期化、WAR化、デプロイ
+
+### 📦 その他の便利スクリプト
+
+```bash
+# すべてを停止（アプリ、Payara、HSQLDB）
+./stop-jsf-person-all.sh
+
+# データベースのみ起動/再起動
+./start-database.sh
+```
 
 ### 前提条件
 
@@ -16,7 +41,7 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 
 > **Note:** ① と ② の手順は、ルートの`README.md`を参照してください。
 
-### ③ 依存関係の確認
+### ③ 依存関係の確認（手動起動する場合）
 
 このプロジェクトを開始する前に、以下が起動していることを確認してください：
 
@@ -37,6 +62,15 @@ JSFとJPA (Java Persistence API) を組み合わせたデータベースCRUD操�
 ```
 
 ### ⑤ プロジェクトを終了するときに1回だけ実行（CleanUp）
+
+#### ⚡ 一括停止（推奨）
+
+```bash
+# このディレクトリ（projects/master/person/jsf-person）から実行
+./stop-jsf-person-all.sh
+```
+
+#### 個別に停止する場合
 
 ```bash
 # プロジェクトをアンデプロイ

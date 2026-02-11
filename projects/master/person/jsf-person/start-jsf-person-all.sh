@@ -28,7 +28,7 @@ cd "$PROJECT_ROOT"
 LOG_DIR="$PROJECT_ROOT/logs"
 mkdir -p "$LOG_DIR"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-LOG_FILE="$LOG_DIR/run-jsf-person-all_${TIMESTAMP}.log"
+LOG_FILE="$LOG_DIR/start-jsf-person-all_${TIMESTAMP}.log"
 
 # ログ出力関数（文字化け対策: 色コード付きを標準出力、色コードなしをログファイル）
 log() {

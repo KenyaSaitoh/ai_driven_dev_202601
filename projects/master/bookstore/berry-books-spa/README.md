@@ -9,24 +9,16 @@ Berry Books オンライン書店のSPAフロントエンド（React + TypeScrip
 
 ### 前提条件
 
-* Node.js 18以上
-* npm または yarn
-* バックエンドAPIが起動していること（マイクロサービス構成）
+* **Node.js 18以上**
+* **npm または yarn**
+* **バックエンドAPI**が起動していること（マイクロサービス構成）
+  * `berry-books-api` - 認証・注文API
+  * `back-office-api` - 書籍・在庫API
+  * `customer-hub-api` - 顧客API（オプション）
 
-### ③ 依存関係の確認
+> **Note:** バックエンドAPIの起動方法は、[bookstore/README.md](../README.md)を参照してください。
 
-このプロジェクトを開始する前に、以下が起動していることを確認してください：
-
-**※ 全てのGradleコマンドはリポジトリルートから実行してください**
-
-* **① HSQLDBサーバー** （`./gradlew startHsqldb`）
-* **② Payara Server** （`./gradlew startPayara`）
-* **③ バックエンドAPI**（マイクロサービス構成）
-  * `./gradlew :berry-books-api-sdd:deploy` - 認証・注文API
-  * `./gradlew :back-office-api-sdd:deploy` - 書籍・在庫API
-  * `./gradlew :customer-hub-api:deploy` - 顧客API（オプション）
-
-### ④ プロジェクトを開始するときに1回だけ実行
+### セットアップ手順
 
 ```bash
 # 1. プロジェクトのディレクトリに移動
@@ -48,17 +40,13 @@ npm run dev
 インストール後、VSCodeを再読み込みすることをお勧めします：
 * `Ctrl+Shift+P` → "Reload Window" を実行
 
-### ⑤ プロジェクトを終了するときに1回だけ実行（CleanUp）
+### 開発サーバーの停止
 
 ```bash
 # 開発サーバーのターミナルで Ctrl+C を押す
 ```
 
-### ⑥ アプリケーション作成・更新のたびに実行
-
-開発中はファイルを保存すると**自動的に再読み込み**されます（HMR）。手動での再起動は不要です。
-
-**プロダクション用ビルド:**
+### プロダクション用ビルド
 
 ```bash
 # プロダクション用にビルド

@@ -34,24 +34,58 @@ Feature: 社員認証
   社員コードとパスワードで認証を行う
 
   Scenario: 正しいパスワードで認証成功
-    Given DBに社員が存在する:
-      | employeeCode | password                    | departmentId |
-      | EMP001       | $2a$10$...（BCryptハッシュ） | 1            |
+    Given DBに以下の社員が存在する:
+      テーブル: EMPLOYEE
+      件数: 1件
+      データセット: /datasets/common/initial-employee.xml
+      データ:
+        | EMPLOYEE_ID | EMPLOYEE_CODE | PASSWORD                      | DEPARTMENT_ID | NAME   |
+        | 1           | EMP001        | $2a$10$...（BCryptハッシュ）    | 1             | 山田太郎 |
+    
     When EmployeeService.authenticate("EMP001", "password123")を呼び出す
+    
     Then 認証が成功する
-    And Employeeエンティティが返される
+    And Employeeエンティティが返される:
+      | employeeId | employeeCode | departmentId |
+      | 1          | EMP001       | 1            |
+    
+    And DBの状態は変化しない:
+      テーブル: EMPLOYEE
+      件数: 1件（変更なし）
+      検証:
+        - 認証処理はREAD操作のみ、DBは更新されない
 
   Scenario: パスワード不一致で認証失敗
-    Given DBに社員が存在する:
-      | employeeCode | password            | departmentId |
-      | EMP001       | $2a$10$...         | 1            |
+    Given DBに以下の社員が存在する:
+      テーブル: EMPLOYEE
+      件数: 1件
+      データセット: /datasets/common/initial-employee.xml
+      データ:
+        | EMPLOYEE_ID | EMPLOYEE_CODE | PASSWORD    | DEPARTMENT_ID |
+        | 1           | EMP001        | $2a$10$...  | 1             |
+    
     When EmployeeService.authenticate("EMP001", "wrongpassword")を呼び出す
+    
     Then AuthenticationExceptionがスローされる
+    
+    And DBの状態は変化しない:
+      テーブル: EMPLOYEE
+      件数: 1件（変更なし）
+      検証:
+        - 認証エラーのため、DB操作は行われない
 
   Scenario: 存在しない社員コードで認証失敗
-    Given DBに社員が存在しない
+    Given DBに社員が存在しない:
+      テーブル: EMPLOYEE
+      件数: 0件
+    
     When EmployeeService.authenticate("NONEXIST", "password123")を呼び出す
+    
     Then AuthenticationExceptionがスローされる
+    
+    And DBの状態は変化しない:
+      テーブル: EMPLOYEE
+      件数: 0件（変更なし）
 ```
 
 ---
@@ -68,23 +102,50 @@ Feature: 書籍検索
 
   Scenario: カテゴリで書籍を検索
     Given DBに以下の書籍が存在する:
-      | bookId | bookName      | categoryId |
-      | 1      | Java完全理解   | 1          |
-      | 2      | Spring入門     | 1          |
-      | 3      | 文学作品       | 2          |
+      テーブル: BOOK
+      件数: 3件
+      データセット: /datasets/common/initial-books-by-category.xml
+      データ:
+        | BOOK_ID | BOOK_NAME     | CATEGORY_ID | PRICE |
+        | 1       | Java完全理解  | 1           | 3000  |
+        | 2       | Spring入門    | 1           | 2500  |
+        | 3       | 文学作品      | 2           | 2000  |
+    
     When BookDao.searchBooks(categoryId=1, keyword=null)を呼び出す
+    
     Then カテゴリID=1の書籍2件が返される:
-      | bookName      |
-      | Java完全理解   |
-      | Spring入門     |
+      データ:
+        | bookName     |
+        | Java完全理解 |
+        | Spring入門   |
+    
+    And DBの状態は変化しない:
+      テーブル: BOOK
+      件数: 3件（変更なし）
+      検証:
+        - READ操作のため、DBは更新されない
 
   Scenario: キーワードで書籍を検索
-    Given DBに書籍が存在する:
-      | bookId | bookName          | categoryId |
-      | 1      | Java完全理解       | 1          |
-      | 2      | JavaScript入門     | 1          |
+    Given DBに以下の書籍が存在する:
+      テーブル: BOOK
+      件数: 2件
+      データセット: /datasets/common/initial-books-for-keyword-search.xml
+      データ:
+        | BOOK_ID | BOOK_NAME        | CATEGORY_ID |
+        | 1       | Java完全理解     | 1           |
+        | 2       | JavaScript入門   | 1           |
+    
     When BookDao.searchBooks(categoryId=null, keyword="Java")を呼び出す
-    Then "Java"を含む書籍2件が返される
+    
+    Then "Java"を含む書籍2件が返される:
+      データ:
+        | bookName        |
+        | Java完全理解    |
+        | JavaScript入門  |
+    
+    And DBの状態は変化しない:
+      テーブル: BOOK
+      件数: 2件（変更なし）
 ```
 
 ### 3.2 StockDao - 在庫管理
@@ -96,21 +157,49 @@ Feature: 在庫更新
   在庫数を更新する（楽観的ロック対応）
 
   Scenario: 在庫数を更新（正常系）
-    Given DBに在庫が存在する:
-      | bookId | quantity | version |
-      | 1      | 10       | 1       |
+    Given DBに以下の在庫が存在する:
+      テーブル: STOCK
+      件数: 1件
+      データセット: /datasets/common/initial-stock-before-update.xml
+      データ:
+        | BOOK_ID | QUANTITY | VERSION |
+        | 1       | 10       | 1       |
+    
     When StockDao.updateStock(bookId=1, quantity=15, version=1)を呼び出す
-    Then DBの在庫が更新される:
-      | bookId | quantity | version |
-      | 1      | 15       | 2       |
+    
+    Then DBの在庫テーブルは以下になる:
+      テーブル: STOCK
+      件数: 1件（変更なし）
+      データセット: /datasets/common/expected-stock-updated.xml
+      データ:
+        | BOOK_ID | QUANTITY | VERSION |
+        | 1       | 15       | 2       |
+      検証:
+        - QUANTITY が 10 から 15 に更新される
+        - VERSION が 1 から 2 にインクリメントされる
 
   Scenario: 楽観的ロック競合検知
-    Given DBに在庫が存在する:
-      | bookId | quantity | version |
-      | 1      | 10       | 2       |
+    Given DBに以下の在庫が存在する:
+      テーブル: STOCK
+      件数: 1件
+      データセット: /datasets/common/initial-stock-version-conflict.xml
+      データ:
+        | BOOK_ID | QUANTITY | VERSION |
+        | 1       | 10       | 2       |
+    
     When StockDao.updateStock(bookId=1, quantity=15, version=1)を呼び出す（古いバージョン）
+    
     Then OptimisticLockExceptionがスローされる
-    And DBの在庫は更新されない
+    
+    And DBの在庫テーブルは変化しない:
+      テーブル: STOCK
+      件数: 1件（変更なし）
+      データ:
+        | BOOK_ID | QUANTITY | VERSION |
+        | 1       | 10       | 2       |
+      検証:
+        - 在庫は更新されない
+        - VERSION は 2 のまま変化しない
 ```
 
 ---
@@ -126,21 +215,69 @@ Feature: 書籍詳細取得
   書籍詳細を取得（カテゴリ、出版社、在庫を含む）
 
   Scenario: 書籍詳細を取得
-    Given DBに書籍とリレーションデータが存在する:
-      | bookId | bookName      | categoryId | publisherId |
-      | 1      | Java完全理解   | 1          | 1           |
-    And Category(id=1, name="プログラミング")が存在する
-    And Publisher(id=1, name="技術評論社")が存在する
-    And Stock(bookId=1, quantity=10)が存在する
+    Given DBに以下の書籍が存在する:
+      テーブル: BOOK
+      件数: 1件
+      データセット: /datasets/common/initial-book-detail.xml
+      データ:
+        | BOOK_ID | BOOK_NAME    | CATEGORY_ID | PUBLISHER_ID | PRICE |
+        | 1       | Java完全理解 | 1           | 1            | 3000  |
+    
+    And DBに以下のカテゴリが存在する:
+      テーブル: CATEGORY
+      件数: 1件
+      データ:
+        | CATEGORY_ID | CATEGORY_NAME    |
+        | 1           | プログラミング   |
+    
+    And DBに以下の出版社が存在する:
+      テーブル: PUBLISHER
+      件数: 1件
+      データ:
+        | PUBLISHER_ID | PUBLISHER_NAME |
+        | 1            | 技術評論社     |
+    
+    And DBに以下の在庫が存在する:
+      テーブル: STOCK
+      件数: 1件
+      データ:
+        | BOOK_ID | QUANTITY | VERSION |
+        | 1       | 10       | 1       |
+    
     When BookDao.findById(bookId=1)を呼び出す
+    
     Then 書籍詳細が取得される:
-      | bookName      | categoryName      | publisherName | quantity |
-      | Java完全理解   | プログラミング      | 技術評論社     | 10       |
+      データ:
+        | bookName     | categoryName   | publisherName | quantity |
+        | Java完全理解 | プログラミング | 技術評論社    | 10       |
+      検証:
+        - BOOK, CATEGORY, PUBLISHER, STOCK のリレーションが正しく取得される
+    
+    And DBの状態は変化しない:
+      テーブル: BOOK, CATEGORY, PUBLISHER, STOCK
+      検証:
+        - READ操作のため、DBは更新されない
 ```
 
 ---
 
-## 5. 参考資料
+## 5. DBUnitデータセット対応表
+
+| シナリオ | 初期データセット | 期待データセット | 検証テーブル |
+|---------|----------------|----------------|------------|
+| 正しいパスワードで認証成功 | `/datasets/common/initial-employee.xml` | （変更なし） | EMPLOYEE |
+| パスワード不一致で認証失敗 | `/datasets/common/initial-employee.xml` | （変更なし） | EMPLOYEE |
+| 存在しない社員コードで認証失敗 | （空） | （変更なし） | EMPLOYEE |
+| カテゴリで書籍を検索 | `/datasets/common/initial-books-by-category.xml` | （変更なし） | BOOK |
+| キーワードで書籍を検索 | `/datasets/common/initial-books-for-keyword-search.xml` | （変更なし） | BOOK |
+| 在庫数を更新（正常系） | `/datasets/common/initial-stock-before-update.xml` | `/datasets/common/expected-stock-updated.xml` | STOCK |
+| 楽観的ロック競合検知 | `/datasets/common/initial-stock-version-conflict.xml` | （変更なし） | STOCK |
+| 書籍詳細を取得 | `/datasets/common/initial-book-detail.xml` | （変更なし） | BOOK<br>CATEGORY<br>PUBLISHER<br>STOCK |
+
+---
+
+## 6. 参考資料
 
 * [functional_design.md](functional_design.md) - 共通機能設計書
 * [data_model.md](data_model.md) - データモデル仕様書
+* DBUnit公式ドキュメント: http://dbunit.sourceforge.net/

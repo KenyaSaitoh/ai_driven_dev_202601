@@ -48,7 +48,7 @@
 
 ```bash
 # このディレクトリ（projects/master/bookstore）から実行
-./run-bookstore-all.sh
+./start-bookstore-api-spa-all.sh
 ```
 
 このスクリプトは以下を自動実行します：
@@ -58,7 +58,21 @@
 4. 3つのJakarta EE APIのDB初期化、WAR化、デプロイ
 5. 3つのReact SPAの依存関係インストールと起動
 
-> **Note**: SPAのみを再起動したい場合は、`./run-bookstore-spa.sh` を使用してください。
+### 📦 その他の便利スクリプト
+
+```bash
+# SPAのみを再起動
+./start-bookstore-spa-only.sh
+
+# SPAのみを停止
+./stop-bookstore-spa-only.sh
+
+# すべてを停止（SPA、API、Payara、HSQLDB）
+./stop-bookstore-all.sh
+
+# データベースのみ起動/再起動
+./start-database.sh
+```
 
 ### 前提条件
 
@@ -75,7 +89,6 @@
 ### ① 研修環境セットアップ後に1回だけ実行
 
 ```bash
-# プロジェクトルートで実行
 # HSQLDBドライバをPayara Serverにインストール
 ./gradlew installHsqldbDriver
 ```
@@ -83,7 +96,6 @@
 ### ② MAC固有の作業（初回のみ実行）
 
 ```bash
-# プロジェクトルートで実行
 # 実行権限を付与
 chmod +x gradlew
 chmod +x payara6/bin/*
@@ -98,8 +110,6 @@ chmod +x projects/sdd-wf/accounting/accounting_etl_sdd/*.sh
 環境をクリーンな状態から開始する場合：
 
 ```bash
-# プロジェクトルートで実行
-
 # 1. Payara Serverのdomain.xmlを初期化（クリーンな状態にリセット）
 ./gradlew initPayaraDomainConfig
 
@@ -124,7 +134,6 @@ chmod +x projects/sdd-wf/accounting/accounting_etl_sdd/*.sh
 各プロジェクトを開始する前に、データベーステーブルとデータを作成します：
 
 ```bash
-# プロジェクトルートで実行
 ./gradlew :berry-books-api:setupHsqldb      # 注文管理テーブル
 ./gradlew :back-office-api:setupHsqldb      # 書籍・在庫テーブル
 ./gradlew :customer-hub-api:setupHsqldb     # 顧客テーブル
@@ -133,7 +142,6 @@ chmod +x projects/sdd-wf/accounting/accounting_etl_sdd/*.sh
 ### ⑤ ビルド
 
 ```bash
-# プロジェクトルートで実行
 ./gradlew :berry-books-api:war
 ./gradlew :back-office-api:war
 ./gradlew :customer-hub-api:war
@@ -142,7 +150,6 @@ chmod +x projects/sdd-wf/accounting/accounting_etl_sdd/*.sh
 ### ⑥ デプロイ
 
 ```bash
-# プロジェクトルートで実行
 ./gradlew :berry-books-api:deploy
 ./gradlew :back-office-api:deploy
 ./gradlew :customer-hub-api:deploy
@@ -151,7 +158,6 @@ chmod +x projects/sdd-wf/accounting/accounting_etl_sdd/*.sh
 ### ⑦ アプリケーション作成・更新のたびに実行
 
 ```bash
-# アプリケーションを再ビルドして再デプロイ
 # 例：berry-books-apiの場合
 ./gradlew :berry-books-api:war
 ./gradlew :berry-books-api:deploy
@@ -190,7 +196,6 @@ http://localhost:8080/customer-hub-api/customers/1
 別のターミナルでPayara Serverのログをリアルタイムに監視できます：
 
 ```bash
-# プロジェクトルートで実行
 tail -f -n 50 payara6/glassfish/domains/domain1/logs/server.log
 ```
 
@@ -200,24 +205,36 @@ tail -f -n 50 payara6/glassfish/domains/domain1/logs/server.log
 
 ## 🧹 クリーンアップ
 
-### プロジェクトを終了するとき
+### ⚡ 一括停止（推奨）
 
-作業終了時にアプリケーションをアンデプロイします：
+すべてのアプリケーション（SPA、API、Payara、HSQLDB）を一括停止できる自動化スクリプトを用意しています：
 
 ```bash
-# プロジェクトルートで実行
+# このディレクトリ（projects/master/bookstore）から実行
+./stop-bookstore-all.sh
+```
+
+このスクリプトは以下を自動実行します：
+1. React SPA（3つ）を停止
+2. Jakarta EE API（3つ）をアンデプロイ
+3. Payara Serverを停止
+4. HSQLDBサーバーを停止
+
+### 個別に停止する場合
+
+作業終了時にアプリケーションを個別にアンデプロイします：
+
+```bash
 ./gradlew :berry-books-api:undeploy
 ./gradlew :back-office-api:undeploy
 ./gradlew :customer-hub-api:undeploy
 ```
 
-### 研修開催につき最後に1回だけ実行（環境全体のクリーンアップ）
+### プロジェクトを終了するときに実行（環境全体のクリーンアップ）
 
-研修終了時に環境全体をクリーンアップする場合：
+プロジェクト終了時に環境全体をクリーンアップする場合：
 
 ```bash
-# プロジェクトルートで実行
-
 # すべてのアプリケーションをアンデプロイし、データソースを削除
 ./gradlew cleanupAll
 
@@ -225,6 +242,76 @@ tail -f -n 50 payara6/glassfish/domains/domain1/logs/server.log
 ./gradlew stopPayara
 ./gradlew stopHsqldb
 ```
+
+## 🧪 E2Eテスト（Playwright）
+
+### テストシナリオ定義書
+
+Berry Books SPAのE2Eテストシナリオ定義書が用意されています：
+
+- [berry-books-spa/playwright_berry-books.md](berry-books-spa/playwright_berry-books.md)
+
+テストシナリオ定義書は、人が読みやすい日本語で記述されており、以下の5つのシナリオをカバーしています：
+
+1. **基本フロー** - ログインから注文までの基本操作
+2. **完全フロー** - 全画面遷移と検証を含む完全なE2Eテスト
+3. **新規顧客登録** - 新規ユーザー登録のフロー
+4. **書籍検索と注文** - カテゴリ検索から注文までのフロー
+5. **カート操作** - カート内の商品削除操作
+
+### Playwrightテストコードの自動生成
+
+Agent Skillsを使用して、テストシナリオ定義書からPlaywrightテストコードを自動生成できます：
+
+```
+@agent_skills/playwright-e2e-test/instructions/generate_playwright_tests.md
+
+テストシナリオ定義書からPlaywrightテストコードを生成してください
+
+パラメータ
+* project_root: projects/master/bookstore/berry-books-spa
+* instructions_file: projects/master/bookstore/berry-books-spa/playwright_berry-books.md
+```
+
+AIが自動で以下を実行します：
+1. テストシナリオ定義書を読み込み
+2. アプリケーションコードを解析してセレクタを自動推論
+3. Page Object Model（POM）クラスを生成
+4. TypeScriptテストコードを生成
+5. 設定ファイル（`playwright.config.ts`）を生成
+
+### テストの実行
+
+生成されたテストを実行するには：
+
+```bash
+# berry-books-spaディレクトリで実行
+
+# 依存関係のインストール
+npm install
+
+# Playwrightのインストール
+npx playwright install
+
+# 全テストを実行
+npx playwright test
+
+# UIモードで実行（デバッグ用）
+npx playwright test --ui
+
+# レポートを表示
+npx playwright show-report
+```
+
+> **Note**: テスト実行前に、Berry Books API（`http://localhost:8080/berry-books-api`）とSPA（`http://localhost:5173`）が起動している必要があります。
+
+### 詳細情報
+
+- **[Berry Books Playwright詳細ドキュメント](berry-books-spa/README_PLAYWRIGHT.md)** - テスト実行方法、トラブルシューティング、CI/CD統合など
+- [Playwright Agent Skills](../../../agent_skills/playwright-e2e-test/README.md) - テストコード自動生成の詳細
+- [Playwrightベストプラクティス](../../../agent_skills/playwright-e2e-test/principles/playwright_best_practices.md)
+
+---
 
 ## 📋 各プロジェクトの詳細
 
@@ -239,6 +326,20 @@ tail -f -n 50 payara6/glassfish/domains/domain1/logs/server.log
 - [customer-hub-swing/README.md](customer-hub-swing/README.md)
 
 ## 🗄️ データベース設定
+
+### ⚡ データベース起動/再起動
+
+データベース（HSQLDB）のみを起動または再起動するスクリプトを用意しています：
+
+```bash
+# このディレクトリ（projects/master/bookstore）から実行
+./start-database.sh
+```
+
+このスクリプトは以下を実行します：
+- HSQLDBが起動中の場合は再起動
+- HSQLDBが停止中の場合は起動
+- 接続確認と詳細情報を表示
 
 ### HSQLDB接続情報
 
@@ -300,6 +401,7 @@ SELECT * FROM PERSON;
 | **データベース** | HSQLDB | 2.7.x |
 | **ビルドツール** | Gradle | 8.x+ |
 | **フロントエンド** | React + TypeScript | - |
+| **E2Eテスト** | Playwright | - |
 | **デスクトップ** | Java Swing | - |
 
 ## 📚 関連ドキュメント

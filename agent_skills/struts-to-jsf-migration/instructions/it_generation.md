@@ -122,9 +122,283 @@ spec_directory: "projects/sdd-wf/person/jsf-person/specs/baseline"
 * テスト対象のエンティティを `<class>` で列挙
 * HSQLDB メモリ（jdbc:hsqldb:mem:testdb）、Hibernate で `hbm2ddl.auto=create-drop`、dialect=HSQLDialect
 
+### 2.4 DBUnitの導入（必須）
+
+結合テストでは、テストデータの管理にDBUnitを使用する（必須）:
+
+* DBUnit: `org.dbunit:dbunit:2.7.3`（プロジェクトのbuild.gradleに追加済み）
+* テストデータをXML/CSV形式で外部管理
+* データベースの初期状態を明示的に定義し、再現性を確保
+* テスト実行前のクリーンアップとセットアップの自動化
+* テスト実行後のデータベース状態の検証
+
+**テストデータセットの配置:**
+```
+src/test/resources/datasets/
+  ├── persons/
+  │   ├── initial-data.xml
+  │   ├── expected-after-create.xml
+  │   └── multiple-persons.xml
+  └── common/
+      └── master-data.xml
+```
+
 ---
 
-## 3. 結合テストケース生成
+## 3. DBUnitによるテストデータ管理（必須）
+
+### 3.1 BaseIntegrationTestへのDBUnit統合
+
+BaseIntegrationTestクラスにDBUnitサポートを追加する:
+
+```java
+package pro.kensait.person.integration;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+import org.dbunit.IDatabaseTester;
+import org.dbunit.JdbcDatabaseTester;
+import org.dbunit.database.DatabaseConfig;
+import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.ITable;
+import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.dbunit.ext.hsqldb.HsqldbDataTypeFactory;
+import org.dbunit.operation.DatabaseOperation;
+import org.jboss.weld.environment.se.Weld;
+import org.jboss.weld.environment.se.WeldContainer;
+import org.junit.jupiter.api.*;
+
+@Tag("integration")
+public abstract class BaseIntegrationTest {
+    
+    protected static WeldContainer container;
+    protected static EntityManagerFactory emf;
+    
+    protected EntityManager em;
+    protected IDatabaseTester databaseTester;
+    
+    @BeforeAll
+    public static void setUpAll() {
+        // Weld SE の起動
+        Weld weld = new Weld()
+            .enableDiscovery()
+            .addPackages(true, BaseIntegrationTest.class.getPackage());
+        container = weld.initialize();
+        
+        // EntityManagerFactory の作成
+        emf = Persistence.createEntityManagerFactory("test-pu");
+    }
+    
+    @AfterAll
+    public static void tearDownAll() {
+        if (emf != null && emf.isOpen()) {
+            emf.close();
+        }
+        if (container != null) {
+            container.close();
+        }
+    }
+    
+    @BeforeEach
+    public void setUp() throws Exception {
+        em = emf.createEntityManager();
+        em.getTransaction().begin();
+        
+        // DBUnitのセットアップ
+        setupDatabaseTester();
+    }
+    
+    @AfterEach
+    public void tearDown() throws Exception {
+        // トランザクションロールバック
+        if (em != null && em.getTransaction().isActive()) {
+            em.getTransaction().rollback();
+        }
+        if (em != null && em.isOpen()) {
+            em.close();
+        }
+        
+        // DBUnit クリーンアップ
+        if (databaseTester != null) {
+            databaseTester.onTearDown();
+        }
+    }
+    
+    /**
+     * DBUnitのセットアップ
+     */
+    protected void setupDatabaseTester() throws Exception {
+        // JDBC接続情報（persistence.xmlと同じ）
+        String jdbcUrl = "jdbc:hsqldb:mem:testdb";
+        String user = "SA";
+        String password = "";
+        
+        // JdbcDatabaseTesterの作成
+        databaseTester = new JdbcDatabaseTester(
+            "org.hsqldb.jdbcDriver", jdbcUrl, user, password
+        );
+        
+        // DatabaseConfigの設定（HSQLDB用）
+        DatabaseConfig config = databaseTester.getConnection().getConfig();
+        config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, 
+            new HsqldbDataTypeFactory());
+    }
+    
+    /**
+     * XMLデータセットをロードしてDBに投入
+     */
+    protected void loadDataSet(String dataSetPath) throws Exception {
+        IDataSet dataSet = new FlatXmlDataSetBuilder()
+            .setColumnSensing(true)
+            .build(getClass().getResourceAsStream(dataSetPath));
+        databaseTester.setDataSet(dataSet);
+        databaseTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+        databaseTester.onSetup();
+    }
+    
+    /**
+     * データベースの特定テーブルを取得
+     */
+    protected ITable getDatabaseTable(String tableName) throws Exception {
+        return databaseTester.getConnection()
+            .createDataSet()
+            .getTable(tableName);
+    }
+    
+    /**
+     * データベースの状態を期待XMLと比較
+     */
+    protected void assertDatabaseState(String expectedDataSetPath, String... tableNames) 
+            throws Exception {
+        IDataSet expectedDataSet = new FlatXmlDataSetBuilder()
+            .setColumnSensing(true)
+            .build(getClass().getResourceAsStream(expectedDataSetPath));
+        
+        IDataSet actualDataSet = databaseTester.getConnection().createDataSet(tableNames);
+        
+        for (String tableName : tableNames) {
+            ITable expectedTable = expectedDataSet.getTable(tableName);
+            ITable actualTable = actualDataSet.getTable(tableName);
+            
+            org.dbunit.Assertion.assertEquals(expectedTable, actualTable);
+        }
+    }
+}
+```
+
+### 3.2 XMLデータセットの作成例
+
+**`src/test/resources/datasets/persons/initial-data.xml`:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+  <PERSON PERSON_ID="1" FIRST_NAME="太郎" LAST_NAME="山田" AGE="30" />
+  <PERSON PERSON_ID="2" FIRST_NAME="花子" LAST_NAME="鈴木" AGE="25" />
+  <PERSON PERSON_ID="3" FIRST_NAME="次郎" LAST_NAME="佐藤" AGE="35" />
+</dataset>
+```
+
+### 3.3 DBUnitを使用したテストケースの実装パターン
+
+**パターン1: 初期データ投入 + DB状態検証**
+```java
+@Tag("integration")
+class PersonServiceIntegrationTest extends BaseIntegrationTest {
+    
+    private PersonService personService;
+    
+    @BeforeEach
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        personService = container.select(PersonService.class).get();
+    }
+    
+    @Test
+    void testCreatePerson_Success() throws Exception {
+        // Arrange: DBUnitで初期データ投入（既存の人物データ）
+        loadDataSet("/datasets/persons/initial-data.xml");
+        
+        // 新しい人物を作成
+        Person newPerson = new Person("三郎", "田中", 28);
+        
+        // Act
+        personService.create(newPerson);
+        em.flush();
+        em.clear();
+        
+        // Assert: DBUnit でテーブル検証
+        ITable personTable = getDatabaseTable("PERSON");
+        assertEquals(4, personTable.getRowCount()); // 既存3件 + 新規1件
+        
+        // 新規追加された人物を確認（最後の行）
+        assertEquals("三郎", personTable.getValue(3, "FIRST_NAME"));
+        assertEquals("田中", personTable.getValue(3, "LAST_NAME"));
+        assertEquals(28, Integer.parseInt(personTable.getValue(3, "AGE").toString()));
+    }
+    
+    @Test
+    void testFindAll_MultiplePersons() throws Exception {
+        // Arrange: DBUnitで複数の人物データを投入
+        loadDataSet("/datasets/persons/multiple-persons.xml");
+        
+        // Act
+        List<Person> persons = personService.findAll();
+        
+        // Assert
+        assertEquals(5, persons.size());
+        
+        // DBのデータと一致することを確認
+        ITable personTable = getDatabaseTable("PERSON");
+        assertEquals(persons.size(), personTable.getRowCount());
+    }
+}
+```
+
+**パターン2: 期待データセットとの完全比較**
+```java
+@Test
+void testUpdatePerson_Success() throws Exception {
+    // Arrange: 更新前の状態を投入
+    loadDataSet("/datasets/persons/person-before-update.xml");
+    
+    // Act: 人物情報を更新
+    Person person = em.find(Person.class, 1L);
+    person.setAge(31);
+    personService.update(person);
+    em.flush();
+    em.clear();
+    
+    // Assert: 期待する状態と完全一致を検証
+    assertDatabaseState("/datasets/persons/person-after-update.xml", "PERSON");
+}
+```
+
+### 3.4 DBUnitのベストプラクティス
+
+1. **データセットの粒度**
+   * 1テストケース = 1データセット（または複数の組み合わせ）
+   * 共通データは別ファイルに分離
+   * シナリオ固有データは専用ファイルに配置
+
+2. **カラム名とテーブル名**
+   * データベースの実際のカラム名・テーブル名を使用（大文字/小文字を統一）
+   * `setColumnSensing(true)` で未定義カラムを自動検出
+
+3. **NULL値の扱い**
+   * XMLでNULL値を表現: `<TABLE COLUMN="[null]" />`
+
+4. **日付・時刻の扱い**
+   * ISO 8601形式で記述: `2024-01-01 12:00:00`
+
+5. **テストの独立性**
+   * 各テストで CLEAN_INSERT を使用（既存データをクリア）
+   * @AfterEach でトランザクションロールバック
+
+---
+
+## 4. 結合テストケース生成
 
 ### 3.1 テストケース設計方針（共通）
 
@@ -213,19 +487,57 @@ class PersonServiceIntegrationTest extends BaseIntegrationTest {
 
 ---
 
-## 4. テストデータの準備
+## 5. テストデータの準備
 
-### 4.1 DBのセットアップ
+### 5.1 DBのセットアップ（DBUnit使用を推奨）
 
-* @BeforeEach で EntityManager を使い、em.persist でテストデータを投入し、em.flush() で反映する
+結合テストでは、テストデータの投入に **DBUnit を使用する（必須）**:
 
-### 4.2 テストデータ管理のベストプラクティス
+* XMLまたはCSV形式でテストデータを外部ファイルとして管理
+* `loadDataSet()` メソッドで初期データを投入
+* EntityManagerを直接使用する方法との併用も可能
 
-@agent_skills/struts-to-jsf-migration/principles/architecture.md の「9.4 テストデータ管理」を参照する。
+**DBUnit使用例（推奨）:**
+```java
+@Test
+void testBusinessLogic() throws Exception {
+    // DBUnitで初期データを投入
+    loadDataSet("/datasets/persons/initial-persons.xml");
+    
+    // 必要に応じてEntityManagerで追加データ投入
+    em.persist(additionalPerson);
+    em.flush();
+    
+    // テスト実行...
+}
+```
+
+**EntityManager直接使用例（補助的）:**
+```java
+@Test
+void testSimpleCase() {
+    // シンプルなケースではEntityManagerを直接使用してもよい
+    Person person = new Person("太郎", "山田", 30);
+    em.persist(person);
+    em.flush();
+    em.clear();
+    
+    // テスト実行...
+}
+```
+
+### 5.2 テストデータ管理のベストプラクティス
+
+@agent_skills/struts-to-jsf-migration/principles/architecture.md の「9.4 テストデータ管理」と、上記「3. DBUnitによるテストデータ管理」を参照する。
+
+**重要なポイント:**
+* 結合テストでは DBUnit を優先的に使用する
+* テストデータをコードから分離し、XMLまたはCSVで管理
+* データセットの再利用性を高める
 
 ---
 
-## 5. basic_design/behaviors.md からのテストケース生成
+## 6. basic_design/behaviors.md からのテストケース生成
 
 ### 5.1 シナリオの読み取り
 
@@ -292,10 +604,12 @@ spec_directory: "{spec_directory}"
 
 ---
 
-## 8. 参考資料
+## 9. 参考資料
 
 * Weld SE公式ドキュメント: https://weld.cdi-spec.org/
 * JUnit 5公式ドキュメント: https://junit.org/junit5/
+* **DBUnit公式ドキュメント: http://dbunit.sourceforge.net/**
+* **DBUnitベストプラクティス: http://dbunit.sourceforge.net/bestpractices.html**
 * basic_design/behaviors.md - 結合テストシナリオ
 * basic_design/functional_design.md - 機能仕様
 * basic_design/architecture_design.md - システム構成
