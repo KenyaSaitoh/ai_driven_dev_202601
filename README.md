@@ -42,13 +42,13 @@ Bookstoreドメインの全アプリケーション（バックエンドAPI 3つ
 ```bash
 # Git Bashで実行（プロジェクトルートから）
 cd projects/master/bookstore
-./start-bookstore-api-spa-all.sh
+./start-bookstore-all.sh
 ```
 
 **sandbox（トライアル用）で起動する場合:**
 ```bash
 cd projects/sandbox/bookstore
-./start-bookstore-api-spa-all.sh
+./start-bookstore-all.sh
 ```
 
 ### 🛑 停止方法

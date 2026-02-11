@@ -47,7 +47,7 @@
 
 ```bash
 # このディレクトリ（projects/sandbox/bookstore）から実行
-./start-bookstore-api-spa-all.sh
+./start-bookstore-all.sh
 ```
 
 このスクリプトは以下を自動実行します：

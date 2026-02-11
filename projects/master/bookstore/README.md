@@ -48,7 +48,7 @@
 
 ```bash
 # このディレクトリ（projects/master/bookstore）から実行
-./start-bookstore-api-spa-all.sh
+./start-bookstore-all.sh
 ```
 
 このスクリプトは以下を自動実行します：
@@ -307,7 +307,7 @@ npx playwright show-report
 
 ### 詳細情報
 
-- **[Berry Books Playwright詳細ドキュメント](berry-books-spa/README_PLAYWRIGHT.md)** - テスト実行方法、トラブルシューティング、CI/CD統合など
+- **[Berry Books SPA README](berry-books-spa/README.md)** - Playwrightテスト実行方法、トラブルシューティング、CI/CD統合など
 - [Playwright Agent Skills](../../../agent_skills/playwright-e2e-test/README.md) - テストコード自動生成の詳細
 - [Playwrightベストプラクティス](../../../agent_skills/playwright-e2e-test/principles/playwright_best_practices.md)
 
