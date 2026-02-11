@@ -188,7 +188,7 @@ http://localhost:8080/customer-hub-api/customers/1
 
 ### ログイン情報
 
-- **メールアドレス**: alice@gmail.com
+- **メールアドレス**: alice@example.com
 - **パスワード**: password
 
 ## 📊 ログをリアルタイム監視

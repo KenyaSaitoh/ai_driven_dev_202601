@@ -266,7 +266,7 @@ npm run dev
 http://localhost:5173 にアクセスして書店アプリを確認できます。
 
 **初回ログイン用テストユーザー:**
-* メールアドレス: `alice@gmail.com`
+* メールアドレス: `alice@example.com`
 * パスワード: `password`
 
 または、新規登録から新しいアカウントを作成してください。
