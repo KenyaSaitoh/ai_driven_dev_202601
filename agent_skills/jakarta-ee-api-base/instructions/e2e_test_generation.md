@@ -30,9 +30,12 @@ spec_directory: "projects/sdd-wf/bookstore/back-office-api/specs/baseline"
 * 実装完了後にE2Eテストを生成する（code_generation.mdの次のステップ）
 * テストフレームワーク: JUnit 5 + REST Assured
 * 外部APIモック: Wiremock（必須） - 外部マイクロサービスをスタブ化
-* データベーステスト: DBUnit（必須） - テストデータのセットアップと検証
-* テスト対象: requirements/behaviors.md（E2Eテスト用）のシナリオ（Gherkin 記法で記述されている前提。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
-* 複数機能間の連携、実際のHTTPリクエスト/レスポンス、実際のDBアクセスを含む
+* データベーステスト: DBUnit（必須） - テストデータのセットアップとDB更新の検証
+* テスト対象:
+  * requirements/requirements.md（EARS記法）: システム全体の機能要件を理解
+  * basic_design/{ドメイン名}/functional_design.md: API仕様（エンドポイント、リクエスト/レスポンス形式）
+  * basic_design/{ドメイン名}/behaviors.md（Gherkin記法）: 各ドメインの振る舞いとDB更新を確認
+* 複数機能間の連携、実際のHTTPリクエスト/レスポンス、実際のDBアクセスとDB更新の検証を含む
 * アプリケーションサーバーが起動している状態でテストを実行
 * 既存テストの扱い（重要）:
   * 既存の JUnit + REST Assured テストコードは削除せずに保護する
@@ -52,25 +55,39 @@ spec_directory: "projects/sdd-wf/bookstore/back-office-api/specs/baseline"
   * 重要: E2Eテスト生成においても、ルールドキュメントに記載されたすべてのルールを遵守すること
   * 注意: Agent Skills配下のルールは全プロジェクト共通。プロジェクト固有のルールがある場合は `{project_root}/principles/` も確認すること
 
-### 1.2 基本設計の仕様
+### 1.2 要件定義書（EARS記法）
 
-以下のファイルを読み込み、システム全体の設計を理解する
+以下のファイルを読み込み、システム全体の機能要件を理解する
 
-* {spec_directory}/basic_design/architecture_design.md - 技術スタック、パッケージ構造、テスト設定を確認する
+* {spec_directory}/requirements/requirements.md - 機能要件（EARS記法）を確認する
+  * WHEN/IF-THEN/WHERE形式で記述された機能要件
+  * システム全体の機能仕様
+  * 認証・認可、各種業務機能の要件
+  * エラーハンドリング要件
+  * 注: プロジェクトルートが決まれば、要件定義書のパスは `{spec_directory}/requirements/requirements.md` で決め打ち可能
+
+### 1.3 基本設計の仕様
+
+以下のファイルを読み込み、システム全体の設計とテスト設計を理解する
+
+* {spec_directory}/basic_design/common/architecture_design.md - 技術スタック、パッケージ構造、テスト設定を確認する
   * ベースURL、ポート番号
   * 認証方式（JWT等）
   * テストフレームワーク設定
 
-* {spec_directory}/basic_design/functional_design.md - システム全体の機能設計（全APIを含む）を確認する
+* {spec_directory}/basic_design/common/functional_design.md - 共通API仕様を確認する
+
+* {spec_directory}/basic_design/{ドメイン名}/functional_design.md - 各ドメインのAPI仕様を確認する
   * 全てのAPI仕様
   * エンドポイント一覧
   * リクエスト/レスポンス形式
 
-* {spec_directory}/requirements/behaviors.md - E2Eテストシナリオを確認する
-  * システム全体の振る舞い
-  * API間連携シナリオ
-  * E2Eのフロー
-  * 例: 認証 → 書籍検索 → 注文作成 → 在庫更新
+* {spec_directory}/basic_design/{ドメイン名}/behaviors.md - 各ドメインの振る舞いとDB更新を確認する
+  * Gherkin記法で記述されたシナリオ
+  * Service層以下の結合テスト仕様
+  * DBの初期状態とテストデータ
+  * DB更新の期待値（在庫減少、データ追加/更新/削除など）
+  * 注: プロジェクトルートが決まれば、基本設計書のパスは `{spec_directory}/basic_design/` で決め打ち可能
 
 ---
 
@@ -248,22 +265,44 @@ static void cleanupDatabase() throws Exception {
 </dataset>
 ```
 
-### 4.3 データ検証
+### 4.3 DB更新の検証
+
+重要: E2Eテストでは、API呼び出し後のDB更新をDBUnitで検証する。basic_design/{ドメイン名}/behaviors.md の期待値に基づいて検証を実装する。
 
 テスト実行後、DBUnitを使用してデータベースの状態を検証:
 
 ```java
 @Test
 void testOrderCreation_UpdatesStock() throws Exception {
+    // Given: 初期データセットアップ（behaviors.mdのデータセットを参照）
+    // 初期在庫数: 10
+    
     // When: 注文作成
     given().body(orderRequest).post("/api/orders").then().statusCode(201);
     
-    // Then: 在庫が減少していることを検証
+    // Then: 在庫が減少していることを検証（behaviors.mdの期待値に基づく）
     ITable actualTable = connection.createQueryTable("STOCK",
         "SELECT * FROM STOCK WHERE BOOK_ID = 1");
     assertEquals(8, actualTable.getValue(0, "STOCK_COUNT")); // 10 - 2 = 8
 }
 ```
+
+behaviors.md の例:
+```gherkin
+Scenario: 書籍を検索して注文を作成する
+  Given DBに以下の在庫が存在する:
+    | BOOK_ID | STOCK_COUNT | VERSION |
+    | 1       | 10          | 1       |
+  
+  When 書籍ID=1を2冊注文する
+  
+  Then 注文が作成される
+  And DBの在庫が更新される:
+    | BOOK_ID | STOCK_COUNT | VERSION |
+    | 1       | 8           | 2       |
+```
+
+上記シナリオに基づいて、DBUnitでSTOCK_COUNTが8に、VERSIONが2に更新されていることを検証する。
 
 ### 4.4 テストデータ管理のベストプラクティス
 
@@ -271,17 +310,59 @@ void testOrderCreation_UpdatesStock() throws Exception {
 
 ---
 
-## 5. requirements/behaviors.md からのテストケース生成
+## 5. 要件定義書・基本設計書からのテストケース生成
 
-### 5.1 シナリオの読み取り
+### 5.1 要件定義書（EARS記法）の読み取り
 
-requirements/behaviors.md は Gherkin 記法で記述されている。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照の上、各シナリオから Given/When/Then を抽出する。
+requirements/requirements.md は EARS記法で記述されている。以下の形式で機能要件を理解する:
 
-### 5.2 シナリオとテストの対応
+* WHEN: トリガー条件（「〜したとき」）
+* IF-THEN: 条件分岐（「もし〜ならば、〜しなければならない」）
+* WHERE: 環境条件（「〜の場合」）
 
-* Given: login() でトークン取得。必要なら GET で初期状態（在庫数など）を .extract().path() で取得
-* When: POST/GET 等でエンドポイントを呼び出し（functional_design の形式に合わせる）
-* Then: statusCode(201/200)、body で注文ID・在庫数などを検証。在庫減少は GET で再取得して initialStock - 注文数 と比較する
+例:
+```
+FR-BOOK-001: WHEN 書籍一覧取得リクエストが送信されたとき、システムは論理削除されていない全書籍情報をカテゴリ、出版社、在庫情報とともに返さなければならない。
+
+FR-BOOK-005: IF 指定された書籍IDが存在しない場合、THEN システムは404 Not Foundエラーを返し、"書籍が見つかりません"というメッセージを表示しなければならない。
+```
+
+### 5.2 基本設計書（behaviors.md）の読み取り
+
+basic_design/{ドメイン名}/behaviors.md は Gherkin 記法で記述されている。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照の上、各シナリオから Given/When/Then を抽出する。
+
+重要: behaviors.mdには以下の情報が含まれる:
+* DBの初期状態（Given: DBに以下のデータが存在する）
+* テストデータファイルのパス（データセット: /datasets/xxx.xml）
+* DB更新の期待値（Then: DBの状態は以下のように更新される）
+
+### 5.3 E2Eテストの設計方針
+
+requirements/requirements.md（EARS記法）と basic_design/{ドメイン名}/behaviors.md（Gherkin記法）を組み合わせてE2Eテストを生成する:
+
+1. requirements.md から機能要件を理解
+   * 正常系の要件（WHEN）
+   * 異常系の要件（IF-THEN）
+   * 環境条件（WHERE）
+
+2. functional_design.md からAPI仕様を確認
+   * エンドポイント、HTTPメソッド
+   * リクエスト/レスポンス形式
+   * ステータスコード
+
+3. behaviors.md からDB更新を確認
+   * 初期データのセットアップ
+   * DB更新の期待値（在庫減少、データ追加/更新/削除など）
+
+### 5.4 シナリオとテストの対応
+
+* Given: login() でトークン取得。DBUnit で初期データをセットアップ（behaviors.md のデータセットを参照）
+* When: POST/GET 等でエンドポイントを呼び出し（functional_design.md の形式に合わせる）
+* Then: 
+  * statusCode(201/200) でステータスコードを検証（requirements.md の要件に合わせる）
+  * body で注文ID・在庫数などレスポンスボディを検証
+  * DBUnit でDB更新を検証（behaviors.md の期待値に合わせる）
+    * 例: 在庫減少は ITable で STOCK テーブルを取得して initialStock - 注文数 と比較する
 
 ---
 
@@ -342,6 +423,8 @@ spec_directory: "{spec_directory}"
 
 * REST Assured公式ドキュメント: https://rest-assured.io/
 * JUnit 5公式ドキュメント: https://junit.org/junit5/
-* requirements/behaviors.md - E2Eテストシナリオ
-* basic_design/functional_design.md - API仕様
-* basic_design/architecture_design.md - システム構成
+* DBUnit公式ドキュメント: http://dbunit.sourceforge.net/
+* requirements/requirements.md - 機能要件（EARS記法）
+* basic_design/{ドメイン名}/functional_design.md - API仕様
+* basic_design/{ドメイン名}/behaviors.md - 振る舞い仕様とDB更新（Gherkin記法）
+* basic_design/common/architecture_design.md - システム構成
