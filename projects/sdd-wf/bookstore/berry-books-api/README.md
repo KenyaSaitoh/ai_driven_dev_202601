@@ -17,7 +17,7 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 このプロジェクトは、汎用的な Jakarta EE マイクロサービス開発 Agent Skills を使用して開発します。
 
-開発は以下の6段階プロセスで進めます（ドメイン単位）：
+開発は以下の7段階プロセスで進めます（ドメイン単位）：
 
 ```
 ステップ1: 基本設計（ドメイン構造決定）← AIと対話しながら
@@ -30,9 +30,9 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
     ↓
 ステップ5: テスト評価（テスト実行 → カバレッジ分析 → フィードバック）
     ↓
-ステップ5: 結合テスト生成（basic_design/{domain}/behaviors.md → JUnit + Weld SE）
+ステップ6: 結合テスト生成（basic_design/{domain}/behaviors.md → JUnit + Weld SE）
     ↓
-ステップ6: E2Eテスト生成（requirements/behaviors.md → REST Assured）
+ステップ7: E2Eテスト生成（requirements/requirements.md [EARS] + basic_design/{domain}/behaviors.md [Gherkin] → REST Assured + DBUnit）
 ```
 
 **ドメイン構成:**
@@ -242,7 +242,7 @@ AIが：
 
 ---
 
-#### ステップ5: 結合テスト生成（全ドメイン完了後）
+#### ステップ6: 結合テスト生成（全ドメイン完了後）
 
 すべてのドメインの実装が完了したら、結合テスト（JUnit 5 + Weld SE）を生成します。
 
@@ -279,9 +279,9 @@ AIが：
 
 ---
 
-#### ステップ6: E2Eテスト生成（全ドメイン完了後）
+#### ステップ7: E2Eテスト生成（全ドメイン完了後）
 
-すべてのドメインの実装が完了したら、E2Eテスト（REST Assured）を生成します。
+すべてのドメインの実装が完了したら、E2Eテスト（REST Assured + DBUnit）を生成します。
 
 ```
 @agent_skills/jakarta-ee-api-base/instructions/e2e_test_generation.md
@@ -292,6 +292,20 @@ E2Eテストコードを生成してください
 * project_root: projects/sdd-wf/bookstore/berry-books-api
 * spec_directory: projects/sdd-wf/bookstore/berry-books-api/specs/baseline
 ```
+
+AIが：
+1. 📄 要件定義書と基本設計書を読み込む
+   * requirements/requirements.md（EARS記法）: システム全体の機能要件を理解
+   * basic_design/{domain}/functional_design.md: API仕様（エンドポイント、リクエスト/レスポンス形式）
+   * basic_design/{domain}/behaviors.md（Gherkin記法）: 各ドメインの振る舞いとDB更新を確認
+2. 🧪 JUnit 5 + REST Assured + DBUnit を使用したE2Eテストを生成
+   * 複数API間の連携テスト
+   * 実際のHTTPリクエスト/レスポンス
+   * 実際のDBアクセスとDB更新の検証を含む
+   * 既存テストがある場合は、削除せずに差分のみを反映する
+3. 🏷️ `@Tag("e2e")` でE2Eテストを分離
+4. テストデータのセットアップ/クリーンアップコードを生成
+5. 🗄️ DBUnitでDB更新を検証（behaviors.mdの期待値に基づく）
 
 重要: テスト生成のみを実施（テスト実行はリポジトリルートから手動で実行。アプリケーションサーバー起動が前提）
 
