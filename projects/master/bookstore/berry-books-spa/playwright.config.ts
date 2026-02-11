@@ -73,10 +73,10 @@ export default defineConfig({
 
   // Webサーバーの自動起動設定
   // 手動でサーバーを起動する場合は、このセクションをコメントアウトしてください
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: true, // 既存サーバーを再利用（重要）
-    timeout: 120 * 1000, // 2分
-  },
+  // webServer: {
+  //   command: 'npm run dev',
+  //   url: 'http://localhost:5173',
+  //   reuseExistingServer: true, // 既存サーバーを再利用（重要）
+  //   timeout: 120 * 1000, // 2分
+  // },
 });

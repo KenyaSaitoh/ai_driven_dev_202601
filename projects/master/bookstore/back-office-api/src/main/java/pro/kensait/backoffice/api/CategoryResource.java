@@ -1,6 +1,6 @@
 package pro.kensait.backoffice.api;
 
-import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import pro.kensait.backoffice.api.dto.CategoryTO;
 import pro.kensait.backoffice.service.category.CategoryService;
 
 /**
@@ -28,16 +27,15 @@ public class CategoryResource {
     private CategoryService categoryService;
 
     /**
-     * カテゴリ一覧取得（配列形式）
+     * カテゴリ一覧取得（マップ形式：カテゴリ名→IDのマップ）
+     * 注: BFF側が {"Java": 1, "SpringBoot": 2} 形式を期待しているため、マップ形式で返す
      */
     @GET
     public Response getAllCategories() {
         logger.info("[ CategoryResource#getAllCategories ]");
 
-        List<CategoryTO> categories = categoryService.getCategoriesAll().stream()
-                .map(c -> new CategoryTO(c.getCategoryId(), c.getCategoryName()))
-                .toList();
-        return Response.ok(categories).build();
+        Map<String, Integer> categoryMap = categoryService.getCategoryMap();
+        return Response.ok(categoryMap).build();
     }
 }
 
