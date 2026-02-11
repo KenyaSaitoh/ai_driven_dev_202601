@@ -71,6 +71,27 @@ export class BookSearchPage {
   }
 
   /**
+   * 検索結果の表示を待つ
+   * ローディングが完了するまで待機
+   */
+  async waitForSearchResults() {
+    // 検索ボタンがdisabled属性を持たなくなるまで待つ（検索処理完了の確認）
+    // loading状態の間、ボタンはdisabledになる
+    await this.page.waitForFunction(
+      () => {
+        const jpqlButton = document.querySelector('#search1Button');
+        const criteriaButton = document.querySelector('#search2Button');
+        return (jpqlButton && !jpqlButton.hasAttribute('disabled')) ||
+               (criteriaButton && !criteriaButton.hasAttribute('disabled'));
+      },
+      { timeout: 15000 }
+    );
+    
+    // 検索処理が完了してDOMが更新されるまで少し待機
+    await this.page.waitForTimeout(300);
+  }
+
+  /**
    * 検索結果の指定した番号（1始まり）の書籍を買い物カゴに追加
    */
   async addToCartByIndex(index: number) {

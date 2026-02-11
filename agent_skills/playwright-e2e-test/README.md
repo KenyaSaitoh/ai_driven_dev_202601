@@ -400,6 +400,38 @@ await categorySelect.selectOption('2');
 - 「キャンセル→再試行」のような複雑なフローは避ける
 - シンプルな accept または dismiss のみを使用
 
+### 検索結果が表示されない
+
+**症状**: 検索ボタンをクリック直後に検索結果の表示確認が失敗する
+
+**原因**: 検索処理中（loading状態）で検索結果がまだ非表示
+
+**解決策**: 検索処理の完了を待つメソッドをPage Objectに追加
+
+```typescript
+// BookSearchPage.ts
+async waitForSearchResults() {
+  // 検索ボタンがdisabled属性を持たなくなるまで待つ
+  await this.page.waitForFunction(
+    () => {
+      const jpqlButton = document.querySelector('#search1Button');
+      return jpqlButton && !jpqlButton.hasAttribute('disabled');
+    },
+    { timeout: 15000 }
+  );
+  await this.page.waitForTimeout(300);
+}
+
+// テストで使用
+await bookSearchPage.searchJpqlButton.click();
+await bookSearchPage.waitForSearchResults();
+await expect(bookSearchPage.searchResults).toBeVisible();
+```
+
+**また、検索条件を確実に結果が表示される条件にする**:
+- カテゴリ: すべて
+- キーワード: Java（一般的で該当データが多いもの）
+
 ### タイムアウトエラー
 
 テスト実行時にタイムアウトが発生する場合:

@@ -454,7 +454,55 @@ page.on('dialog', async dialog => await dialog.accept());
 
 テストシナリオ自体をシンプルにし、「キャンセル→再試行」のような複雑なフローは避けることを推奨します。
 
-### 3. テストがバックグラウンドで長時間実行される
+### 3. 検索結果が表示されない（非同期検索処理）
+
+**原因**: 検索ボタンをクリックした直後は、まだ検索処理中（loading状態）で検索結果が非表示
+
+**対策**: 検索ボタンの`disabled`属性を監視して、検索処理の完了を待つ
+```typescript
+// Page Objectに検索結果待機メソッドを追加
+async waitForSearchResults() {
+  // 検索ボタンがdisabled属性を持たなくなるまで待つ（検索処理完了の確認）
+  await this.page.waitForFunction(
+    () => {
+      const jpqlButton = document.querySelector('#search1Button');
+      const criteriaButton = document.querySelector('#search2Button');
+      return (jpqlButton && !jpqlButton.hasAttribute('disabled')) ||
+             (criteriaButton && !criteriaButton.hasAttribute('disabled'));
+    },
+    { timeout: 15000 }
+  );
+  // 検索処理が完了してDOMが更新されるまで少し待機
+  await this.page.waitForTimeout(300);
+}
+
+// テストコードで使用
+await bookSearchPage.searchJpqlButton.click();
+await bookSearchPage.waitForSearchResults(); // 検索処理完了を待つ
+await expect(bookSearchPage.searchResults).toBeVisible();
+```
+
+### 4. 検索結果が見つからない（テストデータ不足）
+
+**原因**: 検索条件が厳しすぎて、テストデータベースに該当データが存在しない
+
+**対策**: 確実に結果が表示される条件を選択
+- カテゴリは「すべて」を選択
+- キーワードは一般的で該当データが多いもの（例：「Java」「Python」など）を使用
+
+```markdown
+| 13 | 選択 | カテゴリ | すべて |  |
+| 14 | 入力 | キーワード | `Java` |  |
+```
+
+**避けるべき例**:
+```markdown
+| 13 | 選択 | カテゴリ | 最初の選択肢（すべて以外） |  |
+| 14 | 入力 | キーワード | `Cloud` |  |
+```
+→ 特定カテゴリ + 特定キーワードの組み合わせで該当データがない可能性
+
+### 5. テストがバックグラウンドで長時間実行される
 
 **原因**: `webServer.reuseExistingServer`が`false`または`!process.env.CI`で、環境変数が正しく設定されていない
 

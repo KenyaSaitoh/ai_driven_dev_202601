@@ -7,7 +7,7 @@ import { OrderConfirmPage } from './pages/OrderConfirmPage';
 import { OrderSuccessPage } from './pages/OrderSuccessPage';
 import { HeaderNav } from './pages/HeaderNav';
 
-test.describe('シナリオ 2: 完全フロー（検証あり）', () => {
+test.describe('完全フロー（検証あり）', () => {
   test('全画面遷移と各ページの要素を検証する', async ({ page }) => {
     // ダイアログハンドラーの設定（削除確認ダイアログを受諾）
     page.on('dialog', async dialog => await dialog.accept());
@@ -83,14 +83,17 @@ test.describe('シナリオ 2: 完全フロー（検証あり）', () => {
     // ステップ21: カテゴリ選択肢の読み込み完了を待つ
     await bookSearchPage.waitForCategoryOptions();
 
-    // ステップ22: カテゴリを選択（最初の選択肢、すべて以外）
-    await bookSearchPage.categorySelect.selectOption({ index: 1 });
+    // ステップ22: カテゴリを選択（すべて）
+    await bookSearchPage.categorySelect.selectOption({ index: 0 });
 
     // ステップ23: キーワードを入力
-    await bookSearchPage.keywordInput.fill('Cloud');
+    await bookSearchPage.keywordInput.fill('Java');
 
     // ステップ24: 検索実行ボタンをクリック（JPQL版）
     await bookSearchPage.searchJpqlButton.click();
+
+    // 検索処理の完了を待つ
+    await bookSearchPage.waitForSearchResults();
 
     // ステップ25: 検索結果が表示されることを確認
     await expect(bookSearchPage.searchResults).toBeVisible();
