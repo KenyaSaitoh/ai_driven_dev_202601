@@ -28,15 +28,14 @@ spec_directory: "projects/sdd-wf/bookstore/back-office-api/specs/baseline"
 
 重要な方針
 * 実装完了後にE2Eテストを生成する（code_generation.mdの次のステップ）
-* **テストフレームワーク（2種類を並行使用）:**
-  * **主: JUnit 5 + REST Assured** - 従来型のE2Eテスト（必須）
-  * **補助・実験的: JUnit 5 + Cucumber + REST Assured** - Gherkin記法によるBDD形式テスト（オプション）
+* **テストフレームワーク: JUnit 5 + REST Assured**
+* **外部APIモック: Wiremock（必須）** - 外部マイクロサービスをスタブ化
+* **データベーステスト: DBUnit（必須）** - テストデータのセットアップと検証
 * テスト対象: requirements/behaviors.md（E2Eテスト用）のシナリオ（Gherkin 記法で記述されている前提。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 * 複数機能間の連携、実際のHTTPリクエスト/レスポンス、実際のDBアクセスを含む
 * アプリケーションサーバーが起動している状態でテストを実行
 * **既存テストの扱い（重要）:**
   * 既存の JUnit + REST Assured テストコードは削除せずに保護する
-  * 既存の Cucumber テストコード（.feature ファイルやステップ定義）が存在する場合は、それらを削除せずに読み込んで、差分のみを反映する
   * ファイルをゼロから作り直すのではなく、既存の内容を尊重して必要なテストケースのみを追加・修正する
   * 新規テストファイルが必要な場合のみ、新規作成する
 
@@ -79,13 +78,14 @@ spec_directory: "projects/sdd-wf/bookstore/back-office-api/specs/baseline"
 
 ### 2.1 依存関係
 
-E2Eテスト生成に必要なライブラリ:
+E2Eテスト生成に必要なライブラリ（すべて必須）:
 
-* REST Assured（rest-assured, json-path, xml-path）
-* JUnit 5: `org.junit.jupiter:junit-jupiter:5.10.0`
-* JUnit Platform: `org.junit.platform:junit-platform-launcher:1.10.0`
-* JUnit Platform Suite: `org.junit.platform:junit-platform-suite:1.10.0` (Cucumber使用時に必要)
-* Jackson（JSON処理）
+* **REST Assured**（rest-assured, json-path, xml-path）- REST APIテスト
+* **JUnit 5**: `org.junit.jupiter:junit-jupiter:5.10.0` - テストフレームワーク
+* **JUnit Platform**: `org.junit.platform:junit-platform-launcher:1.10.0` - テスト実行エンジン
+* **Wiremock** (`com.github.tomakehurst:wiremock-jre8:2.35.0`) - 外部APIモック（必須）
+* **DBUnit** (`org.dbunit:dbunit:2.7.3`) - データベーステスト（必須）
+* **Jackson** - JSON処理
 
 * E2Eテストクラスには `@Tag("e2e")` を付与し、通常の単体テスト実行から分離する
 
@@ -102,6 +102,8 @@ E2Eテスト生成に必要なライブラリ:
 * `@Tag("e2e")` の abstract ベースクラスを用意する
 * @BeforeAll: architecture_design.md のベースURL・ポートに合わせ、RestAssured.baseURI/basePath と RequestSpecBuilder で Content-Type/Accept を設定
 * 認証が必要なAPI向けに、ログインAPIを呼びトークン（cookie または header）を返す login(employeeCode, password) を用意する
+* **Wiremockサーバーの起動**: @BeforeAll で WireMockServer を起動し、外部API（customer-hub-api等）をスタブ化する
+* **DBUnit初期化**: テストデータのセットアップ用にDBUnitのIDatabaseConnectionを準備する
 
 ---
 
@@ -115,7 +117,7 @@ E2Eテスト生成に必要なライブラリ:
 * HTTPステータスコード、レスポンスボディ、ヘッダーの検証
 * @Tag("e2e") を付与し、e2eTest タスクで実行されるようにする
 
-### 3.2 主テスト: JUnit 5 + REST Assured（従来型、必須）
+### 3.2 JUnit 5 + REST Assured
 
 * `src/test/java` 配下に通常のJUnitテストクラスを作成
 * BaseE2ETest を継承（REST Assuredの設定、認証トークン管理）
@@ -148,26 +150,36 @@ class OrderE2ETest extends BaseE2ETest {
 }
 ```
 
-### 3.3 補助テスト: JUnit 5 + Cucumber + REST Assured（BDD形式、実験的・オプション）
+### 3.3 外部APIのモック化（Wiremock - 必須）
 
-* requirements/behaviors.md（E2Eテスト用）の Gherkin シナリオを、**Cucumber .feature ファイル**（`src/test/resources/features/e2e` 配下）と **Cucumber ステップ定義**（Java、REST Assured を利用）に変換する
-* 1シナリオ＝1 Feature または 1 Scenario の粒度で .feature に記述
-* 各 Given-When-Then を実際のHTTPリクエストとしてステップ定義で実装
-* feature およびステップ定義に @Tag("e2e") を付与
-* **注意**: Cucumberテストは補助的・実験的な位置づけであり、従来のJUnit + REST Assuredテストを置き換えるものではない
+**重要**: E2Eテストでは外部API（他のマイクロサービス）を実際に呼び出すのではなく、Wiremockでスタブ化する。
 
-**重要: Cucumberの日本語アノテーション問題について**
-* Cucumberの日本語アノテーション（`io.cucumber.java.ja.*`）はコンパイルエラーが発生する可能性がある
-* **推奨**: Cucumberテストは完全にオプショナルなので、**生成をスキップすることを推奨**
-* どうしてもCucumberテストが必要な場合は、英語アノテーション（`io.cucumber.java.en.*`）を使用すること
-  * `@Given`, `@When`, `@Then`, `@And` は `io.cucumber.java.en` パッケージから import
-  * .feature ファイルも英語で記述する（`# language: ja` は使用しない）
-* Cucumberテストを生成しない場合でも、.feature ファイル（ドキュメント用）は作成してよい（ステップ定義なし）
+```java
+@BeforeAll
+static void setupWiremock() {
+    wireMockServer = new WireMockServer(8089);
+    wireMockServer.start();
+    WireMock.configureFor("localhost", 8089);
+    
+    // 外部API（customer-hub-api）のスタブ
+    stubFor(get(urlEqualTo("/api/customers/1"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody("{\"customerId\":1,\"name\":\"Alice\"}")));
+}
 
-### 3.4 Wiremock の利用
+@AfterAll
+static void teardownWiremock() {
+    if (wireMockServer != null) {
+        wireMockServer.stop();
+    }
+}
+```
 
-* E2Eテストでも、外部サービスのスタブ化が必要な場合は Wiremock を利用可能
-* Wiremock を使用したテストも削除せず、既存テストと共存させる
+* 外部APIのエンドポイントを特定し、必要なレスポンスをスタブ化する
+* functional_design.md から外部システム連携の仕様を確認する
+* 正常系だけでなく、エラーレスポンス（404, 500等）もスタブ化する
 
 ### 3.2 テストケースのポイント
 
@@ -188,13 +200,72 @@ class OrderE2ETest extends BaseE2ETest {
 
 ---
 
-## 4. テストデータの準備
+## 4. テストデータの準備（DBUnit - 必須）
 
-### 4.1 DBのセットアップ
+### 4.1 DBUnitによるデータセットアップ
 
-* E2E用データは SQL スクリプト・REST API 経由・または DB 直接のいずれかで準備。@AfterAll でクリーンアップする
+**重要**: E2EテストではDBUnitを使用してテストデータを準備する。
 
-### 4.2 テストデータ管理のベストプラクティス
+```java
+private static IDatabaseConnection connection;
+private static IDataSet dataSet;
+
+@BeforeAll
+static void setupDatabase() throws Exception {
+    // DBUnit接続
+    Connection jdbcConnection = DriverManager.getConnection(
+        "jdbc:hsqldb:hsql://localhost:9001/testdb", "SA", "");
+    connection = new DatabaseConnection(jdbcConnection);
+    
+    // テストデータのロード
+    dataSet = new FlatXmlDataSetBuilder()
+        .build(BaseE2ETest.class.getResourceAsStream("/dataset/e2e-test-data.xml"));
+    
+    // データベースにテストデータを投入
+    DatabaseOperation.CLEAN_INSERT.execute(connection, dataSet);
+}
+
+@AfterAll
+static void cleanupDatabase() throws Exception {
+    if (connection != null) {
+        // テストデータのクリーンアップ
+        DatabaseOperation.DELETE_ALL.execute(connection, dataSet);
+        connection.close();
+    }
+}
+```
+
+### 4.2 テストデータファイル（XML）
+
+`src/test/resources/dataset/e2e-test-data.xml` にテストデータを定義:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <CUSTOMER CUSTOMER_ID="1" EMAIL="alice@example.com" CUSTOMER_NAME="Alice" />
+    <BOOK BOOK_ID="1" BOOK_NAME="Java入門" PRICE="3000" PUBLISHER_ID="1" CATEGORY_ID="1" />
+    <STOCK BOOK_ID="1" STOCK_COUNT="10" VERSION="1" />
+</dataset>
+```
+
+### 4.3 データ検証
+
+テスト実行後、DBUnitを使用してデータベースの状態を検証:
+
+```java
+@Test
+void testOrderCreation_UpdatesStock() throws Exception {
+    // When: 注文作成
+    given().body(orderRequest).post("/api/orders").then().statusCode(201);
+    
+    // Then: 在庫が減少していることを検証
+    ITable actualTable = connection.createQueryTable("STOCK",
+        "SELECT * FROM STOCK WHERE BOOK_ID = 1");
+    assertEquals(8, actualTable.getValue(0, "STOCK_COUNT")); // 10 - 2 = 8
+}
+```
+
+### 4.4 テストデータ管理のベストプラクティス
 
 @agent_skills/jakarta-ee-api-base/principles/architecture.md の「9.4 テストデータ管理」を参照する。
 
@@ -224,14 +295,6 @@ requirements/behaviors.md は Gherkin 記法で記述されている。@agent_sk
 
 * ネットワーク遅延を考慮してタイムアウトを設定。テスト間の依存関係を避ける。
 
-### 6.3 既存の単体テスト用Cucumberテストランナーとの競合回避
-
-* 既存の `src/test/java/.../cucumber/CucumberTestRunner.java` は単体テスト用である
-* E2Eテストを実行する際、CucumberTestRunnerが存在するとコンパイルエラーが発生する可能性がある（JUnit Platform Suiteの依存関係が不足）
-* 対処方法:
-  * プロジェクトのbuild.gradleまたは共通のbuild.gradleに `org.junit.platform:junit-platform-suite` を追加する
-  * CucumberTestRunnerのインポート文を明示的に記述する（ワイルドカードインポートを避ける）
-  * または、CucumberTestRunnerを単体テスト専用として保持し、E2Eテストでは従来のJUnit + REST Assuredのみを使用する
 
 ---
 

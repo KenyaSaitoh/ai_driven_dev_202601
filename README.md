@@ -12,11 +12,11 @@ Jakarta EE 10とReactを使用したフルスタックWebアプリケーショ�
 
 **Bookstoreドメイン**のフルスタックプロジェクトから始めることをお勧めします：
    
-- **REST API**（バックエンド）: `berry-books-api`、`back-office-api`、`customer-hub-api`（master）/ `-sandbox` 付き（sandbox）
-- **SPA**（フロントエンド）: `berry-books-spa`、`back-office-spa`、`customer-hub-spa`（master/bookstore または sandbox/bookstore）
-- **Desktop**（Swing）: `customer-hub-swing`（master のみ）
+- **REST API**（バックエンド）: `berry-books-api`、`back-office-api`、`customer-hub-api`
+- **SPA**（フロントエンド）: `berry-books-spa`、`back-office-spa`、`customer-hub-spa`
+- **Desktop**（Swing）: `customer-hub-swing`
    
-詳細は [projects/master/bookstore/README.md](projects/master/bookstore/README.md) または [projects/sandbox/bookstore/README.md](projects/sandbox/bookstore/README.md) を参照してください。
+詳細は [projects/master/bookstore/README.md](projects/master/bookstore/README.md) を参照してください。
 
 ## ⚡ クイックスタート: Bookstore フルスタック自動起動
 
@@ -38,16 +38,9 @@ Bookstoreドメインの全アプリケーション（バックエンドAPI 3つ
 
 ### 🚀 実行方法
 
-**master（模範解答）で起動する場合:**
 ```bash
 # Git Bashで実行（プロジェクトルートから）
 cd projects/master/bookstore
-./start-bookstore-all.sh
-```
-
-**sandbox（トライアル用）で起動する場合:**
-```bash
-cd projects/sandbox/bookstore
 ./start-bookstore-all.sh
 ```
 
@@ -57,14 +50,14 @@ cd projects/sandbox/bookstore
 
 ```bash
 # すべてを停止（SPA、API、Payara、HSQLDB）
-cd projects/master/bookstore  # または projects/sandbox/bookstore
+cd projects/master/bookstore
 ./stop-bookstore-all.sh
 ```
 
 **または、SPAのみを停止する場合:**
 
 ```bash
-cd projects/master/bookstore  # または projects/sandbox/bookstore
+cd projects/master/bookstore
 ./stop-bookstore-spa-only.sh
 ```
 
@@ -82,12 +75,12 @@ kill <PID1> <PID2> <PID3>
 
 > **Note**: 個別のアプリケーションのみを起動したい場合は、後述の「セットアップとコマンド実行ガイド」を参照してください。
 > 
-> **Note**: SPAのみを再起動したい場合は、`projects/master/bookstore/start-bookstore-spa-only.sh` または `projects/sandbox/bookstore/start-bookstore-spa-only.sh` を使用してください。SPAのみを停止する場合は、`stop-bookstore-spa-only.sh` を使用してください。
+> **Note**: SPAのみを再起動したい場合は、`projects/master/bookstore/start-bookstore-spa-only.sh` を使用してください。SPAのみを停止する場合は、`stop-bookstore-spa-only.sh` を使用してください。
 
 ## 📁 プロジェクト構成
 
 このリポジトリは複数の技術スタックを含むマルチプロジェクト構成です。
-プロジェクトは以下の4つのカテゴリに分類されています。
+プロジェクトは以下の3つのカテゴリに分類されています。
 
 > **Note**: このREADMEでは、環境全体のセットアップと基本的なコマンドを説明します。個別のプロジェクトについては、各ドメインフォルダやプロジェクトのREADME.mdを参照してください（例：[projects/master/bookstore/README.md](projects/master/bookstore/README.md)）。
 
@@ -97,16 +90,12 @@ kill <PID1> <PID2> <PID3>
    - 動作確認済みの完成版コード。**これ以上手を入れない想定**
    - 学習のリファレンス実装として利用
 
-2. **sandbox/** - トライアル用プロジェクト（プロンプトエンジニアリング等）
-   - master からコピーした完成版。様々なプロンプトエンジニアリングを試すサンドボックス
-   - 自由に改変・試行可能（Gradle プロジェクト名は `-sandbox` 付き）
-
-3. **sdd-wf/** - 仕様駆動開発（ウォーターフォール）プロジェクト（研修用）
+2. **sdd-wf/** - 仕様駆動開発（ウォーターフォール）プロジェクト（研修用）
    - 仕様書→タスク分解→詳細設計→実装の順で進める手法を学習
    - AIを活用した段階的な実装プロセスを体験
    - SDD対象は `back-office-api`、`berry-books-api` のみ。それ以外（SPA、customer-hub-api 等）は master と同じ内容。
 
-4. **sdd-agile/** - 仕様駆動開発（アジャイル）プロジェクト（研修用）
+3. **sdd-agile/** - 仕様駆動開発（アジャイル）プロジェクト（研修用）
    - 書店ドメイン（bookstore）をイテレーション単位で仕様駆動開発
    - sdd-wf の bookstore をコピーした構成で、アジャイル向けの進め方を学習
    - SDD対象は `back-office-api`、`berry-books-api` のみ。それ以外は master と同じ内容。
@@ -128,14 +117,6 @@ ai_driven_dev_202601/
 │   │   └── person/                                  # 人物管理ドメイン
 │   │       ├── jsf-person/                          # Person管理（JSF + JPA）【完成版】
 │   │       └── struts-person/                       # Person管理（Struts 1.3 + EJB）【完成版】
-│   ├── sandbox/                                     # トライアル用（プロンプトエンジニアリング等）
-│   │   └── bookstore/                               # 書店ドメイン（master からコピー）
-│   │       ├── berry-books-api/                      # REST API: 注文管理（-sandbox でビルド）
-│   │       ├── berry-books-spa/                     # SPA: 注文管理
-│   │       ├── back-office-api/                     # REST API: 書籍・在庫管理（-sandbox でビルド）
-│   │       ├── back-office-spa/                     # SPA: 書籍管理
-│   │       ├── customer-hub-api/                    # REST API: 顧客管理（-sandbox でビルド）
-│   │       └── customer-hub-spa/                    # SPA: 顧客管理
 │   ├── sdd-wf/                                      # 仕様駆動開発（ウォーターフォール）研修用
 │   │   ├── bookstore/                               # 書店ドメイン
 │   │   │   ├── back-office-api/                     # REST API: 書籍・在庫管理【SDD対象】
@@ -251,13 +232,9 @@ chmod +x projects/sdd-wf/accounting/accounting_etl_sdd/*.sh
 
 #### フロントエンド（SPA）
 
-> **Note**: SPAプロジェクトは `master/bookstore` および `sandbox/bookstore` にあります。
-
 ```bash
-# SPAプロジェクトディレクトリに移動（master または sandbox）
+# SPAプロジェクトディレクトリに移動
 cd projects/master/bookstore/<spa-project-name>
-# または
-cd projects/sandbox/bookstore/<spa-project-name>
 
 # 依存関係をインストール（初回のみ）
 npm install
@@ -266,7 +243,7 @@ npm install
 npm run dev
 ```
 
-> **Note**: 具体的なコマンドについては、各ドメインのREADME.mdを参照してください（例：[projects/master/bookstore/README.md](projects/master/bookstore/README.md)、[projects/sandbox/bookstore/README.md](projects/sandbox/bookstore/README.md)）。
+> **Note**: 具体的なコマンドについては、各ドメインのREADME.mdを参照してください（例：[projects/master/bookstore/README.md](projects/master/bookstore/README.md)）。
 
 ### ⑥ プロジェクトを終了する
 

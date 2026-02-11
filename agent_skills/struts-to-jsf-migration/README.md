@@ -1,14 +1,14 @@
 # Struts to JSF マイグレーション - クイックスタートガイド
 
-Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを7ステップで実現します。
+Apache Struts 1.xからJakarta Faces (JSF) 4.0へのマイグレーションを6ステップで実現します。
 
 ---
 
 ## 🎯 マイグレーションアプローチ
 
 ```
-Struts コード → SPEC生成        → タスク分解 → 詳細設計   → 本番コード生成 → テストコード生成 → テスト評価 → E2Eテスト
- (既存分析)    (画面グループ単位)   (AIと対話)   (画面単位)   (実装のみ)     (ブラックボックス  (品質検証)   (Playwright)
+Struts コード → SPEC生成        → タスク分解 → 詳細設計   → 本番コード生成 → テストコード生成 → テスト評価
+ (既存分析)    (画面グループ単位)   (AIと対話)   (画面単位)   (実装のみ)     (ブラックボックス  (品質検証)
                                                                          +ホワイトボックス)
 ```
 
@@ -60,7 +60,7 @@ JSFは画面中心のサーバーサイドMVCフレームワークです。設�
 
 ---
 
-## 🚀 7ステップでマイグレーション
+## 🚀 6ステップでマイグレーション
 
 ### ステップ1: 🔍 既存コード分析
 
@@ -225,37 +225,6 @@ AIが：
 4. ✅ テスト生成後、自動的に結合テストを実行（./gradlew integrationTest）
    * テスト結果を分析し、成功/失敗を報告
 
-### ステップ7: 🧪 E2Eテスト生成
-
-```
-@agent_skills/struts-to-jsf-migration/instructions/e2e_test_generation.md
-
-E2Eテストを生成してください。
-
-パラメータ:
-* project_root: projects/jsf-migration/struts-app-jsf
-* spec_directory: projects/jsf-migration/struts-app-jsf/specs/baseline
-* build_script_path: null  # オプション（通常は不要）。マルチプロジェクト構成の場合のみ指定
-```
-
-AIが：
-1. 📄 requirements/behaviors.md（E2Eテストシナリオ）を読み込む
-2. 🧪 Playwright を使用したE2Eテストを生成する
-   * 複数画面にまたがるフローをテスト
-   * 実際のブラウザ操作
-   * 実際のDBアクセスを含む
-   * エンドツーエンドのフロー検証
-3. 📋 テストデータのセットアップ/クリーンアップコードを生成
-4. 🏷️ `@Tag("e2e")` でE2Eテストを分離
-5. ✅ テスト生成後、自動的にE2Eテストを実行（./gradlew e2eTest）
-   * アプリケーションサーバーが起動していることを確認
-   * テスト結果を分析し、成功/失敗を報告
-
-重要：
-* E2Eテストは実装完了後に実行
-* アプリケーションサーバーが起動している状態で実行
-* `@Tag("e2e")` でE2Eテストを分離（実行はプロジェクトのビルド設定に従う）
-
 ---
 
 ## 🔄 基本設計変更対応（手戻り・拡張案件）
@@ -358,7 +327,6 @@ agent_skills/struts-to-jsf-migration/
     ├── code_generation.md            # ステップ4: コード生成（実装+単体テスト）
     ├── unit_test_execution.md        # ステップ5: 単体テスト実行評価
     ├── it_generation.md              # ステップ6: 結合テスト生成
-    ├── e2e_test_generation.md        # ステップ7: E2Eテスト生成
     └── basic_design_change.md        # 基本設計変更対応
 ```
 

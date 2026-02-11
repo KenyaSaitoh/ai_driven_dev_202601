@@ -658,11 +658,13 @@ E2Eテストコードを生成してください
 
 AIが自動で実行:
 1. requirements/behaviors.md（E2Eテストシナリオ、Gherkin記法）を読み込む
-2. JUnit 5 + REST Assured を使用したE2Eテストを生成する
+2. JUnit 5 + REST Assured + Wiremock + DBUnit を使用したE2Eテストを生成する
    * 複数機能間の連携、実際のHTTPリクエスト/レスポンス、実際のDBアクセスを含む
+   * **Wiremock（必須）**: 外部マイクロサービス（customer-hub-api等）をスタブ化
+   * **DBUnit（必須）**: テストデータ（XML）のセットアップとDB状態の検証
    * エンドツーエンドのフロー検証
    * 既存テストがある場合は、削除せずに差分のみを反映する
-3. テストデータのセットアップ/クリーンアップコードを生成
+3. テストデータXMLファイル（`src/test/resources/dataset/e2e-test-data.xml`）を生成
 4. `@Tag("e2e")` でE2Eテストを分離
 
 重要:

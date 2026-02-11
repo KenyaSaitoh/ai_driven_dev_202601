@@ -26,6 +26,9 @@ Jakarta EE 10とJAX-RS (Jakarta RESTful Web Services) 3.1を使用したオン�
 
 - **JUnit 5** - テストフレームワーク
 - **Mockito** - モックライブラリ
+- **ArchiUnit** - アーキテクチャテスト
+- **Cucumber** - BDD結合テスト
+- **Weld SE** - CDIコンテナ（結合テスト用）
 - **JaCoCo** - カバレッジツール（オプション）
 
 ## 🚀 セットアップとコマンド実行ガイド
@@ -195,6 +198,109 @@ projects/master/bookstore/back-office-api/build/reports/tests/test/index.html
 
 ブラウザで開くとテスト結果の詳細が確認できます。
 
+### ArchiUnitアーキテクチャテスト
+
+このプロジェクトでは、ArchiUnitを使用してアーキテクチャルールを検証できます。
+
+#### ArchiUnitテストの生成
+
+```bash
+# Agent SKILLを使用してArchiUnitテストを自動生成
+@agent_skills/archiunit-test/instructions/generate_archunit_tests.md
+
+Back Office APIのアーキテクチャテストを生成してください
+
+パラメータ
+* project_path: projects/master/bookstore/back-office-api
+* package_root: pro.kensait.backoffice
+```
+
+#### ArchiUnitテストの実行
+
+```bash
+# プロジェクトルートで実行
+
+# すべてのArchiUnitテストを実行
+./gradlew :back-office-api:test --tests "*architecture.*"
+
+# 特定のアーキテクチャテストのみ実行
+./gradlew :back-office-api:test --tests "*LayeredArchitectureTest"
+./gradlew :back-office-api:test --tests "*NamingConventionTest"
+./gradlew :back-office-api:test --tests "*AnnotationRulesTest"
+./gradlew :back-office-api:test --tests "*PackageStructureTest"
+```
+
+#### 検証されるアーキテクチャルール
+
+1. **レイヤー依存関係**: API → Service → DAO → Entity の依存方向
+2. **命名規則**: Resource、Service、Dao のサフィックス
+3. **アノテーションルール**: @Path、@ApplicationScoped、@Entity の使用
+4. **パッケージ構造**: DTOとEntityの分離、サイクル依存の検出
+
+詳細は生成される `README_ARCHUNIT.md` を参照してください。
+
+### Cucumber BDD結合テスト
+
+このプロジェクトでは、Cucumberを使用してビジネスシナリオを検証できます。
+
+#### ステップ1: Featureファイルの生成（behaviors.mdから）
+
+まず、既存の `behaviors.md` から Cucumber用の `.feature` ファイルを生成します。
+
+```bash
+# Agent SKILLを使用してFeatureファイルを自動生成
+@agent_skills/cucumber-test/instructions/generate_feature_from_behaviors.md
+
+Back Office APIのbehaviors.mdからFeatureファイルを生成してください
+
+パラメータ:
+* project_path: projects/master/bookstore/back-office-api
+```
+
+これにより、プロジェクト内のすべての `behaviors.md` ファイルから、対応する `.feature` ファイルが **同じディレクトリ** に生成されます。
+
+例:
+- `specs/baseline/requirements/behaviors.md` → `specs/baseline/requirements/requirements.feature`
+- `specs/baseline/basic_design/orders/behaviors.md` → `specs/baseline/basic_design/orders/orders.feature`
+
+#### ステップ2: Cucumberテストコードの生成
+
+生成された `.feature` ファイルを使用して、Step Definitions と Test Runner を生成します。
+
+```bash
+# Agent SKILLを使用してCucumber結合テストを自動生成
+@agent_skills/cucumber-test/instructions/generate_cucumber_tests.md
+
+Back Office APIのCucumber結合テストを生成してください
+
+パラメータ
+* project_path: projects/master/bookstore/back-office-api
+* package_root: pro.kensait.backoffice
+```
+
+#### Cucumberテストの実行
+
+```bash
+# プロジェクトルートで実行
+
+# すべてのCucumber結合テストを実行
+./gradlew :back-office-api:integrationTest
+
+# 特定のタグを持つテストのみ実行
+./gradlew :back-office-api:integrationTest -Dcucumber.filter.tags="@order"
+
+# HTMLレポートの確認
+# build/reports/cucumber/cucumber.html を開く
+```
+
+#### 検証されるビジネスシナリオ
+
+1. **注文管理**: 書籍の注文処理、在庫確認
+2. **書籍検索**: カテゴリ、キーワードによる検索
+3. **在庫管理**: 在庫の更新、在庫不足の検出
+
+詳細は生成される `README_CUCUMBER.md` を参照してください。
+
 ## 🎯 プロジェクト構成
 
 ```
@@ -220,8 +326,28 @@ projects/master/bookstore/back-office-api/
 │   │           ├── web.xml
 │   │           └── beans.xml
 │   └── test/
-│       └── java/
-│           └── pro/kensait/backoffice/service/   # サービス層のテスト
+│       ├── java/
+│       │   └── pro/kensait/backoffice/
+│       │       ├── service/          # サービス層のユニットテスト
+│       │       ├── architecture/     # ArchiUnitアーキテクチャテスト
+│       │       │   ├── LayeredArchitectureTest.java
+│       │       │   ├── NamingConventionTest.java
+│       │       │   ├── AnnotationRulesTest.java
+│       │       │   └── PackageStructureTest.java
+│       │       └── cucumber/         # Cucumber BDD結合テスト
+│       │           ├── CucumberIntegrationTestRunner.java
+│       │           ├── steps/        # Step Definitions
+│       │           │   ├── OrderManagementSteps.java
+│       │           │   ├── BookSearchSteps.java
+│       │           │   └── CommonSteps.java
+│       │           └── support/      # テストサポート
+│       │               ├── TestContext.java
+│       │               ├── TestDatabase.java
+│       │               └── Hooks.java
+│       └── resources/
+│           └── features/             # Gherkin Featureファイル
+│               ├── order_management.feature
+│               └── book_search.feature
 ├── sql/
 │   └── hsqldb/                       # SQLスクリプト
 └── build/

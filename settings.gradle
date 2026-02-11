@@ -12,11 +12,6 @@ include 'back-office-api'
 include 'jsf-person'
 include 'struts-person'
 
-// Sandbox: プロンプトエンジニアリング等のトライアル用（master からコピーした完成版）
-include 'berry-books-api-sandbox'
-include 'back-office-api-sandbox'
-include 'customer-hub-api-sandbox'
-
 // SDD: 仕様駆動開発（Specification-Driven Development）プロジェクト
 // sdd-wf: ウォーターフォール開発用（仕様→タスク分解→詳細設計→実装の順）
 include 'berry-books-api-sdd-wf'
@@ -36,11 +31,6 @@ project(':customer-hub-api').projectDir = file('projects/master/bookstore/custom
 project(':customer-hub-swing').projectDir = file('projects/master/bookstore/customer-hub-swing')
 project(':jsf-person').projectDir = file('projects/master/person/jsf-person')
 project(':struts-person').projectDir = file('projects/master/person/struts-person')
-
-// Sandbox: トライアル用（bookstore のみ）
-project(':berry-books-api-sandbox').projectDir = file('projects/sandbox/bookstore/berry-books-api')
-project(':back-office-api-sandbox').projectDir = file('projects/sandbox/bookstore/back-office-api')
-project(':customer-hub-api-sandbox').projectDir = file('projects/sandbox/bookstore/customer-hub-api')
 
 // SDD: 仕様駆動開発プロジェクト（ドメイン別に整理）
 // sdd-wf: ウォーターフォール用（フォルダ名にsddは付けない、論理名で識別）

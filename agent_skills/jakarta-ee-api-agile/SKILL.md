@@ -154,7 +154,11 @@ E2Eテストコードを生成してください
 * spec_directory: <SPECディレクトリパス>
 ```
 
-common / usecases 配下の behaviors を参照してE2Eテストを生成
+AIが自動で以下を実行
+1. usecases/ 配下の behaviors.md を参照してE2Eテストを生成
+2. JUnit 5 + REST Assured + Wiremock + DBUnit を使用
+   * **Wiremock（必須）**: 外部マイクロサービスをスタブ化
+   * **DBUnit（必須）**: テストデータのセットアップとDB状態の検証
 
 重要: テスト生成のみを実施（テスト実行は手動で ./gradlew e2eTest を実行。アプリケーションサーバー起動が前提）
 
@@ -203,8 +207,8 @@ agent_skills/jakarta-ee-api-agile/
     ├── usecase_spec.md
     ├── code_generation.md
     ├── unit_test_execution.md
-    ├── it_generation.md
-    └── e2e_test_generation.md
+    ├── it_generation.md              # 結合テスト生成（Weld SE + Wiremock）
+    └── e2e_test_generation.md        # E2Eテスト生成（REST Assured + Wiremock + DBUnit）
 ```
 
 ---

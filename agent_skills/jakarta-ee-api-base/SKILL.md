@@ -201,11 +201,13 @@ E2Eテストコードを生成してください
 
 AIが自動で以下を実行
 1. requirements/behaviors.md（E2Eテストシナリオ）を読み込み
-2. JUnit 5 + REST Assured を使用したE2Eテストを生成
+2. JUnit 5 + REST Assured + Wiremock + DBUnit を使用したE2Eテストを生成
    * API層を含む全体フロー
    * 実際のHTTPリクエスト/レスポンス
+   * **Wiremock（必須）**: 外部マイクロサービスをスタブ化
+   * **DBUnit（必須）**: テストデータのセットアップとDB状態の検証
    * 既存テストがある場合は、削除せずに差分のみを反映する
-3. テストデータのセットアップ/クリーンアップコードを生成
+3. テストデータXMLファイルとクリーンアップコードを生成
 
 重要:
 * テスト生成のみを実施（テスト実行は手動で ./gradlew e2eTest を実行）
@@ -318,8 +320,8 @@ agent_skills/jakarta-ee-api-base/
     ├── detailed_design.md            # ステップ2: 詳細設計（ドメイン単位）
     ├── code_generation.md            # ステップ3: コード生成（実装+単体テスト、ドメイン単位）
     ├── unit_test_execution.md        # ステップ4: 単体テスト実行評価
-    ├── it_generation.md              # ステップ5: 結合テスト生成（Cucumber + Weld SE）
-    ├── e2e_test_generation.md        # ステップ6: E2Eテスト生成（Cucumber + REST Assured）
+    ├── it_generation.md              # ステップ5: 結合テスト生成（Weld SE + Wiremock）
+    ├── e2e_test_generation.md        # ステップ6: E2Eテスト生成（REST Assured + Wiremock + DBUnit）
     └── basic_design_change.md        # 基本設計変更対応（手戻り・拡張案件）
 ```
 

@@ -146,11 +146,9 @@ subprojects {
         if (project.name == "berry-books-api" || 
             project.name == "berry-books-api-sdd-wf" ||
             project.name == "berry-books-api-sdd-agile" ||
-            project.name == "berry-books-api-sandbox" ||
             project.name == "back-office-api" ||
             project.name == "back-office-api-sdd-wf" ||
-            project.name == "back-office-api-sdd-agile" ||
-            project.name == "back-office-api-sandbox") {
+            project.name == "back-office-api-sdd-agile") {
             // JWT
             implementation "io.jsonwebtoken:jjwt-api:0.12.6"
             runtimeOnly "io.jsonwebtoken:jjwt-impl:0.12.6"
@@ -172,6 +170,9 @@ subprojects {
         // Mockito（単体テスト用モッキング）
         testImplementation "org.mockito:mockito-core:5.5.0"
         testImplementation "org.mockito:mockito-junit-jupiter:5.5.0"
+        
+        // ArchUnit（アーキテクチャテスト用）
+        testImplementation "com.tngtech.archunit:archunit-junit5:1.3.0"
         
         // DBUnit（データベーステスト用）
         testImplementation "org.dbunit:dbunit:2.7.3"
@@ -199,13 +200,10 @@ subprojects {
         if (project.name == "berry-books-api" || 
             project.name == "berry-books-api-sdd-wf" ||
             project.name == "berry-books-api-sdd-agile" ||
-            project.name == "berry-books-api-sandbox" ||
             project.name == "back-office-api" ||
             project.name == "back-office-api-sdd-wf" ||
             project.name == "back-office-api-sdd-agile" ||
-            project.name == "back-office-api-sandbox" ||
             project.name == "customer-hub-api" ||
-            project.name == "customer-hub-api-sandbox" ||
             project.name == "customer-hub-api-sdd-wf") {
             testImplementation "io.rest-assured:rest-assured:5.4.0"
             testImplementation "io.rest-assured:json-path:5.4.0"

@@ -127,16 +127,15 @@
 * 基本設計SPECの変更管理を行わない方針に統一。SPEC を編集したうえで code_generation を target 指定で再実行し、既存コードへ差分を反映する運用に変更
 * instructions/code_generation.md: アジャイルにおける位置づけを追記。何度でも再実行し、既存コードに対して SPEC に基づく差分を漸進的に反映する前提を明記。既存コードがある場合は差分のみ反映し、他 target のコードは破壊しない旨を追加
 
-#### プロジェクト構造・ビルド（sdd-wf / sdd-agile / sandbox、Gradle、ルート README）
-* フォルダ `projects/sdd` を `projects/sdd-wf` にリネームしたことに伴い、`settings.gradle`、ルート `README.md`、`CHANGELOG.md`、`agent_skills`（jakarta-ee-api-base / struts-to-jsf-migration）の instructions・SKILL・README、`docs/`、`projects/master`・`projects/sandbox`・`projects/sdd-wf`・`projects/sdd-agile` 配下の README・test_script 等のパスを `projects/sdd-wf` に統一
-* ルート `README.md`: プロジェクトカテゴリを 4 つに再構成（master / sandbox / sdd-wf / sdd-agile）。master を「模範解答・手を入れない想定」、sandbox を「トライアル用（プロンプトエンジニアリング等）」と明記。ディレクトリ構造ツリーに sandbox と sdd-agile を追加
-* ルート `README.md`: クイックスタートに master 用・sandbox 用の実行方法を分けて記載。代表プロジェクト・SPA の説明に sandbox を追加。SDD クリーン手順に sdd-agile 用コマンドと `cleanupAllSddProjects` を追記
-* `settings.gradle`: Master を「模範解答・手を入れない想定」、SDD を sdd-wf（ウォーターフォール）と sdd-agile（アジャイル）に分けてコメント整理。sdd-agile 用に `berry-books-api-sdd-agile`・`back-office-api-sdd-agile` の projectDir を追加。sandbox 用に `berry-books-api-sandbox`・`back-office-api-sandbox`・`customer-hub-api-sandbox` の projectDir を追加
-* `build.gradle`: JWT/BCrypt および REST Assured の対象に `*-sdd-agile`・`*-sandbox` を追加。sddProjects と cleanupAllSddProjects に sdd-agile の 2 プロジェクトを追加
+#### プロジェクト構造・ビルド（sdd-wf / sdd-agile、Gradle、ルート README）
+* フォルダ `projects/sdd` を `projects/sdd-wf` にリネームしたことに伴い、`settings.gradle`、ルート `README.md`、`CHANGELOG.md`、`agent_skills`（jakarta-ee-api-base / struts-to-jsf-migration）の instructions・SKILL・README、`docs/`、`projects/master`・`projects/sdd-wf`・`projects/sdd-agile` 配下の README・test_script 等のパスを `projects/sdd-wf` に統一
+* ルート `README.md`: プロジェクトカテゴリを 3 つに再構成（master / sdd-wf / sdd-agile）。master を「模範解答・手を入れない想定」と明記。ディレクトリ構造ツリーに sdd-agile を追加
+* ルート `README.md`: クイックスタートに master 用の実行方法を記載。SDD クリーン手順に sdd-agile 用コマンドと `cleanupAllSddProjects` を追記
+* `settings.gradle`: Master を「模範解答・手を入れない想定」、SDD を sdd-wf（ウォーターフォール）と sdd-agile（アジャイル）に分けてコメント整理。sdd-agile 用に `berry-books-api-sdd-agile`・`back-office-api-sdd-agile` の projectDir を追加
+* `build.gradle`: JWT/BCrypt および REST Assured の対象に `*-sdd-agile` を追加。sddProjects と cleanupAllSddProjects に sdd-agile の 2 プロジェクトを追加
 
 #### 各プロジェクト配下（README・スクリプト・vite）
 * `projects/sdd-agile/bookstore/` 配下: README（back-office-api-sdd, berry-books-api-sdd）に sdd-agile 用の注記・Gradle 名（-agile）・コンテキストルートを追記。Gradle コマンド例・URL を -agile に統一。test_script/README・test_images.sh・run-bookstore-all.sh・test_all.sh・specs/baseline/basic_design/behaviors.md のパス・Gradle 名・API_BASE を sdd-agile 用に更新
-* `projects/sandbox/bookstore/`: README を「Sandbox（プロンプトエンジニアリング用）」に変更し、Gradle 名（-sandbox）・コンテキストルート・コマンド例・URL を -sandbox に統一。customer-hub-swing は sandbox に含まない旨を記載。run-bookstore-all.sh の Gradle タスクと SPA パスを -sandbox 用に変更。run-bookstore-spa.sh のパスを `projects/sandbox/bookstore/` に変更
 * `run-berry-books-all.sh` を `run-bookstore-all.sh` にリネームし、`projects/master/bookstore/` に移動
 * `restart-berry-books-spa.sh` を `run-bookstore-spa.sh` にリネームし、`projects/master/bookstore/` に移動
 * ルート直下の `README.md` のクイックスタートセクションを更新（スクリプト名・実行パス・Bookstore表記に統一）
@@ -161,11 +160,12 @@
 
 #### Gradle ビルドへの組み込み
 * アジャイル向け仕様駆動開発用に `projects/sdd-agile`（bookstore）を Gradle ビルドに組み込み: `settings.gradle` に `berry-books-api-sdd-agile`・`back-office-api-sdd-agile` を追加（projectDir は `projects/sdd-agile/bookstore/berry-books-api-sdd` 等）
-* プロンプトエンジニアリング等のトライアル用に `projects/sandbox`（bookstore、master からコピーした完成版）を Gradle ビルドに組み込み: `settings.gradle` に `berry-books-api-sandbox`・`back-office-api-sandbox`・`customer-hub-api-sandbox` を追加（projectDir は `projects/sandbox/bookstore/berry-books-api` 等）
 
 #### 起動スクリプト
 * `projects/master/person/jsf-person/run-jsf-person-all.sh` を追加: JSF Person アプリケーションの一括起動スクリプト
 * `projects/master/person/struts-person/run-struts-person-all.sh` を追加: Struts Person アプリケーションの一括起動スクリプト
-* `projects/sdd-wf/bookstore/run-bookstore-all.sh` を追加: SDD版Bookstoreフルスタック一括起動スクリプト（back-office-api-sdd、berry-books-api-sdd、customer-hub-api + 3つのSPA）
-* `projects/sdd-wf/bookstore/run-bookstore-spa.sh` を追加: SDD版Bookstore SPA再起動スクリプト
-* `projects/sdd-wf/person/jsf-person-sdd/run-jsf-person-all.sh` を追加: SDD版JSF Personアプリケーションの一括起動スクリプト
+* `projects/sdd-wf/bookstore/run-bookstore-all.sh` を追加: SDD-WF版Bookstoreフルスタック一括起動スクリプト（back-office-api-sdd-wf、berry-books-api-sdd-wf、customer-hub-api-sdd-wf + 3つのSPA）
+* `projects/sdd-wf/bookstore/run-bookstore-spa.sh` を追加: SDD-WF版Bookstore SPA再起動スクリプト
+* `projects/sdd-wf/person/jsf-person-sdd/run-jsf-person-all.sh` を追加: SDD-WF版JSF Personアプリケーションの一括起動スクリプト
+* `projects/sdd-agile/bookstore/run-bookstore-all.sh` を追加: SDD-Agile版Bookstoreフルスタック一括起動スクリプト（back-office-api-sdd-agile、berry-books-api-sdd-agile、customer-hub-api-sdd-agile + 3つのSPA）
+* `projects/sdd-agile/bookstore/run-bookstore-spa.sh` を追加: SDD-Agile版Bookstore SPA再起動スクリプト

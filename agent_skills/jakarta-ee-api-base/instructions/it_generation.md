@@ -37,9 +37,7 @@ target_domains: "all"
 
 重要な方針
 * 単体テスト実行評価後に結合テストを生成する（unit_test_execution.mdの次のステップ）
-* **テストフレームワーク（2種類を並行使用）:**
-  * **主: JUnit 5 + Weld SE（CDIコンテナ）** - 従来型の結合テスト（必須）
-  * **補助・実験的: JUnit 5 + Cucumber + Weld SE** - Gherkin記法によるBDD形式テスト（オプション）
+* **テストフレームワーク: JUnit 5 + Weld SE（CDIコンテナ）**
 * テスト対象: basic_design/{domain}/behaviors.md（結合テスト用）のシナリオ（Gherkin 記法で記述されている前提。@agent_skills/jakarta-ee-api-base/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 * Service層以下（Service + DAO + Entity）の実際の連携をテスト
 * モックは使用しない（外部APIのみWireMockでスタブ化）
@@ -47,12 +45,8 @@ target_domains: "all"
 * ドメイン単位または全ドメインの結合テストを生成
 * **既存テストの扱い（重要）:**
   * 既存の JUnit + Weld テストコードは削除せずに保護する
-  * 既存の Cucumber テストコード（.feature ファイルやステップ定義）が存在する場合は、それらを削除せずに読み込んで、差分のみを反映する
   * ファイルをゼロから作り直すのではなく、既存の内容を尊重して必要なテストケースのみを追加・修正する
   * 新規テストファイルが必要な場合のみ、新規作成する
-  * **既存の単体テスト用CucumberTestRunner.java（src/test/java/.../cucumber/）は削除しない**
-    * このファイルは単体テスト専用で、結合テストとは独立している
-    * ルートbuild.gradleに `junit-platform-suite` 依存関係が追加されているため、コンパイルエラーは発生しない
 
 ---
 
@@ -123,7 +117,6 @@ target_domains: "all"
 * Hibernate (JPA実装): `org.hibernate.orm:hibernate-core:6.4.0.Final`
 * JUnit 5: `org.junit.jupiter:junit-jupiter:5.10.0`
 * JUnit Platform: `org.junit.platform:junit-platform-launcher:1.10.0`
-* JUnit Platform Suite: `org.junit.platform:junit-platform-suite:1.10.0`
 * JAX-RS Client: `org.glassfish.jersey.core:jersey-client:3.1.3`
 * JAX-RS JSON処理: `org.glassfish.jersey.media:jersey-media-json-binding:3.1.3`
 * HSQLDB: `org.hsqldb:hsqldb:2.7.2`
@@ -571,7 +564,7 @@ void testFindOrdersByDateRange_MultipleResults() throws Exception {
 * @Tag("integration") を付与し、integrationTest タスクで実行されるようにする
 * target_domains が "all" の場合、すべてのドメインの behaviors.md からテストを生成
 
-### 3.2 主テスト: JUnit 5 + Weld SE（従来型、必須）
+### 3.2 JUnit 5 + Weld SE
 
 * `src/test/java` 配下に通常のJUnitテストクラスを作成
 * BaseIntegrationTest を継承（Weld SE によるCDIコンテナ起動、EntityManager管理、WireMock管理）
@@ -606,27 +599,7 @@ class OrderServiceIntegrationTest extends BaseIntegrationTest {
 }
 ```
 
-### 3.3 補助テスト: JUnit 5 + Cucumber + Weld SE（BDD形式、実験的・オプション）
-
-* behaviors.md の Gherkin シナリオを、**Cucumber の .feature ファイル**（`src/test/resources/features/integration` 配下）と **Cucumber ステップ定義**（Java、Weld SE を利用）に変換する
-* 1シナリオ＝1 Feature または 1 Scenario の粒度で .feature に記述
-* feature およびステップ定義に @Tag("integration") を付与
-* **注意**: Cucumberテストは補助的・実験的な位置づけであり、従来のJUnit + Weldテストを置き換えるものではない
-
-**重要: Cucumberの日本語アノテーション問題について**
-* Cucumberの日本語アノテーション（`io.cucumber.java.ja.*`）はコンパイルエラーが発生する可能性がある
-* **推奨**: Cucumberテストは完全にオプショナルなので、**生成をスキップすることを推奨**
-* どうしてもCucumberテストが必要な場合は、英語アノテーション（`io.cucumber.java.en.*`）を使用すること
-  * `@Given`, `@When`, `@Then`, `@And` は `io.cucumber.java.en` パッケージから import
-  * .feature ファイルも英語で記述する（`# language: ja` は使用しない）
-* Cucumberテストを生成しない場合でも、.feature ファイル（ドキュメント用）は作成してよい（ステップ定義なし）
-
-**Cucumberテストランナーの注意点:**
-* 単体テスト用のCucumberTestRunnerは結合テストと競合する可能性がある
-* 単体テスト用のCucumberTestRunnerは `src/test/java/.../cucumber/` に配置し、結合テストとは分離する
-* 結合テストではCucumberTestRunnerを使用せず、.featureファイルのみを作成する（オプション）
-
-### 3.4 RestAssured や Wiremock の直接利用
+### 3.3 RestAssured や Wiremock の直接利用
 
 * 結合テストでは、必要に応じて RestAssured や Wiremock を直接利用したテストも作成可能
 * これらのテストも削除せず、既存テストと共存させる
@@ -915,14 +888,6 @@ basic_design/{target_domain}/behaviors.md は Gherkin 記法で記述されて�
 
 * テスト間の独立性を保つ（@BeforeEach/@AfterEachで初期化・クリーンアップ）。外部APIはWireMockでスタブ化。テストデータは一意にする（UUID等）。トランザクション境界を明確にする。
 
-### 7.3 既存の単体テスト用Cucumberテストランナーとの競合回避
-
-* 既存の `src/test/java/.../cucumber/CucumberTestRunner.java` は単体テスト用である
-* 結合テストを実行する際、CucumberTestRunnerが存在するとコンパイルエラーが発生する可能性がある（JUnit Platform Suiteの依存関係が不足）
-* 対処方法:
-  * プロジェクトのbuild.gradleまたは共通のbuild.gradleに `org.junit.platform:junit-platform-suite` を追加する
-  * CucumberTestRunnerのインポート文を明示的に記述する（ワイルドカードインポートを避ける）
-  * または、CucumberTestRunnerを単体テスト専用として保持し、結合テストではCucumberを使用しない（.featureファイルのみ作成）
 
 ### 7.4 JAX-RS ClientでのJSON処理
 

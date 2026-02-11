@@ -384,8 +384,10 @@ E2Eテストを生成してください
 
 AIが自動で実行:
 1. usecases/ 配下の behaviors.md（Gherkin）を読み込む
-2. JUnit 5 + Cucumber（.feature + ステップ定義）+ REST Assured でE2Eテストを生成
+2. JUnit 5 + REST Assured + Wiremock + DBUnit でE2Eテストを生成
    * API層を含む全体フロー、実際のHTTPリクエスト/レスポンス、実DB
+   * **Wiremock（必須）**: 外部マイクロサービス（customer-hub-api等）をスタブ化
+   * **DBUnit（必須）**: テストデータ（XML）のセットアップとDB状態の検証
 3. `@Tag("e2e")` でE2Eテストを分離
 4. テスト生成後、自動的にE2Eテストを実行（./gradlew e2eTest）
    * アプリケーションサーバーが起動していることを確認

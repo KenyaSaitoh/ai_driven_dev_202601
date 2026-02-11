@@ -28,9 +28,7 @@ spec_directory: "projects/sdd-wf/person/jsf-person/specs/baseline"
 
 重要な方針
 * 単体テスト実行評価後に結合テストを生成する（unit_test_execution.mdの次のステップ）
-* **テストフレームワーク（2種類を並行使用）:**
-  * **主: JUnit 5 + Weld SE（CDIコンテナ）** - 従来型の結合テスト（必須）
-  * **補助・実験的: JUnit 5 + Cucumber + Weld SE** - Gherkin記法によるBDD形式テスト（オプション）
+* **テストフレームワーク: JUnit 5 + Weld SE（CDIコンテナ）**
 * テスト対象: basic_design/behaviors.md（結合テスト用）のシナリオ（Gherkin 記法で記述されている前提。@agent_skills/struts-to-jsf-migration/principles/common_rules.md の「振る舞いの記法（Gherkin）」を参照）
 * Service層以下（Service + Entity）の実際の連携をテスト
 * モックは使用しない（実際のDB操作）
@@ -38,12 +36,8 @@ spec_directory: "projects/sdd-wf/person/jsf-person/specs/baseline"
 * Managed Beanは結合テストの対象外（E2Eテストで検証）
 * **既存テストの扱い（重要）:**
   * 既存の JUnit + Weld テストコードは削除せずに保護する
-  * 既存の Cucumber テストコード（.feature ファイルやステップ定義）が存在する場合は、それらを削除せずに読み込んで、差分のみを反映する
   * ファイルをゼロから作り直すのではなく、既存の内容を尊重して必要なテストケースのみを追加・修正する
   * 新規テストファイルが必要な場合のみ、新規作成する
-  * **既存の単体テスト用CucumberTestRunner.java（src/test/java/.../cucumber/）は削除しない**
-    * このファイルは単体テスト専用で、結合テストとは独立している
-    * ルートbuild.gradleに `junit-platform-suite` 依存関係が追加されているため、コンパイルエラーは発生しない
 
 ---
 
@@ -99,7 +93,6 @@ spec_directory: "projects/sdd-wf/person/jsf-person/specs/baseline"
 * Hibernate (JPA実装): `org.hibernate.orm:hibernate-core:6.4.0.Final`
 * JUnit 5: `org.junit.jupiter:junit-jupiter:5.10.0`
 * JUnit Platform: `org.junit.platform:junit-platform-launcher:1.10.0`
-* JUnit Platform Suite: `org.junit.platform:junit-platform-suite:1.10.0`
 * HSQLDB: `org.hsqldb:hsqldb:2.7.2`
 
 * 結合テストクラスには `@Tag("integration")` を付与し、通常の単体テスト実行から分離する
@@ -409,7 +402,7 @@ void testUpdatePerson_Success() throws Exception {
 * トランザクション管理の検証
 * @Tag("integration") を付与し、integrationTest タスクで実行されるようにする
 
-### 3.2 主テスト: JUnit 5 + Weld SE（従来型、必須）
+### 3.2 JUnit 5 + Weld SE
 
 * `src/test/java` 配下に通常のJUnitテストクラスを作成
 * BaseIntegrationTest を継承（Weld SE によるCDIコンテナ起動、EntityManager管理）
@@ -438,21 +431,6 @@ class PersonServiceIntegrationTest extends BaseIntegrationTest {
     }
 }
 ```
-
-### 3.3 補助テスト: JUnit 5 + Cucumber + Weld SE（BDD形式、実験的・オプション）
-
-* basic_design/behaviors.md の Gherkin シナリオを、**Cucumber .feature ファイル**（`src/test/resources/features/integration` 配下）と **Cucumber ステップ定義**（Java、Weld SE を利用）に変換する
-* 1シナリオ＝1 Feature または 1 Scenario の粒度で .feature に記述
-* feature およびステップ定義に @Tag("integration") を付与
-* **注意**: Cucumberテストは補助的・実験的な位置づけであり、従来のJUnit + Weldテストを置き換えるものではない
-
-**重要: Cucumberの日本語アノテーション問題について**
-* Cucumberの日本語アノテーション（`io.cucumber.java.ja.*`）はコンパイルエラーが発生する可能性がある
-* **推奨**: Cucumberテストは完全にオプショナルなので、**生成をスキップすることを推奨**
-* どうしてもCucumberテストが必要な場合は、英語アノテーション（`io.cucumber.java.en.*`）を使用すること
-  * `@Given`, `@When`, `@Then`, `@And` は `io.cucumber.java.en` パッケージから import
-  * .feature ファイルも英語で記述する（`# language: ja` は使用しない）
-* Cucumberテストを生成しない場合でも、.feature ファイル（ドキュメント用）は作成してよい（ステップ定義なし）
 
 ### 3.2 テストベースクラス
 
