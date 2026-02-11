@@ -327,15 +327,59 @@ npx playwright install
 
 このコマンドは、Chromium、Firefox、WebKitブラウザをインストールします。
 
-#### 3. 環境確認
+#### 3. 環境確認とサーバー起動
 
 テストを実行する前に、以下を確認してください：
 
-- バックエンドAPIサーバーが起動していること（例: `http://localhost:8080`）
-- フロントエンドの開発サーバーが起動可能であること（`npm run dev`）
-- テストデータベースが適切に準備されていること
+**✅ バックエンドAPIサーバーの起動確認**
+
+以下のAPIがすべて起動している必要があります：
+```bash
+# プロジェクトルートから確認
+# 1. berry-books-api が起動していること
+curl http://localhost:8080/berry-books-api/api/auth/me
+
+# 2. back-office-api が起動していること
+curl http://localhost:8080/back-office-api/api/books
+
+# 3. customer-hub-api が起動していること
+curl http://localhost:8080/customer-hub-api/customers
+```
+
+起動していない場合は、[bookstore/README.md](../README.md)を参照して起動してください。
+
+**✅ フロントエンド開発サーバーの起動（重要）**
+
+Playwrightテストを実行する前に、**別のターミナルで**フロントエンド開発サーバーを起動する必要があります：
+
+```bash
+# このディレクトリ（berry-books-spa）で実行
+npm run dev
+```
+
+開発サーバーが起動すると、以下のように表示されます：
+```
+  VITE v5.0.8  ready in 500 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h to show help
+```
+
+> **重要**: 
+> - フロントエンドサーバーは**テスト実行前に起動**しておく必要があります
+> - `playwright.config.ts`では`webServer`設定がコメントアウトされているため、自動起動されません
+> - テスト中はこのターミナルを開いたままにしてください
+
+**✅ テストデータの確認**
+
+テストデータベースに以下のテストユーザーが登録されていることを確認：
+- メールアドレス: `alice@example.com`
+- パスワード: `password`
 
 ### テスト実行方法
+
+**前提**: 上記の「3. 環境確認とサーバー起動」ですべてのサーバーが起動済みであること
 
 #### 基本的な実行
 

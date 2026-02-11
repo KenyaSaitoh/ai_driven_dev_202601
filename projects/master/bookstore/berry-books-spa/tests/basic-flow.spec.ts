@@ -87,8 +87,8 @@ test.describe('シナリオ 1: 基本フロー（検証なし）', () => {
     // ステップ25: 注文するボタンをクリック（方式1）
     await orderConfirmPage.submitOrder1();
 
-    // ステップ26: URLを確認
-    await expect(page).toHaveURL('/orders/success');
+    // ステップ26: 注文処理完了を待ってURLを確認
+    await page.waitForURL('/orders/success', { timeout: 10000 });
 
     // ステップ27: ログアウトボタンをクリック
     await header.logout();
