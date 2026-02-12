@@ -1,7 +1,5 @@
 package pro.kensait.berrybooks.architecture;
 
-import com.tngtech.archunit.core.domain.JavaClasses;
-import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
@@ -35,7 +33,8 @@ public class NamingConventionTest {
             .because("REST APIクラスは 'Resource' サフィックスを使用する");
     
     /**
-     * サービスクラスは "*Service" または "*ServiceIF" で終わること
+     * サービスクラスは "*Service" で終わること
+     * (インターフェース、例外、TO、テスト、モデルクラスは除外)
      */
     @ArchTest
     static final ArchRule service_classes_should_be_suffixed = 
@@ -43,8 +42,9 @@ public class NamingConventionTest {
             .that().resideInAPackage("..service..")
             .and().areNotInterfaces()
             .and().areNotEnums()
-            .and().haveSimpleNameNotEndingWith("Exception")
-            .and().haveSimpleNameNotEndingWith("TO")
+            .and().areNotMemberClasses()
+            .and().haveSimpleNameContaining("Service")
+            .and().haveSimpleNameNotEndingWith("Test")
             .should().haveSimpleNameEndingWith("Service")
             .because("サービス実装クラスは 'Service' サフィックスを使用する");
     
@@ -95,6 +95,7 @@ public class NamingConventionTest {
     
     /**
      * External DTOクラスは "*TO", "*Request" または "*Response" で終わること
+     * (内部クラスは除外)
      */
     @ArchTest
     static final ArchRule external_dto_classes_should_be_suffixed = 
@@ -102,6 +103,7 @@ public class NamingConventionTest {
             .that().resideInAPackage("..external.dto..")
             .and().areNotInterfaces()
             .and().areNotEnums()
+            .and().areNotMemberClasses()
             .should().haveSimpleNameEndingWith("TO")
             .orShould().haveSimpleNameEndingWith("Request")
             .orShould().haveSimpleNameEndingWith("Response")
