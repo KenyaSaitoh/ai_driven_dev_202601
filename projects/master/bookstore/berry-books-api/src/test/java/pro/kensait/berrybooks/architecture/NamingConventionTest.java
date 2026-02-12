@@ -88,11 +88,13 @@ public class NamingConventionTest {
             .that().resideInAPackage("..api.dto..")
             .and().areNotInterfaces()
             .and().areNotEnums()
-            .should().haveSimpleNameMatching(".*(?:Request|Response|ErrorResponse)")
+            .should().haveSimpleNameEndingWith("Request")
+            .orShould().haveSimpleNameEndingWith("Response")
+            .orShould().haveSimpleNameEndingWith("ErrorResponse")
             .because("API DTOクラスは 'Request' または 'Response' サフィックスを使用する");
     
     /**
-     * External DTOクラスは "*TO" で終わること
+     * External DTOクラスは "*TO", "*Request" または "*Response" で終わること
      */
     @ArchTest
     static final ArchRule external_dto_classes_should_be_suffixed = 
@@ -100,8 +102,8 @@ public class NamingConventionTest {
             .that().resideInAPackage("..external.dto..")
             .and().areNotInterfaces()
             .and().areNotEnums()
-            .and().haveSimpleNameNotEndingWith("Request")
-            .and().haveSimpleNameNotEndingWith("Response")
-            .should().haveSimpleNameMatching(".*(?:TO|Request|Response)")
+            .should().haveSimpleNameEndingWith("TO")
+            .orShould().haveSimpleNameEndingWith("Request")
+            .orShould().haveSimpleNameEndingWith("Response")
             .because("External DTOクラスは 'TO'、'Request' または 'Response' サフィックスを使用する");
 }
